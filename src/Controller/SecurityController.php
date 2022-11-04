@@ -155,8 +155,13 @@ class SecurityController extends AbstractController
     public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ParameterBagInterface $parameterBag): Response {
 
         // If already connected..
-        if (($user = $this->getUser()) && $user->isPersistent())
+        if (($user = $this->getUser()) && $user->isPersistent()) {
+
+            $notification = new Notification("login.already");
+            $notification->send("warning");
+
             return $this->redirectToRoute('user_profile');
+        }
 
         // Prepare registration form
         $formProcessor = $this->formProxy->createProcessor("form:login", SecurityRegistrationType::class, [
@@ -168,14 +173,21 @@ class SecurityController extends AbstractController
                 $newUser = $formProcessor->hydrate((new User()));
 
                 // An account might require to be verified by an admin
-                $adminApprovalRequired = $this->parameterBag->get("security.user.adminApproval") ?? false;
+                $adminApprovalRequired = !$this->parameterBag->get("base.user.register.autoapprove") ?? false;
                 $newUser->approve(!$adminApprovalRequired);
-                
                 $newUser->setPlainPassword($formProcessor->getData("plainPassword"));
                 
                 // Social account connection
                 if (($user = $this->getUser()) && $user->isVerified())
                     $newUser->verify($user->isVerified());
+
+                if($this->parameterBag->get("base.user.register.notify_admins")) {
+
+                    $notification = new Notification("register.notify_admins");
+                    $notification->setUser($newUser);
+                    $notification->setHtmlTemplate("@Base/security/email/admin_approval.html.twig",["new_user" => $newUser]);
+                    $notification->sendAdmins("low");
+                }
 
                 $this->entityManager->persist($newUser);
                 $this->entityManager->flush();
@@ -200,11 +212,11 @@ class SecurityController extends AbstractController
      * @Route("/verify-email", name="security_verifyEmail")
      * @IsGranted("ROLE_USER")
      */
-    public function VerifyEmailRequest(Request $request, NotifierInterface $notifier)
+    public function VerifyEmailRequest()
     {
         // Check if accound is already verified..
         $user = $this->getUser();
-        if ($user->isVerified()) {
+        if (false && $user->isVerified()) {
 
             $notification = new Notification("verifyEmail.already");
             $notification->send("info");
@@ -212,9 +224,9 @@ class SecurityController extends AbstractController
         } else {
 
             $verifyEmailToken = $user->getToken("verify-email");
-            if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
+            if(false && $verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
-                $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getRemainingTimeStr()]);
+                $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getThrottleTimeStr()]);
                 $notification->send("danger");
 
             } else {
@@ -380,8 +392,13 @@ class SecurityController extends AbstractController
      */
     public function ResetPasswordRequest(Request $request): Response
     {
-        if (($user = $this->getUser()) && $user->isPersistent())
+        if (($user = $this->getUser()) && $user->isPersistent()) {
+         
+            $notification = new Notification("login.already");
+            $notification->send("warning");
+
             return $this->redirectToRoute('user_profile');
+        }
 
         $form = $this->createForm(SecurityResetPasswordType::class);
         $form->handleRequest($request);
@@ -421,8 +438,13 @@ class SecurityController extends AbstractController
      */
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
-        if (($user = $this->getUser()) && $user->isPersistent())
+        if (($user = $this->getUser()) && $user->isPersistent()) {
+            
+            $notification = new Notification("login.already");
+            $notification->send("warning");
+
             return $this->redirectToRoute('user_profile');
+        }
 
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
         if (!$resetPasswordToken) {
@@ -430,6 +452,8 @@ class SecurityController extends AbstractController
             $notification = new Notification("resetPassword.invalidToken");
             $notification->send("danger");
 
+            dump($token);
+            exit(1);
             return $this->redirectToRoute($this->baseService->getRouteName("/"));
 
         } else {

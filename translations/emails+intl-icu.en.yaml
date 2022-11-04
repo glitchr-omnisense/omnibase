@@ -18,6 +18,11 @@ resetPassword:
   action_text: "Reset your password"
   expiry: "The link will expire in {0}."
 
+register_notifyAdmins:
+    subject: "New user registered"
+    content: "Bravo ! A new user just registered, it is identify by {0} ({1})"
+    action_text: "See the profile"
+
 verifyEmail:
     subject: "Verify your email"
     content: "Bravo ! You are receiving this email because you successfully sign up to our website.

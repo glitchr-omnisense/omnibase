@@ -140,32 +140,29 @@
     {% endfor %}
 
     {% if instantiable %}
-
         <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
             {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
             {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
         </a>
 
-        {% if discriminatorMap|length > 0 %}
+        {% if discriminatorMap|length > 1 %}
         <button type="button" class="btn btn-primary dropdown-toggle root-allowed dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
             <span class="visually-hidden"></span>
         </button>
         {% endif %}
-
     {% else %}
-
         <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
             {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
             {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
         </span>
-
     {% endif %}
 
-    {% if discriminatorMap|length > 0 %}
+    {% if discriminatorMap|length > 1 %}
     <ul class="dropdown-menu dropdown-menu-end">
         {% for group,entities in discriminatorMap %}
+
             {% if entities|length != 1 %}
                 {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
                 {% if group is not empty %}
@@ -176,22 +173,19 @@
                 {% endif %}
             {% endif %}
 
-            {% for crudEntity in entities|reverse %}
+            {% set instantiableCrudEntity = entities|reverse|filter(crudEntity => static_call(crudEntity|urldecode, "isInstantiable")) %}
+            {% for crudEntity in instantiableCrudEntity %}
 
-                {% set instantiable = static_call(crudEntity|urldecode, "isInstantiable") %}
-                {% if instantiable %}
+                {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
+                {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
+                {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
 
-                    {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
-                    {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
-                    {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
-
-                    <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
-                        {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-                        {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                        {{- label !=  static_call(crudEntity|urldecode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
-                    </a></li>
-                {% endif %}
-
+                <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
+                    {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                    {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
+                    {{- label !=  static_call(crudEntity|urldecode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
+                </a></li>
+            
             {% endfor %}
         {% endfor %}
     </ul>

@@ -9,6 +9,9 @@ paginator:
     last: "Dernière page"
     page: "Page {0}"
 
+page:
+    empty: Cette page est vide !
+    
 words:
     by: par
     and: et

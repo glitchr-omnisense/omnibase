@@ -16,6 +16,11 @@ resetPassword:
     action_text: "Réinitialise ton mot de passe"
     expiry: "Le lien expirera dans {0}."
 
+register_notifyAdmins:
+    subject: "Nouvel utilisateur !"
+    content: "Un nouvel utilisateur vient de s'inscrire, il s'agit de {0} ({1})"
+    action_text: "Voir le profil"
+
 verifyEmail:
     subject: "Vérifie ton email"
     content: "Bravo ! Tu as reçu cet email car tu t'es inscrit sur notre site.

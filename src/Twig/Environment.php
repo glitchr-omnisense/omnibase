@@ -3,6 +3,7 @@
 namespace Base\Twig;
 
 use Base\Routing\RouterInterface;
+use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Exception;
 use RuntimeException;
@@ -16,17 +17,47 @@ use Twig\TemplateWrapper;
 
 class Environment extends TwigEnvironment
 {
-    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, RouterInterface $router, ParameterBagInterface $parameterBag)
+    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocaleProviderInterface $localeProvider, RouterInterface $router, ParameterBagInterface $parameterBag)
     {
-        $this->requestStack = $requestStack;
-        $this->router   = $router;
-        $this->parameterBag = $parameterBag;
+        $this->requestStack   = $requestStack;
+        $this->router         = $router;
+        $this->parameterBag   = $parameterBag;
+        $this->localeProvider = $localeProvider;
 
         parent::__construct($loader, $options);
     }
 
     public function render($name, array $context = []): string
     {
+        //
+        // Make sure to load localized twig template, if available.
+        if(str_ends_with($name, ".twig")) {
+
+            $basename = explode(".", $name);
+
+            $extension = [];
+            $extension[] = array_pop($basename);
+            $extension[] = array_pop($basename);
+            $extension = implode(".", array_reverse($extension));
+            $basename  = implode(".", $basename); 
+
+            $lang           = $this->localeProvider->getLang();
+            $defaultLang    = $this->localeProvider->getDefaultLang();
+            $locale         = str_replace("-", "_", $this->localeProvider->getLocale());
+            $defaultLocale  = str_replace("-", "_", $this->localeProvider->getDefaultLocale());
+
+            if($this->getLoader()->exists($basename.".".$locale.".".$extension))
+                $name = $basename.".".$locale.".".$extension;
+            if($this->getLoader()->exists($basename.".".$lang.".".$extension))
+                $name = $basename.".".$lang.".".$extension;
+            if($this->getLoader()->exists($basename.".".$defaultLocale.".".$extension))
+                $name = $basename.".".$locale.".".$extension;
+            if($this->getLoader()->exists($basename.".".$defaultLang.".".$extension))
+                $name = $basename.".".$lang.".".$extension;
+        }
+
+        //
+        // Load resources: additional stylesheets & javascripts
         if(str_ends_with($name, ".html.twig")) {
 
             $stylesheet = str_rstrip($name, ".html.twig").".css.twig";
