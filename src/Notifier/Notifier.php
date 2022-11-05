@@ -14,6 +14,7 @@ use Base\Service\ParameterBagInterface;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use Doctrine\ORM\Cache\Exception\NonCacheableEntity;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
@@ -76,18 +77,13 @@ class Notifier implements NotifierInterface
     protected function getAdminUsers()
     {
         if(!$this->adminRole) return [];
-        if (BaseService::getService() === null) return [];
-
-        $item = $this->cache->getItem("base.notifier.admin_users[".$this->adminRole."]");
-        if($item->get() !== null) return $item->get();
 
         try {
 
             $userRepository = $this->entityManager->getRepository(User::class);
-            $adminUsers = $userRepository->findByRoles($this->adminRole);
-            if(!is_cli()) $this->cache->save($item->set($adminUsers));
+            $adminUsers = $userRepository->cacheByRoles($this->adminRole)->getResult();
 
-        } catch(DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
+        } catch(NonCacheableEntity|DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
 
         return $adminUsers;
     }
@@ -136,11 +132,10 @@ class Notifier implements NotifierInterface
         return $this;
     }
 
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager,  CacheInterface $cache, ParameterBagInterface $parameterBag, TranslatorInterface $translator,  LocaleProviderInterface $localeProvider, SettingBag $settingBag)
+    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator,  LocaleProviderInterface $localeProvider, SettingBag $settingBag)
     {
         $this->notifier      = $notifier;
         $this->policy        = $policy;
-        $this->cache         = $cache;
 
         $this->adminRole          = $parameterBag->get("base.notifier.admin_role");
         $this->options            = $parameterBag->get("base.notifier.options") ?? [];

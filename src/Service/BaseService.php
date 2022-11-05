@@ -179,9 +179,9 @@ class BaseService implements RuntimeExtensionInterface
     public function getEmail()
     {
         return [
-            "title"  => $this->getSettingBag()->getScalar("base.settings.title.email"),
-            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.email"),
-            "logo"   => $this->getSettingBag()->getScalar("base.settings.logo.email")
+            "title"  => $this->getSettingBag()->getScalar("base.settings.title.email") ?? $this->getSettingBag()->getScalar("base.settings.title"),
+            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.email") ?? $this->getSettingBag()->getScalar("base.settings.slogan.email"),
+            "logo"   => $this->getSettingBag()->getScalar("base.settings.logo.email") ?? $this->getSettingBag()->getScalar("base.settings.logo.email")
         ];
     }
 

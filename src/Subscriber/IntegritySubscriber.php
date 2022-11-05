@@ -8,7 +8,8 @@ use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\BaseService;
 use Base\BaseBundle;
-use Base\Routing\AdvancedRouter;
+
+use Doctrine\DBAL\Exception as DoctrineException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Doctrine\ORM\PersistentCollection;
@@ -20,13 +21,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use ErrorException;
 use InvalidArgumentException;
-use Symfony\Component\Console\ConsoleEvents;
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use TypeError;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
 
 class IntegritySubscriber implements EventSubscriberInterface
 {
@@ -81,7 +81,7 @@ class IntegritySubscriber implements EventSubscriberInterface
     {
         $throwable = $event->getThrowable();
 
-        $instanceOf = ($throwable instanceof TypeError || $throwable instanceof ErrorException || $throwable instanceof InvalidArgumentException);
+        $instanceOf = ($throwable instanceof TypeError || $throwable instanceof DoctrineException || $throwable instanceof ErrorException || $throwable instanceof InvalidArgumentException);
         if($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace()))
             throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
     }

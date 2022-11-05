@@ -85,7 +85,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             $identifier = $accessor->getValue($this, self::$identifier);
 
         if( $identifier === null)
-            throw new Exception("User identifier is NULL, is this user already persistent in the database?");
+            throw new Exception("User identifier is NULL. Is this user initialized or database persistent ?");
 
         return $identifier;
     }

@@ -185,8 +185,8 @@ class SecurityController extends AbstractController
 
                     $notification = new Notification("register.notify_admins");
                     $notification->setUser($newUser);
-                    $notification->setHtmlTemplate("@Base/security/email/admin_approval.html.twig",["new_user" => $newUser]);
-                    $notification->sendAdmins("low");
+                    $notification->setHtmlTemplate("@Base/security/email/register_notifyAdmins.html.twig",["new_user" => $newUser]);
+                    $notification->sendAdmins("email");
                 }
 
                 $this->entityManager->persist($newUser);

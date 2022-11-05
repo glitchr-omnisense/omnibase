@@ -8,7 +8,7 @@ register:
     username: "Pseudonyme"
     firstname: "Prénom"
     lastname: "Nom"
-    agreeTerms: 'En cochant, j'accepte les <a href="{0}">conditions d'utilisation</a> et la <a href="{0}">politique de confidentialité</a> de ce site'
+    agreeTerms: "En cochant, j'accepte les <a href=\"{0}\">conditions d'utilisation</a> et la <a href=\"{0}\">politique de confidentialité</a> de ce site"
 
 logout:
     title: "Se déconnecter"

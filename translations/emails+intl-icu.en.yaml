@@ -20,7 +20,7 @@ resetPassword:
 
 register_notifyAdmins:
     subject: "New user registered"
-    content: "Bravo ! A new user just registered, it is identify by {0} ({1})"
+    content: "Bravo ! A new user just registered. He is identified by <b>{0}</b> ({1})"
     action_text: "See the profile"
 
 verifyEmail:
@@ -32,7 +32,7 @@ verifyEmail:
 
 adminApproval:
   subject: "Validation requested"
-  content: <b>{0} \#{1}</b> is ready for validation !
+  content: "<b>{0} #{1}</b> is ready for validation !"
   action_text: Go to dashboard
 
 adminApprovalConfirm:

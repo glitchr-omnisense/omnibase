@@ -205,6 +205,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $workflow;
+    public function isApproved() { return $this->workflow == WorkflowState::APPROVED; }
     public function getWorkflow() { return $this->workflow; }
     public function setWorkflow($workflow): self
     {

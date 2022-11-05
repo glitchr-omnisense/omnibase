@@ -1,17 +1,17 @@
 {% extends 'email.html.twig' %}
 
 {% block subject %}
-    {{ '@emails.security.register_notifyAdmins.subject'|trans|raw }}
+    {{ '@emails.register_notifyAdmins.subject'|trans|raw }}
 {% endblock %}
 
 {% block content %}
-    {{ '@emails.security.register_notifyAdmins.content'|trans([newUser, newUser.email])|raw }}
+    {{ '@emails.register_notifyAdmins.content'|trans([new_user, new_user.email])|raw }}
 {% endblock %}
 
 {% block action_text %}
-    {{ '@emails.security.register_notifyAdmins.action_text'|trans([newUser|trans_entity]) | raw }}
+    {{ '@emails.register_notifyAdmins.action_text'|trans([new_user|trans_entity]) | raw }}
 {% endblock %}
 
 {% block action_url %}
-    {{ newUser|linkify }}
+    {{ new_user|linkify }}
 {% endblock %}

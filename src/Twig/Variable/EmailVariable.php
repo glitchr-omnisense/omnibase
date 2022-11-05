@@ -17,7 +17,7 @@ class EmailVariable
 
     public function homepage() { return $this->baseService->getIndexPage(); }
 
-    public function title()  { return $this->baseService->getEmail()["title"] ?? null; }
+    public function title()  { return $this->baseService->getEmail()["title"]  ?? null; }
     public function slogan() { return $this->baseService->getEmail()["slogan"] ?? null; }
     public function logo()   { return $this->baseService->getEmail()["logo"]   ?? null; }
 

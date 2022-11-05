@@ -8,7 +8,7 @@ register:
     username: "Username"
     firstname: "Firstname"
     lastname: "Lastname"
-    agreeTerms: 'I agree to the website <a href="{0}">terms & conditions</a> and <a href="{0}">privacy policy</a>'
+    agreeTerms: "I agree to the website <a href=\"{0}\">terms & conditions</a> and <a href=\"{0}\">privacy policy</a>"
 
 logout:
     title: "Sign Out"

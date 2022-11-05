@@ -245,6 +245,7 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function datetime(Environment $env, DateTime|DateInterval|int|string|null $datetime, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
     {
+        if($locale === null) $locale = $this->translator->getLocale();
         if(is_array($pattern)) {
 
             $array = [];
@@ -258,9 +259,9 @@ final class FunctionTwigExtension extends AbstractExtension
         if($datetime == null) return $pattern;
         if($datetime instanceof DateTime) $datetime = $datetime->getTimestamp();
         if($datetime instanceof DateInterval) $datetime = $now + (int) $datetime->format("s");
-        if(is_string($datetime)) return $datetime;
+        if(is_string($datetime)) return mb_strtolower($datetime);
 
-        return $this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
+        return mb_strtolower($this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale));
     }
 
     public function pickup(?array $array, int $i)
