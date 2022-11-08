@@ -92,7 +92,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('str_shorten', 'str_shorten'),
             new TwigFilter('intval',      'intval'),
             new TwigFilter('strval',      'strval'),
-            new TwigFilter('urldecode',   'urldecode'),
+            new TwigFilter('url_decode',  'urldecode'),
             new TwigFilter('synopsis',    'synopsis'),
             new TwigFilter('closest',     'closest'),
             new TwigFilter('distance',    'distance'),

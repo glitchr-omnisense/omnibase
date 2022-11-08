@@ -15,7 +15,9 @@ user:
    username:
       unique: "Ce pseudo existe déjà"
 
-string_case: "Ce champ ne peut pas changer d'orthographe (seulement la casse)"
+unique_entity: \"{{value}}\" est déjà utilisé.
+
+string_case: "Le champ \"{{field}}\" ne peut pas changer d'orthographe (seulement la casse)"
 
 hexcode:
    "class": Color {{ value }} is not a valid hexadecimal value.

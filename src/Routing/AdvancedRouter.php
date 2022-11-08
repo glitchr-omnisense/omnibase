@@ -77,8 +77,8 @@ class AdvancedRouter implements RouterInterface
 
     public function isCli(): bool { return is_cli(); }
     public function isDebug(): bool { return $this->debug; }
-    public function isBackend(mixed $request = null) { return $this->isEasyAdmin($request) || $this->isProfiler($request); }
-    public function isProfiler(mixed $request = null)
+    public function isBackend(mixed $request = null):bool { return $this->isEasyAdmin($request) || $this->isProfiler($request); }
+    public function isProfiler(mixed $request = null):bool
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
         if ($request instanceof KernelEvent)
@@ -92,7 +92,7 @@ class AdvancedRouter implements RouterInterface
         return str_starts_with($route, "_wdt") || str_starts_with($route, "_profiler");
     }
 
-    public function isUX(mixed $request = null)
+    public function isUX(mixed $request = null):bool
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
         if ($request instanceof KernelEvent)
@@ -108,7 +108,7 @@ class AdvancedRouter implements RouterInterface
         return str_starts_with($route, "ux_");
     }
 
-    public function isSecured(mixed $request = null)
+    public function isSecured(mixed $request = null):bool
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
         if ($request instanceof KernelEvent)
@@ -124,7 +124,7 @@ class AdvancedRouter implements RouterInterface
         return str_starts_with($route, "security_");
     }
 
-    public function isWdt(mixed $request = null)
+    public function isWdt(mixed $request = null):bool
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
         if ($request instanceof KernelEvent)
@@ -140,7 +140,7 @@ class AdvancedRouter implements RouterInterface
         return str_starts_with($route, "_wdt");
     }
 
-    public function isEasyAdmin(mixed $request = null)
+    public function isEasyAdmin(mixed $request = null):bool
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
         if($request instanceof KernelEvent)

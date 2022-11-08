@@ -103,7 +103,9 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
                     $constraints = array_merge($constraints, $metadata->findConstraints($group));
                 
                 $errors = $this->validator->validate($form->getData(), array_unique_object($constraints), $form->getConfig()->getOption("validation_groups"));
-                if (count($errors) > 0) $form->addError(new FormError((string) $errors));
+                
+                foreach($errors as $error)
+                    $form->addError(new FormError($error->getMessage()));
             });
         }
 
@@ -128,7 +130,9 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
 
                 $entity = $this->entityHydrator->hydrate($validationEntity, $form->getData(), []);
                 $errors = $this->validator->validate($entity, array_unique_object($constraints), $form->getConfig()->getOption("validation_groups"));
-                if (count($errors) > 0) $form->addError(new FormError((string) $errors));
+                
+                foreach($errors as $error)
+                    $form->addError(new FormError($error->getMessage()));
             }
         });
 

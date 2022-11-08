@@ -11,8 +11,13 @@ class EasyAdminVariable
     public function __construct(AdminUrlGenerator $adminUrlGenerator) { $this->adminUrlGenerator = $adminUrlGenerator; }
     public function crudify(mixed $entity)
     {
+        if($entity == null) return null;
+
+        $entityCrudController = AbstractCrudController::getCrudControllerFqcn($entity);
+        if($entityCrudController == null) return null;
+
         return $this->adminUrlGenerator->unsetAll()
-                    ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
+                    ->setController($entityCrudController)
                     ->setEntityId($entity->getId())
                     ->setAction(Crud::PAGE_EDIT)
                     ->includeReferrer()

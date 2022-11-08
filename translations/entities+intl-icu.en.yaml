@@ -1,6 +1,9 @@
 user:
   _singular: "user"
   _plural: "users"
+  _validators: 
+    email:
+      unique: "This email is already used"
 
   group:
     _singular: "group"

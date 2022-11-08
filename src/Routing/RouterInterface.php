@@ -18,10 +18,11 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getIndexPage(): string;
 
     public function useAdvancedFeatures(): bool;
-    public function isProfiler(mixed $request = null);
-    public function isEasyAdmin(mixed $request = null);
-    public function isUX(mixed $request = null);
-    public function isSecured(mixed $request = null);
+    public function isProfiler(mixed $request = null) :bool;
+    public function isEasyAdmin(mixed $request = null) :bool;
+    public function isUX(mixed $request = null) :bool;
+    public function isWdt(mixed $request = null) :bool;
+    public function isSecured(mixed $request = null) :bool;
     public function keepMachine(): bool;
     public function keepSubdomain(): bool;
 
@@ -48,6 +49,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function isCli(): bool;
     public function isDebug(): bool;
+    public function isBackend(mixed $request = null) :bool;
     public function hasFirewall(?string $routeUrl = null): ?bool;
 
     public function getCache();

@@ -9,11 +9,10 @@ barcode:
    value:
       unique: "Barcode \"{value}\" is already used"
 
-user:
    email:
       unique: "This email is already used"
-   username:
-      unique: "This username is already used"
+
+unique_entity: \"{{value}}\"" is already used
 
 string_case: "This string can only change its case"
 

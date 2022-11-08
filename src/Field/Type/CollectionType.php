@@ -2,12 +2,13 @@
 
 namespace Base\Field\Type;
 
-use App\Enum\UserRole;
 use Base\Backend\Config\Action;
 use Base\Controller\Backend\AbstractCrudController;
+use Base\Enum\UserRole;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -18,13 +19,17 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
 class CollectionType extends AbstractType
 {
-    public function __construct(Environment $twig, TranslatorInterface $translator)
+    public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->twig = $twig;
         $this->translator = $translator;
+    
+        $this->authorizationChecker = $authorizationChecker;
+        $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
     public function getBlockPrefix(): string { return 'collection2'; }
@@ -34,8 +39,8 @@ class CollectionType extends AbstractType
         $resolver->setDefaults([
             'form2' => false,
             'length' => 0,
-            'allow_add' => true,
-            'allow_delete' => true,
+            'allow_add' => false,
+            'allow_delete' => false,
             'html'      => false,
             'href' => null,
             'prototype' => true,
@@ -68,6 +73,7 @@ class CollectionType extends AbstractType
             $value["label"] = false;
             return $value;
         });
+
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
             // Collection is always submitted regardless of its options..

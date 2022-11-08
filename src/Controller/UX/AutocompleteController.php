@@ -46,7 +46,10 @@ class AutocompleteController extends AbstractController
         $filters = $dict["filters"] ?? null;
         $class   = $dict["class"] ?? null;
         $html    = $dict["html"] ?? true;
-        $format  = ($dict["capitalize"] ?? false) ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+
+        $format = FORMAT_IDENTITY;
+        if ($dict["capitalize"] !== null)
+            $format = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
@@ -66,7 +69,7 @@ class AutocompleteController extends AbstractController
                 $fields = array_filter($fields);
 
                 $index0 = -1;
-                $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields, [],[],null,null,["id"]); // If no field, then get them all..
+                $entries = $repository->cacheByInstanceOfAndPartialModel($filters, $fields, [],[],null,null,["id"]); // If no field, then get them all..
                 
                 do {
 
@@ -134,46 +137,76 @@ class AutocompleteController extends AbstractController
      */
     public function Icons(Request $request, string $provider, int $pageSize, string $hashid): Response
     {
-        $dict    = $this->obfuscator->decode($hashid);
+        $dict     = $this->obfuscator->decode($hashid);
 
-        $token   = $dict["token"] ?? null;
-        $format  = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+        $token    = $dict["token"] ?? null;
+        $html     = $dict["html"] ?? true;
+        $pageSize = $dict["page_size"] ?? 200;
 
+        $format = FORMAT_IDENTITY;
+        if ($dict["capitalize"] !== null)
+            $format = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+
+        $results = [];
+        $pagination = false;
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
-        if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
-
+        if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod)
+        {
             $term = mb_strtolower($request->get("term")) ?? "";
-            $page = $request->get("page") ?? 1;
+            $meta = explode(".", $request->get("page") ?? "");
+            $page     = max(1, intval($meta[0] ?? 1));
+            $bookmark = max(0, intval($meta[1] ?? 0));
 
             $iconProvider = $this->getIconProvider()->getAdapter($provider);
             $entries = $iconProvider->getChoices($term);
 
-            $book = $this->paginator->paginate($entries, $page, $pageSize);
-            $pagination = $book->getTotalPages() > $book->getPage();
-            $array["pagination"] = ["more" => $pagination];
-            $results = $book->current();
+            $index0 = -1;
+            do {
 
-            $array["results"] = array_transforms(function($k,$v,$callback,$i,$d) use ($format): ?array {
+                $book = $this->paginator->paginate($entries, $page, $pageSize);
+                if($page > $book->getTotalPages()+1)
+                    throw $this->createNotFoundException("Page Not Found");
 
-                if(is_array($v)) {
+                $bookIsFull = false;
 
-                    $children = array_transforms($callback, $v, ++$d);
+                foreach($book as $index => $result) {
 
-                    $group = array_pop_key("_self", $children);
-                    $group["text"] = $k;
-                    $group["children"] = $children;
-                    return [null, $group];
+                    $entry = $this->autocomplete->resolveArray($result, ["format" => $format, "html" => $html]);
+                    if($entry === null) continue;
+                    if($index0 < 0) $index0 = $index;
+                    if($index - $index0 < $bookmark) continue;
+
+                    $bookIsFull = count_leaves($results) >= $book->getPageSize();
+                    if($bookIsFull) break;
+
+                    $bookmark++;
+                    $results[] = $entry;
                 }
 
-                return [null, ["id" => $v, "icon" => $v, "text" => castcase($k, $format)]];
+                $bookmark = $bookmark % $book->getPageSize();
 
-            }, !empty($results) ? $results : []);
+            } while($page++ < $book->getTotalPages() && !$bookIsFull);
+
+            $pagination = [];
+            $pagination["more"] = $book->getTotalPages() > $book->getPage() || $bookIsFull;
+            if ($pagination["more"]) {
+
+                $page = $book->getPage();
+                $bookmark = ($book->getBookmark()+1) % $book->getPageSize();
+                if($bookmark == 0) $page++;
+
+                $pagination["page"] = $page.".".$bookmark;
+            }
+
+            $array = [
+                "pagination" => $pagination,
+                "results" => $results
+            ];
 
             return new JsonResponse($array);
         }
 
         $array = ["status" => "Invalid request"];
-
         return new JsonResponse($array, 500);
     }
 }

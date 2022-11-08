@@ -7,7 +7,7 @@ use Base\Entity\User\Notification;
 use Base\Notifier\NotifierInterface;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
-use Base\Service\BaseService;
+use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
@@ -23,7 +23,6 @@ use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
 use Symfony\Component\Notifier\Recipient\NoRecipient;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
-use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
 use Symfony\Component\Notifier\Notifier as SymfonyNotifier;
@@ -57,6 +56,7 @@ class Notifier implements NotifierInterface
     public function getTestRecipients(): array{ return $this->testRecipients; }
     public  function isTest(RecipientInterface $recipient): bool
     {
+        if($this->debug == false) return false;
         if(!$recipient instanceof EmailRecipientInterface)
             return false;
 
@@ -83,7 +83,7 @@ class Notifier implements NotifierInterface
             $userRepository = $this->entityManager->getRepository(User::class);
             $adminUsers = $userRepository->cacheByRoles($this->adminRole)->getResult();
 
-        } catch(NonCacheableEntity|DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
+        } catch(NonCacheableEntity|DoctrineException|DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
 
         return $adminUsers;
     }
@@ -132,7 +132,7 @@ class Notifier implements NotifierInterface
         return $this;
     }
 
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator,  LocaleProviderInterface $localeProvider, SettingBag $settingBag)
+    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator,  LocaleProviderInterface $localeProvider, SettingBag $settingBag, bool $debug = false)
     {
         $this->notifier      = $notifier;
         $this->policy        = $policy;
@@ -150,9 +150,12 @@ class Notifier implements NotifierInterface
         $this->settingBag     = $settingBag;
         $this->localeProvider = $localeProvider;
         $this->translator     = $translator;
+        
+        $this->debug          = $debug;
 
         // Address support only once..
         $adminRecipients = [];
+
         foreach ($this->getAdminUsers() as $adminUser)
             $adminRecipients[] = $adminUser->getRecipient();
 

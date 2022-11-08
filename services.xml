@@ -119,6 +119,7 @@
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="setting_bag" />
+            <bind key="$debug">%kernel.debug%</bind>
         </service>
 
         <service id="Base\CacheWarmer\IconCacheWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
@@ -888,6 +889,8 @@
         <service id="Base\Field\Type\CollectionType"><tag name="form.type" />
             <argument type="service" id="twig" />
             <argument type="service" id="translator" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
         <service id="Base\Field\Configurator\IdConfigurator">

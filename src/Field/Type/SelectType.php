@@ -2,9 +2,9 @@
 
 namespace Base\Field\Type;
 
-use App\Enum\UserRole;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Service\Model\Autocomplete;
 use Base\Service\LocaleProvider;
@@ -263,7 +263,10 @@ class SelectType extends AbstractType implements DataMapperInterface
                     } else {
 
                         // Format values
-                        $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+                        $entryFormat = FORMAT_IDENTITY;
+                        if ($options["capitalize"] !== null)
+                            $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+
                         $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, [
                             "html" => $options["html"],
                             "format" => $entryFormat
@@ -322,9 +325,13 @@ class SelectType extends AbstractType implements DataMapperInterface
                     } else {
 
                         // Format values
+                        $format = FORMAT_IDENTITY;
+                        if ($options["capitalize"] !== null)
+                            $format = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+
                         $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, [
                             "html" => $options["html"],
-                            "format" => $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE
+                            "format" => $format
                         ]);
 
                         if($entry === null) return null;

@@ -3,11 +3,8 @@
 namespace Base\Validator;
 
 use Base\Traits\BaseTrait;
-use Exception;
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use UnexpectedValueException;
 
 /**
@@ -46,12 +43,16 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
         return empty($this->getPropertyName()) ? "class" : "property";
     }
 
+    protected function formatIdentifier(Constraint $constraint)
+    {
+        return $constraint->message;
+    }
+
     protected $buildViolation = null;
-    public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface {
-
-        $value = is_stringeable($value) ? $value : "";
-
-        $this->buildViolation = $this->context->buildViolation($constraint->message);
+    public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface
+    {
+        $this->buildViolation = $this->context->buildViolation($this->formatIdentifier($constraint));
+        
         $this->setParameter('field', $this->getPropertyName());
         $this->setParameter('value', $value);
 

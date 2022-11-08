@@ -38,7 +38,7 @@
         {% if labelTrim is not empty %}
             {{- label|raw -}}
             {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value %}
-            <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
+            <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
                 <i class="fas fa-external-link-square-alt"></i>
             </a>{% endif %}
 
@@ -53,10 +53,18 @@
 {%- endblock -%}
 {%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}
 {%- block form2_errors -%}
-{%- set row_attr = row_attr|merge({'class': 'form-errors' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
-{% if errors|length %}
-    <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>{{- form_errors(form) -}}</div>
-{% endif %}
+    {%- set row_attr = row_attr|merge({'class': 'form-errors' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+    {% if errors|length %}
+        <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        {%- if errors|length > 0 -%}
+            <ul>
+                {%- for error in errors -%}
+                    <li><span>{{ error.message }}</span></li>
+                {%- endfor -%}
+            </ul>
+        {%- endif -%}
+        </div>
+    {%- endif -%}
 {%- endblock -%}
 
 {%- block form2_help -%}
@@ -134,7 +142,7 @@
     {% set attr = attr|merge({
         'data-select2-field'     : form.vars.id~"_choice",
         'data-select2-options'   : select2,
-        'data-select2-href'      : form.vars["select2-href"]|default("")|urldecode,
+        'data-select2-href'      : form.vars["select2-href"]|default("")|url_decode,
         'data-select2-sortable'  : form.vars["select2-sortable"],
         'data-select2-tabulation': form.vars["tabulation"]
     }) %}
@@ -444,7 +452,7 @@
     'data-file-lightbox-options'      : form.vars.lightbox,
 
     'data-file-ajax'                  : form.vars.ajax,
-    'data-file-href'                  : form.vars.href|default("")|urldecode,
+    'data-file-href'                  : form.vars.href|default("")|url_decode,
     'data-file-max-files'             : form.vars.max_files,
 
     'data-file-path-links'            : path,
@@ -641,8 +649,8 @@
 
     {% set attr = attr|merge({
         'data-collection-field': 'true',
-        'data-allow-add': allow_add ? 'true' : 'false',
-        'data-allow-delete': allow_delete ? 'true' : 'false',
+        'data-allow-add': allow_add,
+        'data-allow-delete': allow_delete,
         'data-num-items': form.children|length,
         'data-form-type-name-placeholder': prototype is defined ? prototype.vars.name : '',
         'data-empty-collection': block('collection2_empty')
@@ -653,7 +661,6 @@
 
     {% set group = form.vars.group %}
     {% if group == true %}
-        {% if form.children is not empty or allow_add != false %}
 
         <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
             {{ form_label(form)}}
@@ -661,7 +668,6 @@
                 {{ form_widget(form) }}
             </div>
         </div>
-        {% endif %}
     {% else %}
         {{ form_widget(form) }}
     {% endif %}
@@ -676,7 +682,6 @@
 
     {# the "is iterable" check is needed because if an object implements __toString() and
                returns an empty string, "is empty" returns true even if it's not a collection #}
-
     {% set isEmptyCollection = value is null or (value is iterable and value is empty) %}
     {% if isEmptyCollection %}
         {{ block('collection2_empty') }}
@@ -705,9 +710,13 @@
     {% set row_group = form_parent(form).vars.row_group ?? false %}
     {% set collapsed = form_parent(form).vars.entry_collapsed ?? true %}
 
+    {% set href = form.vars.href ?? null %}
+    {% if is_granted("ROLE_ADMIN") %}
+        {% set href = href ?? (form.vars.value == "" ? null : app.ea.crudify(form.vars.value)|url_encode) %}
+    {% endif %}
+
     {% if group %}
 
-        {% set href = form.vars.href ?? null %}
         {% set allows_deleting_items = form_parent(form).vars.allow_delete %}
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
@@ -727,7 +736,7 @@
 
                     {% set html = form_parent(form).vars.html and form.vars.value is not null and method_exists(form.vars.value, "__autocomplete") %}
                     {%- if linkable and not html -%}
-                    <a class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
+                    <a target='_blank' class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{ _href|url_decode|replace({'{0}': (form.vars.value.id)}) }}">
                     {%- else -%}
                     <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ is_empty ? 'style="cursor:default;"' : '' }}
                             type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
@@ -751,11 +760,12 @@
 
                             {% set url = method_exists(form.vars.value, "__toLink") ? form.vars.value.__toLink() : null %}
                             {% if url is not empty %}
-                                {{ url ? clipboard("copy", url)|raw : "" }}<a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify|first|raw}}</a>
+                                {{ url ? clipboard("copy", url)|raw : "" }}
+                                <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify|first|raw}}</a>
                             {% endif %}
 
                             {% if _href is not null %}
-                            <a target='_blank' href="{{ _href|urldecode|replace({'{0}': form.vars.value.id}) }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
+                            <a target="_blank" href="{{ _href|url_decode|replace({'{0}': form.vars.value.id}) }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
                             {% endif %}
 
                         {% endif %}
@@ -785,12 +795,19 @@
             {% if  label != false %}
                 <label>
                     {{ label|default(value)|stringify }}
+                    {% set _href    =  href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
                     {% if form.vars.value is defined %}
-                        {% set url = form.vars.value.__toLink() ?? form.vars.href ?? null %}
+
+                        {% set url = method_exists(form.vars.value, "__toLink") ? form.vars.value.__toLink() : null %}
                         {% if url is not empty %}
-                            {{ clipboard("copy", url)|raw }}
+                            {{ url ? clipboard("copy", url)|raw : "" }}
                             <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify|first|raw}}</a>
                         {% endif %}
+
+                        {% if _href is not null %}
+                        <a target='_blank' href="{{ _href|url_decode|replace({'{0}': form.vars.value.id}) }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
+                        {% endif %}
+                        
                     {% endif %}
                 </label>
             {% endif %}

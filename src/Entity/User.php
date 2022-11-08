@@ -244,11 +244,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Assert\Locale(canonicalize = true)
      */
     protected $locale;
-    public function getLocale(): ?string { return $this->locale ?? LocaleProvider::getDefaultLocale(); }
+    public function getLocale(): ?string { return $this->locale ?? LocaleProvider::__toLocale($this->getTranslator()->getLocale()); }
     public function setLocale(?string $locale = null): self
     {
         if(empty($locale)) $locale = $this->locale ?? null;
-        $this->locale = $locale ?? User::getCookie("locale") ?? LocaleProvider::getDefaultLocale();
+        $this->locale = $locale ?? LocaleProvider::__toLocale($this->getTranslator()->getLocale());
 
         if(!$this->locale)
             throw new MissingLocaleException("Missing locale.");

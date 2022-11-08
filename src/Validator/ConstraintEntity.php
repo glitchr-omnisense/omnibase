@@ -2,7 +2,7 @@
 
 namespace Base\Validator;
 
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Base\Service\TranslatorInterface;
 
 /**
  * @Annotation
@@ -35,47 +35,10 @@ abstract class ConstraintEntity extends Constraint
             $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
             $firstField = $fields['fields'][0] ?? "unknown";
 
-            $this->message =
-                camel2snake($firstField) .".".
-                camel2snake($constraintName);
+            $this->message = camel2snake($firstField) .".". camel2snake($constraintName);
         }
 
         parent::__construct($options, $groups, $payload);
-    }
-
-    public function getTranslation($entity, TranslatorInterface $translator)
-    {
-        $class = get_class($entity);
-        while($class !== false) {
-
-            $classname = explode("\\", $class);
-            $classname = array_pop($classname);
-
-            $firstField = $this->fields[0] ?? "unknown";
-
-            $constraintName = explode("\\", get_called_class());
-            $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
-
-            $id = camel2snake($classname).".".camel2snake($firstField).".".camel2snake($constraintName);
-            $this->message = $translator->transQuiet($id);
-            if ($this->message !== null) {
-                $this->message = $id;
-                break; // Intl found
-            }
-
-            $class = get_parent_class($class);
-        }
-
-        if ($class === false) {
-
-            $classname = explode("\\", get_class($entity));
-            $classname = array_pop($classname);
-
-            $id = camel2snake($firstField).".".camel2snake($constraintName);
-            $this->message = $translator->transQuiet($id) ?? $id;
-        }
-
-        return $this->message;
     }
 
     public function getRequiredOptions() : array

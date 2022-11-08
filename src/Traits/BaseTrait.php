@@ -20,6 +20,7 @@ use Base\Twig\Environment;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
+use Exception;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
@@ -60,7 +61,7 @@ trait BaseTrait
         return BaseService::getObjectManager(is_object($object) ? get_class($object) : $object)->getRepository(is_object($object) ? get_class($object) : $object);
     }
 
-    public static function isEntity(mixed $entity)         : ?bool            { return BaseService::getClassMetadataManipulator()?->isEntity($entity); }
+    public static function isEntity(mixed $entity)         : ?bool { return BaseService::getClassMetadataManipulator()?->isEntity($entity); }
 
     public static function getProjectDir()    : string { return (self::class === BaseService::class) ? BaseService::$projectDir   : BaseService::getProjectDir(); }
     public static function getEnvironment()   : string { return (self::class === BaseService::class) ? BaseService::$environment   : BaseService::getEnvironment(); }

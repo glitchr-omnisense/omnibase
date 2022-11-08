@@ -76,13 +76,13 @@
 
                     {% for crudEntity in entities %}
 
-                        {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
-                        {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
+                        {% set icon    = static_call(crudEntity|url_decode, "getEntityIcon")|default(null) %}
+                        {% set label   = static_call(crudEntity|url_decode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
                         {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
                         <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
                             {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                             {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                            {{- label !=  static_call(crudEntity|urldecode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
+                            {{- label !=  static_call(crudEntity|url_decode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
                         </a></li>
 
                     {% endfor %}
@@ -135,7 +135,7 @@
     {% set instantiable = false %}
     {% for group, entities in discriminatorMap %}
         {% if not instantiable %}
-            {% set instantiable = (crud in entities) and static_call(crud|urldecode, "isInstantiable") %}
+            {% set instantiable = (crud in entities) and static_call(crud|url_decode, "isInstantiable") %}
         {% endif %}
     {% endfor %}
 
@@ -173,17 +173,17 @@
                 {% endif %}
             {% endif %}
 
-            {% set instantiableCrudEntity = entities|reverse|filter(crudEntity => static_call(crudEntity|urldecode, "isInstantiable")) %}
+            {% set instantiableCrudEntity = entities|reverse|filter(crudEntity => static_call(crudEntity|url_decode, "isInstantiable")) %}
             {% for crudEntity in instantiableCrudEntity %}
 
-                {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
-                {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
+                {% set icon    = static_call(crudEntity|url_decode, "getEntityIcon")|default(null) %}
+                {% set label   = static_call(crudEntity|url_decode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
                 {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
 
                 <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
                     {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                     {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                    {{- label !=  static_call(crudEntity|urldecode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
+                    {{- label !=  static_call(crudEntity|url_decode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
                 </a></li>
             
             {% endfor %}

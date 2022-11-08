@@ -2,6 +2,8 @@
 
 namespace Base\Validator;
 
+use Base\BaseBundle;
+use Base\Service\TranslatorInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
@@ -77,12 +79,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
             }
         }
 
-        $class = $em->getClassMetadata(\get_class($entity));
-        $value = $this->formatWithIdentifiers($em, $class, $value);
-
         $this->setParameter("entity", $this->translator->transEntity($entity));
-
-        // $buildViolation->addViolation();
         return $buildViolation;
     }
 
@@ -109,43 +106,26 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $this->em = $this->getDoctrine()->getManagerForClass(get_class($entity));
     }
 
-    private function formatWithIdentifiers($em, $class, $value)
+    protected function formatIdentifier(Constraint $constraint)
     {
-        if (!\is_object($value) || $value instanceof \DateTimeInterface) {
-            return $this->formatValue($value, self::PRETTY_DATE);
-        }
+        $class = get_class($constraint->entity);
 
-        if (method_exists($value, '__toString')) {
-            return (string) $value;
-        }
+        $message = $constraint->message;
+        while($class !== false) {
 
-        if ($class->getName() !== $idClass = \get_class($value)) {
-            // non unique value might be a composite PK that consists of other entity objects
-            if ($em->getMetadataFactory()->hasMetadataFor($idClass)) {
-                $identifiers = $em->getClassMetadata($idClass)->getIdentifierValues($value);
-            } else {
-                // this case might happen if the non unique column has a custom doctrine type and its value is an object
-                // in which case we cannot get any identifiers for it
-                $identifiers = [];
-            }
-        } else {
-            $identifiers = $class->getIdentifierValues($value);
-        }
+            $className = explode("\\", $class);
+            array_shift($className);
+            array_shift($className);
 
-        if (!$identifiers) {
-            return sprintf('object("%s")', $idClass);
-        }
-
-        array_walk($identifiers, function (&$id, $field) {
-            if (!\is_object($id) || $id instanceof \DateTimeInterface) {
-                $idAsString = $this->formatValue($id, self::PRETTY_DATE);
-            } else {
-                $idAsString = sprintf('object("%s")', \get_class($id));
+            $id = trim("@entities." . implode(".", array_map(fn($c) => camel2snake($c), $className)) . "._validators.".$constraint->message,".");
+            if ($this->translator->transExists($id)) {
+                $message = $id;
+                break; // Intl found
             }
 
-            $id = sprintf('%s => %s', $field, $idAsString);
-        });
+            $class = get_parent_class($class);
+        }
 
-        return sprintf('object("%s") identified by (%s)', $idClass, implode(', ', $identifiers));
+        return $message;
     }
 }

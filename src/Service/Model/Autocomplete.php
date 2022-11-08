@@ -2,7 +2,6 @@
 
 namespace Base\Service\Model;
 
-use Base\Database\Type\EnumType;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -16,8 +15,8 @@ class Autocomplete
 
     public function resolve($entry, $class = null, array $entryOptions = [])
     {
-        $entryOptions["format"] ??= FORMAT_TITLECASE;
-        $entryOptions["html"] ??= true;
+        $entryOptions["format"] ??= FORMAT_IDENTITY;
+        $entryOptions["html"]   ??= true;
 
         if($entry == null) return null;
         if(is_object($entry) && $class !== null) {
@@ -81,4 +80,24 @@ class Autocomplete
         ];
     }
 
+    public function resolveArray($entry, array $entryOptions = [])
+    {
+        $entryOptions["format"] ??= FORMAT_IDENTITY;
+
+        return array_transforms(function($k,$v,$callback,$i,$d) use ($entryOptions): ?array {
+
+            if(is_array($v)) {
+
+                $children = array_transforms($callback, $v, ++$d);
+
+                $group = array_pop_key("_self", $children);
+                $group["text"] = $k;
+                $group["children"] = $children;
+                return [null, $group];
+            }
+
+            return [null, ["id" => $v, "icon" => $v, "text" => castcase($k, $entryOptions["format"])]];
+
+        }, !empty($entry) ? $entry : []);
+    }
 }

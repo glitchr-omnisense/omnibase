@@ -11,7 +11,6 @@
 
 namespace Base\Validator\Constraints;
 
-use Base\Database\Mapping\ClassMetadataManipulator;
 use Symfony\Component\Validator\Constraint;
 use Base\Validator\ConstraintEntityValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
@@ -39,7 +38,6 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         $hasNullValue = false;
 
         $fields = array_map(fn($f) => $classMetadata->getFieldName($f), $constraint->fields);
-
         foreach ($fields as $key => $fieldName) {
 
             //
@@ -145,11 +143,8 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             return;
         }
 
-        if($constraint instanceof \Base\Validator\ConstraintEntity) {
-
-            $constraint->getTranslation($entity, $this->translator);
+        if($constraint instanceof \Base\Validator\ConstraintEntity)
             $constraint->entity  = $entity;
-        }
 
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];
         $invalidValue = $criteria[$errorPath] ?? $criteria[$fields[0]];

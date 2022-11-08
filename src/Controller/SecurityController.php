@@ -181,6 +181,9 @@ class SecurityController extends AbstractController
                 if (($user = $this->getUser()) && $user->isVerified())
                     $newUser->verify($user->isVerified());
 
+                $this->entityManager->persist($newUser);
+                $this->entityManager->flush();
+
                 if($this->parameterBag->get("base.user.register.notify_admins")) {
 
                     $notification = new Notification("register.notify_admins");
@@ -188,9 +191,6 @@ class SecurityController extends AbstractController
                     $notification->setHtmlTemplate("@Base/security/email/register_notifyAdmins.html.twig",["new_user" => $newUser]);
                     $notification->sendAdmins("email");
                 }
-
-                $this->entityManager->persist($newUser);
-                $this->entityManager->flush();
 
                 return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
             })
@@ -224,7 +224,7 @@ class SecurityController extends AbstractController
         } else {
 
             $verifyEmailToken = $user->getToken("verify-email");
-            if(false && $verifyEmailToken && $verifyEmailToken->hasVeto()) {
+            if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
                 $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getThrottleTimeStr()]);
                 $notification->send("danger");
@@ -233,6 +233,7 @@ class SecurityController extends AbstractController
 
                 $verifyEmailToken = new Token("verify-email", 24*3600, 3600);
                 $verifyEmailToken->setUser($user);
+                $this->entityManager->flush();
 
                 $notification = new Notification('verifyEmail.check');
                 $notification->setUser($user);
@@ -242,6 +243,7 @@ class SecurityController extends AbstractController
         }
 
         $this->entityManager->flush();
+
         return $this->redirectToRoute('user_profile');
     }
 

@@ -4,9 +4,9 @@ namespace Base\Controller\Frontend\User;
 
 use App\Entity\User;
 use Base\Enum\UserState;
-use Base\Form\Data\User\SearchData;
 use Base\Form\FormProxyInterface;
-use Base\Form\Type\User\SearchType;
+use Base\Form\Model\UserSearchModel;
+use Base\Form\Type\UserSearchType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,7 +29,7 @@ class SearchController extends AbstractController
      */
     public function Main(Request $request, ?FormInterface $formSearch = null)
     {
-        $formSearch = $formSearch ?? $this->formProxy->getForm("user:search") ?? $this->createForm(SearchType::class, new SearchData());
+        $formSearch = $formSearch ?? $this->formProxy->getForm("user:search") ?? $this->createForm(UserSearchType::class, new UserSearchModel());
         $formSearch->handleRequest($request);
 
         $formattedData = null;
@@ -50,7 +50,7 @@ class SearchController extends AbstractController
         
         return $this->render('@Base/client/user/search.html.twig', [
             "form" => $formSearch->createView(),
-            "form_data" => $formattedData ?? new SearchData(),
+            "form_data" => $formattedData ?? new UserSearchModel(),
             "users" => $users
         ]);
     }

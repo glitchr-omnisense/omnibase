@@ -3,8 +3,6 @@
 namespace Base\Field\Type;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Form\FormFactoryInterface;
-use Base\Service\BaseService;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -16,14 +14,14 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
 class ArrayType extends CollectionType
 {
-    public function __construct(Environment $twig, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, ClassMetadataManipulator $classMetadataManipulator)
     {
-        parent::__construct($twig, $translator);
+        parent::__construct($twig, $translator, $authorizationChecker, $adminUrlGenerator);
         $this->classMetadataManipulator = $classMetadataManipulator;
-
     }
 
     public function getBlockPrefix(): string { return 'array'; }
