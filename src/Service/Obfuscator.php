@@ -18,8 +18,10 @@ class Obfuscator implements ObfuscatorInterface
         return $this->hashids->encodeHex(bin2hex(serialize($value)));
     }
 
-    public function decode(string $hash, string $compressor = null): mixed  {
-
+    public function decode(string $hash, string $compressor = null): mixed
+    {
         if(!preg_match("/^[a-zA-Z0-9]+$/",$hash)) return null; // Only hash candidate can pass this line
-        return unserialize(hex2bin($this->hashids->decodeHex($hash))); }
+        $array = unserialize(hex2bin($this->hashids->decodeHex($hash)));
+        return $array == false ? null : $array;
+    }
 }

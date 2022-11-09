@@ -74,7 +74,6 @@ class FileType extends AbstractType implements DataMapperInterface
 
             'allow_delete' => true,
             "allow_delete[confirmation]" => true,
-
             "allow_cancel[confirmation]" => true,
 
             'multiple'     => null,
@@ -84,7 +83,6 @@ class FileType extends AbstractType implements DataMapperInterface
             'title'          => null,
             'allow_url'      => false,
             'allow_reupload' => true,
-            'obfusca'        => false,
 
             'sortable'     => null,
             'sortable-js'  => $this->parameterBag->get("base.vendor.sortablejs.javascript"),

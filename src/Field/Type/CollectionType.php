@@ -2,9 +2,6 @@
 
 namespace Base\Field\Type;
 
-use Base\Backend\Config\Action;
-use Base\Controller\Backend\AbstractCrudController;
-use Base\Enum\UserRole;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
@@ -27,7 +24,7 @@ class CollectionType extends AbstractType
     {
         $this->twig = $twig;
         $this->translator = $translator;
-    
+
         $this->authorizationChecker = $authorizationChecker;
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
@@ -39,8 +36,8 @@ class CollectionType extends AbstractType
         $resolver->setDefaults([
             'form2' => false,
             'length' => 0,
-            'allow_add' => false,
-            'allow_delete' => false,
+            'allow_add' => true,
+            'allow_delete' => true,
             'html'      => false,
             'href' => null,
             'prototype' => true,

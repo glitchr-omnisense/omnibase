@@ -98,6 +98,12 @@ class SelectField implements FieldInterface
         return $this;
     }
 
+    public function allowSearch(bool $allow = true)
+    {
+        $this->setFormTypeOption("minimumResultsForSearch", $allow ? 0 : -1);
+        return $this;
+    }
+
     public function turnHorizontal(bool $horizontal) { return $this->showVertical(!$horizontal); }
     public function showVertical(bool $vertical = true)
     {

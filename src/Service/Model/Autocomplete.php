@@ -27,12 +27,9 @@ class Autocomplete
             $autocomplete     = null;
             $autocompleteData = [];
 
-            if($entryOptions["html"]) {
-
-                if(class_implements_interface($entry, AutocompleteInterface::class)) {
-                    $autocomplete = $entry->__autocomplete() ?? null;
-                    $autocompleteData = $entry->__autocompleteData() ?? [];
-                }
+            if(class_implements_interface($entry, AutocompleteInterface::class)) {
+                $autocomplete = $entry->__autocomplete() ?? null;
+                $autocompleteData = $entry->__autocompleteData() ?? [];
             }
 
             $className = get_class($entry);

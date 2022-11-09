@@ -3,7 +3,6 @@
 namespace Base\Console\Command;
 
 use Base\Service\Flysystem;
-use League\Flysystem\UnableToCreateDirectory;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -29,23 +28,23 @@ class CacheClearCommand extends \Symfony\Bundle\FrameworkBundle\Command\CacheCle
 
         $testFile = $realCacheDir."/.test";
         $testFileExists = file_exists($testFile);
-        
+
         $ret = parent::execute($input, $output);
-        
+
         file_put_contents($testFile, "Hello World !");
         if(!$testFileExists)
             $io->warning(sprintf('Cache requires to run a second `cache:clear` to account for custom base bundle features.', $kernel->getEnvironment(), var_export($kernel->isDebug(), true)));
-        
+
         if($this->flysystem !== null) {
-        
+
             $io->note("Flysystem symlink(s) got generated in public directory.");
 
             foreach($this->flysystem->getStorageNames(false) as $storageName) {
-    
+
                 if(!$this->flysystem->hasStorage($storageName.".public"))
                     continue;
 
-                $realPath = str_rstrip($this->flysystem->prefixPath("", $storageName), "/");                 
+                $realPath = str_rstrip($this->flysystem->prefixPath("", $storageName), "/");
 
                 $publicPath = $this->flysystem->getPublicRoot($storageName.".public");
                 $publicPath = str_rstrip($publicPath, "/");

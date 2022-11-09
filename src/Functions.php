@@ -17,7 +17,7 @@ namespace {
 
         $last = strlen($basename);
         $length = array_pad(is_array($length) ? $length : [], $subdivision, is_array($length) ? 1 : $length);
-        
+
         $remainingSubdivision = ceil(($last - array_sum($length))/MAX_DIRSIZE);
         $length = array_pad($length, $subdivision+$remainingSubdivision, MAX_DIRSIZE);
 
@@ -1437,7 +1437,7 @@ namespace {
         $image->destroy();
     }
 
-    function is_emptydir($dir) 
+    function is_emptydir($dir)
     {
         $handle = opendir($dir);
         while (false !== ($entry = readdir($handle))) {

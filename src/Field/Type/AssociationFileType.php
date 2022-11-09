@@ -6,7 +6,6 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
-use Base\Entity\Thread;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Service\FileService;
@@ -17,7 +16,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use Error;
-use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -69,7 +67,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             'entity_data'    => [],
 
             "multiple"     => null,
-            'allow_delete' => true,
+            'allow_delete' => false,
             "allow_delete[confirmation]" => true,
 
             'href'         => null,
@@ -253,13 +251,12 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                         } else if($entity->getId() === null) {
 
-                            try { $this->propertyAccessor->setValue($entity, $fieldName, [$file]); }
+                            try { $this->propertyAccessor->setValue($entity, $fieldName, $file); }
                             catch (Error $e) { throw $e; }
                         }
 
                         $newData[] = $entity;
                     }
-
                 }
 
             } else if(($file = $form->getData())) {

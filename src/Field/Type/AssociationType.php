@@ -250,7 +250,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
     {
         $form = current(iterator_to_array($forms));
         $formParent  = $form->getParent();
-        if ($formParent?->getData() instanceof PersistentCollection && 
+        if ($formParent?->getData() instanceof PersistentCollection &&
             !$this->classMetadataManipulator->isCollectionOwner($formParent, $formParent?->getData())) return;
 
         $options     = $formParent->getConfig()->getOptions();

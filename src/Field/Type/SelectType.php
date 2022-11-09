@@ -124,6 +124,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'maximum'            => 0,
             'tabulation'         => "1.75em",
             'tags'               => false,
+            'highlight'          => null,
             'minimumInputLength' => 0,
             'tokenSeparators'    => [' ', ',', ';'],
             'closeOnSelect'      => null,
@@ -150,8 +151,12 @@ class SelectType extends AbstractType implements DataMapperInterface
         ]);
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
-            if($value === null) return $options["tags"] !== true;
+            if($value === null) return $options["tags"] != true;
             return $value;
+        });
+
+        $resolver->setNormalizer('highlight', function (Options $options, $value) {
+            return ($options["tags"] != true) && $value;
         });
 
         $resolver->setNormalizer('tokenSeparators', function (Options $options, $value) {
@@ -287,7 +292,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 if($this->classMetadataManipulator->isEntity($options["class"])) {
 
                     foreach($dataChoices as $data) {
-                        
+
                         if(!in_array($data, $knownData)) {
 
                             $classRepository = $this->entityManager->getRepository($options["class"]);
@@ -611,6 +616,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $selectOpts["dropdownCssClass"]  .= " select2-selection--hide";
             }
 
+            $view->vars["highlight"] = $options["highlight"];
             if($options["tags"]) {
                 $view->vars["tokenSeparators"] = $options["tokenSeparators"];
             }
