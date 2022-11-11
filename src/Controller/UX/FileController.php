@@ -120,7 +120,7 @@ class FileController extends AbstractController
         $this->localCache = false;
         return $this->ImageCrop($hashid, $identifier, $extension);
     }
- 
+
     /**
      * @Route("/images/cropper/{identifier}/{hashid}/image.{extension}", name="imageCropExtension", requirements={"hashid"=".+"})
      * @Route("/images/cropper/{identifier}/{hashid}", name="imageCrop", requirements={"hashid"=".+"})
@@ -202,14 +202,13 @@ class FileController extends AbstractController
 
         // File should be access from default "image" route to spare some computing time
         $config["identifier"] = $identifier;
-        $hashid = $this->imageService->obfuscate($path, $config, $filters); 
-        
+        $hashid = $this->imageService->obfuscate($path, $config, $filters);
+
         $output = pathinfo_extension($hashid."/image", $extension);
         $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
-       
         return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
-    
+
     /**
      * @Route("/images/cacheless/{hashid}/image.webp", name="imageWebp_cacheless", requirements={"hashid"=".+"})
      */
@@ -240,7 +239,6 @@ class FileController extends AbstractController
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($hashid."/image", "webp");
-        
         $path = $this->imageService->filter($config["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
         return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
@@ -280,7 +278,7 @@ class FileController extends AbstractController
         // Extract parameters
         $config = $this->imageService->resolve($hashid);
         if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
-        
+
         $filters = $config["filters"] ?? [];
         $options = $config["options"] ?? [];
         $path    = $config["path"] ?? null;

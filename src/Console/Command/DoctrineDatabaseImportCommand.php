@@ -612,7 +612,7 @@ class DoctrineDatabaseImportCommand extends Command
                     switch($state) {
 
                         case self::VALID_ENTITY :
-                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <ln>".$entityStr.": </ln><info>\"". $entity."\"</info> ".($onTheFly ? " just got imported on the fly" : "is ready for import")." !", OutputInterface::VERBOSITY_VERBOSE);
+                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <ln>".$entityStr.": </ln><info>\"". $entity."\"</info> ".($onTheFly ? " just got imported on the fly" : "is ready for import")." !");
                             break;
 
                         case self::ALREADY_IN_DATABASE:
@@ -625,7 +625,7 @@ class DoctrineDatabaseImportCommand extends Command
                             else if($state == self::PARENT_NOT_FOUND) $msg = "parent not found";
                             else $msg = "unknown reason";
 
-                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <red>".$entityStr.": </red>\"". $entity."\" is invalid  <warning>(hint:\"".$msg."\")</warning> and cannot be imported");
+                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <red>".$entityStr.": </red>\"". $entity."\" is invalid  <warning>(hint:\"".$msg."\")</warning> and cannot be imported", OutputInterface::VERBOSITY_VERBOSE);
                     }
                 }
             }

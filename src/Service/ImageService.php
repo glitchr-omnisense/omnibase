@@ -12,6 +12,7 @@ use Base\Routing\RouterInterface;
 use Exception;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
+use Imagine\Image\Profile;
 
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
@@ -190,7 +191,7 @@ class ImageService extends FileService implements ImageServiceInterface
     {
         if(!is_array($filters)) $filters = [$filters];
 
-        //
+       //
         // Resolve nested paths
         $options = $this->resolve($path, $filters);
         $path    = $config["path"]    ?? $options["path"]    ?? $path; // Cache directory location
@@ -231,6 +232,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
         $pathRelative = $this->flysystem->stripPrefix($output, $storage);
         $pathCache = $pathRelative;
+
         // NB: Encode path using hashid only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over
         // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
@@ -297,6 +299,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
         $pathRelative = $this->flysystem->stripPrefix($output, $storage);
         $pathCache = $pathRelative;
+
         // Encode path using hashid only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over. Lines below make sure suffix is applied including filter operations
         // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
@@ -309,7 +312,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
             return $this->noImage;
         }
-        
+
         //
         // Compute a response.. (if cache not found)
         if ($config["local_cache"] ?? true) {
@@ -354,7 +357,7 @@ class ImageService extends FileService implements ImageServiceInterface
         try { $image = $imagine->open($path); }
         catch (Exception $e) { return null; }
 
-        if($formatter instanceof BitmapFilter) // Take care to set proper palette
+        if($formatter instanceof BitmapFilter)
             $image->usePalette(is_cmyk($path) ? new CMYK() : new RGB());
 
         // Apply filters

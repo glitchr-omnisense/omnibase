@@ -461,6 +461,7 @@ namespace {
         }
     }
 
+
     function debug_backtrace_short()
     {
         $backtrace = [];
@@ -1393,7 +1394,7 @@ namespace {
      * @param string $path The path to the file.
      * @return bool
      */
-    function is_cmyk($path)
+    function is_cmyk(string $path)
     {
         if(!$path || !file_exists($path))
             return false;
@@ -1404,7 +1405,7 @@ namespace {
                array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
     }
 
-    function is_rgb($path)
+    function is_rgb(string $path)
     {
         if(!$path || !file_exists($path))
             return false;
@@ -1413,7 +1414,43 @@ namespace {
         return array_key_exists('channels', $imagesize) && 3 == $imagesize['channels'];
     }
 
-    function cmyk2rgb($path) // Not working... color are distorded
+    function cmyk_profile(string $path, string $name)
+    {
+        $image = new \Imagick($path); // load image
+        return $image->getImageProfiles($name, true)[$name] ?? null; // get profiles
+    }
+
+    function write_cmyk_profiles(string $path, array $profiles)
+    {
+        $image = new \Imagick($path); // load image
+        foreach($profiles as $name => $data)
+            $image->profileImage($name, $data);
+
+        $image->setImageColorSpace(is_cmyk($path) ? Imagick::COLORSPACE_CMYK : Imagick::COLORSPACE_RGB);
+        $image->writeImage($path);
+    }
+
+    function write_cmyk_profile(string $path, string $name, $data)
+    {
+        $image = new \Imagick($path); // load image
+        $image->profileImage($name, $data);
+        $image->setImageColorSpace(is_cmyk($path) ? Imagick::COLORSPACE_CMYK : Imagick::COLORSPACE_RGB);
+        $image->writeImage($path);
+    }
+
+    function cmyk_profiles(string $path)
+    {
+        $image = new \Imagick($path); // load image
+        return $image->getImageProfiles('*', true); // get profiles
+    }
+
+    function cmyk_icc_profile(string $path)
+    {
+        $image = new \Imagick($path); // load image
+        return $image->getImageProfiles('icc', true)['icc'] ?? null; // get profiles
+    }
+
+    function cmyk2rgb(string $path) // Not working... color are distorded
     {
         if(is_rgb($path)) return $path;
         if(!class_exists("Imagick"))

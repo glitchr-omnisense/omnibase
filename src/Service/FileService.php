@@ -42,7 +42,7 @@ class FileService implements FileServiceInterface
 
         $this->mimeTypes = new MimeTypes();
     }
-    
+
     public function getProjectDir() { return $this->projectDir; }
     public function getPublicDir() { return $this->publicDir; }
 
@@ -172,7 +172,6 @@ class FileService implements FileServiceInterface
     public function resolve(string $hashid): ?array
     {
         $config = [];
-
         $match = $this->router->getRouteMatch($hashid);
         $hashid = $match && array_key_exists("hashid", $match) ? $match["hashid"] : $hashid;
         $hashid = str_replace("/", "", $hashid);
@@ -180,7 +179,7 @@ class FileService implements FileServiceInterface
         $decodedHashid = $this->obfuscator->decode($hashid);
         foreach($decodedHashid ?? [] as $key => $el)
             $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;
-    
+
         if(array_key_exists("path", $config ?? [])) {
 
             $resolvedPath = $this->resolve($config["path"]);

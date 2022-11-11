@@ -185,8 +185,8 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 $extensions = $this->imageService->getExtensions($file);
                 $extension  = first($extensions);
 
-                $hashidWebp = basename(dirname($this->imageService->imagine($file, [], ["webp" => true])));
-                $hashid     = basename(dirname($this->imageService->imagine($file, [], ["webp" => false, "extension" => $extension])));
+                $hashidWebp = $this->imageService->imagine($file, [], ["webp" => true]);
+                $hashid     = $this->imageService->imagine($file, [], ["webp" => false, "extension" => $extension]);
 
                 if($this->isCached($hashid)) {
 

@@ -68,7 +68,6 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
 
     public function isCached($hashid)
     {
-
         $args = $this->imageService->resolve($hashid);
         if(!$args) return false;
 
@@ -78,7 +77,11 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
 
-        return $this->imageService->isCached($args["path"] ?? $hashid, new WebpFilter(null, $filters, $options), ["webp" => true, "local_cache" => $localCache]);
+        $extensions = $this->imageService->getExtensions($args["path"] ?? $hashid);
+        $extension  = first($extensions);
+
+        $output = pathinfo_extension($hashid."/image", $extension);
+        return $this->imageService->isCached($args["path"] ?? $hashid, new WebpFilter(null, $filters, $options), ["webp" => true, "local_cache" => $localCache, "output" => $output]);
     }
 
     protected $ibatch = 0;
@@ -154,7 +157,11 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 $formatStr = implode(", ", array_map(fn($f) => implode("x", $f), $formats));
                 $formatStr = $formatStr ? "Formats: ".$formatStr : "";
 
-                if($this->isCached($file)) {
+                $extensions = $this->imageService->getExtensions($file);
+                $extension  = first($extensions);
+
+                $hashid = $this->imageService->imagine($file, [], ["webp" => false]);
+                if($this->isCached($hashid)) {
 
                     $this->output->section()->writeln("             <warning>* Already cached \"".str_lstrip($file,$publicDir)."\".. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
 
@@ -163,20 +170,17 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                     $this->output->section()->writeln("             <info>* Warming up \"".str_lstrip($file,$publicDir)."\".. (".($i+1)."/".$N.")</info>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->ibatch++;
 
-                    $extensions = $this->imageService->getExtensions($file);
-                    $extension  = first($extensions);
-
-                    $hashid = basename(dirname($this->imageService->imagine($file, [], ["webp" => false])));
                     $this->fileController->Image($hashid, $extension);
-                    $hashid = basename(dirname($this->imageService->imagine($file, [], ["webp" => true])));
+
+                    $hashid = $this->imageService->imagine($file, [], ["webp" => true]);
                     $this->fileController->ImageWebp($hashid);
 
                     foreach($formats as $format) {
 
                         list($width, $height) = $format;
-                        $hashid = basename(dirname($this->imageService->thumbnail($file, $width, $height, [], ["webp" => false])));
+                        $hashid = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => false]);
                         $this->fileController->Image($hashid, $extension);
-                        $hashid = basename(dirname($this->imageService->thumbnail($file, $width, $height, [], ["webp" => true])));
+                        $hashid = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => true]);
                         $this->fileController->ImageWebp($hashid);
                     }
                 }

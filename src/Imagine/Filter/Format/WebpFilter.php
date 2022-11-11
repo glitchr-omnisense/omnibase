@@ -7,6 +7,8 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Imagine\Filter\Basic\Autorotate;
 use Imagine\Filter\Basic\WebOptimization;
 use Imagine\Image\ImageInterface;
+use Imagine\Image\Palette\CMYK;
+use Imagine\Image\Palette\RGB;
 
 class WebpFilter extends WebOptimization implements BitmapFilterInterface
 {
@@ -52,6 +54,8 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 
     public function apply(ImageInterface $image): ImageInterface
     {
+        $image->usePalette(is_cmyk($image->metadata()->get("filepath")) ? new CMYK() : new RGB());
+
         foreach($this->filters as $filter){
 
             $oldImage = $image;
@@ -61,6 +65,14 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
                 $oldImage->__destruct();
         }
 
-        return parent::apply($image);
+        $image = parent::apply($image);
+
+        // ICC not well supported for webp.. it results in a brighter image.. TBC
+        // NB: Adding ICC profile wasnt working at this step.. so I bypass the issue as following
+        // if(is_cmyk($image->metadata()->get("filepath"))) {
+        //     write_cmyk_profiles($this->path, cmyk_profiles($image->metadata()->get("filepath")));
+        // }
+
+        return $image;
     }
 }
