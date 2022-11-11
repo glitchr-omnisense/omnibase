@@ -65,7 +65,11 @@ class ImageService extends FileService implements ImageServiceInterface
     public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image"    , [], $path, array_merge($config, ["filters" => $filters])); }
     public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
-        $supports_webp = array_pop_key("webp", $config) ?? browser_supports_webp();
+        $supports_webp  = array_pop_key("webp", $config) ?? browser_supports_webp();
+
+        $extension = $config["extension"] ?? null;
+        if($extension) $supports_webp &= ($extension == "webp");
+
         return $supports_webp ? $this->webp($path, $filters, $config) : $this->image($path, $filters, $config);
     }
 

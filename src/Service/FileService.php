@@ -155,8 +155,11 @@ class FileService implements FileServiceInterface
         // Append hashid
         $proxyRouteParameters["hashid"] = $hashid;
 
+        $extension = array_pop_key("extension", $config);
+        if ($extension !== null) $proxyRouteParameters["extension"] = $extension;
+
         // Add custom _host if found
-        $host = array_pop_key("host", $config);
+        $host = array_pop_key("_host", $config);
         if ($host !== null) $proxyRouteParameters["_host"] = $host;
 
         $variadic = [];

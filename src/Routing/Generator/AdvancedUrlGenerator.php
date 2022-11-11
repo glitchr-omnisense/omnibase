@@ -28,7 +28,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         //     (.. and Matcher class is changing context.)
         $context = new RequestContext($context->getBaseUrl(), $context->getMethod(), $context->getHost(), $context->getScheme(), $context->getHttpPort(), $context->getHttpsPort(), $context->getPathInfo(), $context->getQueryString());
         parent::__construct($compiledRoutes, $context, $logger, $defaultLocale);
-        
+
         $this->compiledRoutes = $compiledRoutes;
         $this->cachedRoutes   = BaseBundle::CACHE && $this->getRouter()->getCache()
             ? $this->getRouter()->getCacheRoutes()->get() ?? []
@@ -74,7 +74,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             try { return parent::generate($routeName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType); }
             catch (InvalidParameterException|RouteNotFoundException $_) { $e = $_; }
         }
-       
+
         try { return sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType)); }
         catch (InvalidParameterException|RouteNotFoundException $_) { $e = $_; }
 
@@ -108,7 +108,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $this->getContext()->setHost($parse["host"]);
             if($parse && array_key_exists("base_dir", $parse))
                 $this->getContext()->setBaseUrl($parse["base_dir"]);
-                
+
         } else {
 
             $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()); // Make sure also it gets the basic context
@@ -140,16 +140,16 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             if(str_ends_with($routeName, ".".$lang)) {
 
                 $routeName = str_rstrip($routeName, ".".$lang);
-                $locale = $lang;                
+                $locale = $lang;
             }
         }
 
-        // Priority to route parameter locale 
+        // Priority to route parameter locale
         if(array_key_exists("_locale", $routeParameters))
             $locale = $this->getLocaleProvider()->getLang($routeParameters["_locale"]);
 
         $routeParameters = $this->resolveParameters($routeParameters, $referenceType);
-        
+
         // Check whether the route is already cached
         $hash = $this->getRouter()->getRouteHash($routeName, $routeParameters, $referenceType);
         if(array_key_exists($hash, $this->cachedRoutes)) {
