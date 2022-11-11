@@ -190,8 +190,8 @@ class ServiceEntityParser
         return $this->__findOneBy($criteria, $orderBy, $groupBy, $selectAs);
     }
 
-    protected function __findNextOneBy   (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null,                                ?array $selectAs = null)      { return $this->__findOneBy       ($criteria, $orderBy,                  $groupBy, $selectAs); }
-    protected function __lengthOfBy      (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null, $limit = null, $offset = null, ?array $selectAs = null)      { return $this->getQueryWithLength($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs)->getResult(); }
+    protected function __findNextOneBy   (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null,                                ?array $selectAs = null)   { return $this->__findOneBy       ($criteria, $orderBy,                  $groupBy, $selectAs); }
+    protected function __lengthOfBy      (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null, $limit = null, $offset = null, ?array $selectAs = null)   { return $this->getQueryWithLength($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs)->getResult(); }
     protected function __distinctCountBy (array $criteria = [],                                            ?array $groupBy = null,                                ?array $selectAs = null): int { return $this->__countBy         ($criteria, self::COUNT_DISTINCT,      $groupBy, $selectAs); }
     protected function __countBy         (array $criteria = [], ?string $mode = null, ?array $orderBy = null, ?array $groupBy = null,                                ?array $selectAs = null)
     {
@@ -1556,8 +1556,8 @@ class ServiceEntityParser
         $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], null, null, $groupBy ?? [], $selectAs ?? []);
         if($this->classMetadata->hasAssociation($column))
             $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column);
-       
-        $qb->addSelect('COUNT('.trim($mode.' '.$e_column).') AS count');
+
+        $qb->select('COUNT('.trim($mode.' '.$e_column).') AS count');
         return $qb->getQuery();
     }
 

@@ -168,7 +168,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
-        
+
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 
@@ -181,7 +181,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
-           
+
             // In case of restriction: profiler is disabled
             if(!$specialGrant && $this->profiler) $this->profiler->disable();
 
@@ -304,11 +304,11 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $response    = $event->getResponse();
                 $alreadyRedirected = $response && $response->getStatusCode() == 302;
                 $isException =  $this->baseService->isEasyAdmin() || $this->baseService->isProfiler();
-                
+
                 if($alreadyRedirected || $isException) $callbackFn();
                 else $this->baseService->redirectToRoute("user_profile", [], 302, [
-                    "event" => $event, 
-                    "exceptions" => $exceptions, 
+                    "event" => $event,
+                    "exceptions" => $exceptions,
                     "callback" => $callbackFn
                 ]);
 
