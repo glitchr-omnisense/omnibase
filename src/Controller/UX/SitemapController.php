@@ -18,7 +18,7 @@ class SitemapController extends AbstractController
     /**
      * @Route("/sitemap.{extension}", name="ux_sitemap", requirements={"hashid"="xml|txt"})
      */
-    public function XmlFormat(string $extension, Request $request, SitemapperInterface $sitemap): XmlResponse
+    public function Main(string $extension, Request $request, SitemapperInterface $sitemap): XmlResponse
     {
         $hostname = $request->getSchemeAndHttpHost();
 
