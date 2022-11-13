@@ -9,21 +9,23 @@ use Symfony\Component\Routing\Annotation\Route;
 
 use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class SitemapController extends AbstractController
 {
     use BaseTrait;
 
     /**
-     * @Route("/sitemap.xml", name="ux_sitemap")
+     * @Route("/sitemap.{extension}", name="ux_sitemap", requirements={"hashid"="xml|txt"})
      */
-    public function Main(Request $request, SitemapperInterface $sitemap): XmlResponse
+    public function XmlFormat(string $extension, Request $request, SitemapperInterface $sitemap): XmlResponse
     {
         $hostname = $request->getSchemeAndHttpHost();
 
         return $sitemap
             ->setHostname($hostname)
             ->registerAnnotations()
-            ->generate('sitemap.xml.twig');
+            ->generate('sitemap.'.$extension.'.twig');
     }
+
 }

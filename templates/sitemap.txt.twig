@@ -1,0 +1,6 @@
+{%- for url in urlset -%}
+{{ url.loc}}
+{%- for alternate in url.alternates ?? [] -%}
+{{ alternate.href }}
+{%- endfor -%}
+{%- endfor -%}
