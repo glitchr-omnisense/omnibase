@@ -36,7 +36,7 @@ class Autocomplete
             $className = $this->translator->transEntity($className, null, Translator::NOUN_SINGULAR);
 
             $html = $entryOptions["html"] && is_html($autocomplete) ? $autocomplete : null;
-            $text = $entryOptions["html"] && is_html($autocomplete) ? null          : $autocomplete;
+            $text = $entryOptions["html"] && is_html($autocomplete) ? null          : strip_tags($autocomplete);
             $data = $autocompleteData;
 
             if(!$text)

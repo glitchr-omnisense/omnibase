@@ -139,6 +139,8 @@ class FileController extends AbstractController
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
+        if(!$extensions) throw $this->createNotFoundException();
+
         if ($extension == null || !in_array($extension, $extensions))
             return $this->redirectToRoute("ux_imageCropExtension", ["hashid" => $hashid, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
@@ -285,6 +287,8 @@ class FileController extends AbstractController
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
+        if(!$extensions) throw $this->createNotFoundException();
+
         if ($extension == null || !in_array($extension, $extensions))
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
