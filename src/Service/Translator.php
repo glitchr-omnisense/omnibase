@@ -295,7 +295,7 @@ class Translator implements TranslatorInterface
         return $this->transExists($domain.$routeName.".title");
     }
 
-    public function transEnum(string $value, string $class, null|string|array $options = self::NOUN_SINGULAR): ?string
+    public function transEnum(?string $value, string $class, null|string|array $options = self::NOUN_SINGULAR): ?string
     {
         if(class_exists($class)) $declaringClass = $class;
         else if(Type::hasType($class)) $declaringClass = get_class(Type::getType($class));
@@ -318,7 +318,7 @@ class Translator implements TranslatorInterface
         return $class ? $this->transPerms($class.$value, $options, [], self::DOMAIN_ENUM) : null;
     }
 
-    public function transEnumExists(string $value , string $class, string|array $options = self::NOUN_SINGULAR): bool
+    public function transEnumExists(string $value, string $class, string|array $options = self::NOUN_SINGULAR): bool
     {
         $declaringClass = $class;
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
