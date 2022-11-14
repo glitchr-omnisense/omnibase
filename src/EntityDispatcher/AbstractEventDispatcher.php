@@ -6,8 +6,6 @@ use Base\Database\Entity\EntityHydrator;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
 use Exception;
 
@@ -19,7 +17,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
      * @var SymfonyEventDispatcherInterface
      */
     protected $dispatcher;
-    
+
     protected array $events;
 
     public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydrator $entityHydrator, EntityManagerInterface $entityManager)
@@ -60,7 +58,6 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function addEvent(string $event, mixed $subject)
     {
         $id = spl_object_id($subject);
-
         if(!array_key_exists($id, $this->events))
             $this->events[$id] = [];
 
@@ -78,14 +75,13 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
         $reflush = false;
         $eventClass = $this->getEventClass();
- 
+
         foreach ($this->events[$id] as $eventName => $alreadyTriggered) {
 
             if($alreadyTriggered === false) continue;
-            
+
             $this->events[$id][$eventName] = false;
             $this->dispatcher->dispatch(new $eventClass($event), $eventName);
-
             $reflush = true;
         }
 

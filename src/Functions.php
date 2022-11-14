@@ -397,7 +397,7 @@ namespace {
 
     function in_class(object $class, mixed $needle) {
 
-        $haystack = array_filter(get_object_vars($class));
+        $haystack = array_filter((array) $class);
         return in_array($needle, $haystack, true);
     }
 

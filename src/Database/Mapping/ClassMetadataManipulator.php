@@ -2,7 +2,6 @@
 
 namespace Base\Database\Mapping;
 
-use App\Entity\User;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
@@ -171,7 +170,7 @@ class ClassMetadataManipulator
                 $validFields[$fieldName] = ["form_type" => HiddenType::class];
             else if($fieldName == "translations")
                 $validFields[$fieldName] = [
-                    "form_type" => TranslationType::class, 
+                    "form_type" => TranslationType::class,
                     "translatable_class" => $classMetadata->getName(),
                     "translation_class"  => $classMetadata->getName()::getTranslationEntityClass(),
                 ];
@@ -356,7 +355,7 @@ class ClassMetadataManipulator
            $fieldValue = $classMetadata->getFieldValue($entity, $fieldName);
         else {
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
-            $fieldValue = $propertyAccessor->getValue($entity, $fieldName);  
+            $fieldValue = $propertyAccessor->getValue($entity, $fieldName);
         }
 
         if(class_implements_interface($fieldValue, TranslatableInterface::class))
@@ -380,7 +379,7 @@ class ClassMetadataManipulator
         // If field path is not empty
         if(!empty($fieldPath))
             return $this->getFieldValue($fieldValue, implode(".", $fieldPath));
-        
+
         // Access property
         return $fieldValue;
     }
@@ -404,7 +403,7 @@ class ClassMetadataManipulator
     }
 
     public function hasProperty(null|string|object $entityOrClassOrMetadata, string $fieldName): ?string { return property_exists($entityOrClassOrMetadata, $fieldName); }
-    
+
     public function getPropertyValue($entity, string $property)
     {
         if(!$entity) return null;
@@ -432,7 +431,7 @@ class ClassMetadataManipulator
             : $this->getTypeOfField($entityOrClassOrMetadata, $property);
     }
 
-    public function getClosestEntity(FormInterface|FormEvent $form) 
+    public function getClosestEntity(FormInterface|FormEvent $form)
     {
         if ($form instanceof FormEvent)
             $form = $form->getForm();
@@ -446,7 +445,7 @@ class ClassMetadataManipulator
         return $form->getData();
     }
 
-    public function getClosestEntityCollection(FormInterface|FormEvent $form) 
+    public function getClosestEntityCollection(FormInterface|FormEvent $form)
     {
         if ($form instanceof FormEvent)
             $form = $form->getForm();
@@ -467,8 +466,8 @@ class ClassMetadataManipulator
         if($entity == null) return null;
 
         $collection ??= $this->isEntity($entityOrForm) ? null : $this->getClosestEntityCollection($entityOrForm);
-        if($collection == null) return null;
- 
+        if(!$collection instanceof Collection) return null;
+
         if($collection instanceof PersistentCollection) {
 
             if($collection->getOwner() === null) return null;
@@ -479,10 +478,7 @@ class ClassMetadataManipulator
             return $entity === $collection->getOwner();
         }
 
-        if($collection instanceof Collection)
-            return in_class($entity, $collection);
-
-        return null;
+        return in_class($entity, $collection);
     }
 
     public function getDeclaringEntity(null|string|object $entityOrClassOrMetadata, $fieldPath)
@@ -497,7 +493,7 @@ class ClassMetadataManipulator
             $fieldPath = $this->getFieldName($entityOrClassOrMetadata, $fieldPath) ?? $fieldPath;
 
             $entityOrClassOrMetadata = $this->getTargetClass($entityOrClassOrMetadata, $fieldPath);
-        
+
             return $entityOrClassOrMetadata;
         }
 
@@ -597,7 +593,7 @@ class ClassMetadataManipulator
 
         if(array_key_exists("targetEntity", $entityMapping))
             return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $fieldPath));
-    
+
         return null; // Fallback, invalid path provided
     }
 

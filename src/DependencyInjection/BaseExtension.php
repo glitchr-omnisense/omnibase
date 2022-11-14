@@ -4,6 +4,7 @@ namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
 use Base\Database\Entity\EntityExtensionInterface;
+use Base\EntityDispatcher\EventDispatcherInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -41,6 +42,8 @@ class BaseExtension extends Extension
             $container->getParameter('twig.form.resources')
         ));
 
+        $container->registerForAutoconfiguration(AbstractEntity::class)->addTag('base.entity_extension');
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_subscriber');
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');

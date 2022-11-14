@@ -441,7 +441,7 @@ class SecurityController extends AbstractController
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent()) {
-            
+
             $notification = new Notification("login.already");
             $notification->send("warning");
 
@@ -454,8 +454,6 @@ class SecurityController extends AbstractController
             $notification = new Notification("resetPassword.invalidToken");
             $notification->send("danger");
 
-            dump($token);
-            exit(1);
             return $this->redirectToRoute($this->baseService->getRouteName("/"));
 
         } else {

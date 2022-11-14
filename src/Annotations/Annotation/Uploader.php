@@ -113,10 +113,10 @@ class Uploader extends AbstractAnnotation
     }
 
     public static function getPublic($entity, $fieldName)
-    {        
+    {
         if(!self::hasAnnotation($entity, $fieldName, self::class))
         return null;
-        
+
         /**
          * @var Uploader
          */
@@ -156,7 +156,7 @@ class Uploader extends AbstractAnnotation
 
             if(!is_stringeable($uuidOrFile))
                 return null;
-            
+
             $path = $that->getPath($entity, $fieldName, $uuidOrFile);
             $pathPublic = $that->getFlysystem()->getPublic($path, $that->getStorage());
             if($pathPublic) return $pathPublic;

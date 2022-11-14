@@ -2,7 +2,6 @@
 
 namespace Base\Database\Entity;
 
-use App\Entity\Article\Reply;
 use Base\Database\Entity\AggregateHydrator\PopulableInterface;
 use Base\Database\Entity\AggregateHydrator\SerializableInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
@@ -336,7 +335,7 @@ class EntityHydrator implements EntityHydratorInterface
     {
         $reflEntity = new ReflectionObject($entity);
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        
+
         foreach ($data as $propertyName => $value) {
 
             if($this->classMetadataManipulator->hasAssociation($entity, $propertyName))
@@ -356,12 +355,12 @@ class EntityHydrator implements EntityHydratorInterface
             // Default behavior
             $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
             if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
-                
+
                 $this->propertyAccessor->setValue($entity, $propertyName, $value);
                 $this->markAsHydrated($entity, $propertyName);
-                
+
             } else if($aggregateModel & self::OBJECT_PROPERTIES || $aggregateFallback) {
-                
+
                 $reflProperty = $reflEntity->hasProperty($propertyName) ? $reflEntity->getProperty($propertyName) : null;
                 if ($reflProperty !== null) {
 

@@ -9,7 +9,7 @@ use Base\Serializer\Encoder\ExcelEncoder;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
-use Base\Entity\Thread;
+
 use Base\Service\Model\GraphInterface;
 use Base\Notifier\Notifier;
 use Base\Service\LocaleProviderInterface;

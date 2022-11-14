@@ -150,6 +150,8 @@
 
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {%- set attr = attr|merge({'disabled': form.vars.disabled or (form.vars.is_inherited ?? false)} ) -%}
+    {%- set attr = attr|merge({'required': form.vars.required }) -%}
+
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
 
     {% if form.vars.tokenSeparators is defined %}

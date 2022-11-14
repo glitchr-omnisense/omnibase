@@ -27,6 +27,7 @@ class Autocomplete
             $autocomplete     = null;
             $autocompleteData = [];
 
+            $entityStr = is_stringeable($entry) ? $entry->__toString() : null;
             if(class_implements_interface($entry, AutocompleteInterface::class)) {
                 $autocomplete = $entry->__autocomplete() ?? null;
                 $autocompleteData = $entry->__autocompleteData() ?? [];
@@ -36,7 +37,7 @@ class Autocomplete
             $className = $this->translator->transEntity($className, null, Translator::NOUN_SINGULAR);
 
             $html = $entryOptions["html"] && is_html($autocomplete) ? $autocomplete : null;
-            $text = $entryOptions["html"] && is_html($autocomplete) ? null          : ($autocomplete ? strip_tags($autocomplete) : $autocomplete);
+            $text = $entryOptions["html"] && is_html($autocomplete) ? null          : $entityStr;
             $data = $autocompleteData;
 
             if(!$text)
