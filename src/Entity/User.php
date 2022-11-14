@@ -44,8 +44,8 @@ use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use Base\Enum\UserRole;
-use Base\Enum\UserState;
+use App\Enum\UserRole;
+use App\Enum\UserState;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)

@@ -17,9 +17,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
-use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\PasswordUpgradeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
@@ -90,6 +88,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         if( array_key_exists("_captcha", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) && class_exists(CaptchaBadge::class) )
             $badges[] = new CaptchaBadge("_captcha", $request->get('security_login')["_captcha"] ?? $request->get('_base_security_login')["_captcha"]);
 
+            // exit(1);
         return new Passport(
             new UserBadge($identifier),
             new PasswordCredentials($password), $badges);
