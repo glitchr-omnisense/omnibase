@@ -67,8 +67,8 @@ class ImageService extends FileService implements ImageServiceInterface
     {
         $supports_webp  = array_pop_key("webp", $config) ?? browser_supports_webp();
 
-        $extension = $config["extension"] ?? null;
-        if($extension) $supports_webp &= ($extension == "webp");
+        $extension = $config["extension"] ??= first($this->getExtensions($path));
+        if($extension) $supports_webp &= ($extension != "svg");
 
         return $supports_webp ? $this->webp($path, $filters, $config) : $this->image($path, $filters, $config);
     }
