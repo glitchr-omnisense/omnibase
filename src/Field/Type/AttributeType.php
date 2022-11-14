@@ -120,7 +120,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
             if(!is_instanceof($options["class"], AbstractAttribute::class))
                 $options["class"] = Attribute::class;
 
-
             $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAdapter::class;
 
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);

@@ -1,8 +1,7 @@
 <?php
 
-namespace Base\Controller\UX;
+namespace Base\Controller;
 
-use Base\Response\XmlResponse;
 use Base\Service\SitemapperInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,7 +17,7 @@ class SitemapController extends AbstractController
     /**
      * @Route("/sitemap.{extension}", name="ux_sitemap", requirements={"hashid"="xml|txt"})
      */
-    public function Main(string $extension, Request $request, SitemapperInterface $sitemap): XmlResponse
+    public function Main(string $extension, Request $request, SitemapperInterface $sitemap): Response
     {
         $hostname = $request->getSchemeAndHttpHost();
 

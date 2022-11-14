@@ -54,7 +54,7 @@ class IntlSubscriber implements EventSubscriberInterface
         }
     }
 
-    public function upgradeIntl($intl) 
+    public function upgradeIntl($intl)
     {
         $translations = [];
         if($intl instanceof TranslationInterface)

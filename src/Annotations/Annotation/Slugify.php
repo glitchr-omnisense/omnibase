@@ -91,7 +91,7 @@ class Slugify extends AbstractAnnotation
     public function slug($entity, ?string $input = null, string $suffix = ""): ?string
     {
         // Check if field already set.. get field value or by default class name
-        if(!$input && $this->referenceColumn) $input = $this->getPropertyValue($entity, $this->referenceColumn);
+        if(!$input && $this->referenceColumn) $input = $this->getPropertyValue($entity, $this->referenceColumn) ?? $this->getFieldValue($entity, $this->referenceColumn);
         if(!$input && $this->nullable) return null;
 
         if(!$input) $input = camel2snake(class_basename($entity), "-");
@@ -122,7 +122,6 @@ class Slugify extends AbstractAnnotation
          */
         $repository  = $this->getPropertyOwnerRepository($entity, $property);
         $defaultSlug = $this->slug($entity, $defaultInput);
-
         $slug = $defaultSlug;
         if(!$slug) return null;
 
@@ -156,11 +155,8 @@ class Slugify extends AbstractAnnotation
                 $labelModified = !$this->referenceColumn ? null :
                     $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
 
-                if($labelModified) {
-
+                if($labelModified)
                     $slug = $this->getSlug($entity, $property);
-                    $this->setFieldValue($entity, $property, $slug);
-                }
             }
 
         } else {

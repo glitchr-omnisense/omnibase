@@ -5,9 +5,10 @@ namespace Base\Service;
 use Base\Annotations\Annotation\Sitemap;
 use Base\Annotations\AnnotationReader;
 use Base\Exception\SitemapNotFoundException;
-use Base\Response\XmlResponse;
 use Base\Routing\RouterInterface;
 use Base\Service\Model\SitemapEntry;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
@@ -25,6 +26,8 @@ class Sitemapper implements SitemapperInterface
         $this->router           = $router;
         $this->localeProvider   = $localeProvider;
         $this->annotationReader = $annotationReader;
+
+        $this->mimeTypes        = new MimeTypes();
     }
 
     public function getSitemap(Route $route): ?Sitemap
@@ -200,15 +203,24 @@ class Sitemapper implements SitemapperInterface
 
         return $this->urlset;
     }
-    public function generate(string $name, array $context = []): XmlResponse
+
+    public function generate(string $name, array $context = []): Response
     {
         $urlset = array_reverse(array_map(fn($s) => $s->toArray($this->hostname), $this->doCompute()));
 
-        return new XmlResponse($this->twig->render($name,
+        $extension = explode(".", basename($name, ".twig"));
+        $extension = end($extension) ?? "txt";
+        $mimeTypes = $this->mimeTypes->getMimeTypes($extension);
+
+        $response = new Response($this->twig->render($name,
             array_merge($context, [
                 'urlset' => $urlset,
                 'hostname' => $this->hostname
             ]))
         );
+
+        if ($mimeTypes) $response->headers->set('Content-Type', first($mimeTypes));
+
+        return $response;
     }
 }

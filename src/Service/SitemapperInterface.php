@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Response\XmlResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Route;
 
 interface SitemapperInterface
@@ -14,5 +14,5 @@ interface SitemapperInterface
     public function registerUrl(string $url): self;
     public function registerAnnotations(): self;
 
-    public function generate(string $name, array $context = []): XmlResponse;
+    public function generate(string $name, array $context = []): Response;
 }
