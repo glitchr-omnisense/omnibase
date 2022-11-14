@@ -51,6 +51,11 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
             $identifier ??= implode("x", array_slice($thumbnail, 0, 2)); // Set cropper using thumbnail information if not cropper not defined
         }
 
+        if (array_key_exists("extension", $routeParameters)) {
+            if($routeParameters["extension"] === true) $routeParameters["extension"] = first($this->getImageService()->getExtensions($this->getSource()));
+            else if($routeParameters["extension"] === false) array_pop_key("extension", $routeParameters);
+        }
+
         $routeName = $identifier
             ? (array_key_exists("extension", $routeParameters) ? "ux_imageCropExtension" : "ux_imageCrop")
             : (array_key_exists("extension", $routeParameters) ? "ux_imageExtension"     : "ux_image");
