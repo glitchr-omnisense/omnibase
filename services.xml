@@ -282,7 +282,7 @@
             <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
-        <service id="Base\Controller\UX\SitemapController">
+        <service id="Base\Controller\SitemapController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>

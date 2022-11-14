@@ -7,6 +7,7 @@ use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslationInterface;
 
 use Base\Service\BaseService;
+use Base\Service\LocaleProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
@@ -85,7 +86,7 @@ trait TranslatableTrait
     {
         if($translation !== null) {
 
-            $this->getTranslations()->set($translation->getLocale(), $translation);
+            $this->getTranslations()->set(LocaleProvider::normalize($translation->getLocale()), $translation);
             $translation->setTranslatable($this);
         }
 
