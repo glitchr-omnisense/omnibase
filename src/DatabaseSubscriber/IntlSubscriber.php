@@ -54,7 +54,7 @@ class IntlSubscriber implements EventSubscriberInterface
         }
     }
 
-    public function upgradeIntl($intl) 
+    public function upgradeIntl($intl)
     {
         $translations = [];
         if($intl instanceof TranslationInterface)
@@ -232,7 +232,6 @@ class IntlSubscriber implements EventSubscriberInterface
                     "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
-
             }
 
         } else {

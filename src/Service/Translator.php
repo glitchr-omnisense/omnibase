@@ -159,7 +159,7 @@ class Translator implements TranslatorInterface
         if ($trans == $id && $customId)
             return ($domain && $atBegin ? "@".$domain.".".$id : $id);
 
-        return trim($trans);
+        return trim($trans ?? "");
     }
 
     protected function parseClass($class, string $parseBy = self::PARSE_NAMESPACE) :string
@@ -167,7 +167,7 @@ class Translator implements TranslatorInterface
         switch($parseBy) {
 
             case self::PARSE_EXTENDS:
-                
+
                 $parent = class_exists($class) ? get_parent_class($class) : null;
 
                 $class = class_basename($class);
@@ -177,7 +177,7 @@ class Translator implements TranslatorInterface
 
                 return camel2snake($class);
 
-            default: 
+            default:
             case self::PARSE_NAMESPACE:
 
                 $class = str_replace(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], ["", "", "",], $class);
@@ -295,12 +295,12 @@ class Translator implements TranslatorInterface
         return $this->transExists($domain.$routeName.".title");
     }
 
-    public function transEnum(string $value, string $class, null|string|array $options = self::NOUN_SINGULAR): ?string
+    public function transEnum(?string $value, string $class, null|string|array $options = self::NOUN_SINGULAR): ?string
     {
         if(class_exists($class)) $declaringClass = $class;
         else if(Type::hasType($class)) $declaringClass = get_class(Type::getType($class));
         else return $value;
-        
+
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
 
             $declaringClass = get_parent_class($declaringClass);
@@ -318,7 +318,7 @@ class Translator implements TranslatorInterface
         return $class ? $this->transPerms($class.$value, $options, [], self::DOMAIN_ENUM) : null;
     }
 
-    public function transEnumExists(string $value , string $class, string|array $options = self::NOUN_SINGULAR): bool
+    public function transEnumExists(string $value, string $class, string|array $options = self::NOUN_SINGULAR): bool
     {
         $declaringClass = $class;
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {

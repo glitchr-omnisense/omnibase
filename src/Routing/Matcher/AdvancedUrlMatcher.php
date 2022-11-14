@@ -112,7 +112,6 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         $this->getContext()->setHost($parse["host"] ?? "");
         $this->getContext()->setBaseUrl($parse["base_dir"] ?? "");
 
-        try { return parent::match(str_lstrip($parse["path"] ?? $pathinfo, $this->getContext()->getBaseUrl())); }
-        catch(Exception $e) { throw $e; }
+        return parent::match(str_lstrip($parse["path"] ?? $pathinfo, $this->getContext()->getBaseUrl()));
     }
 }

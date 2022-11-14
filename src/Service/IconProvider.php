@@ -98,7 +98,7 @@ class IconProvider
 
         if(is_array($icon)) {
 
-            $icon = array_map(fn($i) => $this->iconify($i, $attributes), $icon);
+            $icon = array_filter(array_map(fn($i) => $this->iconify($i, $attributes), $icon));
             if($icon) return array_merge(...$icon);
 
         } else {

@@ -397,7 +397,7 @@ namespace {
 
     function in_class(object $class, mixed $needle) {
 
-        $haystack = array_filter(get_object_vars($class));
+        $haystack = array_filter((array) $class);
         return in_array($needle, $haystack, true);
     }
 
@@ -1051,7 +1051,8 @@ namespace {
 
     function get_browser2(?string $userAgent = null)
     {
-        $userAgent = $userAgent ?? $_SERVER['HTTP_USER_AGENT'];
+        $userAgent = $userAgent ?? $_SERVER['HTTP_USER_AGENT'] ?? null;
+        if($userAgent == null) return [];
 
         $platform = "unknown";
         if (preg_match('/android/i', $userAgent))
@@ -1097,7 +1098,7 @@ namespace {
 
             //we will have two since we are not using 'other' argument yet
             //see if version is before or after the name
-            if (strripos($userAgent,"Version") < strripos($userAgent,$name)) $version = $matches['version'][0] ?? null;
+            if (strripos($userAgent, "Version") < strripos($userAgent,$name)) $version = $matches['version'][0] ?? null;
             else $version = $matches['version'][1] ?? null;
         }
 

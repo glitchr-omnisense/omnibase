@@ -204,7 +204,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
         return $this->isApproved() && $this->isPublished() && !$this->isSecret();
     }
-    
+
     public function isPublishable(): bool
     {
         if(!$this->publishedAt) return false;
@@ -401,8 +401,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $updatedAt;
     public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
-    public function poke(): self 
-    { 
+    public function poke(): self
+    {
         $this->updatedAt = new DateTime("now");
         return $this;
     }
@@ -413,8 +413,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     protected $publishedAt;
     public function getPublishedAt(): ?\DateTimeInterface { return $this->publishedAt; }
     public function getPublishTime() :?int { return $this->publishedAt ? $this->publishedAt->getTimestamp() - time() : null; }
-    public function getPublishTimeStr() :?string 
-    { 
+    public function getPublishTimeStr() :?string
+    {
         $publishTime = $this->getPublishTime();
         return $publishTime ? $this->getTranslator()->transTime($publishTime) : null;
     }

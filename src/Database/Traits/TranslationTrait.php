@@ -23,7 +23,7 @@ trait TranslationTrait
     /**
      * Translatable related methods
      */
-    public static function getEntityFqcn(): string { dump(self::getTranslatableEntityClass()); return self::getTranslatableEntityClass()::getTranslationEntityClass(); }
+    public static function getEntityFqcn(): string { return self::getTranslatableEntityClass()::getTranslationEntityClass(); }
     public static function getTranslatableEntityClass(): string
     {
         // By default, the translatable class has the same name but without the suffix

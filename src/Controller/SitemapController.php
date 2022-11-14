@@ -1,29 +1,30 @@
 <?php
 
-namespace Base\Controller\UX;
+namespace Base\Controller;
 
-use Base\Response\XmlResponse;
 use Base\Service\SitemapperInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class SitemapController extends AbstractController
 {
     use BaseTrait;
 
     /**
-     * @Route("/sitemap.xml", name="ux_sitemap")
+     * @Route("/sitemap.{extension}", name="ux_sitemap", requirements={"hashid"="xml|txt"})
      */
-    public function Main(Request $request, SitemapperInterface $sitemap): XmlResponse
+    public function Main(string $extension, Request $request, SitemapperInterface $sitemap): Response
     {
         $hostname = $request->getSchemeAndHttpHost();
 
         return $sitemap
             ->setHostname($hostname)
             ->registerAnnotations()
-            ->generate('sitemap.xml.twig');
+            ->generate('sitemap.'.$extension.'.twig');
     }
+
 }

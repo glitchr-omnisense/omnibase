@@ -22,7 +22,7 @@ class Referrer implements ReferrerInterface
         $this->router       = $router;
     }
 
-    public function isVetoed(?string $routeName) 
+    public function isVetoed(?string $routeName)
     {
         if(!$routeName) return false;
         if(RescueFormAuthenticator::isSecurityRoute($routeName))
@@ -31,7 +31,7 @@ class Referrer implements ReferrerInterface
         if(LoginFormAuthenticator::isSecurityRoute($routeName))
             return true;
     }
-    
+
     public function setUrl(?string $url)
     {
         $route = $url ? $this->router->getRouteName($url) : null;
