@@ -179,8 +179,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             //
             // Check for user special grants (based on roles)
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
-            if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
-            if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
+            if(!$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
+            if(!$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
 
             // In case of restriction: profiler is disabled
             if(!$specialGrant && $this->profiler) $this->profiler->disable();
@@ -202,7 +202,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             // Let's notify connected user that there is a special access grant for this page
             if(!$this->baseService->isProfiler() && !$this->baseService->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
 
-                if($user && $specialGrant) {
+                if($specialGrant) {
 
                     $notification = new Notification("access_restricted.".$restrictionType.".exception");
                     $notification->send("info");
@@ -219,7 +219,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             if (!in_array($this->router->getRouteName(), $routeRestriction)) {
 
-                if($user && $specialGrant) {
+                if($specialGrant) {
 
                     // If not let them know that this page is locked for others
                     $notification = new Notification("access_restricted.".$restrictionType.".message");
@@ -236,7 +236,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                 return false;
 
-            } else if($user && $specialGrant) {
+            } else if($specialGrant) {
 
                 // If not let them know that this page is locked for others
                 $notification = new Notification("access_restricted.".$restrictionType.".on_deny");

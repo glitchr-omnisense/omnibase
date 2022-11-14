@@ -1553,11 +1553,11 @@ class ServiceEntityParser
         else if($this->classMetadata->hasField($column))
             $e_column = self::ALIAS_ENTITY.".".$e_column;
 
-        $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], null, null, $groupBy ?? [], $selectAs ?? []);
+        $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], null, null, $groupBy ?? $selectAs ?? [], $selectAs ?? []);
         if($this->classMetadata->hasAssociation($column))
             $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column);
 
-        $qb->select('COUNT('.trim($mode.' '.$e_column).') AS count');
+        $qb->addSelect('COUNT('.trim($mode.' '.$e_column).') AS count');
         return $qb->getQuery();
     }
 
@@ -1571,7 +1571,7 @@ class ServiceEntityParser
         else if($this->classMetadata->hasField($column))
             $e_column = self::ALIAS_ENTITY.".".$column;
 
-        $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], $limit, $offset, $groupBy ?? [], $selectAs ?? []);
+        $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], $limit, $offset, $groupBy ?? $selectAs ?? [], $selectAs ?? []);
 
         if($this->classMetadata->hasAssociation($column))
             $this->leftJoin($qb, $column);
