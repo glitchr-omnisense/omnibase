@@ -35,6 +35,7 @@ trait ProxyTrait
             if($global !== null) return $global;
         }
 
-        throw new \BadMethodCallException("Variable \"".$methodOrProperty."\" does not exist.");
+        return null;
+        // throw new \BadMethodCallException("Variable \"".$methodOrProperty."\" does not exist.");
     }
 }
