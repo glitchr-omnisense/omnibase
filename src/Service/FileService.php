@@ -156,6 +156,7 @@ class FileService implements FileServiceInterface
         $proxyRouteParameters["hashid"] = $hashid;
 
         $extension = array_pop_key("extension", $config);
+        if ($extension !== null) $extension = first($this->getExtensions($path));
         if ($extension !== null) $proxyRouteParameters["extension"] = $extension;
 
         // Add custom _host if found
