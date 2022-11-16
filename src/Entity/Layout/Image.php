@@ -56,13 +56,12 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
             else if($routeParameters["extension"] === false) array_pop_key("extension", $routeParameters);
         }
 
-        $routeName = $identifier
-            ? (array_key_exists("extension", $routeParameters) ? "ux_imageCropExtension" : "ux_imageCrop")
-            : (array_key_exists("extension", $routeParameters) ? "ux_imageExtension"     : "ux_image");
-
+        $routeName = (array_key_exists("extension", $routeParameters) ? "ux_imageExtension"     : "ux_image");
         $routeParameters = array_merge($routeParameters, [
-            "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
-            "hashid" => $this->getImageService()->obfuscate($this->getSource(), ["salt" => $this->getSalt()], $filters),
+            "hashid" => $this->getImageService()->obfuscate($this->getSource(), [
+                "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
+                "salt"       => $this->getSalt()
+            ], $filters),
         ]);
 
         return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
