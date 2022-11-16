@@ -4,6 +4,7 @@ namespace Base\Service;
 
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\RouterInterface;
@@ -87,29 +88,32 @@ class IconProvider
         return $this;
     }
 
-    public function iconify(null|string|array|IconizeInterface $icon, array $attributes = []) : null|string|array
+    public function iconify(null|string|array|EnumType|IconizeInterface $icon, array $attributes = [], bool $wrap = true) : null|string|array
     {
         if(!$icon) return $icon;
 
-        if($icon instanceof IconizeInterface)
+        if ($icon instanceof IconizeInterface)
             $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
         else if(($routeIcons = $this->getRouteIcons($icon)))
             $icon = $routeIcons;
 
+        if(is_array($icon) && is_associative($icon)) return array_map_recursive(fn($i) => $this->iconify($i, $attributes, false), $icon);
         if(is_array($icon)) {
 
-            $icon = array_filter(array_map(fn($i) => $this->iconify($i, $attributes), $icon));
+            $icon = array_filter(array_map(fn($i) => $this->iconify($i, $attributes, $wrap), $icon));
             if($icon) return array_merge(...$icon);
 
         } else {
 
             foreach($this->adapters as $provider) {
 
-                if ($provider->supports($icon))
-                    return [$provider->iconify($icon, $attributes)];
+                if ($provider->supports($icon)) {
+                    $icon = $provider->iconify($icon, $attributes, $wrap);
+                    return $wrap ? [$icon] : $icon;
+                }
             }
         }
 
-        return $this->iconify("fas fa-question-circle", $attributes) ?? null;
+        return $this->iconify("fas fa-question-circle", $attributes, $wrap) ?? null;
     }
 }

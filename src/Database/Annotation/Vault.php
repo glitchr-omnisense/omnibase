@@ -68,13 +68,15 @@ class Vault extends AbstractAnnotation
         return [$decryptionKey];
     }
 
-    public function getMarshaller(?string $vault = null)
+    public function getMarshaller(?string $vault = null) : ?MarshallerInterface
     {
-        $keys = $this->loadKeys($vault);
+        try { $keys = $this->loadKeys($vault); }
+        catch (Exception $e) { return null; }
+    
         return new SodiumMarshaller($keys);
     }
 
-    public function seal(MarshallerInterface $marshaller, ?string $value)
+    public function seal(?MarshallerInterface $marshaller, ?string $value)
     {
         try {
 
@@ -87,11 +89,11 @@ class Vault extends AbstractAnnotation
         } catch (\Exception $e) { return null; }
     }
 
-    public function reveal(MarshallerInterface $marshaller, ?string $value)
+    public function reveal(?MarshallerInterface $marshaller, ?string $value)
     {
         if($value === null) return null;
 
-        try { return $marshaller->unmarshall($value); }
+        try { return $marshaller?->unmarshall($value); }
         catch (\Exception $e) { return null; }
     }
 

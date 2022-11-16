@@ -2,13 +2,16 @@
 
 namespace Base\Twig\Extension;
 
+use Base\Database\Type\EnumType;
 use Base\Service\Model\Color\Intl\Colors;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
+use Base\Service\Model\ColorizeInterface;
 use Base\Service\TranslatorInterface;
 use DateInterval;
 use DateTime;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Type;
 use ReflectionFunction;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Twig\Environment;
@@ -82,6 +85,10 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('empty',           "empty"),
             new TwigFunction('property_accessor',            [$this, "property_accessor"]),
             new TwigFunction('cast',          "cast"),
+
+            new TwigFunction('enum', [$this, 'enum']),
+            new TwigFunction('colorify', [$this, 'colorify']),
+
         ];
     }
 
@@ -123,6 +130,8 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('mb_ucwords',     'mb_ucwords'),
             new TwigFilter('second',         "second"),
             new TwigFilter('empty',          "empty"),
+ 
+            new TwigFilter('colorify',            [$this, 'colorify']),
         ];
     }
     
@@ -131,6 +140,35 @@ final class FunctionTwigExtension extends AbstractExtension
     public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }
     public function pad(array $array = [], int $length = 0, mixed $value = null): array { return array_pad($array, $length, $value); }
     public function transforms(array $array = [], $arrow = null) { return $arrow instanceof \Closure ? $arrow($array) : $array; }
+
+    public function enum(null|string|array $class): ?EnumType
+    {
+        if(is_array($class)) {
+
+            return array_map(fn($c) => $this->enum($c), $class);
+        }
+        
+        return Type::hasType($class) ? Type::getType($class) : null;
+    }
+
+
+    public function colorify(null|string|array|ColorizeInterface $color) : null|string|array
+    {
+        if(!$color) return $color;
+
+        if($color instanceof ColorizeInterface && $color instanceof EnumType)
+            return  $color->__colorize() ?? $color->__colorizeStatic();
+        if($color instanceof ColorizeInterface)
+            $color = $color->__colorize() ?? $color->__colorizeStatic();
+
+        if(is_array($color)) {
+
+            $color = array_filter(array_map(fn($i) => $this->colorify($i), $color));
+            if($color) return array_merge(...$color);
+        }
+
+        return null;
+    }
 
     public function filter(Environment $env,  $array = [], $arrow = null)
     {
