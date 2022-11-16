@@ -79,10 +79,12 @@ class ImageService extends FileService implements ImageServiceInterface
         if(is_array($path)) return array_map(fn($s) => $this->imagify($s, $attributes), $path);
 
         $lazyload = array_pop_key("lazy", $attributes);
+        $lazybox  = array_pop_key("lazy-box", $attributes);
         return $this->twig->render("@Base/image/default.html.twig", [
             "path" => $this->imagine($path),
             "attr" => $attributes,
-            "lazyload" => $lazyload
+            "lazyload" => $lazyload,
+            "lazybox"  => $lazybox
         ]);
     }
 
@@ -108,11 +110,13 @@ class ImageService extends FileService implements ImageServiceInterface
             $lightboxAttributes["data-title"] = $lightboxTitle;
 
         $lazyload = array_pop_key("lazy", $attributes);
+        $lazybox = array_pop_key("lazy-box", $attributes);
         return $this->twig->render("@Base/image/lightbox.html.twig", [
             "path" => $path,
             "attr" => $attributes,
             "attr_lightbox" => $lightboxAttributes,
-            "lazyload" => $lazyload
+            "lazyload" => $lazyload,
+            "lazybox"  => $lazybox
         ]);
     }
 

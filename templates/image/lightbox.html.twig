@@ -1,5 +1,5 @@
 <a href='{{path}}' {{ html_attributes(attr_lightbox)}}>
-    {{ lazyload ? "<div class='lazybox'>" : "" }}
+    {{ lazyload and lazybox ? "<div class='lazybox'>" : "" }}
     <img {{ lazyload ? "data-src" : "src" }}='{{ path }}' {{ html_attributes(attr) }} />
-    {{ lazyload ? "</div>" : "" }}
+    {{ lazyload and lazybox ? "</div>" : "" }}
 </a>
