@@ -393,6 +393,7 @@
 
         <service id="Base\Service\FileService"  public="true">
             <tag name="twig.runtime" />
+            <argument type="service" id="twig" />
             <argument type="service" id="router" />
             <argument type="service" id="obfuscator" />
             <argument type="service" id="flysystem" />

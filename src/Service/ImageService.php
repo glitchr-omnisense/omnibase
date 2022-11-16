@@ -5,21 +5,18 @@ namespace Base\Service;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
-use Base\Imagine\Filter\Format\BitmapFilter;
+
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Routing\RouterInterface;
-use Error;
+use Base\Twig\Environment;
 use Exception;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
-use Imagine\Image\Profile;
 
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
-use Imagine\Image\Palette\CMYK;
-use Imagine\Image\Palette\RGB;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,10 +34,10 @@ class ImageService extends FileService implements ImageServiceInterface
     protected $flysystem;
 
     public function __construct(
-        RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem,
+        Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem,
         ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg, ?Profiler $profiler)
     {
-        parent::__construct($router, $obfuscator, $flysystem);
+        parent::__construct($twig, $router, $obfuscator, $flysystem);
 
         $this->profiler      = $parameterBag->get("base.images.profiler") ? $profiler : null;
 
@@ -54,6 +51,8 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->enableWebp    = $parameterBag->get("base.images.enable_webp");
         $this->noImage       = $parameterBag->get("base.images.no_image");
         $this->debug         = $parameterBag->get("base.images.debug");
+
+        $this->twig          = $twig;
 
         // Local cache directory for filtered images
         $this->localCache = "local.cache";
@@ -79,10 +78,12 @@ class ImageService extends FileService implements ImageServiceInterface
         if(!$path) return $path;
         if(is_array($path)) return array_map(fn($s) => $this->imagify($s, $attributes), $path);
 
-        if($attributes["lazyload"] ?? false) $attributes["data-src"] = $this->imagine($path);
-        else $attributes["src"] = $this->imagine($path);
-
-        return "<img ".html_attributes($attributes)." />";
+        $lazyload = array_pop_key("lazy", $attributes);
+        return $this->twig->render("@Base/image/default.html.twig", [
+            "path" => $this->imagine($path),
+            "attr" => $attributes,
+            "lazyload" => $lazyload
+        ]);
     }
 
     public function lightbox(null|array|string $path, array $attributes = [], array|string $lightboxId = null, array|string $lightboxTitle = null, array $lightboxAttributes = []): ?string
@@ -106,10 +107,13 @@ class ImageService extends FileService implements ImageServiceInterface
         if ($lightboxTitle !== null)
             $lightboxAttributes["data-title"] = $lightboxTitle;
 
-        if($attributes["lazyload"] ?? false) $src = "data-src";
-        else $src = "src";
-
-        return "<a href='".$path."' ".html_attributes($lightboxAttributes)."><img $src='".$path."' ".html_attributes($attributes)." /></a>";
+        $lazyload = array_pop_key("lazy", $attributes);
+        return $this->twig->render("@Base/image/lightbox.html.twig", [
+            "path" => $path,
+            "attr" => $attributes,
+            "attr_lightbox" => $lightboxAttributes,
+            "lazyload" => $lazyload
+        ]);
     }
 
     public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null

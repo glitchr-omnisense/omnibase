@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Routing\RouterInterface;
+use Base\Twig\Environment;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
@@ -32,8 +33,14 @@ class FileService implements FileServiceInterface
      */
     protected $router;
 
-    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
+    public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
+        $this->twig       = $twig;
         $this->router     = $router;
         $this->obfuscator = $obfuscator;
         $this->flysystem  = $flysystem;
