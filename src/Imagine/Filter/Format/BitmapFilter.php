@@ -6,10 +6,7 @@ use Base\Imagine\FilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Imagine\Filter\Basic\Autorotate;
 use Imagine\Image\ImageInterface;
-use Imagine\Image\Palette\CMYK;
 use Symfony\Component\Mime\MimeTypes;
-use Imagine\Image\Palette\RGB;
-use Imagine\Image\Profile;
 
 class BitmapFilter implements BitmapFilterInterface
 {
@@ -69,8 +66,6 @@ class BitmapFilter implements BitmapFilterInterface
 
     public function apply(ImageInterface $image): ImageInterface
     {
-        $image->usePalette(is_cmyk($image->metadata()->get("filepath")) ? new CMYK() : new RGB());
-
         foreach($this->filters as $filter){
 
             $oldImage = $image;
@@ -81,10 +76,6 @@ class BitmapFilter implements BitmapFilterInterface
         }
 
         $image = $this->path === null ? $image : $image->save($this->path, $this->options);
-
-        // NB: Adding ICC profile wasnt working at this step.. so I bypass the issue as following
-        if(is_cmyk($image->metadata()->get("filepath")))
-            write_cmyk_profiles($this->path, cmyk_profiles($image->metadata()->get("filepath")));
 
         return $image;
     }

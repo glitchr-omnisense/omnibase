@@ -9,6 +9,7 @@ use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Routing\RouterInterface;
+use Error;
 use Exception;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
@@ -78,7 +79,9 @@ class ImageService extends FileService implements ImageServiceInterface
         if(!$path) return $path;
         if(is_array($path)) return array_map(fn($s) => $this->imagify($s, $attributes), $path);
 
-        $attributes["src"] = $this->imagine($path);
+        if($attributes["lazyload"] ?? false) $attributes["data-src"] = $this->imagine($path);
+        else $attributes["src"] = $this->imagine($path);
+
         return "<img ".html_attributes($attributes)." />";
     }
 
@@ -103,7 +106,10 @@ class ImageService extends FileService implements ImageServiceInterface
         if ($lightboxTitle !== null)
             $lightboxAttributes["data-title"] = $lightboxTitle;
 
-        return "<a href='".$path."' ".html_attributes($lightboxAttributes)."><img src='".$path."' ".html_attributes($attributes)." /></a>";
+        if($attributes["lazyload"] ?? false) $src = "data-src";
+        else $src = "src";
+
+        return "<a href='".$path."' ".html_attributes($lightboxAttributes)."><img $src='".$path."' ".html_attributes($attributes)." /></a>";
     }
 
     public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
@@ -361,8 +367,10 @@ class ImageService extends FileService implements ImageServiceInterface
         try { $image = $imagine->open($path); }
         catch (Exception $e) { return null; }
 
-        if($formatter instanceof BitmapFilter)
-            $image->usePalette(is_cmyk($path) ? new CMYK() : new RGB());
+        if($formatter instanceof BitmapFilterInterface) {
+            $image->usePalette(new \Imagine\Image\Palette\RGB());
+            $image->strip();
+        }
 
         // Apply filters
         foreach ($filters as $filter) {
