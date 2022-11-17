@@ -51,7 +51,7 @@ class CacheClearCommand extends \Symfony\Bundle\FrameworkBundle\Command\CacheCle
                 if($realPath == $publicPath)
                     continue;
 
-                if(file_exists($publicPath)) {
+                    if(is_link($publicPath) || file_exists($publicPath)) {
 
                     if(is_link($publicPath)) unlink($publicPath);
                     else if(is_emptydir($publicPath)) rmdir($publicPath);
