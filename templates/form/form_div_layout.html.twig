@@ -211,7 +211,7 @@
                         {% set country = form_locale|country %}
                         <button class="nav-link {% if compatible_locale == form_locale %}active{% endif %} {% if not(form_locale in nonempty_locales) %}muted{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}-tab" data-bs-toggle="tab" data-bs-target="#{{ form.vars['id']~"_"~form_locale}}" type="button" role="tab" aria-controls="{{form_locale}}" aria-selected="true">
                             <label {% if form_locale == default_locale or form_locale in required_locales %}class="required"{% endif %}>
-                                <img class="country-flag {% if default_locale == form_locale %}default{% endif %}" src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
+                                <img class="country-flag {% if default_locale == form_locale %}default{% endif %}" data-src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
                             </label>
                         </button>
                     </li>
@@ -374,9 +374,9 @@
 <div class="imageupload" {{ block('attributes') }}>
 
     {% if not multiple %}
-        <figure>
+        <figure class="lazyload">
 
-            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(500,500) | default(thumbnail) }}" />
+            <img id="{{id}}_thumbnail" style="cursor: pointer;" data-src="{{ form.vars.value | thumbnail(500,500) | default(thumbnail) }}" />
             <figcaption id="{{id}}_figcaption">
                 <div class="figwrapper">
                 {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}

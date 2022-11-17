@@ -188,23 +188,24 @@ class FileController extends AbstractController
         // Apply filter
         // NB: Only applying cropping if ImageCrop is found ..
         //     .. otherwise some naughty users might be generating infinite amount of image
-        if(!$imageCrop) throw $this->createNotFoundException();
+        if($imageCrop) {
 
-        array_prepend($filters, new CropFilter(
-            $imageCrop->getX0(), $imageCrop->getY0(),
-            $imageCrop->getWidth0(), $imageCrop->getHeight0()
-        ));
+            array_prepend($filters, new CropFilter(
+                $imageCrop->getX0(), $imageCrop->getY0(),
+                $imageCrop->getWidth0(), $imageCrop->getHeight0()
+            ));
+        }
 
         // This has been removed, otherwise users might overload the server changing the size in the URL..
         // if($width && $height)
         //     array_prepend($filters, new ThumbnailFilter($height, $width));
-
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         // File should be access from default "image" route to spare some computing time
-        $config["identifier"] = $identifier;
-        $hashid = $this->imageService->obfuscate($path, $config, $filters);
+        // NB: These lines below are commented to keep the same url and cache the image
+        // $config["identifier"] = $identifier;
+        // $hashid = $this->imageService->obfuscate($path, $config, $filters);
 
         $output = pathinfo_extension($hashid."/image", $extension);
         $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);

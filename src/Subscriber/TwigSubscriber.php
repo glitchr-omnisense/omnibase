@@ -66,6 +66,7 @@ class TwigSubscriber implements EventSubscriberInterface
         $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.clipboardjs.stylesheet")));
         $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.fontawesome.stylesheet")));
         $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.dockjs.stylesheet")));
+        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/vendor/imaginejs/imagine.css"));
         $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/app.css"));
 
         $this->twig->addHtmlContent("javascripts:head", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery.javascript")));
@@ -75,6 +76,7 @@ class TwigSubscriber implements EventSubscriberInterface
         $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.cookie-consent.javascript")));
         $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.clipboardjs.javascript")));
         $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.dockjs.javascript")));
+        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset("bundles/base/vendor/imaginejs/imagine.js"));
         $this->twig->addHtmlContent("javascripts", $this->twig->getAsset("bundles/base/app.js"));
     }
 

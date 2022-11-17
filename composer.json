@@ -63,7 +63,6 @@
         "league/flysystem-bundle": "^2.4",
     	"league/flysystem-ftp": "^3.0",
 
-        "iconify/json": "^2.1",
         "nelmio/security-bundle": "^3.0",
         "nelmio/cors-bundle": "^2.2",
         "hashids/hashids": "^4.1",
