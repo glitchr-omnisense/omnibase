@@ -6,6 +6,7 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
+use Base\Validator\Constraints\File as ConstraintsFile;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -178,13 +179,18 @@ class Uploader extends AbstractAnnotation
 
     public static function getMaxFilesize($entity, $fieldName): int
     {
-        if(!self::hasAnnotation($entity, $fieldName, self::class))
-            return UploadedFile::getMaxFilesize();
+        $maxSize = UploadedFile::getMaxFilesize();
+        if(self::hasAnnotation($entity, $fieldName, self::class)) {
+            $that = self::getAnnotation($entity, $fieldName, self::class);
+            $maxSize = min($that->maxSize ?: $maxSize, $maxSize);
+        }
 
-        $that = self::getAnnotation($entity, $fieldName, self::class);
-        if(!$that) return UploadedFile::getMaxFilesize();
+        if(self::hasAnnotation($entity, $fieldName, ConstraintsFile::class)) {
+            $that = self::getAnnotation($entity, $fieldName, ConstraintsFile::class);
+            $maxSize = min($that->getMaxSize() ?: $maxSize, $maxSize);
+        }
 
-        return min($that->maxSize ?: \PHP_INT_MAX, UploadedFile::getMaxFilesize());
+        return $maxSize;
     }
 
     protected static $tmpHashTable = [];

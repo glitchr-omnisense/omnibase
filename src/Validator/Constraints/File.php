@@ -24,8 +24,7 @@ class File extends Constraint
         $this->mimeTypes = $options["mime_types"] ?? [];
         unset($options["mime_types"]);
 
-        $this->maxSize   = $options["max_size"] ?? (string) UploadedFile::getMaxFilesize();
-        $this->maxSize   = min(str2dec($this->maxSize), UploadedFile::getMaxFilesize());
+        $this->maxSize   = str2dec($options["max_size"] ?? 8*UploadedFile::getMaxFilesize())/8;
         unset($options["max_size"]);
 
         parent::__construct($options ?? [], $groups, $payload);

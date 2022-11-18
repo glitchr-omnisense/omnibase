@@ -886,6 +886,8 @@ namespace {
                 return explode("Content-Type: ", $headers[1])[1] ?? null;
         }
 
+        if(!file_exists($filename)) return null;
+
         try { return mime_content_type($filename); }
         catch (TypeError|Exception $e) { return null; }
     }

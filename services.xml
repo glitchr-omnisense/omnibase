@@ -841,6 +841,7 @@
 
             <argument type="service" id="translator" />
             <argument type="service" id="cache.adapter" />
+            <argument type="service" id="obfuscator" />
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
@@ -882,8 +883,10 @@
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="form.factory" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
             <argument type="service" id="base.service.image" />
+            <argument type="service" id="obfuscator" />
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
         <service id="Base\Field\Type\ArrayType" parent="Base\Field\Type\CollectionType"><tag name="form.type" /><argument type="service" id="base.database.metadata_manipulator" /></service>

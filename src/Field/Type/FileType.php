@@ -5,9 +5,11 @@ namespace Base\Field\Type;
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
+use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\FileService;
 use Base\Service\ImageService;
+use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
@@ -30,25 +32,27 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class FileType extends AbstractType implements DataMapperInterface
 {
-    protected $baseService;
+    protected $router;
     protected $translator;
 
     public function __construct(
         ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig,
         ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager,
-        FormFactory $formFactory, BaseService $baseService, ImageService $imageService)
+        FormFactory $formFactory, RouterInterface $router, ImageService $imageService, ObfuscatorInterface $obfuscator, string $cacheDir)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
-        $this->baseService      = $baseService;
+        $this->router           = $router;
         $this->parameterBag     = $parameterBag;
         $this->translator       = $translator;
         $this->twig             = $twig;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
+        $this->obfuscator       = $obfuscator;
 
         $this->imageService     = $imageService;
         $this->fileService      = cast($imageService, FileService::class);
+        $this->cacheDir         = $cacheDir;
     }
 
     /**
@@ -157,7 +161,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $data = $event->getData();
             if(is_string($data)) {
 
-                $cacheDir = $this->baseService->getCacheDir()."/dropzone";
+                $cacheDir = $this->cacheDir."/dropzone";
                 $data = explode("|", $data);
 
                 foreach($data as $key => $uuid)
@@ -219,9 +223,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["allow_url"]      = $options["allow_url"];
 
         $view->vars['max_files'] = $view->vars['max_files'] ?? $options["max_files"];
-        $view->vars['max_size'] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
-        if($options["max_size"] !== null)
-            $view->vars['max_size'] = min($view->vars['max_size'], $options["max_size"]);
+        $view->vars['max_size'] = $options["max_size"] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
 
         $mimeTypes = $options["mime_types"];
         if(!$mimeTypes && $entity)
@@ -281,7 +283,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $options["dropzone"] = $options["dropzone"];
             if(!array_key_exists("url", $options["dropzone"])) $options["dropzone"]["url"] = $action;
             if($options['allow_delete'] !== null) $options["dropzone"]["addRemoveLinks"] = $options['allow_delete'];
-            if($options['max_size'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_size"];
+            if($options['max_size']     !== null) $options["dropzone"]["maxFilesize"]    = $options["max_size"]/1e6; // from B to MB
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
             if($mimeTypes) $options["dropzone"]["acceptedFiles"]  = implode(",", $mimeTypes);
 
@@ -303,12 +305,13 @@ class FileType extends AbstractType implements DataMapperInterface
             if(array_key_exists("maxFiles", $options["dropzone"]) && !empty($view->vars["value"]))
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));
 
-            $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $view->vars["ajax"]     = $this->twig->getAsset("ux/dropzone/" . $token);
+            $token  = $this->csrfTokenManager->getToken("dropzone")->getValue();
+            $hashid = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
+            $view->vars["ajax"]     = $this->router->generate("ux_dropzone", ["hashid" => $hashid]);
+
             $options["dropzone"]["url"] = $view->vars["ajax"];
 
             $view->vars["dropzone"]  = json_encode($options["dropzone"]);
-
             $view->vars["sortable"]  = json_encode($options["sortable"]);
             if($options["sortable"] && $options["sortable-js"])
                 $this->twig->addHtmlContent("javascripts:head", $options["sortable-js"]);
