@@ -1,0 +1,4 @@
+#! /bin/bash
+
+$(which -a npm | xargs realpath | grep -v $(realpath $0) | head -1) $@ --prefix="./var/npm"
+
