@@ -24,7 +24,6 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Contracts\EventDispatcher\Event;
-use Twig\Loader\ChainLoader;
 
 class AdvancedRouter implements RouterInterface
 {
@@ -316,7 +315,7 @@ class AdvancedRouter implements RouterInterface
     }
 
     public function getIndexPage():string { return $this->parameterBag->get("base.site.index") ?? $this->getUrl("/"); }
-    
+
     public function getRouteName(?string $routeUrl = null): ?string
     {
         if($this->getRequestUri() && !$routeUrl) return $this->getRouteName($this->getRequestUri());

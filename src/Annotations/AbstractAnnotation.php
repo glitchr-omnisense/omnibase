@@ -8,15 +8,12 @@ use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Proxy\Proxy;
 use Doctrine\ORM\UnitOfWork;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -58,7 +55,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
             $mapping   = trim(substr($mapping,    $dot+1));
 
             $entityOrClassNameOrMetadataOrRefl = self::getClassMetadataManipulator()->getTargetClass($entityOrClassNameOrMetadataOrRefl, $fieldPath);
-            if(!$entityOrClassNameOrMetadataOrRefl) return [];         
+            if(!$entityOrClassNameOrMetadataOrRefl) return [];
         }
 
         $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($entityOrClassNameOrMetadataOrRefl);
@@ -71,7 +68,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return $annotations[$mapping] ?? [];
     }
 
-    public static function getAnnotation($entityOrClassNameOrMetadataOrRefl, string $mapping, string $annotationClass): ?AbstractAnnotation
+    public static function getAnnotation($entityOrClassNameOrMetadataOrRefl, string $mapping, string $annotationClass): mixed
     {
         $annotations = self::getAnnotations($entityOrClassNameOrMetadataOrRefl, $mapping, $annotationClass);
         return !empty($annotations) ? end($annotations) : null;

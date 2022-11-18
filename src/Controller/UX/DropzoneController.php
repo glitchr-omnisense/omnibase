@@ -2,8 +2,10 @@
 
 namespace Base\Controller\UX;
 
+use Base\Service\FileService;
+use Base\Service\ObfuscatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,11 +25,12 @@ class DropzoneController extends AbstractController
     public const STATUS_BAD     = "BAD";
     public const STATUS_NOTOKEN = "NO_TOKEN";
 
-    public function __construct(TranslatorInterface $translator, CacheInterface $cache, string $cacheDir)
+    public function __construct(TranslatorInterface $translator, CacheInterface $cache, ObfuscatorInterface $obfuscator, string $cacheDir)
     {
         $this->cache      = $cache;
         $this->cacheDir   = $cacheDir;
         $this->translator = $translator;
+        $this->obfuscator = $obfuscator;
 
         $this->filesystem = new \Symfony\Component\Filesystem\Filesystem();
     }
@@ -40,10 +43,13 @@ class DropzoneController extends AbstractController
     /**
      * Controller example
      *
-     * @Route("/ux/dropzone/{token}", name="ux_dropzone")
+     * @Route("/ux/dropzone/{hashid}", name="ux_dropzone")
      */
-    public function Main(Request $request, $token = null): Response
+    public function Main(Request $request, $hashid = null): Response
     {
+        $config = $this->obfuscator->decode($hashid);
+        $token = $config["token"] ?? null;
+
         if(!$token || !$this->isCsrfTokenValid("dropzone", $token))
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
 
@@ -71,6 +77,9 @@ class DropzoneController extends AbstractController
                 return new Response("Unknown error during upload.", 500);
         }
 
+        if(array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6*$config["maxFilesize"])
+            return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
+
         $cacheDir = $this->getCacheDir()."/dropzone";
         if(!$this->filesystem->exists($cacheDir))
             $this->filesystem->mkdir($cacheDir);
@@ -86,7 +95,7 @@ class DropzoneController extends AbstractController
         ];
 
         if(!move_uploaded_file($file->getRealPath(), $filePath))
-            return new Response("Failed to write into buffer", 500);
+            return new Response($this->translator->trans("fileupload.error.cant_write", [], "fields"), 500);
 
         $fnExpiry = function($expiry, $uuid) use ($cacheDir) {
 
@@ -156,7 +165,7 @@ class DropzoneController extends AbstractController
             return $response;
         }
 
-        return throw new NotFoundHttpException();
+        throw new NotFoundHttpException();
     }
 
     /**
