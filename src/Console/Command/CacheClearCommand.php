@@ -61,12 +61,12 @@ EOF
 
         //
         // Check for node_modules directory
-        if(!is_dir($this->projectDir."/node_modules") && !is_dir($this->projectDir."/var/node_modules")) {
+        if(!is_dir($this->projectDir."/var/modules") && !is_dir($this->projectDir."/node_modules")) {
 
             $ret = true;
             $io->error(
-                'Node package manager directory is missing. '.PHP_EOL.
-                'Run `npm install` (or `./vendor/bin/npm install` custom command) to setup your dependencies !'
+                'Node package manager directory `'.$this->projectDir."/var/modules".'` is missing. '.PHP_EOL.
+                'Run `./vendor/bin/npm install package.json` to setup your dependencies !'
             );
         }
 
