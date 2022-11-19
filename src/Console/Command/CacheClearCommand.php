@@ -2,39 +2,82 @@
 
 namespace Base\Console\Command;
 
+use Base\Console\Command;
 use Base\Service\Flysystem;
+use Base\Service\LocaleProviderInterface;
+use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Command\CacheClearCommand as SymfonyCacheClearCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpKernel\CacheClearer\CacheClearerInterface;
 
 #[AsCommand(name:'cache:clear', aliases:[], description:'')]
-class CacheClearCommand extends \Symfony\Bundle\FrameworkBundle\Command\CacheClearCommand
+class CacheClearCommand extends Command
 {
-    public function __construct(CacheClearerInterface $cacheClearer, Filesystem $filesystem = null, ?Flysystem $flysystem = null)
+    public function __construct(
+        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
+        SymfonyCacheClearCommand $cacheClearCommand, ?Flysystem $flysystem = null, string $projectDir, string $cacheDir)
     {
+        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        $this->cacheClearCommand = $cacheClearCommand;
+
         $this->flysystem = $flysystem;
-        parent::__construct($cacheClearer, $filesystem);
+        $this->projectDir  = $projectDir;
+        $this->cacheDir    = $cacheDir;
+    }
+
+    protected function configure(): void
+    {
+        parent::configure();
+        $this
+            ->setDefinition([
+                new InputOption('no-warmup', '', InputOption::VALUE_NONE, 'Do not warm up the cache'),
+                new InputOption('no-optional-warmers', '', InputOption::VALUE_NONE, 'Skip optional cache warmers (faster)'),
+            ])
+            ->setHelp(<<<'EOF'
+The <info>%command.name%</info> command clears and warms up the application cache for a given environment
+and debug mode:
+
+  <info>php %command.full_name% --env=dev</info>
+  <info>php %command.full_name% --env=prod --no-debug</info>
+EOF
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $kernel = $this->getApplication()->getKernel();
-        $realCacheDir = $kernel->getContainer()->getParameter('kernel.cache_dir');
-
-        $testFile = $realCacheDir."/.test";
+        $testFile = $this->cacheDir."/.test";
         $testFileExists = file_exists($testFile);
 
-        $ret = parent::execute($input, $output);
+        $this->cacheClearCommand->setApplication($this->getApplication());
+        $ret = $this->cacheClearCommand->execute($input, $output);
 
+        //
+        // Check for node_modules directory
+        if(!is_dir($this->projectDir."/node_modules") && !is_dir($this->projectDir."/var/node_modules")) {
+
+            $ret = true;
+            $io->error(
+                'Node package manager directory is missing. '.PHP_EOL.
+                'Run `npm install` (or `./vendor/bin/npm install` custom command) to setup your dependencies !'
+            );
+        }
+
+        //
+        // Run second cache clear command
         file_put_contents($testFile, "Hello World !");
         if(!$testFileExists)
-            $io->warning(sprintf('Cache requires to run a second `cache:clear` to account for custom base bundle features.', $kernel->getEnvironment(), var_export($kernel->isDebug(), true)));
+            $io->warning('Cache requires to run a second `cache:clear` to account for the custom base bundle features.');
 
+        //
+        // Generate flysystem public symlink
         if($this->flysystem !== null) {
 
             $io->note("Flysystem symlink(s) got generated in public directory.");
@@ -51,7 +94,7 @@ class CacheClearCommand extends \Symfony\Bundle\FrameworkBundle\Command\CacheCle
                 if($realPath == $publicPath)
                     continue;
 
-                    if(is_link($publicPath) || file_exists($publicPath)) {
+                if(is_link($publicPath) || file_exists($publicPath)) {
 
                     if(is_link($publicPath)) unlink($publicPath);
                     else if(is_emptydir($publicPath)) rmdir($publicPath);

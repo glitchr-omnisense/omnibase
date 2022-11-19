@@ -32,7 +32,6 @@
             <argument type="service" id="referrer" />
             <argument type="service" id="twig" />
             <argument type="service" id="locale_provider" />
-
         </service>
 
         <service id="Base\Routing\RouterInterface" alias="Base\Routing\AdvancedRouter"/>
@@ -72,12 +71,17 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\Backend\Factory\MenuFactory"         parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"         decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"><argument type="service" id="router" /></service>
-        <service id="Base\Backend\Factory\AdminContextFactory" parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory" decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"><argument type="service" id="ea_extension" /></service>
-        <service id="Base\Backend\Field\Configurator\CommonPreConfigurator"
-            parent="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator"
-            decorates="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator">
-            <argument type="service" id="translator" />
+        <service id="Base\Backend\Factory\MenuFactory"                      parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"         decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"><argument type="service" id="router" /></service>
+        <service id="Base\Backend\Factory\AdminContextFactory"              parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory" decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"><argument type="service" id="ea_extension" /></service>
+        <service id="Base\Backend\Field\Configurator\CommonPreConfigurator" parent="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator" decorates="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator"><argument type="service" id="translator" /></service>
+
+        <service id="Base\Console\Command\CacheClearCommand" parent="Base\Console\Command" decorates="console.command.cache_clear">
+            <tag name="console.command" />
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="flysystem" on-invalid="null" />
+            <bind key="$projectDir">%kernel.project_dir%</bind>
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
+
     </services>
 </container>
