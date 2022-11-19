@@ -1,3 +1,1 @@
-#! /bin/bash
-
-$(which -a $(basename $0) | xargs realpath | grep -v $(realpath $0) | head -1) $@ --prefix="./var/nodejs"
+yarn
