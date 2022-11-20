@@ -1,5 +1,5 @@
 {
-    "name": "xkzl/base-bundle",
+    "name": "glitchr/base-bundle",
     "type": "symfony-bundle",
     "description": "Base helper integration for Symfony",
     "keywords": ["symfony", "base", "helper"],
