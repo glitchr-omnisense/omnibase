@@ -1,5 +1,0 @@
-#! /bin/bash
-
-[[ basename $0 = "yarn" ]] && opt="--modules-folder" || opt="--prefix"
-
-$(which -a $(basename $0) | xargs realpath | grep -v $(realpath $0) | head -1) $@ $opt="./var/modules"

@@ -65,8 +65,8 @@ EOF
 
             $ret = true;
             $io->error(
-                'Node package manager directory `'.$this->projectDir."/var/modules".'` is missing. '.PHP_EOL.
-                'Run `./vendor/bin/npm install package.json` to setup your dependencies !'
+                'Node package manager directory `'.$this->projectDir."/node_modules".'` is missing. '.PHP_EOL.
+                'Run `npm install` to setup your dependencies !'
             );
         }
 
