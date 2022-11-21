@@ -4,7 +4,7 @@
     "description": "Base helper integration for Symfony",
     "keywords": ["symfony", "base", "helper"],
     "homepage": "https://gitlab.glitchr.dev/public-repository/symfony",
-    "license": "GPL",
+    "license": "LGPL-3.0-or-later",
     "authors": [
         {
             "name": "Marco Meyer",
