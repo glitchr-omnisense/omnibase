@@ -477,7 +477,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->scalarNode('default_path')
                             ->info('Default twig path')
-                            ->defaultValue("%kernel.project_dir%/vendor/xkzl/base-bundle/templates")
+                            ->defaultValue("%kernel.project_dir%/vendor/glitchr/base-bundle/templates")
                             ->end()
                         ->arrayNode('form_themes')
                             ->addDefaultChildrenIfNoneSet()
