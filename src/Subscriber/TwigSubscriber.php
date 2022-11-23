@@ -61,23 +61,8 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        $this->twig->addHtmlContent("stylesheets:before", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery-ui.stylesheet")));
-        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.lightbox.stylesheet")));
-        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.clipboardjs.stylesheet")));
-        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.fontawesome.stylesheet")));
-        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.dockjs.stylesheet")));
-        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/vendor/imaginejs/imagine.css"));
         $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/app.css"));
-
-        $this->twig->addHtmlContent("javascripts:head", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery.javascript")));
-        $this->twig->addHtmlContent("javascripts:head", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery-ui.javascript")));
-        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.lightbox.javascript")));
-        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.lightbox2b.javascript")));
-        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.cookie-consent.javascript")));
-        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.clipboardjs.javascript")));
-        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.dockjs.javascript")));
-        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset("bundles/base/vendor/imaginejs/imagine.js"));
-        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset("bundles/base/app.js"));
+        $this->twig->addHtmlContent("javascripts:body", $this->twig->getAsset("bundles/base/app.js"));
     }
 
     public function onKernelResponse(ResponseEvent $event)
