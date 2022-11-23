@@ -2,6 +2,7 @@
   "devDependencies": {
     "@babel/core": "^7.17.0",
     "@babel/preset-env": "^7.16.0",
+    "file-loader": "^6.0.0",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@glitchr/clipboardjs": "^1.0",
     "@glitchr/dockjs": "^1.0",
@@ -25,7 +26,8 @@
     "regenerator-runtime": "^0.13.9",
     "sass": "^1.56.1",
     "sass-loader": "^13.0.0",
-    "sortablejs": "1.15.0"
+    "sortablejs": "1.15.0",
+    "country-flag-icons": "^1.4.25"
   },
   "license": "LGPL-3.0-or-later",
   "private": true,
