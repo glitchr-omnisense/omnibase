@@ -20,7 +20,7 @@ class CacheClearCommand extends Command
 {
     public function __construct(
         LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
-        SymfonyCacheClearCommand $cacheClearCommand, ?Flysystem $flysystem = null, string $projectDir, string $cacheDir)
+        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, string $projectDir, string $cacheDir)
     {
         parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
@@ -63,7 +63,6 @@ EOF
         // Check for node_modules directory
         if(!is_dir($this->projectDir."/var/modules") && !is_dir($this->projectDir."/node_modules")) {
 
-            $ret = true;
             $io->error(
                 'Node package manager directory `'.$this->projectDir."/node_modules".'` is missing. '.PHP_EOL.
                 'Run `npm install` to setup your dependencies !'
@@ -78,31 +77,31 @@ EOF
 
         //
         // Generate flysystem public symlink
-        if($this->flysystem !== null) {
 
+        $storageNames = $this->flysystem->getStorageNames(false);
+        if($storageNames)
             $io->note("Flysystem symlink(s) got generated in public directory.");
 
-            foreach($this->flysystem->getStorageNames(false) as $storageName) {
+        foreach($storageNames as $storageName) {
 
-                if(!$this->flysystem->hasStorage($storageName.".public"))
-                    continue;
+            if(!$this->flysystem->hasStorage($storageName.".public"))
+                continue;
 
-                $realPath = str_rstrip($this->flysystem->prefixPath("", $storageName), "/");
+            $realPath = str_rstrip($this->flysystem->prefixPath("", $storageName), "/");
 
-                $publicPath = $this->flysystem->getPublicRoot($storageName.".public");
-                $publicPath = str_rstrip($publicPath, "/");
-                if($realPath == $publicPath)
-                    continue;
+            $publicPath = $this->flysystem->getPublicRoot($storageName.".public");
+            $publicPath = str_rstrip($publicPath, "/");
+            if($realPath == $publicPath)
+                continue;
 
-                if(is_link($publicPath) || file_exists($publicPath)) {
+            if(is_link($publicPath) || file_exists($publicPath)) {
 
-                    if(is_link($publicPath)) unlink($publicPath);
-                    else if(is_emptydir($publicPath)) rmdir($publicPath);
-                    else exit("Public path \"$publicPath\" already exists but it is not a symlink\n");
-                }
-
-                symlink($realPath, $publicPath);
+                if(is_link($publicPath)) unlink($publicPath);
+                else if(is_emptydir($publicPath)) rmdir($publicPath);
+                else exit("Public path \"$publicPath\" already exists but it is not a symlink\n");
             }
+
+            symlink($realPath, $publicPath);
         }
 
         return $ret;

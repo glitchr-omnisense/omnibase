@@ -61,8 +61,11 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/app.css"));
-        $this->twig->addHtmlContent("javascripts:body", $this->twig->getAsset("bundles/base/app.js"));
+        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/form.css"));
+        $this->twig->addHtmlContent("javascripts:body", $this->twig->getAsset("bundles/base/form.js"));
+
+        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/base.css"));
+        $this->twig->addHtmlContent("javascripts:body", $this->twig->getAsset("bundles/base/base.js"));
     }
 
     public function onKernelResponse(ResponseEvent $event)

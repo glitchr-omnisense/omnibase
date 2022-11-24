@@ -78,7 +78,7 @@
         <service id="Base\Console\Command\CacheClearCommand" parent="Base\Console\Command" decorates="console.command.cache_clear">
             <tag name="console.command" />
             <argument type="service" id=".inner"/>
-            <argument type="service" id="flysystem" on-invalid="null" />
+            <argument type="service" id="flysystem" />
             <bind key="$projectDir">%kernel.project_dir%</bind>
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
