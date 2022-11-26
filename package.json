@@ -40,7 +40,7 @@
     "dev-server": "encore dev-server",
     "dev": "encore dev",
     "watch": "encore dev --watch",
-    "build": "encore production --progress"
+    "prod": "encore production --progress"
   },
   "repository": {
     "type": "git",
