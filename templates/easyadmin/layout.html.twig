@@ -37,6 +37,9 @@
     {% block configured_javascripts %}
         {{ include('@EasyAdmin/includes/_js_assets.html.twig', { assets: ea.assets.jsAssets ?? [] }, with_context = false) }}
         {{ include('@EasyAdmin/includes/_encore_script_tags.html.twig', { assets: ea.assets.webpackEncoreAssets ?? [] }, with_context = false) }}
+
+        {{ base.renderEncoreScriptTags('easyadmin')|raw }}
+
     {% endblock %}
 
     {% if 'rtl' == ea.i18n.textDirection %}
@@ -50,9 +53,8 @@
     {% endblock %}
 
     {% block head_stylesheets %}
-        <link rel="stylesheet" type="text/css" href="{{ asset('app.css', ea.assets.defaultAssetPackageName) }}">
+        {{ base.renderEncoreLinkTags('easyadmin')|raw }}
         {{ base.renderHtmlContent("stylesheets")|raw }}
-        <link rel="stylesheet" type="text/css" href="{{ asset('bundles/base/easyadmin.css') }}">
         {{ base.renderHtmlContent("stylesheets:after")|raw }}
     {% endblock %}
 </head>

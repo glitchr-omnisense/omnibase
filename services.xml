@@ -75,6 +75,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
+            <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
         <service id="Base\Subscriber\HotParameterBagSubscriber">
             <tag name="kernel.event_subscriber" priority="1024" />

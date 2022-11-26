@@ -1,0 +1,9 @@
+{% for tag in tags %}
+    {% if tag.preload ?? false %}
+        <link rel="preload" href="{{ call_user_func_if_exists('preload', [asset(tag.value, tag.packageName ?? null), { as: 'style', nopush: tag.nopush ?? false }]) }}"
+        {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
+    {% else %}
+        <link rel="stylesheet" href="{{ asset(tag.value, tag.packageName ?? null) }}"
+        {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
+    {% endif %}
+{% endfor %}

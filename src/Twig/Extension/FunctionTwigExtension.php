@@ -72,6 +72,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('is_countable',                 [$this, 'is_countable']),
             new TwigFunction('is_callable',                  [$this, 'is_callable']),
             new TwigFunction('call_user_func_with_defaults', [$this, 'call_user_func_with_defaults']),
+            new TwigFunction('call_user_func_if_exists',     [$this, 'call_user_func_if_exists'], ["needs_environment" => true]),
             new TwigFunction('method_exists',                [$this, 'method_exists']),
             new TwigFunction('static_call',                  [$this, 'static_call'  ]),
             new TwigFunction('static_property',              [$this, 'static_property'  ]),
@@ -138,6 +139,12 @@ final class FunctionTwigExtension extends AbstractExtension
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
     public function nargs(callable $fn): int { return (new ReflectionFunction($fn))->getNumberOfParameters(); }
     public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }
+    public function call_user_func_if_exists    (Environment $environment, string $fn, array $args) 
+    {
+        if (false === $func = $environment->getFunction($fn)) return '';
+        return $func->getCallable()(...array_values($args));
+    }
+
     public function pad(array $array = [], int $length = 0, mixed $value = null): array { return array_pad($array, $length, $value); }
     public function transforms(array $array = [], $arrow = null) { return $arrow instanceof \Closure ? $arrow($array) : $array; }
 

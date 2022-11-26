@@ -6,14 +6,15 @@ use Base\Routing\RouterInterface;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Exception;
+use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookup;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Twig\Environment as TwigEnvironment;
 use Twig\Error\LoaderError;
-use Twig\Loader\ChainLoader;
+use Twig\Error\RuntimeError;
 use Twig\Loader\LoaderInterface;
-use Twig\Template;
-use Twig\TemplateWrapper;
 
 class Environment extends TwigEnvironment
 {
@@ -153,8 +154,101 @@ class Environment extends TwigEnvironment
         throw new Exception("Unknown merging method for \"$name\"");
     }
 
-    private $htmlContent = [];
+    protected $encoreEntryPoints = [];
+    protected $encoreEntryLinkTags = [];
+    protected $encoreEntryScriptTags = [];
+    public function renderEncoreLinkTags  (?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) 
+    {
+        if($value) $this->addEncoreLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+        return $this->render("webpack/link_tags_encore.html.twig", ["tags" => $this->encoreEntryLinkTags]);
+    }
 
+    public function renderEncoreScriptTags(?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) 
+    { 
+        if($value) $this->addEncoreLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+        return $this->render("webpack/script_tags_encore.html.twig", ["tags" => $this->encoreEntryScriptTags]);
+    }
+
+    public function renderEncoreTags(?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) 
+    {
+        return $this->renderEncoreLinkTags( $value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes).PHP_EOL.
+               $this->renderEncoreScriptTags( $value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+    }
+
+    public function getEncoreEntryPoints(): array { return $this->encoreEntryPoints; }
+    public function getEncoreEntryPoint(string $value): ?EntrypointLookupInterface
+    {
+        return $this->encoreEntryPoints[$value] ?? null;
+    }
+
+    public function addEncoreEntryPoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
+    {
+        $this->encoreEntryPoints[$value] = new EntrypointLookup($entrypointJsonPath, $cache, $cacheKey, $strictMode);
+        return $this;
+    }
+
+    public function addEncoreTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    {
+        $this->addEncoreLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+        $this->addEncoreScriptTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+
+        return $this;
+    }
+
+    public function addEncoreLinkTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    {
+        if(!array_key_exists($value, $this->encoreEntryLinkTags)) {
+
+            $this->encoreEntryLinkTags[$value] = array_filter([
+                "value" => $value,
+                "webpack_package_name" => $webpackPackageName,
+                "webpack_entrypoint_name" => $webpackEntrypointName,
+                "html_attributes" => $htmlAttributes
+            ]);
+        }
+
+        return $this;
+    }
+    public function addEncoreScriptTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    {
+        if(!array_key_exists($value, $this->encoreEntryScriptTags)) {
+
+            $this->encoreEntryScriptTags[$value] = array_filter([
+                "value" => $value,
+                "webpack_package_name" => $webpackPackageName,
+                "webpack_entrypoint_name" => $webpackEntrypointName,
+                "html_attributes" => $htmlAttributes
+            ]);
+        }
+
+        return $this;
+    }
+
+    public function removeEncoreEntryScriptTags(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    {
+        $this->removeEncoreLinkTag($value);
+        $this->removeEncoreScriptTag($value);
+
+        return $this;
+    }
+
+    public function removeEncoreLinkTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    {
+        if(array_key_exists($value, $this->encoreEntryLinkTags))
+            unset($this->encoreEntryLinkTags[$value]);
+
+        return $this;
+    }
+
+    public function removeEncoreScriptTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    {
+        if(array_key_exists($value, $this->encoreEntryScriptTags))
+            unset($this->encoreEntryScriptTags[$value]);
+
+        return $this;
+    }
+
+    protected $htmlContent = [];
     public function renderHtmlContent(string $location)
     {
         $htmlContent = $this->getHtmlContent($location);
@@ -164,11 +258,7 @@ class Environment extends TwigEnvironment
         return $htmlContent;
     }
 
-    public function getHtmlContent(string $location)
-    {
-        return trim(implode(PHP_EOL,array_unique($this->htmlContent[$location] ?? [])));
-    }
-
+    public function getHtmlContent(string $location) { return trim(implode(PHP_EOL,array_unique($this->htmlContent[$location] ?? []))); }
     public function removeHtmlContent(string $location)
     {
         if(array_key_exists($location, $this->htmlContent))

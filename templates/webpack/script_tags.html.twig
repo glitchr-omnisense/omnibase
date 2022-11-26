@@ -1,0 +1,9 @@
+{% for tag in tags %}
+    {% if tag.preload ?? false %}
+        <link rel="preload" href="{{ call_user_func_if_exists('preload', [asset(tag.value, tag.packageName), { as: 'script', nopush: tag.nopush }]) }}"
+        {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
+    {% else %}
+        <script src="{{ asset(tag.value, tag.packageName ?? null) }}" {{ (tag.async ?? false) ? 'async' }} {{ (tag.defer ?? false) ? 'defer' }}
+        {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}></script>
+    {% endif %}
+{% endfor %}

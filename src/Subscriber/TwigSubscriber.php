@@ -14,12 +14,13 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 class TwigSubscriber implements EventSubscriberInterface
 {
-    public function __construct(Environment $twig, ParameterBag $parameterBag, RouterInterface $router)
+    public function __construct(Environment $twig, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
     {
         $this->twig         = $twig;
         $this->parameterBag = $parameterBag;
         $this->router       = $router;
 
+        $this->publicDir = $publicDir;
         $this->autoAppend   = $this->parameterBag->get("base.twig.autoappend");
     }
 
@@ -61,11 +62,9 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/form.css"));
-        $this->twig->addHtmlContent("javascripts:body", $this->twig->getAsset("bundles/base/form.js"));
-
-        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/base.css"));
-        $this->twig->addHtmlContent("javascripts:body", $this->twig->getAsset("bundles/base/base.js"));
+        $this->twig->addEncoreEntryPoint("glitchr/base-bundle", $this->publicDir."/bundles/base/entrypoints.json");
+        $this->twig->addEncoreTag("base");
+        $this->twig->addEncoreTag("form");
     }
 
     public function onKernelResponse(ResponseEvent $event)

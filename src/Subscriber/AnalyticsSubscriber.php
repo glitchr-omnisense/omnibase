@@ -2,14 +2,12 @@
 
 namespace Base\Subscriber;
 
-use Base\BaseBundle;
-
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\Query;
-use Google\Analytics\Service\GaService;
+use Google\Service\GaService;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

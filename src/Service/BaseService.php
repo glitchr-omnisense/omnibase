@@ -223,10 +223,15 @@ class BaseService implements RuntimeExtensionInterface
     public function hasParameterTwig(string $name) { return $this->getTwig()->hasParameter($name); }
     public function setParameterTwig(string $name, mixed $value) { return $this->getTwig()->setParameter($name, $value); }
     public function appendParameterTwig($name, mixed $value) { return $this->getTwig()->appendParameter($name, $value); }
+    
     public function renderHtmlContent(string $location) { return $this->getTwig()->renderHtmlContent($location); }
     public function getHtmlContent(string $location) { return $this->getTwig()->getHtmlContent($location); }
     public function removeHtmlContent(string $location) { return $this->getTwig()->removeHtmlContent($location); }
     public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = []) { return $this->getTwig()->addHtmlContent($location,$contentOrArrayOrFile,$options); }
+    
+    public function renderEncoreTags      (?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)  { return $this->getTwig()->renderEncoreTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes); }
+    public function renderEncoreLinkTags  (?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)  { return $this->getTwig()->renderEncoreLinkTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes); }
+    public function renderEncoreScriptTags(?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)  { return $this->getTwig()->renderEncoreScriptTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes); }
 
     /**
      *
