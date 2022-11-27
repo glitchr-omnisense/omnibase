@@ -2,6 +2,7 @@
 
 namespace Base\Subscriber;
 
+use App\Enum\UserRole;
 use Base\Routing\RouterInterface;
 use Base\Service\ParameterBag;
 use Base\Twig\Environment;
@@ -11,23 +12,25 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class TwigSubscriber implements EventSubscriberInterface
 {
-    public function __construct(Environment $twig, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
+    public function __construct(Environment $twig, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
     {
-        $this->twig         = $twig;
-        $this->parameterBag = $parameterBag;
-        $this->router       = $router;
+        $this->twig                 = $twig;
+        $this->parameterBag         = $parameterBag;
+        $this->router               = $router;
+        $this->authorizationChecker = $authorizationChecker;
 
-        $this->publicDir = $publicDir;
-        $this->autoAppend   = $this->parameterBag->get("base.twig.autoappend");
+        $this->publicDir            = $publicDir;
+        $this->autoAppend           = $this->parameterBag->get("base.twig.autoappend");
     }
 
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST => ['onKernelRequest', 128],
+            KernelEvents::REQUEST => ['onKernelRequest', 8],
             KernelEvents::RESPONSE => ['onKernelResponse'],
             KernelEvents::EXCEPTION => ['onKernelException'],
         ];
@@ -62,9 +65,18 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        $this->twig->addEncoreEntryPoint("glitchr/base-bundle", $this->publicDir."/bundles/base/entrypoints.json");
+        $this->twig->addEncoreEntrypoint("glitchr/base-bundle", $this->publicDir."/bundles/base/entrypoints.json");
         $this->twig->addEncoreTag("base");
         $this->twig->addEncoreTag("form");
+        
+        foreach(UserRole::getPermittedValues() as $role) {
+
+            $tag = "security_".snake2camel(strtolower(str_lstrip($role, "ROLE_")));
+            if(!$this->twig->hasEncoreEntry($tag)) continue;
+
+            if ($this->authorizationChecker->isGranted($role))
+                $this->twig->addEncoreTag($tag);
+        }
     }
 
     public function onKernelResponse(ResponseEvent $event)

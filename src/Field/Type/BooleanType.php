@@ -34,8 +34,5 @@ class BooleanType extends AbstractType
         $view->vars["confirmation_check"] = $options["confirmation[onCheck]"];
         $view->vars["confirmation_uncheck"] = $options["confirmation[onUncheck]"];
         $view->vars["toogle_url"] = $options["toogle_url"];
-        $view->vars["inline"] = $options["inline"];
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-boolean.js");
-    }
+        $view->vars["inline"] = $options["inline"];    }
 }

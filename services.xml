@@ -70,9 +70,10 @@
         </service>
 
         <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="router" /></service>
-        <service id="Base\Subscriber\TwigSubscriber"    >
+        <service id="Base\Subscriber\TwigSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="twig" />
+            <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>

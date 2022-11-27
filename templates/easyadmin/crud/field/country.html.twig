@@ -3,7 +3,7 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% if field.value %} {# if not null #}
     <img class="country-flag"
-         src="{{asset('bundles/base/flags/'~field.value~'.png')}}"> {{ field.formattedValue ?? '' }}
+         src="{{asset('bundles/base/images/flags/'~field.value~'.svg')}}"> {{ field.formattedValue ?? '' }}
 {% else %}
     <span class="badge badge-secondary">{{field.formattedValue ?? '-'}}</span>
 {% endif %}

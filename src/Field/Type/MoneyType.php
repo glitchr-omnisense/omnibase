@@ -66,8 +66,6 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
                 ];
             break;
         }
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-money.js");
     }
 
     /**

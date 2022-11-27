@@ -79,7 +79,7 @@ final class FileTwigExtension extends AbstractExtension
         $entryName = is_array($entry) ? $entry["value"] ?? null : $entry;
         if($entryName == null) return [];
        
-        $entryPoints = $env->getEncoreEntryPoints();
+        $entryPoints = $env->getEncoreEntrypoints();
         foreach($entryPoints as $entryPoint) {
             
             try { $jsFiles = $entryPoint->getJavaScriptFiles($entryName); }
@@ -96,7 +96,7 @@ final class FileTwigExtension extends AbstractExtension
         $entryName = is_array($entry) ? $entry["value"] ?? null : $entry;
         if($entryName == null) return [];
        
-        $entryPoints = $env->getEncoreEntryPoints();
+        $entryPoints = $env->getEncoreEntrypoints();
         foreach($entryPoints as $entryPoint) {
             
             try { $cssFiles = $entryPoint->getCssFiles($entryName); }

@@ -58,7 +58,5 @@ final class BooleanConfigurator implements FieldConfiguratorInterface
             $field->setFormTypeOptionIfNotSet('label_attr.class', 'checkbox-switch');
             $field->setCssClass($field->getCssClass().' has-switch');
         }
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-boolean.js");
     }
 }

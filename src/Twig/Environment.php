@@ -2,6 +2,7 @@
 
 namespace Base\Twig;
 
+use App\Enum\UserRole;
 use Base\Routing\RouterInterface;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
@@ -10,20 +11,22 @@ use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookup;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Twig\Environment as TwigEnvironment;
 use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
 use Twig\Loader\LoaderInterface;
 
 class Environment extends TwigEnvironment
 {
-    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocaleProviderInterface $localeProvider, RouterInterface $router, ParameterBagInterface $parameterBag)
+    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocaleProviderInterface $localeProvider, RouterInterface $router, ParameterBagInterface $parameterBag, ?EntrypointLookupCollectionInterface $entrypointLookupCollection = null)
     {
         $this->requestStack   = $requestStack;
         $this->router         = $router;
         $this->parameterBag   = $parameterBag;
         $this->localeProvider = $localeProvider;
+
+        $this->entrypointLookupCollection = $entrypointLookupCollection;
 
         parent::__construct($loader, $options);
     }
@@ -165,7 +168,7 @@ class Environment extends TwigEnvironment
 
     public function renderEncoreScriptTags(?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) 
     { 
-        if($value) $this->addEncoreLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+        if($value) $this->addEncoreScriptTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
         return $this->render("webpack/script_tags_encore.html.twig", ["tags" => $this->encoreEntryScriptTags]);
     }
 
@@ -175,16 +178,22 @@ class Environment extends TwigEnvironment
                $this->renderEncoreScriptTags( $value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
     }
 
-    public function getEncoreEntryPoints(): array { return $this->encoreEntryPoints; }
-    public function getEncoreEntryPoint(string $value): ?EntrypointLookupInterface
-    {
-        return $this->encoreEntryPoints[$value] ?? null;
-    }
-
+    public function getEncoreEntrypoints(): array { return $this->encoreEntryPoints; }
+    public function getEncoreEntry(string $entrypointName): ?EntrypointLookupInterface { return $this->encoreEntryPoints[$entrypointName] ?? null; }
     public function addEncoreEntryPoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
     {
         $this->encoreEntryPoints[$value] = new EntrypointLookup($entrypointJsonPath, $cache, $cacheKey, $strictMode);
         return $this;
+    }
+
+    public function hasEncoreEntry(string $entryName, string $entrypointName = '_default'): bool
+    {
+        $entrypointLookup = $this->entrypointLookupCollection?->getEntrypointLookup($entrypointName);
+        if (!$entrypointLookup instanceof EntrypointLookup) {
+            throw new \LogicException(sprintf('Cannot use entryExists() unless the entrypoint lookup is an instance of "%s"', EntrypointLookup::class));
+        }
+
+        return $entrypointLookup->entryExists($entryName);
     }
 
     public function addEncoreTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)

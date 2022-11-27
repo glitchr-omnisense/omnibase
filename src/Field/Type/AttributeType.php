@@ -106,8 +106,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars["allow_add"]    = $options["allow_add"];
         $view->vars["is_inherited"] = $view->children["choice"]->vars["is_inherited"] ?? false;
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-attribute.js");
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

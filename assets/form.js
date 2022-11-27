@@ -1,5 +1,21 @@
 import './styles/form.scss';
 
+import '@glitchr/select2';
+import '@glitchr/quill';
+import 'highlight.js';
+import 'cropperjs';
+import 'sortablejs';
+import '@eonasdan/tempus-dominus';
+
+import 'bootstrap';
+import 'bootstrap-icons/font/bootstrap-icons';
+
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import fontawesome from '@fortawesome/fontawesome-free'
+fontawesome.config = { autoReplaceSvg: false }
+
+
+import './styles/js/form.js';
 import './styles/js/forms/form-type-array.js';
 import './styles/js/forms/form-type-avatar.js';
 import './styles/js/forms/form-type-attribute.js';
