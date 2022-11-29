@@ -7,7 +7,6 @@
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
   },
-
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@glitchr/cookie-consent": "^1.0",
@@ -20,12 +19,11 @@
     "@glitchr/select2": "^1.0",
     "@simonwep/pickr": "^1.8.2",
     "bootstrap-icons": "^1.10.2",
-    "@popperjs/core":"^2.11.6",
+    "@popperjs/core": "^2.11.6",
     "chart.js": "4.0.1",
     "core-js": "^3.23.0",
     "cropperjs": "1.5.12",
     "dropzone": "^6.0.0-beta.2",
-
     "highlight.js": "11.6.0",
     "jquery": "^3.6.1",
     "jscolor": "^0.3",
@@ -52,5 +50,6 @@
   "description": "",
   "directories": {
     "test": "tests"
-  }
+  },
+  "version": "0.0.1"
 }
