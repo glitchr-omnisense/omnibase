@@ -65,10 +65,11 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        $this->twig->addEncoreEntrypoint("glitchr/base-bundle", $this->publicDir."/bundles/base/entrypoints.json");
-        $this->twig->addEncoreTag("base");
-        $this->twig->addEncoreTag("form");
-        
+        // @TODO.. use cache warmer
+        $this->twig->addEncoreEntrypoint( "_base", $this->publicDir."/bundles/base/entrypoints.json");
+        $this->twig->addEncoreTag("base", "_base");
+        $this->twig->addEncoreTag("form", "_base");
+
         foreach(UserRole::getPermittedValues() as $role) {
 
             $tag = "security_".snake2camel(strtolower(str_lstrip($role, "ROLE_")));

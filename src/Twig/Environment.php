@@ -157,7 +157,7 @@ class Environment extends TwigEnvironment
         throw new Exception("Unknown merging method for \"$name\"");
     }
 
-    protected $encoreEntryPoints = [];
+    protected $encoreEntrypoints = [];
     protected $encoreEntryLinkTags = [];
     protected $encoreEntryScriptTags = [];
     public function renderEncoreLinkTags  (?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) 
@@ -178,11 +178,12 @@ class Environment extends TwigEnvironment
                $this->renderEncoreScriptTags( $value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
     }
 
-    public function getEncoreEntrypoints(): array { return $this->encoreEntryPoints; }
-    public function getEncoreEntry(string $entrypointName): ?EntrypointLookupInterface { return $this->encoreEntryPoints[$entrypointName] ?? null; }
-    public function addEncoreEntryPoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
+    public function getEncoreEntrypoints(): array { return $this->encoreEntrypoints; }
+    public function getEncoreEntry(string $entrypointName): ?EntrypointLookupInterface { return $this->encoreEntrypoints[$entrypointName] ?? null; }
+
+    public function addEncoreEntrypoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
     {
-        $this->encoreEntryPoints[$value] = new EntrypointLookup($entrypointJsonPath, $cache, $cacheKey, $strictMode);
+        $this->encoreEntrypoints[$value] = new EntrypointLookup($entrypointJsonPath, $cache, $cacheKey, $strictMode);
         return $this;
     }
 

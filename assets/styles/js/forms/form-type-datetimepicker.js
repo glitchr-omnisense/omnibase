@@ -1,3 +1,5 @@
+import '@glitchr/datetime-picker'
+
 $(document).on("DOMContentLoaded", function () {
 
     $(document).on("load.form_type.datetimepicker", function () {
@@ -16,7 +18,8 @@ $(document).on("DOMContentLoaded", function () {
                 $('#'+id).datetimepicker(isVisible ? "hide" : "show");
                 isVisible = !isVisible;
             });
-
+                
+            console.log(datetimepicker);
             $('#'+id).datetimepicker(datetimepicker);
         }));
     });

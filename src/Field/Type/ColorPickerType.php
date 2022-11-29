@@ -240,8 +240,5 @@ final class ColorPickerType extends AbstractType
                 $view->vars['value'] = "#00000000";
         }
         $options["value"] = $view->vars['value'];
-
-        $this->twig->addHtmlContent("javascripts:head", $options["pickr-js"]);
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-color.js");
     }
 }

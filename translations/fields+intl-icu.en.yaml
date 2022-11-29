@@ -20,7 +20,7 @@ password:
   first: "Password"
   second: "Password confirmation"
   unchanged: "This field is optional, leave it blank if no change."
-  unsecure: "This field is unsecure."
+  unsecure: "This field is unsecured."
   strength:
     label: "Password strength is <b>{label}</b> (Force {force})."
     bad:

@@ -21,8 +21,6 @@ class StockType extends NumberType
         $view->vars['allow_infinite'] = $options["allow_infinite"];
         $view->vars["stepUp"]   = $options["stepUp"];
         $view->vars["stepDown"] = $options["stepDown"];
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-stock.js");
     }
 
     public function configureOptions(OptionsResolver $resolver)

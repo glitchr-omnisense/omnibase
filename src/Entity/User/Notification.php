@@ -302,23 +302,33 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
     }
 
-    public function send(string $importance, ...$recipients)
+    public function send(string $importance, RecipientInterface ...$recipients)
     {
         $this->setImportance($importance);
 
-        $recipients[] = ($this->user ? $this->user->getRecipient() : new NoRecipient());
-        User::getNotifier()->sendUsers($this, ...$recipients);
+        $userRecipient = $this->user?->getRecipient();
+        if($userRecipient !== null && !in_array($userRecipient, $recipients))
+            $recipients[] = $this->user->getRecipient();
+        if(empty($recipients)) 
+            $recipients[] = new NoRecipient();
+
+        User::getNotifier()->sendUsers($this, ...array_unique($recipients));
 
         return $this;
     }
 
-    public function sendBy(array $channels,  ...$recipients)
+    public function sendBy(array $channels, RecipientInterface ...$recipients)
     {
         if(!$this->getImportance())
             $this->setImportance(Notification::IMPORTANCE_DEFAULT);
 
-        $recipients[] = ($this->user ? $this->user->getRecipient() : new NoRecipient());
-        User::getNotifier()->sendUsersBy($channels, $this, ...$recipients);
+        $userRecipient = $this->user?->getRecipient();
+        if($userRecipient !== null && !in_array($userRecipient, $recipients))
+            $recipients[] = $this->user->getRecipient();
+        if(empty($recipients)) 
+            $recipients[] = new NoRecipient();
+
+        User::getNotifier()->sendUsersBy($channels, $this, ...array_unique($recipients));
 
         return $this;
     }

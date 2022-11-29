@@ -82,13 +82,6 @@ class QuillType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        // Import highlight
-        $this->twig->addHtmlContent("javascripts:head", $options["highlight-js"]);
-        $this->twig->addHtmlContent("stylesheets:before", $options["highlight-css"]);
-
-        // Import quill
-        $this->twig->addHtmlContent("javascripts:head", $options["quill-js"]);
-
         $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
 
         // Quill options
@@ -110,9 +103,5 @@ class QuillType extends AbstractType
         $quillOpts["height"] = $options["height"];
 
         $view->vars["quill"] = json_encode($quillOpts);
-
-        //
-        // Default quill initialializer
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-quill.js");
     }
 }

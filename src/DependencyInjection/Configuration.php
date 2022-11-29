@@ -383,7 +383,7 @@ class Configuration implements ConfigurationInterface
                             ->defaultValue(true)
                             ->end()
                         ->scalarNode('no_image')
-                            ->defaultValue("%kernel.project_dir%/public/bundles/base/image.svg")
+                            ->defaultValue("%kernel.project_dir%/public/bundles/base/images/image.svg")
                             ->end()
                         ->booleanNode('fallback')
                             ->defaultValue(false)

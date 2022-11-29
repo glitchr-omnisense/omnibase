@@ -42,8 +42,6 @@ class QuadrantType extends AbstractType implements DataMapperInterface
         $view->vars['quadrants']  = $options["class"]::getPermittedValues();
         $view->vars['icons']      = $options["class"]::getIcons();
         $view->vars['default']    = $options["class"]::getDefault();
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-quadrant.js");
     }
 
     public function mapDataToForms($viewData, Traversable $forms) { }

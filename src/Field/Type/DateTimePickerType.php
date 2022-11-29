@@ -2,6 +2,7 @@
 
 namespace Base\Field\Type;
 
+use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 
@@ -14,19 +15,17 @@ use Symfony\Component\Form\FormView;
 
 class DateTimePickerType extends AbstractType
 {
-    public function __construct(ParameterBagInterface $parameterBag, Environment $twig)
+    public function __construct(ParameterBagInterface $parameterBag, Environment $twig, LocaleProviderInterface $localeProvider)
     {
         $this->parameterBag = $parameterBag;
+        $this->localeProvider = $localeProvider;
         $this->twig = $twig;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'moment-js'    => $this->parameterBag->get("base.vendor.moment.javascript"),
-            'datetimepicker-js'    => $this->parameterBag->get("base.vendor.datetimepicker.javascript"),
-            'datetimepicker-css'   => $this->parameterBag->get("base.vendor.datetimepicker.stylesheet"),
-
+            
             // PHP Datetime format:
             // This format is replacing the shitty HTML5_FORMAT :-)
             "format" => "yyyy-MM-dd HH:mm:ss",
@@ -37,6 +36,7 @@ class DateTimePickerType extends AbstractType
             "datetimepicker" => [
                 // "debug" => true,
                 "keepOpen" => true,
+                "locale" => $this->localeProvider->getLang(),
                 "format" => "YYYY-MM-DD HH:mm:ss", // JS Datetime Format
                 "sideBySide" => true,
                 "allowInputToggle" => true
@@ -49,20 +49,11 @@ class DateTimePickerType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        // Import datetimepicker
-        $this->twig->addHtmlContent("javascripts:head", $options["moment-js"]);
-        $this->twig->addHtmlContent("javascripts:head", $options["datetimepicker-js"]);
-        $this->twig->addHtmlContent("stylesheets:before", $options["datetimepicker-css"]);
-
         //
         // Datetime picker Options
         $dateTimePickerOpts = $options["datetimepicker"];
         $dateTimePickerOpts["defaultDate"] = $view->vars["value"];
 
         $view->vars["datetimepicker"] = json_encode($dateTimePickerOpts);
-
-        //
-        // Datetime picker initialializer
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-datetimepicker.js");
     }
 }

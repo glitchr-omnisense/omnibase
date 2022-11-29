@@ -85,7 +85,5 @@ class ArrayType extends CollectionType
         $view->vars['length'] = is_string($options["length"]) ? explode(".", $options["length"]) : $options["length"];
         $view->vars["pattern"] = $options["pattern"];
         $view->vars["placeholder"] = $options["placeholder"];
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-array.js");
     }
 }

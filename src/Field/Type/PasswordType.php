@@ -42,8 +42,6 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $view->vars["autocomplete"] = $options["autocomplete"];
         $view->vars["suggestions"]  = $options["suggestions"];
         $view->vars["required"]     = $options["required"] ?? true;
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-password.js");
     }
 
     public function configureOptions(OptionsResolver $resolver)

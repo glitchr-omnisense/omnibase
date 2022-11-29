@@ -1,3 +1,4 @@
+import 'bootstrap'
 
 $(document).on("DOMContentLoaded", function () {
 

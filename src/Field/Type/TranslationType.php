@@ -228,8 +228,6 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 break;
             }
         }
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-translatable.js");
     }
 
     public function getTranslationFields(string $translationClass, array $options): array

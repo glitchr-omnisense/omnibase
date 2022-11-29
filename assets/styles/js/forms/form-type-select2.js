@@ -1,3 +1,6 @@
+
+import '@glitchr/select2';
+
 $(document).on("DOMContentLoaded", function () {
 
     var localCache = {};
@@ -203,6 +206,7 @@ $(document).on("DOMContentLoaded", function () {
             select2["containerCssClass"] = select2["containerCssClass"] + ($(field).attr('required') ? 'required' : '');
 
             var parent = parent || $(field).parent();
+            console.log(field);
             $(field).select2(select2).on("select2:unselecting", function(e) {
 
                 $(this).data('state', 'unselected');

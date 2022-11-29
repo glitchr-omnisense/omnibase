@@ -191,14 +191,8 @@ class FileType extends AbstractType implements DataMapperInterface
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
 
         $view->vars["lightbox"] = null;
-        if(is_array($options["lightbox"])) {
-
-            $this->twig->addHtmlContent("javascripts", $options["lightbox-js"]);
-            $this->twig->addHtmlContent("javascripts", $options["lightbox2b-js"]);
-            $this->twig->addHtmlContent("stylesheets", $options["lightbox-css"]);
-
+        if(is_array($options["lightbox"]))
             $view->vars["lightbox"]  = json_encode($options["lightbox"]);
-        }
 
         if($this->classMetadataManipulator->isEntity($entity)) {
 
@@ -274,9 +268,6 @@ class FileType extends AbstractType implements DataMapperInterface
 
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
-            if($options["dropzone-js"] ) $this->twig->addHtmlContent("javascripts:head", $options["dropzone-js"]);
-            if($options["dropzone-css"]) $this->twig->addHtmlContent("stylesheets:before", $options["dropzone-css"]);
-
             $action = (!empty($options["action"]) ? $options["action"] : ".");
             $view->vars["attr"]["class"] = "dropzone";
 
@@ -313,11 +304,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
             $view->vars["dropzone"]  = json_encode($options["dropzone"]);
             $view->vars["sortable"]  = json_encode($options["sortable"]);
-            if($options["sortable"] && $options["sortable-js"])
-                $this->twig->addHtmlContent("javascripts:head", $options["sortable-js"]);
         }
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-file.js");
     }
 
     public function mapDataToForms($viewData, \Traversable $forms): void

@@ -190,7 +190,5 @@ class CollectionType extends AbstractType
 
             array_splice($prototypeView->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix().'_entry');
         }
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-collection.js");
     }
 }

@@ -80,8 +80,5 @@ final class ColorType extends AbstractType
 
         // Add alpha channel by default
         $options["value"] = expandhex($view->vars["value"], true);
-
-        // Import JSColor
-        $this->twig->addHtmlContent("javascripts:head", $options["jscolor-js"]);
     }
 }

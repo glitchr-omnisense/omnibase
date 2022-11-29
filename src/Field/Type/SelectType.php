@@ -106,10 +106,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'choice_label'     => function($value, $label, $id) { return $label; },   // Return translated label
 
             'select2'          => [],
-            'select2-i18n'     => $this->parameterBag->get("base.vendor.select2.i18n"),
-            'select2-js'       => $this->parameterBag->get("base.vendor.select2.javascript"),
-            'select2-css'      => $this->parameterBag->get("base.vendor.select2.stylesheet"),
-            'theme'            => $this->parameterBag->get("base.vendor.select2.theme"),
+            'theme'            => "bootstrap4",
             'empty_data'       => null,
 
             // Generic parameters
@@ -708,20 +705,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             $selectOpts["selected"] = $selectedData;
 
             //
-            // Set select2 theme
-            if($selectOpts["theme"] != "default" && $selectOpts["theme"] != "classic") {
-
-                $themeCssFile = dirname($options["select2-css"]) . "/themes/select2-" . $selectOpts["theme"] . ".css";
-                if(preg_match("/.*\/select2-(.*).css/", $selectOpts["theme"], $themeArray)) {
-
-                    $selectOpts["theme"] = $themeArray[1];
-                    $themeCssFile = $themeArray[0];
-                }
-
-                $this->twig->addHtmlContent("stylesheets:before", $themeCssFile);
-            }
-
-            //
             // Set controller url
             $crudController = AbstractCrudController::getCrudControllerFqcn($options["class"]);
 
@@ -745,12 +728,6 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // NB: Sorting elements is not working at the moment for multivalue SelectType, reason why I disable it here..
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
-
-            // Import select2
-            $this->twig->addHtmlContent("stylesheets:before", $options["select2-css"]);
-            $this->twig->addHtmlContent("javascripts:head", $options["select2-js"]);
-            $this->twig->addHtmlContent("javascripts:head", $options["select2-i18n"]."/".$selectOpts["language"].".js");
-            $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");
         }
     }
 }

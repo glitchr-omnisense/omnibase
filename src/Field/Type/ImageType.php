@@ -17,7 +17,7 @@ class ImageType extends FileType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'    => "bundles/base/image.svg",
+            'thumbnail'    => "bundles/base/images/image.svg",
             'alt'          => null,
             'clipboard'    => true,
 
@@ -27,8 +27,6 @@ class ImageType extends FileType
             ],
 
             'cropper'     => null,
-            'cropper-js'  => $this->parameterBag->get("base.vendor.cropperjs.javascript"),
-            'cropper-css' => $this->parameterBag->get("base.vendor.cropperjs.stylesheet"),
 
             'mime_types'  => ["image/*"]
         ]);
@@ -61,9 +59,6 @@ class ImageType extends FileType
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $view->vars["ajax"]     = $this->twig->getAsset("ux/dropzone/" . $token);
 
-            $this->twig->addHtmlContent("javascripts:head", $options["cropper-js"]);
-            $this->twig->addHtmlContent("stylesheets:before", $options["cropper-css"]);
-
             if(!array_key_exists('viewMode',     $options["cropper"])) $options["cropper"]['viewMode']         = 2;
             if(!array_key_exists('autoCropArea', $options["cropper"])) $options["cropper"]['autoCropArea'] = true;
             if(!array_key_exists('movable'     , $options["cropper"])) $options["cropper"]['movable']       = false;
@@ -73,7 +68,5 @@ class ImageType extends FileType
 
             $view->vars["cropper"]  = json_encode($options["cropper"]);
         }
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-image.js");
     }
 }

@@ -69,6 +69,12 @@
             <argument type="service" id="setting_bag" />
         </service>
 
+        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer">
+            <tag name="kernel.cache_warmer" />
+            <argument>%kernel.cache_dir%/webpack_encore.cache.php</argument>
+            <bind key="$publicDir">%kernel.project_dir%/public</bind>
+        </service>
+
         <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="router" /></service>
         <service id="Base\Subscriber\TwigSubscriber">
             <tag name="kernel.event_subscriber" />
@@ -814,6 +820,7 @@
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
+            <argument type="service" id="locale_provider" />
         </service>
         <service id="Base\Field\Type\ColorType">
             <tag name="form.type" />

@@ -28,8 +28,6 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["max"]          = $options["max"];
         $view->vars["disabled"]     = $options["disabled"];
         $view->vars["autocomplete"]     = $options["autocomplete"];
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-number.js");
     }
 
     public function configureOptions(OptionsResolver $resolver)

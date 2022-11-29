@@ -1,3 +1,6 @@
+
+import '@glitchr/quill';
+
 $(document).on("DOMContentLoaded", function () {
 
     $(document).on("load.form_type.quill", function () {

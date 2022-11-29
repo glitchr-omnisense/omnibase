@@ -44,19 +44,6 @@ class IconType extends SelectType implements SelectInterface
         });
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
-        parent::buildForm($builder, $options);
-
-        $adapter = self::$iconProvider->getAdapter($options["adapter"]);
-        foreach($adapter->getAssets() as $asset) {
-
-            $relationship = pathinfo_relationship($asset);
-            $location = $relationship == "javascript" ? "javascripts" : "stylesheets";
-            $this->twig->addHtmlContent($location, $asset);
-        }
-    }
-
     public static function getIcon(string $id, int $index = -1): ?string
     {
         $adapter = self::$iconProvider->getAdapter($id);

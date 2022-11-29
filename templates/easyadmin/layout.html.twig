@@ -51,6 +51,7 @@
     {% endblock %}
 
     {% block head_stylesheets %}
+        <link rel="stylesheet" href="{{ asset('app.css', ea.assets.defaultAssetPackageName) }}">
         {{ base.renderEncoreLinkTags('easyadmin')|raw }}
         {{ base.renderHtmlContent("stylesheets")|raw }}
         {{ base.renderHtmlContent("stylesheets:after")|raw }}

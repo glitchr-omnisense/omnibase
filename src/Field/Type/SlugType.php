@@ -44,11 +44,6 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             });
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
-    {
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-slug.js");
-    }
-
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars["keep"]      = $options["keep"]      ? preg_quote($options["keep"])      : null;

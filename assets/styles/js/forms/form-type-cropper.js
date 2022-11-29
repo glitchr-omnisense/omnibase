@@ -1,4 +1,6 @@
 
+import 'cropperjs';
+
 $(document).on("DOMContentLoaded", function () {
 
     var cropperSource = {};

@@ -119,8 +119,6 @@ class CropperType extends AbstractType implements DataMapperInterface
     {
         $view->vars["cropper"]      = json_encode($options["cropper"]);
         $view->vars["aspectRatios"] = $options["aspectRatios"];
-
-        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-cropper.js");
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)
