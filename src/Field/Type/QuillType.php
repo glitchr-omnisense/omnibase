@@ -34,13 +34,9 @@ class QuillType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'highlight-js'  => $this->parameterBag->get("base.vendor.highlight.javascript"),
-            'highlight-css' => $this->parameterBag->get("base.vendor.highlight.stylesheet"),
-            'quill-js'      => $this->parameterBag->get("base.vendor.quill.javascript"),
-            'quill-css'     => $this->parameterBag->get("base.vendor.quill.stylesheet"),
             'empty_data', null,
 
-            'theme' => $this->parameterBag->get("base.vendor.quill.theme"),
+            'theme' => "snow",
             'placeholder' => "Compose an epic..",
             'height' => "250px",
             'modules' => [
@@ -86,14 +82,6 @@ class QuillType extends AbstractType
 
         // Quill options
         $theme = $options["theme"];
-        $themeCssFile = dirname($options["quill-css"]) . "/quill." . $theme . ".css";
-        if (preg_match("/.*\/quill.(.*).css/", $theme, $themeArray)) {
-
-            $theme = $themeArray[1];
-            $themeCssFile = $themeArray[0];
-        }
-
-        $this->twig->addHtmlContent("stylesheets:before", $themeCssFile);
         $modules = $options["modules"] ?? [];
 
         $quillOpts = [];

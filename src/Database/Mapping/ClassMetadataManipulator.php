@@ -478,7 +478,7 @@ class ClassMetadataManipulator
             return $entity === $collection->getOwner();
         }
 
-        return in_class($entity, $collection);
+        return in_class($entity, $collection) || $collection instanceof ArrayCollection;
     }
 
     public function getDeclaringEntity(null|string|object $entityOrClassOrMetadata, $fieldPath)

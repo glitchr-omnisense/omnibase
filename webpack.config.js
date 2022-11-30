@@ -12,6 +12,16 @@ Encore
     .enableVersioning(Encore.isProduction())
 
     .copyFiles({
+        from: './node_modules/@fortawesome/fontawesome-free/metadata/',
+        pattern: /icons.yml$/,
+        to: 'metadata/[name].[ext]'
+    })
+    .copyFiles({
+        from: './node_modules/bootstrap-icons/font/',
+        pattern: /bootstrap-icons.json$/,
+        to: 'metadata/[name].[ext]'
+    })
+    .copyFiles({
         from: './node_modules/@fortawesome/fontawesome-free/webfonts/',
         to: 'fonts/[name].[hash].[ext]'
     })

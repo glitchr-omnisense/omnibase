@@ -834,7 +834,7 @@ form .row button[type="submit"] { margin: 1em 0; }
 .ql-snow .ql-picker { color: var(--form-label-color); }
 .ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label
 {
-    border-color: 1px solid var(--content-top-border-color);
+    border: 1px solid transparent;
 }
 .ql-snow .ql-picker-options {
     background-color: var(--body-bg);
@@ -897,7 +897,19 @@ input.form-control
     background-color: var(--select2-bg);
     border-color: var(--sidebar-border-color);
 }
+.select2-container--bootstrap4 .select2-selection__clear {
+    background-color: var(--sidebar-border-color);
+}
 
+.popupContainer {
+    z-index:1000;
+}
+.pcr-app {
+    background-color: var(--secondary-bg);
+}
+.pcr-app .pcr-interaction .pcr-result {
+    background-color: var(--body-bg);
+}
 ul.sidebar-menu a { white-space: nowrap; }
 .content-header-icon {
     background-color:var(--fieldset-bg);

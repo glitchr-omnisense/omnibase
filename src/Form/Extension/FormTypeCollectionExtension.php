@@ -53,7 +53,7 @@ class FormTypeCollectionExtension extends AbstractTypeExtension
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
         if ($form->getData() instanceof PersistentCollection &&
-            !$this->classMetadataManipulator->isCollectionOwner($form, $form->getData())) {
+            $this->classMetadataManipulator->isCollectionOwner($form, $form->getData()) === false) {
 
             $view->vars["required"] = false;
             $view->vars["disabled"] = true;

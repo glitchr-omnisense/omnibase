@@ -2,12 +2,9 @@
 
 namespace Base\Form;
 
-use Base\Form\Common\FormModelInterface;
-use Base\Form\Common\FormTypeInterface;
 use Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormTypeInterface as SymfonyFormTypeInterface;
 
 class FormProxy implements FormProxyInterface
 {

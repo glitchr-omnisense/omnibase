@@ -1,3 +1,7 @@
+import Sortable from 'sortablejs';
+import Dropzone from 'dropzone';
+import 'dropzone/src/dropzone.scss';
+
 if (typeof Dropzone !== 'undefined')
     Dropzone.autoDiscover = false;
 

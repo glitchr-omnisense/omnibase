@@ -18,8 +18,7 @@ $(document).on("DOMContentLoaded", function () {
                 $('#'+id).datetimepicker(isVisible ? "hide" : "show");
                 isVisible = !isVisible;
             });
-                
-            console.log(datetimepicker);
+
             $('#'+id).datetimepicker(datetimepicker);
         }));
     });

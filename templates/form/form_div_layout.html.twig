@@ -1307,12 +1307,20 @@
 
 {%- endblock -%}
 
-{% block color_pickr %}
+{% block colorpickr_widget %}
+{% set attr = attr|merge({
+        'data-color-field': form.vars.id
+    })
+%}
+
+{{ form_widget(form, {attr: attr}) }}
+{% endblock %}
+
+{% block emojipickr_widget %}
 
 {% set attr = attr|merge({
-        'data-color-field': form.vars.id,
-        'data-options': pickr | json_encode,
-        'class' : 'form-color'
+        'data-emoji-field': form.vars.id,
+        'renderer': form.vars.renderer
     })
 %}
 

@@ -1,6 +1,10 @@
 
 import '@glitchr/quill';
 
+// import hljs from 'highlight.js';
+import Quill from 'quill';
+export default Quill;
+
 $(document).on("DOMContentLoaded", function () {
 
     $(document).on("load.form_type.quill", function () {
@@ -41,7 +45,7 @@ $(document).on("DOMContentLoaded", function () {
 
                 // TBI: HTML replacement is in conflict with soft-break line..
                 quill.modules.toolbar.push(["html"]);
-
+                quill.modules.syntax = false;
                 quill.modules.clipboard = { matchers: [['BR', lineBreakMatcher]] }
                 quill.modules.keyboard = {
                     bindings: {

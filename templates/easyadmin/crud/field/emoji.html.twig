@@ -1,0 +1,23 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+{% if field.formattedValue is not null %}
+    <span class="badge badge-secondary"
+          onclick="var clipboard = document.createElement('textarea');
+                       clipboard.value = this.getAttribute('value');
+
+                       document.body.appendChild(clipboard); clipboard.select();
+
+                       $(this).attr('data-original-title', clipboard.value+': copied').tooltip('show');
+                       var that = this; setTimeout(function() {
+                           $(that).attr('data-original-title', clipboard.value);
+                       }, 1000);
+
+                       document.execCommand('copy'); clipboard.remove();"
+
+          style="cursor: pointer; margin:0.25em 0; width:40px; border:1px solid;"
+          data-toggle="tooltip" data-placement="top"
+          title="{{ field.formattedValue }}" value="{{field.formattedValue}}">{{field.formattedValue}}</span>
+{% else %}
+    -
+{% endif %}

@@ -60,7 +60,7 @@ final class ColorPickerType extends AbstractType
     }
 
     public function getParent() : ?string { return TextType::class; }
-    public function getBlockPrefix(): string { return 'color_pickr'; }
+    public function getBlockPrefix(): string { return 'colorpickr'; }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -201,8 +201,6 @@ final class ColorPickerType extends AbstractType
                 ],
             ],
 
-            'pickr-js'  => $this->parameterBag->get("base.vendor.pickr.javascript"),
-            'pickr-css'  => $this->parameterBag->get("base.vendor.pickr.stylesheet"),
             'is_nullable' => true
         ]);
     }
@@ -218,10 +216,10 @@ final class ColorPickerType extends AbstractType
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $options["pickr"]["el"] = $view->vars["id"];
+        $options["pickr"]["el"] = "#".$view->vars["id"];
 
         // JSColor requirement
-        $view->vars['attr']['data-pickr'] = json_encode($options["pickr"]);
+        $view->vars['attr']['data-color-pickr'] = json_encode($options["pickr"]);
 
         // JSColor class for stylsheet
         $view->vars['attr']["class"] = "form-color";

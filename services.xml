@@ -445,14 +445,11 @@
 
         <service id="Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter">
             <tag name="base.service.icon" />
-            <bind key="$metadata">%base.vendor.fontawesome.metadata%</bind>
-            <bind key="$javascript">%base.vendor.fontawesome.javascript%</bind>
-            <bind key="$stylesheet">%base.vendor.fontawesome.stylesheet%</bind>
+            <bind key="$metadata">%kernel.project_dir%/public/bundles/base/metadata/icons.yml</bind>
         </service>
         <service id="Base\Service\Model\IconProvider\Adapter\BootstrapTwitterAdapter">
             <tag name="base.service.icon" />
-            <bind key="$metadata">%base.vendor.bootstrap_twitter.metadata%</bind>
-            <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
+            <bind key="$metadata">%kernel.project_dir%/public/bundles/base/metadata/bootstrap-icons.json</bind>
         </service>
 
         <service id="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
@@ -833,6 +830,11 @@
             <argument type="service" id="twig" />
             <argument type="service" id="parameter_bag" />
         </service>
+
+        <service id="Base\Field\Type\EmojiPickerType">
+            <tag name="form.type" />
+        </service>
+        
         <service id="Base\Field\Type\SlugType"><tag name="form.type" />
             <argument type="service" id="twig" />
             <argument type="service" id="base.database.metadata_manipulator" />

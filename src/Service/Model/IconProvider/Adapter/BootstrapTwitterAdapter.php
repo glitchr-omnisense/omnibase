@@ -18,7 +18,7 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         return [$this->stylesheet];
     }
 
-    public function __construct(string $metadata, string $stylesheet)
+    public function __construct(string $metadata, ?string $stylesheet = null)
     {
         $this->metadata = $metadata;
         $this->stylesheet = $stylesheet;

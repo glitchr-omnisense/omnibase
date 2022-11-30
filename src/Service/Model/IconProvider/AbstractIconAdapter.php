@@ -16,7 +16,7 @@ abstract class AbstractIconAdapter implements IconAdapterInterface
     public function getContents() { return $this->contents; }
     public static function parse(string $metadata): array
     {
-        if (empty(self::$contents[$metadata])) {
+        if (empty(self::$contents[$metadata]) && file_exists($metadata)) {
 
             self::$contents[$metadata] =
                 (str_ends_with($metadata, "yml") ?
@@ -27,7 +27,7 @@ abstract class AbstractIconAdapter implements IconAdapterInterface
                     json_decode(file_get_contents($metadata), true) : [])));
         }
 
-        return self::$contents[$metadata];
+        return self::$contents[$metadata] ?? [];
     }
 
     public function getEntries()

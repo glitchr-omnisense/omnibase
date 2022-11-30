@@ -1,4 +1,3 @@
-
 import '@glitchr/select2';
 
 $(document).on("DOMContentLoaded", function () {
@@ -10,10 +9,11 @@ $(document).on("DOMContentLoaded", function () {
 
     function highlight_search(text, search) {
 
-        reg = new RegExp(search, 'gi');
+        var reg = new RegExp(search, 'gi');
         return text.replace(reg, function(str) {return '<mark>'+str+'</mark>'});
     }
 
+    var dropdown = [];
     $(document).on("load.form_type.select2", function () {
 
         document.querySelectorAll("[data-select2-field]").forEach((function (el) {
@@ -21,7 +21,7 @@ $(document).on("DOMContentLoaded", function () {
             var field = $("#"+el.getAttribute("data-select2-field"));
             var defaultTemplate = function(option) {
 
-                dataAttribute = "";
+                var dataAttribute = "";
                 $(option["data"]).each(function(key, value)
                 {
                     var value = option["data"][key];
@@ -40,7 +40,7 @@ $(document).on("DOMContentLoaded", function () {
 
                 if(!is_dict(option.icon)) option.icon = {'class': option.icon};
 
-                iconAttributes = "";
+                var iconAttributes = "";
                 $(Object.keys(option["icon"])).each(function(i, key) {
 
                     var value = option["icon"][key];
@@ -206,7 +206,6 @@ $(document).on("DOMContentLoaded", function () {
             select2["containerCssClass"] = select2["containerCssClass"] + ($(field).attr('required') ? 'required' : '');
 
             var parent = parent || $(field).parent();
-            console.log(field);
             $(field).select2(select2).on("select2:unselecting", function(e) {
 
                 $(this).data('state', 'unselected');
@@ -247,34 +246,7 @@ $(document).on("DOMContentLoaded", function () {
             $(field).parent().find('input.select2-search__field').on("input", function() { page = "1.0"; });
 
             dropdown = $(field).select2("data");
-
-            var openClick = false;
-            $(field).on("select2:opening", function() { openClick = true; });
-            $(window).on("click.select2", function(e) {
-
-                // Prevent opening select2 when clicking on link
-                // var links = e.target.closest("a, button");
-                // if(links.length > 0) $(field).select2("close");
-
-                var select2 = e.target.closest(".select2-container");
-                if(!openClick) {
-
-                    let container = $(".select2-container").last();
-                    let results = $(document.body).find(".select2-results")[0];
-                    let target = e.target;
-
-                    if(!select2["closeOnSelect"]) {
-
-                        do { if (target == container || target == results) return; }
-                        while ((target = target.parentNode));
-                    }
-
-                    $(field).select2("close");
-                }
-
-                openClick = false;
-            });
-
+ 
             var sortable = el.getAttribute("data-select2-sortable") || false;
             if(sortable) {
 

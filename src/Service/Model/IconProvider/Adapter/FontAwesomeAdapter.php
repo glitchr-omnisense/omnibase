@@ -15,7 +15,7 @@ class FontAwesomeAdapter extends AbstractIconAdapter
     public const STYLE_BRANDS  = "brands";
     public const STYLE_KIT     = "kit";
 
-    public function __construct(string $metadata, string $javascript, string $stylesheet)
+    public function __construct(string $metadata, ?string $javascript = null, ?string $stylesheet = null)
     {
         $this->metadata   = $metadata;
         $this->javascript = $javascript;
@@ -23,16 +23,22 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         $this->getVersion();
     }
 
+    public function getVersion(): string
+    {
+        $this->version = first($this->getEntries())["changes"];
+        $this->version = last($this->version);
+        return $this->version ?? "unk.";
+    }
+
     public static function getName(): string { return "fa"; }
     public static function getOptions(): array { return ["class" => "fa-fw"]; }
 
     public function getAssets(): array
     {
-        return [
-            "<script type='text/javascript'>window.FontAwesomeConfig = { autoReplaceSvg: false }</script>",
+        return array_filter([
             $this->javascript,
             $this->stylesheet
-        ];
+        ]);
     }
 
     public function supports(IconizeInterface|string|null $icon): bool

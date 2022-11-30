@@ -1,5 +1,3 @@
-import 'bootstrap'
-
 $(document).on("DOMContentLoaded", function () {
 
     $(document).on("load.form_type.image", function () {

@@ -196,7 +196,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     {
         $parentForm = current(iterator_to_array($forms))->getParent();
         if ($parentForm?->getData() instanceof PersistentCollection &&
-            !$this->classMetadataManipulator->isCollectionOwner($parentForm, $parentForm?->getData())) return;
+            $this->classMetadataManipulator->isCollectionOwner($parentForm, $parentForm?->getData()) === false) return;
 
         $parentEntity = $parentForm->getParent() ? $parentForm->getParent()->getData() : null;
 

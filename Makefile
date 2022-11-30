@@ -4,7 +4,7 @@ dev: development
 development: clean
 	@cd assets
 	@yarn install
-	@yarn run dev
+	@yarn run watch
 
 assets: production
 prod: production

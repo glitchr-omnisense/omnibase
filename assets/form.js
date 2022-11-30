@@ -1,8 +1,6 @@
 import './styles/form.scss';
 
-import 'highlight.js';
-import 'sortablejs';
-
+import 'bootstrap'
 import 'bootstrap-icons/font/bootstrap-icons';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -18,6 +16,7 @@ import './styles/js/forms/form-type-collection.js';
 import './styles/js/forms/form-type-color.js';
 import './styles/js/forms/form-type-cropper.js';
 import './styles/js/forms/form-type-datetimepicker.js';
+import './styles/js/forms/form-type-emoji.js';
 import './styles/js/forms/form-type-file.js';
 import './styles/js/forms/form-type-image.js';
 import './styles/js/forms/form-type-money.js';
