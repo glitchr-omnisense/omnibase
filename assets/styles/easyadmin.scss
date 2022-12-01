@@ -827,8 +827,9 @@ form .row button[type="submit"] { margin: 1em 0; }
 .dropzone .dz-preview .dz-image {border: 0.5px solid var(--content-top-border-color); }
 .dropzone .dz-preview .dz-image { background-color: var(--body-bg); }
 
-.ql-container { background-color: #FFF !important; }
+
 .ql-container.ql-snow { border: 1px solid var(--content-top-border-color); }
+.ql-container { background-color: #FFF !important; }
 .ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill ,
 .ql-snow .ql-stroke { stroke: var(--form-label-color); }
 .ql-snow .ql-picker { color: var(--form-label-color); }
@@ -853,7 +854,6 @@ form .row button[type="submit"] { margin: 1em 0; }
     border: 1px solid var(--content-top-border-color);
     border-bottom: 0px;
 }
-
 .page-login { background-color: var(--body-bg); }
 .page-login .content{ background-color: var(--sidebar-bg); }
 .page-login .login-wrapper {

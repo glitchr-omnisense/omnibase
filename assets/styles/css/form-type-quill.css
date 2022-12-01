@@ -1,0 +1,82 @@
+
+.ql-align-right img { float: right; }
+.ql-align-left img { float: left; }
+.ql-editor {
+    text-align:inherit;
+    white-space: pre-line;
+}
+
+.ql-container { background-color: #FFF !important; }
+.ql-editor
+{
+    color:initial;
+    background-color: #FFF;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    text-align:inherit;
+    white-space: pre-line;
+}
+
+.ql-toolbar.ql-snow {
+    border: 1px solid var(--content-top-border-color);
+    border-bottom: 0px;
+}
+
+.ql-editor h1, .ql-editor h2,
+.ql-editor h3, .ql-editor h4,
+.ql-editor h5, .ql-editor h6 { color:inherit; }
+.ql-container { height:auto; }
+
+.ql-toolbar.ql-toolbar-html-only { background-color: #f8fafc; }
+.ql-toolbar.ql-toolbar-html-only button:not(.ql-html) { visibility:hidden; }
+.ql-toolbar.ql-toolbar-html-only select:not(.ql-html) { visibility:hidden; }
+.ql-toolbar.ql-toolbar-html-only .ql-picker { visibility:hidden; }
+.ql-html:after {
+    content: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAyOTkuMjE1IDI5OS4yMTUiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI5OS4yMTUgMjk5LjIxNTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8ZyBpZD0iWE1MSURfMTA2XyI+Cgk8cGF0aCBpZD0iWE1MSURfMTA3XyIgZD0iTTIyLjM0NywwYy0yLjc1LDAtNC43OTksMi4yNDEtNC41NTUsNC45OGwyMy4xODQsMjYwLjA0N2MwLjI0NCwyLjczOSwyLjYxMSw1LjU4Miw1LjI2Miw2LjMxOAoJCWw5OC4zODEsMjcuMzE2YzIuNjUsMC43MzYsNi45ODYsMC43MzYsOS42MzcsMC4wMDJsOTguNjgtMjcuMzYxYzIuNjUtMC43MzUsNS4wMi0zLjU3OCw1LjI2NC02LjMxNkwyODEuNDIyLDQuOTgKCQljMC4yNDYtMi43MzktMS44MDUtNC45OC00LjU1NS00Ljk4SDIyLjM0N3ogTTIzMi4wNDksNTkuNjQxYy0wLjIxOSwyLjQ0My0wLjU5OCw2LjY4NC0wLjg0Miw5LjQyM2wtMC42MTEsNi44MjMKCQljLTAuMjQ2LDIuNzM4LTAuNTk2LDYuNjU0LTAuNzgxLDguNzAxYy0wLjE4NCwyLjA0OC0wLjM1OSwzLjcyMy0wLjM5MSwzLjcyM2MtMC4wMzEsMC0yLjMwNywwLTUuMDU3LDBoLTY5Ljc2CgkJYy0yLjc1LDAtNS4wMjMsMC01LjA1Mywwcy0yLjMwNSwwLTUuMDU1LDBoLTM2Ljc0Yy0yLjc1LDAtNC43OTksMi4yNDEtNC41NTUsNC45OGwyLjE0MywyMy45NTVjMC4yNDQsMi43MzgsMi42OTUsNC45OCw1LjQ0NSw0Ljk4CgkJSDE0NC41YzIuNzUsMCw1LjAyNSwwLDUuMDU1LDBzMi4zMDMsMCw1LjA1MywwaDU3LjkzOWMyLjc1LDAsNy4wMDYsMCw5LjQ1NywwYzIuNDQ5LDAsNC4yNzMsMS45OTksNC4wNTEsNC40NDIKCQljLTAuMjIzLDIuNDQzLTAuNjA0LDYuNjg1LTAuODQ4LDkuNDIzbC02Ljg5MSw3Ny4yMjhjLTAuMjQ2LDIuNzM5LTAuNTU3LDYuMjM4LTAuNjkxLDcuNzc2Yy0wLjEzNywxLjUzNy0yLjQxNiwzLjM5Ni01LjA2Niw0LjEzMQoJCWwtNTguMTMzLDE2LjExOWMtMi42NSwwLjczNC00Ljg1MiwxLjM0Mi00Ljg5MywxLjM1MWMtMC4wNDEsMC4wMDktMi4yNDItMC41ODYtNC44OTMtMS4zMjFsLTU4LjE5NS0xNi4xNDgKCQljLTIuNjUtMC43MzUtNS4wMTgtMy41NzgtNS4yNjItNi4zMTdsLTMuNzQ2LTQyLjA0NWMtMC4yNDQtMi43MzksMS44MDctNC45OCw0LjU1Ny00Ljk4aDUuMzExYzIuNzUsMCw3LjI1LDAsMTAsMGg3LjkyCgkJYzIuNzUsMCw1LjE5OSwyLjI0MSw1LjQ0NSw0Ljk4bDEuNDY5LDE2LjQ1OWMwLjI0NCwyLjczOSwyLjYxNSw1LjU2Niw1LjI3MSw2LjI4M2wyNy4yMjEsNy4zNTEKCQljMi42NTQsMC43MTcsNC44MzYsMS4zMDQsNC44NDgsMS4zMDRzMi4xOTMtMC41ODgsNC44NDgtMS4zMDVsMjcuMjctNy4zNjljMi42NTQtMC43MTcsNS4wMjctMy41NDUsNS4yNzMtNi4yODNsMi45NTctMzIuOTc2CgkJYzAuMjQ2LTIuNzM5LTEuODAzLTQuOTgtNC41NTMtNC45OGgtMzAuNjY2Yy0yLjc1LDAtNS4wMjMsMC01LjA1Mywwcy0yLjMwNSwwLTUuMDU1LDBIODAuNTExYy0yLjc1LDAtNS4xOTktMi4yNDItNS40NDMtNC45OAoJCWwtNy4yNTYtODEuMzA2Yy0wLjI0NC0yLjczOS0wLjYyMy02Ljk3OS0wLjg0Mi05LjQyM2MtMC4yMTctMi40NDMsMS44NTQtNC40NDIsNC42MDQtNC40NDJIMTQ0LjVjMi43NSwwLDUuMDI1LDAsNS4wNTUsMAoJCXMyLjMwMywwLDUuMDUzLDBoNzIuODM4QzIzMC4xOTUsNTUuMTk4LDIzMi4yNjcsNTcuMTk3LDIzMi4wNDksNTkuNjQxeiIvPjwvZz48L3N2Zz4=");
+}
+.ql-editor.ql-blank::before { color: rgba(0,0,0,0.8); }
+
+.btn-matrix i { font-size: 13pt; }
+.ql-editor h1:first-of-type { margin-top: 0em !important; }
+.ql-editor h1 { margin: 1.0em 0.00em 0.5em 0.00 !important; }
+.ql-editor h2 { margin: 0.5em 1.00em !important; }
+.ql-editor h3 { margin: 0.5em 2.00em !important; }
+.ql-editor h4 { margin: 0.5em 3.00em !important; }
+.ql-editor h5 { margin: 0.5em 4.00em !important; }
+.ql-editor h6 { margin: 0.5em 5.00em !important; }
+
+.ql-editor { height:auto; }
+.ql-editor p
+{
+  border-left: 3px solid #000A;
+  max-width: 100vw;
+  padding-left:5px;
+}
+
+.ql-editor.ql-toolbar-html-only p
+{
+    border-left: 0;
+}
+
+.ql-picker-options 
+{
+    display: block;
+    margin-top: 16px;
+    top: 100%;
+    z-index: 1;
+    border-radius: 0.25em;
+}
+
+.ql-editor p,
+.ql-editor ol,
+.ql-editor ul,
+.ql-editor pre,
+.ql-editor blockquote,
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6 {
+  margin-bottom: 1em !important;
+}
