@@ -72,7 +72,7 @@ class TwigSubscriber implements EventSubscriberInterface
 
         foreach(UserRole::getPermittedValues() as $role) {
 
-            $tag = "security_".snake2camel(strtolower(str_lstrip($role, "ROLE_")));
+            $tag = "security.".strtolower(str_lstrip($role, "ROLE_"));
             if(!$this->twig->hasEncoreEntry($tag)) continue;
 
             if ($this->authorizationChecker->isGranted($role))

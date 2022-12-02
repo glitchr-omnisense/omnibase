@@ -1,8 +1,3 @@
 {% for tag in tags %}
-    {% set custom_tags = encore_custom_entry_link_tags(tag) %}
-    {% if custom_tags|length > 0 %}
-        {% include "@Base/webpack/link_tags.html.twig" with {"tags": custom_tags} only %}
-    {% else %}
-        {{ call_user_func_if_exists("encore_entry_link_tags", tag)|raw }}
-    {% endif %}
+    {{ encore_entry_link_tags(tag) }}
 {% endfor %}

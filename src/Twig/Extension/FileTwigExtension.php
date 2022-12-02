@@ -35,9 +35,6 @@ final class FileTwigExtension extends AbstractExtension
 
             new TwigFunction('iconify', [IconProvider::class,   'iconify'], ["is_safe" => ['all']]),
             new TwigFunction('asset',   [AdvancedRouter::class, 'getAssetUrl']),
-
-            new TwigFunction('encore_custom_entry_link_tags',   [$this, 'getEncoreCustomEntryLinkTags'], ["is_safe" => ['all'], 'needs_environment' => true]),
-            new TwigFunction('encore_custom_entry_script_tags',   [$this, 'getEncoreCustomEntryScriptTags'], ["is_safe" => ['all'], 'needs_environment' => true])
         ];
     }
 
@@ -72,40 +69,6 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFilter('thumbnail_noclone ', [ImageService::class, 'thumbnail_noclone ']),
             new TwigFilter('thumbnail_upscale ', [ImageService::class, 'thumbnail_upscale ']),
         ];
-    }
-
-    public function getEncoreCustomEntryScriptTags(Environment $env, string|array $entry) : array
-    {
-        $entryName = is_array($entry) ? $entry["value"] ?? null : $entry;
-        if($entryName == null) return [];
-       
-        $entryPoints = $env->getEncoreEntrypoints();
-        foreach($entryPoints as $entryPoint) {
-            
-            try { $jsFiles = $entryPoint->getJavaScriptFiles($entryName); }
-            catch(UndefinedBuildException|EntrypointNotFoundException $e) { continue; }
-
-            if($jsFiles) return array_map(fn($e) => ["value" => $e], $jsFiles);
-        }
-
-        return [];
-    }
-
-    public function getEncoreCustomEntryLinkTags(Environment $env, string|array $entry) : array
-    {
-        $entryName = is_array($entry) ? $entry["value"] ?? null : $entry;
-        if($entryName == null) return [];
-       
-        $entryPoints = $env->getEncoreEntrypoints();
-        foreach($entryPoints as $entryPoint) {
-            
-            try { $cssFiles = $entryPoint->getCssFiles($entryName); }
-            catch(UndefinedBuildException|EntrypointNotFoundException $e) { continue; }
-
-            if($cssFiles) return array_map(fn($e) => ["value" => $e], $cssFiles);
-        }
-
-        return [];
     }
 
     public function urlify(LinkableInterface|string $urlOrPath, ?string $label = null, array $attributes = [])

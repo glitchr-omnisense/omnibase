@@ -556,6 +556,13 @@
             <bind key="$projectDir">%kernel.project_dir%</bind>
        </service>
 
+        <service id="Base\Twig\Extension\EncoreTwigExtension" public="true">
+            <tag name="twig.extension" priority="-1" />
+            <argument type="service" id="webpack_encore.tag_renderer" />
+            <argument type="service" id="webpack_encore.entrypoint_lookup_collection" />
+            <bind key="$publicDir">%kernel.project_dir%/public</bind>
+       </service>
+
         <service id="Base\Twig\Extension\FunctionTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
