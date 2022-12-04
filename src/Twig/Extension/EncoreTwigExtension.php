@@ -4,7 +4,6 @@ namespace Base\Twig\Extension;
 
 use Base\Twig\Environment;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
-use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Symfony\WebpackEncoreBundle\Asset\TagRenderer;
 use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
 use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
@@ -13,7 +12,7 @@ use Twig\TwigFunction;
 
 final class EncoreTwigExtension extends AbstractExtension
 {
-    public function __construct(TagRenderer $tagRenderer, EntrypointLookupCollectionInterface $entrypointLookupCollection, string $publicDir)
+    public function __construct(?TagRenderer $tagRenderer = null, ?EntrypointLookupCollectionInterface $entrypointLookupCollection = null, ?string $publicDir = null)
     {
         $this->publicDir        = $publicDir;   
         $this->tagRenderer      = $tagRenderer;
@@ -55,13 +54,15 @@ final class EncoreTwigExtension extends AbstractExtension
 
     public function renderWebpackScriptTags(Environment $env, string|array $entry) : string
     {
+	if($this->entrypointLookupCollection == null) return "";
+
         $entryName = is_array($entry) ? $entry["value"] ?? null : $entry;
         if($entryName == null) return "";
-       
+
         $entryPoints   = $env->getEncoreEntrypoints();
         $entryPoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();
         foreach($entryPoints as $entryPoint) {
-            
+
             try { $files = $entryPoint->getJavaScriptFiles($entryName); }
             catch(UndefinedBuildException|EntrypointNotFoundException $e) { continue; }
 
@@ -75,13 +76,14 @@ final class EncoreTwigExtension extends AbstractExtension
         throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entryPoints)));
     }
 
-    
     public function renderDefaultWebpackLinkTags(string $entryName, string $packageName = null, string $entrypointName = '_default', array $attributes = []): ?string { return $this->tagRenderer?->renderWebpackLinkTags($entryName, $packageName, $entrypointName, $attributes); }
     public function renderWebpackLinkTags(Environment $env, string|array $entry) : string
     {
+	if($this->entrypointLookupCollection == null) return "";
+
         $entryName = is_array($entry) ? $entry["value"] ?? null : $entry;
         if($entryName == null) return "";
-       
+
         $tags = [];
         $entryPoints   = $env->getEncoreEntrypoints();
         $entryPoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();

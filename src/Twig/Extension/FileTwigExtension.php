@@ -10,8 +10,6 @@ use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Twig\Environment;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
-use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
-use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
 use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -120,9 +118,9 @@ final class FileTwigExtension extends AbstractExtension
         $email = $context["email"] ?? null;
        
         return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : str_lstrip($path, [
-            $this->projectDir, 
             $this->projectDir."/public",
-            $this->projectDir."/data"
+            $this->projectDir."/data",
+            $this->projectDir
         ]);
     }
 }

@@ -179,7 +179,10 @@ class Environment extends TwigEnvironment
     }
 
     public function getEncoreEntrypoints(): array { return $this->encoreEntrypoints; }
-    public function getEncoreEntry(string $entrypointName): ?EntrypointLookupInterface { return $this->encoreEntrypoints[$entrypointName] ?? null; }
+    public function getEncoreEntry(string $entrypointName): ?EntrypointLookupInterface 
+    {
+        return $this->encoreEntrypoints[$entrypointName] ?? null;
+    }
 
     public function addEncoreEntrypoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
     {
@@ -189,6 +192,8 @@ class Environment extends TwigEnvironment
 
     public function hasEncoreEntry(string $entryName, string $entrypointName = '_default'): bool
     {
+        if($this->entrypointLookupCollection === null) return false;
+
         $entrypointLookup = $this->entrypointLookupCollection?->getEntrypointLookup($entrypointName);
         if (!$entrypointLookup instanceof EntrypointLookup) {
             throw new \LogicException(sprintf('Cannot use entryExists() unless the entrypoint lookup is an instance of "%s"', EntrypointLookup::class));
@@ -234,7 +239,7 @@ class Environment extends TwigEnvironment
         return $this;
     }
 
-    public function removeEncoreEntryScriptTags(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    public function removeEncoreEntryScriptTags(string $value)
     {
         $this->removeEncoreLinkTag($value);
         $this->removeEncoreScriptTag($value);
@@ -242,7 +247,7 @@ class Environment extends TwigEnvironment
         return $this;
     }
 
-    public function removeEncoreLinkTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    public function removeEncoreLinkTag(string $value)
     {
         if(array_key_exists($value, $this->encoreEntryLinkTags))
             unset($this->encoreEntryLinkTags[$value]);
@@ -250,8 +255,10 @@ class Environment extends TwigEnvironment
         return $this;
     }
 
-    public function removeEncoreScriptTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
+    public function removeEncoreScriptTag(string $value)
     {
+        if($entrypointLookupCollection == null) return $this;
+
         if(array_key_exists($value, $this->encoreEntryScriptTags))
             unset($this->encoreEntryScriptTags[$value]);
 

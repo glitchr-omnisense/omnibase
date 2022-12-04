@@ -13,6 +13,7 @@ use Base\DependencyInjection\Compiler\IconProviderPass;
 use Base\DependencyInjection\Compiler\SharerPass;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -65,8 +66,11 @@ class BaseBundle extends Bundle
         Type::overrideType('datetime', UTCDateTimeType::class);
         Type::overrideType('datetimetz', UTCDateTimeType::class);
 
+        /**
+         * @var EntityManagerInterface
+         */
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
-        $entityManager->getConfiguration()->setNamingStrategy(new \Base\Database\Mapping\NamingStrategy());
+        $entityManagerConfig  = $entityManager->getConfiguration();
 
         /**
          * Testing doctrine connection
@@ -75,15 +79,35 @@ class BaseBundle extends Bundle
         catch (\Exception $e) { return false; }
 
         /**
-         * Doctrine types
+         * Doctrine custom configuration
          */
-        $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
-        $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
+        // $entityManagerConfig
+        //     ->setNamingStrategy(new \Base\Database\Mapping\NamingStrategy());
+        // $entityManagerConfig
+        //     ->setClassMetadataFactoryName(\Base\Database\Mapping\Factory\ClassMetadataFactory::class);
+        $entityManagerConfig
+            ->addFilter("trash_filter", TrashFilter::class);
+        $entityManagerConfig
+            ->addFilter("vault_filter", VaultFilter::class);
+        $entityManagerConfig
+            ->addCustomNumericFunction("rand", \Base\Database\Function\Rand::class);
+        $entityManagerConfig->setDefaultQueryHint(
+            Query::HINT_CUSTOM_TREE_WALKERS, [/* No default tree walker for the moment */]
+        );
 
-        $classList = BaseBundle::getAllClasses($this->getProjectDir() . "./Enum");
-        $classList = array_merge(BaseBundle::getAllClasses(self::getBundleLocation() . "./Enum"), $classList);
+        /** 
+         * Doctrine custom types: (priority to \App namespace) 
+         */
+        $entityManager->getConnection()
+            ->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+        $entityManager->getConnection()
+            ->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
 
-        /* Register enum types: priority to App namespace */
+        $classList = array_merge(
+            BaseBundle::getAllClasses(self::getBundleLocation() . "./Enum"), 
+            BaseBundle::getAllClasses($this->getProjectDir() . "./Enum")
+        );
+
         foreach($classList as $className) {
 
             if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
@@ -95,19 +119,12 @@ class BaseBundle extends Bundle
         /**
          * Doctrine filters
          */
-        $entityManager->getConfiguration()->addFilter("trash_filter", TrashFilter::class);
-        $entityManager->getFilters()->enable("trash_filter");
-        $entityManager->getConfiguration()->addFilter("vault_filter", VaultFilter::class);
-        $filter = $entityManager->getFilters()->enable("vault_filter");
-        $filter->setEnvironment($this->getEnvironment());
-
-        /**
-         * Doctrine walkers
-         */
-        $entityManager = $this->container->get('doctrine.orm.entity_manager');
-        $entityManager->getConfiguration()->setDefaultQueryHint(
-            Query::HINT_CUSTOM_TREE_WALKERS, [/* No default tree walker for the moment */]
-        );
+        $entityManager->getFilters()
+            ->enable("trash_filter");
+        
+        $entityManager->getFilters()
+            ->enable("vault_filter")
+            ->setEnvironment($this->getEnvironment());
 
         return true;
     }
