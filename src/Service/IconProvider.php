@@ -34,8 +34,8 @@ class IconProvider
 
         // Turn icon annotation into cache
         $cacheName = "base.icon_service." . hash('md5', self::class);
-        $cacheRouteIcons = !is_cli() ? $cache->getItem($cacheName.".route_icons") : null;
-
+        $cacheRouteIcons = $cache->getItem($cacheName.".route_icons");
+        
         $this->routeIcons = $cacheRouteIcons !== null ? $cacheRouteIcons->get() : [];
         if($this->routeIcons === null) {
 
@@ -96,7 +96,7 @@ class IconProvider
             $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
         else if(($routeIcons = $this->getRouteIcons($icon)))
             $icon = $routeIcons;
-
+        
         if(is_array($icon) && is_associative($icon)) return array_map_recursive(fn($i) => $this->iconify($i, $attributes, false), $icon);
         if(is_array($icon)) {
 

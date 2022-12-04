@@ -72,19 +72,19 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         )[0];
     }
 
-    public function getValues() { return array_keys(self::$contents); }
+    public function getValues() { return array_keys($this->contents); }
     public function getValue(string $name)
     {
         $identifier = $this->getIdentifier($name);
-        if (!array_key_exists($identifier, self::$contents)) return "";
+        if (!array_key_exists($identifier, $this->contents)) return "";
         return $identifier;
     }
 
-    public function getLabels() { return array_map(function($icon) { return $icon["label"]; }, self::$contents); }
+    public function getLabels() { return array_map(function($icon) { return $icon["label"]; }, $this->contents); }
     public function getLabel(string $name)
     {
         $identifier = $this->getIdentifier($name);
-        if (!array_key_exists($identifier, self::$contents)) return "";
-        return self::$contents[$identifier]["label"];
+        if (!array_key_exists($identifier, $this->contents)) return "";
+        return $this->contents[$identifier]["label"];
     }
 }

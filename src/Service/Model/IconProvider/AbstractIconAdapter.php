@@ -10,15 +10,15 @@ abstract class AbstractIconAdapter implements IconAdapterInterface
     protected string $metadata;
 
     public function getMetadata() { return $this->metadata; }
-    public function load(): array { return self::parse($this->metadata); }
+    public function load(): array { return $this->parse($this->metadata); }
 
-    protected static $contents = [];
+    protected $contents = [];
     public function getContents() { return $this->contents; }
-    public static function parse(string $metadata): array
+    public function parse(string $metadata): array
     {
-        if (empty(self::$contents[$metadata]) && file_exists($metadata)) {
+        if (empty($this->contents[$metadata]) && file_exists($metadata)) {
 
-            self::$contents[$metadata] =
+            $this->contents[$metadata] =
                 (str_ends_with($metadata, "yml") ?
                     Yaml::parse(file_get_contents($metadata)) :
                 (str_ends_with($metadata, "yaml") ?
@@ -27,19 +27,19 @@ abstract class AbstractIconAdapter implements IconAdapterInterface
                     json_decode(file_get_contents($metadata), true) : [])));
         }
 
-        return self::$contents[$metadata] ?? [];
+        return $this->contents[$metadata] ?? [];
     }
 
     public function getEntries()
     {
-        if(empty(self::$contents[$this->metadata])) self::parse($this->metadata);
-        return self::$contents[$this->metadata] ?? [];
+        if(empty($this->contents[$this->metadata])) $this->parse($this->metadata);
+        return $this->contents[$this->metadata] ?? [];
     }
 
     public function getEntry(string $value = null): string
     {
-        if(empty(self::$contents[$this->metadata])) self::parse($this->metadata);
-        return self::$contents[$this->metadata][$value] ?? "";
+        if(empty($this->contents[$this->metadata])) $this->parse($this->metadata);
+        return $this->contents[$this->metadata][$value] ?? "";
     }
 
     protected $version;

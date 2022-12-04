@@ -2,6 +2,7 @@
 
 namespace Base\Controller\UX;
 
+use Base\Annotations\Annotation\IsGranted;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
@@ -15,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 

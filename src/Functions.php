@@ -53,6 +53,13 @@ namespace {
         }, $input);
     }
 
+    function start_timer() { $_SERVER["APP_TIMER"] = microtime(true); }
+    function get_lap() // ms
+    { 
+        if(!array_key_exists("APP_TIMER", $_SERVER)) return 0;
+        return 1000*(microtime(true) - $_SERVER["APP_TIMER"]);
+    }
+
     function get_url(?string $scheme = null, ?string $http_host = null, ?string $request_uri = null) : ?string
     {
         $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"]?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null ;

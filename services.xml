@@ -670,6 +670,11 @@
             <argument type="service" id="security.authorization_checker" />
         </service>
 
+        <service id="Base\Subscriber\IsGrantedSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="security.authorization_checker" on-invalid="null" />
+        </service>
+
         <service id="Base\Subscriber\SecuritySubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />

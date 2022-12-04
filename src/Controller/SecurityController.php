@@ -10,8 +10,8 @@ use Base\Security\LoginFormAuthenticator;
 
 use App\Form\Type\SecurityRegistrationType;
 use App\Form\Type\SecurityLoginType;
+use Base\Annotations\Annotation\IsGranted;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

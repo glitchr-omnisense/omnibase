@@ -73,8 +73,6 @@ class FileType extends AbstractType implements DataMapperInterface
             'empty_data'   => null,
 
             'dropzone'     => [],
-            'dropzone-js'  => $this->parameterBag->get("base.vendor.dropzone.javascript"),
-            'dropzone-css' => $this->parameterBag->get("base.vendor.dropzone.stylesheet"),
 
             'allow_delete' => true,
             "allow_delete[confirmation]" => true,
@@ -92,9 +90,6 @@ class FileType extends AbstractType implements DataMapperInterface
             'sortable-js'  => $this->parameterBag->get("base.vendor.sortablejs.javascript"),
 
             'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
-            'lightbox-css' => $this->parameterBag->get("base.vendor.lightbox.stylesheet"),
-            'lightbox-js'  => $this->parameterBag->get("base.vendor.lightbox.javascript"),
-            'lightbox2b-js'  => $this->parameterBag->get("base.vendor.lightbox2b.javascript"),
 
             'thumbnail_width'  => null,
             'thumbnail_height' => 250,

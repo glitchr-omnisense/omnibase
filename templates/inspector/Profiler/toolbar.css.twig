@@ -4,12 +4,16 @@
     overflow-x: scroll;
     width: 100%;
 }
+
 .sf-toolbar-block:hover .sf-toolbar-info { position:fixed; }
+
 .sf-toolbarreset .hide-button {
   z-index: 20000;
-  border-left: 1px solid #222;
-  top:initial;
+  top:auto;
   position:fixed;
+  color: white;
+  background-color:#222;
+  height:36px;
 }
 
 .sf-toolbarreset {
@@ -105,6 +109,7 @@
   white-space: nowrap;
 }
 
+.sf-toolbar-block .sf-toolbar-info { bottom:35px; }
 .sf-toolbar-block-gtm .sf-toolbar-info-block > * { padding:0 0.5em; }
 .sf-toolbar-block-gtm .sf-toolbar-info-block
 {
@@ -126,6 +131,13 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
   justify-content: space-between;
 }
 
+.sf-toolbar-block-right .sf-toolbar-info { 
+  border-radius: 4px;
+  border-bottom-right-radius: 0;
+}
+.sf-toolbar-block-right:last-of-type {
+  margin-right:36px;
+}
 .sf-toolbar-block-right {
   flex-grow: 2;
   display: flex;
@@ -150,4 +162,10 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
     top:0;
     min-height: 20px;
     min-width: 20px;
+}
+
+.sf-minitoolbar button
+{
+  height:auto;
+  cursor: pointer;
 }

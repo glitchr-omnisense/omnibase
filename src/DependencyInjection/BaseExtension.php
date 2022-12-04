@@ -35,6 +35,7 @@ class BaseExtension extends Extension
         $processor = new Processor();
         $configuration = new Configuration();
         $config = $processor->processConfiguration($configuration, $configs);
+
         $this->setConfiguration($container, $config, $configuration->getTreeBuilder()->getRootNode()->getNode()->getName());
 
         // Override and merge form_themes.. to add some features..

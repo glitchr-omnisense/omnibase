@@ -52,9 +52,6 @@ class CropperType extends AbstractType implements DataMapperInterface
                 "center"       => true,
             ],
 
-            'cropper-js'  => $this->parameterBag->get("base.vendor.cropperjs.javascript"),
-            'cropper-css' => $this->parameterBag->get("base.vendor.cropperjs.stylesheet"),
-
             "quadrant"          => null,
             "target"         => null,
             "natural_width"  => null,

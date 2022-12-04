@@ -2,12 +2,8 @@
 
 namespace Base;
 
-use Base\Entity\User;
-
-use Base\Database\Type\UTCDateTimeType;
 use Symfony\Bundle\FrameworkBundle\HttpCache\HttpCache;
 
-use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,6 +13,7 @@ class Kernel extends HttpCache
     {
         // Load default kernel
         $kernel = new \App\Kernel($environment, $debug);
+        $_SERVER["APP_TIMER"] = microtime(true);
 
         // Forward to HttpCache
         parent::__construct($kernel);
