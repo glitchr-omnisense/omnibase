@@ -2,23 +2,29 @@
 
 namespace Base\CacheWarmer;
 
+use Base\Cache\SimpleCacheInterface;
+use Base\Cache\SimpleCacheWarmer;
 use Base\Service\IconProvider;
-use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-class IconCacheWarmer implements CacheWarmerInterface
-{
-    public function __construct(IconProvider $iconProvider)
+class IconCacheWarmer extends SimpleCacheWarmer { 
+
+    public function __construct(IconProvider $iconProvider, string $cacheDir)
     {
-        $this->shellVerbosity = getenv("SHELL_VERBOSITY");
-        $this->iconProvider   = $iconProvider;
+        $this->adapters = array_filter($iconProvider->getAdapters(), fn($a) => $a instanceof SimpleCacheInterface);
+        parent::__construct($iconProvider, $cacheDir);
     }
 
-    public function isOptional():bool { return false; }
-    public function warmUp($cacheDir): array
+    protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter): bool
     {
-        if($this->shellVerbosity > 0 && php_sapi_name() == "cli")
-            echo " // Warming up cache... Icon provider".PHP_EOL.PHP_EOL;
+        $ret = parent::doWarmUp($cacheDir, $arrayAdapter);
+        
+        foreach($this->adapters as $adapter) {
+        
+            $adapter->setCache($arrayAdapter);
+            $ret &= $adapter->warmUp($cacheDir);
+        }
 
-        return [ get_class($this->iconProvider)];
+        return $ret;
     }
 }

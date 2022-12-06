@@ -12,7 +12,9 @@
 {% block body_class 'page-login' %}
 {% block head_stylesheets %}
     <link rel="stylesheet" href="{{ asset('app.css', ea.assets.defaultAssetPackageName) }}">
-    <link rel="stylesheet" href="{{ asset('bundles/base/easyadmin.css') }}">
+    {{ encore_entry_link_tags('base') }}
+    {{ encore_entry_link_tags('form') }}
+    {{ encore_entry_link_tags('easyadmin') }}
 {% endblock %}
 
 {% block page_title %}{{ (page_title ?? ea.dashboardTitle ?? ('@forms.login.title'|trans))|raw }}{% endblock %}

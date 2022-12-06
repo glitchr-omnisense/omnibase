@@ -52,7 +52,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
-use Symfony\Component\Stopwatch\Stopwatch;
 
 class BaseService implements RuntimeExtensionInterface
 {
@@ -122,6 +121,7 @@ class BaseService implements RuntimeExtensionInterface
         ClassMetadataManipulator $classMetadataManipulator,
         AdminUrlGenerator $adminUrlGenerator)
     {
+
         $this->setInstance($this);
         $this->startTime($kernel->getStartTime());
 
@@ -217,22 +217,7 @@ class BaseService implements RuntimeExtensionInterface
             ->includeReferrer()
             ->generateUrl();
     }
-
-    public function getParameterTwig(string $name = "") { return $this->getTwig()->getParameterTwig($name); }
-    public function addParameterTwig(string $name, $newValue) { return $this->getTwig()->addParameterTwig($name, $newValue); }
-    public function hasParameterTwig(string $name) { return $this->getTwig()->hasParameter($name); }
-    public function setParameterTwig(string $name, mixed $value) { return $this->getTwig()->setParameter($name, $value); }
-    public function appendParameterTwig($name, mixed $value) { return $this->getTwig()->appendParameter($name, $value); }
-    
-    public function renderHtmlContent(string $location) { return $this->getTwig()->renderHtmlContent($location); }
-    public function getHtmlContent(string $location) { return $this->getTwig()->getHtmlContent($location); }
-    public function removeHtmlContent(string $location) { return $this->getTwig()->removeHtmlContent($location); }
-    public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = []) { return $this->getTwig()->addHtmlContent($location,$contentOrArrayOrFile,$options); }
-    
-    public function renderEncoreTags      (?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)  { return $this->getTwig()->renderEncoreTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes); }
-    public function renderEncoreLinkTags  (?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)  { return $this->getTwig()->renderEncoreLinkTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes); }
-    public function renderEncoreScriptTags(?string $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)  { return $this->getTwig()->renderEncoreScriptTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes); }
-
+ 
     /**
      *
      * Symfony kernel container related methods
@@ -276,20 +261,6 @@ class BaseService implements RuntimeExtensionInterface
     public function setParameter(string $name, array|bool|string|int|float|null $value) { return $this->kernel->getContainer()->setParameter($name, $value); }
 
     public function getAsset(string $url): string { return $this->getTwig()->getAsset($url); }
-        // $url = trim($url);
-        // $parse = parse_url($url);
-        // if($parse["scheme"] ?? false)
-        //     return $url;
-
-        // $request = $this->getRequestStack()->getCurrentRequest();
-        // $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
-        // $baseDir = $baseDir ."/";
-        // $path = trim($parse["path"]);
-        // if($path == "/") return $baseDir ? $baseDir : "/";
-        // else if(!str_starts_with($path, "/"))
-        //     $path = $baseDir.$path;
-
-        // return $path ? $path : null;
 
     public function        getRequest(): ?Request { return $this->getRouter()->getRequest(); }
     public function getCurrentRequest(): ?Request { return $this->getRequest(); }

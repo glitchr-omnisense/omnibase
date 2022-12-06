@@ -3,10 +3,12 @@
 namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
+use Base\Cache\SimpleCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\EntityDispatcher\EventDispatcherInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
+use Base\Twig\TagRendererInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -44,7 +46,6 @@ class BaseExtension extends Extension
             $container->getParameter('twig.form.resources')
         ));
 
-        $container->registerForAutoconfiguration(AbstractEntity::class)->addTag('base.entity_extension');
         $container->registerForAutoconfiguration(AbstractIconAdapter::class)->addTag('base.service.icon');
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_subscriber');
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
@@ -52,6 +53,9 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
         $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('base.currency_api');
+        $container->registerForAutoconfiguration(SimpleCacheInterface::class)->addTag('base.simple_cache');
+
+        $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
     }
 
     public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = "")

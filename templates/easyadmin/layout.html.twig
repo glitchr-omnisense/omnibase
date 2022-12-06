@@ -31,7 +31,9 @@
 
     {% block head_javascript %}
         <script src="{{ asset('app.js', ea.assets.defaultAssetPackageName) }}"></script>
-        {{ base.renderEncoreScriptTags('easyadmin')|raw }}
+        {{ encore_entry_script_tags('base') }}
+        {{ encore_entry_script_tags('form') }}
+        {{ encore_entry_script_tags('easyadmin') }}
     {% endblock head_javascript %}
 
     {% block configured_javascripts %}
@@ -52,9 +54,10 @@
 
     {% block head_stylesheets %}
         <link rel="stylesheet" href="{{ asset('app.css', ea.assets.defaultAssetPackageName) }}">
-        {{ base.renderEncoreLinkTags('easyadmin')|raw }}
-        {{ base.renderHtmlContent("stylesheets")|raw }}
-        {{ base.renderHtmlContent("stylesheets:after")|raw }}
+        {{ encore_entry_link_tags('base') }}
+        {{ encore_entry_link_tags('form') }}
+        {{ encore_entry_link_tags('easyadmin') }}
+        {{ html_entry_link_tags() }}
     {% endblock %}
 </head>
 

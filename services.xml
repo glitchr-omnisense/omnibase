@@ -69,16 +69,11 @@
             <argument type="service" id="setting_bag" />
         </service>
 
-        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer">
-            <tag name="kernel.cache_warmer" />
-            <argument>%kernel.cache_dir%/webpack_encore.cache.php</argument>
-            <bind key="$publicDir">%kernel.project_dir%/public</bind>
-        </service>
-
         <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="router" /></service>
         <service id="Base\Subscriber\TwigSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="twig" />
+            <argument type="service" id="twig.html_renderer" />
+            <argument type="service" id="twig.encore_renderer" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
@@ -130,10 +125,27 @@
             <bind key="$debug">%kernel.debug%</bind>
         </service>
 
-        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
-        <service id="Base\CacheWarmer\LocaleCacheWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>
+        <service id="Base\Cache\SimpleCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
+        <service id="Base\Cache\SimpleCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
+
         <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="setting_bag" /></service>
         <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
+        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\SimpleCacheWarmer">
+            <tag name="kernel.cache_warmer" />
+            <argument type="service" id="base.service.icon" />
+        </service>
+        <service id="Base\CacheWarmer\LocaleCacheWarmer"      public="true" parent="Base\Cache\SimpleCacheWarmer">
+            <tag name="kernel.cache_warmer" />
+            <argument type="service" id="locale_provider" />
+        </service>
+        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\SimpleCacheWarmer"><tag name="kernel.cache_warmer" />
+            <argument type="service" id="twig.encore_renderer" />
+            <bind key="$publicDir">%kernel.project_dir%/public</bind>
+        </service>
+        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"     parent="Base\Cache\SimpleCacheWarmer" public="true">
+            <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
+            <argument type="service" id="base.annotation_reader" />
+        </service>
 
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
@@ -159,7 +171,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Service\LocaleProvider" public="true">
+        <service id="Base\Service\LocaleProvider" parent="Base\Cache\SimpleCache" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
@@ -438,18 +450,20 @@
             <tag name="twig.runtime" />
             <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="base.service.image" />
-            <argument type="service" id="cache.adapter" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
         <service id="Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter">
             <tag name="base.service.icon" />
             <bind key="$metadata">%kernel.project_dir%/public/bundles/base/metadata/icons.yml</bind>
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
         <service id="Base\Service\Model\IconProvider\Adapter\BootstrapTwitterAdapter">
             <tag name="base.service.icon" />
             <bind key="$metadata">%kernel.project_dir%/public/bundles/base/metadata/bootstrap-icons.json</bind>
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
         <service id="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
@@ -483,16 +497,11 @@
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
             <bind key="$projectDir">%kernel.project_dir%</bind>
             <bind key="$environment">%kernel.environment%</bind>
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
-        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"      public="true">
-            <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
-            <argument type="service" id="base.annotation_reader" />
-            <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
-        </service>
 
          <service id="Base\Security\Voter\BackendVoter">
             <tag name="security.voter" />
@@ -556,12 +565,26 @@
             <bind key="$projectDir">%kernel.project_dir%</bind>
        </service>
 
-        <service id="Base\Twig\Extension\EncoreTwigExtension" public="true">
-            <tag name="twig.extension" priority="-1" />
-            <argument type="service" id="webpack_encore.tag_renderer" on-invalid="null" />
+        <service id="Base\Twig\Renderer\AbstractRenderer">
+            <argument type="service" id="twig" />
+            <argument type="service" id="locale_provider" />
+        </service>
+        <service id="Base\Twig\Renderer\Adapter\HtmlTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true">
+            <tag name="twig.runtime" />
+            <tag name="twig.tag_renderer" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="request_stack" />
+        </service>
+        <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true" >
+            <tag name="twig.runtime" />
+            <tag name="twig.tag_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup_collection" on-invalid="null" />
-            <bind key="$publicDir">%kernel.project_dir%/public</bind>
-       </service>
+        </service>
+
+        <service id="Base\Twig\Extension\EncoreTwigExtension"><tag name="twig.extension" priority="-1" /></service>
+        <service id="Base\Twig\Extension\HtmlTwigExtension"><tag name="twig.extension" />
+            <argument type="service" id="twig.html_renderer" />
+        </service>
 
         <service id="Base\Twig\Extension\FunctionTwigExtension" public="true">
             <tag name="twig.extension" />

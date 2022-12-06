@@ -69,7 +69,6 @@
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="webpack_encore.entrypoint_lookup_collection" on-invalid="null" />
         </service>
 
         <service id="Base\Backend\Factory\MenuFactory"                      parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"         decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"><argument type="service" id="router" /></service>

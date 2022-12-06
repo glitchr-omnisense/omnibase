@@ -4,18 +4,53 @@ namespace Base\Service;
 
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
+use Base\Cache\SimpleCache;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\RouterInterface;
-use Symfony\Contracts\Cache\CacheInterface;
 
-class IconProvider
+class IconProvider extends SimpleCache
 {
-    protected $routeIcons = [];
-
-    public function getRouteIcons(string $route)
+    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, LocaleProviderInterface $localeProvider, RouterInterface $router, string $cacheDir)
     {
+        $this->annotationReader = $annotationReader;
+        $this->imageService = $imageService;
+        $this->localeProvider = $localeProvider;
+        $this->router = $router;
+
+        parent::__construct($cacheDir);
+    }
+
+    public function warmUp(string $cacheDir): bool
+    {
+        $this->routeIcons = $this->getCache("/RouteIcons",
+
+            array_transforms(function($route, $controller) : ?array {
+
+                $controller = $controller->getDefault("_controller");
+                if(!$controller) return null;
+
+                try { list($class, $method) = explode("::", $controller); }
+                catch(\ErrorException $e) { return null; }
+                if(!class_exists($class)) return null;
+
+                $iconAnnotations = $this->annotationReader->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
+                if(!$iconAnnotations) return null;
+
+                return [$route, end($iconAnnotations)->getIcons()];
+
+            }, $this->router->getRouteCollection()->all())
+        );
+        
+        return true;
+    }
+
+    protected ?array $routeIcons = null;
+    public function getRouteIcons(?string $route = null)
+    {
+        if($this->routeIcons && $route === null) return $this->routeIcons;
+
         return $this->routeIcons[$route.".".$this->localeProvider->getLang()]
             ?? $this->routeIcons[$route]
 
@@ -25,39 +60,6 @@ class IconProvider
             ?? $this->routeIcons[$route.".".$this->localeProvider->getDefaultLang()]
             ?? $this->routeIcons[$route.".default.".$this->localeProvider->getDefaultLang()]
             ?? null;
-    }
-
-    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, CacheInterface $cache, LocaleProviderInterface $localeProvider, RouterInterface $router)
-    {
-        $this->imageService = $imageService;
-        $this->localeProvider = $localeProvider;
-
-        // Turn icon annotation into cache
-        $cacheName = "base.icon_service." . hash('md5', self::class);
-        $cacheRouteIcons = $cache->getItem($cacheName.".route_icons");
-        
-        $this->routeIcons = $cacheRouteIcons !== null ? $cacheRouteIcons->get() : [];
-        if($this->routeIcons === null) {
-
-            $this->routeIcons = array_transforms(function($route, $controller) use ($annotationReader, $router) : ?array {
-
-                $controller = $controller->getDefault("_controller");
-                if(!$controller) return null;
-
-                try { list($class, $method) = explode("::", $controller); }
-                catch(\ErrorException $e) { return null; }
-                if(!class_exists($class)) return null;
-
-                $iconAnnotations = $annotationReader->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
-                if(!$iconAnnotations) return null;
-
-                return [$route, end($iconAnnotations)->getIcons()];
-
-            }, $router->getRouteCollection()->all());
-
-            if ($cacheRouteIcons !== null)
-                $cache->save($cacheRouteIcons->set($this->routeIcons));
-        }
     }
 
     protected $adapters = [];

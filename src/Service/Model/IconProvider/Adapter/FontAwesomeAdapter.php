@@ -15,19 +15,13 @@ class FontAwesomeAdapter extends AbstractIconAdapter
     public const STYLE_BRANDS  = "brands";
     public const STYLE_KIT     = "kit";
 
-    public function __construct(string $metadata, ?string $javascript = null, ?string $stylesheet = null)
+    public function __construct(string $metadata, string $cacheDir, ?string $javascript = null, ?string $stylesheet = null)
     {
         $this->metadata   = $metadata;
         $this->javascript = $javascript;
         $this->stylesheet = $stylesheet;
-        $this->getVersion();
-    }
 
-    public function getVersion(): string
-    {
-        $this->version = first($this->getEntries())["changes"];
-        $this->version = last($this->version);
-        return $this->version ?? "unk.";
+        parent::__construct($cacheDir);
     }
 
     public static function getName(): string { return "fa"; }
@@ -39,6 +33,20 @@ class FontAwesomeAdapter extends AbstractIconAdapter
             $this->javascript,
             $this->stylesheet
         ]);
+    }
+
+    public function warmUp(string $cacheDir): bool
+    {
+        parent::warmUp($cacheDir);
+
+        $this->version = $this->getCache("/Version", function() {
+
+            $version = first($this->getEntries())["changes"];
+            $version = last($version);
+            return $version ?? "unk.";
+        });
+
+        return true;
     }
 
     public function supports(IconizeInterface|string|null $icon): bool

@@ -6,7 +6,6 @@ use Base\Service\Model\IconizeInterface;
 
 interface IconAdapterInterface
 {
-    public function load(): array;
     public function supports(IconizeInterface|string|null $icon): bool;
     public function iconify (IconizeInterface|string $icon, array $attributes): string;
 

@@ -2,18 +2,36 @@
 
 namespace Base\Service;
 
+use Base\Cache\SimpleCache;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 
-class LocaleProvider implements LocaleProviderInterface
+class LocaleProvider extends SimpleCache implements LocaleProviderInterface
 {
     public const UNIVERSAL = "xx_XX";
 
     protected $requestStack = null;
     protected $parameterBag = null;
+
+    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, string $cacheDir)
+    {
+        $this->parameterBag = $parameterBag;
+        $this->translator   = $translator;
+        
+        parent::__construct($cacheDir);
+    }
+
+    public function warmUp(string $cacheDir): bool
+    {
+        self::$locales = $this->getCache("/Locales", self::getLocales());
+        self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($this->parameterBag->get("kernel.default_locale"));
+        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalize($this->translator->getFallbackLocales());
+    
+        return true;
+    }
 
     /**
      * @var TranslatorInterface
@@ -56,7 +74,7 @@ class LocaleProvider implements LocaleProviderInterface
     private static ?array $locales = null;
     public static function getLocales()
     {
-        if(!self::$locales) {
+        if(self::$locales === null) {
 
             self::$locales = [];
             foreach(Locales::getLocales() as $locale) {
@@ -91,15 +109,6 @@ class LocaleProvider implements LocaleProviderInterface
         }
 
         return false;
-    }
-
-    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator)
-    {
-        $this->parameterBag = $parameterBag;
-        $this->translator   = $translator;
-
-        self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($parameterBag->get("kernel.default_locale"));
-        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalize($this->translator->getFallbackLocales());
     }
 
     protected static $isLate = null; // Turns on when on kernel request

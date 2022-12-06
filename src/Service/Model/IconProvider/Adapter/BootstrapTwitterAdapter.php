@@ -13,17 +13,15 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
     public static function getName(): string { return "bi"; }
     public static function getOptions(): array { return []; }
 
-    public function getAssets(): array
-    {
-        return [$this->stylesheet];
-    }
-
-    public function __construct(string $metadata, ?string $stylesheet = null)
+    public function __construct(string $metadata, string $cacheDir, ?string $stylesheet = null)
     {
         $this->metadata = $metadata;
         $this->stylesheet = $stylesheet;
-        $this->getVersion();
+
+        parent::__construct($cacheDir);
     }
+
+    public function getAssets(): array { return [$this->stylesheet]; }
 
     public function supports(IconizeInterface|string|null $icon): bool
     {
@@ -35,6 +33,21 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         }
 
         return count(array_filter(explode(" ", $icon), fn($id) => $id == $this->getName()));
+    }
+
+    public function warmUp(string $cacheDir): bool
+    {
+        parent::warmUp($cacheDir);
+
+        $this->version = $this->getCache("/Version", function() {
+
+            if ( !preg_match('/.*\/([0-9.]*(?:[-_]{1}[a-zA-Z0-9]*)?)\//', $this->metadata ?? "", $matches) )
+                return "unk.";
+
+            return $matches[1] ?? "";
+        });
+
+        return true;
     }
 
     public function getChoices(string $term = ""): array

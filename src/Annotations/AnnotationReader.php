@@ -11,9 +11,10 @@ use Exception;
 
 use App\Entity\User;
 use Base\BaseBundle;
+use Base\Cache\SimpleCache;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Entity\Layout\SettingIntl;
+
 use Base\Service\FlysystemInterface;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -27,7 +28,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
-class AnnotationReader
+class AnnotationReader extends SimpleCache
 {
     use SingletonTrait;
 
@@ -88,8 +89,9 @@ class AnnotationReader
         TokenStorageInterface $tokenStorage,
         EntityHydrator $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator,
-        string $phpArrayFile, string $projectDir, string $environment)
+        string $projectDir, string $environment, string $cacheDir)
     {
+
         if(!self::getInstance(false))
             self::setInstance($this);
 
@@ -120,8 +122,7 @@ class AnnotationReader
         $this->environment = $environment;
         $this->projectDir  = $projectDir;
 
-        $this->setCache(new PhpArrayAdapter($phpArrayFile, new FilesystemAdapter()));
-        $this->warmUp();
+        parent::__construct($cacheDir);
     }
 
     public function getEnvironment() { return $this->environment; }
@@ -139,16 +140,6 @@ class AnnotationReader
     protected array $classAnnotations    = [];
     protected array $methodAnnotations   = [];
     protected array $propertyAnnotations = [];
-
-    protected $cacheSalt = '__ANNOTATIONS__';
-    protected function getCacheKey(string $realClassName): string { return str_replace(['\\', '/'], ['__', '_'], $realClassName) . $this->cacheSalt; }
-
-    public function getCache() : ?CacheItemPoolInterface { return $this->cache; }
-    public function setCache(CacheItemPoolInterface $cache)
-    {
-        $this->cache = $cache;
-        return $this;
-    }
 
     /**
      * @var array
@@ -255,14 +246,7 @@ class AnnotationReader
             }
         }
 
-        if($this->getCache()) {
-
-            $item = $this->getCache()->getItem($this->getCacheKey(self::class."/Targets"));
-            $item->set($this->annotationTargets);
-
-            $this->getCache()->saveDeferred($item);
-       }
-
+        $this->setCache("/Targets", $this->annotationTargets, true);
         return $this->annotationTargets[$className] ?? [];
     }
 
@@ -281,13 +265,7 @@ class AnnotationReader
                 $classAncestor = $parentClass;
 
             $this->classAncestors[$className] = $classAncestor;
-            if($this->getCache()) {
-
-                $item = $this->getCache()->getItem($this->getCacheKey(self::class."/Ancestors"));
-                $item->set($this->classAncestors);
-
-                $this->getCache()->saveDeferred($item);
-            }
+            $this->setCache("/Ancestors", $this->classAncestors, true);
         }
 
         return $this->classAncestors[$className];
@@ -366,14 +344,7 @@ class AnnotationReader
                 $this->classAnnotations[$reflClass->name][] = $annotation;
             }
 
-            if($this->getCache()) {
-
-                $item = $this->getCache()->getItem($this->getCacheKey(self::class."/ClassAnnotations"));
-                $item->set($this->classAnnotations);
-
-                $this->getCache()->saveDeferred($item);
-            }
-
+            $this->setCache("/ClassAnnotations", $this->classAnnotations, true);
         }
 
         return $this->filterClassAnnotations($reflClass->name, $annotationNames);
@@ -440,13 +411,7 @@ class AnnotationReader
                 }
             }
 
-            if($this->getCache()) {
-
-                $item = $this->getCache()->getItem($this->getCacheKey(self::class."/MethodAnnotations"));
-                $item->set($this->methodAnnotations);
-
-                $this->getCache()->saveDeferred($item);
-            }
+            $this->setCache("/MethodAnnotations", $this->methodAnnotations, true);
         }
 
         return $this->filterMethodAnnotations($reflClass->name, $annotationNames);
@@ -516,13 +481,7 @@ class AnnotationReader
                 }
             }
 
-            if($this->getCache()) {
-
-                $item = $this->getCache()->getItem($this->getCacheKey(self::class."/PropertyAnnotations"));
-                $item->set($this->propertyAnnotations);
-
-                $this->getCache()->saveDeferred($item);
-            }
+            $this->setCache("/PropertyAnnotations", $this->propertyAnnotations, true);
         }
 
         return $this->filterPropertyAnnotations($reflClass->name, $annotationNames);
@@ -622,18 +581,14 @@ class AnnotationReader
         return $annotationTargets;
     }
 
-    public function warmUp(): bool
+    public function warmUp(string $cacheDir): bool
     {
-        if(!$this->cache) return false;
-
-        $this->annotationTargets   = ($this->cache->getItem($this->getCacheKey(self::class."/Targets"))->get()     ?? []);
-
-        $this->classHierarchies    = ($this->cache->getItem($this->getCacheKey(self::class."/Hierarchies"))->get() ?? []);
-        $this->classAncestors      = ($this->cache->getItem($this->getCacheKey(self::class."/Ancestors"))->get()   ?? []);
-
-        $this->classAnnotations    = ($this->cache->getItem($this->getCacheKey(self::class."/ClassAnnotations"))->get()          ?? []);
-        $this->methodAnnotations   = ($this->cache->getItem($this->getCacheKey(self::class."/MethodAnnotations"))->get()          ?? []);
-        $this->propertyAnnotations = ($this->cache->getItem($this->getCacheKey(self::class."/PropertyAnnotations"))->get()       ?? []);
+        $this->annotationTargets   = $this->getCache("/Targets") ?? [];
+        $this->classHierarchies    = $this->getCache("/Hierarchies") ?? [];
+        $this->classAncestors      = $this->getCache("/Ancestors") ?? [];
+        $this->classAnnotations    = $this->getCache("/ClassAnnotations") ?? [];
+        $this->methodAnnotations   = $this->getCache("/MethodAnnotations") ?? [];
+        $this->propertyAnnotations = $this->getCache("/PropertyAnnotations") ?? [];
 
         /**
          * @var ClassMetadataFactory
@@ -645,8 +600,7 @@ class AnnotationReader
             $this->getAnnotations($className);
         }
 
-        $this->getCache()->commit();
-
+        $this->commitCache();
         return true;
     }
 
@@ -669,13 +623,7 @@ class AnnotationReader
             if (($parentClassName = get_parent_class($reflClass->getName())))
                 $this->classHierarchies[$reflClass->getName()] = $parentClassName;
 
-            if($this->getCache()) {
-
-                $item = $this->getCache()->getItem($this->getCacheKey(self::class."/Hierarchies"));
-                $item->set($this->classHierarchies);
-
-                $this->getCache()->saveDeferred($item);
-            }
+            $this->setCache("/Hierarchies", $this->classHierarchies, true);
         }
 
 

@@ -2,7 +2,7 @@
 
 .sf-toolbarreset {
     overflow-x: scroll;
-    width: 100%;
+    width: 100vw;
 }
 
 .sf-toolbar-block:hover .sf-toolbar-info { position:fixed; }
@@ -16,6 +16,36 @@
   height:36px;
 }
 
+.sf-toolbar-block.hover .sf-toolbar-info { 
+    min-width:75%;
+    max-width:100%;
+}
+
+.sf-toolbar-ajax-requests th,
+.sf-toolbar-ajax-requests td
+{ border:0; padding:5px }
+
+.sf-toolbar-block .sf-toolbar-info-piece .sf-toolbar-ajax-requests .sf-toolbar-status { font-size:12px; }
+
+.sf-toolbar-ajax-requests { border:0; }
+.sf-toolbar-ajax-requests thead th:first-of-type 
+{ 
+  border-top-left-radius:6px;
+  border-bottom-left-radius:6px;
+}
+.sf-toolbar-ajax-requests thead th:last-of-type 
+{ 
+  border-top-right-radius:6px;
+  border-bottom-right-radius:6px;
+}
+.sf-toolbar-block .sf-toolbar-info-piece b,
+.sf-toolbar-ajax-requests th, 
+.sf-toolbar-ajax-requests td
+{
+  font-size:13px;
+}
+
+.sf-ajax-request-url { max-width:75%; }
 .sf-toolbarreset {
 
   height: 100vh;
@@ -135,9 +165,7 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
   border-radius: 4px;
   border-bottom-right-radius: 0;
 }
-.sf-toolbar-block-right:last-of-type {
-  margin-right:36px;
-}
+
 .sf-toolbar-block-right {
   flex-grow: 2;
   display: flex;
@@ -164,6 +192,7 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
     min-width: 20px;
 }
 
+.sf-minitoolbar { height:auto; }
 .sf-minitoolbar button
 {
   height:auto;

@@ -2,58 +2,41 @@
 
 namespace Base\Service\Model\IconProvider;
 
+use Base\Cache\SimpleCache;
 use Base\Service\Model\IconizeInterface;
 use Symfony\Component\Yaml\Yaml;
 
-abstract class AbstractIconAdapter implements IconAdapterInterface
+abstract class AbstractIconAdapter extends SimpleCache implements IconAdapterInterface
 {
     protected string $metadata;
 
-    public function getMetadata() { return $this->metadata; }
-    public function load(): array { return $this->parse($this->metadata); }
+    public function warmUp(string $cacheDir): bool
+    {
+        $this->contents = $this->getCache("/Contents", function() {
+
+            if (file_exists($this->metadata)) {
+
+                return  (str_ends_with($this->metadata, "yml") ?
+                            Yaml::parse(file_get_contents($this->metadata)) :
+                        (str_ends_with($this->metadata, "yaml") ?
+                            Yaml::parse(file_get_contents($this->metadata)) :
+                        (str_ends_with($this->metadata, "json") ?
+                            json_decode(file_get_contents($this->metadata), true) : [])));
+            }
+        });
+
+        return true;
+    }
+    
+    protected $version;
+    public function getVersion(): string { return $this->version; }
 
     protected $contents = [];
     public function getContents() { return $this->contents; }
-    public function parse(string $metadata): array
-    {
-        if (empty($this->contents[$metadata]) && file_exists($metadata)) {
-
-            $this->contents[$metadata] =
-                (str_ends_with($metadata, "yml") ?
-                    Yaml::parse(file_get_contents($metadata)) :
-                (str_ends_with($metadata, "yaml") ?
-                    Yaml::parse(file_get_contents($metadata)) :
-                (str_ends_with($metadata, "json") ?
-                    json_decode(file_get_contents($metadata), true) : [])));
-        }
-
-        return $this->contents[$metadata] ?? [];
-    }
-
-    public function getEntries()
-    {
-        if(empty($this->contents[$this->metadata])) $this->parse($this->metadata);
-        return $this->contents[$this->metadata] ?? [];
-    }
-
-    public function getEntry(string $value = null): string
-    {
-        if(empty($this->contents[$this->metadata])) $this->parse($this->metadata);
-        return $this->contents[$this->metadata][$value] ?? "";
-    }
-
-    protected $version;
-    public function getVersion(): string
-    {
-        if( !empty($this->version) )
-            return $this->version;
-
-        if ( !preg_match('/.*\/([0-9.]*(?:[-_]{1}[a-zA-Z0-9]*)?)\//', $this->metadata ?? "", $matches) )
-            return "unk.";
-
-        $this->version = $matches[1];
-        return $this->version;
-    }
+    
+    public function getMetadata() { return $this->metadata; }
+    public function getEntries() { return $this->contents ?? []; }
+    public function getEntry(string $value = null): string { return $this->contents[$value] ?? ""; }
 
     public function iconify(IconizeInterface|string $icon, array $attributes = []): string
     {

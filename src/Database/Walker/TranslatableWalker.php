@@ -10,6 +10,7 @@ use Base\Service\LocaleProvider;
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST;
 use RuntimeException;
+use Doctrine\ORM\Events;
 
 class TranslatableWalker extends SqlWalker
 {
@@ -87,13 +88,10 @@ class TranslatableWalker extends SqlWalker
 
     protected function getLocaleProvider(): LocaleProvider
     {
-        foreach ($this->getEntityManager()->getEventManager()->getListeners() as $event => $listeners) {
+        foreach ($this->getEntityManager()->getEventManager()->getListeners(Events::loadClassMetadata) as $listener) {
 
-            foreach ($listeners as $listener) {
-
-                if ($listener instanceof IntlSubscriber)
-                    return $listener->getLocaleProvider();
-            }
+            if ($listener instanceof IntlSubscriber)
+                return $listener->getLocaleProvider();
         }
 
         throw new RuntimeException('Locale provider not found.');
