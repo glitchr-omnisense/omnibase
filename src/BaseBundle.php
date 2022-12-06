@@ -11,6 +11,7 @@ use Base\DependencyInjection\Compiler\CurrencyApiPass;
 use Base\DependencyInjection\Compiler\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;
 use Base\DependencyInjection\Compiler\SharerPass;
+use Base\DependencyInjection\Compiler\TagRendererPass;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\EntityManagerInterface;
@@ -138,6 +139,7 @@ class BaseBundle extends Bundle
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());
         $container->addCompilerPass(new CurrencyApiPass());
+        $container->addCompilerPass(new TagRendererPass());
 
         /* Register aliased repositories */
         foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {

@@ -68,12 +68,8 @@ class Environment extends TwigEnvironment
 
         return null;
     }
-
     
-    public function getAsset(string $url): string
-    {
-        return $this->getRenderer(HtmlTagRenderer::class)?->getAsset($url);
-    }
+    public function getAsset(string $url): string { return $this->getRenderer(HtmlTagRenderer::class)?->getAsset($url); }
     
     public function render($name, array $context = []): string
     {
