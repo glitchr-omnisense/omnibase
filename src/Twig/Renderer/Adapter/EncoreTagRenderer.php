@@ -21,10 +21,11 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     private ?CacheItemPoolInterface $cache = null;
     use SimpleCacheTrait;
 
-    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, ?EntrypointLookupCollectionInterface $entrypointLookupCollection = null)
+    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, EntrypointLookupCollectionInterface $entrypointLookupCollection, string $publicDir)
     {
         parent::__construct($twig, $localeProvider);
         $this->entrypointLookupCollection = $entrypointLookupCollection;
+        $this->publicDir = $publicDir;
     }
 
     public function warmUp(string $cacheDir): bool
@@ -135,23 +136,23 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             $this->addLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
 
         $source = "";
-        $entryPoints = $this->getEntrypoints();
-        $entryPoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();
-        foreach($entryPoints as $entryPoint) {
-            
-            try { $files = $entryPoint->getCssFiles($entryName); }
+        $entrypoints = $this->getEntrypoints();
+        $entrypoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();
+        foreach($entrypoints as $entrypoint) {
+
+            try { $files = $entrypoint->getCssFiles($entryName); }
             catch(UndefinedBuildException|EntrypointNotFoundException $e) { continue; }
 
-            foreach ($files as $file) {
+            foreach ($files as $file)
                 $source .= file_get_contents($this->publicDir.'/'.$file);
-            }
 
-            break;
+            $this->removeLinkTag($entryName);
+            $entrypoint->reset();
+            
+            return $source;
         }
 
-        if($source) return $source;
-        
-        throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entryPoints)));
+        throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entrypoints)));
     }
 
     public function renderLinkTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) : string
@@ -164,11 +165,11 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             $this->addLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
 
         $tags = [];
-        $entryPoints = $this->getEntrypoints();
-        $entryPoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();
-        foreach($entryPoints as $entryPoint) {
+        $entrypoints = $this->getEntrypoints();
+        $entrypoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();
+        foreach($entrypoints as $entrypoint) {
 
-            try { $files = $entryPoint->getCssFiles($entryName); }
+            try { $files = $entrypoint->getCssFiles($entryName); }
             catch(UndefinedBuildException|EntrypointNotFoundException $e) { continue; }
 
             if($files) {
@@ -179,8 +180,8 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
                 return $this->twig->render("@Base/webpack/link_tags.html.twig", ["tags" => $tags]);
             }
         }
-    
-        throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entryPoints)));
+        
+        throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entrypoints)));
     }
 
     public function renderScriptTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) : string
@@ -193,11 +194,11 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         if($entryName && !array_key_exists($entryName, $this->encoreEntryScriptTags)) 
             $this->addScriptTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
 
-        $entryPoints = $this->getEntrypoints();
-        $entryPoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();
-        foreach($entryPoints as $entryPoint) {
+        $entrypoints = $this->getEntrypoints();
+        $entrypoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();
+        foreach($entrypoints as $entrypoint) {
 
-            try { $files = $entryPoint->getJavaScriptFiles($entryName); }
+            try { $files = $entrypoint->getJavaScriptFiles($entryName); }
             catch(UndefinedBuildException|EntrypointNotFoundException $e) { continue; }
 
             if($files) {
@@ -209,7 +210,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             }
         }
 
-        throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entryPoints)));
+        throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entrypoints)));
     }
 
     public function render(string $value, ?array $context = [], ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) : string

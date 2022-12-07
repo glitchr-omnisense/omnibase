@@ -323,6 +323,8 @@ class BaseBundle extends Bundle
 }
 
 BaseBundle::setMapping("./Enum",       "Base\Enum",       "App\Enum");
+BaseBundle::setMapping("./Notifier",   "Base\Notifier",   "App\Notifier");
+
 BaseBundle::setMapping("./Form",       "Base\Form",       "App\Form");
 BaseBundle::setMapping("./Entity",     "Base\Entity",     "App\Entity");
 BaseBundle::setMapping("./Repository", "Base\Repository", "App\Repository");

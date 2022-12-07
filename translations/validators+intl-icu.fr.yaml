@@ -17,6 +17,9 @@ user:
 
 unique_entity: \"{{value}}\" est déjà utilisé.
 
+email:
+   unique: "Cet email est déjà utilisé"
+
 string_case: "Le champ \"{{field}}\" ne peut pas changer d'orthographe (seulement la casse)"
 
 hexcode:

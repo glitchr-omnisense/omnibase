@@ -6,7 +6,7 @@ use Base\Annotations\AnnotationReader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Doctrine\ORM\EntityManagerInterface;
-use Base\Notifier\NotifierInterface;
+use Base\Notifier\Abstract\BaseNotifierInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\SettingBag;
@@ -20,7 +20,7 @@ use Base\Twig\Environment;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
-use Exception;
+
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
@@ -82,7 +82,7 @@ trait BaseTrait
     public static function getRouter()        : ?RouterInterface         { return (self::class === BaseService::class) ? BaseService::$router         : BaseService::getRouter(); }
     public static function getFirewallMap()   : ?FirewallMapInterface    { return (self::class === BaseService::class) ? BaseService::$firewallMap    : BaseService::getFirewallMap(); }
     public static function getTwig()          : ?Environment             { return (self::class === BaseService::class) ? BaseService::$twig           : BaseService::getTwig(); }
-    public static function getNotifier()      : ?NotifierInterface       { return (self::class === BaseService::class) ? BaseService::$notifier       : BaseService::getNotifier(); }
+    public static function getNotifier()      : ?BaseNotifierInterface   { return (self::class === BaseService::class) ? BaseService::$notifier       : BaseService::getNotifier(); }
     public static function getTranslator()    : ?TranslatorInterface     { return (self::class === BaseService::class) ? BaseService::$translator     : BaseService::getTranslator(); }
     public static function getSlugger()       : ?SluggerInterface        { return (self::class === BaseService::class) ? BaseService::$slugger        : BaseService::getSlugger(); }
 

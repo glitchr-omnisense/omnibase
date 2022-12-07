@@ -3,6 +3,7 @@
 namespace Base\Subscriber;
 
 use Base\Annotations\Annotation\IsGranted;
+use Base\Annotations\AnnotationReader;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -12,31 +13,42 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class IsGrantedSubscriber implements EventSubscriberInterface
 {
-    private $authChecker;
+    /**
+     * @var AuthorizationCheckerInterface
+     */
+    private $authorizationChecker;
 
-    public function __construct(AuthorizationCheckerInterface $authChecker = null)
+    /**
+     * @var AnnotationReader
+     */
+    private $annotationReader;
+
+    public function __construct(AnnotationReader $annotationReader, AuthorizationCheckerInterface $authorizationChecker = null)
     {
-        $this->authChecker = $authChecker;
+        $this->authorizationChecker = $authorizationChecker;
+        $this->annotationReader = $annotationReader;
     }
 
     public function onKernelControllerArguments(KernelEvent $event)
     {
         $request = $event->getRequest();
 
-        /** @var $configurations IsGranted[] */
-        if (!$configurations = $request->attributes->get('_is_granted')) {
-            return;
-        }
+        $controller = $request->attributes->get("_controller") ;
+        list($class, $method) = is_array($controller) ? $controller : explode("::", $controller ?? "");
+        if(!class_exists($class)) return;
 
-        if (null === $this->authChecker) {
+        $configurations = array_merge(
+            $this->annotationReader->getClassAnnotations ($class, IsGranted::class),
+            $this->annotationReader->getMethodAnnotations($class, IsGranted::class)[$method] ?? []
+        );
+
+        if (null === $this->authorizationChecker) {
             throw new \LogicException('To use the @IsGranted tag, you need to install symfony/security-bundle and configure your security system.');
         }
 
-        dump($event);
-        exit(1);
-        $arguments = $this->argumentNameConverter->getControllerArguments($event);
-
+        $arguments = $request->attributes->get("_route_parameters");
         foreach ($configurations as $configuration) {
+
             $subjectRef = $configuration->getSubject();
             $subject = null;
 
@@ -58,7 +70,7 @@ class IsGrantedSubscriber implements EventSubscriberInterface
                 }
             }
 
-            if (!$this->authChecker->isGranted($configuration->getAttributes(), $subject)) {
+            if (!$this->authorizationChecker->isGranted($configuration->getAttributes(), $subject)) {
                 $argsString = $this->getIsGrantedString($configuration);
 
                 $message = $configuration->getMessage() ?: sprintf('Access Denied by controller annotation @IsGranted(%s)', $argsString);

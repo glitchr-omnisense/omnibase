@@ -31,6 +31,10 @@ login:
 kickout: "{0}, tu as été jeté du site.."
 integrity: "Tu as été volontairement déconnecté.. L'intégrité du site était compromise"
 
+notifier:
+    no_loopback: "Le debugging est activé, mais la boucle locale ne l'est pas: les utilisateurs peuvent recevoir leurs emails."
+    no_debug: "Le debugging est désactivé, mais la boucle locale est activée ! Les emails seront tous redirigés vers l'adresse technique: {0})"
+
 impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurper l'identité de <b>{0}</b> !
     <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Retour à ton compte</a>"

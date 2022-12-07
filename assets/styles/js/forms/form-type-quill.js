@@ -3,6 +3,9 @@ import '@glitchr/quill';
 
 // import hljs from 'highlight.js';
 import Quill from 'quill';
+// import { ImageDrop } from 'quill-image-drop-module';
+// import { ImageResize } from 'quill-image-resize-module';
+ 
 export default Quill;
 
 $(document).on("DOMContentLoaded", function () {
@@ -40,12 +43,16 @@ $(document).on("DOMContentLoaded", function () {
             SmartBreak.blotName = 'break';
             SmartBreak.tagName = 'BR'
             Quill.register(SmartBreak, true);
+            // Quill.register('modules/imageDrop', ImageDrop);
+            // Quill.register('modules/imageResize', ImageResize);
 
             var quill = JSON.parse(el.getAttribute("data-quill-options")) || {};
 
                 // TBI: HTML replacement is in conflict with soft-break line..
                 quill.modules.toolbar.push(["html"]);
                 quill.modules.syntax = false;
+                // quill.modules.imageResize = {displaySize: true};
+                // quill.modules.imageDrop = true;
                 quill.modules.clipboard = { matchers: [['BR', lineBreakMatcher]] }
                 quill.modules.keyboard = {
                     bindings: {

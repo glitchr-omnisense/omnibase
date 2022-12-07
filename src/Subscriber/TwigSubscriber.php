@@ -87,7 +87,7 @@ class TwigSubscriber implements EventSubscriberInterface
         $allowRender = $this->allowRender($event);
         if(!$allowRender) 
             return false;
-     
+
         $response = $event->getResponse();
         if(is_instanceof($response, [StreamedResponse::class, BinaryFileResponse::class]))
             return false;

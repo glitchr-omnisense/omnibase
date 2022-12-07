@@ -277,6 +277,11 @@ class Configuration implements ConfigurationInterface
 
                     ->children()
 
+                        ->booleanNode('technical_loopback')
+                            ->info('Do not allow sending email until loopback is removed')
+                            ->defaultValue(true)
+                        ->end()
+
                         ->arrayNode('technical_recipient')->addDefaultsIfNotSet()
                         ->children()
                             ->scalarNode('email')

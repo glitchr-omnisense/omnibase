@@ -801,13 +801,13 @@ input.required:after, textarea.required:after, select.required:after {
 .highlightWord    {
     background-color:#C4E8AC;
     padding: 0em;
-    border-radius: 1.25em;
+    border-radius: 0.25em;
 }
 
 .highlightPattern:empty { background-color:transparent; padding:0; }
 .highlightPattern {
     background-color: #FFD37F;
-    padding: 0em 0.25em;
+    padding: 0em;
     border-radius: 1.25em;
 }
 

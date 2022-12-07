@@ -513,20 +513,49 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public const MAX_ANCHOR = 6;
     public function getContentWithAnchors(array $options = [], $suffix = "", $max = self::MAX_ANCHOR): ?string
     {
-        $max = min($max, self::MAX_ANCHOR);
-        return preg_replace_callback("/\<(h[1-".$max."])\>([^\<\>]*)\<\/h[1-".$max."]\>/", function ($match) use ($suffix, $options) {
+        $encoding = mb_detect_encoding($this->content);
 
-            $tag = $match[1];
-            $content = $match[2];
-            $slug = strtolower($this->getSlugger()->slug($content));
+        $dom = new \DOMDocument('1.0', $encoding);
+        $dom->loadHTML(mb_convert_encoding($this->content, 'HTML-ENTITIES', $encoding));
+        
+        $options["attr"] = [];
+        $options["attr"]["class"] = $options["attr"]["class"] ?? "";
+        $options["attr"]["class"] = trim($options["attr"]["class"] . " anchor");
 
-            $options["attr"]["class"] = $options["attr"]["class"] ?? "";
-            $options["attr"]["class"] = trim($options["attr"]["class"] . " anchor");
+        $hXs = ["h1", "h2", "h3", "h4", "h5", "h6"];
+        foreach ($hXs as $hX) {
 
-            return "<".$tag." ".html_attributes($options["row_attr"] ?? [], ["id" => $slug])."><a ".html_attributes($options["attr"] ?? [])." href='#" . $slug . "'>".$content."</a><a href='#" . $slug . "'>".$suffix."</a></".$tag.">";
+            $tags = $dom->getElementsByTagName($hX);
+            foreach ($tags as $tag) {
+               
+                $content = $tag->nodeValue;
+                $tag->nodeValue = null;
 
-        }, $this->content);
+                $id = strtolower($this->getSlugger()->slug($content));
+                $tag->setAttribute("id", $id);
 
+                $template = $dom->createDocumentFragment();
+                $template->appendXML("<a ".html_attributes($options["attr"]). " href='#".$id."'>".$content."</a>");
+
+                $tag->appendChild($template);
+            }
+        }
+
+        // Lazy loading
+        $options["lazyload"] ??= false;
+        if($options["lazyload"]) {
+
+            $images = $dom->getElementsByTagName('img');
+            foreach ($images as $img) {
+                
+                $url = $img->getAttribute('src');
+
+                $img->setAttribute('data-src', $url);
+                $img->removeAttribute("src");
+            }
+        }
+
+        return $dom->saveHTML();
     }
 
     /**

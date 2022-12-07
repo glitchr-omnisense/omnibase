@@ -113,14 +113,18 @@
             <bind key="$environment">%kernel.environment%</bind>
         </service>
 
-        <service id="Base\Notifier\NotifierInterface" alias="Base\Notifier\Notifier"/>
-        <service id="Base\Notifier\Notifier" public="true">
+        <service id="Base\Notifier\NotifierInterface"  alias="Base\Notifier\Notifier" />
+        <service id="Base\Notifier\Notifier"          parent="Base\Notifier\Abstract\BaseNotifier" public="true" />
+
+        <service id="Base\Notifier\Abstract\BaseNotifierInterface" alias="Base\Notifier\Abstract\BaseNotifier"/>
+        <service id="Base\Notifier\Abstract\BaseNotifier" abstract="true">
             <argument type="service" id="notifier" />
             <argument type="service" id="notifier.channel_policy" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
+            <argument type="service" id="twig" />
             <argument type="service" id="setting_bag" />
             <bind key="$debug">%kernel.debug%</bind>
         </service>
@@ -227,13 +231,15 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
+        <service id="Base\Console\Command\NotifierCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
+
         <service id="Base\Service\TimeMachine" parent="BackupManager\Manager" public="true">
             <argument type="service" id="flysystem" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\Console\Command\TimeMachineDoctrineCommand"        parent="Base\Console\Command"                          ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
+        <service id="Base\Console\Command\TimeMachineDoctrineCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
         <service id="Base\Console\Command\TimeMachineStorageCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
         <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
         <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="time_machine" /></service>
@@ -578,7 +584,8 @@
         <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true" >
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
-            <argument type="service" id="webpack_encore.entrypoint_lookup_collection" on-invalid="null" />
+            <argument type="service" id="webpack_encore.entrypoint_lookup_collection" />
+            <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
 
         <service id="Base\Twig\Extension\EncoreTwigExtension"><tag name="twig.extension" priority="-1" /></service>
@@ -693,8 +700,16 @@
             <argument type="service" id="security.authorization_checker" />
         </service>
 
+        <service id="Base\Subscriber\NotifierSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="parameter_bag" />
+            <bind key="$debug">%kernel.debug%</bind>
+        </service>
+
         <service id="Base\Subscriber\IsGrantedSubscriber">
             <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="security.authorization_checker" on-invalid="null" />
         </service>
 

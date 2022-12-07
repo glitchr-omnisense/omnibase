@@ -32,6 +32,7 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\NotificationRepository;
 use Base\Database\Annotation\Cache;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -296,10 +297,22 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
             $this->setContent("<div class='title'>".$location."</div><div class='message'>".$message.'</div>');
 
+        } else if($this->getTwig()->getLoader()->exists($content)) {
+            
+            $this->setHtmlTemplate($content);
+
         } else {
 
             $this->setContent($this->getTranslator()->trans($content, $parameters, $domain, $locale) ?? "");
         }
+    }
+
+    public function render(): Response
+    {
+        $htmlTemplate = $this->getHtmlTemplate();
+        $context      = $this->getContext();
+
+        return new Response($htmlTemplate ? $this->getTwig()->render($htmlTemplate, $context) : $this->getContent());
     }
 
     public function send(string $importance, RecipientInterface ...$recipients)

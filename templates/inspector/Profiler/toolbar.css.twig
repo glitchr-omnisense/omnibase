@@ -2,7 +2,7 @@
 
 .sf-toolbarreset {
     overflow-x: scroll;
-    width: 100vw;
+    width: calc(100vw + 1px);
 }
 
 .sf-toolbar-block:hover .sf-toolbar-info { position:fixed; }
@@ -16,8 +16,9 @@
   height:36px;
 }
 
-.sf-toolbar-block.hover .sf-toolbar-info { 
-    min-width:75%;
+.sf-toolbar-block-ajax:hover .sf-toolbar-info,
+.sf-toolbar-block-ajax.hover .sf-toolbar-info { 
+    min-width:auto;
     max-width:100%;
 }
 
@@ -48,7 +49,7 @@
 .sf-ajax-request-url { max-width:75%; }
 .sf-toolbarreset {
 
-  height: 100vh;
+  height: 36px;
   align-items: flex-end;
   background-color: transparent;
 }

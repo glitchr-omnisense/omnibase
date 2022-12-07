@@ -6,7 +6,9 @@ development: clean
 	@yarn install
 	@yarn run watch
 
-assets: production
+assets:
+	@yarn install
+
 prod: production
 production: clean
 	@cd assets

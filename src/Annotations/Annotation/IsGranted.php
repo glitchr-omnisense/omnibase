@@ -3,6 +3,7 @@
 namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
+use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 
 /**
  * @Annotation
@@ -58,9 +59,13 @@ class IsGranted extends AbstractAnnotation
             $values = $data;
         }
 
-        $values['subject'] = $values['subject'] ?? $subject;
-        $values['message'] = $values['message'] ?? $message;
-        $values['statusCode'] = $values['statusCode'] ?? $statusCode;
+        if(!array_key_exists("value", $values))
+            throw new MissingConstructorArgumentsException("Attribute parameter missing", 500);
+
+        $this->setSubject   ($values['subject'] ?? $subject);
+        $this->setMessage   ($values['message'] ?? $message);
+        $this->setMessage   ($values['statusCode'] ?? $statusCode);
+        $this->setAttributes($values['value'] ?? null);
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool { return true; }
