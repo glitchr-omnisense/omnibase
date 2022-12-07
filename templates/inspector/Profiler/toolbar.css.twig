@@ -193,7 +193,23 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
     min-width: 20px;
 }
 
-.sf-minitoolbar { height:auto; }
+@media all and (max-width: 1024px)
+{
+  .sf-toolbar-block .sf-toolbar-icon img, .sf-toolbar-block .sf-toolbar-icon svg{
+      min-height: 25px;
+      min-width: 25px;
+  }
+}
+
+
+.sf-minitoolbar 
+{ 
+  height:auto;
+  background-color: white;
+  border-top-left-radius: 1em;
+  color:black;
+}
+
 .sf-minitoolbar button
 {
   height:auto;
