@@ -18,7 +18,7 @@ class AvatarType extends ImageType
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'thumbnail'   => "bundles/base/user.svg",
+            'thumbnail'   => "bundles/base/images/user.svg",
             "lightbox"    => null,
             'clipboard'   => false,
             'cropper'     => null

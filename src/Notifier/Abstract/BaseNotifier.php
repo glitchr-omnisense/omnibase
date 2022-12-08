@@ -6,12 +6,13 @@ use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
+use Base\Routing\RouterInterface;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
-use Base\Twig\Renderer\Adapter\EncoreTagRenderer;
+
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
@@ -111,7 +112,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $adminUsers;
     }
 
-    public function getTechnicalRecipient(): RecipientInterface
+    public function getTechnicalRecipient(): Recipient
     {
         $mail = $this->settingBag->getScalar("base.settings.mail");
         if(!$mail) $mail = $this->getAdminRecipient()?->getEmail();
@@ -155,12 +156,20 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this;
     }
 
+    public function getRouter(): RouterInterface { return $this->router; }
+    public function setRouter(RouterInterface $router)
+    {
+        $this->router = $router;
+        return $this;
+    }
+
     public function getEnvironment() : Environment { return $this->twig; }
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy, EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocaleProviderInterface $localeProvider, Environment $twig, SettingBag $settingBag, bool $debug = false)
+    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy, EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
     {
         $this->twig          = $twig;
         $this->notifier      = $notifier;
         $this->policy        = $policy;
+        $this->router        = $router;
 
         $this->adminRole          = $parameterBag->get("base.notifier.admin_role");
         $this->options            = $parameterBag->get("base.notifier.options") ?? [];

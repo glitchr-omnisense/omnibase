@@ -6,8 +6,8 @@ fake_test:
   notice: "This email was sent programmatically, the author is referring to a fictive person for development purposes"
 
 action_text: Go to the page
-unsubscribe:  "Click <a href='{0}'>here</a> to unsubscribe"
-returnIndex:  "Click <a href='/'>here</a> to return to home page"
+unsubscribe:  "Click <a href=\"{0}\">here</a> to unsubscribe"
+returnIndex:  "Click <a href=\"{0}\">here</a> to return to home page"
 itWorks: "It works!"
 
 resetPassword:

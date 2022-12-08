@@ -80,7 +80,7 @@
         {% block flash_messages %}
             {{ include(ea.templatePath('flash_messages')) }}
         {% endblock flash_messages %}
-
+        
         {% set user_menu_avatar %}
         <div class="img-fluid">
             {% if null == ea.userMenu.avatarUrl %}
@@ -241,6 +241,11 @@
 
                                 <div class="online-user-dropdown navbar-custom-menu">
                                     <div class="dropdown user-menu-wrapper">
+
+                                        <button id="navigation-toggler" type="button" aria-label="Toggle navigation">
+                                            <i class="fa fa-fw fa-bars"></i>
+                                        </button>
+
                                         <a class="dropdown-appearance-button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
                                             <i class="{{ (user_manager.online ?? [])|length ? 'fas fa-cloud' : 'fas fa-cloud-moon'}}"></i>
                                         </a>

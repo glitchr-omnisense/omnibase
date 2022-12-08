@@ -5,6 +5,7 @@ namespace Base\Notifier;
 use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Notifier\Abstract\BaseNotifier;
+use Symfony\Component\Routing\Router;
 
 class Notifier extends BaseNotifier
 {
@@ -39,7 +40,7 @@ class Notifier extends BaseNotifier
                     Pellentesque pretium dui ac justo elementum blandit.
                     Donec nibh erat, maximus in condimentum ac, condimentum eget lorem.
                     Sed hendrerit maximus ante, eu euismod purus tempor vel.",
-            "footer_text" => $this->translator->trans('@emails.returnIndex') ?? null
+            "footer_text" => $this->translator->trans('@emails.returnIndex', [$this->router->generate("/", [], Router::ABSOLUTE_URL)]) ?? null
         ]);
 
         return $notification;

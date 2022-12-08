@@ -9,8 +9,12 @@ class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implemen
     use LocaleRecipientTrait;
 
     public function __toString() {
-        if($this->getEmail()) return $this->getEmail();
-        if($this->getPhone()) return $this->getPhone();
+
+        $technicalRecipientStr  = "\"". $this->getEmail() . "\"";
+        $technicalRecipientStr .= $this->getPhone()  ? " / (" . $this->getPhone() .")" : "";
+        $technicalRecipientStr .= $this->getLocale() ? " / " . $this->getLocale() : "";
+
+        return $technicalRecipientStr;
     }
 
     public function __construct(?string $email = null, ?string $phone = null, ?string $locale = null)

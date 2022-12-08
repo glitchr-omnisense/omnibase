@@ -3,6 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
+use Base\Notifier\Notifier;
 use Base\Service\Flysystem;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
@@ -18,14 +19,26 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name:'cache:clear', aliases:[], description:'')]
 class CacheClearCommand extends Command
 {
+    /**
+     * @var Flysystem
+     */
+    protected $flysystem;
+
+    /**
+     * @var Notifier
+     */
+    protected $notifier;
+    
     public function __construct(
         LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
-        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, string $projectDir, string $cacheDir)
+        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, string $projectDir, string $cacheDir)
     {
         parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
 
         $this->flysystem = $flysystem;
+        $this->notifier  = $notifier;
+
         $this->projectDir  = $projectDir;
         $this->cacheDir    = $cacheDir;
     }
@@ -103,6 +116,8 @@ EOF
 
             symlink($realPath, $publicPath);
         }
+
+        $io->note("Technical recipient configured: ".$this->notifier->getTechnicalRecipient());
 
         return $ret;
     }
