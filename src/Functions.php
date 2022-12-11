@@ -2059,7 +2059,7 @@ namespace {
         return array_intersect_key($array, $arrayMask);
     }
 
-    function object_hydrate($object, array $vars)
+    function object_hydrate(object $object, array $vars)
     {
         $reflClass      = new ReflectionClass($object);
 

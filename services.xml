@@ -724,13 +724,21 @@
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
-            <argument type="service" id="locale_provider" />
             <argument type="service" id="referrer" />
+            <argument type="service" id="setting_bag" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="base.service.maintenance" />
             <argument type="service" id="base.service.maternity" />
             <argument type="service" id="profiler" on-invalid="null" />
+        </service>
+
+        <service id="Base\Subscriber\ReferrerSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="referrer" />
+            <argument type="service" id="router" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Subscriber\IntegritySubscriber">

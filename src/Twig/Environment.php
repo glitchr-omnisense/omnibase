@@ -25,7 +25,6 @@ class Environment extends TwigEnvironment
         parent::__construct($loader, $options);
     }
 
-
     public function getParameter(string $name = "")
     {
         if(!$name) return $this->getGlobals();

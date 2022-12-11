@@ -385,31 +385,27 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $footer = $this->getFooter();
 
         $importance = $this->getImportance();
-        $this->setImportance(""); // Remove importance from email subject
 
         $fwd = "";
         $subject = $this->getSubject();
         $from = $technicalRecipient->getEmail();
         $to   = $recipient->getEmail();
    
-        if($this->isMarkAsAdmin()) {
+       if($this->isMarkAsAdmin()) {
 
             $user = $this->user ?? "User \"".User::getIp()."\"";
-            $fwd .= "Fwd: ";
+            $fwd .= "Forward: ";
             $title   = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
             $content = $this->getContent();
         }
 
-        dump($recipient);
-        exit(1);
         if(User::getNotifier()->isTest($recipient)) {
 
-            $fwd = "Test: ";
-            $email = array_keys(mailparse($recipient->getEmail()));
-            $email = mailformat(mailparse($this->getRecipient()->getEmail()), null, first($email));
+            $fwd .= "Test: ";
+            $email = mailparse($recipient->getEmail());
+            $email = mailformat(mailparse($technicalRecipient->getEmail()), first($email));
             $to   = "[".$notifier->getTranslator()->trans("@emails.fake_test.author")."] ". $email;
 
-            $from = $recipient->getEmail();
             $footer  = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
             $footer  = implode(" - ", array_filter($footer));
         }
@@ -446,8 +442,10 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         $subject ??= $this->getSubject();
         $subject = $fwd.$subject;
-
+       
+        $priority = [self::IMPORTANCE_HIGH, self::IMPORTANCE_MEDIUM, self::IMPORTANCE_LOW];
         $email
+            ->importance(in_array($importance, $priority) ? $importance : "")
             ->subject($subject)
             ->from($from)
             ->to($to)
@@ -455,7 +453,6 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             ->htmlTemplate($this->htmlTemplate)
             ->context($context);
 
-        $this->setImportance($importance);
         return $notification;
     }
 

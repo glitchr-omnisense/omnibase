@@ -4,6 +4,9 @@
 window.addEventListener('load', function(event) {
 
     $("form.needs-validation input").on("invalid", (e) => e.preventDefault() );
+
+    $("form").submit(function() { this.submit(); }); // On pressing enter...
+
     $("[type=submit]").on("click", function() {
 
         const style = getComputedStyle(document.body);

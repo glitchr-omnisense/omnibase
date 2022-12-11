@@ -126,6 +126,13 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
 
+                        ->arrayNode('route_exceptions')
+                            ->addDefaultChildrenIfNoneSet()
+                                ->prototype('scalar')
+                                ->defaultValue('@localhost$')
+                            ->end()
+                        ->end()
+                        
                         ->arrayNode('exceptions')
                             ->arrayPrototype()->addDefaultsIfNotSet()
                                 ->children()

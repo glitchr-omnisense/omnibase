@@ -6,6 +6,7 @@ use Base\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use  Base\Security\LoginFormAuthenticator;
 use  Base\Security\RescueFormAuthenticator;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class Referrer implements ReferrerInterface
 {
@@ -22,6 +23,11 @@ class Referrer implements ReferrerInterface
         $this->router       = $router;
     }
 
+    public function redirect(array $headers = []): RedirectResponse
+    {
+        return $this->router->redirect($this->getUrl() ?? $this->router->getBaseDir(), [], 302, $headers); 
+    }
+
     public function isVetoed(?string $routeName)
     {
         if(!$routeName) return false;
@@ -32,10 +38,11 @@ class Referrer implements ReferrerInterface
             return true;
     }
 
+    public function clear() { return $this->setUrl(null); }
     public function setUrl(?string $url)
     {
-        $route = $url ? $this->router->getRouteName($url) : null;
-
+        $this->requestStack->getMainRequest()->getSession()->remove('_security.main.target_path');    // Internal definition by firewall
+        $this->requestStack->getMainRequest()->getSession()->remove('_security.account.target_path'); // Internal definition by firewall
         $this->requestStack->getMainRequest()->getSession()->set('_target_path', $url);
         return $this;
     }
@@ -85,17 +92,11 @@ class Referrer implements ReferrerInterface
         }
 
         if(!$targetRoute) {
-            $targetPath = $request->request->get('referer');
-            $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
-            $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
-        }
-
-        if(!$targetRoute) {
             $targetPath = $request->request->get('referrer');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
-        return $targetPath ? $targetPath : null;
+        return $targetPath ? $targetPath : "/";
     }
 }

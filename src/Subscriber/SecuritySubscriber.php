@@ -32,6 +32,7 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Service\ParameterBagInterface;
+use Base\Service\SettingBagInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
 class SecuritySubscriber implements EventSubscriberInterface
@@ -58,8 +59,9 @@ class SecuritySubscriber implements EventSubscriberInterface
         TokenStorageInterface $tokenStorage,
         TranslatorInterface $translator,
         BaseService $baseService,
-        LocaleProvider $localeProvider,
         ReferrerInterface $referrer,
+        SettingBagInterface $settingBag,
+        LocaleProvider $localeProvider,
         RouterInterface $router,
         ParameterBagInterface $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
@@ -80,14 +82,10 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->parameterBag = $parameterBag;
 
         $this->baseService = $baseService;
+        $this->settingBag = $settingBag;
         $this->referrer = $referrer;
         $this->profiler = $profiler;
-        $this->exceptions = [
-            "/^locale_/",
-            "/^ux_/",
-            "/^user(?:.*)$/",
-            "/^security(?:.*)$/",
-        ];
+
     }
 
     public static function getSubscribedEvents(): array
@@ -95,62 +93,12 @@ class SecuritySubscriber implements EventSubscriberInterface
         return [
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [
-                ['onMaintenanceRequest', 4], ['onBirthRequest', 4], ['onAccessRequest', 6],
-                ['onReferrerRequest', 3], ['onKernelRequest', 3],
-            ],
-
-            ResponseEvent::class   => ['onKernelResponse'],
+            RequestEvent::class      => [['onMaintenanceRequest', 4], ['onBirthRequest', 4], ['onAccessRequest', 6], ['onKernelRequest', 3]],
+            ResponseEvent::class     => ['onKernelResponse'],
             LoginSuccessEvent::class => ['onLoginSuccess'],
             LoginFailureEvent::class => ['onLoginFailure'],
-            LogoutEvent::class       => ['onLogout'],
+            LogoutEvent::class       => ['onLogout']
         ];
-    }
-
-    public function getCurrentRouteName($event) { return $event->getRequest()->get('_route'); }
-
-    public function isException($route)
-    {
-        $exceptions = is_string($this->exceptions) ? [$this->exceptions] : $this->exceptions;
-        foreach($exceptions as $pattern)
-            if (preg_match($pattern, $route)) return true;
-
-        return false;
-    }
-
-    public function onReferrerRequest(RequestEvent $event)
-    {
-        if(!$event->isMainRequest()) return;
-        if($this->baseService->isProfiler()) return;
-
-        $targetPath = strval($this->referrer);
-        $targetRoute = $this->baseService->getRouteName($targetPath);
-
-        $currentRoute = $this->getCurrentRouteName($event);
-        if($this->isException($currentRoute)) return;
-
-        $session = $event->getRequest()->getSession();
-        $session->remove('_security.main.target_path');    // Internal definition by firewall
-        $session->remove('_security.account.target_path'); // Internal definition by firewall
-
-        $currentRouteIsLoginForm = in_array($currentRoute, [
-            LoginFormAuthenticator::LOGOUT_ROUTE,
-            LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE,
-            LoginFormAuthenticator::LOGIN_ROUTE,
-            RescueFormAuthenticator::LOGIN_ROUTE]
-        );
-
-        $session->set('_target_path', $currentRoute == $targetRoute || $currentRouteIsLoginForm ? $targetPath : null);
-
-        $targetRouteIsLoginForm = in_array($targetRoute, [
-            LoginFormAuthenticator::LOGOUT_ROUTE,
-            LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE,
-            LoginFormAuthenticator::LOGIN_ROUTE,
-            RescueFormAuthenticator::LOGIN_ROUTE]
-        );
-
-        if ($targetPath && !$targetRouteIsLoginForm)
-            return $this->baseService->redirect($targetPath, [], 302);
     }
 
     public function onAccessRequest(?RequestEvent $event = null): bool
@@ -191,16 +139,16 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             //
             // Prevent average guy to see the administration and debug tools
-            if($this->baseService->isProfiler() && !$this->authorizationChecker->isGranted("BACKEND"))
+            if($this->router->isProfiler() && !$this->authorizationChecker->isGranted("BACKEND"))
                 throw new NotFoundHttpException();
 
-            if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND"))
+            if($this->router->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND"))
             if(!$isSecurityRoute) throw new NotFoundHttpException();
 
             //
             // Nonetheless exception access is always possible
             // Let's notify connected user that there is a special access grant for this page
-            if(!$this->baseService->isProfiler() && !$this->baseService->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
+            if(!$this->router->isProfiler() && !$this->router->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
 
                 if($specialGrant) {
 
@@ -213,7 +161,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             //
             // If not, then user is redirected to a specific route
-            $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny") ?? [];
+            $routeRestriction = $this->settingBag->getScalar("base.settings.access_restriction.redirect_on_deny") ?? [];
             foreach($routeRestriction as $i => $route)
                 $routeRestriction[$i] = str_rstrip($route, ".".$this->localeProvider->getDefaultLang());
 
@@ -228,8 +176,8 @@ class SecuritySubscriber implements EventSubscriberInterface
                     return true;
                 }
 
-                $response   = $routeRestriction ? $this->baseService->redirect(first($routeRestriction)) : null;
-                $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
+                $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction)) : null;
+                $response ??= $this->router->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
                 if($event) $event->setResponse($response);
                 if($event) $event->stopPropagation();
@@ -260,7 +208,8 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(!$user) return;
 
         // Notify user about the authentication method
-        $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
+        $exceptions = $this->parameterBag->get("base.access_restrictions.route_exceptions") ?? [];
+        $exceptions = array_merge($exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
         if ($token instanceof SwitchUserToken) {
 
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
@@ -275,7 +224,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
 
             $this->referrer->setUrl($event->getRequest()->getUri());
-            $event->setResponse($this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE));
+            $event->setResponse($this->router->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE));
 
             $this->userRepository->flush($user);
             return $event->stopPropagation();
@@ -296,17 +245,17 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                     } else {
 
-                        $notification = new Notification("verifyEmail.pending", [$this->baseService->generateUrl("security_verifyEmail")]);
+                        $notification = new Notification("verifyEmail.pending", [$this->router->generate("security_verifyEmail")]);
                         $notification->send("warning");
                     }
                 };
 
                 $response    = $event->getResponse();
                 $alreadyRedirected = $response && $response->getStatusCode() == 302;
-                $isException =  $this->baseService->isEasyAdmin() || $this->baseService->isProfiler();
+                $isException =  $this->router->isEasyAdmin() || $this->router->isProfiler();
 
                 if($alreadyRedirected || $isException) $callbackFn();
-                else $this->baseService->redirectToRoute("user_profile", [], 302, [
+                else $this->router->redirectToRoute("user_profile", [], 302, [
                     "event" => $event,
                     "exceptions" => $exceptions,
                     "callback" => $callbackFn
@@ -328,7 +277,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             } else {
 
-                $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
+                $this->router->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
 
                     $notification = new Notification("login.pending");
                     $notification->send("warning");
@@ -404,6 +353,11 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $notification->send("success");
             }
         }
+
+        if($event) $event->setResponse($this->router->redirect($this->referrer->getUrl(), [], 302));
+        if($event) $event->stopPropagation();
+
+        $this->referrer->clear();   
     }
 
     public function onLogout(LogoutEvent $event)
@@ -414,7 +368,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ($user instanceof User) // Just to remember username.. after logout & first redirection
             $this->baseService->addSession("_user", $user);
 
-        return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
+        return $this->router->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
     }
 
     public function onMaintenanceRequest(RequestEvent $event)

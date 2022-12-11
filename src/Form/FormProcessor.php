@@ -50,7 +50,10 @@ class FormProcessor implements FormProcessorInterface
     { 
         $array = is_array($data) ? $data : $this->getEntityHydrator()->dehydrate($data);
 
-        object_hydrate($this->form->getData(), $array);
+        $formData = $this->form->getData();
+        if(is_object($this->form->getData())) $this->form->setData(object_hydrate($this->form->getData(), $array));
+        else $this->form->setData($formData ?? $data);
+        
         foreach($this->form->all() as $childName => $child) // @TODO Use array_map_recursive()
             $child->setData($array[$childName]);
 

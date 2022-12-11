@@ -314,7 +314,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $this->localeProvider->setLocale($locale);
 
             $notification->setRecipient($recipient);
-            $this->send($notification, $this->isTest($recipient) ? $technicalRecipient : $recipient);
+            $this->send($notification, $recipient);
             $this->localeProvider->setLocale($localeBak);
         }
 
@@ -352,7 +352,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $this->localeProvider->setLocale($locale);
 
             $notification->setRecipient($recipient);
-            $this->send($notification, $this->isTest($recipient) ? $technicalRecipient : $recipient);
+            $this->send($notification, $recipient);
             $this->localeProvider->setLocale($localeBak);
         }
 

@@ -80,3 +80,19 @@
 .ql-editor h6 {
   margin-bottom: 1em !important;
 }
+
+@media all and (max-width: 1024px) {
+
+    .ql-editor h2 {
+        margin:0 !important;
+        height:auto !important;
+        width:auto !important;
+        padding-left:0 !important;
+        
+    }
+
+    .ql-editor h1 {
+        width:auto !important;
+        height:auto !important;
+    }
+}

@@ -5,12 +5,14 @@ namespace Base\Controller\Frontend\User;
 use App\Entity\User;
 use App\Form\Type\UserProfileType;
 use Base\Annotations\Annotation\Iconize;
+use Base\Enum\UserRole;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class ProfileController extends AbstractController
 {
@@ -38,6 +40,9 @@ class ProfileController extends AbstractController
                 return $this->redirectToRoute('user_search');
         }
         
+        if($user != $this->getUser() && !$this->isGranted(UserRole::ADMIN))
+            throw new AccessDeniedException();
+
         return $this->formProxy
                 ->createProcessor("profile:user", UserProfileType::class, ["use_model" => true])
                 ->setData($user)
