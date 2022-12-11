@@ -502,7 +502,7 @@
         </div>
         {% endif %}
 
-        {% if (allow_url or value is null) %}
+        {% if (allow_url) %}
         <div class="input-group field-url">
             <div class="input-group-text">{{ "fas fa-link"|iconify|first|raw }}</div>
             {{ form_widget(form.url, { attr: form.url.vars.attr|merge({'placeholder': ("@fields.fileupload.download_placeholder"|trans)}) }) }}

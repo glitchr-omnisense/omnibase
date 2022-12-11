@@ -1,3 +1,7 @@
+import Cropper from 'cropperjs/dist/cropper.min.js';
+import 'cropperjs/dist/cropper.min.css';
+
+
 $(document).on("DOMContentLoaded", function () {
 
     $(document).on("load.form_type.image", function () {

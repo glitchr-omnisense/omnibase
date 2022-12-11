@@ -27,7 +27,7 @@ class ProfileController extends AbstractController
     /**
      * @Route("/profile/{id}/edit/", name="user_profileEdit")
      */
-    public function Edit(int $id = -1, Request $request)
+    public function Edit(Request $request, int $id = -1)
     {
         if($id > 0) {
 

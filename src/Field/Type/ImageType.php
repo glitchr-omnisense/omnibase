@@ -56,8 +56,9 @@ class ImageType extends FileType
         $view->vars["cropper"] = null;
         if(is_array($options["cropper"])) {
 
-            $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $view->vars["ajax"]     = $this->twig->getAsset("ux/dropzone/" . $token);
+            $token  = $this->csrfTokenManager->getToken("dropzone")->getValue();
+            $hashid = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
+            $view->vars["ajax"]     = $this->router->generate("ux_dropzone", ["hashid" => $hashid]);
 
             if(!array_key_exists('viewMode',     $options["cropper"])) $options["cropper"]['viewMode']         = 2;
             if(!array_key_exists('autoCropArea', $options["cropper"])) $options["cropper"]['autoCropArea'] = true;
