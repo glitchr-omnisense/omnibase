@@ -3,23 +3,29 @@
 namespace Base\Controller\Frontend\User;
 
 use App\Entity\User;
-
+use App\Form\Type\UserProfileType;
 use Base\Annotations\Annotation\Iconize;
+use Base\Form\FormProcessorInterface;
+use Base\Form\FormProxyInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 
 class ProfileController extends AbstractController
 {
-    public function __construct(EntityManagerInterface $entityManager)
+
+    public function __construct(EntityManagerInterface $entityManager, FormProxyInterface $formProxy)
     {
+        $this->formProxy = $formProxy;
+        $this->entityManager = $entityManager;
         $this->userRepository = $entityManager->getRepository(User::class);
     }
 
     /**
      * @Route("/profile/{id}/edit/", name="user_profileEdit")
      */
-    public function Edit(int $id = -1)
+    public function Edit(int $id = -1, Request $request)
     {
         if($id > 0) {
 
@@ -32,7 +38,28 @@ class ProfileController extends AbstractController
                 return $this->redirectToRoute('user_search');
         }
         
-        return $this->render('@Base/client/user/profile_edit.html.twig', ['user' => $user]);
+        return $this->formProxy
+                ->createProcessor("profile:user", UserProfileType::class, ["use_model" => true])
+                ->setData($user)
+                ->onDefault(function(FormProcessorInterface $formProcessor) use ($user) {
+
+                    return $this->render('@Base/client/user/profile_edit.html.twig', [
+                        'user' => $user, 
+                        "form" => $formProcessor->getForm()->createView()
+                    ]);
+                })
+                ->onSubmit(function(FormProcessorInterface $formProcessor, Request $request) use ($user) {
+                    
+                    $user = $formProcessor->hydrate($user);
+                    $this->entityManager->flush();
+
+                    return $this->render('@Base/client/user/profile_edit.html.twig', [
+                        'user' => $user, 
+                        "form" => $formProcessor->getForm()->createView()
+                    ]);
+                })
+                ->handleRequest($request)
+                ->getResponse();
     }
 
     /**

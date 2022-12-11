@@ -48,7 +48,12 @@ class FormProcessor implements FormProcessorInterface
 
     public function setData    (mixed $data): self 
     { 
-        $this->form->setData($data);
+        $array = is_array($data) ? $data : $this->getEntityHydrator()->dehydrate($data);
+
+        object_hydrate($this->form->getData(), $array);
+        foreach($this->form->all() as $childName => $child) // @TODO Use array_map_recursive()
+            $child->setData($array[$childName]);
+
         return $this;
     }
 
@@ -177,6 +182,9 @@ class FormProcessor implements FormProcessorInterface
 
         if (is_string($this->response))
             $this->response = new Response($this->response);
+
+        // Create one view.. make sure assets are loaded 
+        $this->getForm()->createView();
 
         return $this;
     }

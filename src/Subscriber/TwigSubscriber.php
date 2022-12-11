@@ -7,6 +7,8 @@ use Base\Routing\RouterInterface;
 use Base\Service\ParameterBag;
 use Base\Twig\Renderer\Adapter\EncoreTagRenderer;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -20,6 +22,7 @@ class TwigSubscriber implements EventSubscriberInterface
     public function __construct(HtmlTagRenderer $htmlTagRenderer, EncoreTagRenderer $encoreTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
     {
         $this->encoreTagRenderer    = $encoreTagRenderer;
+
         $this->htmlTagRenderer      = $htmlTagRenderer;
 
         $this->parameterBag         = $parameterBag;
@@ -33,6 +36,7 @@ class TwigSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
+            ConsoleEvents::COMMAND => ['onConsoleCommand'],
             KernelEvents::REQUEST => ['onKernelRequest', 8],
             KernelEvents::RESPONSE => ['onKernelResponse'],
             KernelEvents::EXCEPTION => ['onKernelException'],
@@ -64,6 +68,11 @@ class TwigSubscriber implements EventSubscriberInterface
     public function onKernelException(RequestEvent $event)
     {
         $this->exceptionTriggered = true;
+    }
+
+    public function onConsoleCommand(ConsoleCommandEvent $event)
+    {
+        $this->encoreTagRenderer->addEntrypoint("_base", $this->publicDir."/bundles/base/entrypoints.json");
     }
 
     public function onKernelRequest(RequestEvent $event)

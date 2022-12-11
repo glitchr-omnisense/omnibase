@@ -67,6 +67,9 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $resolver->setNormalizer('revealer', function (Options $options, $value) {
             return $value || !$options["repeater"];
         });
+        $resolver->setNormalizer('allow_empty', function (Options $options, $value) {
+            return $value || !$options["required"];
+        });
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)

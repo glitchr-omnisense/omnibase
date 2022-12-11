@@ -2,10 +2,13 @@
 
 namespace Base\Form\Type;
 
+use Base\Field\Type\AvatarType;
 use Base\Field\Type\PasswordType;
 use Base\Form\Model\UserProfileModel;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Util\StringUtil;
 
@@ -22,8 +25,8 @@ class UserProfileType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('avatar'  , TextType::class, ["required" => false]);
-        $builder->add('email', TextType::class, ["required" => false]);
+        $builder->add('avatar'       , AvatarType::class, ["required" => false]);
+        $builder->add('email'        , EmailType::class, ["required" => false]);
         $builder->add('plainPassword', PasswordType::class, ["required" => false]);
     }
 }

@@ -116,7 +116,7 @@ class Uploader extends AbstractAnnotation
     public static function getPublic($entity, $fieldName)
     {
         if(!self::hasAnnotation($entity, $fieldName, self::class))
-        return null;
+            return null;
 
         /**
          * @var Uploader

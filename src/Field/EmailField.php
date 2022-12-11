@@ -36,4 +36,28 @@ class EmailField implements FieldInterface
             ->setCustomOption(self::OPTION_ICON_CUSTOM, "fas fa-at")
             ->setDefaultColumns('col-md-6 col-xxl-5');
     }
+
+    public function setCustomIcon(string $faIcon) 
+    {
+        $this->setCustomOption(self::OPTION_ICON_CUSTOM, $faIcon);
+        return $this;
+    }
+
+    public function renderIcon() 
+    {
+        $this->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON);
+        return $this;
+    }
+
+    public function renderAll()
+    {
+        $this->setCustomOption(self::OPTION_SHOW, self::SHOW_ALL);
+        return $this;
+    }
+
+    public function renderText() 
+    {
+        $this->setCustomOption(self::OPTION_SHOW, self::SHOW_EMAIL);
+        return $this;
+    }
 }

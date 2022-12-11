@@ -4,7 +4,6 @@ namespace Base\Entity\User;
 
 use App\Entity\User;
 use Base\Service\Model\IconizeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 
 use Base\Service\BaseService;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
@@ -25,14 +24,14 @@ use Base\Traits\BaseTrait;
 use Throwable;
 use Exception;
 use UnexpectedValueException;
-use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Base\Database\Annotation\DiscriminatorEntry;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\NotificationRepository;
 use Base\Database\Annotation\Cache;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -71,10 +70,10 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
      */
     protected $user;
 
-    public function getUser() { return $this->user; }
-
+    public function getUser() : ?User { return $this->user; }
     public function setUser(?User $user): self
     {
+        
         if ($this->user) {
             $this->user->removeNotification($this);
             $this->removeContextKey("user");
@@ -82,9 +81,18 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         if(($this->user = $user) ) {
             $this->user->addNotification($this);
+            $this->setRecipient($this->user->getRecipient());
             $this->addContextKey("user", $this->user);
         }
 
+        return $this;
+    }
+
+    protected RecipientInterface $recipient;
+    public function getRecipient(): RecipientInterface { return $this->recipient; }
+    public function setRecipient(?RecipientInterface $recipient): self
+    {
+        $this->recipient = $recipient ?? new NoRecipient();
         return $this;
     }
 
@@ -269,7 +277,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     {
         $backtrace = debug_backtrace()[0];
         $this->backtrace = $backtrace["file"].":".$backtrace["line"];
-        $this->recipient = new ArrayCollection();
+        $this->recipient = new NoRecipient();
 
         // Inject service from base class..
         if (User::getNotifier() == null)
@@ -300,7 +308,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         } else if($this->getTwig()->getLoader()->exists($content)) {
             
             $this->setHtmlTemplate($content);
-
+            $this->setContent("");
+            
         } else {
 
             $this->setContent($this->getTranslator()->trans($content, $parameters, $domain, $locale) ?? "");
@@ -315,17 +324,16 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         return new Response($htmlTemplate ? $this->getTwig()->render($htmlTemplate, $context) : $this->getContent());
     }
 
-    public function send(string $importance, RecipientInterface ...$recipients)
+    public function send(string $importance = null, RecipientInterface ...$recipients)
     {
-        $this->setImportance($importance);
+        $this->setImportance($importance ?? self::IMPORTANCE_DEFAULT);
 
-        $userRecipient = $this->user?->getRecipient();
-        if($userRecipient !== null && !in_array($userRecipient, $recipients))
-            $recipients[] = $this->user->getRecipient();
-        if(empty($recipients)) 
-            $recipients[] = new NoRecipient();
+        $userRecipient = $this->getRecipient();
+        if(empty($recipients) && $userRecipient !== null)
+                $recipients[] = $userRecipient;
 
-        User::getNotifier()->sendUsers($this, ...array_unique($recipients));
+        $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
+        User::getNotifier()->sendUsers($this, ...array_unique_object($recipients));
 
         return $this;
     }
@@ -335,13 +343,12 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         if(!$this->getImportance())
             $this->setImportance(Notification::IMPORTANCE_DEFAULT);
 
-        $userRecipient = $this->user?->getRecipient();
+        $userRecipient = $this->getRecipient();
         if($userRecipient !== null && !in_array($userRecipient, $recipients))
-            $recipients[] = $this->user->getRecipient();
-        if(empty($recipients)) 
-            $recipients[] = new NoRecipient();
+            $recipients[] = $this->getRecipient();
 
-        User::getNotifier()->sendUsersBy($channels, $this, ...array_unique($recipients));
+        $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
+        User::getNotifier()->sendUsersBy($channels, $this, ...array_unique_object($recipients));
 
         return $this;
     }
@@ -363,13 +370,15 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
     {
         $notifier = User::getNotifier();
+        $notification = EmailMessage::fromNotification($this, $recipient, $transport);
 
         /**
          * @var EmailRecipientInterface
          */
 
         $technicalRecipient = $notifier->getTechnicalRecipient();
-        if($technicalRecipient instanceof NoRecipient) throw new UnexpectedValueException("No support address found.");
+        if($technicalRecipient instanceof NoRecipient) 
+            throw new UnexpectedValueException("No support address found.");
 
         $title = $this->getTitle();
         $content = $this->getContent();
@@ -378,28 +387,32 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $importance = $this->getImportance();
         $this->setImportance(""); // Remove importance from email subject
 
+        $fwd = "";
+        $subject = $this->getSubject();
+        $from = $technicalRecipient->getEmail();
+        $to   = $recipient->getEmail();
+   
         if($this->isMarkAsAdmin()) {
 
             $user = $this->user ?? "User \"".User::getIp()."\"";
-            $subject = "Fwd: " . $this->getSubject();
+            $fwd .= "Fwd: ";
             $title   = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
             $content = $this->getContent();
-            $from    = $technicalRecipient->getEmail();
-
-        } else if($this->user && $this->user->getRecipient() != $recipient) {
-
-            $subject = "Fwd: " . $this->getSubject();
-            $from    = "[".$notifier->getTranslator()->trans("@emails.fake_test.author")."] ". $this->user->getRecipient()->getEmail();
-            $footer  = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
-            $footer  = implode(" - ", array_filter($footer));
-
-        } else {
-
-            $subject = $this->getSubject();
-            $from    = $technicalRecipient->getEmail();
         }
 
-        $notification = EmailMessage::fromNotification($this, $recipient, $transport);
+        dump($recipient);
+        exit(1);
+        if(User::getNotifier()->isTest($recipient)) {
+
+            $fwd = "Test: ";
+            $email = array_keys(mailparse($recipient->getEmail()));
+            $email = mailformat(mailparse($this->getRecipient()->getEmail()), null, first($email));
+            $to   = "[".$notifier->getTranslator()->trans("@emails.fake_test.author")."] ". $email;
+
+            $from = $recipient->getEmail();
+            $footer  = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
+            $footer  = implode(" - ", array_filter($footer));
+        }
 
         /**
          * @var TemplatedEmail
@@ -409,7 +422,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             "importance"  => $importance,
             "title"       => $title,
             "content"     => $content,
-            "footer_text" => $footer
+            "footer_text" => $footer,
+            "recipient"   => $recipient
         ]);
 
         // Attach images using cid:/
@@ -428,11 +442,15 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         // I was hoping to replace content with html(), but this gets overriden by Symfony notification
         $htmlTemplate = $this->getTwig()->render($this->htmlTemplate, $context);
         if(preg_match('/<title>(.*)<\/title>/ims', $htmlTemplate, $matches))
-            $subject = trim($matches[1] ?? $this->getSubject());
+            $subject = trim($matches[1]);
+
+        $subject ??= $this->getSubject();
+        $subject = $fwd.$subject;
 
         $email
             ->subject($subject)
             ->from($from)
+            ->to($to)
             //->html($html) // DO NOT USE: Overridden by the default Symfony notification template
             ->htmlTemplate($this->htmlTemplate)
             ->context($context);
@@ -446,22 +464,21 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $chatMessage = ChatMessage::fromNotification($this, $recipient, $transport);
 
         $user = ($this->user ? $this->user->getUsername() : "User \"".User::getIp()."\"");
+
+        $fwd = "";
+        $content = $this->getContent();
+        $user = $this->user ?? "User \"" . User::getIp() . "\"";
+
         if($this->isMarkAsAdmin()) {
 
+            $fwd = "Fwd: ";
             $user = $this->user ?? "User \"" . User::getIp() . "\"";
-            $subject = "Fwd: " . $this->getSubject();
             $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";
 
-        } else if($this->user && $this->user->getRecipient() != $recipient) {
+        } else if($this->getRecipient() != $recipient && User::getNotifier()->isTest($recipient)) {
 
             $user = $recipient;
-            $subject = "Fwd: [TEST:".$recipient."] " . $this->getSubject();
-            $content = $this->getContent();
-
-        } else {
-
-            $user = $this->user ?? "User \"" . User::getIp() . "\"";
-            $subject = $this->getSubject();
+            $fwd = "Fwd: [TEST:".$recipient."] ";
             $content = $this->getContent();
         }
 
@@ -470,7 +487,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
                 $chatMessage->options(new DiscordOptions(["username" => $user]));
         }
 
-        $chatMessage->subject("[" . $subject. "] " . $content);
+        $chatMessage->subject($fwd . "[" . $this->getSubject(). "] " . $content);
         return $chatMessage;
     }
 }

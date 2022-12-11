@@ -124,16 +124,26 @@ class EntityHydrator implements EntityHydratorInterface
         return $entity;
     }
 
-    public function dehydrate(mixed $entity, array $fieldExceptions = []): ?array
+    public function dehydrate(mixed $entity, array $fieldExceptions = [], int $aggregateModel = self::CLASS_METHODS|self::OBJECT_PROPERTIES): ?array
     {
         if($entity === null) return null;
 
         $data = $entity ?? [];
         $data = $data instanceof Collection ? $data->toArray() : $data;
-        if(is_object($data)) $data = array_transforms(
-            fn($k, $e):array => [str_lstrip($k, "\x00*\x00"), $e instanceof ArrayCollection && $e->isEmpty() ? null : $e],
-            (array) $data
-        );
+        if(is_object($data)) {
+            
+            $data = array_transforms(
+                function($k, $e) use ($aggregateModel, $data) :array {
+
+                    $varName = str_lstrip($k, "\x00*\x00");
+                    if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isReadable($data, $varName))
+                        return [$varName, $this->propertyAccessor->getValue($data, $varName)];
+
+                    if($aggregateModel & self::OBJECT_PROPERTIES)
+                        return [$varName, $e instanceof ArrayCollection && $e->isEmpty() ? null : $e];
+
+                }, (array) $data);
+        }
 
         return array_key_removes($data, ...$fieldExceptions);
     }

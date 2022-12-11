@@ -70,10 +70,10 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
             $formModelClass = str_replace("\\Type\\", "\\Model\\", str_rstrip($type, "Type")."Model");
 
         if($formModelClass && !class_implements_interface($formModelClass, FormModelInterface::class))
-            throw new Exception("Form model \"$formModelClass\" must exist and implement \"".FormModelInterface::class."\". Please disable option `use_model` if you don't want to use DTO model schema");
-        
+            throw new Exception("Form model \"$formModelClass\" must implement \"".FormModelInterface::class."\". Please disable option `use_model` if you don't want to use DTO model schema");
+
         if($formModelClass) {
-        
+
             if(!$data) $data = cast_empty($formModelClass);
             else if(is_array($data)) $data = cast_from_array($data, $formModelClass);
             else $data = cast($data, $formModelClass);

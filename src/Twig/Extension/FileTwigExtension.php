@@ -8,6 +8,7 @@ use Base\Routing\RouterInterface;
 use Base\Service\FileService;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
+use Base\Service\Obfuscator;
 use Base\Twig\Environment;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Twig\Error\LoaderError;
@@ -54,7 +55,9 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFilter('url',            [$this, 'url'], ['needs_context' => true]),
             new TwigFilter('asset',          [AdvancedRouter::class, 'getAssetUrl']),
             new TwigFilter('filesize',       [FileService::class,    'filesize']),
-            new TwigFilter('obfuscate',      [FileService::class,    'obfuscate']),
+            new TwigFilter('obfuscate',      [Obfuscator::class,     'encode']),
+            new TwigFilter('obfuscate_file', [FileService::class,    'obfuscate']),
+            new TwigFilter('obfuscate_image',[ImageService::class,   'obfuscate']),
             new TwigFilter('imagine',        [ImageService::class,   'imagine']),
             new TwigFilter('webp',           [ImageService::class,   'webp']),
             new TwigFilter('crop',           [ImageService::class,   'crop']),

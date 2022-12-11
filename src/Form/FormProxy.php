@@ -61,6 +61,9 @@ class FormProxy implements FormProxyInterface
 
     public function create(string $name, string $type = FormType::class, mixed $data = null, array $options = [], array $listeners = []): FormInterface
     {
+        if(array_key_exists($name, $this->forms))
+            throw new Exception("Form \"$name\" already exists.");
+
         $this->forms[$name] = $this->formFactory->create($type, $data, $options, $listeners);
         return $this->forms[$name];
     }

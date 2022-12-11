@@ -15,7 +15,7 @@
 {% if ea.crud.currentAction == 'detail' %}
     {% set show = "all" %}
 {% endif %}
-
+<div class="form-email">
     {% if show != "email" %}
     <a href="mailto:{{ email }}">
         <span class="field-email-icon" {% if show == "icon" %}data-toggle="tooltip" data-placement="top" title="{{ email }}"{% endif %}>
@@ -26,6 +26,7 @@
 
     {% if show != "icon" %}
     <a href="mailto:{{ email }}">
-        {{ email }}
+        {{ email|str_shorten(25, constant("SHORTEN_MIDDLE")) }}
     </a>
     {% endif %}
+    </div>

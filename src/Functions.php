@@ -2035,6 +2035,18 @@ namespace {
         return $matches;
     }
 
+    function mailformat(array $address, ?string $name = null, ?string $email = null): string
+    {
+        $email ??= array_keys($address)[0] ?? null;
+        if(!$email) return "";
+
+        $name ??= first($address);
+        $name = $name ? $name : array_keys($address)[0] ?? $email;
+        
+        $name = str_replace("@", "[at]", $name);
+        return $name." <".$email.">";
+    }
+
     function array_unique_end($array)
     {
         $len = count($array);
@@ -2045,6 +2057,26 @@ namespace {
     {
         $arrayMask = array_fill_keys(array_keys(array_unique(array_map($callback, $array), $flags)), null);
         return array_intersect_key($array, $arrayMask);
+    }
+
+    function object_hydrate($object, array $vars)
+    {
+        $reflClass      = new ReflectionClass($object);
+
+        do {
+
+            foreach ($reflClass->getProperties() as $reflProperty) {
+
+                $value = $vars[$reflProperty->getName()] ?? null;
+                if(!$value) continue;
+
+                $reflProperty->setAccessible(true);
+                $reflProperty->setValue($object, $value);
+            }
+
+        } while ($reflClass = $reflClass->getParentClass());
+
+        return $object;
     }
 
     function cast_from_array(array $array, string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"',serialize((object) $array) )); }

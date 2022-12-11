@@ -162,6 +162,11 @@ form fieldset
 .content-body fieldset { padding: 1em 0.5em 1.25em 1em; }
 
 form fieldset legend { font-size: 11pt; }
+.datagrid td             .form-email { display: flex; }
+.datagrid td.text-left   .form-email { justify-content: flex-start; }
+.datagrid td.text-center .form-email { justify-content: center; }
+.datagrid td.text-right  .form-email { justify-content: flex-end; }
+
 .datagrid .lightbox-association img { filter: blur(2px); }
 .datagrid .lightbox-association:hover img { filter: blur(0px); }
 .datagrid .lightbox-association:hover span { visibility:hidden; }
@@ -338,12 +343,6 @@ form fieldset legend { font-size: 11pt; }
 }
 
 .main-content .content-top::-webkit-scrollbar { display: none; }
-.main-content .content-top {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    overflow-x:auto;
-}
-
 .main-content .content {
     max-width: calc(100vw - var(--sidebar-max-width));
 }

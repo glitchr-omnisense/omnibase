@@ -199,7 +199,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         if($this->getService()->isGranted("ROLE_ADMIN"))
             return true;
 
-        if($this->getAuthor() == $this->getTokenStorage()->getToken())
+        if($this->getOwners()->contains($this->getTokenStorage()->getToken()))
             return true;
 
         return $this->isApproved() && $this->isPublished() && !$this->isSecret();

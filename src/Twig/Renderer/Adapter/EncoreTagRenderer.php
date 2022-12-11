@@ -8,6 +8,8 @@ use Base\Traits\SimpleCacheTrait;
 use Base\Twig\Environment;
 use Base\Twig\Renderer\AbstractTagRenderer;
 use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookup;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
@@ -21,11 +23,17 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     private ?CacheItemPoolInterface $cache = null;
     use SimpleCacheTrait;
 
-    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, EntrypointLookupCollectionInterface $entrypointLookupCollection, string $publicDir)
+    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, EntrypointLookupCollectionInterface $entrypointLookupCollection, string $publicDir, string $cacheDir)
     {
         parent::__construct($twig, $localeProvider);
         $this->entrypointLookupCollection = $entrypointLookupCollection;
         $this->publicDir = $publicDir;
+
+        // NB:: $this->getCache() issue..
+        // $this->cacheDir = $cacheDir;
+        // $cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
+        // $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));
+        // $this->warmUp($cacheDir);
     }
 
     public function warmUp(string $cacheDir): bool
@@ -34,7 +42,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         return true;
     }
 
-    protected ?array $encoreEntrypoints     = null;
+    protected ?array $encoreEntrypoints;
     protected  array $encoreEntryLinkTags   = [];
     protected  array $encoreEntryScriptTags = [];
 

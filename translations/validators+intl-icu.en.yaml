@@ -25,7 +25,10 @@ file:
 
 password:
    not_matching: "Passwords are not matching."
-   min_length: "Password is expected to be {0} long."
+   min_length: "{0, plural,
+      =1 {Password is expected to be # character long.}
+      other {Password is expected to be # characters long.}
+   }"
    min_strength: "Minimum required strength is {0}."
 
 not_blank: "Field \"{label}\" is blank."

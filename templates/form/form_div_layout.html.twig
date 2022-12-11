@@ -375,7 +375,6 @@
 
     {% if not multiple %}
         <figure class="lazyload">
-
             <img id="{{id}}_thumbnail" style="cursor: pointer;" data-src="{{ form.vars.value | thumbnail(500,500) | default(thumbnail) }}" />
             <figcaption id="{{id}}_figcaption">
                 <div class="figwrapper">

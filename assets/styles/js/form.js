@@ -12,8 +12,9 @@ window.addEventListener('load', function(event) {
         if(!form.length) form = $(this).closest("form.needs-validation");
 
         if (!this.checkValidity()) {
-            event.preventDefault()
-            event.stopPropagation()
+
+            event.preventDefault();
+            event.stopPropagation();
         }
 
         var el = $(form).find(":invalid, .has-error");

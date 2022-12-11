@@ -7,11 +7,13 @@ use Base\Service\LocaleProvider;
 use Base\Traits\BaseTrait;
 use Exception;
 use Generator;
+use Symfony\Bundle\FrameworkBundle\Controller\RedirectController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\RedirectableUrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMatcherInterface
 {
@@ -112,6 +114,13 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         $this->getContext()->setHost($parse["host"] ?? "");
         $this->getContext()->setBaseUrl($parse["base_dir"] ?? "");
 
-        return parent::match(str_lstrip($parse["path"] ?? $pathinfo, $this->getContext()->getBaseUrl()));
+        $pathinfo = str_lstrip($parse["path"] ?? $pathinfo, $this->getContext()->getBaseUrl());
+        try { $match = parent::match($pathinfo); } // Hand the case there is a "/$" in @Route
+        catch(ResourceNotFoundException $e) { $match = []; }
+
+        if(empty($match) || (array_key_exists("_controller", $match) && $match["_controller"] == RedirectController::class."::urlRedirectAction")) 
+            $match = parent::match($pathinfo."/");
+
+        return $match;
     }
 }

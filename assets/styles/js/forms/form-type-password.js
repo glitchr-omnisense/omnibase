@@ -17,7 +17,7 @@ $(document).on("DOMContentLoaded", function () {
             var minStrengthStr   = el.getAttribute("data-password-minstrength[feedback]");
             var minLength        = el.getAttribute("data-password-minlength") ?? 0;
             var minLengthStr     = el.getAttribute("data-password-minlength[feedback]");
-            var allowEmpty       = el.getAttribute("data-password-allow-empty");
+            var allowEmpty       = el.getAttribute("data-password-allow-empty") || minLength == 0;
             var passwordMatchStr = el.getAttribute("data-password-match[feedback]");
 
             function checkStrength(strength) {

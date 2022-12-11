@@ -36,7 +36,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
     { 
         $action = str_starts_with($method, "render") ? "render" : (str_starts_with($method, "send") ? "send" : null);
         if(!$action)
-            throw new AccessException("Unexpected action received. Templated notification \"$method\" starts with either  \"send\" or \"render\".");
+            throw new AccessException("Unexpected action received. Templated notification \"$method\" should starts with either  \"send\" or \"render\".");
 
         $method = lcfirst(substr($method, strlen($action)));
         if(method_exists(self::class, $method))
@@ -289,6 +289,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Set importance of the notification
         $this->markAsAdmin(false);
 
+        $prevRecipient = $notification->getRecipient();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
@@ -300,7 +301,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
             // Set selected channels, if any
             $channels    = $this->getUserChannels($notification->getImportance(), $recipient);
-            if (empty($channels))
+            if (!$recipient instanceof NoRecipient && empty($channels))
                 throw new Exception("No valid channel for the notification \"".$notification->getBacktrace()."\" sent with \"".$notification->getImportance()."\"");
 
             $prevChannels = array_merge($prevChannels, $channels);
@@ -312,11 +313,13 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
 
+            $notification->setRecipient($recipient);
             $this->send($notification, $this->isTest($recipient) ? $technicalRecipient : $recipient);
             $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);
+        $notification->setRecipient($prevRecipient);
         $notification->setSentAt(new \DateTime("now"));
 
         return $this;
@@ -327,6 +330,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Set importance of the notification
         $this->markAsAdmin(false);
 
+        $prevRecipient = $notification->getRecipient();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
@@ -347,11 +351,13 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
 
+            $notification->setRecipient($recipient);
             $this->send($notification, $this->isTest($recipient) ? $technicalRecipient : $recipient);
             $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);
+        $notification->setRecipient($prevRecipient);
         $notification->setSentAt(new \DateTime("now"));
 
         return $this;
@@ -363,6 +369,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $this->markAsAdmin(true, $notification);
 
         // Reset channels and keep here them for later use
+        $prevRecipient = $notification->getRecipient();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
@@ -380,12 +387,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $localeBak = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
-            
+
+            $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
             $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);
+        $notification->setRecipient($prevRecipient);
 
         $this->markAsAdmin(false);
         return $this;

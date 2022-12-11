@@ -208,7 +208,7 @@ class AdvancedRouter implements RouterInterface
 
     public function match(string $pathinfo)       : array { return $this->router->match($pathinfo); }
     public function matchRequest(Request $request): array { return $this->router->matchRequest($request); }
-    public function getMatcher(): UrlMatcherInterface { return  $this->router->getMatcher(); }
+    public function getMatcher(): UrlMatcherInterface { return $this->router->getMatcher(); }
 
     public function getRouteCollection(): RouteCollection { return $this->router->getRouteCollection(); }
 

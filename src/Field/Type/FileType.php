@@ -6,7 +6,6 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Routing\RouterInterface;
-use Base\Service\BaseService;
 use Base\Service\FileService;
 use Base\Service\ImageService;
 use Base\Service\ObfuscatorInterface;
@@ -221,11 +220,13 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["mime_types"] = $mimeTypes;
         $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
-
+        
         $view->vars['clippable'] = $view->vars['path'] = $view->vars['download'] = json_encode([]);
         if(!is_array($view->vars["value"]) && $options["multiple"])
             $view->vars["value"] = [$view->vars["value"]];
-
+        else if (is_array($view->vars["value"]) && !$options["multiple"])
+            $view->vars["value"] = first($view->vars["value"]);
+            
         if(is_array($view->vars['value'])) {
 
             if ($view->vars['value']) {
@@ -251,7 +252,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $view->vars['download']  = $this->fileService->downloadable($view->vars["value"]);
             $view->vars['clippable'] = $this->fileService->isImage($view->vars["value"]);
         }
-
+        
         $view->vars["clipboard"]    = $options["clipboard"];
         $view->vars["sortable"]     = true;
         $view->vars['dropzone']     = null;

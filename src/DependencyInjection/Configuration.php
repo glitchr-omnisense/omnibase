@@ -41,7 +41,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')
                         ->info('Global list of fields to exclude from form generation. (Default: id, locale, translatable)')->end()
                         ->end()
-                ->end()
+                    ->end()
                 ->end()
 
                 ->arrayNode('share')

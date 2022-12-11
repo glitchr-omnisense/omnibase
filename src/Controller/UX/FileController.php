@@ -244,6 +244,7 @@ class FileController extends AbstractController
 
         $output = pathinfo_extension($hashid."/image", "webp");
         $path = $this->imageService->filter($config["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+
         return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
 
