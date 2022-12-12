@@ -8,6 +8,7 @@ use Base\Service\ParameterBagInterface;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Base\Twig\Renderer\TagRendererInterface;
 use Exception;
+use LogicException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment as TwigEnvironment;
@@ -30,6 +31,14 @@ class Environment extends TwigEnvironment
         if(!$name) return $this->getGlobals();
 
         return (array_key_exists($name, $this->getGlobals())) ? $this->getGlobals()[$name] : null;
+    }
+
+    public function addGlobal(string $name, $value): bool
+    {
+        try { parent::addGlobal($name, $value); }
+        catch ( LogicException $e ) { return false; }    
+
+        return true;
     }
 
     public function hasParameter(string $name) { return $this->getGlobals()[$name] ?? null; }

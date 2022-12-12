@@ -20,8 +20,6 @@ html, body { scroll-padding-top: 11em; }
     height:100%;
 }
 
-.ql-align-right img { float: right; }
-.ql-align-left img { float: left; }
 .ql-editor {
     text-align:inherit;
     white-space: pre-line;

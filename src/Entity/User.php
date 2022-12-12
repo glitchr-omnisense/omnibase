@@ -209,7 +209,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getEmail(): ?string { return $this->email; }
     public function setEmail(string $email): self
     {
-        $this->email = $email;
+        $this->email = strtolower($email);
 
         return $this;
     }
