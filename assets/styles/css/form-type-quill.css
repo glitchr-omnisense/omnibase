@@ -89,9 +89,10 @@
   margin-bottom: 1em !important;
 }
 
-@media all and (max-width: 470) {
+@media all and (max-width: 470px) {
     .ql-editor img { width:100%; }
 }
+
 @media all and (max-width: 1024px) {
 
     .ql-editor h2 {
