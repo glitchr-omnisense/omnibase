@@ -2,11 +2,8 @@
     float: left; 
     
     padding:1em; 
-    width:100%;
     max-width:400px;
     max-height:400px;
-
-    border-radius: 2em;
 }
 .ql-editor .ql-align-justify img { float: initial; }
 .ql-editor .ql-align-center img { float: initial; }
