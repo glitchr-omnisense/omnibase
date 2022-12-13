@@ -42,7 +42,7 @@ class IconProvider extends SimpleCache
 
             }, $this->router->getRouteCollection()->all())
         );
-        
+
         return true;
     }
 
@@ -98,7 +98,7 @@ class IconProvider extends SimpleCache
             $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
         else if(($routeIcons = $this->getRouteIcons($icon)))
             $icon = $routeIcons;
-        
+
         if(is_array($icon) && is_associative($icon)) return array_map_recursive(fn($i) => $this->iconify($i, $attributes, false), $icon);
         if(is_array($icon)) {
 
@@ -116,6 +116,6 @@ class IconProvider extends SimpleCache
             }
         }
 
-        return $this->iconify("fas fa-question-circle", $attributes, $wrap) ?? null;
+        return ["fas fa-question-circle"]; //$this->iconify("fas fa-question-circle", $attributes, $wrap) ?? null;
     }
 }

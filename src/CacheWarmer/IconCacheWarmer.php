@@ -7,7 +7,7 @@ use Base\Cache\SimpleCacheWarmer;
 use Base\Service\IconProvider;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-class IconCacheWarmer extends SimpleCacheWarmer { 
+class IconCacheWarmer extends SimpleCacheWarmer {
 
     public function __construct(IconProvider $iconProvider, string $cacheDir)
     {
@@ -18,9 +18,9 @@ class IconCacheWarmer extends SimpleCacheWarmer {
     protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter): bool
     {
         $ret = parent::doWarmUp($cacheDir, $arrayAdapter);
-        
+
         foreach($this->adapters as $adapter) {
-        
+
             $adapter->setCache($arrayAdapter);
             $ret &= $adapter->warmUp($cacheDir);
         }

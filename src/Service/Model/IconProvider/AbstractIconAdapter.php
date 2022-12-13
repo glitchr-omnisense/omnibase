@@ -3,12 +3,23 @@
 namespace Base\Service\Model\IconProvider;
 
 use Base\Cache\SimpleCache;
+use Base\Service\IconProvider;
 use Base\Service\Model\IconizeInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\Yaml\Yaml;
 
 abstract class AbstractIconAdapter extends SimpleCache implements IconAdapterInterface
 {
     protected string $metadata;
+
+    public function __construct(string $cacheDir)
+    {
+        $cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], IconProvider::class).".php";
+
+        $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));
+        $this->warmUp($cacheDir);
+    }
 
     public function warmUp(string $cacheDir): bool
     {

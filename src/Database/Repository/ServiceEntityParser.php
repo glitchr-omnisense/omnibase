@@ -1527,8 +1527,8 @@ class ServiceEntityParser
 
         // $query->setResultCacheId("test");
         $query->useQueryCache($this->cacheable);
-        if($this->cacheable) $query->enableResultCache();
-        else $query->disableResultCache();
+        // if($this->cacheable) $query->enableResultCache();
+        // else $query->disableResultCache();
 
         //
         // Apply custom output walker to all entities (some join may relates to translatable entities)

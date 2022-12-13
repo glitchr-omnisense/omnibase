@@ -41,7 +41,7 @@ class FontAwesomeAdapter extends AbstractIconAdapter
 
         $this->version = $this->getCache("/Version", function() {
 
-            $version = first($this->getEntries())["changes"] ?? [];
+            $version = first($this->getEntries())["changes"];
             $version = last($version);
             return $version ?? "unk.";
         });
