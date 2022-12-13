@@ -116,6 +116,6 @@ class IconProvider extends SimpleCache
             }
         }
 
-        return ["fas fa-question-circle"]; //$this->iconify("fas fa-question-circle", $attributes, $wrap) ?? null;
+        return $this->iconify("fas fa-question-circle", $attributes, $wrap) ?? null;
     }
 }
