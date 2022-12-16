@@ -21,6 +21,8 @@ class FormProxy implements FormProxyInterface
     protected array $forms = [];
 
     public function all() { return $this->forms; }
+
+    public function empty(): bool { return empty($this->forms); }
     public function has(string $name):bool { return array_key_exists($name, $this->forms); }
     
     public function getData    (string $name, ?string $childName = null): mixed {

@@ -58,10 +58,7 @@ class ProfileController extends AbstractController
                     $user = $formProcessor->hydrate($user);
                     $this->entityManager->flush();
 
-                    return $this->render('@Base/client/user/profile_edit.html.twig', [
-                        'user' => $user, 
-                        "form" => $formProcessor->getForm()->createView()
-                    ]);
+                    return $this->redirectToRoute('user_profileEdit');
                 })
                 ->handleRequest($request)
                 ->getResponse();
