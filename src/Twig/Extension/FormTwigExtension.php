@@ -17,11 +17,13 @@ final class FormTwigExtension extends AbstractExtension
     public function getFunctions() : array 
     { 
         return [
+            new TwigFunction('use_form_proxy', [$this, 'useForm']),
             new TwigFunction('form_proxy', [$this, 'getForm']),
             new TwigFunction('form_view', [$this, 'getView']),
         ]; 
     }
 
+    public function useForm(): bool { return $this->formProxy->empty(); }
     public function getForm(string $name): ?FormInterface { return $this->formProxy->get($name); }
     public function getView(string $name): ?FormView
     {
