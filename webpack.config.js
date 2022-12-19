@@ -49,7 +49,7 @@ Encore
         to: 'images/[path][name].[ext]',
         pattern: /\.svg$/
     })
-    
+
     .configureCssMinimizerPlugin((options) => {
         options.minimizerOptions = {
             preset: [
@@ -73,8 +73,8 @@ Encore
     // uncomment if you're having problems with a jQuery plugin
     .autoProvidejQuery()
 
-    .addEntry('base', './assets/base.js')
-    .addEntry('easyadmin', './assets/easyadmin.js')
-    .addEntry('form', './assets/form.js');
+    .addEntry('base.defer', './assets/base.defer.js')
+    .addEntry('easyadmin.defer', './assets/easyadmin.defer.js')
+    .addEntry('form.defer', './assets/form.defer.js');
 
 module.exports = Encore.getWebpackConfig();

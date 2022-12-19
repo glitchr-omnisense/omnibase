@@ -114,7 +114,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $extension[] = array_pop($basename);
             $extension[] = array_pop($basename);
             $extension = implode(".", array_reverse($extension));
-            $basename  = implode(".", $basename); 
+            $basename  = implode(".", $basename);
 
             $lang           = $this->localeProvider->getLang();
             $defaultLang    = $this->localeProvider->getDefaultLang();

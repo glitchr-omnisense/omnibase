@@ -1,9 +1,21 @@
 {% for tag in tags %}
-    {% if tag.preload ?? false %}
-        <link rel="preload" href="{{ call_user_func_if_exists('preload', [asset(tag.value, tag.packageName), { as: 'script', nopush: tag.nopush }]) }}"
-        {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
+    {%- set preload        = tag.preload ?? false -%}
+    {%- set defer          = tag.defer ?? false -%}
+    {%- set value          = tag.value ?? null -%}
+    {%- set packageName    = tag.packageName ?? null -%}
+    {%- set nopush         = tag.nopush ?? false -%}
+    {%- set async          = tag.async ?? false -%}
+    {%- set htmlAttributes = tag.htmlAttributes ?? [] -%}
+    {%- set htmlAttributes = htmlAttributes|merge({'as': 'script'}) -%}
+    {% if nopush %}
+        {%- set htmlAttributes = htmlAttributes|merge({'nopush': nopush}) -%}
+    {% endif %}
+    {% if defer %}
+        {%- set htmlAttributes = htmlAttributes|merge({'defer':''}) -%}
+    {% endif %}
+    {% if preload %}
+    {{ ('<link rel="preload" href="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ ">")|raw }}
     {% else %}
-        <script src="{{ asset(tag.value, tag.packageName ?? null) }}" {{ (tag.async ?? false) ? 'async' }} {{ (tag.defer ?? false) ? 'defer' }}
-        {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}></script>
+    {{ ('<script src="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ "></script>")|raw }}
     {% endif %}
 {% endfor %}
