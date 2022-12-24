@@ -15,12 +15,20 @@ class FormProxy implements FormProxyInterface
 
     public function __construct(FormFactoryInterface $formFactory)
     {
-        $this->formFactory   = $formFactory;
+        $this->formFactory  = $formFactory;
     }
 
     protected array $forms = [];
 
     public function all() { return $this->forms; }
+
+    protected bool $advancedForm = false;
+    public function advancedForm() { return $this->advancedForm; } 
+    public function useAdvancedForm(bool $advancedForm = true) 
+    { 
+        $this->advancedForm = $advancedForm;
+        return $this;
+    }
 
     public function empty(): bool { return empty($this->forms); }
     public function has(string $name):bool { return array_key_exists($name, $this->forms); }
