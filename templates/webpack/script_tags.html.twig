@@ -1,5 +1,7 @@
 {% for tag in tags %}
-    {% if tag.preload ?? false %}
+    {% set preload = tag.preload ?? false %}
+    {% set defer   = tag.defer ?? false %}
+    {% if preload or defer %}
         <link rel="preload" href="{{ call_user_func_if_exists('preload', [asset(tag.value, tag.packageName), { as: 'script', nopush: tag.nopush }]) }}"
         {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
     {% else %}

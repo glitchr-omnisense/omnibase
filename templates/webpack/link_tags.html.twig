@@ -1,9 +1,11 @@
 {% for tag in tags %}
-    {% if tag.preload ?? false %}
-        <link rel="preload" href="{{ call_user_func_if_exists('preload', [asset(tag.value, tag.packageName ?? null), { as: 'style', nopush: tag.nopush ?? false }]) }}"
-        {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
+    {% set preload = tag.preload ?? false %}
+    {% set defer   = tag.defer ?? false %}
+    {% if preload or defer %}
+        {% set href =  call_user_func_if_exists('preload', [asset(tag.value, tag.packageName ?? null), { as: 'style', nopush: tag.nopush ?? false }]) %}
+        <link rel="preload" href="{{ href }}" {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
+        <noscript><link rel="stylesheet" href="{{ href }}" {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}></noscript>
     {% else %}
-        <link rel="stylesheet" href="{{ asset(tag.value, tag.packageName ?? null) }}"
-        {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
+        <link rel="stylesheet" href="{{ asset(tag.value, tag.packageName ?? null) }}" {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
     {% endif %}
 {% endfor %}
