@@ -9,14 +9,14 @@ use Base\Twig\Renderer\AbstractTagRenderer;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\String\Slugger\SluggerInterface;
 use Twig\Error\LoaderError;
 
 class HtmlTagRenderer extends AbstractTagRenderer
 {
-    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, ParameterBagInterface $parameterBag, RequestStack $requestStack)
+    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack)
     {
-        parent::__construct($twig, $localeProvider);
-        $this->parameterBag = $parameterBag;
+        parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
         $this->requestStack = $requestStack;
     }
 
@@ -114,7 +114,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $extension[] = array_pop($basename);
             $extension[] = array_pop($basename);
             $extension = implode(".", array_reverse($extension));
-            $basename  = implode(".", $basename); 
+            $basename  = implode(".", $basename);
 
             $lang           = $this->localeProvider->getLang();
             $defaultLang    = $this->localeProvider->getDefaultLang();

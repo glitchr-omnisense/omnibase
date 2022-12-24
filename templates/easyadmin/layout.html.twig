@@ -13,8 +13,8 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noodp, noimageindex, notranslate, nocache" />
-        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-        <meta name="generator" content="EasyAdmin" />
+        <meta content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" name="viewport">
+        <meta name="description" content="{{ (_content_title ?? base.settings.get('base.settings.title.backoffice')['_self'] ?? null) }}" />
     {% endblock head_metas %}
 
     {% set page_title_block_output %}{% block page_title %}{{ _content_title }}{% endblock %}{% endset %}
@@ -80,13 +80,13 @@
         {% block flash_messages %}
             {{ include(ea.templatePath('flash_messages')) }}
         {% endblock flash_messages %}
-        
+
         {% set user_menu_avatar %}
         <div class="img-fluid">
             {% if null == ea.userMenu.avatarUrl %}
                 <i class="fa fa-3x fa-fw {{ ea.user is not null ? 'fa-user-circle' : 'fa-user-times' }} user-avatar"></i>
             {% else %}
-                <img class="user-avatar" data-src="{{ ea.userMenu.avatarUrl }}" />
+                <img class="user-avatar" alt="avatar" data-src="{{ ea.userMenu.avatarUrl }}" />
             {% endif %}
         </div>
         {% endset %}
@@ -162,7 +162,7 @@
                                             {% block header_logo %}
                                                 <a class="logo" title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
                                                     <div class="logo-custom lazybox">
-                                                        <img class="user-avatar" data-src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(250,250) }}" />
+                                                        <img class="user-avatar" alt="avatar" data-src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(250,250) }}" />
                                                     </div>
                                                     <span class="logo-compact"><i class="fas fa-home"></i></span>
                                                 </a>
@@ -231,7 +231,7 @@
                                         {% if null == online_user.avatarFile %}
                                         <i class="fa fa-3x fa-fw {{ ea.user is not null ? 'fa-user-circle' : 'fa-user-times' }} user-avatar"></i>
                                         {% else %}
-                                        <img class="user-avatar" data-src="{{ online_user.avatarFile|thumbnail(250,250) }}" />
+                                        <img class="user-avatar" alt="avatar" data-src="{{ online_user.avatarFile|thumbnail(250,250) }}" />
                                         {% endif %}
                                     </div>
                                     </li>

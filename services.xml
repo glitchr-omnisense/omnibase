@@ -575,11 +575,12 @@
         <service id="Base\Twig\Renderer\AbstractRenderer">
             <argument type="service" id="twig" />
             <argument type="service" id="locale_provider" />
+            <argument type="service" id="slugger" />
+            <argument type="service" id="parameter_bag" />
         </service>
         <service id="Base\Twig\Renderer\Adapter\HtmlTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true">
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
-            <argument type="service" id="parameter_bag" />
             <argument type="service" id="request_stack" />
         </service>
         <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true" >
@@ -895,7 +896,7 @@
         <service id="Base\Field\Type\EmojiPickerType">
             <tag name="form.type" />
         </service>
-        
+
         <service id="Base\Field\Type\SlugType"><tag name="form.type" />
             <argument type="service" id="twig" />
             <argument type="service" id="base.database.metadata_manipulator" />

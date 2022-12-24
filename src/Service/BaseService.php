@@ -37,7 +37,6 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -217,7 +216,7 @@ class BaseService implements RuntimeExtensionInterface
             ->includeReferrer()
             ->generateUrl();
     }
- 
+
     /**
      *
      * Symfony kernel container related methods

@@ -33,6 +33,10 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFunction('url',     [$this, 'url'], ['needs_context' => true]),
 
             new TwigFunction('iconify', [IconProvider::class,   'iconify'], ["is_safe" => ['all']]),
+            new TwigFunction('imagify', [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
+            new TwigFunction('urlify',  [$this, 'urlify' ], ["is_safe" => ['all']]),
+            new TwigFunction('linkify', [$this, 'linkify' ], ["is_safe" => ['all']]),
+
             new TwigFunction('asset',   [AdvancedRouter::class, 'getAssetUrl']),
         ];
     }
@@ -95,11 +99,11 @@ final class FileTwigExtension extends AbstractExtension
 
         return is_object($url) ? null : (is_string($url) ? $url : null);
     }
-    
+
     public function url(array $context, ?string $name, array $parameters = [], int $referenceType = AdvancedRouter::ABSOLUTE_PATH)
     {
         if($name == null) return $name;
-        
+
         $email = $context["email"] ?? null;
         $referenceType = $email instanceof WrappedTemplatedEmail ? AdvancedRouter::ABSOLUTE_URL : $referenceType;
 
@@ -111,15 +115,15 @@ final class FileTwigExtension extends AbstractExtension
         if(!$src) return $src;
 
         if(!str_starts_with($src, "@")) $src = "@Public/".str_lstrip($src, [$this->projectDir."/public", "/"]);
-        
-        try { 
-            $path = $twig->getLoader()->getSourceContext($src)->getPath(); 
+
+        try {
+            $path = $twig->getLoader()->getSourceContext($src)->getPath();
             $contentType = mime_content_type($path);
         }
         catch ( LoaderError $e) { throw $e; }
 
         $email = $context["email"] ?? null;
-       
+
         return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : str_lstrip($path, [
             $this->projectDir."/public",
             $this->projectDir."/data",

@@ -73,22 +73,27 @@ class ImageService extends FileService implements ImageServiceInterface
         return $supports_webp ? $this->webp($path, $filters, $config) : $this->image($path, $filters, array_merge($config, ["extension" => $extension]));
     }
 
-    public function imagify(null|array|string $path, array $attributes = []): ?string
+    public function imagify(null|array|string $path, array $attributes = [], ...$srcset): ?string
     {
         if(!$path) return $path;
         if(is_array($path)) return array_map(fn($s) => $this->imagify($s, $attributes), $path);
 
         $lazyload = array_pop_key("lazy", $attributes);
         $lazybox  = array_pop_key("lazy-box", $attributes);
+
+        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w", $srcset));
+        $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
+
         return $this->twig->render("@Base/image/default.html.twig", [
-            "path" => $this->imagine($path),
-            "attr" => $attributes,
+            "path"     => $this->imagine($path),
+            "attr"     => $attributes,
             "lazyload" => $lazyload,
             "lazybox"  => $lazybox
         ]);
     }
 
-    public function lightbox(null|array|string $path, array $attributes = [], array|string $lightboxId = null, array|string $lightboxTitle = null, array $lightboxAttributes = []): ?string
+    public function lightbox(null|array|string $path, array $attributes = [], array|string $lightboxId = null, array|string $lightboxTitle = null, array $lightboxAttributes = [], ...$srcset): ?string
     {
         $lightboxPathType = gettype($path);
         $lightboxIdType = gettype($lightboxId);
@@ -111,6 +116,11 @@ class ImageService extends FileService implements ImageServiceInterface
 
         $lazyload = array_pop_key("lazy", $attributes);
         $lazybox = array_pop_key("lazy-box", $attributes);
+
+        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w", $srcset));
+        $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
+
         return $this->twig->render("@Base/image/lightbox.html.twig", [
             "path" => $path,
             "attr" => $attributes,

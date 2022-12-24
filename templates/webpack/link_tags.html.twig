@@ -1,11 +1,26 @@
 {% for tag in tags %}
-    {% set preload = tag.preload ?? false %}
-    {% set defer   = tag.defer ?? false %}
-    {% if preload or defer %}
-        {% set href =  call_user_func_if_exists('preload', [asset(tag.value, tag.packageName ?? null), { as: 'style', nopush: tag.nopush ?? false }]) %}
-        <link rel="preload" href="{{ href }}" {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
-        <noscript><link rel="stylesheet" href="{{ href }}" {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}></noscript>
-    {% else %}
-        <link rel="stylesheet" href="{{ asset(tag.value, tag.packageName ?? null) }}" {% for attr, value in tag.htmlAttributes ?? [] %}{{ attr }}="{{ value|e('html_attr') }}" {% endfor %}>
+    {%- set preload        = tag.preload ?? false -%}
+    {%- set defer          = tag.defer ?? false -%}
+    {%- set async          = tag.async ?? false -%}
+    {%- set value          = tag.value ?? null -%}
+    {%- set preloadAs      = tag.preload_as ?? "style" -%}
+    {%- set packageName    = tag.packageName ?? null -%}
+    {%- set htmlAttributes = tag.htmlAttributes ?? [] -%}
+
+    {%- set nopush         = tag.nopush ?? false -%}
+    {% if nopush %}
+        {%- set htmlAttributes = htmlAttributes|merge({'nopush': nopush}) -%}
     {% endif %}
+
+    {%- set media = tag.media ?? null -%}
+    {% if media %}
+        {%- set htmlAttributes = htmlAttributes|merge({'media': media}) -%}
+    {% endif %}
+
+    {% if preload or async or defer %}
+        {{ ('<link rel="preload" href="'~ asset(value, packageName) ~ '" as="' ~ preloadAs ~ '">')|raw }}
+    {% endif %}
+
+    {{ ('<link rel="stylesheet" href="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ '>')|raw }}
+
 {% endfor %}
