@@ -79,22 +79,33 @@ class TwigSubscriber implements EventSubscriberInterface
     {
         $this->encoreTagRenderer->addEntrypoint("_base", $this->publicDir."/bundles/base/entrypoints.json");
         $this->encoreTagRenderer->addTag("base", "_base");
-        $this->encoreTagRenderer->addTag("form", "_base");
 
+        //
+        // Permission based entries
         foreach(UserRole::getPermittedValues() as $role) {
 
-            $tag = "security.".strtolower(str_lstrip($role, "ROLE_"));
+            $tag = "security-".strtolower(str_lstrip($role, "ROLE_")."-async");
             if(!$this->encoreTagRenderer->hasEntry($tag)) continue;
 
             if ($this->authorizationChecker->isGranted($role))
                 $this->encoreTagRenderer->addTag($tag);
         }
+
+        //
+        // Breakpoint based entries
+        foreach($this->parameterBag->get("base.twig.breakpoints") as $breakpoint)
+            $this->encoreTagRenderer->addBreakpoint($breakpoint["name"], $breakpoint["media"] ?? "all");
+
+        //
+        // Alternative entries
+        $this->encoreTagRenderer->addAlternative("async");
+        $this->encoreTagRenderer->addAlternative("defer");
     }
 
     public function onKernelResponse(ResponseEvent $event)
     {
         $allowRender = $this->allowRender($event);
-        if(!$allowRender) 
+        if(!$allowRender)
             return false;
 
         $response = $event->getResponse();

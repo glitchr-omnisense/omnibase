@@ -1,11 +1,4 @@
-import './styles/form.scss';
-
-import 'bootstrap'
-import 'bootstrap-icons/font/bootstrap-icons';
-
-import '@fortawesome/fontawesome-free/css/all.min.css';
-import fontawesome from '@fortawesome/fontawesome-free'
-fontawesome.config = { autoReplaceSvg: false }
+import './styles/form-async.scss';
 
 import './styles/js/form.js';
 import './styles/js/forms/form-type-array.js';

@@ -1,15 +1,19 @@
-var Encore = require('@symfony/webpack-encore');
+const Encore = require('@symfony/webpack-encore');
 
-Encore
+const WebpackBar = require('webpackbar');
+const MediaQueryPlugin = require('media-query-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+Encore.addPlugin(new WebpackBar())
+
     .setOutputPath('./src/Resources/public/')
     .setPublicPath('/bundles/base')
     .setManifestKeyPrefix('.')
 
     .cleanupOutputBeforeBuild()
-    .enableSassLoader()
     .enableBuildNotifications()
     .enableSourceMaps(!Encore.isProduction())
-    .enableVersioning(Encore.isProduction())
+    // .enableVersioning(Encore.isProduction())
 
     .copyFiles({
         from: './node_modules/@fortawesome/fontawesome-free/metadata/',
@@ -17,14 +21,19 @@ Encore
         to: 'metadata/[name].[ext]'
     })
     .copyFiles({
-        from: './node_modules/bootstrap-icons/font/',
-        pattern: /bootstrap-icons.json$/,
-        to: 'metadata/[name].[ext]'
+        from: './node_modules/@fortawesome/fontawesome-free/webfonts/',
+        to: 'fonts/[name].[hash].[ext]'
+    })
+
+    .copyFiles({
+        from: './node_modules/bootstrap-icons/font/fonts',
+        to: 'fonts/[name].[ext]'
     })
     .copyFiles({
         from: './node_modules/@fortawesome/fontawesome-free/webfonts/',
         to: 'fonts/[name].[hash].[ext]'
     })
+
     .copyFiles({
         from: './node_modules/country-flag-icons/3x2/',
         to: 'images/flags/[path][name].[ext]',
@@ -51,18 +60,11 @@ Encore
     })
 
     .configureCssMinimizerPlugin((options) => {
-        options.minimizerOptions = {
-            preset: [
-                'default',
-                {
-                    // disabled to fix these issues: https://github.com/EasyCorp/EasyAdminBundle/pull/5171
-                    svgo: false,
-                },
-            ]
-        };
+        options.minimizerOptions = { preset: ['default', {svgo: false}] };
     })
 
     .disableSingleRuntimeChunk()
+    .configureCssMinimizerPlugin()
 
     // enables and configure @babel/preset-env polyfills
     .configureBabelPresetEnv((config) => {
@@ -73,8 +75,39 @@ Encore
     // uncomment if you're having problems with a jQuery plugin
     .autoProvidejQuery()
 
-    .addEntry('base.defer', './assets/base.defer.js')
-    .addEntry('easyadmin.defer', './assets/easyadmin.defer.js')
-    .addEntry('form.defer', './assets/form.defer.js');
+    .addEntry('base-async', './assets/base-async.js')
+    .addEntry('easyadmin-async', './assets/easyadmin-async.js')
+    .addEntry('form-async', './assets/form-async.js')
+
+    .enableSassLoader()
+    .enablePostCssLoader()
+
+    .addLoader({
+        test: /\.scss$/,
+        use: [
+            MediaQueryPlugin.loader,
+            'postcss-loader'
+        ]
+    })
+
+    .addPlugin(new MiniCssExtractPlugin({
+        filename: '[name].css'
+
+    }))
+
+    .addPlugin(new MediaQueryPlugin({
+        include: ["base-defer", "easyadmin-async", "form-async"],
+        queries: {
+
+          // Standard
+          'all and (min-width: 1281px)': 'desktop',
+          'all and (min-width: 1025px) and (max-width: 1280px)': 'laptop',
+          'all and (min-width: 471px) and (max-width: 1024px)': 'tablet',
+          'all and (min-width: 471px) and (max-width: 1024px) and (orientation: landscape)': 'tablet-landscape',
+          'all and (max-width: 470px)': 'mobile',
+          'all and (max-width: 470px) and (orientation: landscape)': 'mobile-landscape'
+        }
+    }))
+;
 
 module.exports = Encore.getWebpackConfig();

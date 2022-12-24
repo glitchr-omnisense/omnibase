@@ -6,16 +6,19 @@
     {%- set nopush         = tag.nopush ?? false -%}
     {%- set async          = tag.async ?? false -%}
     {%- set htmlAttributes = tag.htmlAttributes ?? [] -%}
-    {%- set htmlAttributes = htmlAttributes|merge({'as': 'script'}) -%}
     {% if nopush %}
         {%- set htmlAttributes = htmlAttributes|merge({'nopush': nopush}) -%}
     {% endif %}
     {% if defer %}
-        {%- set htmlAttributes = htmlAttributes|merge({'defer':''}) -%}
+        {%- set htmlAttributes = htmlAttributes|merge({'defer':'defer'}) -%}
     {% endif %}
+    {% if async %}
+        {%- set htmlAttributes = htmlAttributes|merge({'async':'async'}) -%}
+    {% endif %}
+
     {% if preload %}
-    {{ ('<link rel="preload" href="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ ">")|raw }}
+        {{ ('<link rel="preload" href="'~ asset(value, packageName) ~ '" as="script">')|raw }}
     {% else %}
-    {{ ('<script src="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ "></script>")|raw }}
+        {{ ('<script src="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ "></script>")|raw }}
     {% endif %}
 {% endfor %}

@@ -1,18 +1,27 @@
 {% for tag in tags %}
+
     {%- set preload        = tag.preload ?? false -%}
     {%- set defer          = tag.defer ?? false -%}
+    {%- set async          = tag.async ?? false -%}
     {%- set value          = tag.value ?? null -%}
+    {%- set preloadAs      = tag.preload_as ?? "style" -%}
     {%- set packageName    = tag.packageName ?? null -%}
-    {%- set nopush         = tag.nopush ?? false -%}
     {%- set htmlAttributes = tag.htmlAttributes ?? [] -%}
+
+    {%- set nopush         = tag.nopush ?? false -%}
     {% if nopush %}
         {%- set htmlAttributes = htmlAttributes|merge({'nopush': nopush}) -%}
     {% endif %}
 
-    {% if preload or defer %}
-        {%- set htmlAttributes = htmlAttributes|merge({'as': 'style'}) -%}
-        {{ ('<link rel="preload" href="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ ">")|raw }}
+    {%- set media = tag.media ?? null -%}
+    {% if media %}
+        {%- set htmlAttributes = htmlAttributes|merge({'media': media}) -%}
     {% endif %}
 
-    {{ ('<link rel="stylesheet" href="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ ">")|raw }}
+    {% if preload or async or defer %}
+        {{ ('<link rel="preload" href="'~ asset(value, packageName) ~ '" as="' ~ preloadAs ~ '">')|raw }}
+    {% endif %}
+
+    {{ ('<link rel="stylesheet" href="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ '>')|raw }}
+
 {% endfor %}

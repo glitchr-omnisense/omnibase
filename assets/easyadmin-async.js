@@ -1,4 +1,4 @@
-import './styles/easyadmin.scss';
+import './styles/easyadmin-async.scss';
 
 import './styles/js/user.js';
 // import Tooltip from 'bootstrap';

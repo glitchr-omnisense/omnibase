@@ -394,7 +394,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
        if($this->isMarkAsAdmin()) {
 
             $user = $this->user ?? "User \"".User::getIp()."\"";
-            $fwd .= "Forward: ";
+            $fwd .= "Admin: ";
             $title   = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
             $content = $this->getContent();
         }

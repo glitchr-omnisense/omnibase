@@ -27,7 +27,7 @@ class Configuration implements ConfigurationInterface
     }
 
     private function addGlobalOptionsSection(ArrayNodeDefinition $rootNode)
-    {   
+    {
         $rootNode
             ->children()
 
@@ -132,7 +132,7 @@ class Configuration implements ConfigurationInterface
                                 ->defaultValue('@localhost$')
                             ->end()
                         ->end()
-                        
+
                         ->arrayNode('exceptions')
                             ->arrayPrototype()->addDefaultsIfNotSet()
                                 ->children()
@@ -463,6 +463,27 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode("name")->end()
                                     ->scalarNode("media")->end()
                                 ->end()
+                            ->end()
+                        ->end()
+
+                        ->arrayNode('script_attributes')->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('defer')
+                                    ->defaultValue(false)
+                                    ->end()
+                                ->scalarNode('async')
+                                    ->defaultValue(false)
+                                    ->end()
+                            ->end()
+                        ->end()
+                        ->arrayNode('link_attributes')->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('defer')
+                                    ->defaultValue(false)
+                                    ->end()
+                                ->scalarNode('async')
+                                    ->defaultValue(false)
+                                    ->end()
                             ->end()
                         ->end()
 

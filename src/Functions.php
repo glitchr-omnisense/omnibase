@@ -55,7 +55,7 @@ namespace {
 
     function start_timer() { $_SERVER["APP_TIMER"] = microtime(true); }
     function get_lap() // ms
-    { 
+    {
         if(!array_key_exists("APP_TIMER", $_SERVER)) return 0;
         return 1000*(microtime(true) - $_SERVER["APP_TIMER"]);
     }
@@ -2042,9 +2042,25 @@ namespace {
 
         $name ??= first($address);
         $name = $name ? $name : array_keys($address)[0] ?? $email;
-        
+
         $name = str_replace("@", "[at]", $name);
         return $name." <".$email.">";
+    }
+
+    function str_replace_prefix(string $search, string $replace, string $subject): string
+    {
+        if(!str_starts_with($subject, $search)) return $subject;
+
+        $count = 1;
+        return str_replace($search, $replace, $subject, $count);
+    }
+
+    function str_replace_suffix(string $search, string $replace, string $subject): string
+    {
+        if(!str_ends_with($subject, $search)) return $subject;
+
+        $count = 1;
+        return strrev(str_replace(strrev($search), strrev($replace), strrev($subject), $count));
     }
 
     function array_unique_end($array)
