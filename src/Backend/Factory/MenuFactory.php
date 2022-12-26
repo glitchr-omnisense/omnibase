@@ -3,7 +3,6 @@
 namespace Base\Backend\Factory;
 
 use Base\Routing\RouterInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -21,8 +20,8 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
     protected function generateMenuItemUrl(MenuItemDto $menuItemDto, int $index, int $subIndex): string
     {
         $menuItemType = $menuItemDto->getType();
-        $menuItemDto->setIndex($index);
-        $menuItemDto->setSubIndex($subIndex);
+        if($index < 0) $menuItemDto->setIndex($index);
+        if($subIndex < 0) $menuItemDto->setSubIndex($subIndex);
 
         if (MenuItemDto::TYPE_EXIT_IMPERSONATION === $menuItemType) {
 

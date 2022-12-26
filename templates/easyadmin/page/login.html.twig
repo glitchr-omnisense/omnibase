@@ -41,7 +41,7 @@
                         <div class="logo-custom">
                             <div class="logo {{ page_title|length > 14 ? 'logo-long' }}">
                                 <div class="logo-overlay">{{"security_rescue"|iconify({"class": "fa-3x"})|first|raw}}</div>
-                                <img alt="logo" data-src="{{ logo|thumbnail(500,500)|raw }}">
+                                <img alt="logo" src="{{ logo|thumbnail(500,500)|raw }}">
                             </div>
                         </div>
                     {% endif %}
