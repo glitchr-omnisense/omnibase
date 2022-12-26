@@ -64,6 +64,7 @@ final class FunctionTwigExtension extends AbstractExtension
         return [
 
             new TwigFunction('exit',  'exit'),
+            new TwigFunction('count_leaves',  'count_leaves'),
 
             new TwigFunction('synopsis', 'synopsis'),
             new TwigFunction('title',                        [$this, 'title'  ], ['is_safe' => ['all']]),
@@ -109,6 +110,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('basename',    'basename'),
             new TwigFilter('uniq',        'array_unique'),
             new TwigFilter('at',          'at'),
+            new TwigFilter('count_leaves',  'count_leaves'),
 
             new TwigFilter('datetime',       [$this, 'datetime'],   ['needs_environment' => true]),
             new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),
@@ -131,15 +133,15 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('mb_ucwords',     'mb_ucwords'),
             new TwigFilter('second',         "second"),
             new TwigFilter('empty',          "empty"),
- 
+
             new TwigFilter('colorify',            [$this, 'colorify']),
         ];
     }
-    
+
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
     public function nargs(callable $fn): int { return (new ReflectionFunction($fn))->getNumberOfParameters(); }
     public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }
-    public function call_user_func_if_exists    (Environment $environment, string $fn, array $args) 
+    public function call_user_func_if_exists    (Environment $environment, string $fn, array $args)
     {
         if (false === $func = $environment->getFunction($fn)) return '';
         return $func->getCallable()(...array_values($args));
@@ -154,7 +156,7 @@ final class FunctionTwigExtension extends AbstractExtension
 
             return array_map(fn($c) => $this->enum($c), $class);
         }
-        
+
         return Type::hasType($class) ? Type::getType($class) : null;
     }
 
@@ -200,14 +202,14 @@ final class FunctionTwigExtension extends AbstractExtension
     public function property_accessor(mixed $entity, array|string $propertyName, bool $enableMagicCall = false): mixed
     {
         if($entity == null) return null;
-        
+
         // Shape property path
         $propertyPath = is_string($propertyName) ? explode(".", $propertyName) : $propertyName;
         if(!$propertyPath) return $entity;
 
         // Special case for array
         if(is_array($entity) || $entity instanceof Collection ) {
-         
+
             $id = array_unshift($attributes);
             $entity = $entity[$id] ?? null;
         }

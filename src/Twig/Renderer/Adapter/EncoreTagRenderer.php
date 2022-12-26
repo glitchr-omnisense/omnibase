@@ -205,7 +205,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entrypoints)));
     }
 
-    public function renderLinkTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) : string
+    public function renderLinkTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []) : string
     {
 	    if($this->entrypointLookupCollection == null) return "";
 
@@ -213,7 +213,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         if($entryName == null) return "";
 
         if($entryName && !array_key_exists($entryName, $this->encoreEntryLinkTags))
-            $this->addLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+            $this->addLinkTag($value, $webpackPackageName, $webpackEntrypointName, html_attributes($htmlAttributes));
 
         $tags = [];
         $entrypoints = $this->getEntrypoints();
@@ -257,7 +257,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entrypoints)));
     }
 
-    public function renderScriptTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) : string
+    public function renderScriptTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []) : string
     {
 	    if($this->entrypointLookupCollection == null) return "";
 
@@ -265,7 +265,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         if($entryName == null) return "";
 
         if($entryName && !array_key_exists($entryName, $this->encoreEntryScriptTags))
-            $this->addScriptTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+            $this->addScriptTag($value, $webpackPackageName, $webpackEntrypointName, html_attributes($htmlAttributes));
 
         $entrypoints = $this->getEntrypoints();
         $entrypoints["_default"] = $this->entrypointLookupCollection->getEntrypointLookup();
@@ -283,10 +283,11 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             }
 
             if(!$files) continue;
+
             $tags = array_filter(array_map(fn($e) => [
                 "value" => $e,
-                "defer" => str_contains($e, "-defer") || $this->defaultScriptAttributes["defer"],
-                "async" => str_contains($e, "-async") || $this->defaultScriptAttributes["async"]
+                "defer" => str_contains($e, "-defer") || (!str_contains($e, "-async") && $this->defaultScriptAttributes["defer"]),
+                "async" => str_contains($e, "-async") || (!str_contains($e, "-defer") && $this->defaultScriptAttributes["async"])
             ], $files));
 
             $this->removeScriptTag($entryName);
@@ -297,7 +298,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         throw new EntrypointNotFoundException("Failed to find \"$entryName\" in the lookup collection: ".implode(", ", array_keys($entrypoints)));
     }
 
-    public function render(string $value, ?array $context = [], ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) : string
+    public function render(string $value, ?array $context = [], ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []) : string
     {
         return $this->renderLinkTags  ($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes).PHP_EOL.
                $this->renderScriptTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);

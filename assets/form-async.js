@@ -1,5 +1,7 @@
 import './styles/form-async.scss';
 
+import { Modal, DatePicker } from 'bootstrap';
+
 import './styles/js/form.js';
 import './styles/js/forms/form-type-array.js';
 import './styles/js/forms/form-type-avatar.js';

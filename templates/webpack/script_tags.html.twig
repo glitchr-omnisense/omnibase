@@ -10,10 +10,10 @@
         {%- set htmlAttributes = htmlAttributes|merge({'nopush': nopush}) -%}
     {% endif %}
     {% if defer %}
-        {%- set htmlAttributes = htmlAttributes|merge({'defer':'defer'}) -%}
+        {%- set htmlAttributes = htmlAttributes|merge({'defer':''}) -%}
     {% endif %}
     {% if async %}
-        {%- set htmlAttributes = htmlAttributes|merge({'async':'async'}) -%}
+        {%- set htmlAttributes = htmlAttributes|merge({'async':''}) -%}
     {% endif %}
 
     {% if preload %}

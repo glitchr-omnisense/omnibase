@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
+use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AvatarField as EaAvatarField;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Contracts\Translation\TranslatableInterface;
@@ -17,10 +18,10 @@ use function Symfony\Component\Translation\t;
 
 class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator
 {
-    public function __construct(PropertyAccessor $propertyAccessor, TranslatorInterface $translator)
+    public function __construct(PropertyAccessor $propertyAccessor, EntityFactory $entityFactory, TranslatorInterface $translator)
     {
         $this->translator = $translator;
-        parent::__construct($propertyAccessor);
+        parent::__construct($propertyAccessor, $entityFactory);
     }
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void

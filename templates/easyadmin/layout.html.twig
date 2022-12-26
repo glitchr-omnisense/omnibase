@@ -34,6 +34,19 @@
         {{ encore_entry_script_tags('base') }}
         {{ encore_entry_script_tags('form') }}
         {{ encore_entry_script_tags('easyadmin') }}
+        <script>
+            window.addEventListener("load", function()
+            {
+                [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]')).map(function (el) { return new bootstrap.Tooltip(el) });
+                [].slice.call(document.querySelectorAll('[data-toggle="popover"]')).map(function (el) { return new bootstrap.Popover(el) });
+            });
+
+            window.addEventListener("onbeforeunload", function()
+            {
+                [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]')).map(function (el) { return el.hide().remove(); });
+                [].slice.call(document.querySelectorAll('[data-toggle="popover"]')).map(function (el) { return el.hide().remove(); });
+            });
+        </script>
     {% endblock head_javascript %}
 
     {% block configured_javascripts %}
@@ -227,7 +240,7 @@
                                     {% for online_user in user_manager.online ?? [] %}
                                     {% if online_user != app.user %}
                                     <li class="{{ online_user in user_manager.active ? 'active' : ''}} user-details">
-                                    <div class=" img-fluid" data-toggle="tooltip" title="{{ online_user.fullname }}">
+                                    <div class="img-fluid" data-toggle="tooltip" title="{{ online_user.fullname }}">
                                         {% if null == online_user.avatarFile %}
                                         <i class="fa fa-3x fa-fw {{ ea.user is not null ? 'fa-user-circle' : 'fa-user-times' }} user-avatar"></i>
                                         {% else %}

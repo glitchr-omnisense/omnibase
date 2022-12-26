@@ -146,7 +146,7 @@
             {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
         </a>
 
-        {% if discriminatorMap|length > 1 %}
+        {% if discriminatorMap|count_leaves > 0 %}
         <button type="button" class="btn btn-primary dropdown-toggle root-allowed dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
             <span class="visually-hidden"></span>
         </button>
@@ -159,7 +159,7 @@
         </span>
     {% endif %}
 
-    {% if discriminatorMap|length > 1 %}
+    {% if discriminatorMap|count_leaves > 0 %}
     <ul class="dropdown-menu dropdown-menu-end">
         {% for group,entities in discriminatorMap %}
 
@@ -185,7 +185,7 @@
                     {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
                     {{- label !=  static_call(crudEntity|url_decode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
                 </a></li>
-            
+
             {% endfor %}
         {% endfor %}
     </ul>

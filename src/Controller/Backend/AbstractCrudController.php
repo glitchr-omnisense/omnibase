@@ -116,7 +116,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     }
 
     protected static array $instantiationMap = [];
-    public static function isInstantiable() { return static::$instantiationMap[static::class] ?? true; }
+    public static function isInstantiable() { return static::$instantiationMap[self::class] ?? true; }
     public function allowInstantiation()
     {
         self::$instantiationMap[static::class] = true;

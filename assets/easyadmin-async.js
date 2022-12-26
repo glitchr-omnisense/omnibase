@@ -1,7 +1,5 @@
 import './styles/easyadmin-async.scss';
 
-import './styles/js/user.js';
-
 //
 // Apply bootstrap form validation
 window.addEventListener('load', function(event) {
