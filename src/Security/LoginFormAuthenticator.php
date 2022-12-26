@@ -7,8 +7,7 @@ use App\Enum\UserRole;
 use Base\Routing\RouterInterface;
 use Base\Service\ReferrerInterface;
 use Doctrine\ORM\EntityManagerInterface;
-
-use Google\ReCaptcha\Badge\CaptchaBadge;
+use Google\Badge\CaptchaBadge;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,8 +15,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\PasswordUpgradeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
@@ -25,9 +23,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
-class LoginFormAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
+class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
@@ -66,7 +64,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         return new RedirectResponse($this->router->generate($route));
     }
 
-    public function supports(Request $request): ?bool
+    public function supports(Request $request): bool
     {
         return $request->attributes->get('_route') == static::LOGIN_ROUTE && $request->isMethod('POST');
     }
@@ -75,7 +73,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     {
         $identifier = $request->get('security_login')["identifier"] ?? $request->get('_base_security_login')["identifier"] ?? $request->get("identifier") ?? "";
         $password   = $request->get('security_login')["password"] ?? $request->get('_base_security_login')["password"] ?? $request->get("password") ?? "";
-        $request->getSession()->set(Security::LAST_USERNAME, $identifier);
+        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
 
         $badges   = [];
         if( array_key_exists("_remember_me", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) ) {
@@ -88,7 +86,6 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         if( array_key_exists("_captcha", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) && class_exists(CaptchaBadge::class) )
             $badges[] = new CaptchaBadge("_captcha", $request->get('security_login')["_captcha"] ?? $request->get('_base_security_login')["_captcha"]);
 
-            // exit(1);
         return new Passport(
             new UserBadge($identifier),
             new PasswordCredentials($password), $badges);
@@ -122,8 +119,8 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         return $this->router->redirectToRoute($this->router->getRouteName("/"));
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
+    protected function getLoginUrl(Request $request): string
     {
-        return new RedirectResponse($this->router->generate(static::LOGIN_ROUTE));
+        return $this->router->generate(static::LOGIN_ROUTE);
     }
 }

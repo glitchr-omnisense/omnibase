@@ -92,10 +92,17 @@ class SecurityController extends AbstractController
         $formProcessor = $this->formProxy
             ->createProcessor("form:login", SecurityLoginType::class, ["identifier" => $lastUsername])
             ->handleRequest($request);
+            
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('@Base/security/login.html.twig', [
             "identifier" => $lastUsername,
-            "form" => $formProcessor->getForm()->createView()
+            "form" => $formProcessor->getForm()->createView(),
+            "last_username" => $lastUsername,
+            "error" => $error
         ]);
     }
 
