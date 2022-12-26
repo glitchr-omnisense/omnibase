@@ -36,6 +36,7 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFunction('imagify', [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
             new TwigFunction('urlify',  [$this, 'urlify' ], ["is_safe" => ['all']]),
             new TwigFunction('linkify', [$this, 'linkify' ], ["is_safe" => ['all']]),
+            new TwigFunction('lightbox',[ImageService::class,   'lightbox'], ["is_safe" => ['all']]),
 
             new TwigFunction('asset',   [AdvancedRouter::class, 'getAssetUrl']),
         ];
