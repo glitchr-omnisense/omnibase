@@ -77,7 +77,7 @@ Encore.addPlugin(new WebpackBar())
 
     .addEntry('base-async', './assets/base-async.js')
     .addEntry('easyadmin-async', './assets/easyadmin-async.js')
-    .addEntry('form-async', './assets/form-async.js')
+    .addEntry('form-defer', './assets/form-defer.js')
 
     .enableSassLoader()
     .enablePostCssLoader()
@@ -96,7 +96,7 @@ Encore.addPlugin(new WebpackBar())
     }))
 
     .addPlugin(new MediaQueryPlugin({
-        include: ["base-defer", "easyadmin-async", "form-async"],
+        include: ["base-defer", "easyadmin-async", "form-defer"],
         queries: {
 
           // Standard

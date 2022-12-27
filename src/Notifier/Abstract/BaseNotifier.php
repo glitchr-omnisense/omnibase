@@ -32,8 +32,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 abstract class BaseNotifier implements BaseNotifierInterface
 {
-    public function __call   ($method, $arguments) : mixed 
-    { 
+    public function __call   ($method, $arguments) : mixed
+    {
         $action = str_starts_with($method, "render") ? "render" : (str_starts_with($method, "send") ? "send" : null);
         if(!$action)
             throw new AccessException("Unexpected action received. Templated notification \"$method\" should starts with either  \"send\" or \"render\".");
@@ -120,7 +120,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         $mailName = $this->settingBag->getScalar("base.settings.mail.name");
         if(!$mailName) $mailName = mb_ucwords(str_replace([".", "_"], [" ", " "], explode("@", $mail)[0]));
-        
+
         $phone = $this->settingBag->getScalar("base.settings.phone");
         if(!$phone) $phone = $this->getAdminRecipient()?->getPhone();
 
@@ -185,7 +185,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $this->settingBag     = $settingBag;
         $this->localeProvider = $localeProvider;
         $this->translator     = $translator;
-        
+
         $this->debug          = $debug;
 
         // Address support only once..
@@ -280,7 +280,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
     public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void
     {
-        if ($this->enable) 
+        if ($this->enable)
             $this->notifier->send($notification, ...$recipients);
     }
 
@@ -293,8 +293,8 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
-        // Admin recipient if test address
-        $technicalRecipient = $this->getTechnicalRecipient();
+        if(empty($recipients)) // Display browser+ notification !
+            $recipients = [new NoRecipient()];
 
         // Determine recipient information
         foreach ($recipients as $recipient) {
@@ -333,9 +333,6 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $prevRecipient = $notification->getRecipient();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
-
-        // Admin recipient if test address
-        $technicalRecipient = $this->getTechnicalRecipient();
 
         foreach ($recipients as $recipient) {
 

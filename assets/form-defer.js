@@ -1,4 +1,4 @@
-import './styles/form-async.scss';
+import './styles/form-defer.scss';
 
 import { Modal, DatePicker } from 'bootstrap';
 

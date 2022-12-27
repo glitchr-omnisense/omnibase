@@ -7,7 +7,6 @@ import '@glitchr/imaginejs';
 import 'bootstrap-icons/font/bootstrap-icons';
 
 import { Tooltip, Modal, Popover } from 'bootstrap';
-
 $(window).on("load.tooltip", function() { $('[data-toggle="tooltip"]').tooltip({html:true}) });
 $(window).on("onbeforeunload.tooltip",function() { $("div[id^='tooltip']").hide().remove(); });
 $(window).on("load.popover", function() { $('[data-toggle="popover"]').popover({html:true}) });

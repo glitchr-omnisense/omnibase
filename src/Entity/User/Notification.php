@@ -73,7 +73,6 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function getUser() : ?User { return $this->user; }
     public function setUser(?User $user): self
     {
-        
         if ($this->user) {
             $this->user->removeNotification($this);
             $this->removeContextKey("user");
@@ -306,10 +305,10 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $this->setContent("<div class='title'>".$location."</div><div class='message'>".$message.'</div>');
 
         } else if($this->getTwig()->getLoader()->exists($content)) {
-            
+
             $this->setHtmlTemplate($content);
             $this->setContent("");
-            
+
         } else {
 
             $this->setContent($this->getTranslator()->trans($content, $parameters, $domain, $locale) ?? "");
@@ -377,7 +376,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
          */
 
         $technicalRecipient = $notifier->getTechnicalRecipient();
-        if($technicalRecipient instanceof NoRecipient) 
+        if($technicalRecipient instanceof NoRecipient)
             throw new UnexpectedValueException("No support address found.");
 
         $title = $this->getTitle();
@@ -390,7 +389,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $subject = $this->getSubject();
         $from = $technicalRecipient->getEmail();
         $to   = $recipient->getEmail();
-   
+
        if($this->isMarkAsAdmin()) {
 
             $user = $this->user ?? "User \"".User::getIp()."\"";
@@ -442,7 +441,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         $subject ??= $this->getSubject();
         $subject = $fwd.$subject;
-       
+
         $priority = [self::IMPORTANCE_HIGH, self::IMPORTANCE_MEDIUM, self::IMPORTANCE_LOW];
         $email
             ->importance(in_array($importance, $priority) ? $importance : "")

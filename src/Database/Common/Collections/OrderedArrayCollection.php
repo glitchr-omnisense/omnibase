@@ -6,7 +6,6 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\PersistentCollection;
 
 class OrderedArrayCollection extends ArrayCollection
 {
@@ -53,7 +52,7 @@ class OrderedArrayCollection extends ArrayCollection
     public function remove($key):mixed                       { $this->applyOrdering(); return parent::remove($key); }
     public function removeElement($element):bool             { $this->applyOrdering(); return parent::removeElement($element); }
     public function offsetExists($offset):bool               { $this->applyOrdering(); return parent::offsetExists($offset); }
-    public function offsetGet($offset):mixed                 { $this->applyOrdering(); return parent::offsetGet($offset); }
+    public function offsetGet(mixed $offset):mixed           { $this->applyOrdering(); return parent::offsetGet($offset); }
     public function offsetSet($offset, $value):void          { $this->applyOrdering(); parent::offsetSet($offset, $value); }
     public function offsetUnset($offset):void                { $this->applyOrdering(); parent::offsetUnset($offset); }
     public function containsKey($key):bool                   { $this->applyOrdering(); return parent::containsKey($key); }

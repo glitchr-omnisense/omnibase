@@ -1,37 +1,36 @@
 {% if app.session is not null and app.session.started %}
-    {% set flashbag = app.session.flashbag.all %}
+{% set flashbag = app.session.flashbag.all %}
 
-    {% if flashbag|length > 0 %}
-        <div id="flash-messages">
-            {% for label, flashes in flashbag %}
+<div id="flash-messages">
+    {% for label, flashes in flashbag %}
 
-                {% if label == "error" %}
-                    {% set label = "danger" %}
+        {% if label == "error" %}
+            {% set label = "danger" %}
+        {% endif %}
+
+        {% for flash in flashes %}
+            <div class="alert alert-{{label}} alert-dismissible fade show">
+                {% if flash is iterable and  flash|length > 1 %}
+
+                    {% set flash_title = flash|first %}
+                    {% set flash_message = flash|slice(1,flash|length) %}
+
+                    {% if flash_title is not empty %}
+                    <div class="title">{{flash_title|raw}}</div><hr>
+                    {% endif %}
+
+                    {% for message in flash_message %}
+                    <span class="message">{{ message|raw }}</span>
+                    {% endfor %}
+
+                {% else %}
+                    <span class="message">{{ flash|raw }}</span>
                 {% endif %}
 
-                {% for flash in flashes %}
-                    <div class="alert alert-{{label}} alert-dismissible fade show">
-                        {% if flash is iterable and  flash|length > 1 %}
+                <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.alert').remove()"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
 
-                            {% set flash_title = flash|first %}
-                            {% set flash_message = flash|slice(1,flash|length) %}
-
-                            {% if flash_title is not empty %}
-                            <div class="title">{{flash_title|raw}}</div><hr>
-                            {% endif %}
-
-                            {% for message in flash_message %}
-                            <span class="message">{{ message|raw }}</span>
-                            {% endfor %}
-
-                        {% else %}
-                            <span class="message">{{ flash|raw }}</span>
-                        {% endif %}
-
-                        <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.alert').remove()"></button>
-                    </div>
-                {% endfor %}
-            {% endfor %}
-        </div>
-    {% endif %}
 {% endif %}
