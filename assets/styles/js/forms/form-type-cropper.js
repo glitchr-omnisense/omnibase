@@ -1,5 +1,5 @@
 
-import 'cropperjs';
+import Cropper from 'cropperjs';
 
 $(document).on("DOMContentLoaded", function () {
 
