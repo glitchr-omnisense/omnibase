@@ -22,6 +22,16 @@ class LocaleSubscriber implements EventSubscriberInterface
      */
     protected $localeProvider;
 
+    /**
+     * @var Router
+     */
+    protected $router;
+
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
     public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router, TranslatorInterface $translator)
     {
         $this->localeProvider = $localeProvider;

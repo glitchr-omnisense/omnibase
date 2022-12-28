@@ -15,6 +15,11 @@ use Doctrine\ORM\Events;
 class TranslatableWalker extends SqlWalker
 {
     /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+
+    /**
      * @var string
      */
     public const LOCALE = 'locale';

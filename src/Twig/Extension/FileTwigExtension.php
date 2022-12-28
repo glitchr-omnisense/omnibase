@@ -18,6 +18,14 @@ use Twig\TwigFunction;
 
 final class FileTwigExtension extends AbstractExtension
 {
+    /**
+     * @var Router
+     */
+    protected $router;
+
+    /** @var string */
+    protected $projectDir;
+    
     public function __construct(RouterInterface $router, string $projectDir)
     {
         $this->router   = $router;

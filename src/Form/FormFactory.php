@@ -39,12 +39,11 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
      */
     protected $validator;
 
-    public function __construct(FormRegistryInterface $registry, ValidatorInterface $validator, EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator, EntityHydratorInterface $entityHydrator)
+    public function __construct(FormRegistryInterface $registry, ValidatorInterface $validator, ClassMetadataManipulator $classMetadataManipulator, EntityHydratorInterface $entityHydrator)
     {
         parent::__construct($registry);
 
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->entityManager  = $entityManager; 
         $this->entityHydrator = $entityHydrator; 
         $this->validator = $validator;
     }

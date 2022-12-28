@@ -10,9 +10,19 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-class MaternityService implements MaternityServiceInterface
+class MaternityUnit implements MaternityUnitInterface
 {
+    /** @var Router */
     protected $router;
+    /** @var ParameterBag */
+    protected $parameterBag;
+    /** @var SettingBag */
+    protected $settingBag;
+    /** @var AuthorizationChecker */
+    protected $authorizationChecker;
+    /** @var TokenStorage */
+    protected $tokenStorage;
+    
     public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, TokenStorageInterface $tokenStorage)
     {
         $this->router = $router;
@@ -71,7 +81,7 @@ class MaternityService implements MaternityServiceInterface
         } else if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
 
             $birthdate = $this->getBirthdate();
-            $notification = new Notification("maternity.banner", [IntlDateTime::createFromDateTime($birthdate, $locale)->format("dd MMMM YYYY"), IntlDateTime::createFromDateTime($birthdate, $locale)->format("HH:mm")]);
+            $notification = new Notification("maternityUnit.banner", [IntlDateTime::createFromDateTime($birthdate, $locale)->format("dd MMMM YYYY"), IntlDateTime::createFromDateTime($birthdate, $locale)->format("HH:mm")]);
             $notification->send("warning");
             return false;
         }

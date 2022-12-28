@@ -22,6 +22,19 @@ use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var Router
+     */
+    protected $router;
+    /**
+     * @var AdminContextProvider
+     */
+    protected $adminContextProvider;
+    /**
+     * @var AdminUrlGenerator
+     */
+    protected $adminUrlGenerator;
+    
     public function __construct(RouterInterface $router, AdminContextProvider $adminContextProvider, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->router = $router;

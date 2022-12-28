@@ -56,7 +56,7 @@ access_restricted:
 
 maintenance:
     banner: This website is currently <b>under maintenance</b>.
-maternity:
+maternityUnit:
     banner: "This website is <b>not yet</b> visible. Release date on {0} at {1}"
 
 resetPassword:

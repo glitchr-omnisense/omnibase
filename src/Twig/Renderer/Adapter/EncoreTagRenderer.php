@@ -21,6 +21,13 @@ use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
 
 class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterface
 {
+    /**
+     * @var EntrypointLookupCollectionInterface
+     */
+    protected $entrypointLookupCollection;
+
+    protected string $publicDir;
+    
     private bool $saveDeferred = false;
     private ?CacheItemPoolInterface $cache = null;
     use SimpleCacheTrait;

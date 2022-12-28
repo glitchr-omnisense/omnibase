@@ -10,6 +10,15 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class HotParameterBagSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+    /**
+     * @var SettingBag
+     */
+    protected $settingBag;
+    
     public function __construct($parameterBag, SettingBagInterface $settingBag)
     {
         $this->parameterBag = $parameterBag;

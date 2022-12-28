@@ -14,6 +14,16 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
+    /**
+     * @var ClassMetadataCompletor
+     */
+    protected $classMetadataCompletor;
+
+    /**
+     * @var ServiceEntityParser
+     */
+    protected $serviceParser;
+
     public static function getFqcnEntityName()
     {
         return preg_replace(
@@ -23,7 +33,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         );
     }
 
-    protected $serviceParser;
     public function __construct(ManagerRegistry $doctrine, ?string $entityName = null)
     {
         parent::__construct($doctrine, $entityName ?? $this->getFqcnEntityName());

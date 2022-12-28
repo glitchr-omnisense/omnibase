@@ -56,7 +56,7 @@ access_restricted:
 
 maintenance:
     banner: Ce site est en cours de <b>maintenance</b>.
-maternity:
+maternityUnit:
     banner: Ce site n'est pas encore <b>publié</b>. La publication est prévue pour le {0} à {1}
 
 logout:

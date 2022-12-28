@@ -19,6 +19,36 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class TwigSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var HtmlRagRenderer
+     */
+    protected $htmlTagRenderer;
+
+    /**
+     * @var EncoreTagRenderer
+     */
+    protected $encoreTagRenderer;
+    
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
+     * @var Router
+     */
+    protected $router;
+
+    /**
+     * @var AuthorizationChecker
+     */
+    protected $authorizationChecker;
+    
+    /** * @var string */
+    protected string $publicDir;
+    /** * @var bool */
+    protected ?bool $autoAppend;
+    
     public function __construct(HtmlTagRenderer $htmlTagRenderer, EncoreTagRenderer $encoreTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
     {
         $this->encoreTagRenderer    = $encoreTagRenderer;

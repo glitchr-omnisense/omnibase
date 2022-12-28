@@ -58,6 +58,11 @@ abstract class BaseNotifier implements BaseNotifierInterface
     protected $notifier;
 
     /**
+     * @var Environment
+     */
+    protected $twig;
+
+    /**
      * @var ChannelPolicyInterface
      */
     protected $policy;
@@ -162,6 +167,45 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $this->router = $router;
         return $this;
     }
+
+    /**
+     * @var EntityManager
+     */
+    protected $entityManager;
+
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+
+    /**
+     * @var SettingBag
+     */
+    protected $settingBag;
+
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+
+    protected bool $debug;
+
+    /** * @var ?Recipient */
+    protected $technicalRecipient;
+    /** * @var bool */
+    protected ?bool $technicalLoopback;
+    /** * @var Recipient */
+    protected $testRecipient;
 
     public function getEnvironment() : Environment { return $this->twig; }
     public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy, EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
@@ -297,12 +341,17 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $recipients = [new NoRecipient()];
 
         // Determine recipient information
-        foreach ($recipients as $recipient) {
+        $browserNotificationOnce = false;
+        foreach ($recipients as $i => $recipient) {
 
             // Set selected channels, if any
             $channels    = $this->getUserChannels($notification->getImportance(), $recipient);
             if (!$recipient instanceof NoRecipient && empty($channels))
                 throw new Exception("No valid channel for the notification \"".$notification->getBacktrace()."\" sent with \"".$notification->getImportance()."\"");
+
+            // Only send browser notification once
+            if($browserNotificationOnce) $channels = array_filter($channels, fn($c) => !str_starts_with($c, "browser"));
+            else if(array_starts_with($channels, "browser")) $browserNotificationOnce = true;
 
             $prevChannels = array_merge($prevChannels, $channels);
             $notification->setChannels($channels);

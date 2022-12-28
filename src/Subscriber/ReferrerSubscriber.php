@@ -8,10 +8,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Base\Routing\RouterInterface;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Component\Security\Http\Event\LogoutEvent;
-use Symfony\Component\Security\Http\Event\LoginFailureEvent;
-use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
 use Base\Service\ParameterBagInterface;
 
@@ -20,7 +16,17 @@ class ReferrerSubscriber implements EventSubscriberInterface
     /**
      * @var RouterInterface
      */
-    private $router;
+    protected $router;
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
+     * @var ReferrerInterface
+     */
+    protected $referrer;
 
     public function __construct(
         ReferrerInterface $referrer,

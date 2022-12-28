@@ -18,6 +18,21 @@ class RouterSubscriber implements EventSubscriberInterface
      */
     protected $router;
 
+    /**
+     * @var AuthorizationChecker
+     */
+    protected $authorizationChecker;
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
+     * @var SettingBag
+     */
+    protected $settingBag;
+
     public function __construct(AuthorizationChecker $authorizationChecker, RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag)
     {
         $this->authorizationChecker = $authorizationChecker;

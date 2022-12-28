@@ -13,11 +13,17 @@ class FormProxy implements FormProxyInterface
      */
     protected $formFactory;
 
+    /**
+     * @var array[FormProcessor]
+     */
+    protected $formProcessors;
+
     public function __construct(FormFactoryInterface $formFactory)
     {
         $this->formFactory  = $formFactory;
     }
 
+    /** @var array */
     protected array $forms = [];
 
     public function all() { return $this->forms; }

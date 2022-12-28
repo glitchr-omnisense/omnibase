@@ -10,8 +10,35 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SpamChecker implements SpamCheckerInterface
 {
-    private $client;
 
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
+     * @var SettingBag
+     */
+    protected $settingBag;
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var HttpClientInterface
+     */
+    protected $client;
+    
+    /** * @var bool */
+    protected bool $debug;
+    
     public function __construct(RequestStack $requestStack, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, TranslatorInterface $translator, HttpClientInterface $client, bool $debug)
     {
         $this->requestStack = $requestStack;

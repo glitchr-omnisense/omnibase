@@ -36,6 +36,8 @@ class GenerateUuid extends AbstractAnnotation
     public const UUID_NS_OID  = "6ba7b812-9dad-11d1-80b4-00c04fd430c8";
     public const UUID_NS_X500 = "6ba7b814-9dad-11d1-80b4-00c04fd430c8";
 
+    protected ?string $namespace;
+
     public function __construct(array $data)
     {
         // Determine version

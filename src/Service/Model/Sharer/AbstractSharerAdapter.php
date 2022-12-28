@@ -7,6 +7,12 @@ use Twig\Environment;
 
 abstract class AbstractSharerAdapter implements SharerAdapterInterface, IconizeInterface
 {
+    /**
+     * @var Environment
+     */
+
+    protected $twig;
+
     public function __iconize(): ?array { return null; }
     public function __construct(Environment $twig)
     {

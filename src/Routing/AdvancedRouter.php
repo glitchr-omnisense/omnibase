@@ -32,6 +32,55 @@ class AdvancedRouter implements RouterInterface
      */
     protected $router;
 
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+
+    /**
+     * @var AssetExtension
+     */
+    protected $assetTwigExtension;
+
+    /**
+     * @var CacheInterface
+     */
+    protected $cache;
+
+    /**
+     * @var CacheInterface
+     */
+    protected $cacheRoutes;
+
+    /**
+     * @var CacheInterface
+     */
+    protected $cacheRouteMatches;
+
+    /**
+     * @var CacheInterface
+     */
+    protected $cacheRouteGroups;
+
+    protected string  $environment;
+
+    protected bool    $debug;
+    protected ?string $cacheName;
+    
+    protected bool $useAdvancedFeatures;
+    protected bool $keepMachine;
+    protected bool $keepSubdomain;
+    
     public function getLang   (?string $lang   = null) :string { return $this->localeProvider->getLang($lang);     }
     public function getLocale (?string $locale = null) :string { return $this->localeProvider->getLocale($locale); }
     public function getEnvironment()                   :string { return $this->environment; }

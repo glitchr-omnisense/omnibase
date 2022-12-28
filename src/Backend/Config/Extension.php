@@ -13,6 +13,11 @@ class Extension
     public const PAGE_EDIT    = Crud::PAGE_EDIT;
     public const PAGE_NEW     = Crud::PAGE_NEW;
 
+    /**
+     * @var Environment
+     */
+    protected $twig;
+    
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;

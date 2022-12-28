@@ -10,6 +10,11 @@ use Twig\TwigFunction;
 
 final class BreadgrinderTwigExtension extends AbstractExtension
 {
+    /**
+     * @var Breadgrinder
+     */
+    protected $breadgrinder;
+
     public function __construct(Breadgrinder $breadgrinder) { $this->breadgrinder = $breadgrinder; }
 
     public function getName() { return 'breadcrumb_extension'; }

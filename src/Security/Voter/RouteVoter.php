@@ -17,6 +17,19 @@ class RouteVoter extends Voter
     const  VALIDATE_HOST = "VALIDATE_HOST";
     const  VALIDATE_PATH = "VALIDATE_PATH";
 
+    /** 
+     * @var Router 
+     * */
+    protected $router;
+    /** 
+     * @var ParameterBag 
+     * */
+    protected $parameterBag;
+    /** 
+     * @var LocaleProvider 
+     * */
+    protected $localeProvider;
+    
     public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider)
     {
         $this->router       = $router;

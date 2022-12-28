@@ -14,7 +14,7 @@ namespace Base\Form\Extension;
 use Base\Enum\SpamScore;
 use Base\Routing\RouterInterface;
 use Base\Service\Model\SpamProtectionInterface;
-use Base\Service\BaseService;
+
 use Base\Service\SpamChecker;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -26,7 +26,18 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FormTypeSpamExtension extends AbstractTypeExtension
 {
-    private $defaultEnabled;
+    /**
+     * @var SpamChecker
+     */
+    protected $spamChecker;
+    
+    /**
+     * @var Router
+     */
+    protected $router;
+    
+    /** @var bool */
+    private bool $defaultEnabled;
 
     public function __construct(SpamChecker $spamChecker, RouterInterface $router, bool $defaultEnabled = true)
     {

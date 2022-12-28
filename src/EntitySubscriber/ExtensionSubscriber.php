@@ -16,6 +16,21 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 class ExtensionSubscriber implements EventSubscriberInterface
 {
     /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+    
+    /**
+     * @var EntityExtensionInterface
+     */
+    protected $entityExtension;
+
+    /**
+     * @var PropertyAccess
+     */
+    protected $propertyAccessor;
+
+    /**
      * @return string[]
      */
     public function getSubscribedEvents(): array

@@ -18,6 +18,11 @@ use Exception;
 class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 {
     /**
+     * @var Environment
+     */
+    protected $twig;
+
+    /**
      * @param string|array $paths    A path or an array of paths where to look for templates
      * @param string|null  $bundlePath The root path common to all relative paths (null for getcwd())
      */

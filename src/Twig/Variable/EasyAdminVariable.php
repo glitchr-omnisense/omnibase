@@ -8,6 +8,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 class EasyAdminVariable
 {
+    /**
+     * @var AdminUrlGenerator
+     */
+    protected $adminUrlGenerator;
+
     public function __construct(AdminUrlGenerator $adminUrlGenerator) { $this->adminUrlGenerator = $adminUrlGenerator; }
     public function crudify(mixed $entity)
     {

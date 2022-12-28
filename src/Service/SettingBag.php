@@ -24,9 +24,37 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     protected $packages;
 
     /**
+     * @var EntityManager
+     */
+    protected $entityManager;
+
+    /**
+     * @var CacheInterface
+     */
+    protected $cacheSettingBag;
+
+    /**
+     * @var LocalProvider
+     */
+    protected $localeProvider;
+
+    /**
      * @var SettingRepository
      */
     protected $settingRepository = null;
+
+    protected ?string $environment;
+    
+    /**
+     * @var CacheInterface
+     */
+    protected $cache;
+
+    /**
+     * @var string
+     */
+    protected string $cacheName;
+
 
     public function warmUp(string $cacheDir): array
     {

@@ -13,12 +13,22 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDi
 
 abstract class AbstractEventDispatcher implements EventDispatcherInterface
 {
+    protected array $events;
+
     /**
      * @var SymfonyEventDispatcherInterface
      */
     protected $dispatcher;
 
-    protected array $events;
+    /**
+     * @var EntityHydratorInterface
+     */ 
+    protected $entityHydrator;
+    
+    /**
+     * @var EntityManagerInterface
+     */ 
+    protected $entityManager;
 
     public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydrator $entityHydrator, EntityManagerInterface $entityManager)
     {

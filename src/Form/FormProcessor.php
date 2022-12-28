@@ -12,11 +12,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\FormInterface;
 
+/** @TODO: Implement multi-step submission including $_POST,$_GET,$_FILES forwarding */
 class FormProcessor implements FormProcessorInterface
 {
     use BaseTrait;
     use FormProcessorTrait;
     
+    /** @var FormInterface */
+    protected $form = [];
+
     public $flowSessions = [];
     public $flowCallbacks = [];
 

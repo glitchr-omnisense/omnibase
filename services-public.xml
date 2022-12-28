@@ -39,8 +39,8 @@
         <service id="base.service.maintenance" alias="Base\Service\MaintenanceProvider" />
         <service id="Base\Service\MaintenanceProviderInterface" alias="base.service.maintenance"/>
 
-        <service id="base.service.maternity" alias="Base\Service\MaternityService" />
-        <service id="Base\Service\MaternityServiceInterface" alias="base.service.maternity"/>
+        <service id="base.service.maternity_unit" alias="Base\Service\MaternityUnit" />
+        <service id="Base\Service\MaternityUnitInterface" alias="base.service.maternity_unit"/>
 
         <service id="flysystem" alias="Base\Service\Flysystem" />
         <service id="Base\Service\FlysystemInterface" alias="flysystem"/>

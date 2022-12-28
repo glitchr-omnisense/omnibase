@@ -6,9 +6,8 @@ use Base\Database\Annotation\Vault;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
-use Base\Service\BaseService;
 use Base\BaseBundle;
-
+use Base\Routing\RouterInterface;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -25,7 +24,6 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Routing\RouterInterface;
 use TypeError;
 
 class IntegritySubscriber implements EventSubscriberInterface
@@ -34,6 +32,26 @@ class IntegritySubscriber implements EventSubscriberInterface
      * @var TokenStorageInterface
      */
     protected $tokenStorage;
+
+    /**
+     * @var Doctrine
+     */
+    protected $doctrine;
+
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var Router
+     */
+    protected $router;
 
     /**
      * @Vault
@@ -45,13 +63,12 @@ class IntegritySubscriber implements EventSubscriberInterface
      */
     private $secret;
 
-    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, BaseService $baseService, RouterInterface $router, string $secret = null)
+    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, RouterInterface $router, string $secret = null)
     {
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
         $this->translator   = $translator;
         $this->doctrine     = $doctrine;
-        $this->baseService  = $baseService;
         $this->router       = $router;
 
         $this->secret       = $secret;
@@ -126,7 +143,7 @@ class IntegritySubscriber implements EventSubscriberInterface
 
             $response->sendHeaders();
 
-            $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE, [], 302);
+            $response = $this->router->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE, [], 302);
             $event->setResponse($response);
             $event->stopPropagation();
         }

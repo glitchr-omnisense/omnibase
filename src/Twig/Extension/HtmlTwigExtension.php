@@ -8,6 +8,11 @@ use Twig\TwigFunction;
 
 final class HtmlTwigExtension extends AbstractExtension
 {
+    /**
+     * @var HtmlTagRenderer
+     */
+    protected $htmlTagRenderer;
+
     public function __construct(HtmlTagRenderer $htmlTagRenderer)
     {
         $this->htmlTagRenderer = $htmlTagRenderer;

@@ -21,6 +21,16 @@ use Exception;
 
 class Hierarchify extends AbstractAnnotation
 {
+    /**
+     * @var array
+     */
+    public ?array $hierarchy;
+
+    /**
+     * @var string
+     */
+    public ?string $separator;
+    
     public function __construct(array $data)
     {
         $this->hierarchy = $data["hierarchy"] ?? null;

@@ -23,6 +23,8 @@ class Blameable extends AbstractAnnotation
     private array $fields;
     private array $context;
 
+    protected bool $impersonator;
+
     public function __construct( array $data )
     {
         $this->context = array_map("mb_strtolower", $data['on']);

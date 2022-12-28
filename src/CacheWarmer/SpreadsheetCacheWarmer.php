@@ -8,6 +8,9 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 class SpreadsheetCacheWarmer implements CacheWarmerInterface
 {
+    /** @var int */
+    protected int $shellVerbosity;
+
     public function __construct() { $this->shellVerbosity = getenv("SHELL_VERBOSITY"); }
 
     public function isOptional():bool { return false; }

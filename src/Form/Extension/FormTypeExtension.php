@@ -7,7 +7,6 @@ use Base\Enum\UserRole;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
-use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -33,6 +32,7 @@ class FormTypeExtension extends AbstractTypeExtension
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;
+
     public function __construct(BaseService $baseService, FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->baseService = $baseService;

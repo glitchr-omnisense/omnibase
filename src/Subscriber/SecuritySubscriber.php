@@ -17,8 +17,7 @@ use Base\Routing\RouterInterface;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\LocaleProvider;
 use Base\Service\MaintenanceProviderInterface;
-use Base\Service\MaternityServiceInterface;
-use Doctrine\ORM\EntityManagerInterface;
+use Base\Service\MaternityUnitInterface;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -33,14 +32,15 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
 class SecuritySubscriber implements EventSubscriberInterface
 {
     /**
-     * @var BaseService
+     * @var RequestStack
      */
-    private $baseService;
+    private $requestStack;
 
     /**
      * @var TokenStorageInterface
@@ -52,20 +52,69 @@ class SecuritySubscriber implements EventSubscriberInterface
      */
     private $router;
 
+    /**
+     * @var UserRepository
+     */
+    private $userRepository;
+
+    /**
+     * @var AuthorizationChecker
+     */
+    private $authorizationChecker;
+
+    /**
+     * @var MaternityUnitInterface
+     */
+    private $maternityUnit;
+
+    /**
+     * @var MaintenanceProvider
+     */
+    private $maintenanceProvider;
+
+    /**
+     * @var Profiler
+     */
+    private $profiler;
+
+    /**
+     * @var Referrer
+     */
+    private $referrer;
+
+    /**
+     * @var ParameterBag
+     */
+    private $parameterBag;
+
+    /**
+     * @var SettingBag
+     */
+    private $settingBag;
+    
+    /**
+     * @var LocaleProvider
+     */
+    private $localeProvider;
+
+    /**
+     * @var Translator
+     */
+    private $translator;
+
     public function __construct(
-        EntityManagerInterface $entityManager,
         UserRepository $userRepository,
         AuthorizationChecker $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         TranslatorInterface $translator,
-        BaseService $baseService,
+        RequestStack $requestStack,
         ReferrerInterface $referrer,
         SettingBagInterface $settingBag,
         LocaleProvider $localeProvider,
         RouterInterface $router,
         ParameterBagInterface $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
-        MaternityServiceInterface $maternityService,
+        MaternityUnitInterface $maternityUnit,
         ?Profiler $profiler = null) {
 
         $this->authorizationChecker = $authorizationChecker;
@@ -74,14 +123,13 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->router  = $router;
 
         $this->localeProvider = $localeProvider;
-        $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
 
-        $this->maternityService = $maternityService;
+        $this->maternityUnit = $maternityUnit;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->parameterBag = $parameterBag;
 
-        $this->baseService = $baseService;
+        $this->requestStack = $requestStack;
         $this->settingBag = $settingBag;
         $this->referrer = $referrer;
         $this->profiler = $profiler;
@@ -366,7 +414,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $user = ($token) ? $token->getUser() : null;
 
         if ($user instanceof User) // Just to remember username.. after logout & first redirection
-            $this->baseService->addSession("_user", $user);
+            $this->requestStack->getSession()?->set("_user", $user);
 
         return $this->router->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
     }
@@ -385,7 +433,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale())) {
+        if($this->maternityUnit->redirectOnDeny($event, $this->localeProvider->getLocale())) {
             if($this->profiler) $this->profiler->disable();
             $event->stopPropagation();
         }

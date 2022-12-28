@@ -46,6 +46,16 @@ final class FunctionTwigExtension extends AbstractExtension
     protected $intlExtension;
 
     /**
+     * @var MimeTypes
+     */
+    protected $mimeTypes;
+
+    /**
+     * @var AssetExtension
+     */
+    protected $assetExtension;
+
+    /**
      * @var string
      */
     protected string $projectDir;

@@ -12,6 +12,11 @@ use Symfony\Component\Form\FormView;
 
 class FormTypeBootstrapExtension extends AbstractTypeExtension
 {
+    /**
+     * @var BaseService
+     */
+    protected $baseService;
+    
     public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
 
     public static function getExtendedTypes(): iterable { return [FormType::class]; }

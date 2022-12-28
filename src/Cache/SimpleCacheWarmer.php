@@ -9,7 +9,13 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 abstract class SimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements SimpleCacheWarmerInterface
 {
     /** @var string */
-    private $cacheFile;
+    private string $cacheFile;
+
+    /** @var string */
+    protected string $shellVerbosity;
+    
+    /** @var SimpleCacheInterface */
+    protected $simpleCache;
 
     public function __construct(SimpleCacheInterface $simpleCache, string $cacheDir)
     {

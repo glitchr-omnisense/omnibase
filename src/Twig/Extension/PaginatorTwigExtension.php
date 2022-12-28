@@ -10,6 +10,11 @@ use Twig\TwigFunction;
 
 final class PaginatorTwigExtension extends AbstractExtension
 {
+    /**
+     * @var Translator
+     */
+    protected $translator;
+    
     public function __construct(TranslatorInterface $translator) { $this->translator = $translator; }
 
     public function getName() { return 'paginator_extension'; }

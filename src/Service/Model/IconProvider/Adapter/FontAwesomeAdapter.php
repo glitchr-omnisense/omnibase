@@ -15,6 +15,11 @@ class FontAwesomeAdapter extends AbstractIconAdapter
     public const STYLE_BRANDS  = "brands";
     public const STYLE_KIT     = "kit";
 
+    /** @var ?string */
+    protected ?string $stylesheet;
+    /** @var ?string */
+    protected ?string $javascript;
+    
     public function __construct(string $metadata, string $cacheDir, ?string $javascript = null, ?string $stylesheet = null)
     {
         $this->metadata   = $metadata;

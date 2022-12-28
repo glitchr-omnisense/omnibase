@@ -14,6 +14,11 @@ use Twig\Error\LoaderError;
 
 class HtmlTagRenderer extends AbstractTagRenderer
 {
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
     public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack)
     {
         parent::__construct($twig, $localeProvider, $slugger, $parameterBag);

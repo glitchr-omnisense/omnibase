@@ -25,6 +25,11 @@ class AnnotationSubscriber implements EventSubscriberInterface {
      */
     protected $entityManager;
 
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator, AnnotationReader $annotationReader)
     {
         $this->entityManager    = $entityManager;

@@ -20,6 +20,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
@@ -74,6 +75,11 @@ class EntityHydrator implements EntityHydratorInterface
     const AUTOTYPE             = 0b00100000000;
     const OBJECT_INHERITED     = 0b01000000000;
     const FETCH_ASSOCIATIONS   = 0b10000000000;
+
+    /**
+     * PropertyAccessorInterface
+     */
+    protected $propertyAccessor;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {

@@ -16,6 +16,11 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  */
 class Logging extends AbstractAnnotation implements EntityExtensionInterface
 {
+    /**
+     * @var bool
+     */
+    protected ?bool $verbosity;
+
     public function __construct( array $data = [])
     {
         $this->verbosity = $data['verbosity'] ?? null;

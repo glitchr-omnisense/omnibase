@@ -33,6 +33,8 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     public const ASC  = "ASC";
     public const DESC = "DESC";
 
+    public string $order;
+
     public function __construct( array $data = [] )
     {
         $this->order          = $data['order'] ?? self::ASC;

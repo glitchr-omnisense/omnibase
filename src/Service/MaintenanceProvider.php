@@ -10,12 +10,24 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class MaintenanceProvider implements MaintenanceProviderInterface
 {
+    /** @var Router */
+    protected $router;
+    /** @var ParameterBag */
+    protected $parameterBag;
+    /** @var SettingBag */
+    protected $settingBag;
+    /** @var AuthorizationChecker */
+    protected $authorizationChecker;
+    /** @var LocaleProvider */
+    protected $localeProvider;
+    /** @var TokenStorage */
+    protected $tokenStorage;
+
     protected $remainingTime = 0;
     protected $percentage = -1;
     protected $uptime = 0;
     protected $downtime = 0;
 
-    protected $router;
     public function __construct(RouterInterface $router, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider, TokenStorageInterface $tokenStorage)
     {
         $this->router = $router;

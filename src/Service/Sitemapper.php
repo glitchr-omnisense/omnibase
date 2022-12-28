@@ -16,6 +16,31 @@ use Twig\Environment;
 
 class Sitemapper implements SitemapperInterface
 {
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
+    /**
+     * @var AnnotationReader
+     */
+    protected $annotationReader;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var LocaleProviderInterface
+     */
+    protected $localeProvider;
+
+    /**
+     * @var MimeTypes
+     */
+    protected $mimeTypes;
+
     private $computeFlag = true;
     protected string $hostname = "";
     protected array $urlset = [];

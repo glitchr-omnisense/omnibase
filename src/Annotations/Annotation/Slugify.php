@@ -35,8 +35,13 @@ class Slugify extends AbstractAnnotation
     protected $slugger;
     protected bool $unique;
     protected bool $lowercase;
+    protected bool $nullable;
+
+    protected ?array $keep;
+    protected bool $sync;
 
     protected string $separator;
+    protected ?string $referenceColumn;
 
     public function __construct( array $data )
     {

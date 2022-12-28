@@ -5,7 +5,7 @@ namespace Base\Security\Voter;
 use App\Entity\User;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\MaintenanceProviderInterface;
-use Base\Service\MaternityServiceInterface;
+use Base\Service\maternityUnitInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Referrer;
 use Base\Service\SettingBagInterface;
@@ -25,7 +25,40 @@ class AccessVoter extends Voter
     const      USER_ACCESS = "USER_ACCESS";
     const     ADMIN_ACCESS = "ADMIN_ACCESS";
 
-    public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocaleProviderInterface $localeProvider, MaintenanceProviderInterface $maintenanceProvider, MaternityServiceInterface $maternityService)
+    /** 
+     * @var RequestStack 
+     * */
+    protected $requestStack;
+    /** 
+     * @var Router 
+     * */
+    protected $router;
+    /** 
+     * @var ParameterBag 
+     * */
+    protected $parameterBag;
+    /** 
+     * @var LocaleProvider 
+     * */
+    protected $localeProvider;
+    /** 
+     * @var SettingBag 
+     * */
+    protected $settingBag;
+    /** 
+     * @var FirewallMapInterface 
+     * */
+    protected $firewallMap;
+    /** 
+     * @var MaintenanceProvider 
+     * */
+    protected $maintenanceProvider;
+    /** 
+     * @var MaternityUnit 
+     * */
+    protected $maternityUnit;
+    
+    public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocaleProviderInterface $localeProvider, MaintenanceProviderInterface $maintenanceProvider, MaternityUnitInterface $maternityUnit)
     {
         $this->requestStack   = $requestStack;
         $this->router         = $router;
@@ -34,7 +67,7 @@ class AccessVoter extends Voter
         $this->firewallMap    = $firewallMap;
         $this->localeProvider = $localeProvider;
         $this->maintenanceProvider = $maintenanceProvider;
-        $this->maternityService    = $maternityService;
+        $this->maternityUnit    = $maternityUnit;
     }
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -74,7 +107,7 @@ class AccessVoter extends Voter
                 return !$this->maintenanceProvider->isUnderMaintenance() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
 
             case self::BIRTH_ACCESS:
-                return $this->maternityService->isBorn() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
+                return $this->maternityUnit->isBorn() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
 
             case self::EXCEPTION_ACCESS:
 

@@ -11,6 +11,11 @@ use Symfony\Component\HttpKernel\Event\KernelEvent;
 
 class EagerSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var BaseService
+     */
+    protected $baseService;
+    
     public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;

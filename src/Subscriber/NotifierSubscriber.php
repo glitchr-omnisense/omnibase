@@ -13,6 +13,25 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class NotifierSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var AuthorizationCheckerInterface
+     */
+    protected $authorizationChecker;
+    
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+    
+    /** * @var bool */
+    protected $debug;
+    
+    /** * @var string */
+    protected $technicalRecipient;
+    
+    /** * @var bool */
+    protected bool $technicalLoopback;
+    
     public function __construct(AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, string $debug)
     {
         $this->authorizationChecker = $authorizationChecker;

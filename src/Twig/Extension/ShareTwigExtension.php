@@ -9,6 +9,11 @@ use Twig\TwigFilter;
 
 final class ShareTwigExtension extends AbstractExtension
 {
+    /**
+     * @var Sharer
+     */
+    protected $sharer;
+    
     public function __construct(Sharer $sharer)
     {
         $this->sharer = $sharer;

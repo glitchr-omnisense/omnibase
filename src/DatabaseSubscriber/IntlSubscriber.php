@@ -9,12 +9,10 @@ use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
-use Base\Entity\ThreadIntl;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -32,6 +30,15 @@ class IntlSubscriber implements EventSubscriberInterface
         return [Events::loadClassMetadata, Events::postLoad, Events::onFlush];
     }
 
+    /**
+     * @var EntityManagerInterface 
+     */
+    protected $entityManager;
+
+    /**
+     * @var LocaleProviderInterface 
+     */
+    protected $localeProvider;
     public function getLocaleProvider() { return $this->localeProvider; }
 
     public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider)

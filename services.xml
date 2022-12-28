@@ -191,7 +191,7 @@
             <argument type="service" id="security.token_storage" />
         </service>
 
-        <service id="Base\Service\MaternityService" public="true">
+        <service id="Base\Service\MaternityUnit" public="true">
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="setting_bag" />
@@ -524,7 +524,7 @@
             <argument type="service" id="security.firewall.map" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="base.service.maintenance" />
-            <argument type="service" id="base.service.maternity" />
+            <argument type="service" id="base.service.maternity_unit" />
         </service>
 
          <service id="Base\Security\Voter\RouteVoter">
@@ -551,13 +551,13 @@
             <argument type="service" id="locale_provider" />
             <argument type="service" id="base.service" />
             <argument type="service" id="base.service.maintenance" />
-            <argument type="service" id="base.service.maternity" />
+            <argument type="service" id="base.service.maternity_unit" />
         </service>
 
         <service id="Base\Twig\Variable\EmailVariable" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="base.service" />
-            <argument type="service" id="base.service.maternity" />
+            <argument type="service" id="base.service.maternity_unit" />
         </service>
 
         <service id="Base\Twig\Variable\RandomVariable"     public="true"><tag name="twig.variable" /></service>
@@ -719,19 +719,18 @@
 
         <service id="Base\Subscriber\SecuritySubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="request_stack" />
             <argument type="service" id="referrer" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="base.service.maintenance" />
-            <argument type="service" id="base.service.maternity" />
+            <argument type="service" id="base.service.maternity_unit" />
             <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
@@ -748,7 +747,6 @@
             <argument type="service" id="translator" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="doctrine" />
-            <argument type="service" id="base.service" />
             <argument type="service" id="router" />
 
             <bind key="$secret">%kernel.secret%</bind>

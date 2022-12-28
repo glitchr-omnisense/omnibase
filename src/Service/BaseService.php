@@ -78,6 +78,16 @@ class BaseService implements RuntimeExtensionInterface
     protected $csrfTokenManager;
 
     /**
+     * @var AdminUrlGenerator
+     */
+    protected $adminUrlGenerator;
+
+    /**
+     * @var FormFactory
+     */
+    protected $formFactory;
+
+    /**
      * @var Container
      */
     protected $container;
@@ -226,7 +236,7 @@ class BaseService implements RuntimeExtensionInterface
     public function getExecutionTime(): float { return round(microtime(true) - $this->startTime, 2); }
     public function startTime($startTime = null)
     {
-        $this->$startTime = $startTime;
+        $this->startTime = $startTime;
         if(!$this->startTime || is_infinite($this->startTime))
             $this->startTime = microtime(true);
     }

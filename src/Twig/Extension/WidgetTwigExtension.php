@@ -16,6 +16,11 @@ use Twig\Extension\AbstractExtension;
 
 final class WidgetTwigExtension extends AbstractExtension
 {
+    /**
+     * @var WidgetProvider
+     */
+    protected $widgetProvider;
+    
     public function __construct(WidgetProviderInterface $widgetProvider) { $this->widgetProvider = $widgetProvider; }
 
     public function getName() { return 'widget_extension'; }

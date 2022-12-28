@@ -33,9 +33,26 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     public const LOGOUT_ROUTE         = 'security_logout';
     public const LOGOUT_REQUEST_ROUTE = 'security_logoutRequest';
 
+    /**
+     * @var ReferrerInterface
+     */
+    protected $referrer;
+    /**
+     * @var EntityManagerInterface
+     */
     protected $entityManager;
+    /**
+     * @var AuthorizationCheckerInterface
+     */
     protected $authorizationChecker;
+    /**
+     * @var RouterInterface
+     */
     protected $router;
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
 
     public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, RouterInterface $router, AuthorizationCheckerInterface $authorizationChecker)
     {

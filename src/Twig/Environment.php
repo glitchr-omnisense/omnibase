@@ -16,6 +16,31 @@ use Twig\Loader\LoaderInterface;
 
 class Environment extends TwigEnvironment
 {
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    /**
+     * @var LocaleProviderInterface
+     */
+    protected $localeProvider;
+
+    /**
+     * @var Environment
+     */
+    protected $environment;
+    
     public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocaleProviderInterface $localeProvider, RouterInterface $router, ParameterBagInterface $parameterBag)
     {
         $this->requestStack   = $requestStack;

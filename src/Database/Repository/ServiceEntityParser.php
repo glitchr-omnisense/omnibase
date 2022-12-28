@@ -122,8 +122,27 @@ class ServiceEntityParser
     protected array $options  = [];
 
     protected $classMetadata = null;
+
+    /**
+     * @var ClassMetadataManipulator
+     */
     protected $classMetadataManipulator = null;
 
+    /**
+     * @var ServiceEntityRepository
+     */
+    protected $serviceEntity;
+
+    /**
+     * @var EntityHydrator
+     */
+    protected $entityHydrator;
+
+    /**
+     * @var EntityManager
+     */
+    protected $entityManager;
+    
     public function __construct(ServiceEntityRepository $serviceEntity, EntityManager $entityManager, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
     {
         $this->serviceEntity  = $serviceEntity;

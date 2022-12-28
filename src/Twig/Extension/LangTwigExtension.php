@@ -12,6 +12,11 @@ use Twig\TwigFunction;
 
 final class LangTwigExtension extends AbstractExtension
 {
+    /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+    
     public function __construct(LocaleProviderInterface $localeProvider) { $this->localeProvider = $localeProvider; }
 
     public function getName() { return 'lang_extension'; }

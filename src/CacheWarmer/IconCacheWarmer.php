@@ -9,6 +9,11 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 class IconCacheWarmer extends SimpleCacheWarmer {
 
+    /**
+     * @var array[SimpleCacheInterface]
+     */
+    protected $adapters;
+
     public function __construct(IconProvider $iconProvider, string $cacheDir)
     {
         $this->adapters = array_filter($iconProvider->getAdapters(), fn($a) => $a instanceof SimpleCacheInterface);

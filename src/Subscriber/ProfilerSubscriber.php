@@ -13,6 +13,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ProfilerSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var Router
+     */
+    protected $router;
+
     public function __construct(RouterInterface $router)
     {
         $this->router = $router;

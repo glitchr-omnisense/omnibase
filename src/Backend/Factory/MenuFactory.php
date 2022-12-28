@@ -12,6 +12,11 @@ use Symfony\Component\Security\Http\Logout\LogoutUrlGenerator;
 
 class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
 {
+    /**
+     * @var Router
+     */
+    protected $router;
+
     public function __construct(AdminContextProvider $adminContextProvider, AuthorizationCheckerInterface $authChecker, LogoutUrlGenerator $logoutUrlGenerator, AdminUrlGenerator $adminUrlGenerator, MenuItemMatcherInterface $menuItemMatcher, RouterInterface $router)
     {
         parent::__construct($adminContextProvider, $authChecker, $logoutUrlGenerator, $adminUrlGenerator, $menuItemMatcher);

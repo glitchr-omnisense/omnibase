@@ -5,9 +5,7 @@ namespace Base\EntitySubscriber;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Base\Entity\User;
 
-use Base\BaseBundle;
 use Base\Service\BaseService;
 use Base\Entity\Extension\Log;
 
@@ -29,6 +27,16 @@ class LogSubscriber implements EventSubscriberInterface
      * @var BaseService
      */
     protected $baseService;
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
 
     /**
      * @var TokenStorageInterface

@@ -23,23 +23,53 @@ class AppVariable
     /**
      * @var Referrer
      */
-    protected $referrer;
+    public $referrer;
 
     /**
      * @var Environment
      */
-    protected $twig;
+    public $twig;
 
     /**
      * @var SettingBag
      */
-    protected $settingBag;
+    public $settingBag;
 
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    public $parameterBag;
 
+    /**
+     * @var EasyAdminVariable
+     */
+    public $ea;
+    
+    /**
+     * @var SiteVariable
+     */
+    public $site;
+
+    /**
+     * @var RandomVariable
+     */
+    public $random;
+
+    /**
+     * @var EmailVariable
+     */
+    public $email;
+
+    /**
+     * @var BackofficeVariable
+     */
+    public $backoffice;
+
+    /**
+     * @var LocaleProvider
+     */
+    public $localeProvider;
+    
     public function __construct(
         \Symfony\Bridge\Twig\AppVariable $appVariable, EasyAdminVariable $ea, RandomVariable $random, SiteVariable $site, EmailVariable $email, BackofficeVariable $backoffice,
         SettingBag $settingBag, ParameterBagInterface $parameterBag,

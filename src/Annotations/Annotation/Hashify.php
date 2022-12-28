@@ -43,6 +43,9 @@ class Hashify extends AbstractAnnotation
     protected $nullable;
     protected $reference;
 
+    public bool $random;
+    public ?string $referenceColumn;
+    
     public function __construct( array $data )
     {
         $this->data            = $data;

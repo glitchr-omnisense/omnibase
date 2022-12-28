@@ -26,6 +26,8 @@ class Timestamp extends AbstractAnnotation
 {
     private array $fields;
     private array $context;
+    
+    private bool $immutable;
 
     /**
      * @var DateTime

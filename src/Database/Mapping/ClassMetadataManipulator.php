@@ -38,6 +38,11 @@ class ClassMetadataManipulator
     protected $doctrine;
 
     /**
+     * @var EntityManagerInterface
+     * */
+    protected $entityManager;
+
+    /**
      * @var array
      */
     protected array $globalExcludedFields;
@@ -824,7 +829,11 @@ class ClassMetadataManipulator
      */
     protected $cacheSalt = '__CLASSMETADATA__ENHANCED__';
 
+    /**
+     * @var CacheInterface
+     */
     protected static $cache;
+
     protected static array $loadedMetadata = [];
 
     public function getCache(): ?CacheInterface { return self::$cache; }

@@ -9,6 +9,15 @@ use Imagine\Image\ImageInterface;
 
 class ThumbnailFilter implements FilterInterface
 {
+    /** * @var int */
+    protected ?int $width;
+    /** * @var int */
+    protected ?int $height;
+    /** * @var int */
+    protected $mode;
+    /** * @var string */
+    protected $filter;
+
     public function __construct(?int $width = null, ?int $height = null, $mode = ImageInterface::THUMBNAIL_INSET, $filter = ImageInterface::FILTER_UNDEFINED)
     {
         $this->width  = $width;

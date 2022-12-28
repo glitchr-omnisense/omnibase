@@ -6,13 +6,42 @@ use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\MaintenanceProviderInterface;
-use Base\Service\MaternityServiceInterface;
+use Base\Service\MaternityUnitInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
 use DateTime;
 
 class SiteVariable
 {
+    /**
+     * @var Router
+     */
+    protected $router;
+    /**
+     * @var Sitemapper
+     */
+    protected $sitemapper;
+    /**
+     * @var Translator
+     */
+    protected $translator;
+    /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+    /**
+     * @var MaintenanceProvider
+     */
+    protected $maintenanceProvider;
+    /**
+     * @var MaternityUnit
+     */
+    protected $maternityUnit;
+    /**
+     * @var BaseService
+     */
+    protected $baseService;
+
     public function __construct(
         RouterInterface $router,
         SitemapperInterface $sitemapper,
@@ -20,14 +49,14 @@ class SiteVariable
         LocaleProviderInterface $localeProvider,
         BaseService $baseService,
         MaintenanceProviderInterface $maintenanceProvider,
-        MaternityServiceInterface $maternityService)
+        MaternityUnitInterface $maternityUnit)
     {
         $this->router = $router;
         $this->translator = $translator;
         $this->baseService = $baseService;
         $this->localeProvider = $localeProvider;
         $this->maintenanceProvider = $maintenanceProvider;
-        $this->maternityService = $maternityService;
+        $this->maternityUnit = $maternityUnit;
         $this->sitemapper = $sitemapper;
     }
 
@@ -52,9 +81,9 @@ class SiteVariable
 
     public function under_maintenance() : bool { return $this->maintenanceProvider->isUnderMaintenance(); }
 
-    public function birthdate(?string $locale = null) : DateTime { return $this->maternityService->getBirthdate($locale); }
-    public function is_born(?string $locale = null) : bool { return $this->maternityService->isBorn($locale); }
-    public function age(?string $locale = null) : string { return $this->maternityService->getAge($locale); }
+    public function birthdate(?string $locale = null) : DateTime { return $this->maternityUnit->getBirthdate($locale); }
+    public function is_born(?string $locale = null) : bool { return $this->maternityUnit->isBorn($locale); }
+    public function age(?string $locale = null) : string { return $this->maternityUnit->getAge($locale); }
 
     public function execution_time() { return $this->baseService->getExecutionTime(); }
 }

@@ -16,6 +16,31 @@ use Twig\Environment;
 
 class AnalyticsSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var TokenStorage
+     */
+    protected $tokenStorage;
+    /**
+     * @var Router
+     */
+    protected $router;
+    /**
+     * @var Translator
+     */
+    protected $translator;
+    /**
+     * @var Environment
+     */
+    protected $twig;
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+    /**
+     * @var GaService
+     */
+    protected $gaService;
+    
     public function __construct(
         TokenStorageInterface $tokenStorage,
         RouterInterface $router,

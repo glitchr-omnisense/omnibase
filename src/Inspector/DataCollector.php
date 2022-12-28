@@ -23,7 +23,20 @@ use Symfony\Component\Routing\RouterInterface;
 
 class DataCollector extends AbstractDataCollector
 {
-    private AdminContextProvider $adminContextProvider;
+    /** @var AdminContextProvider */
+    private $adminContextProvider;
+
+    /** @var Doctrine */
+    private $doctrine;
+
+    /** @var Router */
+    private $router;
+
+    /** @var ParameterBag */
+    private $parameterBag;
+
+    /** @var BaseService */
+    private $baseService;
 
     public array $dataBundles = [];
     public function __construct(AdminContextProvider $adminContextProvider, ManagerRegistry $doctrine, ParameterBagInterface $parameterBag, RouterInterface $router, BaseService $baseService)

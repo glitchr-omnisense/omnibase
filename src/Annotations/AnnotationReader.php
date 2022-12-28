@@ -18,10 +18,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\FlysystemInterface;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Psr\Cache\CacheItemPoolInterface;
 use ReflectionClass;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -79,6 +76,41 @@ class AnnotationReader extends SimpleCache
      */
     protected $reader = null;
     public function getDefaultReader(): DoctrineAnnotationReader { return $this->reader; }
+
+    /**
+     * @var string
+     */
+    protected string $environment;
+
+    /**
+     * @var string
+     */
+    protected string $projectDir;
+
+    /**
+     * @var string
+     */
+    protected string $cacheDir;
+
+    /**
+     * @var bool
+     */
+    protected bool $enabled;
+
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
+     * @var TokenStorageInterface
+     */
+    protected $tokenStorage;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher,

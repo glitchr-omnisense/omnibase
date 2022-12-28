@@ -20,6 +20,19 @@ abstract class AbstractTagRenderer implements TagRendererInterface
      */
     protected $localeProvider;
 
+    /**
+     * @var SluggerInterface
+     */
+    protected $slugger;
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    protected array $defaultScriptAttributes;
+    protected array $defaultLinkAttributes;
+
     public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag)
     {
         $this->twig = $twig;

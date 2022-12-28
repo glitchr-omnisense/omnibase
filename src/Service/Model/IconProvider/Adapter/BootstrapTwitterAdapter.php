@@ -13,6 +13,9 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
     public static function getName(): string { return "bi"; }
     public static function getOptions(): array { return []; }
 
+    /** @var ?string */
+    protected ?string $stylesheet;
+
     public function __construct(string $metadata, string $cacheDir, ?string $stylesheet = null)
     {
         $this->metadata = $metadata;

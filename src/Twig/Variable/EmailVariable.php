@@ -3,16 +3,26 @@
 namespace Base\Twig\Variable;
 
 use Base\Service\BaseService;
-use Base\Service\MaternityServiceInterface;
+use Base\Service\MaternityUnitInterface;
 
 class EmailVariable
 {
+    /**
+     * @var MaternityUnit
+     */
+    protected $maternityUnit;
+
+    /**
+     * @var BaseService
+     */
+    protected $baseService;
+
     public function __construct(
         BaseService $baseService,
-        MaternityServiceInterface $maternityService)
+        MaternityUnitInterface $maternityUnit)
     {
         $this->baseService = $baseService;
-        $this->maternityService = $maternityService;
+        $this->maternityUnit = $maternityUnit;
     }
 
     public function homepage() { return $this->baseService->getIndexPage(); }
@@ -21,5 +31,5 @@ class EmailVariable
     public function slogan() { return $this->baseService->getEmail()["slogan"] ?? null; }
     public function logo()   { return $this->baseService->getEmail()["logo"]   ?? null; }
 
-    public function age(?string $locale = null) : string { return $this->maternityService->getAge($locale); }
+    public function age(?string $locale = null) : string { return $this->maternityUnit->getAge($locale); }
 }

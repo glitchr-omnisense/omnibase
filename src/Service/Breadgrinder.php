@@ -3,14 +3,27 @@
 namespace Base\Service;
 
 use Base\Service\Model\Breadcrumb;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
 class Breadgrinder implements BreadgrinderInterface
 {
     protected $breadcrumbs = [];
 
+    /**
+     * @var Router
+     */
     protected $router;
+
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
     public function __construct(RouterInterface $router, TranslatorInterface $translator, ParameterBagInterface $parameterBag)
     {
         $this->router = $router;

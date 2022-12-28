@@ -12,6 +12,23 @@ use Base\Routing\RouterInterface;
 
 class IconProvider extends SimpleCache
 {
+    /**
+     * @var AnnotationReader
+     */
+    protected $annotationReader;
+    /**
+     * @var ImagineService
+     */
+    protected $imageService;
+    /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+    /**
+     * @var Router
+     */
+    protected $router;
+    
     public function __construct(AnnotationReader $annotationReader, ImageService $imageService, LocaleProviderInterface $localeProvider, RouterInterface $router, string $cacheDir)
     {
         $this->annotationReader = $annotationReader;

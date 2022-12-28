@@ -7,6 +7,13 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 class SettingsCacheWarmer implements CacheWarmerInterface
 {
+    /**
+     * @var SettingBag
+     */
+    protected $settingBag;
+    
+    protected int $shellVerbosity;
+
     public function __construct(SettingBag $settingBag)
     {
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");

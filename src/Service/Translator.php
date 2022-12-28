@@ -3,11 +3,7 @@
 namespace Base\Service;
 
 use Base\Database\Type\SetType;
-use Base\Routing\RouterInterface;
 use Doctrine\DBAL\Types\Type;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\TranslatableMessage;
 
@@ -41,6 +37,21 @@ class Translator implements TranslatorInterface
     public const POLITENESS_PLAIN        = "_plain";
     public const POLITENESS_POLITE       = "_polite";
     public const POLITENESS_FORMAL       = "_formal";
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var bool
+     */
+    protected bool $isDebug;
 
     public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, KernelInterface $kernel, ParameterBagInterface $parameterBag)
     {

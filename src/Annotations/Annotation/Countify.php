@@ -26,7 +26,8 @@ use Exception;
  */
 class Countify extends AbstractAnnotation
 {
-    protected string $reference;
+    protected ?string $referenceColumn;
+    protected string $type;
 
     public const COUNT_CHARS     = "chars";
     public const COUNT_LETTERS   = "letters";

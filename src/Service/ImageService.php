@@ -29,9 +29,39 @@ class ImageService extends FileService implements ImageServiceInterface
     protected $imagine;
 
     /**
-     * @var FlysystemInterface
+     * @var Profiler
      */
-    protected $flysystem;
+    protected $profiler;
+
+    /**
+     * @var ImagineInterface
+     */
+    protected $imagineBitmap;
+
+    /**
+     * @var ImagineInterface
+     */
+    protected $imagineSvg;
+
+    protected string $publicDir;
+    protected string $projectDir;
+    protected string $localCache;
+
+    /** @var ?int */
+    protected ?int $timeout;
+    /** @var ?string */
+    protected ?int $fallback;
+    /** @var string */
+    protected string $maxResolution;
+    /** @var string */
+    protected string $maxQuality;
+    /** @var ?bool */
+    protected ?bool $noImage;
+    /** @var ?bool */
+    protected ?bool $debug;
+
+    /** @var ?bool */
+    protected ?bool $enableWebp;
 
     public function __construct(
         Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem,
