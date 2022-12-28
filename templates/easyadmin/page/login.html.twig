@@ -49,11 +49,11 @@
             </div>
         </header>
 
-        {% if error|default(false) %}
+        {# {% if error|default(false) %}
             <div class="w-100 alert alert-danger">
                 {{ error.messageKey|trans(error.messageData, '@security') }}
             </div>
-        {% endif %}
+        {% endif %} #}
         <section class="content">
 
             <h1>{{ page_title }}</h1>
