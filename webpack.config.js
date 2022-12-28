@@ -13,7 +13,7 @@ Encore.addPlugin(new WebpackBar())
     .cleanupOutputBeforeBuild()
     .enableBuildNotifications()
     .enableSourceMaps(!Encore.isProduction())
-    // .enableVersioning(Encore.isProduction())
+    .enableVersioning(Encore.isProduction())
 
     .copyFiles({
         from: './node_modules/@fortawesome/fontawesome-free/metadata/',
@@ -89,11 +89,6 @@ Encore.addPlugin(new WebpackBar())
             'postcss-loader'
         ]
     })
-
-    .addPlugin(new MiniCssExtractPlugin({
-        filename: '[name].css'
-
-    }))
 
     .addPlugin(new MediaQueryPlugin({
         include: ["base-defer", "easyadmin-async", "form-defer"],
