@@ -1577,7 +1577,7 @@ class ServiceEntityParser
             $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column);
 
         $qb->addSelect('COUNT('.trim($mode.' '.$e_column).') AS count');
-        $qb->groupBy($e_column);
+        $qb->addGroupBy($e_column);
 
         return $qb->getQuery();
     }
