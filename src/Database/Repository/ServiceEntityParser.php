@@ -142,7 +142,7 @@ class ServiceEntityParser
      * @var EntityManager
      */
     protected $entityManager;
-    
+
     public function __construct(ServiceEntityRepository $serviceEntity, EntityManager $entityManager, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
     {
         $this->serviceEntity  = $serviceEntity;
@@ -218,6 +218,8 @@ class ServiceEntityParser
         $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
         if(!$query) return null;
 
+        // dump($query);
+        // exit(1);
         return $query->getResult();
     }
 
@@ -1542,7 +1544,7 @@ class ServiceEntityParser
         }
 
         $query = $this->eagerly === false ? $qb->getQuery() : $this->getEagerQuery($qb);
-        if($groupBy) $query->setCacheable(false);
+        if($groupBy) $query->setCacheable(false); // @TODO, if groupBy is used, cache is disabled.. id column not stored for some reasons.
 
         $query->useQueryCache($this->cacheable);
         $query->disableResultCache(); // Disable by default
@@ -1575,6 +1577,8 @@ class ServiceEntityParser
             $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column);
 
         $qb->addSelect('COUNT('.trim($mode.' '.$e_column).') AS count');
+        $qb->groupBy($e_column);
+
         return $qb->getQuery();
     }
 
