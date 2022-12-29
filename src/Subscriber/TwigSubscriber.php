@@ -28,7 +28,7 @@ class TwigSubscriber implements EventSubscriberInterface
      * @var EncoreTagRenderer
      */
     protected $encoreTagRenderer;
-    
+
     /**
      * @var ParameterBag
      */
@@ -43,12 +43,12 @@ class TwigSubscriber implements EventSubscriberInterface
      * @var AuthorizationChecker
      */
     protected $authorizationChecker;
-    
+
     /** * @var string */
     protected string $publicDir;
     /** * @var bool */
     protected ?bool $autoAppend;
-    
+
     public function __construct(HtmlTagRenderer $htmlTagRenderer, EncoreTagRenderer $encoreTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
     {
         $this->encoreTagRenderer    = $encoreTagRenderer;

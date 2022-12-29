@@ -46,7 +46,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
         $this->entrypointLookupCollection = $entrypointLookupCollection;
         $this->publicDir = $publicDir;
-        // $this->packages = $packages;
+        $this->packages = $packages;
 
         // NB:: $this->getCache() issue..
         $this->cacheDir = $cacheDir;
@@ -58,22 +58,18 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     public function warmUp(string $cacheDir): bool
     {
         $this->encoreEntrypoints  = $this->getCache("/Entrypoints", $this->encoreEntrypoints ?? []);
-        $this->renderedCssSource = [];
-        $this->renderedLinkTags = [];
-        $this->renderedScriptTags = [];
-        // dump($this->encoreEntrypoints ?? "");
 
-        // $this->renderedCssSource  = $this->getCache("/Entrypoints/Css/Source", function() {
-        //     return $this->renderedCssSource ?? [];
-        // });
+        $this->renderedCssSource  = $this->getCache("/Entrypoints/Css/Source", function() {
+            return $this->renderedCssSource ?? [];
+        }, true);
 
-        // $this->renderedLinkTags   = $this->getCache("/Entrypoints/Tags/Link", function() {
-        //     return $this->renderedLinkTags ?? [];
-        // });
+        $this->renderedLinkTags   = $this->getCache("/Entrypoints/Tags/Link", function() {
+            return $this->renderedLinkTags ?? [];
+        }, true);
 
-        // $this->renderedScriptTags = $this->getCache("/Entrypoints/Tags/Script", function() {
-        //     return $this->renderedScriptTags ?? [];
-        // });
+        $this->renderedScriptTags = $this->getCache("/Entrypoints/Tags/Script", function() {
+            return $this->renderedScriptTags ?? [];
+        }, true);
 
         $this->commitCache();
 
