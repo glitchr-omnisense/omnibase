@@ -20,7 +20,7 @@ class Notifier extends BaseNotifier
             "raw" => true,
 
             "subject" => $_GET["subject"] ?? $this->translator->trans('@emails.itWorks'),
-            
+
             "excerpt" => $_GET["excerpt"] ??
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     Proin blandit et lorem sed bibendum.

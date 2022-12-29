@@ -25,7 +25,7 @@ final class FileTwigExtension extends AbstractExtension
 
     /** @var string */
     protected $projectDir;
-    
+
     public function __construct(RouterInterface $router, string $projectDir)
     {
         $this->router   = $router;
@@ -45,6 +45,7 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFunction('urlify',  [$this, 'urlify' ], ["is_safe" => ['all']]),
             new TwigFunction('linkify', [$this, 'linkify' ], ["is_safe" => ['all']]),
             new TwigFunction('lightbox',[ImageService::class,   'lightbox'], ["is_safe" => ['all']]),
+            new TwigFunction('image',   [ImageService::class,   'image']),
 
             new TwigFunction('asset',   [AdvancedRouter::class, 'getAssetUrl']),
         ];

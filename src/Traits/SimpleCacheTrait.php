@@ -27,8 +27,8 @@ trait SimpleCacheTrait
 
     public function getCache(string $key, mixed $fallback = null, $deferred = false): mixed
     {
-        if($fallback !== null && !$this->hasCache($key))
-                $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $deferred);
+        if(!$this->hasCache($key))
+            $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $deferred);
 
         return $this->cache?->getItem($this->getCacheKey(static::class.$key))->get();
     }

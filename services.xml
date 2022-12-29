@@ -497,6 +497,7 @@
 
         <service id="Base\Annotations\AnnotationReader" public="true">
             <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="router" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="flysystem" />
@@ -541,6 +542,10 @@
         <service id="Base\Database\Annotation\Trasheable" ><tag name="base.entity_extension" /></service>
 
         <!-- Twig declarations -->
+        <service id="Base\Twig\AssetPackage" public="true">
+            <tag name="assets.package" package="base.assets.package" />
+            <argument type="service" id="request_stack" />
+        </service>
 
         <service id="Base\Twig\Variable\BackofficeVariable" parent="Base\Twig\Variable\SiteVariable" public="true"><tag name="twig.runtime" /></service>
         <service id="Base\Twig\Variable\SiteVariable" public="true">
@@ -587,9 +592,10 @@
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup_collection" />
+            <argument type="service" id="assets.packages" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
-        </service>
+          </service>
 
         <service id="Base\Twig\Extension\EncoreTwigExtension"><tag name="twig.extension" priority="-1" /></service>
         <service id="Base\Twig\Extension\HtmlTwigExtension"><tag name="twig.extension" />

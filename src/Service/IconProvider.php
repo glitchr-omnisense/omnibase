@@ -28,7 +28,7 @@ class IconProvider extends SimpleCache
      * @var Router
      */
     protected $router;
-    
+
     public function __construct(AnnotationReader $annotationReader, ImageService $imageService, LocaleProviderInterface $localeProvider, RouterInterface $router, string $cacheDir)
     {
         $this->annotationReader = $annotationReader;
@@ -41,9 +41,9 @@ class IconProvider extends SimpleCache
 
     public function warmUp(string $cacheDir): bool
     {
-        $this->routeIcons = $this->getCache("/RouteIcons",
+        $this->routeIcons = $this->getCache("/RouteIcons", function() {
 
-            array_transforms(function($route, $controller) : ?array {
+            return array_transforms(function($route, $controller) : ?array {
 
                 $controller = $controller->getDefault("_controller");
                 if(!$controller) return null;
@@ -57,8 +57,8 @@ class IconProvider extends SimpleCache
 
                 return [$route, end($iconAnnotations)->getIcons()];
 
-            }, $this->router->getRouteCollection()->all())
-        );
+            }, $this->router->getRouteCollection()->all());
+        });
 
         return true;
     }

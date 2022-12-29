@@ -14,7 +14,7 @@ use Base\BaseBundle;
 use Base\Cache\SimpleCache;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
-
+use Base\Routing\RouterInterface;
 use Base\Service\FlysystemInterface;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -114,6 +114,7 @@ class AnnotationReader extends SimpleCache
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
+        RouterInterface $router,
         EntityManager $entityManager,
         ParameterBagInterface $parameterBag,
         FlysystemInterface $flysystem,
@@ -149,7 +150,8 @@ class AnnotationReader extends SimpleCache
         $this->tokenStorage    = $tokenStorage;
         $this->flysystem       = $flysystem;
         $this->eventDispatcher = $eventDispatcher;
-        $this->classMetadataManipulator   = $classMetadataManipulator;
+        $this->router          = $router;
+        $this->classMetadataManipulator  = $classMetadataManipulator;
 
         $this->environment = $environment;
         $this->projectDir  = $projectDir;
@@ -625,8 +627,18 @@ class AnnotationReader extends SimpleCache
         /**
          * @var ClassMetadataFactory
          */
-        $classMetadataFactory = $this->getEntityManager()->getMetadataFactory();
+        $classMetadataFactory = $this->entityManager->getMetadataFactory();
         foreach($classMetadataFactory->getAllClassNames() as $className) {
+
+            $this->getAncestor($className);
+            $this->getAnnotations($className);
+        }
+
+        // Warmup controllers
+        foreach($this->router->getRouteCollection()->all() as $route) {
+
+            $className = explode("::", $route->getDefaults()["_controller"] ?? "")[0] ?? "";
+            if(!class_exists($className)) continue;
 
             $this->getAncestor($className);
             $this->getAnnotations($className);

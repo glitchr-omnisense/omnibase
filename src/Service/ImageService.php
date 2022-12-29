@@ -143,7 +143,8 @@ class ImageService extends FileService implements ImageServiceInterface
         if(!$path) return $path;
         if(is_array($path)) return array_map(fn($k) => $this->lightbox($path[$k], $attributes, $lightboxId[$k], $lightboxTitle[$k], $lightboxAttributes), array_keys($path));
 
-        if(!str_starts_with($this->router->getRouteName($path), "ux_"))
+        $routeName = $this->router->getRouteName($path);
+        if($routeName && !str_starts_with($routeName, "ux_"))
             $path = $this->imagine($path);
 
         $lightboxAttributes["loading"] ??= "lazy";

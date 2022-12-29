@@ -13,7 +13,7 @@ abstract class SimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements S
 
     /** @var string */
     protected string $shellVerbosity;
-    
+
     /** @var SimpleCacheInterface */
     protected $simpleCache;
 
@@ -29,11 +29,11 @@ abstract class SimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements S
 
     public function getCache(): ArrayAdapter { return $this->arrayAdapter; }
     public function isOptional(): bool { return false; }
-    
+
     protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter): bool
     {
         if(!BaseBundle::CACHE) return false;
-     
+
         if (is_file($this->cacheFile))
             return false;
 
