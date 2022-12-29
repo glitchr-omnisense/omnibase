@@ -19,13 +19,14 @@ class FontAwesomeAdapter extends AbstractIconAdapter
     protected ?string $stylesheet;
     /** @var ?string */
     protected ?string $javascript;
-    
+
     public function __construct(string $metadata, string $cacheDir, ?string $javascript = null, ?string $stylesheet = null)
     {
         $this->metadata   = $metadata;
         $this->javascript = $javascript;
         $this->stylesheet = $stylesheet;
 
+        dump($this->metadata);
         parent::__construct($cacheDir);
     }
 
@@ -46,8 +47,13 @@ class FontAwesomeAdapter extends AbstractIconAdapter
 
         $this->version = $this->getCache("/Version", function() {
 
-            $version = first($this->getEntries())["changes"];
-            $version = last($version);
+            $version = null;
+            $entries = $this->getEntries();
+            if($entries) {
+                $version = first($entries)["changes"];
+                $version = last($version);
+            }
+
             return $version ?? "unk.";
         });
 
