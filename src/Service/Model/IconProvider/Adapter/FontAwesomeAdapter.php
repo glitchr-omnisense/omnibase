@@ -26,7 +26,6 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         $this->javascript = $javascript;
         $this->stylesheet = $stylesheet;
 
-        dump($this->metadata);
         parent::__construct($cacheDir);
     }
 
