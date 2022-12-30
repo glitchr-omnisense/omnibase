@@ -17,21 +17,21 @@ class NotifierSubscriber implements EventSubscriberInterface
      * @var AuthorizationCheckerInterface
      */
     protected $authorizationChecker;
-    
+
     /**
      * @var ParameterBagInterface
      */
     protected $parameterBag;
-    
+
     /** * @var bool */
     protected $debug;
-    
+
     /** * @var string */
     protected $technicalRecipient;
-    
+
     /** * @var bool */
     protected bool $technicalLoopback;
-    
+
     public function __construct(AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, string $debug)
     {
         $this->authorizationChecker = $authorizationChecker;
@@ -52,8 +52,8 @@ class NotifierSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;        
-        if(!$this->authorizationChecker->isGranted(UserRole::ADMIN));
+        if(!$event->isMainRequest()) return;
+        if(!$this->authorizationChecker->isGranted(UserRole::ADMIN)) return;
 
         $notification = null;
         if ($this->debug && !$this->technicalLoopback) $notification = new Notification("@notifications.notifier.no_loopback");

@@ -66,7 +66,7 @@ class TwigSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            ConsoleEvents::COMMAND => ['onConsoleCommand'],
+            // ConsoleEvents::COMMAND => ['onConsoleCommand'],
             KernelEvents::REQUEST => ['onKernelRequest', 8],
             KernelEvents::RESPONSE => ['onKernelResponse'],
             KernelEvents::EXCEPTION => ['onKernelException'],
@@ -100,21 +100,13 @@ class TwigSubscriber implements EventSubscriberInterface
         $this->exceptionTriggered = true;
     }
 
-    public function onConsoleCommand(ConsoleCommandEvent $event)
-    {
-        $this->encoreTagRenderer->addEntrypoint("_base", $this->publicDir."/bundles/base/entrypoints.json");
-    }
-
     public function onKernelRequest(RequestEvent $event)
     {
-        $this->encoreTagRenderer->addEntrypoint("_base", $this->publicDir."/bundles/base/entrypoints.json");
-        $this->encoreTagRenderer->addTag("base", "_base");
-
         //
         // Permission based entries
         foreach(UserRole::getPermittedValues() as $role) {
 
-            $tag = "security-".strtolower(str_lstrip($role, "ROLE_")."-async");
+            $tag = "security-".strtolower(str_lstrip($role, "ROLE_"));
             if(!$this->encoreTagRenderer->hasEntry($tag)) continue;
 
             if ($this->authorizationChecker->isGranted($role))

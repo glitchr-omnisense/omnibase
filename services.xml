@@ -144,7 +144,9 @@
             <argument type="service" id="locale_provider" />
         </service>
         <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\SimpleCacheWarmer"><tag name="kernel.cache_warmer" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig.encore_renderer" />
+            <argument type="service" id="webpack_encore.entrypoint_lookup[_default]" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
         <service id="Base\CacheWarmer\AnnotationsCacheWarmer"     parent="Base\Cache\SimpleCacheWarmer" public="true">

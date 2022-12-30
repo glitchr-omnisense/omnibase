@@ -3,13 +3,48 @@
 namespace Base\CacheWarmer;
 
 use Base\Cache\SimpleCacheWarmer;
+use Base\Service\ParameterBagInterface;
 use Base\Twig\Renderer\Adapter\EncoreTagRenderer;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
 class WebpackEntrypointCacheWarmer extends SimpleCacheWarmer
 {
-    public function __construct(EncoreTagRenderer $encoreTagRenderer, string $cacheDir, string $publicDir)
+    public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
     {
-        $encoreTagRenderer->addEntrypoint("_base", $publicDir."/bundles/base/entrypoints.json");
+        $appJsonPath = array_filter((array) $entrypointLookup, fn($k) => str_ends_with($k, "entrypointJsonPath"), ARRAY_FILTER_USE_KEY);
+        $appJsonPath = first($appJsonPath);
+        $encoreTagRenderer->addEntrypoint("_default", $appJsonPath);
+
+        $baseJsonPath = str_rstrip($publicDir,"/")."/bundles/base/entrypoints.json";
+        $encoreTagRenderer->addEntrypoint("_base", $baseJsonPath);
+
+        // Extract [app] tags
+        $entrypoints = json_decode(file_get_contents($appJsonPath), true)["entrypoints"];
+        $tags = array_unique(array_map(fn($t) => str_rstrip($t, ["-async", "-defer"]), array_keys($entrypoints)));
+        // $tags = array_keys($entrypoints);
+        foreach($tags as $tag)
+            $encoreTagRenderer->addTag($tag);
+
+        // Extract [base] tags
+        $entrypoints = json_decode(file_get_contents($baseJsonPath), true)["entrypoints"];
+        $tags = array_unique(array_map(fn($t) => str_rstrip($t, ["-async", "-defer"]), array_keys($entrypoints)));
+        foreach($tags as $tag)
+            $encoreTagRenderer->addTag($tag, "_base");
+
+        //
+        // Breakpoint based entries
+        foreach($parameterBag->get("base.twig.breakpoints") as $breakpoint)
+            $encoreTagRenderer->addBreakpoint($breakpoint["name"], $breakpoint["media"] ?? "all");
+
+        //
+        // Alternative entries
+        $encoreTagRenderer->addAlternative("async");
+        $encoreTagRenderer->addAlternative("defer");
+
+        // Encore rest rendering
+        $encoreTagRenderer->renderFallback(new Response());
+        $encoreTagRenderer->reset();
 
         parent::__construct($encoreTagRenderer, $cacheDir);
     }
