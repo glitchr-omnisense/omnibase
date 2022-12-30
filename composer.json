@@ -68,6 +68,7 @@
         "hashids/hashids": "^4.1",
 
         "doctrine/doctrine-bundle": "^2.0",
+        "doctrine/annotations": "^1.0",
         "glitchr/base-plugin": "1.0.*-dev",
 
     	"backup-manager/backup-manager": "^3.1"
