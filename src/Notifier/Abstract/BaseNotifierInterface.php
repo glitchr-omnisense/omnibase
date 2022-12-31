@@ -17,6 +17,7 @@ interface BaseNotifierInterface extends \Symfony\Component\Notifier\NotifierInte
     public function getTestRecipients(): array;
     public function getAdminRecipients(): array;
     public function getTechnicalRecipient(): ?RecipientInterface;
+    public function hasLoopback(): bool;
 
     public function isTest(RecipientInterface $recipient): bool;
     public function getPolicy(): ChannelPolicyInterface;
@@ -24,7 +25,7 @@ interface BaseNotifierInterface extends \Symfony\Component\Notifier\NotifierInte
 
     public function getTranslator(): TranslatorInterface;
     public function getEnvironment(): Environment;
-    
+
     public function enable();
     public function disable();
 }

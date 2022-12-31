@@ -81,7 +81,8 @@ abstract class BaseNotifier implements BaseNotifierInterface
     protected array $testRecipients;
 
     public function getTestRecipients(): array{ return $this->testRecipients; }
-    public  function isTest(RecipientInterface $recipient): bool
+    public function hasLoopback(): bool { return $this->technicalLoopback; }
+    public function isTest(RecipientInterface $recipient): bool
     {
         if($this->technicalLoopback) return true;
         if($this->debug == false) return false;

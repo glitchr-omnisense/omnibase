@@ -4,7 +4,7 @@ namespace Base\Subscriber;
 
 use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
-use Base\Notifier\Recipient\Recipient;
+use Base\Notifier\Notifier;
 use Base\Service\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -32,15 +32,11 @@ class NotifierSubscriber implements EventSubscriberInterface
     /** * @var bool */
     protected bool $technicalLoopback;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, string $debug)
+    public function __construct(Notifier $notifier, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, string $debug)
     {
-        $this->authorizationChecker = $authorizationChecker;
         $this->debug                = $debug;
-
-        $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email");
-        $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
-        $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
-        $this->technicalLoopback  = $parameterBag->get("base.notifier.technical_loopback");
+        $this->notifier             = $notifier;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     public static function getSubscribedEvents(): array
@@ -56,8 +52,8 @@ class NotifierSubscriber implements EventSubscriberInterface
         if(!$this->authorizationChecker->isGranted(UserRole::ADMIN)) return;
 
         $notification = null;
-        if ($this->debug && !$this->technicalLoopback) $notification = new Notification("@notifications.notifier.no_loopback");
-        if(!$this->debug &&  $this->technicalLoopback) $notification = new Notification("@notifications.notifier.no_debug", [$this->technicalEmail]);
+        if ($this->debug && !$this->notifier->hasLoopback()) $notification = new Notification("@notifications.notifier.no_loopback");
+        if(!$this->debug &&  $this->notifier->hasLoopback()) $notification = new Notification("@notifications.notifier.no_debug", array_keys(mailparse($this->notifier->getTechnicalRecipient()->getEmail())));
 
         $notification?->send("warning");
     }

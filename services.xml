@@ -714,6 +714,7 @@
 
         <service id="Base\Subscriber\NotifierSubscriber">
             <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.notifier" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
             <bind key="$debug">%kernel.debug%</bind>
