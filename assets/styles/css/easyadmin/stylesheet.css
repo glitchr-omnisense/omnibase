@@ -5,6 +5,10 @@ html, body { scroll-padding-top: 11em; }
     --select2-bg: var(--gray-100);
 }
 
+.sf-minitoolbar {
+    background-color: #000A;
+}
+
 .row>* { padding-left:0;}
 
 .d-inline .dropdown:after { margin-left:0px; }
