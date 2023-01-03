@@ -4,16 +4,14 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Base\BaseBundle;
 use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Entity\EntityExtensionInterface;
-use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\ArrayType;
 use Doctrine\DBAL\Types\JsonType;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\ORM\PersistentCollection;

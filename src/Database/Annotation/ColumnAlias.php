@@ -2,14 +2,13 @@
 
 namespace Base\Database\Annotation;
 
-use App\Entity\Blog\Comment;
-use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 /**
  * @Annotation
@@ -36,7 +35,7 @@ class ColumnAlias extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
     {
         if($target == "property") $alias = $targetValue;
         else $alias = $this->alias;

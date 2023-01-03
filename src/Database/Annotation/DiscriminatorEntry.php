@@ -4,6 +4,8 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Entity\User\Notification;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
@@ -105,7 +107,7 @@ class DiscriminatorEntry extends AbstractAnnotation
         return empty($classMetadata->parentClasses) && count($classMetadata->discriminatorMap) > 0;
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
     {
         // Recompute the map discriminator
         $discriminatorValues = [];
@@ -120,7 +122,6 @@ class DiscriminatorEntry extends AbstractAnnotation
             $discriminatorValues[$className] = $annotation->getValue($className);
         }
 
-        // Apply new discriminator
         $classMetadata->discriminatorMap   = array_flip($discriminatorValues);
         $classMetadata->discriminatorValue = $discriminatorValues[$classMetadata->getName()] ?? null;
         if($classMetadata->discriminatorValue === null)

@@ -4,7 +4,6 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -36,7 +35,7 @@ class GenerateUuid extends AbstractAnnotation
     public const UUID_NS_OID  = "6ba7b812-9dad-11d1-80b4-00c04fd430c8";
     public const UUID_NS_X500 = "6ba7b814-9dad-11d1-80b4-00c04fd430c8";
 
-    protected ?string $namespace;
+    protected $namespace;
 
     public function __construct(array $data)
     {
@@ -68,11 +67,11 @@ class GenerateUuid extends AbstractAnnotation
                 throw new Exception("UUID v2 is not implemented.. sorry");
                 //return Uuid::v2();
             case self::V3_MD5:
-                return Uuid::v3($this->namespace, get_class($entity));
+                return Uuid::v3(new Uuid($this->namespace), get_class($entity));
             case self::V4_RANDOM:
                 return Uuid::v4();
             case self::V5_SHA1:
-                return Uuid::v5($this->namespace, get_class($entity));
+                return Uuid::v5(new Uuid($this->namespace), get_class($entity));
             case self::V6_SORTABLE:
                 return Uuid::v6();
         }

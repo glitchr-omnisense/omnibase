@@ -3,7 +3,7 @@
 namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**

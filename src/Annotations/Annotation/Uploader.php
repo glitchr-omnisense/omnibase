@@ -7,11 +7,11 @@ use Base\Annotations\AnnotationReader;
 use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
 use Base\Validator\Constraints\File as ConstraintsFile;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\HttpFoundation\File\File;

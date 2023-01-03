@@ -6,7 +6,7 @@ use Base\Annotations\AbstractAnnotation;
 
 use DateTime;
 
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**

@@ -517,7 +517,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
         $dom = new \DOMDocument('1.0', $encoding);
         $dom->loadHTML(mb_convert_encoding($this->content, 'HTML-ENTITIES', $encoding));
-        
+
         $options["attr"] = [];
         $options["attr"]["class"] = $options["attr"]["class"] ?? "";
         $options["attr"]["class"] = trim($options["attr"]["class"] . " anchor");
@@ -527,7 +527,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
             $tags = $dom->getElementsByTagName($hX);
             foreach ($tags as $tag) {
-               
+
                 $content = $tag->nodeValue;
                 $tag->nodeValue = null;
 
@@ -547,7 +547,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
             $images = $dom->getElementsByTagName('img');
             foreach ($images as $img) {
-                
+
                 $url = $img->getAttribute('src');
 
                 $img->setAttribute('data-src', $url);

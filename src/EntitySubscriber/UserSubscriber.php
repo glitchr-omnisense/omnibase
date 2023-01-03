@@ -16,10 +16,19 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class UserSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var BaseService
+     * @var RouterInterface
      */
     protected $router;
+
+    /**
+     * @var TokenStorage
+     */
     protected $tokenStorage;
+
+    /**
+     * @var EntityManager
+     */
+    protected $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage, RouterInterface $router){
 

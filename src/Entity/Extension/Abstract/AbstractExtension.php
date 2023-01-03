@@ -38,12 +38,14 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @Blameable(on="create", impersonator=true)
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $impersonator;
     public function getImpersonator(): ?User { return $this->impersonator; }
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(onDelete="SET NULL")
      * @Blameable(on="create")
      */
     protected $initiator;

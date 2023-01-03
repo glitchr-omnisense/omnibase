@@ -9,7 +9,8 @@ use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\ORM\EntityNotFoundException;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs as BaseLifecycleEventArgs;
+
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -187,12 +188,12 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null) {}
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) { }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
-    public function preUpdate (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
-    public function preRemove (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
+    public function prePersist(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
+    public function preUpdate (BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
+    public function preRemove (BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
 
-    public function postLoad   (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
-    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
-    public function postUpdate (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
-    public function postRemove (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
+    public function postLoad   (BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
+    public function postPersist(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
+    public function postUpdate (BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
+    public function postRemove (BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) {}
 }

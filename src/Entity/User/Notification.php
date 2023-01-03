@@ -31,11 +31,11 @@ use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\NotificationRepository;
-use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  */

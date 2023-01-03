@@ -6,7 +6,6 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\Entity\Extension\Revision;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * @Annotation

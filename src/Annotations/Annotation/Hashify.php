@@ -4,7 +4,7 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
@@ -45,7 +45,7 @@ class Hashify extends AbstractAnnotation
 
     public bool $random;
     public ?string $referenceColumn;
-    
+
     public function __construct( array $data )
     {
         $this->data            = $data;

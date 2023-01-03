@@ -6,8 +6,8 @@ use Base\Annotations\AbstractAnnotation;
 
 use DateTime;
 use DateTimeImmutable;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 /**
  * Class Timestamp
@@ -26,7 +26,7 @@ class Timestamp extends AbstractAnnotation
 {
     private array $fields;
     private array $context;
-    
+
     private bool $immutable;
 
     /**

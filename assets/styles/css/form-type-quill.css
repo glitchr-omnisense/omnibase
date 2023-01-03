@@ -1,5 +1,5 @@
-.ql-editor img { 
-    float: left; 
+.ql-editor img {
+    float: left;
 
     margin: 0 1em;
     max-width:400px;
@@ -17,7 +17,7 @@
 .ql-container { background-color: #FFF !important; }
 .ql-editor
 {
-    color:initial;
+    color:#000;
     background-color: #FFF;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
@@ -66,7 +66,7 @@
     border-left: 0;
 }
 
-.ql-picker-options 
+.ql-picker-options
 {
     display: block;
     margin-top: 16px;
@@ -100,7 +100,7 @@
         height:auto !important;
         width:auto !important;
         padding-left:0 !important;
-        
+
     }
 
     .ql-editor h1 {

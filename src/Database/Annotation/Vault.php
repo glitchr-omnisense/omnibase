@@ -6,7 +6,7 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
@@ -72,7 +72,7 @@ class Vault extends AbstractAnnotation
     {
         try { $keys = $this->loadKeys($vault); }
         catch (Exception $e) { return null; }
-    
+
         return new SodiumMarshaller($keys);
     }
 
