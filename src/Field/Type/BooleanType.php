@@ -11,6 +11,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class BooleanType extends AbstractType
 {
+    /** @var Environment */
+    protected $twig;
+    
     public function __construct(Environment $twig) { $this->twig = $twig; }
 
     public function getBlockPrefix(): string { return 'boolean'; }

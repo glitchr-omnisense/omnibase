@@ -38,6 +38,12 @@ class FileService implements FileServiceInterface
      */
     protected $twig;
 
+    /** * @var string */
+    protected string $projectDir;
+
+    /** * @var string */
+    protected string $publicDir;
+
     public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
         $this->twig       = $twig;
@@ -106,7 +112,7 @@ class FileService implements FileServiceInterface
     public function asset(string $path, ?string $packageName = null): ?string { return $this->router->getAssetUrl($path, $packageName); }
 
     public function isEmpty(?string $file) { return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file)); }
-    public function isImage(?string $file) { return preg_match("/image\/.*/", $this->getMimeType($file)); }
+    public function isImage(?string $file) { return $file ? preg_match("/image\/.*/", $this->getMimeType($file)) : false; }
     public function isSvg  (?string $file) { return $this->getMimeType($file) == "image/svg+xml"; }
 
     public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string

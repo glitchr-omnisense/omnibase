@@ -31,8 +31,59 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class FileType extends AbstractType implements DataMapperInterface
 {
+    /**
+     * @var RouterInterface
+     */
     protected $router;
+
+    /**
+     * @var TranslatorInterface
+     */
     protected $translator;
+
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
+    /**
+     * @var CsrfTokenManager
+     */
+    protected $csrfTokenManager;
+
+    /**
+     * @var FormFactory
+     */
+    protected $formFactory;
+
+    /**
+     * @var Obfuscator
+     */
+    protected $obfuscator;
+
+    /**
+     * @var FileService
+     */
+    protected $fileService;
+
+    /**
+     * @var ImageService
+     */
+    protected $imageService;
+
+
+    /** * @var string */
+    protected string $cacheDir;
 
     public function __construct(
         ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig,

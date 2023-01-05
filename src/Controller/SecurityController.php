@@ -22,8 +22,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
-use Symfony\Component\Notifier\NotifierInterface;
-
 use Base\Entity\User\Token;
 use Base\Form\Type\SecurityResetPasswordType;
 use App\Repository\UserRepository;
@@ -39,15 +37,53 @@ use Base\Service\MaintenanceProviderInterface;
 use Base\Service\MaternityUnitInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
-use DateTime;
-use Doctrine\ORM\EntityManager;
+
+use Doctrine\ORM\EntityManagerInterface;
 
 class SecurityController extends AbstractController
 {
+    /**
+     * @var BaseService
+     */
     protected $baseService;
 
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var TokenStorage
+     */
+    protected $tokenStorage;
+
+    /**
+     * @var FormProxy
+     */
+    protected $formProxy;
+
+    /**
+     * @var ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+
+    /**
+     * @var TokenRepository
+     */
+    protected $tokenRepository;
+
     public function __construct(
-        EntityManager $entityManager, TokenRepository $tokenRepository, UserRepository $userRepository,
+        EntityManagerInterface $entityManager, TokenRepository $tokenRepository, UserRepository $userRepository,
         BaseService $baseService, FormProxy $formProxy, TokenStorageInterface $tokenStorage,
         TranslatorInterface $translator, ParameterBagInterface $parameterBag)
     {
@@ -188,9 +224,6 @@ class SecurityController extends AbstractController
                 if (($user = $this->getUser()) && $user->isVerified())
                     $newUser->verify($user->isVerified());
 
-                $this->entityManager->persist($newUser);
-                $this->entityManager->flush();
-
                 if($this->parameterBag->get("base.user.register.notify_admins")) {
 
                     $notification = new Notification("register.notify_admins");
@@ -198,8 +231,12 @@ class SecurityController extends AbstractController
                     $notification->setHtmlTemplate("@Base/security/email/register_notifyAdmins.html.twig",["new_user" => $newUser]);
                     $notification->sendAdmins("email");
                 }
+    
+                $this->entityManager->persist($newUser);
+                $this->entityManager->flush();
 
-                return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
+                $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
+                return $this->redirectToRoute('user_profile');
             })
 
             ->onDefault(function(FormProcessorInterface $formProcessor) {
@@ -223,7 +260,7 @@ class SecurityController extends AbstractController
     {
         // Check if accound is already verified..
         $user = $this->getUser();
-        if (false && $user->isVerified()) {
+        if ($user->isVerified()) {
 
             $notification = new Notification("verifyEmail.already");
             $notification->send("info");
@@ -240,7 +277,6 @@ class SecurityController extends AbstractController
 
                 $verifyEmailToken = new Token("verify-email", 24*3600, 3600);
                 $verifyEmailToken->setUser($user);
-                $this->entityManager->flush();
 
                 $notification = new Notification('verifyEmail.check');
                 $notification->setUser($user);
@@ -381,14 +417,13 @@ class SecurityController extends AbstractController
 
         } else {
 
-            if ($welcomeBackToken) {
-
+            if ($welcomeBackToken)
                 $welcomeBackToken->revoke();
-                $this->entityManager->flush();
-            }
 
             $notification = new Notification("accountWelcomeBack.invalidToken");
             $notification->send("danger");
+
+            $this->entityManager->flush();
         }
 
         return $this->redirectToRoute($this->baseService->getRouteName("/"));

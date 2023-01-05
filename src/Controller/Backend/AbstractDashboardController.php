@@ -82,7 +82,70 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 {
     use WidgetTrait;
 
+    /**
+     * @var AdminUrlGenerator
+     */
     protected $adminUrlGenerator;
+
+    /**
+     * @var AdminContextProvider
+     */
+    protected $adminContextProvider;
+
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
+     * @var Extension
+     */
+    protected $extension;
+
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
+    /**
+     * @var ImageService
+     */
+    protected $imageService;
+
+    /**
+     * @var SettingBag
+     */
+    protected $settingBag;
+
+    /**
+     * @var EntityManager
+     */
+    protected $entityManager;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var SettingRepository
+     */
+    protected $settingRepository;
+
+    /**
+     * @var WidgetRepository
+     */
+    protected $widgetRepository;
+
+    /**
+     * @var SlotRepository
+     */
+    protected $slotRepository;
 
     public const TRANSLATION_DASHBOARD = "backoffice";
     public const TRANSLATION_ENTITY    = "entities";

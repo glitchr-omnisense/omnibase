@@ -112,6 +112,11 @@ class AnnotationReader extends SimpleCache
      */
     protected $eventDispatcher;
 
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
         RouterInterface $router,

@@ -23,6 +23,11 @@ class NotifierSubscriber implements EventSubscriberInterface
      */
     protected $parameterBag;
 
+    /**
+     * @var NotifierInterface
+     */
+    protected $notifier;
+
     /** * @var bool */
     protected $debug;
 

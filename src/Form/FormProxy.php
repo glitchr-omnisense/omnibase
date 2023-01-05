@@ -14,7 +14,7 @@ class FormProxy implements FormProxyInterface
     protected $formFactory;
 
     /**
-     * @var array[FormProcessor]
+     * @var array[FormProcessorInterface]
      */
     protected $formProcessors;
 

@@ -43,6 +43,26 @@ class AssociationType extends AbstractType implements DataMapperInterface
      */
     protected $formFactory = null;
 
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var Autocomplete
+     */
+    protected $autocomplete;
+
+    /**
+     * @var PropertyAccessor
+     */
+    protected $propertyAccessor;
+
+    /**
+     * @var EntityHydrator
+     */
+    protected $entityHydrator;
+
     public function getBlockPrefix(): string { return 'association'; }
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, TranslatorInterface $translator)

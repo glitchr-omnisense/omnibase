@@ -20,6 +20,27 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
 class CollectionType extends AbstractType
 {
+
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
+    /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var AuthorizationChecker
+     */
+    protected $authorizationChecker;
+
+    /**
+     * @var AdminUrlGenerator
+     */
+    protected $adminUrlGenerator;
+
     public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->twig = $twig;

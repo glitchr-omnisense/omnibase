@@ -12,6 +12,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserChecker implements UserCheckerInterface
 {
+
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;

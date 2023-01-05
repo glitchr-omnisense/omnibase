@@ -8,6 +8,9 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class Autocomplete
 {
+    /** @var TranslatorInterface */
+    protected $translator;
+
     public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;

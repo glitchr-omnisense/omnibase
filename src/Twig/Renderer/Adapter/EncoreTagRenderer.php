@@ -26,14 +26,17 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     /**
      * @var Packages
      */
-    protected $package;
+    protected $packages;
 
     /**
      * @var EntrypointLookupCollectionInterface
      */
     protected $entrypointLookupCollection;
 
+    /** @var string */
     protected string $publicDir;
+    /** @var string */
+    protected string $cacheDir;
 
     private bool $saveDeferred = false;
     private ?CacheItemPoolInterface $cache = null;
@@ -199,7 +202,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         return $this;
     }
 
-    protected array $renderedCssSourceTags = [];
+    protected array $renderedCssSource = [];
     protected array $renderedScriptTags = [];
     protected array $renderedLinkTags = [];
 
@@ -214,7 +217,8 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     {
         $entryName = is_array($value) ? $value["value"] ?? null : $value;
         if($entryName == null) return "";
-
+        
+        $entryName = (string) $this->slugger->slug($entryName);
         if(array_key_exists($entryName, $this->renderedCssSource))
             return $this->renderedCssSource[$entryName];
 
@@ -237,7 +241,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             return $this->renderedCssSource[$entryName];
         }
 
-        throw new EntrypointNotFoundException("Failed to find \"".$this->slugger->slug($entryName)."\" in the lookup collection: ".implode(", ", array_keys($this->getEntrypoints())));
+        throw new EntrypointNotFoundException("Failed to find \"".$entryName."\" in the lookup collection: ".implode(", ", array_keys($this->getEntrypoints())));
     }
 
     public function renderLinkTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []) : string
@@ -247,6 +251,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         $entryName = is_array($value) ? $value["value"] ?? null : $value;
         if($entryName == null) return "";
 
+        $entryName = (string) $this->slugger->slug($entryName);
         if(array_key_exists($entryName, $this->renderedLinkTags))
             return $this->renderedLinkTags[$entryName];
 
@@ -266,8 +271,11 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
                 catch(UndefinedBuildException|EntrypointNotFoundException $e) { }
             }
 
-            $appPackage  = $this->packages->getPackage();
+            /**
+             * @var AssetPackage
+             */
             $basePackage = $this->packages->getPackage(AssetPackage::PACKAGE_NAME);
+            $appPackage  = $this->packages->getPackage();
             for($i = 0, $N = count($files); $i < $N; $i++) {
 
                 foreach($this->encoreBreakpoints as $_) foreach($_ as $name) {
@@ -298,7 +306,8 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             $this->renderedLinkTags[$entryName] = $this->twig->render("@Base/webpack/link_tags.html.twig", ["tags" => $tags]);
             return $this->renderedLinkTags[$entryName];
         }
-        throw new EntrypointNotFoundException("Failed to find \"".$this->slugger->slug($entryName)."\" in the lookup collection: ".implode(", ", array_keys($this->getEntrypoints())));
+
+        throw new EntrypointNotFoundException("Failed to find \"".$entryName."\" in the lookup collection: ".implode(", ", array_keys($this->getEntrypoints())));
     }
 
     public function renderScriptTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []) : string
@@ -308,6 +317,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         $entryName = is_array($value) ? $value["value"] ?? null : $value;
         if($entryName == null) return "";
 
+        $entryName = (string) $this->slugger->slug($entryName);
         if(array_key_exists($entryName, $this->renderedScriptTags))
             return $this->renderedScriptTags[$entryName];
 
@@ -341,7 +351,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         }
 
         // Script not mandatory
-        // throw new EntrypointNotFoundException("Failed to find \"".$this->slugger->slug($entryName)."\" in the lookup collection: ".implode(", ", array_keys($this->getEntrypoints())));
+        // throw new EntrypointNotFoundException("Failed to find \"".$entryName."\" in the lookup collection: ".implode(", ", array_keys($this->getEntrypoints())));
         return "";
     }
 

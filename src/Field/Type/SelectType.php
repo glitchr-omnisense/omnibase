@@ -49,6 +49,39 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var FormFactory */
     protected $formFactory;
 
+    /** @var CsrfTokenManager */
+    protected $csrfTokenManager;
+
+    /** @var TranslatorInterface */
+    protected $translator;
+
+    /** @var EntityManagerInterface */
+    protected $entityManager;
+
+    /** @var obfuscator */
+    protected $obfuscator;
+
+    /** @var ParameterBagInterface */
+    protected $parameterBag;
+
+    /** @var AuthorizationChecker */
+    protected $authorizationChecker;
+
+    /** @var LocaleProvider */
+    protected $localeProvider;
+
+    /** @var AdminUrlGenerator */
+    protected $adminUrlGenerator;
+
+    /** @var Autocomplete */
+    protected $autocomplete;
+
+    /** @var PropertyAccessor */
+    protected $propertyAccessor;
+
+    /** @var RouterInterface */
+    protected $router;
+
     public function __construct(
         FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator,
         ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager,

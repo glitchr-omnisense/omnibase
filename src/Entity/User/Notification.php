@@ -65,7 +65,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function getId(): ?int { return $this->id; }
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="notifications")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="notifications", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
     protected $user;

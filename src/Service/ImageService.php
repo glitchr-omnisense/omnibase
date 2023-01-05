@@ -43,8 +43,6 @@ class ImageService extends FileService implements ImageServiceInterface
      */
     protected $imagineSvg;
 
-    protected string $publicDir;
-    protected string $projectDir;
     protected string $localCache;
 
     /** @var ?int */

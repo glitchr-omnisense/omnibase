@@ -33,6 +33,11 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
     protected $settingBag;
 
     /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+
+    /**
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;

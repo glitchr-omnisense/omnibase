@@ -32,6 +32,13 @@ class TranslationType extends AbstractType implements DataMapperInterface
      * @var LocaleProviderInterface
      */
     protected $localeProvider = null;
+
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
+
     protected $fallbackLocales = [];
 
     /**

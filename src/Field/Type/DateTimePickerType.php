@@ -15,6 +15,16 @@ use Symfony\Component\Form\FormView;
 
 class DateTimePickerType extends AbstractType
 {
+
+    /** @var ParameterBagInterface */
+    protected $parameterBag;
+
+    /** @var LocaleProvider */
+    protected $localeProvider;
+
+    /** @var Environment */
+    protected $twig;
+
     public function __construct(ParameterBagInterface $parameterBag, Environment $twig, LocaleProviderInterface $localeProvider)
     {
         $this->parameterBag = $parameterBag;
