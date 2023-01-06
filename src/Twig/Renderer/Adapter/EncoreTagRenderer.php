@@ -216,15 +216,15 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     public function renderCssSource(string|array $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) : string
     {
         $value = is_array($value) ? $value["value"] ?? null : $value;
-        
+
         $entryName = $value;
-        if($entryName == null) return "";
-        
+        if(!$entryName) return "";
+
         $entryName = (string) $this->slugger->slug($entryName);
         if(array_key_exists($entryName, $this->renderedCssSource))
             return $this->renderedCssSource[$entryName];
 
-        if($entryName && !array_key_exists($entryName, $this->renderedCssSource))
+        if(!array_key_exists($entryName, $this->renderedCssSource))
             $this->addLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
 
         $source = "";
@@ -251,15 +251,15 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
 	    if($this->entrypointLookupCollection == null) return "";
 
         $value = is_array($value) ? $value["value"] ?? null : $value;
-        
+
         $entryName = $value;
-        if($entryName == null) return "";
-        
+        if(!$entryName) return "";
+
         $entryName = (string) $this->slugger->slug($entryName);
         if(array_key_exists($entryName, $this->renderedLinkTags))
             return $this->renderedLinkTags[$entryName];
 
-        if($entryName && !array_key_exists($entryName, $this->encoreEntryLinkTags))
+        if(!array_key_exists($entryName, $this->encoreEntryLinkTags))
             $this->addLinkTag($value, $webpackPackageName, $webpackEntrypointName, html_attributes($htmlAttributes));
 
         $tags = [];
@@ -317,17 +317,17 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     public function renderScriptTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []) : string
     {
 	    if($this->entrypointLookupCollection == null) return "";
-        
+
         $value = is_array($value) ? $value["value"] ?? null : $value;
-        
+
         $entryName = $value;
-        if($entryName == null) return "";
-        
+        if(!$entryName) return "";
+
         $entryName = (string) $this->slugger->slug($entryName);
         if(array_key_exists($entryName, $this->renderedScriptTags))
             return $this->renderedScriptTags[$entryName];
 
-        if($entryName && !array_key_exists($entryName, $this->encoreEntryScriptTags))
+        if(!array_key_exists($entryName, $this->encoreEntryScriptTags))
             $this->addScriptTag($value, $webpackPackageName, $webpackEntrypointName, html_attributes($htmlAttributes));
 
         foreach($this->getEntrypoints() as $entrypoint) {
