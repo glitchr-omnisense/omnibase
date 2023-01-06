@@ -215,7 +215,9 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
 
     public function renderCssSource(string|array $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null) : string
     {
-        $entryName = is_array($value) ? $value["value"] ?? null : $value;
+        $value = is_array($value) ? $value["value"] ?? null : $value;
+        
+        $entryName = $value;
         if($entryName == null) return "";
         
         $entryName = (string) $this->slugger->slug($entryName);
@@ -248,9 +250,11 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     {
 	    if($this->entrypointLookupCollection == null) return "";
 
-        $entryName = is_array($value) ? $value["value"] ?? null : $value;
+        $value = is_array($value) ? $value["value"] ?? null : $value;
+        
+        $entryName = $value;
         if($entryName == null) return "";
-
+        
         $entryName = (string) $this->slugger->slug($entryName);
         if(array_key_exists($entryName, $this->renderedLinkTags))
             return $this->renderedLinkTags[$entryName];
@@ -313,10 +317,12 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     public function renderScriptTags(null|string|array $value = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []) : string
     {
 	    if($this->entrypointLookupCollection == null) return "";
-
-        $entryName = is_array($value) ? $value["value"] ?? null : $value;
+        
+        $value = is_array($value) ? $value["value"] ?? null : $value;
+        
+        $entryName = $value;
         if($entryName == null) return "";
-
+        
         $entryName = (string) $this->slugger->slug($entryName);
         if(array_key_exists($entryName, $this->renderedScriptTags))
             return $this->renderedScriptTags[$entryName];
