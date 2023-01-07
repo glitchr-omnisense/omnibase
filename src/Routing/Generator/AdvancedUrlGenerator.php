@@ -206,11 +206,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function format(string $url): string
     {
-        $permittedHosts   = array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getLocale());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getLang());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getDefaultLocale());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getDefaultLang());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", null) ?? [];
+        $permittedHosts   = array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", $this->getLocaleProvider()->getLocale());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", $this->getLocaleProvider()->getLang());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", $this->getLocaleProvider()->getDefaultLocale());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", $this->getLocaleProvider()->getDefaultLang());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", null) ?? [];
         $permittedHosts = array_transforms(fn($k, $a): ?array => $a["env"] == $this->getRouter()->getEnvironment() ? [$k, $a["regex"]] : null, $permittedHosts);
         if(!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain())
             $permittedHosts = "^$"; // Special case if both subdomain and machine are unallowed

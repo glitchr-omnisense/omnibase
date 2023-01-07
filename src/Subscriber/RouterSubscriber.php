@@ -74,6 +74,9 @@ class RouterSubscriber implements EventSubscriberInterface
             }
 
             // Redirect to sanitized url
+            dump($route, !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route), $url, $this->router->format($url) );
+            dump(!$route->getHost(), $this->router->getHost(), $this->router->getHostFallback());
+            exit(1);
             $event->setResponse(new RedirectResponse($this->router->format($url)));
             return $event->stopPropagation();
         }

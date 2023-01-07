@@ -305,11 +305,11 @@ class AdvancedRouter implements RouterInterface
 
     protected function getHostParameters(?string $locale = null, ?string $environment = null): ?array
     {
-        $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getDefaultLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getDefaultLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", null) ?? [];
+        $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", $this->localeProvider->getLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", $this->localeProvider->getLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", $this->localeProvider->getDefaultLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", $this->localeProvider->getDefaultLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", null) ?? [];
 
         if($environment)
             $fallbacks = array_filter($fallbacks, fn($h) => $h["env"] ?? null == $environment);
@@ -341,14 +341,14 @@ class AdvancedRouter implements RouterInterface
     public function getHostFallback(?string $locale = null, ?string $environment = null): string
     {
         $host = $this->getHostParameters($locale, $environment);
-
+        
         $machine = $host["machine"] ?? null;
         if($machine) $machine = $machine . ".";
 
         $subdomain = $host["subdomain"] ?? null;
         if($subdomain) $subdomain = $subdomain . ".";
 
-        $domain = $host["domain"] ?? null;
+        $domain = $host["domain"] ?? $_SERVER["HTTP_HOST"] ?? null;
 
         return $machine.$subdomain.$domain;
     }

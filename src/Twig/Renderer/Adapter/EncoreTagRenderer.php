@@ -2,24 +2,25 @@
 
 namespace Base\Twig\Renderer\Adapter;
 
-use Base\Twig\AssetPackage;
-use Base\Cache\SimpleCacheInterface;
-use Base\Service\LocaleProviderInterface;
-use Base\Service\ParameterBagInterface;
-use Base\Traits\SimpleCacheTrait;
 use Base\Twig\Environment;
-use Base\Twig\Renderer\AbstractTagRenderer;
+use Base\Twig\AssetPackage;
+use InvalidArgumentException;
+use Base\Traits\SimpleCacheTrait;
+use Base\Cache\SimpleCacheInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
+use Base\Service\ParameterBagInterface;
+use Base\Service\LocaleProviderInterface;
+use Base\Twig\Renderer\AbstractTagRenderer;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookup;
-use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
-use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
 use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
+use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
 
 class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterface
 {
@@ -113,8 +114,8 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         return $this;
     }
 
-    public function getEntryLinkTags() { return $this->encoreEntryLinkTags; }
-    public function getEntryScriptTags() { return $this->encoreEntryScriptTags; }
+    public function getEntryLinkTags(): array { return $this->encoreEntryLinkTags; }
+    public function getEntryScriptTags(): array { return $this->encoreEntryScriptTags; }
     public function getEntrypoints(): array { return $this->encoreEntrypoints; }
     public function getEntry(string $entrypointName): ?EntrypointLookupInterface
     {
@@ -136,7 +137,8 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             throw new \LogicException(sprintf('Cannot use entryExists() unless the entrypoint lookup is an instance of "%s"', EntrypointLookup::class));
         }
 
-        return $entrypointLookup->entryExists($entryName);
+        try { return $entrypointLookup->entryExists($entryName); }
+        catch (InvalidArgumentException $e) { return false; }
     }
 
     public function addTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
