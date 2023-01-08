@@ -12,7 +12,7 @@ class WebpackEntrypointCacheWarmer extends SimpleCacheWarmer
 {
     public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
     {
-        if($entrypointLookup) return;
+        if(!$entrypointLookup) return;
         
         // Extract [app] tags
         $appJsonPath = array_filter((array) $entrypointLookup, fn($k) => str_ends_with($k, "entrypointJsonPath"), ARRAY_FILTER_USE_KEY);

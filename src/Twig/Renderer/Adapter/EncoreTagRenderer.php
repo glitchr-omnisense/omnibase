@@ -126,6 +126,9 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
 
     public function addEntrypoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
     {
+        if( $this->entrypointLookupCollection == null) 
+            throw new \LogicException('You cannot use "'.__CLASS__."::".__METHOD__.'" as the "symfony/webpack-encore-bundle" package is not installed. Try running "composer require symfony/webpack-encore-bundle".');
+
         $this->encoreEntrypoints[$value] = new EntrypointLookup($entrypointJsonPath, $cache, $cacheKey, $strictMode);
         return $this;
     }
