@@ -50,7 +50,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     public function __call   ($method, $arguments) : mixed { return $this->serviceParser->parse($method, $arguments); }
 
     public function find     ($id, $lockMode = null, $lockVersion = null                            ):?object { return $this->findOneById($id, $lockMode, $lockVersion); }
-    public function findAll  (                                                                      ):array   { return $this->__call(__METHOD__, [])->getResult(); }
+    public function findAll  (                                                                      ):array   { dump($this->__call(__METHOD__, [])); return $this->__call(__METHOD__, [])->getResult(); }
     public function findBy   (array $criteria, ?array $orderBy = null, $limit = null, $offset = null):array   { return $this->__call(__METHOD__, [$criteria, $orderBy, $limit, $offset])->getResult(); }
     public function findOneBy(array $criteria, ?array $orderBy = null                               ):?object { return $this->__call(__METHOD__, [$criteria, $orderBy]); }
     public function count    (array $criteria                                                       ):int     { return $this->__call(__METHOD__, [$criteria]); }

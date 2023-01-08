@@ -122,8 +122,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
-        return;
-
+       
         if(!$integrity) {
 
             if($token) {
