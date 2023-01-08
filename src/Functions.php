@@ -155,8 +155,8 @@ namespace {
         if($noscheme) $url = "file://".$url;
 
         $parse = parse_url($url, $component);
-        if($parse === false) return false;
 
+        if($parse === false) return false;
         foreach($parse as &$_)
             $_ = str_lstrip($_, "file://");
 
@@ -176,7 +176,7 @@ namespace {
             if(filter_var($parse["host"], FILTER_VALIDATE_IP) ) $parse["ip"] = $parse["host"];
             if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) $parse["ipv4"] = $parse["host"];
             if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) $parse["ipv6"] = $parse["host"];
-
+    
             //
             // Check if hostname
             if(preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {

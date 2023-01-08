@@ -11,7 +11,7 @@ use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;

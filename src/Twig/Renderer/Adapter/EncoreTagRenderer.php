@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Renderer\Adapter;
 
-use Base\Twig\Environment;
+use Twig\Environment;
 use Base\Twig\AssetPackage;
 use InvalidArgumentException;
 use Base\Traits\SimpleCacheTrait;

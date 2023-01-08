@@ -253,7 +253,7 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                     ->integerNode('port')
                                         ->info('Port')
-                                        ->defaultValue(null)
+                                        ->defaultValue('%env(HTTP_PORT)%')
                                     ->end()
                                 ->end()
                             ->end()

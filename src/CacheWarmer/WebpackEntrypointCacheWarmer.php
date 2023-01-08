@@ -12,7 +12,6 @@ class WebpackEntrypointCacheWarmer extends SimpleCacheWarmer
 {
     public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
     {
-        return;
         if($entrypointLookup) return;
         
         // Extract [app] tags

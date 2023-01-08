@@ -68,7 +68,6 @@ class EasyAdminSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $e)
     {
-        return;
         if($this->router->getMainRequest() != $e->getRequest()) return;
         if($this->router->isProfiler()) return;
         if(!$this->router->isEasyAdmin()) return;

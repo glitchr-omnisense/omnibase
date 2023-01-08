@@ -105,7 +105,6 @@ class IntegritySubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        return;
         if(BaseBundle::isBroken() && $event->isMainRequest())
             throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?");
 
@@ -123,6 +122,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
+        return;
 
         if(!$integrity) {
 
@@ -232,6 +232,8 @@ class IntegritySubscriber implements EventSubscriberInterface
         if($this->secret == null) return true;
 
         $marshaller = $this->vault->getMarshaller();
+        if($marshaller == null) return true;
+ 
         $session = $this->requestStack->getSession();
         if (!$session->get("_integrity/secret")) return false;
 

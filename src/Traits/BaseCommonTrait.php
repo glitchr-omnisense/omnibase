@@ -12,7 +12,7 @@ use Base\Service\ImageServiceInterface;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\RequestStack;

@@ -62,9 +62,7 @@ class RouterSubscriber implements EventSubscriberInterface
         //
         // If no host specified in Route, then check the list of permitted subdomain
         if($route && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route)) {
-
-            dump($route, $this->authorizationChecker->isGranted("VALIDATE_HOST", $route));
-            exit(1);
+            
             $url = get_url(); // Redirect to proper host fallback if required.
             if(!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback()) {
 

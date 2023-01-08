@@ -320,13 +320,17 @@ class AdvancedRouter implements RouterInterface
     public function getScheme(?string $locale = null, ?string $environment = null): string
     {
         $host = $this->getHostParameters($locale, $environment);
-        $use_https = $host["use_https"] ?? $_SERVER["REQUEST_SCHEME"] ?? true;
+
+        $use_https ??= $host["use_https"] ?? $_SERVER["REQUEST_SCHEME"] ?? true;
         return $use_https ? "https" : "http";
     }
 
     public function getBaseDir(?string $locale = null, ?string $environment = null): string
     {
         $host = $this->getHostParameters($locale, $environment);
+        if(array_key_exists("SYMFONY_PROJECT_DEFAULT_ROUTE_PATH", $_SERVER))
+            return $_SERVER['SYMFONY_PROJECT_DEFAULT_ROUTE_PATH'];
+
         if(!is_cli()) $baseDir = $_SERVER['PHP_SELF'] ? dirname($_SERVER['PHP_SELF']) : null;
         $baseDir ??= $host["base_dir"] ?? "";
 
@@ -341,16 +345,18 @@ class AdvancedRouter implements RouterInterface
     public function getHostFallback(?string $locale = null, ?string $environment = null): string
     {
         $host = $this->getHostParameters($locale, $environment);
-        
+
         $machine = $host["machine"] ?? null;
         if($machine) $machine = $machine . ".";
 
         $subdomain = $host["subdomain"] ?? null;
         if($subdomain) $subdomain = $subdomain . ".";
 
-        $domain = $host["domain"] ?? $_SERVER["HTTP_HOST"] ?? null;
+        $domain = $host["domain"] ?? null;
+        $port   = $host["port"] ?? "";
+        if($port) $port = ":" . $port;
 
-        return $machine.$subdomain.$domain;
+        return $machine.$subdomain.$domain.$port;
     }
 
     public function getMachine(?string $locale = null, ?string $environment = null): ?string { return $this->getHostParameters($locale, $environment)["machine"] ?? null; }

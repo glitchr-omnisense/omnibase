@@ -102,7 +102,6 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        return;
         //
         // Permission based entries
         foreach(UserRole::getPermittedValues() as $role) {

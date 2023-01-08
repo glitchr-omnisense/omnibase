@@ -18,7 +18,6 @@ class FlashBagSubscriber implements EventSubscriberInterface
 
     public function onKernelResponse(ResponseEvent $event)
     {
-        return;
         $response = $event->getResponse();
 
         /**

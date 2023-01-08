@@ -31,9 +31,8 @@ class EagerSubscriber implements EventSubscriberInterface
 
     public function onCommand() { }
     public function onValidCache(KernelEvent $e) { BaseBundle::markCacheAsValid(); }
-    public function onKernelRequest(KernelEvent $e) {
-
-        return;
+    public function onKernelRequest(KernelEvent $e)
+    {
         if($e->getRequest()->getPathInfo() == "/") return;
         if(!$this->baseService->getCurrentRouteName()) return;
         if(str_starts_with($this->baseService->getCurrentRouteName(), "_")) return;

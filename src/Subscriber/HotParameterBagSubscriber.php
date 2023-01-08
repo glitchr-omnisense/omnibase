@@ -32,7 +32,6 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        return;
         if(!$event->isMainRequest()) return;
         if(!$this->parameterBag instanceof HotParameterBag) return;
 

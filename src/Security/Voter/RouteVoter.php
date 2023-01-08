@@ -52,6 +52,7 @@ class RouteVoter extends Voter
 
             case self::VALIDATE_IP:
                 $parse = parse_url2($url);
+
                 return !array_key_exists("ip", $parse) || $this->parameterBag->get("base.access_restriction.ip_access");
 
             case self::VALIDATE_PATH:
@@ -64,7 +65,7 @@ class RouteVoter extends Voter
 
                 if(!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback())
                     return false;
-
+    
                 $permittedHosts   = array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLocale());
                 $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLang());
                 $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getDefaultLocale());

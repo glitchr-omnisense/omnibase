@@ -4,7 +4,7 @@ namespace Base\Twig\Renderer\Adapter;
 
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Base\Twig\Renderer\AbstractTagRenderer;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
