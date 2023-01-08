@@ -9,10 +9,10 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 abstract class SimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements SimpleCacheWarmerInterface
 {
     /** @var string */
-    private string $cacheFile;
+    private ?string $cacheFile = null;
 
-    /** @var string */
-    protected string $shellVerbosity;
+    /** @var int */
+    protected int $shellVerbosity = 0;
 
     /** @var SimpleCacheInterface */
     protected $simpleCache;
@@ -39,8 +39,8 @@ abstract class SimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements S
 
         if($this->shellVerbosity > 0 && php_sapi_name() == "cli")
             echo " // Warming up cache... " . ucwords(camel2snake(str_replace("CacheWarmer", "", class_basename(static::class)), " ")) . PHP_EOL.PHP_EOL;
-
-        $this->simpleCache->setCache($arrayAdapter);
-        return $this->simpleCache->warmUp($cacheDir);
+        
+        $this->simpleCache?->setCache($arrayAdapter);
+        return $this->simpleCache?->warmUp($cacheDir) ?? false;
     }
 }

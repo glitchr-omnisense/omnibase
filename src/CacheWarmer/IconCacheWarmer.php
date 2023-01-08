@@ -22,6 +22,7 @@ class IconCacheWarmer extends SimpleCacheWarmer {
 
     protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter): bool
     {
+        return true;
         $ret = parent::doWarmUp($cacheDir, $arrayAdapter);
 
         foreach($this->adapters as $adapter) {

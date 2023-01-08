@@ -65,17 +65,18 @@ class RouteVoter extends Voter
                 if(!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback())
                     return false;
 
-                $permittedHosts   = array_search_by($this->parameterBag->get("base.router.permitted_hosts") ?? [], "locale", $this->localeProvider->getLocale());
-                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts") ?? [], "locale", $this->localeProvider->getLang());
-                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts") ?? [], "locale", $this->localeProvider->getDefaultLocale());
-                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts") ?? [], "locale", $this->localeProvider->getDefaultLang());
-                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts") ?? [], "locale", null) ?? [];
+                $permittedHosts   = array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLocale());
+                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLang());
+                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getDefaultLocale());
+                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getDefaultLang());
+                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", null) ?? [];
                 $permittedHosts = array_transforms(fn($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $permittedHosts);
+
                 if(!$this->router->keepMachine() && !$this->router->keepSubdomain())
                     $permittedHosts[] = "^$"; // Special case if both subdomain and machine are unallowed
 
                 $parse = parse_url2($url);
-                $allowedHost = false;
+                $allowedHost = empty($permittedHosts);
                 foreach($permittedHosts as $permittedHost)
                     $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);
 

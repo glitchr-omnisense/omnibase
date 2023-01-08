@@ -1242,8 +1242,9 @@ namespace {
         return $array;
     }
 
-    function array_search_by(array $array, string $column, mixed $value) : ?array {
+    function array_search_by(?array $array, string $column, mixed $value) : ?array {
 
+        if($array === null) return null;
         if(!is_multidimensional($array)) return $array;
 
         $results = [];
@@ -1511,6 +1512,7 @@ namespace {
     define("FORMAT_SENTENCECASE", 2); // Lorem ipsum dolor sit amet
     define("FORMAT_LOWERCASE",    3); // lorem ipsum dolor sit amet
     define("FORMAT_UPPERCASE",    4); // LOREM IPSUM DOLOR SIT AMET
+
     function call_user_func_with_defaults(callable $fn, ...$args): mixed
     {
         $reflectionFn = new ReflectionFunction($fn);

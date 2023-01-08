@@ -19,6 +19,7 @@ class TimezoneSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        return;
         $timezone = User::getCookie("timezone") ?? "UTC";
         $defaultTimezone = date_default_timezone_get();
 

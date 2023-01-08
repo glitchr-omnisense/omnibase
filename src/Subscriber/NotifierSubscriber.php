@@ -53,6 +53,7 @@ class NotifierSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        return;
         if(!$event->isMainRequest()) return;
         if(!$this->authorizationChecker->isGranted(UserRole::ADMIN)) return;
 

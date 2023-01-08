@@ -63,6 +63,8 @@ class RouterSubscriber implements EventSubscriberInterface
         // If no host specified in Route, then check the list of permitted subdomain
         if($route && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route)) {
 
+            dump($route, $this->authorizationChecker->isGranted("VALIDATE_HOST", $route));
+            exit(1);
             $url = get_url(); // Redirect to proper host fallback if required.
             if(!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback()) {
 
@@ -74,9 +76,6 @@ class RouterSubscriber implements EventSubscriberInterface
             }
 
             // Redirect to sanitized url
-            dump($route, !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route), $url, $this->router->format($url) );
-            dump(!$route->getHost(), $this->router->getHost(), $this->router->getHostFallback());
-            exit(1);
             $event->setResponse(new RedirectResponse($this->router->format($url)));
             return $event->stopPropagation();
         }

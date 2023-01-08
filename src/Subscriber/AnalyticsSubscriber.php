@@ -67,6 +67,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
 
     public function onUserRequest(RequestEvent $event)
     {
+        return;
         if(!$event->isMainRequest()) return;
 
         if($this->router->isProfiler()) return;

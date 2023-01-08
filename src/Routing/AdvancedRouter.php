@@ -305,11 +305,11 @@ class AdvancedRouter implements RouterInterface
 
     protected function getHostParameters(?string $locale = null, ?string $environment = null): ?array
     {
-        $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", $this->localeProvider->getLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", $this->localeProvider->getLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", $this->localeProvider->getDefaultLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", $this->localeProvider->getDefaultLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks") ?? [], "locale", null) ?? [];
+        $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getDefaultLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getDefaultLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", null) ?? [];
 
         if($environment)
             $fallbacks = array_filter($fallbacks, fn($h) => $h["env"] ?? null == $environment);
@@ -320,7 +320,7 @@ class AdvancedRouter implements RouterInterface
     public function getScheme(?string $locale = null, ?string $environment = null): string
     {
         $host = $this->getHostParameters($locale, $environment);
-        $use_https = $_SERVER["REQUEST_SCHEME"] ?? $host["use_https"] ?? true;
+        $use_https = $host["use_https"] ?? $_SERVER["REQUEST_SCHEME"] ?? true;
         return $use_https ? "https" : "http";
     }
 
@@ -355,7 +355,7 @@ class AdvancedRouter implements RouterInterface
 
     public function getMachine(?string $locale = null, ?string $environment = null): ?string { return $this->getHostParameters($locale, $environment)["machine"] ?? null; }
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string { return $this->getHostParameters($locale, $environment)["subdomain"] ?? null; }
-    public function getDomain(?string $locale = null, ?string $environment = null): string { return $this->getHostParameters($locale, $environment)["domain"] ?? $_SERVER["HTTP_HOST"] ?? "localhost"; }
+    public function getDomain(?string $locale = null, ?string $environment = null): string { return $this->getHostParameters($locale, $environment)["domain"] ?? null; }
     public function getPort(?string $locale = null, ?string $environment = null): ?int
     {
         $host = $this->getHostParameters($locale, $environment);

@@ -10,8 +10,11 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
 class WebpackEntrypointCacheWarmer extends SimpleCacheWarmer
 {
-    public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
+    public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
     {
+        return;
+        if($entrypointLookup) return;
+        
         // Extract [app] tags
         $appJsonPath = array_filter((array) $entrypointLookup, fn($k) => str_ends_with($k, "entrypointJsonPath"), ARRAY_FILTER_USE_KEY);
         $appJsonPath = first($appJsonPath);
@@ -23,7 +26,6 @@ class WebpackEntrypointCacheWarmer extends SimpleCacheWarmer
             $tags = array_unique(array_map(fn($t) => str_rstrip($t, ["-async", "-defer"]), array_keys($entrypoints)));
             foreach($tags as $tag)
                 $encoreTagRenderer->addTag($tag);
-            dump($tags);
         }
 
         // Extract [base] tags 

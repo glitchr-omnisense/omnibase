@@ -33,6 +33,7 @@ class ProfilerSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        return;
         if($this->router->isProfiler($event) && !$this->router->isDebug())
             throw new NotFoundHttpException("Page not found.");
     }

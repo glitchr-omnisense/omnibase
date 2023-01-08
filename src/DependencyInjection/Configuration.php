@@ -196,7 +196,6 @@ class Configuration implements ConfigurationInterface
                 ->end()
 
                 ->arrayNode('router')->addDefaultsIfNotSet()
-
                     ->children()
                         ->booleanNode('use_advanced_features')
                             ->info('Use custom router')

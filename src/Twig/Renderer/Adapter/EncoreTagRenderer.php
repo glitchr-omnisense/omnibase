@@ -30,7 +30,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     protected $packages;
 
     /**
-     * @var EntrypointLookupCollectionInterface
+     * @var ?EntrypointLookupCollectionInterface
      */
     protected $entrypointLookupCollection;
 
@@ -45,10 +45,12 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
 
     public function __construct(
         Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag,
-        EntrypointLookupCollectionInterface $entrypointLookupCollection, Packages $packages, string $publicDir, string $cacheDir)
+        ?EntrypointLookupCollectionInterface $entrypointLookupCollection, Packages $packages, string $publicDir, string $cacheDir)
     {
-        parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
         $this->entrypointLookupCollection = $entrypointLookupCollection;
+        if( $this->entrypointLookupCollection == null) return;
+
+        parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
         $this->publicDir = $publicDir;
         $this->packages = $packages;
 
@@ -70,9 +72,9 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         return true;
     }
 
-    protected ?array $encoreEntrypoints;
-    protected  array $encoreEntryLinkTags   = [];
-    protected  array $encoreEntryScriptTags = [];
+    protected array $encoreEntrypoints     = [];
+    protected array $encoreEntryLinkTags   = [];
+    protected array $encoreEntryScriptTags = [];
 
     protected array $encoreBreakpoints = [];
 

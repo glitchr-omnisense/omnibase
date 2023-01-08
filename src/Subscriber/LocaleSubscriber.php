@@ -60,6 +60,7 @@ class LocaleSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        return;
         if(!$event->isMainRequest()) return;
 
         $_locale = $this->router->match($event->getRequest()->getPathInfo())["_locale"] ?? null;

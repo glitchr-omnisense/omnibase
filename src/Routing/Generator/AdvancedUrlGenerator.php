@@ -109,6 +109,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             if($parse && array_key_exists("base_dir", $parse))
                 $this->getContext()->setBaseUrl($parse["base_dir"]);
 
+
         } else {
 
             $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()); // Make sure also it gets the basic context
@@ -128,7 +129,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         if(str_starts_with($routeName, "_") || !$this->getRouter()->useAdvancedFeatures()) {
 
-            $routeParameters = $this->resolveParameters() ?? $routeParameters;
+            $routeParameters = $this->resolveParameters($routeParameters);
             try { return parent::generate($routeName, $routeParameters, $referenceType); }
             catch (Exception $e ) { throw $e; }
         }
@@ -148,7 +149,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if(array_key_exists("_locale", $routeParameters))
             $locale = $this->getLocaleProvider()->getLang($routeParameters["_locale"]);
 
-        $routeParameters = $this->resolveParameters($routeParameters, $referenceType);
+        $routeParameters = $this->resolveParameters($routeParameters);
 
         // Check whether the route is already cached
         $hash = $this->getRouter()->getRouteHash($routeName, $routeParameters, $referenceType);
@@ -206,17 +207,17 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function format(string $url): string
     {
-        $permittedHosts   = array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", $this->getLocaleProvider()->getLocale());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", $this->getLocaleProvider()->getLang());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", $this->getLocaleProvider()->getDefaultLocale());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", $this->getLocaleProvider()->getDefaultLang());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts") ?? [], "locale", null) ?? [];
+        $permittedHosts   = array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getLocale());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getLang());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getDefaultLocale());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getDefaultLang());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", null) ?? [];
         $permittedHosts = array_transforms(fn($k, $a): ?array => $a["env"] == $this->getRouter()->getEnvironment() ? [$k, $a["regex"]] : null, $permittedHosts);
         if(!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain())
             $permittedHosts = "^$"; // Special case if both subdomain and machine are unallowed
 
         $parse = parse_url2($url);
-        $allowedHost = false;
+        $allowedHost = empty($permittedHosts);
         foreach($permittedHosts as $permittedHost)
             $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);
 
@@ -226,7 +227,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         {
             // Special case for WWW subdomain
             if(!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse) && !$allowedHost) {
+            
                 $parse["subdomain"] = "www";
+            
             } else if( array_key_exists("subdomain", $parse) && !$allowedHost) {
 
                 if($parse["subdomain"] === "www") $parse = array_key_removes($parse, "subdomain");
