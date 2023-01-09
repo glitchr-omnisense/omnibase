@@ -81,7 +81,7 @@ class Vault extends AbstractAnnotation
         try {
 
             $failed = [];
-            $encryptedValues = $marshaller->marshall([$value], $failed)[0] ?? [];
+            $encryptedValues = $marshaller?->marshall([$value], $failed)[0] ?? [];
             if(count($failed)) return null;
 
             return $encryptedValues;

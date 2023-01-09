@@ -3,6 +3,7 @@
 namespace {
 
     use Base\BaseBundle;
+
     function get_alias(array|object|string|null $arrayOrObjectOrClass): string { return BaseBundle::getAlias($arrayOrObjectOrClass); }
     function alias_exists(mixed $objectOrClass): bool { return BaseBundle::hasAlias($objectOrClass); }
 
@@ -155,8 +156,8 @@ namespace {
         if($noscheme) $url = "file://".$url;
 
         $parse = parse_url($url, $component);
-        if($parse === false) return false;
 
+        if($parse === false) return false;
         foreach($parse as &$_)
             $_ = str_lstrip($_, "file://");
 
@@ -176,7 +177,7 @@ namespace {
             if(filter_var($parse["host"], FILTER_VALIDATE_IP) ) $parse["ip"] = $parse["host"];
             if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) $parse["ipv4"] = $parse["host"];
             if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) $parse["ipv6"] = $parse["host"];
-
+    
             //
             // Check if hostname
             if(preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
@@ -537,15 +538,16 @@ namespace {
     const  BINARY_PREFIX = array("", "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi");
     const DECIMAL_PREFIX = array("", "k",  "m",  "g",  "t",  "p",  "e",  "z",  "y");
 
+    function all_in_array(array $needle, array $haystack): bool { return !array_diff($needle, $haystack); }
 
-    function byte2bit(int $num): int { return 8*$num; } // LMFAO !
-    function bit2byte(int $num): int { return $num/8; } // LMFAO !
+    function byte2bit(int $num): int { return 8*$num; } // LMFAO :o)
+    function bit2byte(int $num): int { return $num/8; }
     function byte2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix).BYTE_PREFIX[0]; }
     function  bit2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix).BIT_PREFIX[0]; }
     function  dec2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string
     {
-             if ($unitPrefix == DECIMAL_PREFIX) $divider = 1000;
-        else if ($unitPrefix == BINARY_PREFIX)  $divider = 1024;
+             if (all_in_array($unitPrefix, DECIMAL_PREFIX)) $divider = 1000;
+        else if (all_in_array($unitPrefix, BINARY_PREFIX))  $divider = 1024;
         else throw new \Exception("Unknown prefix found: \"$unitPrefix\"");
         $unitPrefix = [''] + $unitPrefix;
 
@@ -556,7 +558,10 @@ namespace {
         if($rest < 0) $factor--;
 
         $quotient = (int) ($num / ($divider ** $factor));
-        return strval($factor > 0 ? $quotient.@mb_ucfirst($unitPrefix[$factor]) : $num);
+        $diff = $factor - count($unitPrefix) + 1;
+        if($diff > 0) $quotient *= $divider ** $diff;
+        
+        return strval($factor > 0 ? $quotient.@mb_ucfirst($unitPrefix[$factor] ?? end($unitPrefix)) : $num);
     }
 
     function only_alphachars(string $str) { return preg_replace("/[^a-zA-Z]+/", "", $str); }
@@ -1242,8 +1247,9 @@ namespace {
         return $array;
     }
 
-    function array_search_by(array $array, string $column, mixed $value) : ?array {
+    function array_search_by(?array $array, string $column, mixed $value) : ?array {
 
+        if($array === null) return null;
         if(!is_multidimensional($array)) return $array;
 
         $results = [];
@@ -1511,6 +1517,7 @@ namespace {
     define("FORMAT_SENTENCECASE", 2); // Lorem ipsum dolor sit amet
     define("FORMAT_LOWERCASE",    3); // lorem ipsum dolor sit amet
     define("FORMAT_UPPERCASE",    4); // LOREM IPSUM DOLOR SIT AMET
+
     function call_user_func_with_defaults(callable $fn, ...$args): mixed
     {
         $reflectionFn = new ReflectionFunction($fn);

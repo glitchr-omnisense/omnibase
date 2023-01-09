@@ -146,7 +146,7 @@
         <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\SimpleCacheWarmer"><tag name="kernel.cache_warmer" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig.encore_renderer" />
-            <argument type="service" id="webpack_encore.entrypoint_lookup[_default]" />
+            <argument type="service" id="webpack_encore.entrypoint_lookup[_default]" on-invalid="null" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
         <service id="Base\CacheWarmer\AnnotationsCacheWarmer"     parent="Base\Cache\SimpleCacheWarmer" public="true">
@@ -348,7 +348,6 @@
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
-            <argument type="service" id="translator" />
         </service>
 
         <service id="Base\Subscriber\EagerSubscriber">
@@ -593,7 +592,7 @@
         <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true" >
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
-            <argument type="service" id="webpack_encore.entrypoint_lookup_collection" />
+            <argument type="service" id="webpack_encore.entrypoint_lookup_collection" on-invalid="null" />
             <argument type="service" id="assets.packages" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
             <bind key="$cacheDir">%kernel.cache_dir%</bind>

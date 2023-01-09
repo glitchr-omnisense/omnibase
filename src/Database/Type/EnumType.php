@@ -9,6 +9,7 @@ use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Generator;
 use UnexpectedValueException;
 
@@ -161,6 +162,8 @@ abstract class EnumType extends Type implements SelectInterface
     public function requiresSQLCommentHint(AbstractPlatform $platform) : bool { return true; }
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
+        if($platform instanceof SqlitePlatform) return "TEXT";
+            
         $values = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
         return "ENUM(".implode(", ", $values).")";
     }

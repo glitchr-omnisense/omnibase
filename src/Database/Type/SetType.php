@@ -3,12 +3,16 @@
 namespace Base\Database\Type;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 
 abstract class SetType extends EnumType
 {
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
-        $values = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
+        if($platform instanceof SqlitePlatform)
+            return "TEXT";
+            
+        $values = array_map(fn($val) => "`".$val."`", $this->getPermittedValues());
         return "SET(".implode(", ", $values).")";
     }
 

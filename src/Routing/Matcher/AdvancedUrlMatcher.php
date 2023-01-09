@@ -31,7 +31,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     public function redirect(string $path, string $route, string $scheme = null): array
     {
         return [
-            '_controller' => 'Symfony\\Bundle\\FrameworkBundle\\Controller\\RedirectController::urlRedirectAction',
+            '_controller' => RedirectController::class . '::urlRedirectAction',
             '_route'      => $route,
 
             'path'        => $path,

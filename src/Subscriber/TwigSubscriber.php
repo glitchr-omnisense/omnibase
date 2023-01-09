@@ -115,7 +115,7 @@ class TwigSubscriber implements EventSubscriberInterface
 
         //
         // Breakpoint based entries
-        foreach($this->parameterBag->get("base.twig.breakpoints") as $breakpoint)
+        foreach($this->parameterBag->get("base.twig.breakpoints") ?? [] as $breakpoint)
             $this->encoreTagRenderer->addBreakpoint($breakpoint["name"], $breakpoint["media"] ?? "all");
 
         //

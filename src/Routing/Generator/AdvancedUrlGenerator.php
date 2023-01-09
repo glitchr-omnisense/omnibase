@@ -24,15 +24,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function __construct(array $compiledRoutes, RequestContext $context, LoggerInterface $logger = null, string $defaultLocale = null)
     {
-        // NB: This generator needs separate context as it internally calls its corresponding Matcher in generates..
-        //     (.. and Matcher class is changing context.)
+        // NB: This generator needs separate context.. Matcher class is changing context.
         $context = new RequestContext($context->getBaseUrl(), $context->getMethod(), $context->getHost(), $context->getScheme(), $context->getHttpPort(), $context->getHttpsPort(), $context->getPathInfo(), $context->getQueryString());
         parent::__construct($compiledRoutes, $context, $logger, $defaultLocale);
-
+        
         $this->compiledRoutes = $compiledRoutes;
         $this->cachedRoutes   = BaseBundle::CACHE && $this->getRouter()->getCache()
-            ? $this->getRouter()->getCacheRoutes()->get() ?? []
-            : [];
+            ? ($this->getRouter()->getCacheRoutes()->get() ?? []) : [];
     }
 
     protected function resolveUrl(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
@@ -101,9 +99,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $scheme    = array_pop_key("_scheme"  , $routeParameters) ?? $this->getRouter()->getScheme();
             $host      = array_pop_key("_host"    , $routeParameters) ?? $this->getRouter()->getHost();
             $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getRouter()->getBaseDir();
+
             $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
             $parse["base_dir"] = $baseDir;
-
+           
             if($parse && array_key_exists("host", $parse))
                 $this->getContext()->setHost($parse["host"]);
             if($parse && array_key_exists("base_dir", $parse))
@@ -128,7 +127,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         if(str_starts_with($routeName, "_") || !$this->getRouter()->useAdvancedFeatures()) {
 
-            $routeParameters = $this->resolveParameters() ?? $routeParameters;
+            $routeParameters = $this->resolveParameters($routeParameters);
             try { return parent::generate($routeName, $routeParameters, $referenceType); }
             catch (Exception $e ) { throw $e; }
         }
@@ -148,7 +147,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if(array_key_exists("_locale", $routeParameters))
             $locale = $this->getLocaleProvider()->getLang($routeParameters["_locale"]);
 
-        $routeParameters = $this->resolveParameters($routeParameters, $referenceType);
+        $routeParameters = $this->resolveParameters($routeParameters);
 
         // Check whether the route is already cached
         $hash = $this->getRouter()->getRouteHash($routeName, $routeParameters, $referenceType);
@@ -216,7 +215,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $permittedHosts = "^$"; // Special case if both subdomain and machine are unallowed
 
         $parse = parse_url2($url);
-        $allowedHost = false;
+        $allowedHost = empty($permittedHosts);
         foreach($permittedHosts as $permittedHost)
             $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);
 
@@ -226,7 +225,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         {
             // Special case for WWW subdomain
             if(!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse) && !$allowedHost) {
+            
                 $parse["subdomain"] = "www";
+            
             } else if( array_key_exists("subdomain", $parse) && !$allowedHost) {
 
                 if($parse["subdomain"] === "www") $parse = array_key_removes($parse, "subdomain");

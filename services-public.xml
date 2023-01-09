@@ -68,7 +68,7 @@
         <service id="locale_provider" alias="Base\Service\LocaleProvider" />
         <service id="Base\Service\LocaleProviderInterface" alias="locale_provider"/>
 
-        <service id="base.database.naming_strategy"      alias="Base\Database\Mapping\NamingStrategy" />
+        <service id="doctrine.orm.naming_strategy.camel" alias="Base\Database\Mapping\NamingStrategy" />
         <service id="base.database.metadata_factory"     alias="Base\Database\Mapping\Factory\ClassMetadataFactory" />
 
         <service id="Base\Database\Entity\EntityHydratorInterface" alias="base.database.entity_hydrator"/>

@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Routing\RouterInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;

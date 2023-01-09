@@ -587,6 +587,8 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                             toolbarBlockOver = this;
 
                             var toolbarInfo = this.querySelectorAll('.sf-toolbar-info')[0];
+                            if(!toolbarInfo) return;
+                            
                             var pageWidth = document.body.clientWidth;
                             var elementWidth = toolbarInfo.offsetWidth;
                             var leftValue = (elementWidth + this.offsetLeft) - pageWidth;

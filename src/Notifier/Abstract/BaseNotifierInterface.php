@@ -3,7 +3,7 @@
 namespace Base\Notifier\Abstract;
 
 use Base\Entity\User\Notification;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;

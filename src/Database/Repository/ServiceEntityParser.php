@@ -218,8 +218,6 @@ class ServiceEntityParser
         $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
         if(!$query) return null;
 
-        // dump($query);
-        // exit(1);
         return $query->getResult();
     }
 
@@ -228,7 +226,7 @@ class ServiceEntityParser
     {
         // Parse method and call it
         list($method, $arguments) = $this->__parse($method, $arguments);
-
+      
         try { $ret = $this->$method(...$arguments); }
         finally { // Reset internal variables, even if exception happens.
                   // (e.g. wrong Query in Controller, but additional queries in Subscriber)
@@ -240,6 +238,12 @@ class ServiceEntityParser
             $this->eagerly = false;
         }
 
+        // if($method == "__findAll") {
+        //     dump($ret);
+        //     dump($method, $arguments, $ret->getResult());
+        //     exit(1);
+        // }
+        
         return $ret;
     }
 

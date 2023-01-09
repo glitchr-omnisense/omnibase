@@ -633,8 +633,8 @@ class AnnotationReader extends SimpleCache
          * @var ClassMetadataFactory
          */
         $classMetadataFactory = $this->entityManager->getMetadataFactory();
-        foreach($classMetadataFactory->getAllClassNames() as $className) {
-
+        foreach($this->classMetadataManipulator->getAllClassNames() as $className)
+        {
             $this->getAncestor($className);
             $this->getAnnotations($className);
         }

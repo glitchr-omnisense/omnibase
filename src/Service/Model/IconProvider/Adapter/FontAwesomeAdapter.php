@@ -77,14 +77,15 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         return $isAwesome;
     }
 
-    public function getClass(string $style)
+    public function getClass(string $style) : ?string
     {
         if(version_compare($this->getVersion(), 6, ">="))
             return $this->getName()."-".$style;
         if(version_compare($this->getVersion(), 5, ">="))
             return $this->getName().$style[0];
 
-        throw new \Exception("Version ". $this->getVersion()." is not supported.");
+        return null;
+//        throw new \Exception("Version ". $this->getVersion()." is not supported.");
     }
 
     public function getChoices(string $term = ""): array

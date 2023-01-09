@@ -4,7 +4,7 @@ namespace Base\Twig\Renderer;
 
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 
