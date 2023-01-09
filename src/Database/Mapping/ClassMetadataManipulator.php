@@ -20,6 +20,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
 
+use Base\Database\Mapping\Factory\ClassMetadataFactory;
+
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -820,7 +822,14 @@ class ClassMetadataManipulator
         return $classMetadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }
 
-    public function getAllClassNames() { return $this->entityManager->getMetadataFactory()->getAllClassNames(); }
+    public function getAllClassNames() 
+    { 
+        $classMetadataFactory = $this->entityManager->getMetadataFactory();
+        if($classMetadataFactory instanceof ClassMetadataFactory)
+            return $classMetadataFactory->getAllClassNames();
+        
+        return [];
+    }
 
     /**
      * Salt used by specific Object Manager implementation.

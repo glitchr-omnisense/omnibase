@@ -13,7 +13,6 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
@@ -27,16 +26,11 @@ class LocaleSubscriber implements EventSubscriberInterface
      */
     protected $router;
 
-    /**
-     * @var Translator
-     */
-    protected $translator;
 
-    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router, TranslatorInterface $translator)
+    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router)
     {
         $this->localeProvider = $localeProvider;
         $this->router         = $router;
-        $this->translator     = $translator;
     }
 
     public static function getSubscribedEvents(): array

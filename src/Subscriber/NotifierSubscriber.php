@@ -31,12 +31,6 @@ class NotifierSubscriber implements EventSubscriberInterface
     /** * @var bool */
     protected $debug;
 
-    /** * @var string */
-    protected $technicalRecipient;
-
-    /** * @var bool */
-    protected bool $technicalLoopback;
-
     public function __construct(Notifier $notifier, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, string $debug)
     {
         $this->debug                = $debug;
