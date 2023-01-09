@@ -2,14 +2,24 @@
 
 .ql-editor img { 
     float: left; 
-    
-    margin: 0 1em;
-    max-width:400px;
+    margin: 0 1em 1em 1em;
     max-height:400px;
 }
-.ql-editor .ql-align-center { text-align:center; }
+
+@media all and (max-width: 470px) {
+    
+    .ql-editor img { 
+        
+        width:100%;
+        margin: auto;
+        max-width:auto;
+        max-height:auto;
+    }
+}
+
+.ql-editor .ql-align-justify img { float: left; }
 .ql-editor .ql-align-center img { float: initial; }
-.ql-editor .ql-align-justify img { float: initial; }
+.ql-editor .ql-align-center { clear: both; text-align:center; }
 .ql-align-right img { float: right; }
 .ql-align-left img { float: left; }
 .ql-editor {

@@ -180,7 +180,11 @@ $(document).on("DOMContentLoaded", function () {
                         return $.ajax(options)
                                     .done((_response) => localCache[index] = _response)
                                     .done(success)
-                                    .fail(() => delete localCache[index])
+                                    .fail(function() 
+                                    {                    
+                                        $('body > .select2-container .loading-results .select2-selection__entry').html("<span style='color:red;'>Unexpected response.. Please try again.</span>");
+                                        delete localCache[index];
+                                    })
                                     .fail(failure);
 
                             /*[......].done(function(data) {
@@ -236,11 +240,6 @@ $(document).on("DOMContentLoaded", function () {
 
             $('body > .select2-container input.select2-search__field').off();
             $('body > .select2-container input.select2-search__field').on("input", function() { page = "1.0"; });
-
-            $(field).on("click", function(e) {
-
-                console.log(e);
-            });
 
             $(field).parent().find('input.select2-search__field').off();
             $(field).parent().find('input.select2-search__field').on("input", function() { page = "1.0"; });
