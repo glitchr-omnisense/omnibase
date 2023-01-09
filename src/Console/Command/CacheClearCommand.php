@@ -117,7 +117,30 @@ EOF
             symlink($realPath, $publicPath);
         }
 
-        $io->note("Technical recipient configured: ".$this->notifier->getTechnicalRecipient());
+        //
+        // Disk space and memory checks
+        $freeSpace = disk_free_space(".");
+        $diskSpace = disk_total_space(".");
+        $remainingSpace = $diskSpace - $freeSpace;
+        $percentSpace = round(100*$remainingSpace/$diskSpace, 2);
+
+        if($percentSpace < 5) $fn = "warning";
+        else if($percentSpace < 25) $fn = "note";
+        else $fn = "info";
+
+        $memoryLimit = str2dec(ini_get("memory_limit"));
+
+        $io->$fn(
+            'Disk space information: '. byte2str($freeSpace, BINARY_PREFIX) . ' / ' . byte2str($diskSpace, BINARY_PREFIX) . " available (".$percentSpace." % used)".PHP_EOL.
+            'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(BINARY_PREFIX, 0, 3))
+        );
+
+        if($memoryLimit < str2dec("512M"))
+            $io->warning('Memory limit is very low.. Consider to increase it');
+
+        $technicalRecipient = $this->notifier->getTechnicalRecipient();
+        if(is_stringeable($technicalRecipient))
+            $io->note("Technical recipient configured: ".$technicalRecipient);
 
         return $ret;
     }
