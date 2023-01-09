@@ -129,19 +129,19 @@ EOF
         $diskSpace = disk_total_space(".");
         $remainingSpace = $diskSpace - $freeSpace;
         $percentSpace = round(100*$remainingSpace/$diskSpace, 2);
-
-        if($percentSpace < 5) $fn = "warning";
-        else if($percentSpace < 25) $fn = "note";
+        
+        if($percentSpace > 95) $fn = "warning";
+        else if($percentSpace > 75) $fn = "note";
         else $fn = "info";
 
         $memoryLimit = str2dec(ini_get("memory_limit"));
-
+        $memoryLimitStr = $memoryLimit > 0 ? 'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(BINARY_PREFIX, 0, 3)) : "";
         $io->$fn(
             'Disk space information: '. byte2str($freeSpace, BINARY_PREFIX) . ' / ' . byte2str($diskSpace, BINARY_PREFIX) . " available (".$percentSpace." % used)".PHP_EOL.
-            'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(BINARY_PREFIX, 0, 3))
+            $memoryLimitStr
         );
 
-        if($memoryLimit < str2dec("512M"))
+        if($memoryLimit > 0 && $memoryLimit < str2dec("512M"))
             $io->warning('Memory limit is very low.. Consider to increase it');
 
         return $ret;
