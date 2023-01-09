@@ -118,6 +118,12 @@ EOF
         }
 
         //
+        // Technical contact and language
+        $technicalRecipient = $this->notifier->getTechnicalRecipient();
+        if(is_stringeable($technicalRecipient))
+            $io->note("Technical recipient configured: ".$technicalRecipient);
+
+        //
         // Disk space and memory checks
         $freeSpace = disk_free_space(".");
         $diskSpace = disk_total_space(".");
@@ -137,10 +143,6 @@ EOF
 
         if($memoryLimit < str2dec("512M"))
             $io->warning('Memory limit is very low.. Consider to increase it');
-
-        $technicalRecipient = $this->notifier->getTechnicalRecipient();
-        if(is_stringeable($technicalRecipient))
-            $io->note("Technical recipient configured: ".$technicalRecipient);
 
         return $ret;
     }
