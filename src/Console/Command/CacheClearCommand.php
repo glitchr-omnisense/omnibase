@@ -20,15 +20,23 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class CacheClearCommand extends Command
 {
     /**
+     * @var SymfonyCacheClearCommand
+     */
+    protected $cacheClearCommand;
+
+    /**
      * @var Flysystem
      */
     protected $flysystem;
-
+    
     /**
      * @var Notifier
      */
     protected $notifier;
     
+    protected string $projectDir;
+    protected string $cacheDir;
+
     public function __construct(
         LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
         SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, string $projectDir, string $cacheDir)
@@ -136,7 +144,7 @@ EOF
 
         $memoryLimit = str2dec(ini_get("memory_limit"));
         $memoryLimitStr = $memoryLimit > 1 ? 'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(BINARY_PREFIX, 0, 3)) : "";
-        $io->$fn(
+        $io->{$fn}(
             'Disk space information: '. byte2str($freeSpace, BINARY_PREFIX) . ' / ' . byte2str($diskSpace, BINARY_PREFIX) . " available (".$percentSpace." % used)".PHP_EOL.
             $memoryLimitStr
         );
