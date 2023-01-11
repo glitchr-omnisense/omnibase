@@ -1268,11 +1268,11 @@ class ServiceEntityParser
                 $expr = [];
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "like" : "notLike");
 
-                if(!is_array($fieldValue)) $expr[] = $qb->expr()->$fnExpr($tableColumn, ":${fieldID}");
+                if(!is_array($fieldValue)) $expr[] = $qb->expr()->$fnExpr($tableColumn, ":{$fieldID}");
                 else {
 
                     foreach ($fieldValue as $subFieldID => $_)
-                        $expr[] = $qb->expr()->$fnExpr($fieldID, ":${fieldID}_${subFieldID}");
+                        $expr[] = $qb->expr()->$fnExpr($fieldID, ":{$fieldID}_{$subFieldID}");
                 }
 
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "orX" : "andX");

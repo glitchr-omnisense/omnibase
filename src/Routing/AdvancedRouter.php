@@ -353,8 +353,10 @@ class AdvancedRouter implements RouterInterface
         if($subdomain) $subdomain = $subdomain . ".";
 
         $domain = $host["domain"] ?? null;
-        $port   = $host["port"] ?? "";
-        if($port) $port = ":" . $port;
+
+        $port   = $host["port"] ?? null;
+        if ($port == 80 || $port == 443) $port = null;
+        if ($port) $port = ":" . $port;
 
         return $machine.$subdomain.$domain.$port;
     }

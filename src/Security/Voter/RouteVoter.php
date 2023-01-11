@@ -77,6 +77,7 @@ class RouteVoter extends Voter
                     $permittedHosts[] = "^$"; // Special case if both subdomain and machine are unallowed
 
                 $parse = parse_url2($url);
+
                 $allowedHost = empty($permittedHosts);
                 foreach($permittedHosts as $permittedHost)
                     $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);
