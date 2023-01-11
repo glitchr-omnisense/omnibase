@@ -10,6 +10,7 @@ use League\Flysystem\CorruptedPathDetected;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\PathPrefixer;
+
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToReadFile;
@@ -72,11 +73,6 @@ class Flysystem extends LazyFactory implements FlysystemInterface
                 );
     }
 
-    // public function getStorageName(FilesystemOperator $operator = null):?string
-    // {
-
-    // }
-
     public function getDefaultStorage():FilesystemOperator { return $this->operator; }
     public function setDefaultStorage(FilesystemOperator|string $operator)
     {
@@ -115,11 +111,26 @@ class Flysystem extends LazyFactory implements FlysystemInterface
     {
         $adapter = $this->getAdapter($operator);
 
+        //
+        // Prefixer
         try { $reflProperty = new \ReflectionProperty(get_class($adapter), 'prefixer'); }
         catch (ReflectionException $e) { return null; }
 
         $reflProperty->setAccessible(true);
-        return $reflProperty->getValue($adapter);
+        return $reflProperty->isInitialized($adapter) ? $reflProperty->getValue($adapter) : null;
+    }
+
+    public function getConnectionOptions(FilesystemOperator|string|null $operator = null): ?array {
+
+        $adapter = $this->getAdapter($operator);
+
+        //
+        // Connection options
+        try { $reflProperty = new \ReflectionProperty(get_class($adapter), 'connectionOptions'); }
+        catch (ReflectionException $e) { dump($e, $adapter); return null; }
+
+        $reflProperty->setAccessible(true);
+        return $reflProperty->isInitialized($adapter) ? to_array($reflProperty->getValue($adapter)) : null;
     }
 
     public function prefixPath(string $path, FilesystemOperator|string|null $operator = null)

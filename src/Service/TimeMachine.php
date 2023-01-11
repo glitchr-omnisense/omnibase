@@ -10,6 +10,8 @@ use BackupManager\Databases\Database;
 use BackupManager\Databases\DatabaseProvider;
 use BackupManager\Databases\MysqlDatabase;
 use BackupManager\Databases\PostgresqlDatabase;
+use Base\Database\Provider\PdoMysqlDatabase;
+
 use BackupManager\Filesystems\Awss3Filesystem;
 use BackupManager\Filesystems\Destination;
 use BackupManager\Filesystems\DropboxFilesystem;
@@ -54,7 +56,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         function signal_handler($signal) {
             switch($signal) {
                 case SIGINT:
-                    echo "Time machine is preventing to abort. Please kindly wait until the end of this script.\n";
+                    echo "Time machine is preventing you to abort. Please kindly wait until the end of this script.\n";
             }
         }
     }
@@ -69,15 +71,29 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         //
         // Prepare filesystem configuration
-        foreach($flysystem->getStorageNames() as $storageName)
-            $this->filesystemConfigs[] = ['type' => 'local', 'name' => $storageName];
+        $this->filesystemConfigs = [];
+        foreach($flysystem->getStorageNames() as $storageName) {
+
+            $type = explode(".", $storageName)[0] ?? "local";
+
+            switch($type) {
+                case "ftp": 
+                    $config = ["type" => $type, ...$flysystem->getConnectionOptions($storageName)];
+                    break;
+
+                default:
+                    $config = ['type' => $type, 'root' => $flysystem->prefixPath("", $storageName)];
+            }
+
+            $this->filesystemConfigs[$storageName] = $config;
+        }
 
         //
         // Prepare database configuration
         foreach($doctrine->getConnectionNames() as $connectionName => $_) {
 
             $params = $doctrine->getConnection($connectionName)->getParams();
-            $this->databaseConfigs[] = [
+            $this->databaseConfigs[$connectionName] = [
                 "type" => $params["driver"],
                 "host" => $params["host"],
                 "port" => $params["port"],
@@ -90,8 +106,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         //
         // Build providers
-        $filesystems = new FilesystemProvider(new Config(["type" => "Local", "root" => $this->getCacheDir()]));
-
+        $filesystems = new FilesystemProvider(new Config($this->filesystemConfigs));
         $filesystems->add(new Awss3Filesystem);
         $filesystems->add(new GcsFilesystem);
         $filesystems->add(new DropboxFilesystem);
@@ -102,6 +117,8 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $filesystems->add(new WebdavFilesystem);
 
         $databases = new DatabaseProvider(new Config($this->databaseConfigs));
+       
+        $databases->add(new PdoMysqlDatabase);
         $databases->add(new MysqlDatabase);
         $databases->add(new PostgresqlDatabase);
 
@@ -131,32 +148,61 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         if(!is_array($ids)) $ids = [$ids];
         return array_filter($this->destinations, fn($id) => in_array($id, $ids), ARRAY_FILTER_USE_KEY);
     }
+
     public function addDestination(Destination $destination)
     {
         if(in_array($destination, $this->destinations) === false)
-            $this->destination = $destination;
+            $this->destinations[] = $destination;
 
         return $this;
     }
+
     public function removeDestination(Destination $destination)
     {
-        if(in_array($destination, $this->destinations))
-            $this->destinations[] = $destination;
+        if(($pos = array_search($destination, $this->destinations)))
+            unset($this->destinations[$pos]);
 
         return $this;
     }
 
     public function getDatabase(string $name): Database { return $this->databases->get($name); }
     public function getDatabaseConfiguration(string $name): Database { return $this->databases->get($name); }
-    public function getDatabaseList(string $name): Database { return $this->databases->get($name); }
-    public function getStorage(string $name): Filesystem { return $this->filesystems->get($name); }
-    public function getStorageList(): array { return [] /*$this->filesystems->get($name)*/; }
+    public function getDatabaseList() : array {
+        
+        $list = [];
+        foreach($this->databases->getAvailableProviders() as $connectionName)
+            $list[$connectionName] = $this->databases->get($connectionName);
 
-    public function getLastSnapshot(int|array $ids): array { $snapshot = $this->getSnapshots(); return end($snapshot); }
+        return $list;
+    }
+
+    public function getStorage(string $name): Filesystem { return $this->filesystems->get($name); }
+    public function getStorageList() : array 
+    {
+        $list = [];
+        foreach($this->filesystems->getAvailableProviders() as $storageName)
+            $list[$storageName] = $this->filesystems->get($storageName);
+
+        return $list;
+    }
+
+    public function getLastSnapshot(int|array $ids): array
+    { 
+        $snapshot = $this->getSnapshots();
+        return end($snapshot);
+    }
+    
     public function getSnapshots(int|array $ids = []): array
     {
-        $destinations = $this->getDestinations($ids);
-        dump($destinations);
+        $ids = array_flip($ids);
+        foreach(array_intersect_key($this->getStorageList(), $ids) as $storageName => $filesystem) {
+            foreach($filesystem->listContents("/") as $content) {
+
+                dump($content);
+                exit(1);
+            }
+        }
+
         exit(1);
         // Flysystem
         // $filesystem->listContents($path, );

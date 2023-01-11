@@ -403,6 +403,15 @@ namespace {
         return $fname !== false && strncmp($fname, $base, strlen($base)) === 0;
     }
 
+    function to_array(object $class) {
+
+        $array = array_transforms(
+            fn($k,$v):array => [str_replace("\x00".get_class($class)."\x00", "", $k), $v], 
+            (array) $class
+        );
+        
+        return $array;
+    }
     function in_class(object $class, mixed $needle) {
 
         $haystack = array_filter((array) $class);
