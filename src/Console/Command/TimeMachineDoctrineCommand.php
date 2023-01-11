@@ -32,15 +32,10 @@ class TimeMachineDoctrineCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $version   = $input->getOption('version') ?? -1;
-        foreach($this->timeMachine->getSnapshots() as $snapshot)
-            dump($snapshot);
-
-        // $filename = $this->filePrefix."-".(new \DateTime())->format('Ymd')."-".$version;
-
-        // $destinations = [];
-        // foreach ($input->getArgument('destinations') as $name)
-        //     $destinations[] = new Destination($name, $filename);
+        $output->section()->writeln("Available database connection(s):");
+        
+        foreach($this->timeMachine->getStorageList() as $storageName => $storage)
+            $output->section()->writeln(" * <info>" . $databaseName . "</info> (". get_class($database).")");
 
         return Command::SUCCESS;
     }

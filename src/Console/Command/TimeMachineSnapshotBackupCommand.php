@@ -13,17 +13,20 @@ class TimeMachineSnapshotBackupCommand extends Command
 {
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $version   = $input->getOption('version') ?? -1;
+        $cycle   = $input->getOption('cycle') ?? -1;
         foreach($this->timeMachine->getSnapshots() as $snapshot)
             dump($snapshot);
 
-        $filename = $this->filePrefix."-".(new \DateTime())->format('Ymd')."-".$version;
+        $id   = $input->getOption('id');
+        if(!$id) throw new \Exception("Please select an ID.");
+
+        $filename = $this->filePrefix."-".(new \DateTime())->format('Ymd')."-".$cycle;
 
         $destinations = [];
         foreach ($input->getArgument('destinations') as $name)
             $destinations[] = new Destination($name, $filename);
 
-        $this->timeMachine->restore($id, $version);
+        $this->timeMachine->restore($id, $cycle);
 
         return Command::SUCCESS;
     }
