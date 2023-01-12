@@ -242,14 +242,21 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\Console\Command\TimeMachineDoctrineCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
-        <service id="Base\Console\Command\TimeMachineStorageCommand"         parent="Base\Console\Command"                           ><tag name="console.command" />
+        <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command">
+            <tag name="console.command" />
             <argument type="service" id="time_machine" />
             <argument type="service" id="flysystem" />
         </service>
-        <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
-        <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="time_machine" /></service>
-        <service id="Base\Console\Command\TimeMachineSnapshotRestoreCommand" parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="time_machine" /></service>
+        <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand">
+            <tag name="console.command" />
+            <argument type="service" id="time_machine" />
+            <argument type="service" id="flysystem" />
+        </service>
+        <service id="Base\Console\Command\TimeMachineSnapshotRestoreCommand" parent="Base\Console\Command\TimeMachineSnapshotCommand">
+            <tag name="console.command" />
+            <argument type="service" id="time_machine" />
+            <argument type="service" id="flysystem" />
+        </service>
 
         <service id="Base\Console\Command\BaseMappingCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\ThreadPublishableCommand" parent="Base\Console\Command"><tag name="console.command" /></service>

@@ -11,6 +11,8 @@ use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\PathPrefixer;
 
+use League\Flysystem\PhpseclibV3\SftpAdapter;
+
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToReadFile;
@@ -107,7 +109,7 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return $reflProperty->getValue($operator);
     }
 
-    protected function getPathPrefixer(FilesystemOperator|string|null $operator = null): ?PathPrefixer
+    protected function getPathPrefixer(FilesystemOperator|string|null $operator = null): PathPrefixer
     {
         $adapter = $this->getAdapter($operator);
 
@@ -117,7 +119,7 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         catch (ReflectionException $e) { return null; }
 
         $reflProperty->setAccessible(true);
-        return $reflProperty->isInitialized($adapter) ? $reflProperty->getValue($adapter) : null;
+        return $reflProperty->isInitialized($adapter) ? $reflProperty->getValue($adapter) : new PathPrefixer($this->getConnectionOptions($operator)["root"] ?? "/");;
     }
 
     public function getConnectionOptions(FilesystemOperator|string|null $operator = null): ?array {
@@ -127,7 +129,12 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         //
         // Connection options
         try { $reflProperty = new \ReflectionProperty(get_class($adapter), 'connectionOptions'); }
-        catch (ReflectionException $e) { dump($e, $adapter); return null; }
+        catch (ReflectionException $e) { 
+
+            // Connection provider (SFTP)
+            try { $reflProperty = new \ReflectionProperty(get_class($adapter), 'connectionProvider'); }
+            catch (ReflectionException $e) { return null; }
+        }
 
         $reflProperty->setAccessible(true);
         return $reflProperty->isInitialized($adapter) ? to_array($reflProperty->getValue($adapter)) : null;
@@ -241,6 +248,12 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         catch (UnableToCreateDirectory $e) { $publicPath = $e->location(); }
 
         return $publicPath;
+    }
+
+    public function isRemote(FilesystemOperator|string|null $operator = null)
+    {
+        $adapter = $this->getAdapter($operator);
+        return property_exists($adapter, "connectionOptions") || property_exists($adapter, "connectionProvider");
     }
 
     public function getPublic(mixed $path, FilesystemOperator|string|null $operator = null)

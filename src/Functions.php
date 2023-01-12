@@ -897,6 +897,8 @@ namespace {
         return $http_response_header;
     }
 
+    function dir_empty(string $dir): bool { return !file_exists($dir) || (is_dir($dir) && !(new \FilesystemIterator($dir))->valid()); }
+    
     function mime_content_type2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT)
     {
         // Search by looking at the header if url format
@@ -2190,7 +2192,7 @@ namespace {
 
     function str_blankspace(int $length) { return $length < 1 ? "" : str_repeat(" ", $length); }
     function usort_column(array &$array, string $column, callable $fn):bool { return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null)); }
-    function usort_key(array $array, array $ordering = []) { return array_replace(array_flip($ordering), $array); }
+    function usort_key(array $array, array $ordering = []):array { return array_replace(array_flip($ordering), $array); }
     function usort_startsWith(array &$array, string|array $startingWith)
     {
         if(!is_array($startingWith)) $startingWith = [$startingWith];
@@ -2233,8 +2235,7 @@ namespace {
 
     function array_reverseByMask(array $array, array $mask)
     {
-        if(count($array) != count($mask))
-            throw new Exception("Wrong mask size (".count($mask).") compared to array (".count($array).").");
+        $mask = array_pad($mask, count($array), false);
 
         $keys = [];
         foreach($mask as $key => $b)
