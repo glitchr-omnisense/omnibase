@@ -23,7 +23,7 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
     {
         parent::configure();
         $this->addOption('id', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
-        $this->addOption  ('database', null, InputOption::VALUE_OPTIONAL, 'Which database do you want to backup?', null);
+        $this->addOption('database', null, InputOption::VALUE_OPTIONAL, 'Which database do you want to backup?', null);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -33,11 +33,15 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
         $storages = $input->getArgument('storages') ?? [];
         $database = $input->getOption('database')   ?? null;
         $prefix   = $input->getOption('prefix')     ?? null;
-        $cycle    = $input->getOption('cycle')      ?? -1;
-        $id       = $input->getOption('id')         ?? -1;
-
+        
         if(!$storages) return Command::FAILED;
         
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('You are about to backup this application and database. Do you wish to continue ?', false);
+        if (!$helper->ask($input, $output, $question)) {
+            return Command::SUCCESS;
+        }
+
         return $this->timeMachine->backup($database, $storages, $prefix, $cycle);
     }
 }

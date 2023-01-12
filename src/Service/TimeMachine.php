@@ -25,6 +25,7 @@ use BackupManager\Filesystems\WebdavFilesystem;
 use BackupManager\Manager as BackupManager;
 
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Finder\Finder;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Exception;
@@ -258,6 +259,18 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $snapshots;
     }
 
+    public function getLastCycle(array $files): int
+    {
+        $matches = [];
+        $lastCycle = 0;
+        if(preg_match('/'.preg_quote($prefix).'\-([0-9]*)\.\w/', basename(end($files)), $matches))
+            $lastCycle = intval($matches[1]);
+        else if(preg_match('/'.preg_quote($prefix).'\.\w/', basename(end($files)), $matches))
+            $lastCycle = 1;
+
+        return $lastCycle;
+    }
+
     public function backup(null|string|array $databases, int|array $storageNames = [], $prefix = null, $cycle = -1)
     { 
         $prefix = $prefix ?? "backup";
@@ -305,12 +318,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
             //
             // Compute next version
-            $lastCycle = 0;
-            if(preg_match('/'.preg_quote($prefix).'\-([0-9]*)\.\w/', basename(end($files)), $matches))
-                $lastCycle = intval($matches[1]);
-            else if(preg_match('/'.preg_quote($prefix).'\.\w/', basename(end($files)), $matches))
-                $lastCycle = 1;
-
+            $lastCycle = $this->getLastCycle($files);
             $cycle = $cycle < 0 ? $lastCycle+1 : min($cycle, $lastCycle+1);
             $file = $cycle > 1 ? $prefix."-".$cycle.".tar" : $prefix.".tar";
 
@@ -330,7 +338,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         // Prepare backup directory
         if(!is_dir($this->getCacheDir()."/".$prefix))
-            mkdir($this->getCacheDir()."/".$prefix);
+            mkdir($this->getCacheDir()."/".$prefix, 0755);
             
         // Compress and transfer
         $output = $this->buildArchive($this->getCacheDir()."/".$prefix."/application.tar", getcwd(), [$this->cacheDir]);
@@ -358,14 +366,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return true;
     }
 
-    public function restore(int $id, int|array $storageNames = [], $prefix = null, $cycle = -1)
+    public function restore(int $id, bool $restoreDatabase, bool $restoreApplication, int|array $storageNames = [], $prefix = null, $cycle = -1)
     {
         $prefix = $prefix ?? "backup";
 
         list($storageName, $file) = $this->getSnapshot($id, $storageNames, $prefix, $cycle);
         if(!$storageName) throw new \LogicException("No snapshot found among the list of storages provided: \"".implode(",",$storageNames)."\"");
         
-        $location = getcwd()."-".str_lstrip(basename(basenameWithoutExtension($file), ".tar"), $prefix."-");
+        $location = getcwd()."-".str_lstrip(basename(basenameWithoutExtension($file), ".tar"), $prefix."-")."-at-".date("Ymd-his");
         if(!dir_empty($location)) throw new \LogicException("Restoration directory is not empty: \"".$location."\"");
         
         $filesystem = $this->filesystems->get($storageName);
@@ -380,28 +388,44 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         $this->openArchive($localFile);
     
+        // Restore filesystem
         $outputDir = dirname($localFile)."/".basename(basenameWithoutExtension($localFile), ".tar");    
-        $this->openArchive($outputDir."/application.tar");
-        
-        $location = getcwd()."-".str_lstrip(basename(basenameWithoutExtension($file), ".tar"), $prefix."-");
-        rename($outputDir."/application", $location);
+        if(!$restoreApplication) {
 
-        if ($this->output) {
-            $this->output->section()->writeln("<info>Restoration location:</info> ".$location);
-            $this->output->section()->writeln("<warning>Please move by yourself to the final location !</warning>");
-        }
+            if ($this->output) 
+                $this->output->section()->writeln("<info>- Application not restored !</info> ");
 
-        if($databases) {
+        } else {
 
-            $databases = array_map(fn($d) => basename($d, ".sql"), scandir($outputDir."/databases"));
-            if($this->output) $this->output->section()->writeln("<info>- Restoring databases:</info> ". implode(", ", $databases));
-            
-            foreach($databases as $database) {
-                dump($this->getDatabase($database));
-                exit(1);
-                parent::makeRestore()->run("local", $outputDir."/databases/".$database.".sql", $this->getDatabase($database), $this->compression);
+            $this->openArchive($outputDir."/application.tar");
+            rename($outputDir."/application", $location);
+
+            if ($this->output) {
+                $this->output->section()->writeln("<info>- Restoration location:</info> ".$location);
+                $this->output->section()->writeln("<warning>  Please move by yourself to the final location !</warning>");
             }
         }
+
+        if(!$restoreDatabase) {
+
+            if ($this->output) 
+                $this->output->section()->writeln("<info>- Database not restored !</info> ");
+        
+        } else {
+
+            $finder = new Finder();
+            $databases = [];
+            foreach($finder->name('*.sql')->in($outputDir."/databases") as $sql)
+                $databases[] =  basename($sql, ".sql");
+        
+            if($databases) {
+
+                if($this->output) $this->output->section()->writeln("<info>- Restoring databases:</info> ". implode(", ", $databases));
+                foreach($databases as $database)
+                    parent::makeRestore()->run("local", basename($outputDir)."/databases/".$database.".sql", $database, "null");
+            }
+        }
+
         return true;
     }
 
@@ -430,7 +454,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
        
         // Prepare backup directory
         if(!is_dir($outputDir))
-            mkdir($outputDir);
+            mkdir($outputDir, 0755);
     
         exec(sprintf('tar --directory=%s -xf %s', escapeshellarg($outputDir), escapeshellarg($output)), $_, $ret);
 

@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(name:'timemachine:snapshot:restore', aliases:[], description:'')]
 class TimeMachineSnapshotRestoreCommand extends TimeMachineSnapshotCommand
@@ -36,6 +37,20 @@ class TimeMachineSnapshotRestoreCommand extends TimeMachineSnapshotCommand
 
         if(!$storages) return Command::FAILED;
         
-        return $this->timeMachine->restore($id, $storages, $prefix, $cycle);
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('You are about to restore an old version. Do you wish to continue ? [y/N] ', false);
+        if (!$helper->ask($input, $output, $question)) {
+            return Command::SUCCESS;
+        }
+        
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('Do you wish to restore application from tarball ? [y/N] ', false);
+        $restoreApplication = $helper->ask($input, $output, $question);
+
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('Do you wish to restore database from tarball ? [y/N] ', false);
+        $restoreDatabase = $helper->ask($input, $output, $question);
+
+        return $this->timeMachine->restore($id, $restoreDatabase, $restoreApplication, $storages, $prefix, $cycle);
     }
 }
