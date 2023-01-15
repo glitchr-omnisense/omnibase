@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 #[AsCommand(name:'cache:clear', aliases:[], description:'')]
 class CacheClearCommand extends Command
@@ -151,6 +152,10 @@ EOF
 
         if($memoryLimit > 1 && $memoryLimit < str2dec("512M"))
             $io->warning('Memory limit is very low.. Consider to increase it');
+
+        $phpConfig = php_ini_loaded_file();
+        $maxSize = UploadedFile::getMaxFilesize();
+        $io->note("Loaded PHP Configuration: ".$phpConfig." (might be different from the webserver)\nMaximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX));
 
         return $ret;
     }
