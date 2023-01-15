@@ -294,13 +294,13 @@ class Translator implements TranslatorInterface
         return false;
     }
 
-    public function transRoute(string $routeName, string $domain = null): ?string
+    public function transRoute(string $routeName, ?string $domain = null): ?string
     {
         $domain = $domain ? $domain."." : "@controllers.";
         return $this->trans($domain.$routeName.".title");
     }
 
-    public function transRouteExists(string $routeName, string $domain = null) : bool
+    public function transRouteExists(string $routeName, ?string $domain = null) : bool
     {
         $domain = $domain ? $domain."." : "@controllers.";
         return $this->transExists($domain.$routeName.".title");
