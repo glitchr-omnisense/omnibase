@@ -70,7 +70,6 @@ class Uploader extends AbstractAnnotation
         $this->ancestorEntity = $this->getOldEntity($entity);
     }
 
-    protected function getContents(): string { return file_get_contents($this->file["tmp_name"]); }
     protected function getConfig(): array { return $this->config; }
     public function getStorage() { return $this->storage; }
     public function getFormats() { return $this->formats; }

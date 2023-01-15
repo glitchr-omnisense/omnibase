@@ -87,7 +87,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
     /**
      * @ORM\Column(type="text")
-     * @Uploader(storage="local.storage", max_size="10MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
+     * @Uploader(storage="local.storage", max_size="32MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
      */
     protected $source;
     public function getSource()     { return Uploader::getPublic($this, "source"); }

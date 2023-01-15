@@ -147,6 +147,8 @@ class FileType extends AbstractType implements DataMapperInterface
             'max_files'       => null,
             'mime_types'      => [],
             "data_mapping"    => null,
+            "parallel_uploads" => 5,
+            "upload_multiple"  => false
         ]);
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
@@ -324,6 +326,11 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options['max_size']     !== null) $options["dropzone"]["maxFilesize"]    = $options["max_size"]/1e6; // from B to MB
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
             if($mimeTypes) $options["dropzone"]["acceptedFiles"]  = implode(",", $mimeTypes);
+
+            if(!array_key_exists("parallelUploads", $options["dropzone"])) 
+                $options["dropzone"]["parallelUploads"]  = $options['parallel_uploads'];
+            if(!array_key_exists("uploadMultiple", $options["dropzone"])) 
+                $options["dropzone"]["uploadMultiple"]  = $options['upload_multiple'];
 
             $options["dropzone"]["thumbnailWidth"]  = $options['thumbnail_width'] ?? null;
             $options["dropzone"]["thumbnailHeight"] = $options['thumbnail_height'] ?? null;
