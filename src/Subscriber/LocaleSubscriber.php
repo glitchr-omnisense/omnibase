@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
@@ -26,11 +27,16 @@ class LocaleSubscriber implements EventSubscriberInterface
      */
     protected $router;
 
+    /**
+     * @var TokenStorageInterface
+     */
+    protected $tokenStorage;
 
-    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router)
+    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router, TokenStorageInterface $tokenStorage)
     {
         $this->localeProvider = $localeProvider;
         $this->router         = $router;
+        $this->tokenStorage   = $tokenStorage;
     }
 
     public static function getSubscribedEvents(): array
@@ -42,7 +48,7 @@ class LocaleSubscriber implements EventSubscriberInterface
           * CLI: php bin/console debug:event kernel.request
           */
         return [
-            KernelEvents::REQUEST => ['onKernelRequest', 128],
+            KernelEvents::REQUEST => ['onKernelRequest', 8],
             SecurityEvents::SWITCH_USER => 'onSwitchUser'
         ];
     }
@@ -58,6 +64,7 @@ class LocaleSubscriber implements EventSubscriberInterface
 
         $_locale = $this->router->match($event->getRequest()->getPathInfo())["_locale"] ?? null;
         $_locale = $_locale ? $this->localeProvider->getLocale($_locale) : null;
+        $_locale = $this->tokenStorage->getToken()?->getUser()->getLocale();
         if($_locale !== null) {
 
             User::setCookie('_locale', $_locale);

@@ -358,6 +358,7 @@
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
+            <argument type="service" id="security.token_storage" />
         </service>
 
         <service id="Base\Subscriber\EagerSubscriber">
