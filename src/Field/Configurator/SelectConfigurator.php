@@ -22,7 +22,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
     /**
      * @var AdminUrlGenerator
      */
-    private $adminUrlGenerator;
+    protected $adminUrlGenerator;
 
     /**
      * @var ClassMetadataManipulator
@@ -32,12 +32,12 @@ class SelectConfigurator implements FieldConfiguratorInterface
     /**
      * @var TranslatorInterface
      */
-    private $translator;
+    protected $translator;
 
     /**
      * @var Autocomplete
      */
-    private $autocomplete;
+    protected $autocomplete;
 
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
     {
