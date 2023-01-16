@@ -109,8 +109,9 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
                 foreach($extension::get($entity) as $column) {
 
-                    list($className, $_) = explode("::", $column);
+                    list($className, $property) = explode("::", $column);
                     if(!is_instanceof($entity, $className)) continue;
+                    if(!array_key_exists($property, $uow->getEntityChangeSet($entity))) continue;
 
                     $matches[$className] = $matches[$className] ?? [];
                     $matches[$className][] = $column;

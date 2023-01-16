@@ -19,8 +19,20 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 class AssociationConfigurator implements FieldConfiguratorInterface
 {
+    /**
+     * @var EntityFactory
+     */
     private $entityFactory;
+
+    /**
+     * @var AdminUrlGenerator
+     */
     private $adminUrlGenerator;
+
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
 
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, EntityFactory $entityFactory, AdminUrlGenerator $adminUrlGenerator)
     {

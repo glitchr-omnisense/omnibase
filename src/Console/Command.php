@@ -17,6 +17,27 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
 class Command extends SymfonyCommand
 {
+    /**
+     * @var LocaleProviderInterface
+     */
+    protected $localeProvider;
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+    /**
+     * @var PropertyAccessor
+     */
+    protected $propertyAccessor;
+
     public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
     {
         $this->localeProvider = $localeProvider;
@@ -28,10 +49,10 @@ class Command extends SymfonyCommand
         parent::__construct();
     }
 
-    protected function getTranslator()    { return $this->translator; }
-    protected function getParameterBag()  { return $this->parameterBag; }
-    protected function getEntityManager() { return $this->entityManager; }
-    protected function getLocaleProvider(){ return $this->localeProvider; }
+    protected function getTranslator(): TranslatorInterface         { return $this->translator;    }
+    protected function getParameterBag(): ParameterBagInterface     { return $this->parameterBag;  }
+    protected function getEntityManager(): EntityManagerInterface   { return $this->entityManager; }
+    protected function getLocaleProvider(): LocaleProviderInterface { return $this->localeProvider; }
 
     protected function configure(): void
     {

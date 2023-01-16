@@ -28,6 +28,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
      */
     protected $fileController;
 
+    protected $defaultFormats = [];
     public function __construct(
         LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         ImageServiceInterface $imageService, FileController $fileController)

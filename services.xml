@@ -1039,7 +1039,6 @@
         <service id="Base\Field\Configurator\BooleanConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="twig" />
             <argument type="service" id="security.csrf.token_manager" on-invalid="null" />
         </service>
 

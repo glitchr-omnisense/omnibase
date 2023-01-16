@@ -19,6 +19,26 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectConfigurator implements FieldConfiguratorInterface
 {
+    /**
+     * @var AdminUrlGenerator
+     */
+    private $adminUrlGenerator;
+
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * @var Autocomplete
+     */
+    private $autocomplete;
+
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->translator = $translator;

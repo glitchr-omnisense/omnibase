@@ -18,6 +18,11 @@ use function Symfony\Component\Translation\t;
 
 class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator
 {
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+    
     public function __construct(PropertyAccessor $propertyAccessor, EntityFactory $entityFactory, TranslatorInterface $translator)
     {
         $this->translator = $translator;

@@ -147,7 +147,7 @@ class FileType extends AbstractType implements DataMapperInterface
             'max_files'       => null,
             'mime_types'      => [],
             "data_mapping"    => null,
-            "parallel_uploads" => 1,
+            "parallel_uploads" => 5,
             "upload_multiple"  => false
         ]);
 

@@ -11,15 +11,6 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class IconConfigurator extends SelectConfigurator
 {
-    protected $adapter;
-    public function __construct(...$args)
-    {
-        $this->iconProvider = array_pop($args);
-        $this->twig         = array_pop($args);
-        $this->parameterBag = array_pop($args);
-        parent::__construct(...$args);
-    }
-
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
         return IconField::class === $field->getFieldFqcn();

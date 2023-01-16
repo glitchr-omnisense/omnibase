@@ -18,6 +18,11 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'entity:discriminator', aliases:[], description:'')]
 class EntityDiscriminatorCommand extends Command
 {
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+    
     public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         ClassMetadataManipulator $classMetadataManipulator)
     {

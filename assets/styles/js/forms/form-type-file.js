@@ -144,6 +144,25 @@ $(document).on("DOMContentLoaded", function () {
                         updateMetadata(this.id, val.length);
                     });
 
+                    function updatePositions(files) 
+                    {
+                        var queue = [];
+                        $('#'+id+'_dropzone .dz-preview').each(function(file) {
+
+                            var el = this;
+                            var uuid = undefined;
+                            $(files).each(function(i) {
+
+                                if(el.isEqualNode(this.previewElement))
+                                    uuid = this.uuid;
+                            });
+
+                            if (uuid) queue.push(uuid);
+                        });
+
+                        $('#'+id).val(queue.join('|'));
+                    }
+
                     function findDuplicates(files, file, dataURL = undefined)
                     {
                         var _i, _len;
@@ -169,24 +188,14 @@ $(document).on("DOMContentLoaded", function () {
                         return undefined;
                     }
 
-                    function findByUUID(files, fileUUID)
-                    {
-                        var _i, _len;
-                        for (_i = 0, _len = files.length; _i < _len; _i++) {
-
-                            var uuid = files[_i].serverId ? files[_i].serverId['uuid'] : files[_i].uuid;
-                            if(fileUUID == uuid) return files[_i];
-                        }
-
-                        return undefined;
-                    }
-
                     this.on("thumbnail", function(file, dataURL) {
 
                         $(file.previewTemplate).find(".dz-overlay").remove();
 
                         var duplicateFile = findDuplicates(this.files, file, dataURL);
                         if (duplicateFile) this.removeFile(duplicateFile);
+
+                        updatePositions(this.files);
                     });
 
                     this.on('removedfile', function(file) {
@@ -195,18 +204,8 @@ $(document).on("DOMContentLoaded", function () {
                         if (file.status == 'existing' && editor.options.maxFiles != null) editor.options.maxFiles += 1;
                         else if (file.serverId) $.post(ajax+"/"+file.serverId['uuid']+'/delete');
 
-                        var val = $('#'+id).val();
-                            val = (!val || val.length === 0 ? [] : val.split('|'));
-                            val = val.map(path => {
-                                return path.substring(path.lastIndexOf('/') + 1);
-                            });
-
-                        const index = val.indexOf((file.serverId ? file.serverId['uuid'] : file.uuid));
-                        if (index > -1) val.splice(index, 1);
-
-                        $('#'+id).val(val.join('|'));
-
                         updateMetadata(this.id, val.length);
+                        updatePositions(this.files);
                     });
 
                     this.on("addedfile", function(file) {
@@ -217,6 +216,7 @@ $(document).on("DOMContentLoaded", function () {
                         $(preview).append($("<div class='dz-overlay dz-loader'><span class='loader-spinner'></span></div>"));
 
                         // Add UUID to preview for existing files (these are not triggering "success" event)
+                       
                         if(file.status == "existing") {
 
                             $(preview).find(".dz-filename").remove();
@@ -259,7 +259,7 @@ $(document).on("DOMContentLoaded", function () {
 
                         // Replacement remove button
                         var _this = this;
-                        $(preview).find("[data-dz-remove]").click(function () {
+                        $(preview).find("[data-dz-remove]").on("click", function () {
 
                             if (!_this.options.dictRemoveFileConfirmation)
                                 return _this.removeFile(file);
@@ -272,7 +272,8 @@ $(document).on("DOMContentLoaded", function () {
 
                             });
                        });
-
+                       
+                       updatePositions(this.files);
                     });
 
                     function getImage(fileUUID)
@@ -292,16 +293,7 @@ $(document).on("DOMContentLoaded", function () {
                     if(sortable) {
 
                         this.on('dragend', function() {
-
-                            var queue = [];
-                            var that = this;
-                            $('#'+id+'_dropzone .dz-preview').each(function(file) {
-
-                                var file = findByUUID(that.files, $(this).data("uuid"));
-                                if (file) queue.push(file.uuid);
-                            });
-
-                            $('#'+id).val(queue.join('|'));
+                            updatePositions(this.files);
                         });
                     }
                 };

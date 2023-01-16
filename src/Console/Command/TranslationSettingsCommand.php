@@ -18,6 +18,11 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'translation:settings', aliases:[], description:'')]
 class TranslationSettingsCommand extends Command
 {
+    /**
+     * @var SettingBagInterface
+     */
+    protected $settingBag;
+    
     public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         SettingBagInterface $settingBag)
     {
