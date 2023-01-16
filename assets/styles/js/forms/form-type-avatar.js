@@ -25,13 +25,13 @@ $(document).on("DOMContentLoaded", function () {
             }
 
             $('#'+id+'_figcaption').on('click.avatar', function() {
-                $('#'+id+'_raw').click();
+                $('#'+id+'_raw').trigger("click");
             });
-
+            
             $("#"+id+"_deleteBtn2").on("click.avatar", function() {
 
                 $("#"+id+"_raw").value = '';
-                $("#"+id+"_deleteBtn").click();
+                $("#"+id+"_deleteBtn").trigger("click");
             });
 
             $("#"+id+"_deleteBtn").on("click.avatar", function() {

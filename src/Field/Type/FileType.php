@@ -121,6 +121,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
             'class'        => null,
             'empty_data'   => null,
+            'use_advanced_form' => true,
 
             'dropzone'     => [],
 

@@ -58,12 +58,7 @@ Encore.addPlugin(new WebpackBar())
         pattern: /\.svg$/
     })
 
-    .configureCssMinimizerPlugin((options) => {
-        options.minimizerOptions = { preset: ['default', {svgo: false}] };
-    })
-
     .disableSingleRuntimeChunk()
-    .configureCssMinimizerPlugin()
 
     // enables and configure @babel/preset-env polyfills
     .configureBabelPresetEnv((config) => {
@@ -86,8 +81,7 @@ Encore.addPlugin(new WebpackBar())
         test: /\.scss$/,
         use: [
             MediaQueryPlugin.loader,
-            'postcss-loader',
-            'sass-loader'
+            'postcss-loader'
         ]
     })
 
