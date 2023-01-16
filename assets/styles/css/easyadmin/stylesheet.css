@@ -20,7 +20,7 @@ html, body { scroll-padding-top: 11em; }
     height:100%;
 }
 
-.ts-wrapper.form-control, .ts-wrapper.form-select { height:38px; }
+.ts-wrapper.form-control, .ts-wrapper.form-select { height:38px !important; }
 
 .ql-editor {
     text-align:inherit;
