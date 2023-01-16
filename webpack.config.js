@@ -2,7 +2,6 @@ const Encore = require('@symfony/webpack-encore');
 
 const WebpackBar = require('webpackbar');
 const MediaQueryPlugin = require('@glitchr/media-query-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 Encore.addPlugin(new WebpackBar())
 
@@ -87,7 +86,8 @@ Encore.addPlugin(new WebpackBar())
         test: /\.scss$/,
         use: [
             MediaQueryPlugin.loader,
-            'postcss-loader'
+            'postcss-loader',
+            'sass-loader'
         ]
     })
 

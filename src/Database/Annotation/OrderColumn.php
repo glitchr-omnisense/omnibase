@@ -187,8 +187,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 $orderingId = $this->ordering[$className][$id]->getId();
                 if($orderingId) $this->getEntityManager()->getCache()->evictEntity(Ordering::class, $orderingId);
 
-                exit(1);
-
                 break;
 
             case EntityAction::DELETE:
