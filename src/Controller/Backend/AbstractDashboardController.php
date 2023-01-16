@@ -438,7 +438,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 ->unsetAll()
                 ->setController($crudController)
                 ->setAction(Action::INDEX)
-                ->set(EA::MENU_INDEX, count($menu))
+                // ->set(EA::MENU_INDEX, count($menu))
                 ->generateUrl();
 
             if(empty($values)) $item = MenuItem::linkToUrl($label, $icon, $url);
