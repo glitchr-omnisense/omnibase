@@ -73,7 +73,6 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
         $this->prependPath($projectDir . "/src", "App");
         $this->prependPath($projectDir . "/src/Controller", "Controller");
-        $this->prependPath($projectDir . "/assets", "Assets");
         $this->prependPath($projectDir . "/public", "Public");
         $this->prependPath($projectDir . "/vendor/symfony/twig-bridge/Resources/views", "Twig");
         $this->prependPath($projectDir . "/templates");

@@ -16,6 +16,9 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+use Base\Routing\RouterInterface;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
+
 #[AsCommand(name:'cache:clear', aliases:[], description:'')]
 class CacheClearCommand extends Command
 {
@@ -34,18 +37,24 @@ class CacheClearCommand extends Command
      */
     protected $notifier;
     
+    /**
+     * @var Router
+     */
+    protected $router;
+    
     protected string $projectDir;
     protected string $cacheDir;
 
     public function __construct(
         LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
-        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, string $projectDir, string $cacheDir)
+        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, RouterInterface $router, string $projectDir, string $cacheDir)
     {
         parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
 
         $this->flysystem = $flysystem;
         $this->notifier  = $notifier;
+        $this->router    = $router;
 
         $this->projectDir  = $projectDir;
         $this->cacheDir    = $cacheDir;
@@ -82,13 +91,18 @@ EOF
 
         //
         // Check for node_modules directory
-        if(!is_dir($this->projectDir."/var/modules") && !is_dir($this->projectDir."/node_modules")) {
+        if(class_exists(EntrypointLookupInterface::class) && !is_dir($this->projectDir."/var/modules") && !is_dir($this->projectDir."/node_modules")) {
 
             $io->error(
                 'Node package manager directory `'.$this->projectDir."/node_modules".'` is missing. '.PHP_EOL.
                 'Run `npm install` to setup your dependencies !'
             );
         }
+
+        //
+        // Router fallback information 
+        if($this->parameterBag->get("base.router.fallback_warning") && !$this->router->getHostFallback())
+            $io->warning("No host fallback configured in `base.yaml` (configure 'base.router.fallbacks' to remove this message).");
 
         //
         // Run second cache clear command
@@ -98,7 +112,6 @@ EOF
 
         //
         // Generate flysystem public symlink
-
         $storageNames = $this->flysystem->getStorageNames(false);
         if($storageNames)
             $io->note("Flysystem symlink(s) got generated in public directory.");

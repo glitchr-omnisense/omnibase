@@ -63,7 +63,10 @@ class RouteVoter extends Voter
 
             case self::VALIDATE_HOST:
 
-                if(!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback())
+                $hostFallback = $this->router->getHostFallback();
+                if(!$hostFallback) return true;
+
+                if(!$route->getHost() && $this->router->getHost() != $hostFallback)
                     return false;
     
                 $permittedHosts   = array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLocale());
