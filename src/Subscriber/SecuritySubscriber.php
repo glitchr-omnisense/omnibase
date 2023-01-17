@@ -151,7 +151,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRequest(?RequestEvent $event = null): bool
     {
-        if(!$this->router->getRouteFirewall()->isSecurityEnabled()) return true;
+        if(!$this->router->getRouteFirewall()?->isSecurityEnabled()) return true;
 
         if(!$event->isMainRequest()) return true;
         if( $this->router->isWdt($event) ) return true; // Special case for _wdt

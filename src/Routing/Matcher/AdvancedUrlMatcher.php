@@ -84,13 +84,13 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     public function security(string $pathinfo): bool
     {
         $request = Request::create($pathinfo, "GET", [], $_COOKIE, $_FILES, $_SERVER);
-        return $this->getFirewallMap()->getFirewallConfig($request)?->isSecurityEnabled();
+        return $this->getFirewallMap()?->getFirewallConfig($request)?->isSecurityEnabled() ?? false;
     }
 
     public function firewall(string $pathinfo): ?FirewallConfig
     {
         $request = Request::create($pathinfo, "GET", [], $_COOKIE, $_FILES, $_SERVER);
-        return $this->getFirewallMap()->getFirewallConfig($request);
+        return $this->getFirewallMap()?->getFirewallConfig($request);
     }
 
     public function match(string $pathinfo): array
