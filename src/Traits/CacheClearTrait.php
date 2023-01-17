@@ -33,11 +33,8 @@ trait CacheClearTrait
     // Run second cache clear command
     protected function doubleCacheClearCheck(SymfonyStyle $io): void
     {
-        $testFile = $this->cacheDir."/.test";
-        $testFileExists = file_exists($testFile);
-
-        file_put_contents($testFile, "Hello World !");
-        if(!$testFileExists)
+        file_put_contents($this->testFile, "Hello World !");
+        if(!$this->testFileExists)
             $io->warning('Cache requires to run a second `cache:clear` to account for the custom base bundle features.');
     }
 

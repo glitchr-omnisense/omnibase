@@ -28,6 +28,10 @@ class CacheClearCommand extends Command
     protected string $projectDir;
     /** @var string */
     protected string $cacheDir;
+    /** @var string */
+    protected string $testFile;
+    /** @var string */
+    protected string $testFileExists;
 
     /**
      * @var SymfonyCacheClearCommand
@@ -88,16 +92,20 @@ EOF
     {
         $io = new SymfonyStyle($input, $output);
         $noExtension = $input->getOption('no-extension') ?? true;
-
         if(!$noExtension) {
+
             $this->phpConfigCheck($io);
             $this->diskAndMemoryCheck($io);
+            
+            $this->testFile = $this->cacheDir."/.test";
+            $this->testFileExists = file_exists($this->testFile);
         }
 
         $this->cacheClearCommand->setApplication($this->getApplication());
         $ret = $this->cacheClearCommand->execute($input, $output);
 
         if(!$noExtension) {
+
             $this->webpackCheck($io);
             $this->routerFallbackWarning($io);
             
