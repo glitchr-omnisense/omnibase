@@ -37,7 +37,7 @@
         "symfony/messenger": "^6.0",
         "symfony/notifier": "^6.0",
         "symfony/uid": "^6.0",
-
+        "symfony/serializer": "^6.0",
         "symfony/dependency-injection": "^6.0",
         "symfony/discord-notifier": "^6.0",
         "symfony/monolog-bundle": "^3.1",
@@ -52,7 +52,6 @@
         "imagine/imagine": "^1.2",
         "enshrined/svg-sanitize": "^0.15",
 
-        "scheb/2fa": "^6.0",
         "endroid/qr-code": "^4.0",
         "picqer/php-barcode-generator": "^2.0",
         "florianv/swap": "^4.3",
