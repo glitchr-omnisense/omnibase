@@ -98,6 +98,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('property_accessor',            [$this, "property_accessor"]),
             new TwigFunction('cast',          "cast"),
 
+            new TwigFunction('addslashes',  'addslashes'),
             new TwigFunction('enum', [$this, 'enum']),
             new TwigFunction('colorify', [$this, 'colorify']),
 
@@ -119,6 +120,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('is_uuidv4',   'is_uuidv4'),
             new TwigFilter('basename',    'basename'),
             new TwigFilter('uniq',        'array_unique'),
+            new TwigFilter('addslashes',  'addslashes'),
             new TwigFilter('at',          'at'),
             new TwigFilter('count_leaves',  'count_leaves'),
 
@@ -167,6 +169,7 @@ final class FunctionTwigExtension extends AbstractExtension
             return array_map(fn($c) => $this->enum($c), $class);
         }
 
+        if(class_exists($class) && is_instanceof($class, EnumType::class)) return new $class;
         return Type::hasType($class) ? Type::getType($class) : null;
     }
 

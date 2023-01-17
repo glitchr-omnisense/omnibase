@@ -165,6 +165,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             'html'               => false,
             'href'               => null,
+            'use_advanced_form' => true,
 
             // Autocomplete
             'autocomplete'                     => null,

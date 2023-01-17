@@ -16,14 +16,25 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 final class BooleanConfigurator implements FieldConfiguratorInterface
 {
-    private AdminUrlGenerator $adminUrlGenerator;
-    private ?CsrfTokenManagerInterface $csrfTokenManager;
+    /**
+     * @var AdminUrlGenerator
+     */
+    private $adminUrlGenerator;
 
-    public function __construct(AdminUrlGenerator $adminUrlGenerator, Environment $twig, ?CsrfTokenManagerInterface $csrfTokenManager = null)
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
+    /**
+     * @var ?CsrfTokenManagerInterface
+     */
+    private $csrfTokenManager;
+
+    public function __construct(AdminUrlGenerator $adminUrlGenerator, ?CsrfTokenManagerInterface $csrfTokenManager = null)
     {
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->csrfTokenManager  = $csrfTokenManager;
-        $this->twig              = $twig;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool

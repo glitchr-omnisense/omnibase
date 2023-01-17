@@ -242,11 +242,21 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\Console\Command\TimeMachineDoctrineCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
-        <service id="Base\Console\Command\TimeMachineStorageCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
-        <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
-        <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="time_machine" /></service>
-        <service id="Base\Console\Command\TimeMachineSnapshotRestoreCommand" parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="time_machine" /></service>
+        <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command">
+            <tag name="console.command" />
+            <argument type="service" id="time_machine" />
+            <argument type="service" id="flysystem" />
+        </service>
+        <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand">
+            <tag name="console.command" />
+            <argument type="service" id="time_machine" />
+            <argument type="service" id="flysystem" />
+        </service>
+        <service id="Base\Console\Command\TimeMachineSnapshotRestoreCommand" parent="Base\Console\Command\TimeMachineSnapshotCommand">
+            <tag name="console.command" />
+            <argument type="service" id="time_machine" />
+            <argument type="service" id="flysystem" />
+        </service>
 
         <service id="Base\Console\Command\BaseMappingCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\ThreadPublishableCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
@@ -348,6 +358,7 @@
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
+            <argument type="service" id="security.token_storage" />
         </service>
 
         <service id="Base\Subscriber\EagerSubscriber">
@@ -626,6 +637,7 @@
         <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
             <argument type="service" id="base.service" />
             <argument type="service" id="form.factory" />
+            <argument type="service" id="form.proxy" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
         <service id="Base\Form\Extension\FormTypeCollectionExtension"         ><tag name="form.type_extension" />
@@ -1029,7 +1041,6 @@
         <service id="Base\Field\Configurator\BooleanConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="twig" />
             <argument type="service" id="security.csrf.token_manager" on-invalid="null" />
         </service>
 

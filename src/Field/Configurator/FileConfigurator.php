@@ -13,6 +13,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
 class FileConfigurator implements FieldConfiguratorInterface
 {
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
     public function __construct(ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;

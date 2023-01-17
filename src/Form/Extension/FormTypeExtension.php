@@ -6,6 +6,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\FormFactory;
+use Base\Form\FormProxyInterface;
 use Base\Service\BaseService;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -29,14 +30,20 @@ class FormTypeExtension extends AbstractTypeExtension
     protected $formFactory;
 
     /**
+     * @var FormProxyInterface
+     */
+    protected $formProxy;
+
+    /**
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;
 
-    public function __construct(BaseService $baseService, FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(BaseService $baseService, FormFactory $formFactory, FormProxyInterface $formProxy, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->baseService = $baseService;
         $this->formFactory = $formFactory;
+        $this->formProxy = $formProxy;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -52,14 +59,12 @@ class FormTypeExtension extends AbstractTypeExtension
     {
         $resolver->setDefaults([
             'form2'          => $this->baseService->getParameterBag("base.twig.use_form2"),
-            'easyadmin'      => $this->baseService->getParameterBag("base.twig.use_ea")
-        ]);
-
-        $resolver->setDefaults([
+            'easyadmin'      => $this->baseService->getParameterBag("base.twig.use_ea"),
             'form_flow'         => true,
             'form_flow_id'      => '_flow_token',
             'validation_entity' => null,
-            'use_model'         => false
+            'use_model'         => false,
+            'use_advanced_form' => false
         ]);
 
         $resolver->setNormalizer('form_flow_id', function(Options $options, $value) {
@@ -81,7 +86,9 @@ class FormTypeExtension extends AbstractTypeExtension
     {
         if($options["form2"]) $this->applyForm2($view);
         if($options["easyadmin"]) $this->applyEA($view, $form);
-
+        if($options["use_advanced_form"] ?? false) 
+            $this->formProxy->useAdvancedForm();
+    
         if($this->baseService->isDebug() && $this->baseService->isGranted(UserRole::SUPERADMIN) && $this->baseService->getRouter()->isEasyAdmin()) {
             $this->markDbProperties($view, $form, $options);
             $this->markOptions($view, $form, $options);
@@ -96,6 +103,8 @@ class FormTypeExtension extends AbstractTypeExtension
             $childOptions = $childForm->getConfig()->getOptions();
             $childOptions["form2"] = $options["form2"];
             $childOptions["easyadmin"] = $options["easyadmin"];
+            if($childOptions["use_advanced_form"] ?? false) 
+                $this->formProxy->useAdvancedForm();
 
             $this->browseView($childView, $childForm, $childOptions);
         }

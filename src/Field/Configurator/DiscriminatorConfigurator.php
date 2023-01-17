@@ -16,6 +16,21 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DiscriminatorConfigurator implements FieldConfiguratorInterface
 {
+    /**
+     * @var AdminUrlGenerator
+     */
+    private $adminUrlGenerator;
+
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->translator = $translator;

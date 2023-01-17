@@ -2,9 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Service\BaseService;
 use Symfony\Component\Intl\Countries;
-use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -66,7 +64,8 @@ class CountryType extends AbstractType
 
         $resolver->setDefaults([
             'choices' => $this->getChoices(),
-            'alpha3' => false
+            'alpha3' => false,
+            'use_advanced_form' => true
         ]);
 
     }

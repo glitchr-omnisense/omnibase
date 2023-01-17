@@ -2,7 +2,6 @@ const Encore = require('@symfony/webpack-encore');
 
 const WebpackBar = require('webpackbar');
 const MediaQueryPlugin = require('@glitchr/media-query-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 Encore.addPlugin(new WebpackBar())
 
@@ -59,12 +58,7 @@ Encore.addPlugin(new WebpackBar())
         pattern: /\.svg$/
     })
 
-    .configureCssMinimizerPlugin((options) => {
-        options.minimizerOptions = { preset: ['default', {svgo: false}] };
-    })
-
     .disableSingleRuntimeChunk()
-    .configureCssMinimizerPlugin()
 
     // enables and configure @babel/preset-env polyfills
     .configureBabelPresetEnv((config) => {

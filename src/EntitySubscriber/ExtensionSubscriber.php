@@ -3,13 +3,12 @@
 namespace Base\EntitySubscriber;
 
 use Base\Database\Entity\EntityExtension;
-use Base\Entity\Extension\Abstract\AbstractExtension;
+
 use Base\Enum\EntityAction;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\Common\EventArgs;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -52,6 +51,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
     protected $scheduledEntityUpdates    = [];
     protected $scheduledEntityDeletions  = [];
 
+    protected $entriesPendingForIds = [];
     public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $this->entityManager->getUnitOfWork();
@@ -109,8 +109,9 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
                 foreach($extension::get($entity) as $column) {
 
-                    list($className, $_) = explode("::", $column);
+                    list($className, $property) = explode("::", $column);
                     if(!is_instanceof($entity, $className)) continue;
+                    if(!array_key_exists($property, $uow->getEntityChangeSet($entity))) continue;
 
                     $matches[$className] = $matches[$className] ?? [];
                     $matches[$className][] = $column;

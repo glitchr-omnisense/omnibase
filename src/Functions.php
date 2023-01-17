@@ -403,6 +403,15 @@ namespace {
         return $fname !== false && strncmp($fname, $base, strlen($base)) === 0;
     }
 
+    function to_array(object $class) {
+
+        $array = array_transforms(
+            fn($k,$v):array => [str_replace("\x00".get_class($class)."\x00", "", $k), $v], 
+            (array) $class
+        );
+        
+        return $array;
+    }
     function in_class(object $class, mixed $needle) {
 
         $haystack = array_filter((array) $class);
@@ -888,6 +897,8 @@ namespace {
         return $http_response_header;
     }
 
+    function dir_empty(string $dir): bool { return !file_exists($dir) || (is_dir($dir) && !(new \FilesystemIterator($dir))->valid()); }
+    
     function mime_content_type2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT)
     {
         // Search by looking at the header if url format
@@ -2149,7 +2160,7 @@ namespace {
     }
 
     function str_strip_accents($str) {
-        return strtr(utf8_decode($str), utf8_decode('àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
+        return strtr($str,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
     }
 
     function dec2alphabet(string $s)
@@ -2181,7 +2192,7 @@ namespace {
 
     function str_blankspace(int $length) { return $length < 1 ? "" : str_repeat(" ", $length); }
     function usort_column(array &$array, string $column, callable $fn):bool { return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null)); }
-    function usort_key(array $array, array $ordering = []) { return array_replace(array_flip($ordering), $array); }
+    function usort_key(array $array, array $ordering = []):array { return array_replace(array_flip($ordering), $array); }
     function usort_startsWith(array &$array, string|array $startingWith)
     {
         if(!is_array($startingWith)) $startingWith = [$startingWith];
@@ -2224,8 +2235,7 @@ namespace {
 
     function array_reverseByMask(array $array, array $mask)
     {
-        if(count($array) != count($mask))
-            throw new Exception("Wrong mask size (".count($mask).") compared to array (".count($array).").");
+        $mask = array_pad($mask, count($array), false);
 
         $keys = [];
         foreach($mask as $key => $b)
