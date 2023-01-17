@@ -1,6 +1,10 @@
+console.log("execです");
 $(document).on("DOMContentLoaded", function () {
 
+    console.log("domです");
     $(document).on("load.form_type.avatar", function () {
+
+        console.log("loadです");
 
         document.querySelectorAll("[data-avatar-field]").forEach(function (el) {
 
