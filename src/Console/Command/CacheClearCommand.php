@@ -2,6 +2,7 @@
 
 namespace Base\Console\Command;
 
+use Base\Traits\CacheClearTrait;
 use Base\Console\Command;
 use Base\Notifier\Notifier;
 use Base\Service\Flysystem;
@@ -15,11 +16,19 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+
+use Base\Routing\RouterInterface;
 
 #[AsCommand(name:'cache:clear', aliases:[], description:'')]
 class CacheClearCommand extends Command
 {
+    use CacheClearTrait;
+
+    /** @var string */
+    protected string $projectDir;
+    /** @var string */
+    protected string $cacheDir;
+
     /**
      * @var SymfonyCacheClearCommand
      */
@@ -35,18 +44,21 @@ class CacheClearCommand extends Command
      */
     protected $notifier;
     
-    protected string $projectDir;
-    protected string $cacheDir;
-
+    /**
+     * @var Router
+     */
+    protected $router;
+    
     public function __construct(
         LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
-        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, string $projectDir, string $cacheDir)
+        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, RouterInterface $router, string $projectDir, string $cacheDir)
     {
         parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
 
         $this->flysystem = $flysystem;
         $this->notifier  = $notifier;
+        $this->router    = $router;
 
         $this->projectDir  = $projectDir;
         $this->cacheDir    = $cacheDir;
@@ -57,6 +69,7 @@ class CacheClearCommand extends Command
         parent::configure();
         $this
             ->setDefinition([
+                new InputOption('no-extension', '', InputOption::VALUE_NONE, 'Skip base extension'),
                 new InputOption('no-warmup', '', InputOption::VALUE_NONE, 'Do not warm up the cache'),
                 new InputOption('no-optional-warmers', '', InputOption::VALUE_NONE, 'Skip optional cache warmers (faster)'),
             ])
@@ -74,88 +87,25 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $noExtension = $input->getOption('no-extension') ?? true;
 
-        $testFile = $this->cacheDir."/.test";
-        $testFileExists = file_exists($testFile);
+        if(!$noExtension) {
+            $this->phpConfigCheck($io);
+            $this->diskAndMemoryCheck($io);
+        }
 
         $this->cacheClearCommand->setApplication($this->getApplication());
         $ret = $this->cacheClearCommand->execute($input, $output);
 
-        //
-        // Check for node_modules directory
-        if(!is_dir($this->projectDir."/var/modules") && !is_dir($this->projectDir."/node_modules")) {
-
-            $io->error(
-                'Node package manager directory `'.$this->projectDir."/node_modules".'` is missing. '.PHP_EOL.
-                'Run `npm install` to setup your dependencies !'
-            );
+        if(!$noExtension) {
+            $this->webpackCheck($io);
+            $this->routerFallbackWarning($io);
+            
+            $this->doubleCacheClearCheck($io);
+            $this->routerFallbackWarning($io);
+            $this->generateSymlinks($io);
+            $this->technicalSupportCheck($io);
         }
-
-        //
-        // Run second cache clear command
-        file_put_contents($testFile, "Hello World !");
-        if(!$testFileExists)
-            $io->warning('Cache requires to run a second `cache:clear` to account for the custom base bundle features.');
-
-        //
-        // Generate flysystem public symlink
-
-        $storageNames = $this->flysystem->getStorageNames(false);
-        if($storageNames)
-            $io->note("Flysystem symlink(s) got generated in public directory.");
-
-        foreach($storageNames as $storageName) {
-
-            if(!$this->flysystem->hasStorage($storageName.".public"))
-                continue;
-
-            $realPath = str_rstrip($this->flysystem->prefixPath("", $storageName), "/");
-
-            $publicPath = $this->flysystem->getPublicRoot($storageName.".public");
-            $publicPath = str_rstrip($publicPath, "/");
-            if($realPath == $publicPath)
-                continue;
-
-            if(is_link($publicPath) || file_exists($publicPath)) {
-
-                if(is_link($publicPath)) unlink($publicPath);
-                else if(is_emptydir($publicPath)) rmdir($publicPath);
-                else exit("Public path \"$publicPath\" already exists but it is not a symlink\n");
-            }
-
-            symlink($realPath, $publicPath);
-        }
-
-        //
-        // Technical contact and language
-        $technicalRecipient = $this->notifier->getTechnicalRecipient();
-        if(is_stringeable($technicalRecipient))
-            $io->note("Technical recipient configured: ".$technicalRecipient);
-
-        //
-        // Disk space and memory checks
-        $freeSpace = disk_free_space(".");
-        $diskSpace = disk_total_space(".");
-        $remainingSpace = $diskSpace - $freeSpace;
-        $percentSpace = round(100*$remainingSpace/$diskSpace, 2);
-        
-        if($percentSpace > 95) $fn = "warning";
-        else if($percentSpace > 75) $fn = "note";
-        else $fn = "info";
-
-        $memoryLimit = str2dec(ini_get("memory_limit"));
-        $memoryLimitStr = $memoryLimit > 1 ? 'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(BINARY_PREFIX, 0, 3)) : "";
-        $io->{$fn}(
-            'Disk space information: '. byte2str($freeSpace, BINARY_PREFIX) . ' / ' . byte2str($diskSpace, BINARY_PREFIX) . " available (".$percentSpace." % used)".PHP_EOL.
-            $memoryLimitStr
-        );
-
-        if($memoryLimit > 1 && $memoryLimit < str2dec("512M"))
-            $io->warning('Memory limit is very low.. Consider to increase it');
-
-        $phpConfig = php_ini_loaded_file();
-        $maxSize = UploadedFile::getMaxFilesize();
-        $io->note("Loaded PHP Configuration: ".$phpConfig." (might be different from the webserver)\nMaximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX));
 
         return $ret;
     }

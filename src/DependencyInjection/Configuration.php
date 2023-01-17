@@ -222,6 +222,11 @@ class Configuration implements ConfigurationInterface
                             ->defaultValue(false)
                         ->end()
 
+                        ->booleanNode('fallback_warning')
+                            ->info('Fallback warning disable in case there is no fallback')
+                            ->defaultValue(true)
+                        ->end()
+
                         ->arrayNode('fallbacks')
                             ->arrayPrototype()->addDefaultsIfNotSet()
                                 ->children()

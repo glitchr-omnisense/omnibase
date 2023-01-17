@@ -79,6 +79,7 @@
             <argument type="service" id=".inner"/>
             <argument type="service" id="flysystem" />
             <argument type="service" id="base.notifier" />
+            <argument type="service" id="router" />
             <bind key="$projectDir">%kernel.project_dir%</bind>
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
