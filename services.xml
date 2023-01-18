@@ -235,6 +235,7 @@
         </service>
 
         <service id="Base\Console\Command\NotifierCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
+        <service id="Base\Console\Command\DoctrineSchemaCharsetCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
 
         <service id="Base\Service\TimeMachine" parent="BackupManager\Manager" public="true">
             <argument type="service" id="flysystem" />
