@@ -64,7 +64,8 @@ class LocaleSubscriber implements EventSubscriberInterface
 
         $_locale = $this->router->match($event->getRequest()->getPathInfo())["_locale"] ?? null;
         $_locale = $_locale ? $this->localeProvider->getLocale($_locale) : null;
-        $_locale = $this->tokenStorage->getToken()?->getUser()->getLocale();
+
+        $_locale = $_locale ?? $this->tokenStorage->getToken()?->getUser()->getLocale();
         if($_locale !== null) {
 
             User::setCookie('_locale', $_locale);

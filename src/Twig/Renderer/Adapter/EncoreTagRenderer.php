@@ -156,9 +156,10 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
 
     public function addLinkTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
     {
-        if(!array_key_exists($value, $this->encoreEntryLinkTags)) {
+        $entryName = (string) $this->slugger->slug($value);
+        if(!array_key_exists($entryName, $this->encoreEntryLinkTags)) {
 
-            $this->encoreEntryLinkTags[$value] = array_filter([
+            $this->encoreEntryLinkTags[$entryName] = array_filter([
                 "value" => $value,
                 "webpack_package_name" => $webpackPackageName,
                 "webpack_entrypoint_name" => $webpackEntrypointName,
@@ -170,9 +171,10 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     }
     public function addScriptTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
     {
-        if(!array_key_exists($value, $this->encoreEntryScriptTags)) {
+        $entryName = (string) $this->slugger->slug($value);
+        if(!array_key_exists($entryName, $this->encoreEntryScriptTags)) {
 
-            $this->encoreEntryScriptTags[$value] = array_filter([
+            $this->encoreEntryScriptTags[$entryName] = array_filter([
                 "value" => $value,
                 "webpack_package_name" => $webpackPackageName,
                 "webpack_entrypoint_name" => $webpackEntrypointName,
@@ -193,9 +195,10 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
 
     public function removeLinkTag(string $value)
     {
-        if(array_key_exists($value, $this->encoreEntryLinkTags))
-            unset($this->encoreEntryLinkTags[$value]);
-
+        $entryName = (string) $this->slugger->slug($value);
+        if(array_key_exists($entryName, $this->encoreEntryLinkTags))
+            unset($this->encoreEntryLinkTags[$entryName]);
+        
         return $this;
     }
 
@@ -203,8 +206,9 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
     {
         if($this->entrypointLookupCollection == null) return $this;
 
-        if(array_key_exists($value, $this->encoreEntryScriptTags))
-            unset($this->encoreEntryScriptTags[$value]);
+        $entryName = (string) $this->slugger->slug($value);
+        if(array_key_exists($entryName, $this->encoreEntryScriptTags))
+            unset($this->encoreEntryScriptTags[$entryName]);
 
         return $this;
     }
@@ -235,6 +239,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             $this->addLinkTag($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
 
         $source = "";
+
         foreach($this->getEntrypoints() as $entrypoint) {
 
             try { $files = $entrypoint->getCssFiles($entryName); }
@@ -247,6 +252,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
             $entrypoint->reset();
 
             $this->renderedCssSource[$entryName] = $source;
+          
             return $this->renderedCssSource[$entryName];
         }
 
