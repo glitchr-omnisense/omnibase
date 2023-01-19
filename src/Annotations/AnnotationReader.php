@@ -137,7 +137,7 @@ class AnnotationReader extends SimpleCache
 
         // Check if custom reader is enabled
         $this->parameterBag = $parameterBag;
-        $this->enabled = $parameterBag->get("base.annotations.use_custom_reader");
+	$this->enabled = $parameterBag->get("base.annotations.use_custom") ?? false;
 
         $paths   = [];
         $paths[] = __DIR__ . "/Annotation";
