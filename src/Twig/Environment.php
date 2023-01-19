@@ -106,6 +106,9 @@ class Environment extends TwigEnvironment
     
     public function render($name, array $context = []): string
     {
+        $useCustomTwig = $this->parameterBag->get("base.parameter_bag.use_setting_bag") ?? false;
+        if(!$useCustomTwig) return parent::render($name, $context);
+
         $contents = $this->getRenderer(HtmlTagRenderer::class)?->render($name, $context);
         if($contents === null) throw new RuntimeException(HtmlTagRenderer::class." renderer not found.");
 

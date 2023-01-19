@@ -3,7 +3,9 @@
 namespace Base\Subscriber;
 
 use Base\Database\Annotation\Vault;
-use Base\Entity\User;
+use App\Entity\User;
+use Base\Entity\User as BaseUser;
+
 use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
 use Base\BaseBundle;
@@ -194,6 +196,7 @@ class IntegritySubscriber implements EventSubscriberInterface
          */
         $user = $token->getUser();
         if($user === null) return true;
+        if(!$user instanceof BaseUser) return true;
 
         $persistentCollection = ($user->getLogs() instanceof PersistentCollection ? (array) $user->getLogs() : null);
         if($persistentCollection === null) return false;

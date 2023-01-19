@@ -83,22 +83,22 @@ class AccessVoter extends Voter
         switch($attribute) {
 
             case self::ADMIN_ACCESS:
-                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
+                $access  = filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= $user && $user->isGranted("ROLE_SUPERADMIN");
                 return $access;
 
             case self::USER_ACCESS:
-                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
+                $access  = filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= 
-                    filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN)
+                    filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN)
                     && $user && $user->isGranted("ROLE_ADMIN");
                 return $access;
 
             case self::ANONYMOUS_ACCESS:
-                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.anonymous_access"), FILTER_VALIDATE_BOOLEAN);
+                $access  = filter_var($this->parameterBag->get("base.access_restriction.public_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= (
-                    filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN) ||
-                    filter_var($this->settingBag->getScalar("base.settings.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN)
+                    filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN) ||
+                    filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN)
                 ) && $user && $user->isGranted("ROLE_USER");
 
                 return $access;

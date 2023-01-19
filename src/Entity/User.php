@@ -51,7 +51,7 @@ use App\Enum\UserState;
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  *
-* @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
@@ -63,7 +63,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 {
     use BaseTrait;
 
-    public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
+    public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), array_filter($this->getRoles())); }
     public static function __iconizeStatic() : ?array { return ["fas fa-user"]; }
 
     public const __DEFAULT_COOKIE__ = "user:necessary";
@@ -311,7 +311,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Assert\NotBlank(groups={"new", "edit"})
      * @OrderColumn
      */
-    protected $roles;
+    protected $roles = [];
 
     public function isSocial(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
     public function isPersistent(): bool { return (!$this->isSocial() || $this->id > 0); }
@@ -646,7 +646,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @ORM\Column(type="user_state")
      */
-    protected $states;
+    protected $states = [];
     public function getStates(): array { return $this->states; }
     public function setStates(array $states): self
     {

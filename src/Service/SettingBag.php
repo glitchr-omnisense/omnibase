@@ -55,6 +55,10 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      */
     protected string $cacheName;
 
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
 
     public function warmUp(string $cacheDir): array
     {
@@ -64,10 +68,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return [ get_class($this) ];
     }
 
-    public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
+    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
     {
-        $this->entityManager            = $entityManager;
-        $this->settingRepository        = $entityManager->getRepository(Setting::class);
+        $this->parameterBag      = $parameterBag;
+        $this->entityManager     = $entityManager;
+        $this->settingRepository = $entityManager->getRepository(Setting::class);
 
         $this->cache           = $cache;
         $this->cacheName       = "setting_bag." . hash('md5', self::class);
@@ -173,6 +178,10 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::CACHE, bool $onlyLinkedBag = false)
     {
+        $useSettingBag = $this->parameterBag->get("base.parameter_bag.use_setting_bag") ?? false;
+        if(!$useSettingBag)
+            return [];
+
         $this->clear($path);
         
         if(is_array($paths = $path)) {

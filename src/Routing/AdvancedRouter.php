@@ -99,13 +99,13 @@ class AdvancedRouter implements RouterInterface
         $this->localeProvider     = $localeProvider;
         $this->assetTwigExtension = $assetTwigExtension;
 
-        $this->cache             = $parameterBag->get("base.router.use_cache") ? $cache : null;
+        $this->cache             = $cache;
         $this->cacheName         = "router." . hash('md5', self::class);
         $this->cacheRoutes       = $this->cache ? $this->cache->getItem($this->cacheName.".routes") : null;
         $this->cacheRouteMatches = $this->cache ? $this->cache->getItem($this->cacheName.".route_matches" ) : null;
         $this->cacheRouteGroups  = $this->cache ? $this->cache->getItem($this->cacheName.".route_groups" ) : null;
 
-        $this->useAdvancedFeatures = $parameterBag->get("base.router.use_advanced_features");
+        $this->useAdvancedFeatures = $parameterBag->get("base.router.use_custom") ?? false;
         $this->keepMachine     = $parameterBag->get("base.router.keep_machine");
         $this->keepSubdomain   = $parameterBag->get("base.router.keep_subdomain");
     }

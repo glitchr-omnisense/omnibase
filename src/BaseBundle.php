@@ -44,8 +44,10 @@ class BaseBundle extends Bundle
 
     public function boot()
     {
-        self::$doctrineStartup = $this->doctrineStartup();
         self::$boot = true;
+
+        if($this->container->getParameter("base.database.use_custom"))
+            self::$doctrineStartup = $this->doctrineStartup();
     }
 
     public static function hasDoctrine():bool { return self::$doctrineStartup; }
