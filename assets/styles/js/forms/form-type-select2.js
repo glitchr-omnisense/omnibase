@@ -83,15 +83,15 @@ $(document).on("DOMContentLoaded", function () {
 
                     $(data.results).each(function() {
 
-                        id = this.id;
-                        entry = data.results.filter(e => e.id == id)[0];
+                        var id = this.id;
+                        var entry = data.results.filter(e => e.id == id)[0];
 
-                        occurence = parseInt(selectedOccurences[id]);
+                        var occurence = parseInt(selectedOccurences[id]);
                         if(occurence) {
 
-                            limit = Number.isInteger(select2["multivalue"]) ? occurence < select2["multivalue"] : select2["multivalue"];
-                            ext = (occurence > 0 && limit  ? "/" + (occurence+1) : "");
-                            entry.id = this.id + ext;
+                            var limit = Number.isInteger(select2["multivalue"]) ? occurence < select2["multivalue"] : select2["multivalue"];
+                            var ext   = (occurence > 0 && limit  ? "/" + (occurence+1) : "");
+                            entry.id  = this.id + ext;
                         }
 
                         results.push(entry);
@@ -180,9 +180,12 @@ $(document).on("DOMContentLoaded", function () {
                         return $.ajax(options)
                                     .done((_response) => localCache[index] = _response)
                                     .done(success)
-                                    .fail(function() 
+                                    .fail(function(_response) 
                                     {                    
-                                        $('body > .select2-container .loading-results .select2-selection__entry').html("<span style='color:red;'>Unexpected response.. Please try again.</span>");
+                                        var response = JSON.parse(_response.responseText);
+                                        $('body > .select2-container .loading-results .select2-selection__entry')
+                                            .html("<span style='color:red;'>"+response["status"]+"</span>");
+
                                         delete localCache[index];
                                     })
                                     .fail(failure);

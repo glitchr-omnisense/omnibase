@@ -141,11 +141,11 @@ namespace {
 
         $subdomain = ($domain && $subdomain) ? $subdomain . "." : null;
         $machine   = ($domain && $machine  ) ? $machine . "." : null;
-        $port      = ($domain && $port     ) ? ":".$port : null;
+        $port      = ($domain && $port != 80 && $port != 443) ? ":".$port : null;
 
         $query     =  $query ? "?".$query : null;
 
-        $url = $scheme.$machine.$subdomain.$domain.$user.$password.$path.$query;
+        $url = $scheme.$machine.$subdomain.$domain.$port.$user.$password.$path.$query;
         return $url ? $url : "/";
     }
 
