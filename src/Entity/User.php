@@ -63,7 +63,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 {
     use BaseTrait;
 
-    public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
+    public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), array_filter($this->getRoles())); }
     public static function __iconizeStatic() : ?array { return ["fas fa-user"]; }
 
     public const __DEFAULT_COOKIE__ = "user:necessary";

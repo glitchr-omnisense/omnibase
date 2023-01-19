@@ -259,7 +259,6 @@ class DoctrineDatabaseImportCommand extends Command
             $parentThread = null;
 
             $entities[$spreadsheet]   = [];
-            $entitySpls[$spreadsheet]  = [];
             $entityData[$spreadsheet] = [];
 
             $entityStates[$spreadsheet]         = [];
@@ -276,7 +275,6 @@ class DoctrineDatabaseImportCommand extends Command
             }
 
             $entities[$spreadsheet][$baseName]    ??= [];
-            $entitiesSpls[$spreadsheet][$baseName] ??= [];
             $entityData[$spreadsheet][$baseName]  ??= [];
 
             $entityStates        [$spreadsheet][$baseName] ??= [];
@@ -456,11 +454,24 @@ class DoctrineDatabaseImportCommand extends Command
                                         $typeOfField = $this->classMetadataManipulator->getTargetClass($targetName, $fieldName);
                                         if(!is_instanceof($typeOfField, $enumType)) throw new Exception("Incompatibility between EnumType provided \"".$enumType."\" and database type \"".$typeOfField."\" for entry #".($iEntry+self::OFFSET+1));
 
-                                        if (is_instanceof($enumType, SetType::class))
-                                            $v = array_map(fn($k) => $enumType::getValue($k), $v);
-                                        else if (is_instanceof($enumType, EnumType::class))
+                                        if (is_instanceof($enumType, SetType::class)) {
+
+                                            $v = array_map(function($k) use ($enumType, $iEntry) {
+
+                                                $value = $enumType::getValue($k);
+                                                if(!$value) throw new Exception("Invalid enum key \"".$k."\" provided for EnumType \"".$enumType."\" for entry #".($iEntry+self::OFFSET_TOP+1));
+                                                return $value;
+
+                                            }, $v);
+
+                                        } else if (is_instanceof($enumType, EnumType::class)) {
+
                                             $v = $enumType::getValue($v) ;
-                                        else throw new Exception("Class must be either \"".EnumType::class."\" or \"".SetType::class."\" for entry #".($iEntry+self::OFFSET+1));
+                                            if(!$v) throw new Exception("Invalid enum key provided for EnumType \"".$enumType."\" for entry #".($iEntry+self::OFFSET+1));
+
+                                        } else {
+                                            throw new Exception("Class must be either \"".EnumType::class."\" or \"".SetType::class."\" for entry #".($iEntry+self::OFFSET+1));
+                                        }
 
                                         break;
                                 }
