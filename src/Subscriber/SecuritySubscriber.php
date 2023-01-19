@@ -405,14 +405,6 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $notification->send("success");
             }
         }
-
-        if($event && $this->referrer->getUrl() !== null) {
-            
-            $event->setResponse($this->router->redirect($this->referrer->getUrl(), [], 302));
-            $event->stopPropagation();
-            
-            $this->referrer->clear();   
-        }
     }
 
     public function onLogout(LogoutEvent $event)

@@ -8,4 +8,5 @@ interface ReferrerInterface
     public function setUrl(?string $url);
 
     public function clear();
+    public function sameSite(): bool;
 }
