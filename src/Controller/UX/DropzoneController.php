@@ -25,6 +25,29 @@ class DropzoneController extends AbstractController
     public const STATUS_BAD     = "BAD";
     public const STATUS_NOTOKEN = "NO_TOKEN";
 
+    /**
+     * @var CacheInterface
+     */
+    protected $cache;
+
+    /**
+     * @var ObfuscatorInterface
+     */
+    protected $obfuscator;
+    
+    /** * @var string */
+    protected $cacheDir;
+    
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+
+    /**
+     * @var \Symfony\Component\Filesystem\Filesystem
+     */
+    protected $filesystem;
+    
     public function __construct(TranslatorInterface $translator, CacheInterface $cache, ObfuscatorInterface $obfuscator, string $cacheDir)
     {
         $this->cache      = $cache;
