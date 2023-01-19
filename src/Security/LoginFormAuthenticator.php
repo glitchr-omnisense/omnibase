@@ -94,7 +94,12 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
         $badges   = [];
         if( array_key_exists("_remember_me", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) ) {
-            $badges[] = new RememberMeBadge();
+
+            $rememberBadge = new RememberMeBadge();
+            $rememberBadge->enable();
+
+            $badges[] = $rememberBadge;
+
             if($request->get('security_login')["_remember_me"] ?? $request->get('_base_security_login')["_remember_me"]) end($badges)->enable();
         }
 

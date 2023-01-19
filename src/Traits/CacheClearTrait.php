@@ -72,7 +72,7 @@ trait CacheClearTrait
     {
         $phpConfig = php_ini_loaded_file();
         $maxSize = UploadedFile::getMaxFilesize();
-        $io->note("Loaded PHP Configuration: ".$phpConfig." (might difer from webserver)\nMaximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX));
+        $io->note("Loaded PHP Configuration: ".$phpConfig." (might differ from webserver)\nMaximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX));
     }
 
     protected function technicalSupportCheck(SymfonyStyle $io): void
