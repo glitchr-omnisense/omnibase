@@ -33,6 +33,17 @@ class Configuration implements ConfigurationInterface
 
                 ->arrayNode('database')->addDefaultsIfNotSet()
                 ->children()
+
+                    ->booleanNode('fallback_warning')
+                        ->info('Fallback warning disable in case there is no fallback')
+                        ->defaultValue(true)
+                    ->end()
+
+                    ->booleanNode('use_custom')
+                        ->info('Use custom database settings')
+                        ->defaultValue(null)
+                    ->end()
+
                     ->arrayNode('excluded_fields')
                         ->defaultValue(['id', 'locale', 'translatable'])
                         // ->beforeNormalization()
@@ -106,17 +117,17 @@ class Configuration implements ConfigurationInterface
 
                         ->booleanNode('public_access')
                             ->info('Access to public visitors')
-                            ->defaultValue(false)
+                            ->defaultValue(true)
                         ->end()
 
                         ->booleanNode('user_access')
                             ->info('Access to users')
-                            ->defaultValue(false)
+                            ->defaultValue(true)
                         ->end()
 
                         ->booleanNode('admin_access')
                             ->info('Access to administrators')
-                            ->defaultValue(false)
+                            ->defaultValue(true)
                         ->end()
 
                         ->arrayNode('firewalls')
@@ -197,14 +208,9 @@ class Configuration implements ConfigurationInterface
 
                 ->arrayNode('router')->addDefaultsIfNotSet()
                     ->children()
-                        ->booleanNode('use_advanced_features')
+                        ->booleanNode('use_custom')
                             ->info('Use custom router')
-                            ->defaultValue(True)
-                            ->end()
-
-                        ->booleanNode('use_cache')
-                            ->info('Use cache router')
-                            ->defaultValue(True)
+                            ->defaultValue(null)
                             ->end()
 
                         ->booleanNode('keep_machine')
@@ -220,6 +226,11 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('ip_access')
                             ->info('Allow accessing by')
                             ->defaultValue(false)
+                        ->end()
+
+                        ->booleanNode('fallback_warning')
+                            ->info('Fallback warning disable in case there is no fallback')
+                            ->defaultValue(true)
                         ->end()
 
                         ->arrayNode('fallbacks')
@@ -276,6 +287,20 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
 
+                    ->end()
+                ->end()
+
+                ->arrayNode('parameter_bag')->addDefaultsIfNotSet()
+                
+                    ->children()
+                        ->booleanNode('use_setting_bag')
+                            ->info('Use setting bag from database')
+                            ->defaultValue(null)
+                        ->end()
+                        ->booleanNode('use_hot_bag')
+                            ->info('Use hot bag parameter rewriting')
+                            ->defaultValue(null)
+                        ->end()
                     ->end()
                 ->end()
 
@@ -486,9 +511,9 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
 
-                        ->booleanNode('use_custom_loader')
+                        ->booleanNode('use_custom')
                             ->info('Use base filesystem loader')
-                            ->defaultValue(True)
+                            ->defaultValue(null)
                             ->end()
                         ->booleanNode('use_form2')
                             ->info('Use custom base form style')
@@ -530,9 +555,9 @@ class Configuration implements ConfigurationInterface
 
                 ->arrayNode('annotations')->addDefaultsIfNotSet()
                     ->children()
-                        ->booleanNode('use_custom_reader')
+                        ->booleanNode('use_custom')
                             ->info('Use custom annotation reader')
-                            ->defaultValue(True)
+                            ->defaultValue(null)
                             ->end()
                         ->arrayNode('paths')
                             ->addDefaultChildrenIfNoneSet()

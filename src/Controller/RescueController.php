@@ -27,6 +27,36 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 /* "abstract" (remove because of routes) */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
+    /**
+     * @var RouterInterface 
+     * */
+    protected $router;
+    
+    /**
+     * @var ImageServiceInterface 
+     * */
+    protected $imageService;
+
+    /**
+     * @var SettingBagInterface 
+     * */
+    protected $settingBag;
+
+    /**
+     * @var Environment 
+     * */
+    protected $twig;
+
+    /**
+     * @var TranslatorInterface 
+     * */
+    protected $translator;
+
+    /**
+     * @var FormProxyInterface 
+     * */
+    protected $formProxy;
+
     public function __construct(RouterInterface $router, ImageServiceInterface $imageService, SettingBagInterface $settingBag, Environment $twig, TranslatorInterface $translator, FormProxyInterface $formProxy)
     {
         $this->twig = $twig;

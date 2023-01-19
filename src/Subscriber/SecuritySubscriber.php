@@ -2,11 +2,11 @@
 
 namespace Base\Subscriber;
 
+use Base\Entity\User as BaseUser;
 use App\Repository\UserRepository;
 use Base\Service\ReferrerInterface;
-use Base\Entity\User;
+use App\Entity\User;
 
-use Base\Service\BaseService;
 use Base\Security\LoginFormAuthenticator;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -143,7 +143,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
             RequestEvent::class      => [['onMaintenanceRequest', 4], ['onBirthRequest', 4], ['onAccessRequest', 6], ['onKernelRequest', 3]],
             ResponseEvent::class     => ['onKernelResponse'],
-            LoginSuccessEvent::class => ['onLoginSuccess'],
+            LoginSuccessEvent::class => ['onLoginSuccess', -65],
             LoginFailureEvent::class => ['onLoginFailure'],
             LogoutEvent::class       => ['onLogout']
         ];
@@ -151,7 +151,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRequest(?RequestEvent $event = null): bool
     {
-        if(!$this->router->getRouteFirewall()->isSecurityEnabled()) return true;
+        if(!$this->router->getRouteFirewall()?->isSecurityEnabled()) return true;
 
         if(!$event->isMainRequest()) return true;
         if( $this->router->isWdt($event) ) return true; // Special case for _wdt
@@ -179,7 +179,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
 
             // In case of restriction: profiler is disabled
-            if(!$specialGrant && $this->profiler) $this->profiler->disable();
+            if(!$specialGrant && $this->profiler && !$this->router->isDebug())
+                $this->profiler->disable();
 
             // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
@@ -224,6 +225,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                     return true;
                 }
 
+                dump($this->router->getRouteName(), $routeRestriction);
                 $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction)) : null;
                 $response ??= $this->router->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
@@ -248,12 +250,12 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $token = $this->tokenStorage->getToken();
-
+        
         /**
          * @var User
          */
         $user = $token ? $token->getUser() : null;
-        if(!$user) return;
+        if(!$user instanceof BaseUser) return;
 
         // Notify user about the authentication method
         $exceptions = $this->parameterBag->get("base.access_restrictions.route_exceptions") ?? [];
@@ -343,6 +345,7 @@ class SecuritySubscriber implements EventSubscriberInterface
          * @var User
          */
         if(!($user = $token->getUser())) return;
+        if(!$user instanceof BaseUser) return;
 
         if ( !($user->isActive()) ) {
 
@@ -374,8 +377,9 @@ class SecuritySubscriber implements EventSubscriberInterface
         /**
          * @var User
          */
-        if ($user = $event->getUser()) {
-
+        $user = $event->getUser();
+        if ($user instanceof BaseUser) {
+            
             if (!$user->isPersistent()) {
 
                 $notification = new Notification("login.social", [$user]);

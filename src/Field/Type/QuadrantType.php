@@ -19,12 +19,18 @@ class QuadrantType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'quadrant'; }
 
+    /**
+     * @var Environment
+     */
+    protected $twig;
+    
     public function __construct(Environment $twig) { $this->twig = $twig; }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            "class" => Quadrant8::class
+            "class" => Quadrant8::class,
+            'use_advanced_form' => true
         ]);
     }
 

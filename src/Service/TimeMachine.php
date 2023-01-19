@@ -2,7 +2,6 @@
 
 namespace Base\Service;
 
-use League\Flysystem\PhpseclibV3\SftpConnectionProvider;
 use BackupManager\Compressors\CompressorProvider;
 use BackupManager\Compressors\GzipCompressor;
 use BackupManager\Compressors\NullCompressor;
@@ -28,21 +27,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Exception;
 use League\Flysystem\Filesystem;
-use Phar;
-use PharData;
-
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use RecursiveCallbackFilterIterator;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use UnexpectedValueException;
 
 class TimeMachine extends BackupManager implements TimeMachineInterface
 {
-
     /** @var CompressorProvider */
     protected $compressors;
 
@@ -61,6 +51,9 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
     /** @var OutputInterface */
     protected $output;
+
+    protected string $cacheDir;
+    protected int $snapshotLimit;
 
     public function setCommandOutput(OutputInterface $output)
     { 

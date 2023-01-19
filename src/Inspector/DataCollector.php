@@ -202,7 +202,7 @@ class DataCollector extends AbstractDataCollector
 
         if(class_exists(TwigBundle::class))
             $data[$this->getBundleFormattedName(TwigBundle::class)] = [
-                'Custom Twig Loader' => $this->parameterBag->get("base.twig.use_custom_loader"),
+                'Custom Twig Loader' => $this->parameterBag->get("base.twig.use_custom"),
                 'Twig Autoappending' => $this->parameterBag->get("base.twig.autoappend"),
                 'Form2 Override' => $this->parameterBag->get("base.twig.use_form2"),
                 'Bootstrap Support' => $this->parameterBag->get("base.twig.use_bootstrap"),

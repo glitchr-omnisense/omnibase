@@ -6,4 +6,6 @@ interface ReferrerInterface
 {
     public function getUrl() : ?string;
     public function setUrl(?string $url);
+
+    public function clear();
 }

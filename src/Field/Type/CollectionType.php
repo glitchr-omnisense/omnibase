@@ -20,7 +20,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
 class CollectionType extends AbstractType
 {
-
     /**
      * @var Environment
      */

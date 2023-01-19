@@ -49,7 +49,5 @@ class ThreadSubscriber implements EventSubscriberInterface
             $notification->setUser($author);
             $notification->send("urgent");
         }
-
-        $this->entityManager->flush();
     }
 }

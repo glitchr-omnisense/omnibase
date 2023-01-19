@@ -61,7 +61,12 @@ class Translator implements TranslatorInterface
     }
 
     public function getLocale(): string { return $this->translator->getLocale(); }
-    public function setLocale(string $locale) { $this->translator->setLocale($locale); }
+    public function setLocale(string $locale) 
+    { 
+        $this->translator->setLocale($locale);
+        return $this;
+    }
+
     public function getFallbackLocales(): array { return $this->translator->getFallbackLocales(); }
 
     public function transQuiet(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true, bool $nullable = true): ?string
@@ -73,8 +78,9 @@ class Translator implements TranslatorInterface
     {
         if(!$id) return $id;
 
-        $domainFallback = null;
+        $domainFallback = false;
         if($id instanceof TranslatableMessage) {
+
             $domainFallback = $id->getDomain();
             $domain ??= $domainFallback;
             $parameters = array_merge($id->getParameters(), $parameters);
@@ -83,14 +89,14 @@ class Translator implements TranslatorInterface
 
         $id = trim($id);
         $customId  = preg_match("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $id);
-        $atBegin   = str_starts_with($id, "@");
+        $startsWithDomainTag   = str_starts_with($id, "@");
 
         $domain         = $domain         && str_starts_with($domain, "@")         ? substr($domain, 1)         : ($domain ?? null);
         $domainFallback = $domainFallback && str_starts_with($domainFallback, "@") ? substr($domainFallback, 1) : ($domainFallback ?? null);
         if ($id && $customId) {
 
             $array  = explode(".", $id);
-            if($atBegin) {
+            if($startsWithDomainTag) {
                 $domain = substr(array_shift($array), 1);
                 $id     = implode(".", $array);
             }
@@ -105,10 +111,11 @@ class Translator implements TranslatorInterface
 
             $ret = $this->translator->trans($ret, $parameters, $domain, $locale);
             if(preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) {
+
                 $ret = $this->translator->trans($ret, $parameters, $domainFallback, $locale);
                 if(preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) return $id;
             }
-
+    
             return $ret;
         }
 
@@ -154,21 +161,26 @@ class Translator implements TranslatorInterface
 
         if ($trans == $id) {
 
-            while($this->transExists($trans, $domainFallback, $locale) && $recursive) {
-                $trans = $this->trans($trans, $parameters, $domainFallback, $locale, false);
+            if($domainFallback !== false) {
+
+                while($this->transExists($trans, $domainFallback, $locale) && $recursive) {
+                    $trans = $this->trans($trans, $parameters, $domainFallback, $locale, false);
+                }
             }
 
             if($locale != LocaleProvider::getDefaultLocale() && !$this->isDebug) {
 
                 if ($trans == $id)
                     $trans = $this->transQuiet($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
-                if ($trans == $id)
+                if ($trans == $id && $domainFallback !== false)
                     $trans = $this->transQuiet($id, $parameters, $domainFallback, LocaleProvider::getDefaultLocale());
             }
         }
 
-        if ($trans == $id && $customId)
-            return ($domain && $atBegin ? "@".$domain.".".$id : $id);
+        if ($trans == $id && $customId) {
+
+            return ($domain && $startsWithDomainTag ? "@".$domain.".".$id : $id);
+        }
 
         return trim($trans ?? "");
     }
@@ -294,13 +306,13 @@ class Translator implements TranslatorInterface
         return false;
     }
 
-    public function transRoute(string $routeName, string $domain = null): ?string
+    public function transRoute(string $routeName, ?string $domain = null): ?string
     {
         $domain = $domain ? $domain."." : "@controllers.";
         return $this->trans($domain.$routeName.".title");
     }
 
-    public function transRouteExists(string $routeName, string $domain = null) : bool
+    public function transRouteExists(string $routeName, ?string $domain = null) : bool
     {
         $domain = $domain ? $domain."." : "@controllers.";
         return $this->transExists($domain.$routeName.".title");

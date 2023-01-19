@@ -17,7 +17,8 @@ final class EmojiPickerType extends AbstractType
     {
         $resolver->setDefaults([
             'renderer'     => "native", // native, twemoji, (custom?)
-            'is_nullable' => true
+            'is_nullable' => true,
+            'use_advanced_form' => true
         ]);
     }
 

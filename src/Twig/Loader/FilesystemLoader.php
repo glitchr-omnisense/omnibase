@@ -41,7 +41,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         // 1/ Cannot override <form_div_layout class="html twig">
         // 2/ Infinite loop when using {%use%}
         $projectDir = $baseService->getProjectDir();
-        $useCustomLoader = $baseService->getParameterBag("base.twig.use_custom_loader");
+        $useCustomLoader = $baseService->getParameterBag("base.twig.use_custom");
         if($useCustomLoader) {
 
             $bundlePath = $baseService->getParameterBag("base.twig.default_path");
@@ -64,16 +64,16 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
             $chainLoader = new ChainLoader($loaders);
             $twig->setLoader($chainLoader);
+
+            // Add @Twig, @Assets and @Layout variables
+            $this->prependPath($bundlePath."/inspector", "WebProfiler");
+            $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
+            $this->prependPath($bundlePath);
         }
 
-        // Add @Twig, @Assets and @Layout variables
-        $this->prependPath($bundlePath."/inspector", "WebProfiler");
-        $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
-        $this->prependPath($bundlePath);
 
         $this->prependPath($projectDir . "/src", "App");
         $this->prependPath($projectDir . "/src/Controller", "Controller");
-        $this->prependPath($projectDir . "/assets", "Assets");
         $this->prependPath($projectDir . "/public", "Public");
         $this->prependPath($projectDir . "/vendor/symfony/twig-bridge/Resources/views", "Twig");
         $this->prependPath($projectDir . "/templates");

@@ -169,6 +169,7 @@ final class FunctionTwigExtension extends AbstractExtension
             return array_map(fn($c) => $this->enum($c), $class);
         }
 
+        if(class_exists($class) && is_instanceof($class, EnumType::class)) return new $class;
         return Type::hasType($class) ? Type::getType($class) : null;
     }
 

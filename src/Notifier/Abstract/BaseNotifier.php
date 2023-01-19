@@ -3,10 +3,12 @@
 namespace Base\Notifier\Abstract;
 
 use App\Entity\User;
+use BadMethodCallException;
 use Base\Entity\User\Notification;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
 use Base\Routing\RouterInterface;
+use Base\Service\BaseService;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
 use Base\Service\LocaleProviderInterface;
@@ -18,6 +20,7 @@ use Doctrine\DBAL\Exception\InvalidFieldNameException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\ORM\Cache\Exception\NonCacheableEntity;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\MappingException;
 use Exception;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 
@@ -146,7 +149,6 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         // Address support only once..
         $adminRecipients = [];
-
         foreach ($this->getAdminUsers() as $adminUser)
             $adminRecipients[] = $adminUser->getRecipient();
 
@@ -187,22 +189,27 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $userRepository = $this->entityManager->getRepository(User::class);
             $adminUsers = $userRepository->cacheByRoles($this->adminRole)->getResult();
 
-        } catch(NonCacheableEntity|DoctrineException|DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
+        } catch(MappingException|NonCacheableEntity|BadMethodCallException|DoctrineException|DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
 
         return $adminUsers;
     }
 
     public function getTechnicalRecipient(): RecipientInterface
     {
+        $defaultMail = mailparse($this->technicalRecipient->getEmail());
+
         $mail = $this->settingBag->getScalar("base.settings.mail");
         if(!$mail) $mail = $this->getAdminRecipient()?->getEmail();
+        if(!$mail) $mail = array_keys($defaultMail)[0] ?? null;
         if(!$mail) return new NoRecipient();
 
         $mailName = $this->settingBag->getScalar("base.settings.mail.name");
         if(!$mailName) $mailName = mb_ucwords(str_replace([".", "_"], [" ", " "], explode("@", $mail)[0]));
+        if(!$mailName) $mailName = first($defaultMail) ?? null;
 
         $phone = $this->settingBag->getScalar("base.settings.phone");
         if(!$phone) $phone = $this->getAdminRecipient()?->getPhone();
+        if(!$phone) $phone = $this->technicalRecipient->getPhone();
 
         return new Recipient($mailName." <".$mail.">", $phone);
     }
@@ -243,7 +250,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this;
     }
 
-    public function getDefaultChannels(string $importance) { return User::getNotifier()->getPolicy()->getChannels($importance); }
+    public function getDefaultChannels(string $importance) { return BaseService::getNotifier()->getPolicy()->getChannels($importance); }
 
     protected function getUserChannels($importance, RecipientInterface $recipient): array
     {

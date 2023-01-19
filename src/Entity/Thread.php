@@ -193,7 +193,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function isDeleted()    : bool { return str_starts_with($this->state, ThreadState::DELETE); }
     public function isScheduled()  : bool { return str_starts_with($this->state, ThreadState::FUTURE) && $this->publishedAt && !$this->isPublished(); }
     public function isSecret()     : bool { return str_starts_with($this->state, ThreadState::SECRET); }
-    public function isPublished()  : bool { return str_starts_with($this->state, ThreadState::PUBLISH); }
+    public function isPublished(null|\DateTime|string $within = null)  : bool 
+    {
+        if($within) {
+        
+            $within = $within instanceof DateTime ? $within : new \DateTime($within);
+            return $this->isScheduled() && $this->publishedAt < $within;
+        }
+            
+        return str_starts_with($this->state, ThreadState::PUBLISH);
+    }
+
     public function isVisible()  : bool
     {
         if($this->getService()->isGranted("ROLE_ADMIN"))

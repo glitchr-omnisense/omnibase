@@ -3,6 +3,8 @@
 namespace Base\Subscriber;
 
 use App\Entity\User;
+use Base\Entity\User as BaseUser;
+
 use App\Repository\UserRepository;
 use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
@@ -67,6 +69,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
 
     public function onUserRequest(RequestEvent $event)
     {
+        if(!is_instanceof(User::class, BaseUser::class)) return;
         if(!$event->isMainRequest()) return;
 
         if($this->router->isProfiler()) return;

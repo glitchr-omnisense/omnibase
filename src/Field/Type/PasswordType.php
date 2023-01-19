@@ -20,6 +20,16 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class PasswordType extends AbstractType implements AutovalidateInterface, DataMapperInterface
 {
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+    
+    /**
+     * @var Environment
+     */
+    protected $twig;
+    
     public function __construct(TranslatorInterface $translator, Environment $twig)
     {
         $this->translator = $translator;
@@ -61,6 +71,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
             "max_strength"      => Password::MAX_STRENGTH_FALLBACK,
             'options'           => [],
             'options[repeater]' => [],
+            'use_advanced_form' => true,
             'invalid_message'   => '@fields.password.invalid_message'
         ]);
 

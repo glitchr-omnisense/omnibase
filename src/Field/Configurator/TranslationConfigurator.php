@@ -17,6 +17,21 @@ use function Symfony\Component\String\u;
 
 class TranslationConfigurator implements FieldConfiguratorInterface
 {
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
+    /**
+     * @var LocaleProviderInterface
+     */
+    private $localeProvider;
+
+    /**
+     * @var PropertyAccessor
+     */
+    private $propertyAccessor;
+
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;

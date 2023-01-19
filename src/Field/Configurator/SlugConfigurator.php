@@ -2,7 +2,6 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -10,14 +9,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use Base\Field\SlugField;
 use Base\Service\Model\LinkableInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- */
 class SlugConfigurator implements FieldConfiguratorInterface
 {
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
     public function __construct(TranslatorInterface $translator)

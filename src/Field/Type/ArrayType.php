@@ -18,6 +18,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
 class ArrayType extends CollectionType
 {
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
     public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, ClassMetadataManipulator $classMetadataManipulator)
     {
         parent::__construct($twig, $translator, $authorizationChecker, $adminUrlGenerator);

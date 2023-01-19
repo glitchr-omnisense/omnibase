@@ -2,6 +2,7 @@
 
 namespace Base\Database\Annotation;
 
+use App\Entity\Gallery\Gallery;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Common\Collections\OrderedArrayCollection;
@@ -90,7 +91,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     {
         $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
         $this->addOrderedColumnIfNotSet($classMetadata, $property);
-
+        
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $orderingRepository = $this->getRepository(Ordering::class);
 
@@ -109,6 +110,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
         $cacheDriver = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
         $cacheDriver->deleteAll();
+
         $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
         if($ordering === null) return;
 

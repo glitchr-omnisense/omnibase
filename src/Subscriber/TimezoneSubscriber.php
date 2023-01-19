@@ -3,6 +3,7 @@
 namespace Base\Subscriber;
 
 use App\Entity\User;
+use Base\Entity\User as BaseUser;
 use App\Entity\User\Notification;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -19,6 +20,8 @@ class TimezoneSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        if(!is_instanceof(User::class, BaseUser::class)) return;
+
         $timezone = User::getCookie("timezone") ?? "UTC";
         $defaultTimezone = date_default_timezone_get();
 

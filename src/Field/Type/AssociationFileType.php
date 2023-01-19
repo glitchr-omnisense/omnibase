@@ -43,6 +43,32 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
      */
     protected $formFactory = null;
 
+
+    /**
+     * @var FileService
+     */
+    protected $fileService = null;
+
+    /**
+     * @var EntityHydrator
+     */
+    protected $entityHydrator = null;
+
+    /**
+     * @var ImageService
+     */
+    protected $imageService = null;
+
+    /**
+     * @var PropertyAccessor
+     */
+    protected $propertyAccessor = null;
+
+    /**
+     * @var AdminUrlGenerator
+     */
+    protected $adminUrlGenerator = null;
+
     public function getBlockPrefix(): string { return 'associationfile'; }
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, ImageService $imageService)

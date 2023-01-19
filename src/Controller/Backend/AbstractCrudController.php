@@ -7,6 +7,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\IdField;
 use Base\Service\Model\IconizeInterface;
 use Base\Routing\RouterInterface;
+use Base\Service\Model\LinkableInterface;
 use Base\Service\SettingBagInterface;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
@@ -33,9 +34,41 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     abstract static function getPreferredIcon(): ?string;
 
     /**
+     * @var AdminContextProvider
+     * */
+    protected $adminContextProvider;
+    /**
+     * @var AdminUrlGenerator
+     * */
+    protected $adminUrlGenerator;
+    /**
      * @var ClassMetadataManipulator
-     */
+     * */
     protected $classMetadataManipulator;
+    /**
+     * @var EntityManagerInterface
+     * */
+    protected $entityManager;
+    /**
+     * @var RequestStack
+     * */
+    protected $requestStack;
+    /**
+     * @var Extension
+     * */
+    protected $extension;
+    /**
+     * @var SettingBagInterface
+     * */
+    protected $settingBag;
+    /**
+     * @var RouterInterface
+     * */
+    protected $router;
+    /**
+     * @var TranslatorInterface
+     * */
+    protected $translator;
 
     public function __construct(
         AdminContextProvider $adminContextProvider,
@@ -297,7 +330,15 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
+
             $entityText = $entityLabel ." ID #".$entity->getId();
+            try { # Try to link without route parameter
+
+                if($entity instanceof LinkableInterface) 
+                    $entityText = $entityLabel ." ID <a href='".$entity->__toLink()."'>#".$entity->getId()."</a>";
+            
+            } catch(\Exception $e) { }
+
             $extension->setText($entityText);
         }
 

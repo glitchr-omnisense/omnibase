@@ -1,6 +1,10 @@
+console.log("execです");
 $(document).on("DOMContentLoaded", function () {
 
+    console.log("domです");
     $(document).on("load.form_type.avatar", function () {
+
+        console.log("loadです");
 
         document.querySelectorAll("[data-avatar-field]").forEach(function (el) {
 
@@ -25,13 +29,13 @@ $(document).on("DOMContentLoaded", function () {
             }
 
             $('#'+id+'_figcaption').on('click.avatar', function() {
-                $('#'+id+'_raw').click();
+                $('#'+id+'_raw').trigger("click");
             });
-
+            
             $("#"+id+"_deleteBtn2").on("click.avatar", function() {
 
                 $("#"+id+"_raw").value = '';
-                $("#"+id+"_deleteBtn").click();
+                $("#"+id+"_deleteBtn").trigger("click");
             });
 
             $("#"+id+"_deleteBtn").on("click.avatar", function() {
