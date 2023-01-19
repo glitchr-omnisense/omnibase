@@ -64,7 +64,7 @@ class ReferrerSubscriber implements EventSubscriberInterface
         if($this->isException($referrerRoute)) $this->referrer->clear();
 
         $currentRoute = $this->getCurrentRouteName($event);
-        if(!$this->isException($currentRoute))
+        if(!$this->isException($currentRoute) && !$this->router->isSecured($event->getRequest()))
             $this->referrer->setUrl($event->getRequest()->getUri());
     }
 }

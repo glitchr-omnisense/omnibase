@@ -241,7 +241,7 @@ form fieldset legend { font-size: 11pt; }
     font-size: 16px;
 }
 
-.user-details .img-fluid
+.dropdown-user-details .img-fluid, .user-details .img-fluid
 {
     width:30px;
     height:30px;
