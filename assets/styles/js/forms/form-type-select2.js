@@ -18,6 +18,8 @@ $(document).on("DOMContentLoaded", function () {
 
         document.querySelectorAll("[data-select2-field]").forEach((function (el) {
 
+            var term = "";
+            var page = "1.0";
             var field = $("#"+el.getAttribute("data-select2-field"));
             var defaultTemplate = function(option) {
 
@@ -50,7 +52,7 @@ $(document).on("DOMContentLoaded", function () {
                     iconAttributes += key + "=\"" + value+"\" ";
                 });
 
-                var term = $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val();
+                term = $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val();
                 option.text = option.text.replace("<mark>", "").replace("</mark>", "");
 
                 if (highlight && term) option.text = highlight_search(option.text, term);
@@ -60,13 +62,12 @@ $(document).on("DOMContentLoaded", function () {
                         '</span>'));
             };
 
-            var page = "1.0";
             var data = function (args)
             {
                 var lastTerm = $(field).attr("last-search");
                 $(this).removeAttr("last-search");
 
-                var term = $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val();
+                term = $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val();
                 return {term: lastTerm || term || args.term, page: page};
             }
 
@@ -132,8 +133,8 @@ $(document).on("DOMContentLoaded", function () {
                 select2["ajax"]["delay"] = 0;
                 select2["ajax"]["transport"] = function (options, success, failure) {
 
-                    var term = options.data.term || '';
-                    var page = options.data.page || '';
+                    term = options.data.term || '';
+                    page = options.data.page || '';
                     if(options.data.term == ($('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val())) {
 
                         //
@@ -142,8 +143,6 @@ $(document).on("DOMContentLoaded", function () {
 
                         if(options.cache && index in localCache)
                             return success(localCache[index]);
-
-                        page = 1;
 
                     } else {
 
@@ -181,24 +180,20 @@ $(document).on("DOMContentLoaded", function () {
                                     .done((_response) => localCache[index] = _response)
                                     .done(success)
                                     .fail(function(_response) 
-                                    {                    
-                                        var response = JSON.parse(_response.responseText);
+                                    {        
+                                        var msg = "Unexpected response received.";            
+                                        if(_response) {
+                                            
+                                            var response = JSON.parse(_response.responseText);
+                                            msg = response["status"];
+                                        }
+
                                         $('body > .select2-container .loading-results .select2-selection__entry')
-                                            .html("<span style='color:red;'>"+response["status"]+"</span>");
+                                            .html("<span style='color:red;'>"+msg+"</span>");
 
                                         delete localCache[index];
                                     })
                                     .fail(failure);
-
-                            /*[......].done(function(data) {
-
-                            // Select all entries [not working :-(]
-                            // $(document).on("keyup.select2", ".select2-search__field", function (e) {
-
-                            //     if (e.keyCode === 65 && e.ctrlKey )
-                            //         $(field).val(data.results.map((o) => o.id)).trigger("change");
-                            // });
-                        });*/
                     });
                 }
             }
@@ -231,7 +226,7 @@ $(document).on("DOMContentLoaded", function () {
 
             }).on("select2:close", function(e) {
 
-                $(this).focusout();
+                $(this).trigger("focusout");
                 $(document).off("keyup.select2");
 
                 page = "1.0";

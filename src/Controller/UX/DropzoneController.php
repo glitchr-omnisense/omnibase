@@ -116,6 +116,14 @@ class DropzoneController extends AbstractController
             "error"     => $file->getError(),
         ];
 
+        // dirname($newFileName))
+        if(!is_writable(dirname($file->getPathname())))
+            return new Response("Repository directory not writable.", 500);
+        if(!file_exists($file->getPathname()))
+            return new Response("Uploaded file lost in the limbo.", 500);
+
+        dump($file->getPathname(), $file->getRealPath());
+        
         if(!move_uploaded_file($file->getRealPath(), $filePath))
             return new Response($this->translator->trans("fileupload.error.cant_write", [], "fields"), 500);
 
@@ -131,25 +139,26 @@ class DropzoneController extends AbstractController
 
             return false;
         };
+       
+        // @TODO Implement a cleaning command..
+        // $cacheDropzone = $this->cache->getItem("cache:dropzone");
+        // if($cacheDropzone->isHit()) { // If cache found and didn't expired
 
-        $cacheDropzone = $this->cache->getItem("cache:dropzone");
-        if($cacheDropzone->isHit()) { // If cache found and didn't expired
+        //     $dropzone = $cacheDropzone->get();
+        //     $dropzone = array_filter($dropzone, $fnExpiry, ARRAY_FILTER_USE_BOTH);
 
-            $dropzone = $cacheDropzone->get();
-            $dropzone = array_filter($dropzone, $fnExpiry, ARRAY_FILTER_USE_BOTH);
+        // } else { // If cache not found or expired
 
-        } else { // If cache not found or expired
-
-            $dropzone = $cacheDropzone->get() ?? [];
-            foreach($dropzone as $uuid => $_)
-                if(file_exists($cacheDir."/".$uuid)) unlink($cacheDir."/".$uuid);
-        }
-
-        $dropzone[(string) $fileUuid] = time() + self::CACHE_DURATION;
-        $cacheDropzone->set($dropzone);
-        $cacheDropzone->expiresAfter(self::CACHE_DURATION);
-        $this->cache->save($cacheDropzone);
-
+        //     $dropzone = $cacheDropzone->get() ?? [];
+        //     foreach($dropzone as $uuid => $_)
+        //         if(file_exists($cacheDir."/".$uuid)) unlink($cacheDir."/".$uuid);
+        // }
+        
+        // $dropzone[(string) $fileUuid] = time() + self::CACHE_DURATION;
+        // $cacheDropzone->set($dropzone);
+        // $cacheDropzone->expiresAfter(self::CACHE_DURATION);
+        // $this->cache->save($cacheDropzone);
+        
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
