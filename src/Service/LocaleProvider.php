@@ -29,7 +29,7 @@ class LocaleProvider extends SimpleCache implements LocaleProviderInterface
 
     public function warmUp(string $cacheDir): bool
     {
-        self::$locales = $this->getCache("/Locales", self::getLocales());
+        self::$locales          = $this->getCache("/Locales", self::getLocales());
         self::$fallbackLocales  = self::$fallbackLocales ?? self::normalize($this->translator->getFallbackLocales());
         self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($this->parameterBag->get("kernel.default_locale"));
         

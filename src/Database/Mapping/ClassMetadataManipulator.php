@@ -879,7 +879,7 @@ class ClassMetadataManipulator
             ? $classMetadataCompletor
             : new ClassMetadataCompletor($className, []);
 
-        return self::$loadedMetadata[$this->getCacheKey($className)];
+            return self::$loadedMetadata[$this->getCacheKey($className)];
     }
 
     public function saveCache(ClassMetadataCompletor $completor)

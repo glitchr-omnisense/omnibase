@@ -129,7 +129,6 @@ class AnnotationReader extends SimpleCache
         ClassMetadataManipulator $classMetadataManipulator,
         string $projectDir, string $environment, string $cacheDir)
     {
-
         if(!self::getInstance(false))
             self::setInstance($this);
 
@@ -137,7 +136,7 @@ class AnnotationReader extends SimpleCache
 
         // Check if custom reader is enabled
         $this->parameterBag = $parameterBag;
-	$this->enabled = $parameterBag->get("base.annotations.use_custom") ?? false;
+	    $this->enabled = $parameterBag->get("base.annotations.use_custom") ?? false;
 
         $paths   = [];
         $paths[] = __DIR__ . "/Annotation";
@@ -160,7 +159,7 @@ class AnnotationReader extends SimpleCache
 
         $this->environment = $environment;
         $this->projectDir  = $projectDir;
-
+        
         parent::__construct($cacheDir);
     }
 
@@ -628,28 +627,30 @@ class AnnotationReader extends SimpleCache
         $this->classAnnotations    = $this->getCache("/ClassAnnotations") ?? [];
         $this->methodAnnotations   = $this->getCache("/MethodAnnotations") ?? [];
         $this->propertyAnnotations = $this->getCache("/PropertyAnnotations") ?? [];
+        $this->executeOnce(function () {
 
-        /**
-         * @var ClassMetadataFactory
-         */
-        $classMetadataFactory = $this->entityManager->getMetadataFactory();
-        foreach($this->classMetadataManipulator->getAllClassNames() as $className)
-        {
-            $this->getAncestor($className);
-            $this->getAnnotations($className);
-        }
+            /**
+             * @var ClassMetadataFactory
+             */
+            foreach($this->classMetadataManipulator->getAllClassNames() as $className)
+            {
+                $this->getAncestor($className);
+                $this->getAnnotations($className);
+            }
 
-        // Warmup controllers
-        foreach($this->router->getRouteCollection()->all() as $route) {
+            // Warmup controllers
+            foreach($this->router->getRouteCollection()->all() as $route) {
 
-            $className = explode("::", $route->getDefaults()["_controller"] ?? "")[0] ?? "";
-            if(!class_exists($className)) continue;
+                $className = explode("::", $route->getDefaults()["_controller"] ?? "")[0] ?? "";
+                if(!class_exists($className)) continue;
 
-            $this->getAncestor($className);
-            $this->getAnnotations($className);
-        }
+                $this->getAncestor($className);
+                $this->getAnnotations($className);
+            }
 
-        $this->commitCache();
+            $this->commitCache();
+        });
+
         return true;
     }
 

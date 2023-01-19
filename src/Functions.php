@@ -2453,4 +2453,25 @@ namespace {
 
         return preg_match("/^$regex$/i", $url); // `i` flag for case-insensitive
     }
+
+    function callable_hash(mixed $func): string
+    {
+        if(!is_callable($func)) throw new Exception("Function must be a callable");
+        if(is_string($func)) return $func;
+
+        if(is_array($func)) {
+
+            if(count($func) !== 2) throw new Exception("Array-callables must have exactly 2 elements");
+            if(!is_string($func[1])) throw new Exception("Second element of array-callable must be a string function name");
+            if(is_object($func[0])) return spl_object_hash($func[0]).'::'.$func[1];
+            elseif(is_string($func[0])) return implode('::',$func);
+            throw new Exception("First element of array-callable must be a class name or object instance");
+
+        }
+        
+        if(is_object($func))
+            return spl_object_hash($func);
+
+        throw new Exception("Unhandled callable type");
+    }
 }

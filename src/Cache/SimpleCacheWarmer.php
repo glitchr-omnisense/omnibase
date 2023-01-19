@@ -22,7 +22,6 @@ abstract class SimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements S
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");
 
         $this->simpleCache = $simpleCache;
-
         $this->cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], get_class($simpleCache)).".php";
         parent::__construct($this->cacheFile);
     }

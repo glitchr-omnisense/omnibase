@@ -15,7 +15,7 @@ trait SimpleCacheTrait
         $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));
         $this->warmUp($cacheDir);
     }
-
+    
     protected function getCacheKey(string $realClassName): string
     {
         return str_replace(['\\', '/'], ['__', '_'], $realClassName);
@@ -50,11 +50,19 @@ trait SimpleCacheTrait
         $this->saveDeferred |= $deferred;
         return $this;
     }
-
+    
     public function commitCache()
     {
         if ($this->cache && $this->saveDeferred)
             $this->cache->commit();
+
+        return $this;
+    }
+
+    public function executeOnce(callable $fn)
+    {
+        $keyCache = "/ExecuteOnce/".callable_hash($fn);
+        $this->getCache($keyCache, $fn);
 
         return $this;
     }
