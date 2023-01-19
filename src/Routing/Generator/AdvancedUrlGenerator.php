@@ -45,6 +45,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
 
                     $parse = parse_url2(get_url());
+                    
                     $parameterNames = array_flip($matches[1]);
                     $routeParameters = array_merge(
                         array_intersect_key($parse, $parameterNames),

@@ -35,6 +35,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Traversable;
 
@@ -595,15 +596,19 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //
             // Prepare variables
+            $tokenName = "select2";
+            $token = $this->csrfTokenManager->getToken($tokenName)->getValue();
+           
             $array = [
                 "class"      => $options["class"],
                 "fields"     => $options["autocomplete_fields"],
                 "filters"    => $options["choice_filter"],
                 'capitalize' => $options["capitalize"],
                 "html"       => $options["html"],
-                "token"      => $this->csrfTokenManager->getToken("select2")->getValue()
+                "token_name" => $tokenName,
+                "token"      => $token
             ];
-
+            
             $hash = $this->obfuscator->encode($array);
 
             //
