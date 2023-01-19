@@ -15,6 +15,9 @@ use Base\Field\DateTimePickerField;
 
 class DateTimePickerConfigurator implements FieldConfiguratorInterface
 {
+    /**
+     * @var IntlFormatter
+     */
     private $intlFormatter;
 
     public function __construct()

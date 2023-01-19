@@ -20,6 +20,21 @@ use function Symfony\Component\String\u;
 
 class IdConfigurator implements FieldConfiguratorInterface
 {
+    /**
+     * @var AuthorizationCheckerInterface
+     */
+    private $authorizationChecker;
+
+    /**
+     * @var AdminUrlGenerator
+     */
+    private $adminUrlGenerator;
+
+    /**
+     * @var RouterInterface
+     */
+    private $router;
+
     public function __construct(AuthorizationCheckerInterface $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, RouterInterface $router)
     {
         $this->authorizationChecker = $authorizationChecker;

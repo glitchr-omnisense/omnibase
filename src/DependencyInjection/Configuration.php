@@ -196,7 +196,6 @@ class Configuration implements ConfigurationInterface
                 ->end()
 
                 ->arrayNode('router')->addDefaultsIfNotSet()
-
                     ->children()
                         ->booleanNode('use_advanced_features')
                             ->info('Use custom router')
@@ -221,6 +220,11 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('ip_access')
                             ->info('Allow accessing by')
                             ->defaultValue(false)
+                        ->end()
+
+                        ->booleanNode('fallback_warning')
+                            ->info('Fallback warning disable in case there is no fallback')
+                            ->defaultValue(true)
                         ->end()
 
                         ->arrayNode('fallbacks')
@@ -254,7 +258,7 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                     ->integerNode('port')
                                         ->info('Port')
-                                        ->defaultValue(null)
+                                        ->defaultValue('%env(HTTP_PORT)%')
                                     ->end()
                                 ->end()
                             ->end()

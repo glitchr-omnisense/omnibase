@@ -122,11 +122,11 @@ class AccessVoter extends Voter
                 if(!$isRestrictedFirewall) return true;
 
                 $url = parse_url($url);
-                $urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions") ?? [], "locale", $this->localeProvider->getLocale());
-                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions") ?? [], "locale", $this->localeProvider->getLang());
-                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions") ?? [], "locale", $this->localeProvider->getDefaultLocale());
-                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions") ?? [], "locale", $this->localeProvider->getDefaultLang());
-                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions") ?? [], "locale", null) ?? [];
+                $urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getLocale());
+                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getLang());
+                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getDefaultLocale());
+                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getDefaultLang());
+                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", null) ?? [];
 
                 foreach($urlExceptions as $urlException) {
 

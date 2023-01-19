@@ -360,12 +360,12 @@
                                             <h1 class="title">
                                             {% set url = ea.crud is not null and ea.crud.getCurrentPage() == "detail" ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
                                             {% set isHtml = _content_title != (_content_title|striptags) %}
-
+                                           
                                             {% if url is not empty and not isHtml %}<a href="{{url}}">{% endif %}
                                                 {{ _content_title|raw }}
                                             {% if url is not empty %}</a>{% endif %}
 
-                                            {% set _content_help = block('content_help') ?? null %}
+                                            {% set _content_help = block('content_help') ?? null %}                                           
                                             {% if _content_help is not empty %}
                                                 {{ _content_help|raw }}
                                             {% else %}
@@ -383,6 +383,7 @@
                                                     <i class="far fa-question-circle" data-toggle="tooltip" title="{{ helpMessage|e('html_attr') }}"></i>
                                                 </span>
                                                 {% endif %}
+
                                             {% endif %}
                                             </h1>
 
@@ -392,6 +393,7 @@
                                             {% else %}
                                                 <span>{{ ea_extra.text(ea.crud.getCurrentPage() ?? null)|raw }}</span>
                                             {% endif %}
+
                                         </div>
 
                                         {% block page_actions_wrapper %}

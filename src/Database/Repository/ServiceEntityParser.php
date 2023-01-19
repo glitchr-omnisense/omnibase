@@ -74,6 +74,7 @@ class ServiceEntityParser
     public const OPTION_LOWER_EQUAL   = "LowerEqualTo";
 
     // Datetime related options
+    public const OPTION_WITHIN        = "Within";
     public const OPTION_OLDER         = "OlderThan";
     public const OPTION_OLDER_EQUAL   = "OlderEqualTo";
     public const OPTION_YOUNGER       = "YoungerThan";
@@ -218,8 +219,6 @@ class ServiceEntityParser
         $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
         if(!$query) return null;
 
-        // dump($query);
-        // exit(1);
         return $query->getResult();
     }
 
@@ -228,7 +227,7 @@ class ServiceEntityParser
     {
         // Parse method and call it
         list($method, $arguments) = $this->__parse($method, $arguments);
-
+      
         try { $ret = $this->$method(...$arguments); }
         finally { // Reset internal variables, even if exception happens.
                   // (e.g. wrong Query in Controller, but additional queries in Subscriber)
@@ -239,7 +238,7 @@ class ServiceEntityParser
             $this->cacheable = false;
             $this->eagerly = false;
         }
-
+        
         return $ret;
     }
 
@@ -358,6 +357,7 @@ class ServiceEntityParser
                 str_contains($field, self::OPTION_NOT_OVER)          ||
                 str_contains($field, self::OPTION_YOUNGER)           ||
                 str_contains($field, self::OPTION_OLDER)             ||
+                str_contains($field, self::OPTION_WITHIN)            ||
                 str_contains($field, self::OPTION_YOUNGER_EQUAL)     ||
                 str_contains($field, self::OPTION_OLDER_EQUAL)       ||
 
@@ -560,79 +560,46 @@ class ServiceEntityParser
                 $oldBy = $by;
 
                 $option = null;
-                if ( str_starts_with($by, self::OPTION_PARTIAL) )
-                    $option = self::OPTION_PARTIAL;
-                else if ( str_starts_with($by, self::OPTION_INSENSITIVE) )
-                    $option = self::OPTION_INSENSITIVE;
-                else if ( str_ends_with($by, self::OPTION_WITH_ROUTE) )
-                    $option = self::OPTION_WITH_ROUTE;
-                else if ( str_ends_with($by, self::OPTION_CLOSESTTO) )
-                    $option = self::OPTION_CLOSESTTO;
-                else if ( str_ends_with($by, self::OPTION_FARESTTO) )
-                    $option = self::OPTION_FARESTTO;
-                else if ( str_ends_with($by, self::OPTION_BUT) )
-                    $option = self::OPTION_BUT;
-                else if ( str_ends_with($by, self::OPTION_INSTANCEOF) )
-                    $option = self::OPTION_INSTANCEOF;
-                else if ( str_ends_with($by, self::OPTION_NOT_INSTANCEOF) )
-                    $option = self::OPTION_NOT_INSTANCEOF;
-                else if ( str_ends_with($by, self::OPTION_CLASSOF) )
-                    $option = self::OPTION_CLASSOF;
-                else if ( str_ends_with($by, self::OPTION_NOT_CLASSOF) )
-                    $option = self::OPTION_NOT_CLASSOF;
-                else if ( str_ends_with($by, self::OPTION_MEMBEROF) )
-                    $option = self::OPTION_MEMBEROF;
-                else if ( str_ends_with($by, self::OPTION_NOT_MEMBEROF) )
-                    $option = self::OPTION_NOT_MEMBEROF;
+                     if ( str_starts_with($by, self::OPTION_PARTIAL)         ) $option = self::OPTION_PARTIAL;
+                else if ( str_starts_with($by, self::OPTION_INSENSITIVE)     ) $option = self::OPTION_INSENSITIVE;
+                else if ( str_ends_with($by, self::OPTION_WITH_ROUTE)        ) $option = self::OPTION_WITH_ROUTE;
+                else if ( str_ends_with($by, self::OPTION_CLOSESTTO)         ) $option = self::OPTION_CLOSESTTO;
+                else if ( str_ends_with($by, self::OPTION_FARESTTO)          ) $option = self::OPTION_FARESTTO;
+                else if ( str_ends_with($by, self::OPTION_BUT)               ) $option = self::OPTION_BUT;
+                else if ( str_ends_with($by, self::OPTION_INSTANCEOF)        ) $option = self::OPTION_INSTANCEOF;
+                else if ( str_ends_with($by, self::OPTION_NOT_INSTANCEOF)    ) $option = self::OPTION_NOT_INSTANCEOF;
+                else if ( str_ends_with($by, self::OPTION_CLASSOF)           ) $option = self::OPTION_CLASSOF;
+                else if ( str_ends_with($by, self::OPTION_NOT_CLASSOF)       ) $option = self::OPTION_NOT_CLASSOF;
+                else if ( str_ends_with($by, self::OPTION_MEMBEROF)          ) $option = self::OPTION_MEMBEROF;
+                else if ( str_ends_with($by, self::OPTION_NOT_MEMBEROF)      ) $option = self::OPTION_NOT_MEMBEROF;
 
-                else if ( str_ends_with($by, self::OPTION_STARTING_WITH) )
-                    $option = self::OPTION_STARTING_WITH;
-                else if ( str_ends_with($by, self::OPTION_ENDING_WITH) )
-                    $option = self::OPTION_ENDING_WITH;
-                else if ( str_ends_with($by, self::OPTION_NOT_STARTING_WITH) )
-                    $option = self::OPTION_NOT_STARTING_WITH;
-                else if ( str_ends_with($by, self::OPTION_NOT_ENDING_WITH) )
-                    $option = self::OPTION_NOT_ENDING_WITH;
+                else if ( str_ends_with($by, self::OPTION_STARTING_WITH)     ) $option = self::OPTION_STARTING_WITH;
+                else if ( str_ends_with($by, self::OPTION_ENDING_WITH)       ) $option = self::OPTION_ENDING_WITH;
+                else if ( str_ends_with($by, self::OPTION_NOT_STARTING_WITH) ) $option = self::OPTION_NOT_STARTING_WITH;
+                else if ( str_ends_with($by, self::OPTION_NOT_ENDING_WITH)   ) $option = self::OPTION_NOT_ENDING_WITH;
 
-                else if ( str_ends_with($by, self::OPTION_YOUNGER) )
-                    $option = self::OPTION_YOUNGER;
-                else if ( str_ends_with($by, self::OPTION_YOUNGER_EQUAL) )
-                    $option = self::OPTION_YOUNGER_EQUAL;
-                else if ( str_ends_with($by, self::OPTION_OLDER) )
-                    $option = self::OPTION_OLDER;
-                else if ( str_ends_with($by, self::OPTION_OLDER_EQUAL) )
-                    $option = self::OPTION_OLDER_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_YOUNGER)           ) $option = self::OPTION_YOUNGER;
+                else if ( str_ends_with($by, self::OPTION_YOUNGER_EQUAL)     ) $option = self::OPTION_YOUNGER_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_WITHIN)            ) $option = self::OPTION_WITHIN;
+                else if ( str_ends_with($by, self::OPTION_OLDER)             ) $option = self::OPTION_OLDER;
+                else if ( str_ends_with($by, self::OPTION_OLDER_EQUAL)       ) $option = self::OPTION_OLDER_EQUAL;
 
-                else if ( str_ends_with($by, self::OPTION_LOWER_EQUAL) )
-                    $option = self::OPTION_LOWER_EQUAL;
-                else if ( str_ends_with($by, self::OPTION_LOWER) )
-                    $option = self::OPTION_LOWER;
+                else if ( str_ends_with($by, self::OPTION_LOWER_EQUAL)       ) $option = self::OPTION_LOWER_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_LOWER)             ) $option = self::OPTION_LOWER;
 
-                else if ( str_ends_with($by, self::OPTION_GREATER_EQUAL) )
-                    $option = self::OPTION_GREATER_EQUAL;
-                else if ( str_ends_with($by, self::OPTION_GREATER) )
-                    $option = self::OPTION_GREATER;
+                else if ( str_ends_with($by, self::OPTION_GREATER_EQUAL)     ) $option = self::OPTION_GREATER_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_GREATER)           ) $option = self::OPTION_GREATER;
 
-                else if ( str_ends_with($by, self::OPTION_NOT_EQUAL) )
-                    $option = self::OPTION_NOT_EQUAL;
-                else if ( str_ends_with($by, self::OPTION_EQUAL) )
-                    $option = self::OPTION_EQUAL;
-                else if ( str_ends_with($by, self::OPTION_NOT_NULL) )
-                    $option = self::OPTION_NOT_NULL;
-                else if ( str_ends_with($by, self::OPTION_NULL) )
-                    $option = self::OPTION_NULL;
-                else if ( str_ends_with($by, self::OPTION_NOT_EMPTY) )
-                    $option = self::OPTION_NOT_EMPTY;
-                else if ( str_ends_with($by, self::OPTION_EMPTY) )
-                    $option = self::OPTION_EMPTY;
-                else if ( str_ends_with($by, self::OPTION_NOT_TRUE) )
-                    $option = self::OPTION_NOT_TRUE;
-                else if ( str_ends_with($by, self::OPTION_TRUE) )
-                    $option = self::OPTION_TRUE;
-                else if ( str_ends_with($by, self::OPTION_NOT_FALSE) )
-                    $option = self::OPTION_NOT_FALSE;
-                else if ( str_ends_with($by, self::OPTION_FALSE) )
-                    $option = self::OPTION_FALSE;
+                else if ( str_ends_with($by, self::OPTION_NOT_EQUAL)         ) $option = self::OPTION_NOT_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_EQUAL)             ) $option = self::OPTION_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_NOT_NULL)          ) $option = self::OPTION_NOT_NULL;
+                else if ( str_ends_with($by, self::OPTION_NULL)              ) $option = self::OPTION_NULL;
+                else if ( str_ends_with($by, self::OPTION_NOT_EMPTY)         ) $option = self::OPTION_NOT_EMPTY;
+                else if ( str_ends_with($by, self::OPTION_EMPTY)             ) $option = self::OPTION_EMPTY;
+                else if ( str_ends_with($by, self::OPTION_NOT_TRUE)          ) $option = self::OPTION_NOT_TRUE;
+                else if ( str_ends_with($by, self::OPTION_TRUE)              ) $option = self::OPTION_TRUE;
+                else if ( str_ends_with($by, self::OPTION_NOT_FALSE)         ) $option = self::OPTION_NOT_FALSE;
+                else if ( str_ends_with($by, self::OPTION_FALSE)             ) $option = self::OPTION_FALSE;
 
                 switch($option) {
 
@@ -706,6 +673,7 @@ class ServiceEntityParser
                     case self::OPTION_YOUNGER_EQUAL:
                     case self::OPTION_OLDER:
                     case self::OPTION_OLDER_EQUAL:
+                    case self::OPTION_WITHIN:
                     case self::OPTION_OVER:
                     case self::OPTION_NOT_OVER:
 
@@ -987,44 +955,44 @@ class ServiceEntityParser
         $isClassOf    = $this->findCustomOption($fieldRoot, self::OPTION_CLASSOF);
         $isNotClassOf = $this->findCustomOption($fieldRoot, self::OPTION_NOT_CLASSOF);
 
-        $tableOperator   =
 
-            ($this->findCustomOption ($fieldRoot, self::OPTION_INSTANCEOF)    ? self::OPTION_INSTANCEOF    :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_INSTANCEOF)? self::OPTION_NOT_INSTANCEOF:
-            ($this->findCustomOption ($fieldRoot, self::OPTION_CLASSOF)       ? self::OPTION_CLASSOF       :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_CLASSOF)   ? self::OPTION_NOT_CLASSOF   :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_MEMBEROF)      ? self::OPTION_MEMBEROF      :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_MEMBEROF)  ? self::OPTION_NOT_MEMBEROF  :
-
-            // Datetime related options
-            ($this->findCustomOption ($fieldRoot, self::OPTION_OVER)          ? self::OPTION_OVER          :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_OVER)      ? self::OPTION_NOT_OVER      :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_OLDER)         ? self::OPTION_OLDER         :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_OLDER_EQUAL)   ? self::OPTION_OLDER_EQUAL   :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_YOUNGER)       ? self::OPTION_YOUNGER       :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_YOUNGER_EQUAL) ? self::OPTION_YOUNGER_EQUAL :
-
-            // String related options
-            ($this->findCustomOption ($fieldRoot, self::OPTION_STARTING_WITH)     ? self::OPTION_STARTING_WITH     :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_ENDING_WITH)       ? self::OPTION_ENDING_WITH       :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_STARTING_WITH) ? self::OPTION_NOT_STARTING_WITH :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_ENDING_WITH)   ? self::OPTION_NOT_ENDING_WITH   :
-
-            // Number related options
-            ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER)       ? self::OPTION_GREATER       :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER_EQUAL) ? self::OPTION_GREATER_EQUAL :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ? self::OPTION_LOWER         :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL   :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NULL)          ? self::OPTION_NULL          :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_NULL)      ? self::OPTION_NOT_NULL      :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_EMPTY)         ? self::OPTION_EMPTY         :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EMPTY)     ? self::OPTION_NOT_EMPTY     :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_TRUE)          ? self::OPTION_TRUE          :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_TRUE)      ? self::OPTION_NOT_TRUE      :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_FALSE)         ? self::OPTION_FALSE         :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_FALSE)     ? self::OPTION_NOT_FALSE     :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ? self::OPTION_NOT_EQUAL     : self::OPTION_EQUAL
-        )))))))))))))))))))))))))))));
+        $tableOperator = self::OPTION_EQUAL;
+        if($this->findCustomOption ($fieldRoot, self::OPTION_INSTANCEOF)    ) $tableOperator = self::OPTION_INSTANCEOF    ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_INSTANCEOF)) $tableOperator = self::OPTION_NOT_INSTANCEOF;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_CLASSOF)       ) $tableOperator = self::OPTION_CLASSOF       ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_CLASSOF)   ) $tableOperator = self::OPTION_NOT_CLASSOF   ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_MEMBEROF)      ) $tableOperator = self::OPTION_MEMBEROF      ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_MEMBEROF)  ) $tableOperator = self::OPTION_NOT_MEMBEROF  ;
+        
+        // Datetime related options
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_OVER)          ) $tableOperator = self::OPTION_OVER          ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_OVER)      ) $tableOperator = self::OPTION_NOT_OVER      ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_OLDER)         ) $tableOperator = self::OPTION_OLDER         ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_OLDER_EQUAL)   ) $tableOperator = self::OPTION_OLDER_EQUAL   ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_WITHIN)        ) $tableOperator = self::OPTION_WITHIN        ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_YOUNGER)       ) $tableOperator = self::OPTION_YOUNGER       ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_YOUNGER_EQUAL) ) $tableOperator = self::OPTION_YOUNGER_EQUAL ;
+        
+        // String related options
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_STARTING_WITH)    ) $tableOperator = self::OPTION_STARTING_WITH     ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_ENDING_WITH)      ) $tableOperator = self::OPTION_ENDING_WITH       ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_STARTING_WITH)) $tableOperator = self::OPTION_NOT_STARTING_WITH ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_ENDING_WITH)  ) $tableOperator = self::OPTION_NOT_ENDING_WITH   ;
+        
+        // Number related options
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_GREATER)       ) $tableOperator = self::OPTION_GREATER      ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_GREATER_EQUAL) ) $tableOperator = self::OPTION_GREATER_EQUAL;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ) $tableOperator = self::OPTION_LOWER        ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ) $tableOperator = self::OPTION_LOWER_EQUAL  ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NULL)          ) $tableOperator = self::OPTION_NULL         ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_NULL)      ) $tableOperator = self::OPTION_NOT_NULL     ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_EMPTY)         ) $tableOperator = self::OPTION_EMPTY        ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EMPTY)     ) $tableOperator = self::OPTION_NOT_EMPTY    ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_TRUE)          ) $tableOperator = self::OPTION_TRUE         ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_TRUE)      ) $tableOperator = self::OPTION_NOT_TRUE     ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_FALSE)         ) $tableOperator = self::OPTION_FALSE        ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_FALSE)     ) $tableOperator = self::OPTION_NOT_FALSE    ;
+        else if($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ) $tableOperator = self::OPTION_NOT_EQUAL    ; 
 
         if(is_array($tableOperator))
             throw new Exception("Too many operator requested for \"$fieldName\": ".implode(",", $tableOperator));
@@ -1049,12 +1017,12 @@ class ServiceEntityParser
                 else $tableColumn = $fieldName;
         }
 
-        $datetimeRequested = in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL, self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]);
+        $datetimeRequested = in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER, self::OPTION_OLDER, self::OPTION_WITHIN, self::OPTION_OLDER_EQUAL, self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]);
         if($datetimeRequested) {
 
             if(is_numeric($fieldValue)) $fieldValue = ($fieldValue > 0 ? "+" : "-") . $fieldValue . " second" . ($fieldValue > 1 ? "s" : "");
 
-                   if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
+                if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
             else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
             else {
 
@@ -1264,11 +1232,11 @@ class ServiceEntityParser
                 $expr = [];
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "like" : "notLike");
 
-                if(!is_array($fieldValue)) $expr[] = $qb->expr()->$fnExpr($tableColumn, ":${fieldID}");
+                if(!is_array($fieldValue)) $expr[] = $qb->expr()->$fnExpr($tableColumn, ":{$fieldID}");
                 else {
 
                     foreach ($fieldValue as $subFieldID => $_)
-                        $expr[] = $qb->expr()->$fnExpr($fieldID, ":${fieldID}_${subFieldID}");
+                        $expr[] = $qb->expr()->$fnExpr($fieldID, ":{$fieldID}_{$subFieldID}");
                 }
 
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "orX" : "andX");
@@ -1283,7 +1251,7 @@ class ServiceEntityParser
                 if(empty($fieldValue))
                     return $qb->expr()->eq(1,1);
 
-                return $qb->expr()->$fnExpr($tableColumn, ":${fieldID}");
+                return $qb->expr()->$fnExpr($tableColumn, ":{$fieldID}");
 
             } else if($regexRequested) {
 
@@ -1311,7 +1279,7 @@ class ServiceEntityParser
                 if($tableOperator == self::OPTION_EMPTY){
 
                     $expr = [];
-                    $expr[] = $qb->expr()->isNull($tableColumn, ":$fieldID");
+                    $expr[] = $qb->expr()->isNull($tableColumn, ":{$fieldID}");
                     $expr[] = $qb->expr()->eq($tableColumn, "''");
 
                     return $qb->expr()->orX(...$expr);
@@ -1319,7 +1287,7 @@ class ServiceEntityParser
                 } else if($tableOperator == self::OPTION_NOT_EMPTY) {
 
                     $expr = [];
-                    $expr[] = $qb->expr()->isNotNull($tableColumn, ":$fieldID");
+                    $expr[] = $qb->expr()->isNotNull($tableColumn, ":{$fieldID}");
                     $expr[] = $qb->expr()->neq($tableColumn, "''");
 
                     return $qb->expr()->andX(...$expr);
@@ -1348,6 +1316,7 @@ class ServiceEntityParser
                 else if($tableOperator == self::OPTION_OVER)          $fnExpr = "le";
                 else if($tableOperator == self::OPTION_NOT_OVER)      $fnExpr = "gt";
                 else if($tableOperator == self::OPTION_OLDER)         $fnExpr = "lt";
+                else if($tableOperator == self::OPTION_WITHIN)        $fnExpr = "lt";
                 else if($tableOperator == self::OPTION_OLDER_EQUAL)   $fnExpr = "le";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 

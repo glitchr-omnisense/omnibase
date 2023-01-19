@@ -40,7 +40,7 @@ abstract class AbstractIconAdapter extends SimpleCache implements IconAdapterInt
     }
 
     protected $version;
-    public function getVersion(): string { return $this->version ?? "unk."; }
+    public function getVersion(): string { return $this->version ?? "unk"; }
 
     protected $contents = [];
     public function getContents() { return $this->contents; }

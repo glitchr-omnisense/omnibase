@@ -49,8 +49,8 @@ $(document).on("DOMContentLoaded", function () {
             var quill = JSON.parse(el.getAttribute("data-quill-options")) || {};
 
                 // TBI: HTML replacement is in conflict with soft-break line..
-                quill.modules.toolbar.push(["html"]);
                 quill.modules.syntax = false;
+                // quill.modules.toolbar.push(["html"]);
                 // quill.modules.imageResize = {displaySize: true};
                 // quill.modules.imageDrop = true;
                 quill.modules.clipboard = { matchers: [['BR', lineBreakMatcher]] }
@@ -80,46 +80,52 @@ $(document).on("DOMContentLoaded", function () {
                     }
                 }
 
-                quill.modules.toolbar = {
-                    container: quill.modules.toolbar,
-                    handlers: {
-                        'html': function() {
+                // quill.modules.toolbar = {
+                //     container: quill.modules.toolbar,
+                //     handlers: {
+                //         'html': function() {
 
-                            var quillEditor = $("#"+editorId).find(".ql-editor");
-                            var quillToolbar = $("#"+editorId).parent().find(".ql-toolbar");
+                //             var quillEditor = $("#"+editorId).find(".ql-editor");
+                //             var quillToolbar = $("#"+editorId).parent().find(".ql-toolbar");
 
-                            if(disableHTML) {
+                //             if(disableHTML) {
 
-                                quillContent = quillEditor.text();
-                                quillContent = quillContent.replaceAll(/<\/p>\n*/ig, "</p>");
-                                quillContent = quillContent.replaceAll(/<\/h([1-6])>\n*/ig, "</h$1>");
-                                quillContent = quillContent.replaceAll(/<\/pre>\n*/ig, "</pre>");
-                                quillContent = quillContent.replaceAll(/<br\s*\/?>/ig, "");
-                                quillEditor.html(quillContent);
-                                quillEditor.toggleClass("ql-toolbar-html-only");
-                                quillToolbar.toggleClass("ql-toolbar-html-only");
-                                if(placeholder) quillEditor.css("placeholder", placeholder);
+                //                 console.log(quillEditor);
+                //                 quillContent = quillEditor[0].textContent;
+                //                 quillContent = quillContent.replaceAll(/<\/p>\n*/ig, "</p>");
+                //                 quillContent = quillContent.replaceAll(/<\/h([1-6])>\n*/ig, "</h$1>");
+                //                 quillContent = quillContent.replaceAll(/<\/pre>\n*/ig, "</pre>");
+                //                 quillContent = quillContent.replaceAll(/<br\/?>/ig, "<br>\n");
+                //                 console.log(quillEditor[0].innerHTML);
+                //                 console.log($("#"+editorId).find(".ql-editor"));
+                //                 quillEditor[0].innerHTML = quillContent;
+                //                 quillEditor.toggleClass("ql-toolbar-html-only");
+                //                 quillToolbar.toggleClass("ql-toolbar-html-only");
+                //                 if(placeholder) quillEditor.css("placeholder", placeholder);
 
-                            } else {
+                //             } else {
 
-                                quillContent = quillEditor.html();
-                                if(quillContent == "<p><br></p>") quillContent = "";
-                                quillContent = quillContent.replaceAll("\n", "<br>\n");
-                                quillContent = quillContent.replaceAll("</p>", "</p>\n\n");
-                                quillContent = quillContent.replaceAll("</pre>", "</pre>\n\n");
-                                quillContent = quillContent.replaceAll(/<\/h([1-6])>/ig, "</h$1>\n\n");
+                //                 console.log(quillEditor);
+                //                 quillContent = quillEditor[0].innerHTML;
+                //                 if(quillContent == "<p><br></p>") quillContent = "";
+                //                 quillContent = quillContent.replaceAll("<br>", "<br>\n");
+                //                 quillContent = quillContent.replaceAll("</p>", "</p>\n\n");
+                //                 quillContent = quillContent.replaceAll("</pre>", "</pre>\n\n");
+                //                 quillContent = quillContent.replaceAll(/<\/h([1-6])>/ig, "</h$1>\n\n");
 
+                //                 quillEditor[0].textContent = quillContent;
+                //                 quillEditor.toggleClass("ql-toolbar-html-only");
+                //                 quillToolbar.toggleClass("ql-toolbar-html-only");
+                //                 if(placeholderHTML) quillEditor.css("placeholder", placeholderHTML);
+                //             }
 
-                                quillEditor.text(quillContent);
-                                quillEditor.toggleClass("ql-toolbar-html-only");
-                                quillToolbar.toggleClass("ql-toolbar-html-only");
-                                if(placeholderHTML) quillEditor.css("placeholder", placeholderHTML);
-                            }
+                //             disableHTML = !disableHTML;
+                //         }
+                //     }
+                // };
 
-                            disableHTML = !disableHTML;
-                        }
-                    }
-                };
+            var quillContent = el.innerHTML.replaceAll("<p><br></p>", "").replaceAll("<br>", "<br>\n");
+                el.innerHTML = quillContent;
 
             var quillEditor = new Quill('#'+editorId, quill);
                 quillEditor.on('text-change', function() {
@@ -158,10 +164,6 @@ $(document).on("DOMContentLoaded", function () {
             });
 
             $('#'+editorId).find(".ql-editor").css("min-height", quill["height"]);
-
-            var quillEditor = $("#"+editorId).find(".ql-editor");
-            var quillContent = quillEditor.html().replaceAll("<p><br></p>", "").replaceAll("<br>", "\n");
-                quillEditor.html(quillContent);
         }));
     });
 

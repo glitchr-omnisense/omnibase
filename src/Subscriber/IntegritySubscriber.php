@@ -122,7 +122,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
-
+       
         if(!$integrity) {
 
             if($token) {
@@ -231,6 +231,8 @@ class IntegritySubscriber implements EventSubscriberInterface
         if($this->secret == null) return true;
 
         $marshaller = $this->vault->getMarshaller();
+        if($marshaller == null) return true;
+ 
         $session = $this->requestStack->getSession();
         if (!$session->get("_integrity/secret")) return false;
 

@@ -1,8 +1,7 @@
 const Encore = require('@symfony/webpack-encore');
 
 const WebpackBar = require('webpackbar');
-const MediaQueryPlugin = require('media-query-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const MediaQueryPlugin = require('@glitchr/media-query-plugin');
 
 Encore.addPlugin(new WebpackBar())
 
@@ -59,12 +58,7 @@ Encore.addPlugin(new WebpackBar())
         pattern: /\.svg$/
     })
 
-    .configureCssMinimizerPlugin((options) => {
-        options.minimizerOptions = { preset: ['default', {svgo: false}] };
-    })
-
     .disableSingleRuntimeChunk()
-    .configureCssMinimizerPlugin()
 
     // enables and configure @babel/preset-env polyfills
     .configureBabelPresetEnv((config) => {
@@ -76,6 +70,7 @@ Encore.addPlugin(new WebpackBar())
     .autoProvidejQuery()
 
     .addEntry('base-async', './assets/base-async.js')
+    .addEntry('base-defer', './assets/base-defer.js')
     .addEntry('easyadmin-async', './assets/easyadmin-async.js')
     .addEntry('form-defer', './assets/form-defer.js')
 
@@ -91,7 +86,7 @@ Encore.addPlugin(new WebpackBar())
     })
 
     .addPlugin(new MediaQueryPlugin({
-        include: ["base-defer", "easyadmin-async", "form-defer"],
+        include: ["base-async", "easyadmin-async", "form-defer"],
         queries: {
 
           // Standard

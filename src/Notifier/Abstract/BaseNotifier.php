@@ -11,7 +11,7 @@ use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
@@ -67,7 +67,44 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     protected $policy;
 
-    public function getPolicy(): ChannelPolicyInterface { return $this->policy; }
+    /**
+     * @var EntityManager
+     */
+    protected $entityManager;
+
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+
+    /**
+     * @var SettingBag
+     */
+    protected $settingBag;
+
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+
+    protected bool $debug;
+
+    /** * @var ?RecipientInterface */
+    protected $technicalRecipient;
+    /** * @var bool */
+    protected ?bool $technicalLoopback;
+    /** * @var RecipientInterface */
+    protected $testRecipient;
 
     /**
      * @var array
@@ -81,6 +118,44 @@ abstract class BaseNotifier implements BaseNotifierInterface
     protected array $testRecipients;
 
     public function getTestRecipients(): array{ return $this->testRecipients; }
+    
+    public function getEnvironment() : Environment { return $this->twig; }
+    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy, EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
+    {
+        $this->twig          = $twig;
+        $this->notifier      = $notifier;
+        $this->policy        = $policy;
+        $this->router        = $router;
+
+        $this->adminRole          = $parameterBag->get("base.notifier.admin_role");
+        $this->options            = $parameterBag->get("base.notifier.options") ?? [];
+
+        $this->testRecipients     = array_map(fn($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
+
+        $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email");
+        $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
+        $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
+        $this->technicalLoopback = $parameterBag->get("base.notifier.technical_loopback");
+
+        $this->entityManager  = $entityManager;
+        $this->settingBag     = $settingBag;
+        $this->localeProvider = $localeProvider;
+        $this->translator     = $translator;
+
+        $this->debug          = $debug;
+
+        // Address support only once..
+        $adminRecipients = [];
+
+        foreach ($this->getAdminUsers() as $adminUser)
+            $adminRecipients[] = $adminUser->getRecipient();
+
+        foreach (array_unique_map(fn($r) => $r->getEmail(), $adminRecipients) as $adminRecipient)
+           $this->notifier->addAdminRecipient($adminRecipient);
+    }
+
+    public function getPolicy(): ChannelPolicyInterface { return $this->policy; }
+
     public function hasLoopback(): bool { return $this->technicalLoopback; }
     public function isTest(RecipientInterface $recipient): bool
     {
@@ -101,8 +176,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
      * @var string
      */
     protected string $adminRole;
-
-    public function getAdminRecipient($i = 0): ?Recipient { return $this->notifier->getAdminRecipients()[$i] ?? null; }
+    public function getAdminRecipient($i = 0): ?RecipientInterface { return $this->notifier->getAdminRecipients()[$i] ?? null; }
     public function getAdminRecipients(): array { return $this->notifier->getAdminRecipients(); }
     protected function getAdminUsers()
     {
@@ -118,7 +192,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $adminUsers;
     }
 
-    public function getTechnicalRecipient(): Recipient
+    public function getTechnicalRecipient(): RecipientInterface
     {
         $mail = $this->settingBag->getScalar("base.settings.mail");
         if(!$mail) $mail = $this->getAdminRecipient()?->getEmail();
@@ -167,80 +241,6 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         $this->router = $router;
         return $this;
-    }
-
-    /**
-     * @var EntityManager
-     */
-    protected $entityManager;
-
-    /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBag;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-    /**
-     * @var LocaleProvider
-     */
-    protected $localeProvider;
-
-    /**
-     * @var SettingBag
-     */
-    protected $settingBag;
-
-    /**
-     * @var TranslatorInterface
-     */
-    protected $translator;
-
-    protected bool $debug;
-
-    /** * @var ?Recipient */
-    protected $technicalRecipient;
-    /** * @var bool */
-    protected ?bool $technicalLoopback;
-    /** * @var Recipient */
-    protected $testRecipient;
-
-    public function getEnvironment() : Environment { return $this->twig; }
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy, EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
-    {
-        $this->twig          = $twig;
-        $this->notifier      = $notifier;
-        $this->policy        = $policy;
-        $this->router        = $router;
-
-        $this->adminRole          = $parameterBag->get("base.notifier.admin_role");
-        $this->options            = $parameterBag->get("base.notifier.options") ?? [];
-
-        $this->testRecipients     = array_map(fn($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
-
-        $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email");
-        $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
-        $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
-        $this->technicalLoopback = $parameterBag->get("base.notifier.technical_loopback");
-
-        $this->entityManager  = $entityManager;
-        $this->settingBag     = $settingBag;
-        $this->localeProvider = $localeProvider;
-        $this->translator     = $translator;
-
-        $this->debug          = $debug;
-
-        // Address support only once..
-        $adminRecipients = [];
-
-        foreach ($this->getAdminUsers() as $adminUser)
-            $adminRecipients[] = $adminUser->getRecipient();
-
-        foreach (array_unique_map(fn($r) => $r->getEmail(), $adminRecipients) as $adminRecipient)
-           $this->notifier->addAdminRecipient($adminRecipient);
     }
 
     public function getDefaultChannels(string $importance) { return User::getNotifier()->getPolicy()->getChannels($importance); }

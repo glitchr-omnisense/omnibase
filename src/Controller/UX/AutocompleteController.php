@@ -26,6 +26,23 @@ class AutocompleteController extends AbstractController
      */
     protected $paginator;
 
+    /**
+     * @var ObfuscatorInterface
+     */
+    protected $obfuscator;
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+    /**
+     * @var Autocomplete
+     */
+    protected $autocomplete;
+
     public function __construct(ObfuscatorInterface $obfuscator, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->obfuscator = $obfuscator;

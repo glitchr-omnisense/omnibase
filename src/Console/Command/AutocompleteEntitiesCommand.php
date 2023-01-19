@@ -21,6 +21,11 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'autocomplete:entities', aliases:[], description:'')]
 class AutocompleteEntitiesCommand extends Command
 {
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+    
     public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         ClassMetadataManipulator $classMetadataManipulator)
     {

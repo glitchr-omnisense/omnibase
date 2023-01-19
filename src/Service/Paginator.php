@@ -4,12 +4,22 @@ namespace Base\Service;
 
 use Base\Service\Model\Pagination;
 use Doctrine\ORM\Query;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 class Paginator implements PaginatorInterface
 {
+    /**
+     * @var RouterInterface
+     */
     protected $router;
-    public function __construct(RouterInterface $router, ParameterBag $parameterBag)
+
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag)
     {
         $this->router = $router;
         $this->parameterBag = $parameterBag;

@@ -6,7 +6,8 @@ use BackupManager\Filesystems\Destination;
 use Base\Console\Command;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Service\TimeMachine;
+use Base\Service\TimeMachineInterface;
+use Base\Service\FlysystemInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -14,44 +15,42 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(name:'timemachine:snapshot:restore', aliases:[], description:'')]
-class TimeMachineSnapshotRestoreCommand extends Command
+class TimeMachineSnapshotRestoreCommand extends TimeMachineSnapshotCommand
 {
-    /**
-     * @var TimeMachine
-     */
-    protected $timeMachine;
-
-    public function __construct(
-        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
-        TimeMachine $timeMachine)
-    {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
-        $this->timeMachine = $timeMachine;
-    }
-
     protected function configure(): void
     {
-        $this->addArgument('storage', InputArgument::IS_ARRAY, 'What storages do you want to upload the backup to? Must be array.');
-        $this->addOption  ('version', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', 'null');
-        $this->addOption  ('id', null, InputOption::VALUE_OPTIONAL, 'Which ID do you want to process?', 'null');
+        parent::configure();
+        $this->addOption('id', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $version   = $input->getOption('version') ?? -1;
-        foreach($this->timeMachine->getSnapshots() as $snapshot)
-            dump($snapshot);
+        parent::execute($input, $output);
 
-        $filename = $this->filePrefix."-".(new \DateTime())->format('Ymd')."-".$version;
+        $storages = $input->getArgument('storages') ?? [];
+        $prefix   = $input->getOption('prefix')     ?? null;
+        $cycle    = $input->getOption('cycle')      ?? -1;
+        $id       = $input->getOption('id')         ?? -1;
 
-        $destinations = [];
-        foreach ($input->getArgument('destinations') as $name)
-            $destinations[] = new Destination($name, $filename);
+        if(!$storages) return Command::FAILED;
+        
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('You are about to restore an old version. Do you wish to continue ? [y/N] ', false);
+        if (!$helper->ask($input, $output, $question)) {
+            return Command::SUCCESS;
+        }
+        
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('Do you wish to restore application from tarball ? [y/N] ', false);
+        $restoreApplication = $helper->ask($input, $output, $question);
 
-        $this->timeMachine->restore($id, $version);
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('Do you wish to restore database from tarball ? [y/N] ', false);
+        $restoreDatabase = $helper->ask($input, $output, $question);
 
-        return Command::SUCCESS;
+        return $this->timeMachine->restore($id, $restoreDatabase, $restoreApplication, $storages, $prefix, $cycle);
     }
 }

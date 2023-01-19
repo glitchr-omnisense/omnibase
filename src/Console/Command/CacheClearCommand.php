@@ -2,6 +2,7 @@
 
 namespace Base\Console\Command;
 
+use Base\Traits\CacheClearTrait;
 use Base\Console\Command;
 use Base\Notifier\Notifier;
 use Base\Service\Flysystem;
@@ -16,28 +17,52 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+use Base\Routing\RouterInterface;
+
 #[AsCommand(name:'cache:clear', aliases:[], description:'')]
 class CacheClearCommand extends Command
 {
+    use CacheClearTrait;
+
+    /** @var string */
+    protected string $projectDir;
+    /** @var string */
+    protected string $cacheDir;
+    /** @var string */
+    protected string $testFile;
+    /** @var string */
+    protected string $testFileExists;
+
+    /**
+     * @var SymfonyCacheClearCommand
+     */
+    protected $cacheClearCommand;
+
     /**
      * @var Flysystem
      */
     protected $flysystem;
-
+    
     /**
      * @var Notifier
      */
     protected $notifier;
     
+    /**
+     * @var Router
+     */
+    protected $router;
+    
     public function __construct(
         LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
-        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, string $projectDir, string $cacheDir)
+        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, RouterInterface $router, string $projectDir, string $cacheDir)
     {
         parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
 
         $this->flysystem = $flysystem;
         $this->notifier  = $notifier;
+        $this->router    = $router;
 
         $this->projectDir  = $projectDir;
         $this->cacheDir    = $cacheDir;
@@ -48,6 +73,7 @@ class CacheClearCommand extends Command
         parent::configure();
         $this
             ->setDefinition([
+                new InputOption('no-extension', '', InputOption::VALUE_NONE, 'Skip base extension'),
                 new InputOption('no-warmup', '', InputOption::VALUE_NONE, 'Do not warm up the cache'),
                 new InputOption('no-optional-warmers', '', InputOption::VALUE_NONE, 'Skip optional cache warmers (faster)'),
             ])
@@ -65,59 +91,29 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $noExtension = $input->getOption('no-extension') ?? true;
+        if(!$noExtension) {
 
-        $testFile = $this->cacheDir."/.test";
-        $testFileExists = file_exists($testFile);
+            $this->phpConfigCheck($io);
+            $this->diskAndMemoryCheck($io);
+            
+            $this->testFile = $this->cacheDir."/.test";
+            $this->testFileExists = file_exists($this->testFile);
+        }
 
         $this->cacheClearCommand->setApplication($this->getApplication());
         $ret = $this->cacheClearCommand->execute($input, $output);
 
-        //
-        // Check for node_modules directory
-        if(!is_dir($this->projectDir."/var/modules") && !is_dir($this->projectDir."/node_modules")) {
+        if(!$noExtension) {
 
-            $io->error(
-                'Node package manager directory `'.$this->projectDir."/node_modules".'` is missing. '.PHP_EOL.
-                'Run `npm install` to setup your dependencies !'
-            );
+            $this->webpackCheck($io);
+            $this->routerFallbackWarning($io);
+            
+            $this->doubleCacheClearCheck($io);
+            $this->routerFallbackWarning($io);
+            $this->generateSymlinks($io);
+            $this->technicalSupportCheck($io);
         }
-
-        //
-        // Run second cache clear command
-        file_put_contents($testFile, "Hello World !");
-        if(!$testFileExists)
-            $io->warning('Cache requires to run a second `cache:clear` to account for the custom base bundle features.');
-
-        //
-        // Generate flysystem public symlink
-
-        $storageNames = $this->flysystem->getStorageNames(false);
-        if($storageNames)
-            $io->note("Flysystem symlink(s) got generated in public directory.");
-
-        foreach($storageNames as $storageName) {
-
-            if(!$this->flysystem->hasStorage($storageName.".public"))
-                continue;
-
-            $realPath = str_rstrip($this->flysystem->prefixPath("", $storageName), "/");
-
-            $publicPath = $this->flysystem->getPublicRoot($storageName.".public");
-            $publicPath = str_rstrip($publicPath, "/");
-            if($realPath == $publicPath)
-                continue;
-
-            if(is_link($publicPath) || file_exists($publicPath)) {
-
-                if(is_link($publicPath)) unlink($publicPath);
-                else if(is_emptydir($publicPath)) rmdir($publicPath);
-                else exit("Public path \"$publicPath\" already exists but it is not a symlink\n");
-            }
-
-            symlink($realPath, $publicPath);
-        }
-
-        $io->note("Technical recipient configured: ".$this->notifier->getTechnicalRecipient());
 
         return $ret;
     }

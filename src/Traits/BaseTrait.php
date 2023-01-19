@@ -16,7 +16,7 @@ use Base\Service\LocaleProviderInterface;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;

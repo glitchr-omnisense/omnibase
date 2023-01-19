@@ -33,11 +33,13 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 #[AsCommand(name:'doctrine:database:import', aliases:[], description:'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
 {
-    public const OFFSET_TOP = 2;
+    public const OFFSET = 2;
+
     /**
      * @var EntityManager
      */
@@ -67,8 +69,7 @@ class DoctrineDatabaseImportCommand extends Command
 
         $this->entityHydrator = $entityHydrator;
         $this->notifier       = $notifier;
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
-
+       
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->classMetadataManipulator->setGlobalTrackingPolicy(ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT);
         $this->serializer = new Serializer([], [
@@ -376,7 +377,7 @@ class DoctrineDatabaseImportCommand extends Command
                         if ($special) {
 
                             $resolvedFieldPath = $this->classMetadataManipulator->resolveFieldPath($entityName, $fieldPath);
-                            if($resolvedFieldPath === null) throw new Exception("Cannot resolve field path \"$fieldPath\" for \"$entityName\" for entry #".($iEntry+self::OFFSET_TOP+1));
+                            if($resolvedFieldPath === null) throw new Exception("Cannot resolve field path \"$fieldPath\" for \"$entityName\" for entry #".($iEntry+self::OFFSET+1));
 
                             $fieldName = explode(".", $resolvedFieldPath);
                             $fieldName = end($fieldName);
@@ -417,29 +418,29 @@ class DoctrineDatabaseImportCommand extends Command
 
                                                     $v = $targetRepository->findBy($vBak);
                                                     if(count($v) > 1)
-                                                        throw new Exception("Failed to parse \"".$targetName."\";\nduplicate entity returned with \"".$fieldName."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ? double check case ?)");
+                                                        throw new Exception("Failed to parse \"".$targetName."\";\nduplicate entity returned with \"".$fieldName."\" for entry #".($iEntry+self::OFFSET+1)."\n(did you forgot to explode the input string ? double check case ?)");
 
                                                     $v = first($v);
 
                                                 } else $v = array_filter(array_map(function($e) use ($fieldName, $targetName, $targetRepository, $iEntry) {
 
                                                     if(!is_array($e))
-                                                        throw new Exception("Failed to parse \"".$targetName."\";\nunexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ? double check case ?)");
+                                                        throw new Exception("Failed to parse \"".$targetName."\";\nunexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET+1)."\n(did you forgot to explode the input string ? double check case ?)");
 
                                                     $e = array_filter($e);
                                                     if(empty($e))
-                                                        throw new Exception("Failed to find entity for \"".$targetName."::$fieldName\";\nunexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ? double check case ?)");
+                                                        throw new Exception("Failed to find entity for \"".$targetName."::$fieldName\";\nunexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET+1)."\n(did you forgot to explode the input string ? double check case ?)");
 
                                                     $findBy = $targetRepository->findBy($e);
                                                     if(empty($findBy))
-                                                        throw new Exception("Failed to find entity for \"".$targetName."::$fieldName\";\ninput was \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ? double check case ?)");
+                                                        throw new Exception("Failed to find entity for \"".$targetName."::$fieldName\";\ninput was \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET+1)."\n(did you forgot to explode the input string ? double check case ?)");
 
                                                     return first($findBy);
 
                                                 }, $vBak));
 
                                                 if($v === null)
-                                                    throw new Exception("Failed to find \"".$targetName."\" with parameters \"".serialize($vBak)."\" for entry #".($iEntry+self::OFFSET_TOP+1));
+                                                    throw new Exception("Failed to find \"".$targetName."\" with parameters \"".serialize($vBak)."\" for entry #".($iEntry+self::OFFSET+1));
                                             }
                                         }
 
@@ -451,7 +452,7 @@ class DoctrineDatabaseImportCommand extends Command
                                         $enumType = substr($special, 0, strlen($special)-1);
 
                                         $typeOfField = $this->classMetadataManipulator->getTargetClass($targetName, $fieldName);
-                                        if(!is_instanceof($typeOfField, $enumType)) throw new Exception("Incompatibility between EnumType provided \"".$enumType."\" and database type \"".$typeOfField."\" for entry #".($iEntry+self::OFFSET_TOP+1));
+                                        if(!is_instanceof($typeOfField, $enumType)) throw new Exception("Incompatibility between EnumType provided \"".$enumType."\" and database type \"".$typeOfField."\" for entry #".($iEntry+self::OFFSET+1));
 
                                         if (is_instanceof($enumType, SetType::class)) {
 
@@ -466,10 +467,10 @@ class DoctrineDatabaseImportCommand extends Command
                                         } else if (is_instanceof($enumType, EnumType::class)) {
 
                                             $v = $enumType::getValue($v) ;
-                                            if(!$v) throw new Exception("Invalid enum key provided for EnumType \"".$enumType."\" for entry #".($iEntry+self::OFFSET_TOP+1));
+                                            if(!$v) throw new Exception("Invalid enum key provided for EnumType \"".$enumType."\" for entry #".($iEntry+self::OFFSET+1));
 
                                         } else {
-                                            throw new Exception("Class must be either \"".EnumType::class."\" or \"".SetType::class."\" for entry #".($iEntry+self::OFFSET_TOP+1));
+                                            throw new Exception("Class must be either \"".EnumType::class."\" or \"".SetType::class."\" for entry #".($iEntry+self::OFFSET+1));
                                         }
 
                                         break;
@@ -555,7 +556,7 @@ class DoctrineDatabaseImportCommand extends Command
                                 $counter++;
 
                             } catch (\Exception $e) {
-                                $msg = " Failed to write ".$this->translator->transEntity($entity)."(".$entity.") for entry #".($iEntry+self::OFFSET_TOP+1);
+                                $msg = " Failed to write ".$this->translator->transEntity($entity)."(".$entity.") for entry #".($iEntry+self::OFFSET+1);
                                 $output->writeln('');
                                 $output->writeln('');
                                 $output->writeln('<red,bkg>'.str_blankspace(strlen($msg)));
@@ -577,7 +578,7 @@ class DoctrineDatabaseImportCommand extends Command
                     $occurences = array_filter(array_count_values($values), fn($v) => $v > 1);
                     $duplicates = !empty($occurences);
                     if($duplicates)
-                        throw new Exception("Duplicate entries \"".implode(",", array_unique(array_keys($occurences)))."\" found for $targetName::$".$uniqueKey ."(for entry #".($iEntry+self::OFFSET_TOP+1));
+                        throw new Exception("Duplicate entries \"".implode(",", array_unique(array_keys($occurences)))."\" found for $targetName::$".$uniqueKey ."(for entry #".($iEntry+self::OFFSET+1));
                 }
             }
         }

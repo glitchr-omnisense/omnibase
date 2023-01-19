@@ -34,7 +34,10 @@ class IsGrantedSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
 
         $controller = $request->attributes->get("_controller") ;
-        list($class, $method) = is_array($controller) ? $controller : explode("::", $controller ?? "");
+        $array  = is_array($controller) ? $controller : explode("::", $controller ?? "");
+        $class  = $array[0] ?? null;
+        $method = $array[1] ?? null;
+
         if(!class_exists($class)) return;
 
         $configurations = array_merge(

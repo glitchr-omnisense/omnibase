@@ -46,6 +46,11 @@ class FileController extends AbstractController
     protected $imageCropRepository;
 
     /**
+     * @var Profiler
+     */
+    protected $profiler;
+
+    /**
      * @var ?bool
      */
     protected $localCache;

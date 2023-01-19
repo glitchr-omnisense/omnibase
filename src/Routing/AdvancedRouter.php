@@ -320,13 +320,17 @@ class AdvancedRouter implements RouterInterface
     public function getScheme(?string $locale = null, ?string $environment = null): string
     {
         $host = $this->getHostParameters($locale, $environment);
-        $use_https = $_SERVER["REQUEST_SCHEME"] ?? $host["use_https"] ?? true;
+
+        $use_https ??= $host["use_https"] ?? $_SERVER["REQUEST_SCHEME"] ?? true;
         return $use_https ? "https" : "http";
     }
 
     public function getBaseDir(?string $locale = null, ?string $environment = null): string
     {
         $host = $this->getHostParameters($locale, $environment);
+        if(array_key_exists("SYMFONY_PROJECT_DEFAULT_ROUTE_PATH", $_SERVER))
+            return $_SERVER['SYMFONY_PROJECT_DEFAULT_ROUTE_PATH'];
+
         if(!is_cli()) $baseDir = $_SERVER['PHP_SELF'] ? dirname($_SERVER['PHP_SELF']) : null;
         $baseDir ??= $host["base_dir"] ?? "";
 
@@ -350,12 +354,16 @@ class AdvancedRouter implements RouterInterface
 
         $domain = $host["domain"] ?? null;
 
-        return $machine.$subdomain.$domain;
+        $port   = $host["port"] ?? null;
+        if ($port == 80 || $port == 443) $port = null;
+        if ($port) $port = ":" . $port;
+
+        return $machine.$subdomain.$domain.$port;
     }
 
     public function getMachine(?string $locale = null, ?string $environment = null): ?string { return $this->getHostParameters($locale, $environment)["machine"] ?? null; }
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string { return $this->getHostParameters($locale, $environment)["subdomain"] ?? null; }
-    public function getDomain(?string $locale = null, ?string $environment = null): string { return $this->getHostParameters($locale, $environment)["domain"] ?? $_SERVER["HTTP_HOST"] ?? "localhost"; }
+    public function getDomain(?string $locale = null, ?string $environment = null): string { return $this->getHostParameters($locale, $environment)["domain"] ?? null; }
     public function getPort(?string $locale = null, ?string $environment = null): ?int
     {
         $host = $this->getHostParameters($locale, $environment);

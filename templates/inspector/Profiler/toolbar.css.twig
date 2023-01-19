@@ -167,10 +167,16 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
   border-bottom-right-radius: 0;
 }
 
-.sf-toolbar-block-right {
+{# .sf-toolbar-block-right:last-of-type
+{
+  margin-right: 36px;
+} #}
+
+.sf-toolbar-block-spacer {
   flex-grow: 2;
   display: flex;
   justify-content: flex-end;
+  background-color: #222;
 }
 
 .sf-toolbar-block .sf-toolbar-icon,
@@ -207,6 +213,7 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
   border-top-left-radius: 1em;
   box-shadow: 0px 0px 3px #0008;
   color:inherit;
+  background-color: #FFFA;
 }
 
 .sf-minitoolbar button
