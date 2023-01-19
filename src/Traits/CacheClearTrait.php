@@ -2,18 +2,85 @@
 
 namespace Base\Traits;
 
+use Base\Database\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
 trait CacheClearTrait
 {
-    protected function routerFallbackWarning(SymfonyStyle $io): void
+    protected function customFeatureWarnings(SymfonyStyle $io): void
     {
+        $useCustomRouter     = $this->parameterBag->get("base.router.use_custom");
+        $useCustomLoader     = $this->parameterBag->get("base.twig.use_custom");
+        $useCustomReader     = $this->parameterBag->get("base.annotations.use_custom");
+        $useSettingBag       = $this->parameterBag->get("base.parameter_bag.use_setting_bag");
+        $useHotParameterBag  = $this->parameterBag->get("base.parameter_bag.use_hot_bag");
+        $useCustomDbFeatures = $this->parameterBag->get("base.database.use_custom");
+
         //
         // Router fallback information 
-        if($this->parameterBag->get("base.router.fallback_warning") && !$this->router->getHostFallback())
-            $io->warning("No host fallback configured in `base.yaml` (configure 'base.router.fallbacks' to remove this message).");
+        if($useCustomRouter === null)
+            $io->warning("Advanced router option is not configured in `base.yaml`".PHP_EOL."(configure 'base.router.use_custom' boolean to remove this message).");
+        else if($useCustomRouter)
+            $io->write(" - Advanced router option is <info>'base.router.use_custom'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+        else
+            $io->write(" - Advanced router option is <info>'base.router.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+
+        if($useCustomRouter === true) {
+
+            if($this->parameterBag->get("base.router.fallback_warning") && !$this->router->getHostFallback())
+            $io->warning("No host fallback configured in `base.yaml`".PHP_EOL."(configure 'base.router.fallbacks' to remove this message or disable `base.router.fallback_warning` warning).");
+        }
+
+        if($this->parameterBag->get("base.database.fallback_warning") && !$this->entityManager->getMetadataFactory() instanceof ClassMetadataFactory)
+            $io->warning("Custom ClassMetadataFactory is configured. No fallback configured in `base.yaml`".PHP_EOL."(configure 'doctrine.orm.class_metadata_factory_name' to remove this message or disable `base.database.fallback_warning` warning).");
+        
+        //
+        // Twig custom loader
+        if($useCustomLoader === null)
+            $io->warning("Advanced twig loader option is not configured in `base.yaml`".PHP_EOL."(configure 'base.twig.use_custom' boolean to remove this message).");
+        else if($useCustomLoader)
+            $io->write(" - Advanced twig loader <info>'base.twig.use_custom'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+        else
+            $io->write(" - Advanced twig loader <info>'base.twig.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+
+        //
+        // Annotation reader
+        if($useCustomReader === null)
+            $io->warning("Advanced annotation reader option is not configured in `base.yaml`".PHP_EOL."(configure 'base.annotations.use_custom' boolean to remove this message).");
+            else if($useCustomReader)
+            $io->write(" - Advanced annotation reader option <info>'base.annotations.use_custom'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+        else
+            $io->write(" - Advanced annotation reader option <info>'base.annotations.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+
+        //
+        // Setting bag
+        if($useSettingBag === null)
+            $io->warning("Setting bag is not configured in `base.yaml`".PHP_EOL."(configure 'base.parameter_bag.use_setting_bag' boolean to remove this message).");
+            else if($useSettingBag)
+            $io->write(" - Setting bag <info>'base.parameter_bag.use_setting_bag'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+        else
+            $io->write(" - Setting bag <info>'base.parameter_bag.use_setting_bag'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+
+        //
+        // Hot parameter bag
+        if($useHotParameterBag === null)
+            $io->warning("Hot parameter feature is not configured in `base.yaml`".PHP_EOL."(configure 'base.parameter_bag.use_hot_bag' boolean to remove this message).");
+            else if($useHotParameterBag)
+            $io->write(" - Hot parameter bag option <info>'base.parameter_bag_use_hot_bag'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+        else
+            $io->write(" - Hot parameter bag option <info>'base.parameter_bag_use_hot_bag'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+
+        //
+        // Doctrine features
+        if($useCustomDbFeatures === null)
+            $io->warning("Custom DB features are not configured in `base.yaml`".PHP_EOL."(configure 'base.database.use_custom' boolean to remove this message).");
+        else if($useCustomDbFeatures)
+            $io->write(" - Custom DB features <info>'base.database.use_custom'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+        else
+            $io->write(" - Custom DB features <info>'base.database.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+
     }
     
     //
@@ -46,7 +113,7 @@ trait CacheClearTrait
         $diskSpace = disk_total_space(".");
         $remainingSpace = $diskSpace - $freeSpace;
         $percentSpace = round(100*$remainingSpace/$diskSpace, 2);
-        $diskSpaceStr = 'Disk space information: '. byte2str($freeSpace) . ' / ' . byte2str($diskSpace) . " available (".$percentSpace." % used)";
+        $diskSpaceStr = 'Disk space information: '. byte2str($freeSpace) . ' / ' . byte2str($diskSpace) . " available".PHP_EOL."(".$percentSpace." % used)";
 
         $memoryLimit = str2dec(ini_get("memory_limit"));
         $memoryLimitStr = $memoryLimit > 1 ? 'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(DECIMAL_PREFIX, 0, 3)) : "";
@@ -72,7 +139,7 @@ trait CacheClearTrait
     {
         $phpConfig = php_ini_loaded_file();
         $maxSize = UploadedFile::getMaxFilesize();
-        $io->note("Loaded PHP Configuration: ".$phpConfig." (might difer from webserver)\nMaximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX));
+        $io->note("Loaded PHP Configuration: ".$phpConfig."".PHP_EOL."(might difer from webserver)\nMaximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX));
     }
 
     protected function technicalSupportCheck(SymfonyStyle $io): void

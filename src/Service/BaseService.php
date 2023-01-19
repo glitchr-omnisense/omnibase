@@ -357,7 +357,9 @@ class BaseService implements RuntimeExtensionInterface
 
     public function setUserIdentifier(string $userIdentifier)
     {
-        User::$identifier = $userIdentifier;
+        if(property_exists(User::class, "identifier"))
+            User::$identifier = $userIdentifier;
+
         return $this;
     }
 

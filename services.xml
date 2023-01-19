@@ -106,6 +106,7 @@
         <service id="Base\Service\SettingBagInterface" alias="Base\Service\SettingBag"/>
         <service id="Base\Service\SettingBag" public="true">
             <tag name="twig.runtime" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="assets.packages" />
@@ -600,6 +601,7 @@
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
             <argument type="service" id="request_stack" />
+            <argument type="service" id="router" />
         </service>
         <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true" >
             <tag name="twig.runtime" />

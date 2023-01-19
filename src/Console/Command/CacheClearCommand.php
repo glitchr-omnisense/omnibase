@@ -96,6 +96,7 @@ EOF
 
             $this->phpConfigCheck($io);
             $this->diskAndMemoryCheck($io);
+            $this->customFeatureWarnings($io);
             
             $this->testFile = $this->cacheDir."/.test";
             $this->testFileExists = file_exists($this->testFile);
@@ -106,11 +107,8 @@ EOF
 
         if(!$noExtension) {
 
-            $this->webpackCheck($io);
-            $this->routerFallbackWarning($io);
-            
+            $this->webpackCheck($io);            
             $this->doubleCacheClearCheck($io);
-            $this->routerFallbackWarning($io);
             $this->generateSymlinks($io);
             $this->technicalSupportCheck($io);
         }

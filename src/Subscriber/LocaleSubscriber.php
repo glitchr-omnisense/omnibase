@@ -3,7 +3,8 @@
 namespace Base\Subscriber;
 
 use App\Entity\User;
-use Base\Service\ReferrerInterface;
+use Base\Entity\User as BaseUser;
+
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 
@@ -55,6 +56,7 @@ class LocaleSubscriber implements EventSubscriberInterface
 
     public function onSwitchUser(SwitchUserEvent $event): void
     {
+        if(!is_instanceof(User::class, BaseUser::class)) return;
         User::setCookie('_locale', $event->getTargetUser()->getLocale());
     }
 
@@ -65,16 +67,23 @@ class LocaleSubscriber implements EventSubscriberInterface
         $_locale = $this->router->match($event->getRequest()->getPathInfo())["_locale"] ?? null;
         $_locale = $_locale ? $this->localeProvider->getLocale($_locale) : null;
 
-        $_locale = $_locale ?? $this->tokenStorage->getToken()?->getUser()->getLocale();
+        $user = $this->tokenStorage->getToken()?->getUser();
+        if ($user instanceof BaseUser)
+            $_locale = $_locale ?? $user->getLocale();
+    
         if($_locale !== null) {
 
-            User::setCookie('_locale', $_locale);
+            if(is_instanceof(User::class, BaseUser::class))
+                User::setCookie('_locale', $_locale);
+
             $this->localeProvider->markAsChanged();
             $locale = $_locale;
         }
 
         $locale ??= $event->getRequest()->cookies->get("_locale");
-        $locale ??= User::getCookie("locale");
+        if(is_instanceof(User::class, BaseUser::class))
+            $locale ??= User::getCookie("locale");
+
         $locale ??= $this->localeProvider->getLocale();
 
         // Normalize locale

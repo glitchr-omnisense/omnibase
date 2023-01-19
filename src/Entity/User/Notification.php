@@ -279,7 +279,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $this->recipient = new NoRecipient();
 
         // Inject service from base class..
-        if (User::getNotifier() == null)
+        if (BaseService::getNotifier() == null)
             throw new Exception("Notifier not found in User class");
 
         // Notification variables
@@ -332,7 +332,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
                 $recipients[] = $userRecipient;
 
         $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
-        User::getNotifier()->sendUsers($this, ...array_unique_object($recipients));
+        BaseService::getNotifier()->sendUsers($this, ...array_unique_object($recipients));
 
         return $this;
     }
@@ -347,7 +347,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $recipients[] = $this->getRecipient();
 
         $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
-        User::getNotifier()->sendUsersBy($channels, $this, ...array_unique_object($recipients));
+        BaseService::getNotifier()->sendUsersBy($channels, $this, ...array_unique_object($recipients));
 
         return $this;
     }
@@ -355,7 +355,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function sendAdmins(string $importance)
     {
         $this->setImportance($importance);
-        User::getNotifier()->sendAdmins($this);
+        BaseService::getNotifier()->sendAdmins($this);
 
         return $this;
     }
@@ -368,7 +368,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
     public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
     {
-        $notifier = User::getNotifier();
+        $notifier = BaseService::getNotifier();
         $notification = EmailMessage::fromNotification($this, $recipient, $transport);
 
         /**
@@ -398,7 +398,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $content = $this->getContent();
         }
 
-        if(User::getNotifier()->isTest($recipient)) {
+        if(BaseService::getNotifier()->isTest($recipient)) {
 
             $fwd .= "Test: ";
             $email = mailparse($recipient->getEmail());
@@ -471,7 +471,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $user = $this->user ?? "User \"" . User::getIp() . "\"";
             $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";
 
-        } else if($this->getRecipient() != $recipient && User::getNotifier()->isTest($recipient)) {
+        } else if($this->getRecipient() != $recipient && BaseService::getNotifier()->isTest($recipient)) {
 
             $user = $recipient;
             $fwd = "Fwd: [TEST:".$recipient."] ";

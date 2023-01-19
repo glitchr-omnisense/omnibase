@@ -61,7 +61,12 @@ class Translator implements TranslatorInterface
     }
 
     public function getLocale(): string { return $this->translator->getLocale(); }
-    public function setLocale(string $locale) { $this->translator->setLocale($locale); }
+    public function setLocale(string $locale) 
+    { 
+        $this->translator->setLocale($locale);
+        return $this;
+    }
+
     public function getFallbackLocales(): array { return $this->translator->getFallbackLocales(); }
 
     public function transQuiet(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true, bool $nullable = true): ?string

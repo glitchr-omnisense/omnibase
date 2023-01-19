@@ -19,7 +19,8 @@ class ParameterBag extends ContainerBag implements ParameterBagInterface, Contai
 
     public function get(string $path = "", ?array $bag = null): array|bool|string|int|float|null
     {
-        if(array_key_exists($path, $bag ?? [])) return $bag[$path];
+        if(array_key_exists($path, $bag ?? [])) 
+            return $bag[$path];
 
         if(!$bag) $bag = $this->normalizeAll();
         else $bag = $this->normalize(null, $bag);

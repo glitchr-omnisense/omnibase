@@ -2,6 +2,7 @@
 
 namespace Base\Twig\Renderer\Adapter;
 
+use Base\Routing\RouterInterface;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Twig\Environment;
@@ -19,10 +20,16 @@ class HtmlTagRenderer extends AbstractTagRenderer
      */
     protected $requestStack;
 
-    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack)
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, RouterInterface $router)
     {
         parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
         $this->requestStack = $requestStack;
+        $this->router = $router;
     }
 
     public function getAsset(string $url): string

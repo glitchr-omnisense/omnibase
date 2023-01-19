@@ -224,7 +224,7 @@ class LocaleProvider extends SimpleCache implements LocaleProviderInterface
         if ($lang === null || !array_key_exists($lang, self::getLocales()))
             $lang = substr(self::getDefaultLocale(),0,2);
 
-        $defaultCountry     = self::getDefaultLocale() ? substr(self::getDefaultLocale(),3,2) : (first(self::$locales[$lang]) ?? null);
+        $defaultCountry     = self::getDefaultLocale() ? substr(self::getDefaultLocale(),3,2) : ($lang == "en" ? "GB" : first(self::$locales[$lang]) ?? null);
         $availableCountries = array_transforms(fn($k, $l):array => $l !== null ? [substr($l,0,2), [substr($l,3,2)]] : null, self::getAvailableLocales());
         $langCountries  = $availableCountries[$lang] ?? [];
 
