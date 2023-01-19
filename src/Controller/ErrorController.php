@@ -18,6 +18,10 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 class ErrorController extends AbstractController
 {
     private $baseService;
+    private $router;
+    private $htmlErrorRenderer;
+    private $profiler;
+
     public function __construct(HtmlErrorRenderer $htmlErrorRenderer, RouterInterface $router, BaseService $baseService, ?Profiler $profiler = null)
     {
         $this->baseService = $baseService;
