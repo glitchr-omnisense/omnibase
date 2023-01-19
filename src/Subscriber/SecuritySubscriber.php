@@ -167,7 +167,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
-
+            
                  if(!$adminAccess) $restrictionType = "admin_restriction";
             else if(!$userAccess)  $restrictionType = "user_restriction";
             else $restrictionType = "public_restriction";
@@ -406,10 +406,13 @@ class SecuritySubscriber implements EventSubscriberInterface
             }
         }
 
-        if($event) $event->setResponse($this->router->redirect($this->referrer->getUrl(), [], 302));
-        if($event) $event->stopPropagation();
-
-        $this->referrer->clear();   
+        if($event && $this->referrer->getUrl() !== null) {
+            
+            $event->setResponse($this->router->redirect($this->referrer->getUrl(), [], 302));
+            $event->stopPropagation();
+            
+            $this->referrer->clear();   
+        }
     }
 
     public function onLogout(LogoutEvent $event)

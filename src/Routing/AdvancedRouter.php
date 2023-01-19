@@ -234,7 +234,7 @@ class AdvancedRouter implements RouterInterface
         return trim($this->generate($nameOrUrl, $parameters, $referenceType));
     }
 
-    public function getAssetUrl(string $nameOrUrl, ?string $packageName = null): string { return $this->assetTwigExtension->getAssetUrl($nameOrUrl ?? get_url(), $packageName); }
+    public function getAssetUrl(?string $nameOrUrl = null, ?string $packageName = null): string { return $this->assetTwigExtension->getAssetUrl($nameOrUrl ?? get_url(), $packageName); }
 
     public function keepMachine(): bool { return $this->keepMachine; }
     public function keepSubdomain(): bool { return $this->keepSubdomain; }

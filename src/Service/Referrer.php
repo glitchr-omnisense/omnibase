@@ -97,6 +97,6 @@ class Referrer implements ReferrerInterface
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
-        return $targetPath ? $targetPath : "/";
+        return $targetPath ? $targetPath : null;
     }
 }

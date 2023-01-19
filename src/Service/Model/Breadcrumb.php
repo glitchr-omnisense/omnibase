@@ -40,6 +40,16 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     public function valid(): bool    { return $this->getLength() > $this->iterator; }
     public function current(): mixed { return $this->getItem($this->iterator); }
 
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+    
+    /**
+     * @var AnnotationReader
+     */
+    protected $annotationReader;
+    
     public function __construct(RouterInterface $router, TranslatorInterface $translator, array $options = [], ?string $template = null)
     {
         $this->router = $router;
