@@ -17,7 +17,7 @@
         {% if renderTooltip %}
             <a href="{{ linkUrl }}" class="{{ action.cssClass }}"
             {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
-                data-toggle="tooltip" data-placement="bottom" title="{{- actionLabel ? actionLabel|e('html_attr')|mb_ucfirst : "" -}}">
+                data-toggle="tooltip" data-placement="bottom" title="{{- actionLabel ? actionLabel|mb_ucfirst : "" -}}">
                 <span class="btn-label">
                     <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
                 </span>
