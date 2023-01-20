@@ -5,7 +5,7 @@ namespace Base\Traits;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
-
+use Base\Database\Mapping\ClassMetadataManipulator;
 trait SimpleCacheTrait
 {
     public function __construct(string $cacheDir)
@@ -55,15 +55,14 @@ trait SimpleCacheTrait
     {
         if ($this->cache && $this->saveDeferred)
             $this->cache->commit();
-
+        
         return $this;
     }
 
-    public function executeOnce(callable $fn)
+    public function executeOnce(callable $fn): mixed
     {
         $keyCache = "/ExecuteOnce/".callable_hash($fn);
-        $this->getCache($keyCache, $fn);
+        return $this->getCache($keyCache, $fn);
 
-        return $this;
     }
 }

@@ -179,6 +179,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)
     {
+        $v = get_lap();
         $entity         = $event->getObject();
 
         $className      = get_class($entity);
@@ -203,7 +204,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
             $annotation->{$eventName}($event, $classMetadata, $entity);
         }
-
+        
         $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
         foreach ($propertyAnnotations as $property => $_) {
 

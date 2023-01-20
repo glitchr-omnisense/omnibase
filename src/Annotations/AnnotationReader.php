@@ -627,6 +627,7 @@ class AnnotationReader extends SimpleCache
         $this->classAnnotations    = $this->getCache("/ClassAnnotations") ?? [];
         $this->methodAnnotations   = $this->getCache("/MethodAnnotations") ?? [];
         $this->propertyAnnotations = $this->getCache("/PropertyAnnotations") ?? [];
+
         $this->executeOnce(function () {
 
             /**

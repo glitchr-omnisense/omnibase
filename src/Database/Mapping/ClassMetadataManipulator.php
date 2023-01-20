@@ -20,6 +20,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
 
+use Base\Cache\SimpleCache;
 use Base\Database\Mapping\Factory\ClassMetadataFactory;
 
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -30,9 +31,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Contracts\Cache\CacheInterface;
 
-class ClassMetadataManipulator
+class ClassMetadataManipulator extends SimpleCache
 {
     /**
      * @var ManagerRegistry
@@ -49,17 +49,16 @@ class ClassMetadataManipulator
      */
     protected array $globalExcludedFields;
 
-    public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, ?CacheInterface $cache = null, array $globalExcludedFields = ['id', 'translatable', 'locale'])
+    protected static string $cacheDir;
+
+    public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, ?string $cacheDir = null, array $globalExcludedFields = ['id', 'translatable', 'locale'])
     {
         $this->doctrine = $doctrine;
         $this->entityManager = $entityManager;
         $this->globalExcludedFields = $globalExcludedFields;
-
-        if($cache !== null) {
-
-            $this->setCache($cache);
-            $this->warmUp();
-        }
+        
+        self::$cacheDir = self::$cacheDir ?? $cacheDir;
+        if($cacheDir) parent::__construct(self::$cacheDir);
     }
 
     public function getEntityManager() : EntityManagerInterface { return $this->entityManager; }
@@ -831,70 +830,40 @@ class ClassMetadataManipulator
         return [];
     }
 
-    /**
-     * Salt used by specific Object Manager implementation.
-     *
-     * @var string
-     */
-    protected $cacheSalt = '__CLASSMETADATA__ENHANCED__';
-
-    /**
-     * @var CacheInterface
-     */
-    protected static $cache;
-
-    protected static array $loadedMetadata = [];
-
-    public function getCache(): ?CacheInterface { return self::$cache; }
-    public function setCache(CacheInterface $cache)
-    {
-        self::$cache = $cache;
-        return $this;
-    }
-
-    public function warmUp(): bool
-    {
-        if(!$this->getCache()) return false;
-
-        foreach($this->getAllClassNames() as $className)
-            $this->getMetadataFor($className);
-
-        return true;
-    }
-
-    protected function getCacheKey(string $realClassName): string
-    {
-        $cacheName       = "base.database.classmetadata_completor.";
-        return $cacheName . str_replace('\\', '__', $realClassName) . $this->cacheSalt;
-    }
-
-    protected function getMetadataFor(object|string $className)
+    protected static array $completors = [];
+    protected function getCompletorFor(object|string $className)
     {
         $className = is_object($className) ? get_class($className) : $className;
-        if ( array_key_exists($this->getCacheKey($className), self::$loadedMetadata) )
-            return self::$loadedMetadata[$this->getCacheKey($className)];
+        if ( array_key_exists($className, self::$completors) )
+            return self::$completors[$className];
 
-        $classMetadataCompletor = $this->getCache()?->getItem($this->getCacheKey($className))->get();
-        self::$loadedMetadata[$this->getCacheKey($className)] = $classMetadataCompletor instanceof ClassMetadataCompletor
-            ? $classMetadataCompletor
-            : new ClassMetadataCompletor($className, []);
-
-            return self::$loadedMetadata[$this->getCacheKey($className)];
+        self::$completors[$className] = new ClassMetadataCompletor($className, []);
+        return self::$completors[$className];
     }
 
-    public function saveCache(ClassMetadataCompletor $completor)
-    {
-        if($this->getCache()) {
 
-            $item = $this->getCache()->getItem($this->getCacheKey($completor->getName()));
-            $item->set(self::$loadedMetadata[$this->getCacheKey($completor->getName())]);
-
-            $this->getCache()->save($item);
-        }
-    }
     public function getClassMetadataCompletor(null|string|object $entityOrClassOrMetadata) : ?ClassMetadataCompletor
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
-        return $classMetadata ? $this->getMetadataFor($classMetadata->name) : null;
+        return $classMetadata ? $this->getCompletorFor($classMetadata->name) : null;
+    }
+
+    public function warmUp(string $cacheDir): bool
+    {
+        self::$completors = self::$completors ?? $this->getCache("/Completors") ?? [];
+        $this->executeOnce(function() {
+
+            foreach($this->getAllClassNames() as $className)
+                $this->getCompletorFor($className);
+
+            $this->setCache("/Completors", self::$completors);
+        });
+        
+        return true;
+    }
+    
+    public function saveCompletors()
+    {
+        $this->setCache("/Completors", self::$completors, true);
     }
 }

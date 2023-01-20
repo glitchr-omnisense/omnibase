@@ -2,7 +2,6 @@
 
 namespace Base\Annotations\Annotation;
 
-use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -51,8 +50,6 @@ class Hierarchify extends AbstractAnnotation
         $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);
         $classMetadataCompletor->entityHierarchy ??= $this->hierarchy;
         $classMetadataCompletor->entityHierarchySeparator ??= $this->separator;
-
-        $this->getClassMetadataManipulator()->saveCache($classMetadataCompletor);
     }
 
     function parent_method_exists($object,$method) {

@@ -154,6 +154,10 @@
             <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
             <argument type="service" id="base.annotation_reader" />
         </service>
+        <service id="Base\CacheWarmer\MetadataCacheWarmer" parent="Base\Cache\SimpleCacheWarmer" public="true">
+            <tag name="kernel.cache_warmer" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
 
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
@@ -506,7 +510,7 @@
         <service id="Base\Database\Mapping\ClassMetadataManipulator" public="true">
             <argument type="service" id="doctrine" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="cache.adapter" />
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
         <service id="Base\Annotations\AnnotationReader" public="true">

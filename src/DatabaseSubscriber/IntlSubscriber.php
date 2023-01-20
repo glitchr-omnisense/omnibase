@@ -50,7 +50,7 @@ class IntlSubscriber implements EventSubscriberInterface
     public function postLoad(LifecycleEventArgs $args)
     {
         $uow = $this->entityManager->getUnitOfWork();
-
+        
         $object = $args->getObject();
         $this->upgradeIntl($object);
 
@@ -141,7 +141,7 @@ class IntlSubscriber implements EventSubscriberInterface
     public function loadClassMetadata(LoadClassMetadataEventArgs $loadClassMetadataEventArgs): void
     {
         $classMetadata = $loadClassMetadataEventArgs->getClassMetadata();
-
+        
         if ($classMetadata->reflClass === null)
             return; // Class has not yet been fully built, ignore this event
 

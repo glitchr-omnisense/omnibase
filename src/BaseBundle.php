@@ -45,11 +45,10 @@ class BaseBundle extends Bundle
     public function boot()
     {
         self::$boot = true;
-
         if($this->container->getParameter("base.database.use_custom"))
             self::$doctrineStartup = $this->doctrineStartup();
     }
-
+    
     public static function hasDoctrine():bool { return self::$doctrineStartup; }
     public function doctrineStartup():bool
     {
@@ -77,7 +76,7 @@ class BaseBundle extends Bundle
 
         /**
          * Testing doctrine connection
-         */
+         */ 
         try { $entityManager->getConnection()->connect(); }
         catch (\Exception $e) { return false; }
 

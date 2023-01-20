@@ -52,8 +52,6 @@ class ColumnAlias extends AbstractAnnotation
         $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);
         $classMetadataCompletor->aliasNames ??= [];
         $classMetadataCompletor->aliasNames[$alias] = $this->column;
-
-        $this->getClassMetadataManipulator()->saveCache($classMetadataCompletor);
     }
 
     public function bind($entity, $column, $alias)
@@ -78,10 +76,13 @@ class ColumnAlias extends AbstractAnnotation
         $fnClosure();
     }
 
+    protected static $i = 0;
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $column = $this->column;
         $alias  = $property ?? $this->alias;
+
+        // if(self::$i > 10) exit(1);
         $this->bind($entity, $column, $alias);
     }
 

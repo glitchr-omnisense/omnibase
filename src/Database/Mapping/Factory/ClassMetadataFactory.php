@@ -5,8 +5,7 @@ namespace Base\Database\Mapping\Factory;
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
-use Base\Entity\Layout\Widget;
-use Base\Entity\Layout\WidgetIntl;
+
 use Base\Exception\MissingDiscriminatorMapException;
 use Base\Exception\MissingDiscriminatorValueException;
 use Doctrine\ORM\Mapping\MappingException;
