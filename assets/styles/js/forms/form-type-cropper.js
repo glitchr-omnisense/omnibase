@@ -1,10 +1,12 @@
 
 import Cropper from 'cropperjs';
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.cropper");
+$(window).on("DOMContentLoaded.form_type.cropper", function () {
 
     var cropperSource = {};
-    $(document).on("load.form_type.cropper", function () {
+    $(window).off("load.form_type.cropper");
+    $(window).on("load.form_type.cropper", function () {
 
         document.querySelectorAll("[data-cropper-field]").forEach((function (el) {
 
@@ -64,7 +66,7 @@ $(document).on("DOMContentLoaded", function () {
 
                 data["width"]  = Math.min(data["width"], naturalWidth);
                 data["height"] = Math.min(data["height"], naturalHeight);
-
+                
                 cropper.setData(data);
             }
 
@@ -286,5 +288,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.cropper");
+    $(window).trigger("load.form_type.cropper");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.cropper");

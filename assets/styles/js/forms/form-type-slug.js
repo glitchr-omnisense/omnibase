@@ -1,6 +1,9 @@
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.slug");
+$(window).on("DOMContentLoaded.form_type.slug", function () {
 
-    $(document).on("load.form_type.slug", function () {
+    $(window).on("load.form_type.slug");
+    $(window).on("load.form_type.slug", function () {
+
         function trim (s, c) {
             if (c === "]") c = "\\]";
             if (c === "^") c = "\\^";
@@ -241,5 +244,7 @@ $(document).on("DOMContentLoaded", function () {
         });
     });
 
-    $(document).trigger("load.form_type.slug");
+    $(window).trigger("load.form_type.slug");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.slug");

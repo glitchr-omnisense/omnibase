@@ -1,8 +1,10 @@
 import '@glitchr/datetime-picker'
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.datetimepicker");
+$(window).on("DOMContentLoaded.form_type.datetimepicker", function () {
 
-    $(document).on("load.form_type.datetimepicker", function () {
+    $(window).on("load.form_type.datetimepicker");
+    $(window).on("load.form_type.datetimepicker", function () {
 
         document.querySelectorAll("[data-datetimepicker-field]").forEach((function (el) {
 
@@ -23,5 +25,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.datetimepicker");
+    $(window).trigger("load.form_type.datetimepicker");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.datetimepicker");

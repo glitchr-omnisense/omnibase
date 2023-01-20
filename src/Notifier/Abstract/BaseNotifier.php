@@ -120,6 +120,11 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     protected array $testRecipients;
 
+    /**
+     * @var array
+     */
+    protected array $adminRecipients;
+
     public function getTestRecipients(): array{ return $this->testRecipients; }
     
     public function getEnvironment() : Environment { return $this->twig; }
@@ -147,13 +152,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         $this->debug          = $debug;
 
-        // Address support only once..
-        $adminRecipients = [];
-        foreach ($this->getAdminUsers() as $adminUser)
-            $adminRecipients[] = $adminUser->getRecipient();
-
-        foreach (array_unique_map(fn($r) => $r->getEmail(), $adminRecipients) as $adminRecipient)
-           $this->notifier->addAdminRecipient($adminRecipient);
+        $this->adminRecipients = [];
     }
 
     public function getPolicy(): ChannelPolicyInterface { return $this->policy; }
@@ -178,14 +177,36 @@ abstract class BaseNotifier implements BaseNotifierInterface
      * @var string
      */
     protected string $adminRole;
-    public function getAdminRecipient($i = 0): ?RecipientInterface { return $this->notifier->getAdminRecipients()[$i] ?? null; }
-    public function getAdminRecipients(): array { return $this->notifier->getAdminRecipients(); }
-    protected function getAdminUsers()
+    public function getAdminRecipient($i = 0): ?RecipientInterface
+    { 
+        $this->initializeAdminRecipients();   
+        return $this->notifier->getAdminRecipients()[$i] ?? null; 
+    }
+
+    public function getAdminRecipients(): array
+    { 
+        $this->initializeAdminRecipients();    
+        return $this->notifier->getAdminRecipients(); 
+    }
+
+    protected function initializeAdminRecipients()
     {
         if(!$this->adminRole) return [];
+        if($this->adminRecipients) return $this;
+        
+        foreach ($this->getAdminUsers() as $adminUser)
+            $this->adminRecipients[] = $adminUser->getRecipient();
 
+        foreach (array_unique_map(fn($r) => $r->getEmail(), $this->adminRecipients) as $adminRecipient)
+            $this->notifier->addAdminRecipient($adminRecipient);
+ 
+        return $this;
+    }
+
+    protected function getAdminUsers()
+    {
         try {
-
+            
             $userRepository = $this->entityManager->getRepository(User::class);
             $adminUsers = $userRepository->cacheByRoles($this->adminRole)->getResult();
 

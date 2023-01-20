@@ -81,6 +81,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         /**
          * @var Query
          */
+        
         $onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay());
         $onlineUsers = $onlineUsers->enableResultCache(User::getOnlineDelay())->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);

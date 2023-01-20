@@ -58,7 +58,7 @@ class GenerateUuid extends AbstractAnnotation
         return $this->version;
     }
 
-    public function getUuid($entity)
+    public function getUuid($entity): string
     {
         switch ($this->version) {
             case self::V1_MAC:

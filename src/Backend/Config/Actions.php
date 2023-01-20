@@ -81,9 +81,9 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
                     if($entityRepository instanceof ServiceEntityRepository) {
                         if(get_parent_class($entity) !== false) {
-                            $prevEntity = $entityRepository->findPreviousOneByClassOf($entity->getId(), get_class($entity));
+                            $prevEntity = $entityRepository->cachePreviousOneByClassOf($entity->getId(), get_class($entity));
                         } else {
-                            $prevEntity = $entityRepository->findPreviousOne($entity->getId());
+                            $prevEntity = $entityRepository->cachePreviousOne($entity->getId());
                         }
                     }
 
@@ -104,9 +104,9 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
                     if($entityRepository instanceof ServiceEntityRepository) {
                         if(get_parent_class($entity) !== false) {
-                            $nextEntity = $entityRepository->findNextOneByClassOf($entity->getId(), get_class($entity));
+                            $nextEntity = $entityRepository->cacheNextOneByClassOf($entity->getId(), get_class($entity));
                         } else {
-                            $nextEntity = $entityRepository->findNextOneBy($entity->getId());
+                            $nextEntity = $entityRepository->cacheNextOneBy($entity->getId());
                         }
                     }
 

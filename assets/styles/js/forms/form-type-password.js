@@ -1,6 +1,8 @@
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.password");
+$(window).on("DOMContentLoaded.form_type.password", function () {
 
-    $(document).on("load.form_type.password", function () {
+    $(window).on("load.form_type.password");
+    $(window).on("load.form_type.password", function () {
 
         document.querySelectorAll("[data-password-field]").forEach(function (el) {
 
@@ -98,5 +100,7 @@ $(document).on("DOMContentLoaded", function () {
         });
     });
 
-    $(document).trigger("load.form_type.password");
+    $(window).trigger("load.form_type.password");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.password");

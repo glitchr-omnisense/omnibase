@@ -29,6 +29,10 @@ login:
     banned : "Your user account no longer exists."
     failed : "Invalid login credentials"
 
+
+backoffice:
+    update: Updates have been saved.
+
 kickout: "Sorry {0}, but you have been kicked out !"
 integrity: "Sorry {0}, you have been disconnected, integrity was compromised !"
 

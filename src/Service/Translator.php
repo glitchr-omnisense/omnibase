@@ -168,6 +168,7 @@ class Translator implements TranslatorInterface
                 }
             }
 
+            // Fallback in production
             if($locale != LocaleProvider::getDefaultLocale() && !$this->isDebug) {
 
                 if ($trans == $id)

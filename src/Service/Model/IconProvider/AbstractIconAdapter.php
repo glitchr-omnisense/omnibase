@@ -2,14 +2,14 @@
 
 namespace Base\Service\Model\IconProvider;
 
-use Base\Cache\SimpleCache;
+use Base\Cache\Abstract\AbstractSimpleCache;
 use Base\Service\IconProvider;
 use Base\Service\Model\IconizeInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\Yaml\Yaml;
 
-abstract class AbstractIconAdapter extends SimpleCache implements IconAdapterInterface
+abstract class AbstractIconAdapter extends AbstractSimpleCache implements IconAdapterInterface
 {
     protected string $metadata;
 
@@ -25,15 +25,16 @@ abstract class AbstractIconAdapter extends SimpleCache implements IconAdapterInt
     {
         $this->contents = $this->getCache("/Contents", function() {
 
-            if (file_exists($this->metadata)) {
+            if (!file_exists($this->metadata)) return [];
+            
+            if(str_ends_with($this->metadata, "yml"))
+                return Yaml::parse(file_get_contents($this->metadata));
+            if(str_ends_with($this->metadata, "yaml"))
+                return Yaml::parse(file_get_contents($this->metadata));
+            if(str_ends_with($this->metadata, "json"))
+                return json_decode(file_get_contents($this->metadata), true);
 
-                return  (str_ends_with($this->metadata, "yml") ?
-                            Yaml::parse(file_get_contents($this->metadata)) :
-                        (str_ends_with($this->metadata, "yaml") ?
-                            Yaml::parse(file_get_contents($this->metadata)) :
-                        (str_ends_with($this->metadata, "json") ?
-                            json_decode(file_get_contents($this->metadata), true) : [])));
-            }
+            return [];
         });
 
         return true;

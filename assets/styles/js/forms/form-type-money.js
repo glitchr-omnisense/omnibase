@@ -1,6 +1,8 @@
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.money");
+$(window).on("DOMContentLoaded.form_type.money", function () {
 
-    $(document).on("load.form_type.money", function () {
+    $(window).on("load.form_type.money");
+    $(window).on("load.form_type.money", function () {
 
         document.querySelectorAll("[data-currency-field]").forEach((function (e) {
 
@@ -91,5 +93,7 @@ $(document).on("DOMContentLoaded", function () {
         }))
     });
 
-    $(document).trigger("load.form_type.money");
+    $(window).trigger("load.form_type.money");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.money");

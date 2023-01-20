@@ -1,6 +1,9 @@
-$(document).on("DOMContentLoaded", function () {
 
-    $(document).on("load.form_type.array", function () {
+$(window).on("DOMContentLoaded.form_type.array").off();
+$(window).on("DOMContentLoaded.form_type.array", function () {
+
+    $(window).off("load.form_type.array");
+    $(window).on("load.form_type.array", function () {
 
         var updateArrayItemCssClasses = function (e) {
 
@@ -98,5 +101,7 @@ $(document).on("DOMContentLoaded", function () {
         });
     });
 
-    $(document).trigger("load.form_type.array");
+    $(window).trigger("load.form_type.array");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.array");

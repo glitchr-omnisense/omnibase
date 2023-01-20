@@ -1,12 +1,12 @@
 <?php
 
-namespace Base\Cache;
+namespace Base\Cache\Abstract;
 
 use Base\BaseBundle;
 use Symfony\Bundle\FrameworkBundle\CacheWarmer\AbstractPhpFileCacheWarmer;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-abstract class SimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements SimpleCacheWarmerInterface
+abstract class AbstractSimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements AbstractSimpleCacheWarmerInterface
 {
     /** @var string */
     private ?string $cacheFile = null;
@@ -14,10 +14,10 @@ abstract class SimpleCacheWarmer extends AbstractPhpFileCacheWarmer implements S
     /** @var int */
     protected int $shellVerbosity = 0;
 
-    /** @var SimpleCacheInterface */
+    /** @var AbstractSimpleCacheInterface */
     protected $simpleCache;
 
-    public function __construct(SimpleCacheInterface $simpleCache, string $cacheDir)
+    public function __construct(AbstractSimpleCacheInterface $simpleCache, string $cacheDir)
     {
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");
 

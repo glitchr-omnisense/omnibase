@@ -1,6 +1,8 @@
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.quadrant");
+$(window).on("DOMContentLoaded.form_type.quadrant", function () {
 
-    $(document).on("load.form_type.quadrant", function () {
+    $(window).on("load.form_type.quadrant");
+    $(window).on("load.form_type.quadrant", function () {
 
         document.querySelectorAll("[data-quadrant-field]").forEach((function (e) {
 
@@ -26,5 +28,7 @@ $(document).on("DOMContentLoaded", function () {
         }))
     });
 
-    $(document).trigger("load.form_type.quadrant");
+    $(window).trigger("load.form_type.quadrant");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.quadrant");

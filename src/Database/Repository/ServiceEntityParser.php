@@ -2,6 +2,7 @@
 
 namespace Base\Database\Repository;
 
+use App\Entity\User;
 use Base\BaseBundle;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataManipulator;
@@ -14,7 +15,7 @@ use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
-use Doctrine\ORM\Proxy\Proxy;
+use Doctrine\Persistence\Proxy;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -212,7 +213,7 @@ class ServiceEntityParser
 
     protected function __findNextOneBy   (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null,                                ?array $selectAs = null)   { return $this->__findOneBy       ($criteria, $orderBy,                  $groupBy, $selectAs); }
     protected function __lengthOfBy      (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null, $limit = null, $offset = null, ?array $selectAs = null)   { return $this->getQueryWithLength($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs)->getResult(); }
-    protected function __distinctCountBy (array $criteria = [],                                            ?array $groupBy = null,                                ?array $selectAs = null): int { return $this->__countBy         ($criteria, self::COUNT_DISTINCT,      $groupBy, $selectAs); }
+    protected function __distinctCountBy (array $criteria = [],                                               ?array $groupBy = null,                                ?array $selectAs = null): int { return $this->__countBy         ($criteria, self::COUNT_DISTINCT,      $groupBy, $selectAs); }
     protected function __countBy         (array $criteria = [], ?string $mode = null, ?array $orderBy = null, ?array $groupBy = null,                                ?array $selectAs = null)
     {
         $mode ??= self::COUNT_ALL;
@@ -242,7 +243,10 @@ class ServiceEntityParser
         return $ret;
     }
 
-    protected function getAlias($alias) { return $this->classMetadataManipulator->getFieldName($this->classMetadata->name, $alias) ?? $alias; }
+    protected function getAlias($alias) 
+    { 
+        return $this->classMetadataManipulator->getFieldName($this->classMetadata->name, $alias) ?? $alias;
+    }
 
     protected function addCriteria(?string $by, $value)
     {
@@ -423,8 +427,14 @@ class ServiceEntityParser
         }
 
         // Extract method name and extra parameters
-        $findRequest = self::REQUEST_CACHE."|".self::REQUEST_FIND;
-        $countRequest = self::REQUEST_DISTINCT."|".self::REQUEST_COUNT;
+        $findRequest   = self::REQUEST_CACHE."|".
+                         self::REQUEST_FIND;
+        
+        $countRequest  = self::REQUEST_DISTINCT."|".
+                         self::REQUEST_COUNT."|".
+                         self::REQUEST_CACHE.ucfirst(self::REQUEST_DISTINCT)."|".
+                         self::REQUEST_CACHE.ucfirst(self::REQUEST_COUNT);
+
         $lengthRequest = self::REQUEST_LENGTH;
         $specials = implode("|", self::getSpecials());
 
@@ -437,10 +447,47 @@ class ServiceEntityParser
         $magicFn = null;
         $byNames = [];
 
-        if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?(?P<eagerly>'.$eagerly.')?'.$by.')(?P<names>.*)/', $method, $magicExtra)) {
+        $requestType = self::REQUEST_FIND;
+        if (preg_match('/^(?P<fn>'.$countRequest.')(?:'.$for.'(?P<column>[^'.$by.']*))?'.$by.'(?P<names>.*)/', $method, $magicExtra)) {
+
+            $requestType = self::REQUEST_COUNT;
+            $byNames = array_pop_key("names", $magicExtra);
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
+
+            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
+
+        } else if (preg_match('/^(?P<fn>'.$countRequest.')(?:'.$for.'(?P<column>[^'.$by.']*))?(?P<names>.*)/', $method, $magicExtra)) {
+
+            $requestType = self::REQUEST_COUNT;
+            $byNames = array_pop_key("names", $magicExtra);
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
+
+            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
+
+        } else if (preg_match('/^(?P<fn>'.$lengthRequest.')(?P<column>[^'.$by.']+)'.$by.'(?P<names>.*)/', $method, $magicExtra)) {
+
+            $requestType = self::REQUEST_LENGTH;
+            $byNames = array_pop_key("names", $magicExtra);
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
+
+            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
+
+        } else if (preg_match('/^(?P<fn>'.$lengthRequest.')(?P<column>[^'.$by.']+)(?P<names>.*)/', $method, $magicExtra)) {
+
+            $requestType = self::REQUEST_LENGTH;
+            $byNames = array_pop_key("names", $magicExtra);
+
+            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
+
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
+
+        } else if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?(?P<eagerly>'.$eagerly.')?'.$by.')(?P<names>.*)/', $method, $magicExtra)) {
 
             $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
-
             $byNames = array_pop_key("names", $magicExtra);
             $special = array_pop_key("special", $magicExtra);
             $special = $special ? only_alphachars(ucfirst($special)) : null;
@@ -451,47 +498,12 @@ class ServiceEntityParser
         } else if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?(?P<eagerly>'.$eagerly.')?)(?P<names>.*)/', $method, $magicExtra)) {
 
             $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
-
             $byNames = array_pop_key("names", $magicExtra);
             $special = array_pop_key("special", $magicExtra);
             $special = $special ? only_alphachars(ucfirst($special)) : null;
 
             $magicFn = only_alphachars(trim_brackets(array_pop_key("fn", $magicExtra)));
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-
-        } else if (preg_match('/^(?P<fn>'.$countRequest.')(?:'.$for.'(?P<column>[^'.$by.']*))?'.$by.'(?P<names>.*)/', $method, $magicExtra)) {
-
-            $byNames = array_pop_key("names", $magicExtra);
-            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
-
-            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
-            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-
-        } else if (preg_match('/^(?P<fn>'.$countRequest.')(?:'.$for.'(?P<column>[^'.$by.']*))?(?P<names>.*)/', $method, $magicExtra)) {
-
-            $byNames = array_pop_key("names", $magicExtra);
-            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
-
-            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
-            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-
-
-        } else if (preg_match('/^(?P<fn>'.$lengthRequest.')(?P<column>[^'.$by.']+)'.$by.'(?P<names>.*)/', $method, $magicExtra)) {
-
-            $byNames = array_pop_key("names", $magicExtra);
-            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
-
-            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
-            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-
-        } else if (preg_match('/^(?P<fn>'.$lengthRequest.')(?P<column>[^'.$by.']+)(?P<names>.*)/', $method, $magicExtra)) {
-
-            $byNames = array_pop_key("names", $magicExtra);
-
-            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
-            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-
-            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
 
         } else {
 
@@ -518,6 +530,8 @@ class ServiceEntityParser
 
             $magicFn = str_replace(self::LOAD_EAGERLY, "", $magicFn);
             $this->eagerly = array_shift($arguments);
+            if(!is_array($this->eagerly)) 
+                throw new Exception("Warning /!\ Eager queries requires an array as first argument");
         }
 
         // Reveal obvious logical ambiguities..
@@ -890,7 +904,10 @@ class ServiceEntityParser
         // Mark as cacheable (to be used in self::getQueryBuilder)
         if(str_starts_with($magicFn, self::REQUEST_CACHE)) {
 
-            $magicFn = self::REQUEST_FIND.substr($magicFn, strlen(self::REQUEST_CACHE));
+            $magicFn = lcfirst(str_lstrip($magicFn, self::REQUEST_CACHE));
+            if($requestType == self::REQUEST_FIND && !str_starts_with($magicFn, self::REQUEST_FIND))
+                $magicFn = self::REQUEST_FIND.ucfirst($magicFn); // find <-> cache, findOne <-> cacheOne, [...]
+            
             $this->cacheable = BaseBundle::CACHE;
         }
 
@@ -1473,7 +1490,6 @@ class ServiceEntityParser
 
                 $this->leftJoin($qb, $aliasExpr);
                 // $qb->addSelect($aliasIdentifier);
-
                 $newOptions = [
                     "alias"    => $aliasIdentifier,
                     "required" => $required,
@@ -1503,7 +1519,9 @@ class ServiceEntityParser
         if($this->eagerly === false && class_implements_interface($entityName, TranslatableInterface::class)) {
 
             $this->leftJoin($qb, self::ALIAS_ENTITY.".".TranslatableWalker::COLUMN_NAME);
+            // @TODO this is commented because it generates more queries as no cache result is used..
             // $qb->addSelect(self::ALIAS_ENTITY."_".TranslatableWalker::COLUMN_NAME);
+            
             //
             // @WARN: The above line is commented because of a conflict with __findOneBy..
             // Joining translations in DQL that way create one entry (Translation) per locale
@@ -1516,7 +1534,7 @@ class ServiceEntityParser
         if($groupBy) $query->setCacheable(false); // @TODO, if groupBy is used, cache is disabled.. id column not stored for some reasons.
 
         $query->useQueryCache($this->cacheable);
-        $query->disableResultCache(); // Disable by default
+        // $query->disableResultCache(); // Disable by default
 
         //
         // Apply custom output walker to all entities (some join may relates to translatable entities)

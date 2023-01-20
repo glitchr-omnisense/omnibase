@@ -3,7 +3,7 @@
 namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
-use Base\Cache\SimpleCacheInterface;
+use Base\Cache\Abstract\AbstractSimpleCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\EntityDispatcher\EventDispatcherInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
@@ -53,7 +53,7 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
         $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('base.currency_api');
-        $container->registerForAutoconfiguration(SimpleCacheInterface::class)->addTag('base.simple_cache');
+        $container->registerForAutoconfiguration(AbstractSimpleCacheInterface::class)->addTag('base.simple_cache');
 
         $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
     }

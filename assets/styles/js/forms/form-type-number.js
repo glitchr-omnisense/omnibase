@@ -1,6 +1,8 @@
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.number");
+$(window).on("DOMContentLoaded.form_type.number", function () {
 
-    $(document).on("load.form_type.number", function () {
+    $(window).on("load.form_type.number");
+    $(window).on("load.form_type.number", function () {
 
         document.querySelectorAll("[data-number-field]").forEach((function (e) {
 
@@ -115,5 +117,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.number");
+    $(window).trigger("load.form_type.number");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.number");

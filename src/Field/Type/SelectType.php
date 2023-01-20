@@ -250,7 +250,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
-
+        
             // Guess including class_priority
             $options["guess_priority"] = $options["class_priority"];
             $options["class"]          = $this->formFactory->guessClass($event, $options);
@@ -455,7 +455,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
         if($viewData instanceof PersistentCollection) {
-
+            
             $mappedBy =  $viewData->getMapping()["mappedBy"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
             $oldData = $viewData->toArray();
@@ -484,6 +484,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 }
             }
 
+            // Ordering
             $viewData->clear();
             foreach($dataChoices as $entry) {
 

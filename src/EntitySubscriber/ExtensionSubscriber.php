@@ -102,7 +102,6 @@ class ExtensionSubscriber implements EventSubscriberInterface
         foreach($entities as $entity) {
 
             $id = spl_object_id($entity);
-
             foreach($this->entityExtension->getExtensions() as $extension) {
 
                 $matches = [];
@@ -111,7 +110,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
                     list($className, $property) = explode("::", $column);
                     if(!is_instanceof($entity, $className)) continue;
-                    if(!array_key_exists($property, $uow->getEntityChangeSet($entity))) continue;
+                    // if(!array_key_exists($property, $uow->getEntityChangeSet($entity))) continue;
 
                     $matches[$className] = $matches[$className] ?? [];
                     $matches[$className][] = $column;
@@ -123,8 +122,6 @@ class ExtensionSubscriber implements EventSubscriberInterface
                     foreach($match as $columns)
                         $properties[] = explode("::", $columns)[1];
 
-                    // if($entity !== null) // Make sure to invalidate cache
-                    //     $this->entityManager->refresh($entity);
                     $array = $extension->payload($action, $className, $properties, $entity);
 
                     foreach($array as $entry) {

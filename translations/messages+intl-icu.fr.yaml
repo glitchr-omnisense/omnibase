@@ -30,7 +30,6 @@ locale:
 
 backoffice:
     title: "Administration"
-    update: "Les mises à jour ont bien été prises en compte"
 
 profile:
     title: "Voir mon profil"

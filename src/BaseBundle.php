@@ -114,8 +114,6 @@ class BaseBundle extends Bundle
 
             if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
             else Type::addType($className::getStaticName(), $className);
-
-            $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
         }
 
         /**

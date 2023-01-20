@@ -86,17 +86,20 @@ final class FileTwigExtension extends AbstractExtension
         ];
     }
 
-    public function urlify(LinkableInterface|string $urlOrPath, ?string $label = null, array $attributes = [])
+    public function urlify(LinkableInterface|string|null $urlOrPath, ?string $label = null, array $attributes = [])
     {
+        
         $url   = $urlOrPath;
         $label = $label ?? $urlOrPath;
         if($urlOrPath instanceof LinkableInterface) {
             $url   = $urlOrPath->__toLink();
             $label = $label ?? $urlOrPath->__toString();
         }
-
+        
         if($this->router->getUrl() == $this->router->getAssetUrl($urlOrPath))
-            $attributes["class"] = trim(($attributes["class"] ?? "")." highlight");
+        $attributes["class"] = trim(($attributes["class"] ?? "")." highlight");
+
+        if(!$url) return "";
 
         return "<a href='".$url."' ".html_attributes($attributes).">".$label."</a>";
     }

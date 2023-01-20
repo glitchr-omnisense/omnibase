@@ -35,6 +35,9 @@ notifier:
     no_loopback: "Le debugging est activé, mais la boucle locale ne l'est pas: les utilisateurs peuvent recevoir leurs emails."
     no_debug: "Le debugging est désactivé, mais la boucle locale est activée ! Les emails seront tous redirigés vers l'adresse technique: {0})"
 
+backoffice:
+    update: "Les mises à jour ont bien été prises en compte"
+
 impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurper l'identité de <b>{0}</b> !
     <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Retour à ton compte</a>"

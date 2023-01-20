@@ -11,7 +11,7 @@ use Exception;
 
 use App\Entity\User;
 use Base\BaseBundle;
-use Base\Cache\SimpleCache;
+use Base\Cache\Abstract\AbstractSimpleCache;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Routing\RouterInterface;
@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
-class AnnotationReader extends SimpleCache
+class AnnotationReader extends AbstractSimpleCache
 {
     use SingletonTrait;
 

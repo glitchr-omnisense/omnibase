@@ -1,6 +1,8 @@
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.translatable");
+$(window).on("DOMContentLoaded.form_type.translatable", function () {
 
-    $(document).on("load.form_type.translatable", function () {
+    $(window).on("load.form_type.translatable");
+    $(window).on("load.form_type.translatable", function () {
 
         const isEmpty = (value) => value == undefined || !value.trim().length;
         var submitButtons = document.querySelectorAll('button[type="submit"]');
@@ -128,5 +130,7 @@ $(document).on("DOMContentLoaded", function () {
             });
     });
 
-    $(document).trigger("load.form_type.translatable");
+    $(window).trigger("load.form_type.translatable");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.translatable");

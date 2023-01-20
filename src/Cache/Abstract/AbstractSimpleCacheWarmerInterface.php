@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Cache;
+namespace Base\Cache\Abstract;
 
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-interface SimpleCacheWarmerInterface
+interface AbstractSimpleCacheWarmerInterface
 {
     public function getCache(): ArrayAdapter;
 }

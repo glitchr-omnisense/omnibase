@@ -1,8 +1,13 @@
-console.log("execです");
-$(document).on("DOMContentLoaded", function () {
 
-    console.log("domです");
-    $(document).on("load.form_type.avatar", function () {
+console.log("domです");
+
+$(window).on("DOMContentLoaded.form_type.avatar").off();
+$(window).on("DOMContentLoaded.form_type.avatar", function () {
+
+    console.log("exec");
+
+    $(window).off("load.form_type.avatar");
+    $(window).on("load.form_type.avatar", function () {
 
         console.log("loadです");
 
@@ -48,6 +53,7 @@ $(document).on("DOMContentLoaded", function () {
 
     });
 
-    $(document).trigger("load.form_type.avatar");
+    $(window).trigger("load.form_type.avatar");
 });
 
+$(window).trigger("DOMContentLoaded.form_type.avatar");

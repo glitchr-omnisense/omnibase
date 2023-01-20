@@ -2,11 +2,12 @@
 
 namespace Base\Twig\Renderer\Adapter;
 
+use Base\Cache\Abstract\AbstractSimpleCacheInterface;
+
 use Twig\Environment;
 use Base\Twig\AssetPackage;
 use InvalidArgumentException;
 use Base\Traits\SimpleCacheTrait;
-use Base\Cache\SimpleCacheInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Asset\Packages;
 use Base\Service\ParameterBagInterface;
@@ -22,7 +23,7 @@ use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
 use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
 
-class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterface
+class EncoreTagRenderer extends AbstractTagRenderer implements AbstractSimpleCacheInterface
 {
     /**
      * @var Packages
@@ -54,7 +55,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements SimpleCacheInterf
         $this->publicDir = $publicDir;
         $this->packages = $packages;
 
-        // NB:: $this->getCache() issue..
+        // This class already inherits from AbstractTagRenderer..
         $this->cacheDir = $cacheDir;
         $cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
         $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));

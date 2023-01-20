@@ -1,9 +1,11 @@
 import { createPopup } from '@picmo/popup-picker';
 import { autoTheme, darkTheme, lightTheme } from 'picmo';
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.emoji");
+$(window).on("DOMContentLoaded.form_type.emoji", function () {
 
-    $(document).on("load.form_type.emoji", function () {
+    $(window).on("load.form_type.emoji");
+    $(window).on("load.form_type.emoji", function () {
 
         document.querySelectorAll("[data-emoji-field]").forEach((function (el) {
 
@@ -23,5 +25,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.emoji");
+    $(window).trigger("load.form_type.emoji");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.emoji");

@@ -9,9 +9,11 @@ import '@simonwep/pickr/dist/themes/nano.min.css';      // 'nano' theme
 // Modern or es5 bundle (pay attention to the note below!)
 import Pickr from '@simonwep/pickr';
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.color");
+$(window).on("DOMContentLoaded.form_type.color", function () {
 
-    $(document).on("load.form_type.color", function () {
+    $(window).off("load.form_type.color");
+    $(window).on("load.form_type.color", function () {
 
         document.querySelectorAll("[data-color-field]").forEach((function (el) {
 
@@ -35,5 +37,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.color");
+    $(window).trigger("load.form_type.color");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.color");

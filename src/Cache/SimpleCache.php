@@ -2,12 +2,9 @@
 
 namespace Base\Cache;
 
-use Psr\Cache\CacheItemPoolInterface;
-use Base\Traits\SimpleCacheTrait;
+use Base\Cache\Abstract\AbstractSimpleCache;
 
-abstract class SimpleCache implements SimpleCacheInterface
+class SimpleCache extends AbstractSimpleCache
 {
-    private bool $saveDeferred = false;
-    private ?CacheItemPoolInterface $cache = null;
-    use SimpleCacheTrait;
+    public function warmUp(string $cacheDir): array { }
 }

@@ -19,6 +19,7 @@ class ClassMetadataCompletor
     public function &__get($name) { return $this->payload[$name]; }
     public function __set(string $name, mixed $value)
     {
+        $this->payload["class"] ??= $this->className; // Useful when looking inside cache directory for debugging.....
         $this->payload[$name] = $value;
         return $this;
     }

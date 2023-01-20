@@ -1,6 +1,9 @@
-$(document).on("DOMContentLoaded", function () {
 
-    $(document).on("load.form_type.boolean", function () {
+$(window).on("DOMContentLoaded.form_type.boolean").off();
+$(window).on("DOMContentLoaded.form_type.boolean", function () {
+
+    $(window).off("load.form_type.boolean");
+    $(window).on("load.form_type.boolean", function () {
 
         document.querySelectorAll("[data-boolean-field]").forEach((function (el) {
 
@@ -49,5 +52,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.boolean");
+    $(window).trigger("load.form_type.boolean");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.boolean");

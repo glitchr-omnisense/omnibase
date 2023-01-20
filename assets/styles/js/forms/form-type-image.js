@@ -2,9 +2,11 @@ import Cropper from 'cropperjs/dist/cropper.min.js';
 import 'cropperjs/dist/cropper.min.css';
 
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.image");
+$(window).on("DOMContentLoaded.form_type.image", function () {
 
-    $(document).on("load.form_type.image", function () {
+    $(window).on("load.form_type.image");
+    $(window).on("load.form_type.image", function () {
 
         function formatBytes(bytes, decimals = 2) {
             if (bytes === 0) return '0B';
@@ -177,5 +179,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.image");
+    $(window).trigger("load.form_type.image");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.image");

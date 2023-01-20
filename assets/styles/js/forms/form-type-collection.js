@@ -21,9 +21,11 @@ jQuery(function($) {
     }
   });
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.collection_type");
+$(window).on("DOMContentLoaded.collection_type", function () {
 
-    $(document).on("load.collection_type", function () {
+    $(window).off("load.collection_type");
+    $(window).on("load.collection_type", function () {
 
         var updateCollectionItemCssClasses = function (e) {
 
@@ -88,7 +90,7 @@ $(document).on("DOMContentLoaded", function () {
                         $(collectionItems).remove();
                     }
 
-                    $(document).trigger("collection.item-removed");
+                    $(window).trigger("collection.item-removed");
                     updateCollectionItemCssClasses(o);
                 });
 
@@ -137,7 +139,7 @@ $(document).on("DOMContentLoaded", function () {
 
                 $(u).collapse("show");
 
-                $(document).trigger("collection.item-added");
+                $(window).trigger("collection.item-added");
             });
 
             document.querySelectorAll("button.form-collection-delete-button").forEach(deleteAction);
@@ -148,19 +150,21 @@ $(document).on("DOMContentLoaded", function () {
         document.querySelectorAll("button.form-collection-add-button").forEach(addAction);
         document.querySelectorAll("button.form-collection-delete-button").forEach(deleteAction);
 
-        $(document).off("collection.item-added");
-        $(document).on ("collection.item-added", function() {
+        $(window).off("collection.item-added");
+        $(window).on ("collection.item-added", function() {
 
-            $(document).trigger("load.form_type");
-            $(document).trigger("load.collection_type");
+            $(window).trigger("load.form_type");
+            $(window).trigger("load.collection_type");
         });
-        $(document).off("collection.item-added");
-        $(document).on ("collection.item-added", function() {
+        $(window).off("collection.item-added");
+        $(window).on ("collection.item-added", function() {
 
-            $(document).trigger("load.form_type");
-            $(document).trigger("load.collection_type");
+            $(window).trigger("load.form_type");
+            $(window).trigger("load.collection_type");
         });
     });
 
-    $(document).trigger("load.collection_type");
+    $(window).trigger("load.collection_type");
 });
+
+$(window).trigger("DOMContentLoaded.collection_type");

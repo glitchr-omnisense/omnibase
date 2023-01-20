@@ -1,6 +1,7 @@
 import '@glitchr/select2';
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.select2");
+$(window).on("DOMContentLoaded.form_type.select2", function () {
 
     var localCache = {};
     function is_dict(v) {
@@ -14,7 +15,8 @@ $(document).on("DOMContentLoaded", function () {
     }
 
     var dropdown = [];
-    $(document).on("load.form_type.select2", function () {
+    $(window).on("load.form_type.select2");
+    $(window).on("load.form_type.select2", function () {
 
         document.querySelectorAll("[data-select2-field]").forEach((function (el) {
 
@@ -272,5 +274,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.select2");
+    $(window).trigger("load.form_type.select2");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.select2");

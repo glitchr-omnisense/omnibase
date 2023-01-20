@@ -24,6 +24,7 @@ class TranslationField implements FieldInterface
             ->setTemplateName('crud/field/text')
             ->setTemplatePath('@EasyAdmin/crud/field/translatable.html.twig')
             ->setCustomOption("required", true)
+            ->setCustomOption(self::OPTION_MAX_LENGTH, 50)
             ->setFormType(TranslationType::class);
 
         if($propertyName) $field->setFields([$propertyName => []])->showOnIndex($propertyName);

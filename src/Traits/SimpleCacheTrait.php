@@ -5,20 +5,19 @@ namespace Base\Traits;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
-use Base\Database\Mapping\ClassMetadataManipulator;
+
 trait SimpleCacheTrait
 {
     public function __construct(string $cacheDir)
     {
         $cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
-
         $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));
         $this->warmUp($cacheDir);
     }
     
     protected function getCacheKey(string $realClassName): string
     {
-        return str_replace(['\\', '/'], ['__', '_'], $realClassName);
+        return str_replace(['\\', '/'], ['__', '___'], $realClassName);
     }
     public function hasCache(string $key): bool
     {

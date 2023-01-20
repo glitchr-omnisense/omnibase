@@ -2,6 +2,7 @@
 
 namespace Base\Database\Annotation;
 
+use App\Entity\Article\Article;
 use App\Entity\Gallery\Gallery;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
@@ -36,7 +37,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
     public function __construct( array $data = [] )
     {
-        $this->order          = $data['order'] ?? self::ASC;
+        $this->order = $data['order'] ?? self::ASC;
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
@@ -112,9 +113,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $cacheDriver->deleteAll();
 
         $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
-        if($ordering === null) return;
-
-        $data = $ordering->getEntityData();
+        $data = $ordering?->getEntityData() ?? [];
         $orderedIndexes = $data[$property] ?? [];
 
         $nEntries = $entityValue instanceof Collection ? $entityValue->count() : count($entityValue ?? []);
@@ -130,9 +129,11 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
         } else if($entityValue instanceof PersistentCollection && $entityValue->getOwner() == $entity) {
 
+            $orderedIndexes = $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes;
+
             $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
             $reflProp->setAccessible(true);
-            $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap()->toArray() ?? [], $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes));
+            $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap() ?? [], $orderedIndexes));
         }
     }
 
@@ -151,14 +152,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 $data = [];
                 foreach($properties as $property) {
 
-                    //NB: Evict in AbstractExtension doesn't seems to be working.. TBC
-                    if($this->getEntityManager()->getCache()) {
-
-                        $this->getEntityManager()->getCache()->evictEntity($className, $entity->getId());
-                        if ($this->getClassMetadata($className)->hasAssociation($property))
-                            $this->getEntityManager()->getCache()->evictCollection($className, $property, $entity->getId());
-                    }
-
                     $value = $propertyAccessor->getValue($entity, $property);
                     // TBD: Implement case for array.. this one might be a bit more complicate.. (periodical cycles)
                     /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
@@ -174,18 +167,12 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                     if(array_key_exists($property, $data) && is_identity($data[$property]))
                         unset($data[$property]);
-
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $cacheDriver = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
-                $cacheDriver->deleteAll();
                 $this->ordering[$className][$id]   = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
                 $this->ordering[$className][$id] ??= new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
-
-                $orderingId = $this->ordering[$className][$id]->getId();
-                if($orderingId) $this->getEntityManager()->getCache()->evictEntity(Ordering::class, $orderingId);
 
                 break;
 

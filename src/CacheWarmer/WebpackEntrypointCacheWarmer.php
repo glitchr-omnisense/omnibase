@@ -2,13 +2,13 @@
 
 namespace Base\CacheWarmer;
 
-use Base\Cache\SimpleCacheWarmer;
+use Base\Cache\Abstract\AbstractSimpleCacheWarmer;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Renderer\Adapter\EncoreTagRenderer;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
-class WebpackEntrypointCacheWarmer extends SimpleCacheWarmer
+class WebpackEntrypointCacheWarmer extends AbstractSimpleCacheWarmer
 {
     public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
     {

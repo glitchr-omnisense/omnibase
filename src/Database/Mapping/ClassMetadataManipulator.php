@@ -2,6 +2,7 @@
 
 namespace Base\Database\Mapping;
 
+use Base\Cache\Abstract\AbstractSimpleCache;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
@@ -20,7 +21,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
 
-use Base\Cache\SimpleCache;
 use Base\Database\Mapping\Factory\ClassMetadataFactory;
 
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -32,7 +32,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class ClassMetadataManipulator extends SimpleCache
+class ClassMetadataManipulator extends AbstractSimpleCache
 {
     /**
      * @var ManagerRegistry
@@ -850,13 +850,12 @@ class ClassMetadataManipulator extends SimpleCache
 
     public function warmUp(string $cacheDir): bool
     {
-        self::$completors = self::$completors ?? $this->getCache("/Completors") ?? [];
-        $this->executeOnce(function() {
+        self::$completors = $this->getCache("/Completors", function() {
 
             foreach($this->getAllClassNames() as $className)
                 $this->getCompletorFor($className);
-
-            $this->setCache("/Completors", self::$completors);
+            
+            return self::$completors;
         });
         
         return true;

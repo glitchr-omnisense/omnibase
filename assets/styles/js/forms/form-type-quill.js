@@ -8,9 +8,11 @@ import Quill from 'quill';
  
 export default Quill;
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.quill");
+$(window).on("DOMContentLoaded.form_type.quill", function () {
 
-    $(document).on("load.form_type.quill", function () {
+    $(window).on("load.form_type.quill");
+    $(window).on("load.form_type.quill", function () {
 
         document.querySelectorAll("[data-quill-field]").forEach((function (el) {
 
@@ -167,5 +169,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.quill");
+    $(window).trigger("load.form_type.quill");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.quill");

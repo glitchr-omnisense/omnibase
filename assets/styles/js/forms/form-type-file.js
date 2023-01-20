@@ -4,10 +4,12 @@ import Dropzone from 'dropzone';
 if (typeof Dropzone !== 'undefined')
     Dropzone.autoDiscover = false;
 
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.file");
+$(window).on("DOMContentLoaded.form_type.file", function () {
 
-    $(document).on("load.form_type.file", function () {
-
+    $(window).on("load.form_type.file");
+    $(window).on("load.form_type.file", function () {
+    
         document.querySelectorAll("[data-file-field]").forEach((function (el) {
 
             var id       = el.getAttribute("data-file-field");
@@ -332,5 +334,7 @@ $(document).on("DOMContentLoaded", function () {
         }));
     });
 
-    $(document).trigger("load.form_type.file");
+    $(window).trigger("load.form_type.file");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.file");

@@ -1,6 +1,8 @@
-$(document).on("DOMContentLoaded", function () {
+$(window).off("DOMContentLoaded.form_type.stock");
+$(window).on("DOMContentLoaded.form_type.stock", function () {
 
-    $(document).on("load.form_type.stock", function () {
+    $(window).on("load.form_type.stock");
+    $(window).on("load.form_type.stock", function () {
 
         document.querySelectorAll("[data-stock-field]").forEach((function (e) {
 
@@ -93,5 +95,7 @@ $(document).on("DOMContentLoaded", function () {
         }))
     });
 
-    $(document).trigger("load.form_type.stock");
+    $(window).trigger("load.form_type.stock");
 });
+
+$(window).trigger("DOMContentLoaded.form_type.stock");
