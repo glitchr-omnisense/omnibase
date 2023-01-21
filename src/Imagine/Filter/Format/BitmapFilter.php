@@ -19,6 +19,11 @@ class BitmapFilter implements BitmapFilterInterface
         return path_suffix("", $pathSuffixes);
     }
 
+    /**
+     * @var MimeTypes
+     */
+    protected $mimeTypes;
+    
     public function __construct(?string $path = null, array $filters = [], array $options = [])
     {
         if(!$path) {
@@ -34,7 +39,7 @@ class BitmapFilter implements BitmapFilterInterface
             $options["quality"] /= $options["quality"] <= 1 ? 100 : 1;
 
         if($options["autorotate"] ?? true)
-            array_append($this->filters, new Autorotate());
+            array_prepend($this->filters, new Autorotate());
 
         $this->mimeTypes = new MimeTypes();
     }

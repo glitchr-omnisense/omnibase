@@ -188,6 +188,7 @@ class FileController extends AbstractController
             if($ratio0 == 0) throw $this->createNotFoundException();
 
             $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+
         }
 
         //
@@ -288,7 +289,7 @@ class FileController extends AbstractController
         // Extract parameters
         $config = $this->imageService->resolve($hashid);
         if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
-
+        
         $filters = $config["filters"] ?? [];
         $options = $config["options"] ?? [];
         $path    = $config["path"] ?? null;

@@ -11,6 +11,7 @@ use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Routing\RouterInterface;
 use Twig\Environment;
 use Exception;
+use Imagine\Filter\Basic\Autorotate;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
@@ -335,7 +336,7 @@ class ImageService extends FileService implements ImageServiceInterface
         // Apply image resolution limitation
         if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
             throw new NotFoundHttpException("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
-
+        
         //
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));

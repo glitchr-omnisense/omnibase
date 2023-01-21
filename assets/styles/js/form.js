@@ -2,10 +2,13 @@
 //
 // Apply bootstrap form validation
 window.addEventListener('load', function(event) {
-
+    
+    dispatchEvent(new Event("load.form_type"));
+    dispatchEvent(new Event("load.collection_type"));
+    
     $("form.needs-validation input").on("invalid", (e) => e.preventDefault() );
 
-    $("form").submit(function() { this.submit(); }); // On pressing enter...
+    $("form").on("submit", function() { this.submit(); }); // On pressing enter...
 
     $("[type=submit]").on("click", function() {
 
@@ -32,3 +35,4 @@ window.addEventListener('load', function(event) {
         }
     });
 });
+

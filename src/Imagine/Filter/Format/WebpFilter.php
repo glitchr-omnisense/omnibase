@@ -7,11 +7,11 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Imagine\Filter\Basic\Autorotate;
 use Imagine\Filter\Basic\WebOptimization;
 use Imagine\Image\ImageInterface;
-use Imagine\Image\Palette\CMYK;
-use Imagine\Image\Palette\RGB;
 
 class WebpFilter extends WebOptimization implements BitmapFilterInterface
 {
+    protected array $filters;
+
     public function __toString()
     {
         $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
@@ -39,7 +39,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
             $options["quality"] *= $options["quality"] < 1 ? 100 : 1;
 
         if($options["autorotate"] ?? true)
-            array_append($this->filters, new Autorotate());
+            array_prepend($this->filters, new Autorotate());
 
         parent::__construct($this->path, $options);
     }

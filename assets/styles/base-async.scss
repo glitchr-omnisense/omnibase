@@ -345,8 +345,7 @@ form.was-validated select:invalid ~ .select2-selection,
 .accordion-body { margin:0; padding:0; }
 .form-collection-items .accordion-item .form-control > div label,
 .form-collection-items .accordion-item .form-control > div legend.col-form-label {
-    font-weight: 500;
-    margin: 7.5px 0px;
+    font-weight: 500; 
     padding: 0;
 }
 
@@ -384,8 +383,13 @@ input[type="file"]:not(.form-check-input).form-control { height: 38px !important
 .select2-container .select2-selection--single,
 .select2-container .select2-selection--multiple { min-height: 38px !important; }
 
-.form-text { padding:0; }
-.form-text { margin: 0.6em 0.5em; }
+.form-text 
+{ 
+    padding:0; 
+    color: var(--text-muted);
+    font-size: .875em;
+    margin: 0.6em 0.5em;
+}
 
 .collection-empty .accordion-button:after { display: none }
 .collection-empty .accordion-button input { margin-right: 2em; }
@@ -454,6 +458,7 @@ input[type="file"]:not(.form-check-input).form-control { height: 38px !important
     cursor:pointer;
     z-index:4;
 }
+
 .form-password-block .form-password-details .main { flex-grow:1; }
 .form-password-block .form-password-details .main ul { margin-left:0em; list-style: none; }
 .form-password-block .form-password-details .main p { margin-bottom:0.2rem;}
@@ -471,7 +476,9 @@ input[type="file"]:not(.form-check-input).form-control { height: 38px !important
 
     max-width:50%;
     padding:1em;
-    border-right:1px solid lightgrey;
+    border:1px solid lightgrey;
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
 }
 .form-password-block
 {
@@ -497,11 +504,17 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
 .form-password-block .form-password-details
 {
     border: 1px solid lightgrey;
-    border-right:0;
+    border-right:0 !important;
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
     width:100%;
 }
+.form-password-strength > span.strength {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+
 .form-password-block .form-password
 {
     border-top-right-radius: 4px;

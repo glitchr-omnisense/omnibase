@@ -1,101 +1,92 @@
-$(window).off("DOMContentLoaded.form_type.stock");
-$(window).on("DOMContentLoaded.form_type.stock", function () {
+window.addEventListener("load.form_type", function () {
 
-    $(window).on("load.form_type.stock");
-    $(window).on("load.form_type.stock", function () {
+    document.querySelectorAll("[data-stock-field]").forEach((function (e) {
 
-        document.querySelectorAll("[data-stock-field]").forEach((function (e) {
+        var id = $(e).data("stock-field");
+        var unlimitedStr = $(e).data("stock-unlimited");
 
-            var id = $(e).data("stock-field");
-            var unlimitedStr = $(e).data("stock-unlimited");
+        var input = $("#"+id);
 
-            var input = $("#"+id);
+        var btn   = $("#"+id+"-btn");
+        var btnDown = $("#"+id+"-down");
+        var btnUp = $("#"+id+"-up");
 
-            var btn   = $("#"+id+"-btn");
-            var btnDown = $("#"+id+"-down");
-            var btnUp = $("#"+id+"-up");
+        var icon  = $(btn).find("i");
 
-            var icon  = $(btn).find("i");
+        $(input).prop("placeholder", unlimitedStr);
+        function isUnlimited(input) { return $(input).prop("disabled") && $(input).val() == ""; }
+        function setLimitedState(input, stockValue)
+        {
+            $(input).val(stockValue);
 
-            $(input).prop("placeholder", unlimitedStr);
-            function isUnlimited(input) { return $(input).prop("disabled") && $(input).val() == ""; }
-            function setLimitedState(input, stockValue)
-            {
-                $(input).val(stockValue);
+            $(btnUp  ).prop("disabled", false);
+            $(btnDown).prop("disabled", false);
+            $(input  ).prop("disabled", false);
+            $(icon).addClass("fa-box-open").removeClass("fa-infinity");
+            return $(input).val();
+        }
 
-                $(btnUp  ).prop("disabled", false);
-                $(btnDown).prop("disabled", false);
-                $(input  ).prop("disabled", false);
-                $(icon).addClass("fa-box-open").removeClass("fa-infinity");
-                return $(input).val();
-            }
-
-            function setUnlimitedState(input)
-            {
-                var stockValue = $(input).val() || null;
-                $(input).val(null);
-
-                $(btnUp  ).prop("disabled", true);
-                $(btnDown).prop("disabled", true);
-                $(input  ).prop("disabled", true);
-                $(icon).removeClass("fa-box-open").addClass("fa-infinity");
-                return stockValue;
-            }
-
+        function setUnlimitedState(input)
+        {
             var stockValue = $(input).val() || null;
-            if ($(input).val() == "") stockValue = setUnlimitedState(input);
-            else stockValue = setLimitedState(input, stockValue);
+            $(input).val(null);
 
-            $(btn).off("click");
-            $(btn).on("click", function() {
+            $(btnUp  ).prop("disabled", true);
+            $(btnDown).prop("disabled", true);
+            $(input  ).prop("disabled", true);
+            $(icon).removeClass("fa-box-open").addClass("fa-infinity");
+            return stockValue;
+        }
 
-                if (isUnlimited(input)) stockValue = setLimitedState(input, stockValue);
-                else stockValue = setUnlimitedState(input);
+        var stockValue = $(input).val() || null;
+        if ($(input).val() == "") stockValue = setUnlimitedState(input);
+        else stockValue = setLimitedState(input, stockValue);
 
-            });
+        $(btn).off("click");
+        $(btn).on("click", function() {
 
-            $(btnUp).off("click");
-            $(btnUp).on("click", function()
-            {
-                var stepUp = parseInt($(input).attr("data-stock-up")) ?? 1;
-                if (stepUp == 0) stepUp = 1;
+            if (isUnlimited(input)) stockValue = setLimitedState(input, stockValue);
+            else stockValue = setUnlimitedState(input);
 
-                var val = parseInt($(input).val());
-                if (isNaN(val)) val = 0;
-                if (val < parseInt($(input).attr("data-stock-max")) || !$(input).attr("data-stock-max"))
-                    val = val + Math.abs(stepUp);
-                if (val > parseInt($(input).attr("data-stock-max")) && $(input).attr("data-stock-max"))
-                    val = parseInt($(input).attr("data-stock-max"));
+        });
 
-                $(input).val(val);
-            });
+        $(btnUp).off("click");
+        $(btnUp).on("click", function()
+        {
+            var stepUp = parseInt($(input).attr("data-stock-up")) ?? 1;
+            if (stepUp == 0) stepUp = 1;
 
-            $(btnDown).off("click");
-            $(btnDown).on("click", function()
-            {
-                var stepDown = parseInt($(input).attr("data-stock-down")) ?? 1;
-                if (stepDown == 0) stepDown = 1;
+            var val = parseInt($(input).val());
+            if (isNaN(val)) val = 0;
+            if (val < parseInt($(input).attr("data-stock-max")) || !$(input).attr("data-stock-max"))
+                val = val + Math.abs(stepUp);
+            if (val > parseInt($(input).attr("data-stock-max")) && $(input).attr("data-stock-max"))
+                val = parseInt($(input).attr("data-stock-max"));
 
-                var val = parseInt($(input).val());
-                if (isNaN(val)) val = 0;
-                if (val > parseInt($(input).attr("data-stock-min")) || !$(input).attr("data-stock-min"))
-                    val = val - Math.abs(stepDown);
-                if (val < parseInt($(input).attr("data-stock-min")) && $(input).attr("data-stock-min"))
-                    val = parseInt($(input).attr("data-stock-min"));
+            $(input).val(val);
+        });
 
-                $(input).val(val);
-            });
+        $(btnDown).off("click");
+        $(btnDown).on("click", function()
+        {
+            var stepDown = parseInt($(input).attr("data-stock-down")) ?? 1;
+            if (stepDown == 0) stepDown = 1;
 
-            $(input).off("change");
-            $(input).on("change", function() {
+            var val = parseInt($(input).val());
+            if (isNaN(val)) val = 0;
+            if (val > parseInt($(input).attr("data-stock-min")) || !$(input).attr("data-stock-min"))
+                val = val - Math.abs(stepDown);
+            if (val < parseInt($(input).attr("data-stock-min")) && $(input).attr("data-stock-min"))
+                val = parseInt($(input).attr("data-stock-min"));
 
-                if ($(input).val()) stockValue = $(input).val();
-                if ($(input).val() == "") setUnlimitedState(input);
-            });
-        }))
-    });
+            $(input).val(val);
+        });
 
-    $(window).trigger("load.form_type.stock");
+        $(input).off("change");
+        $(input).on("change", function() {
+
+            if ($(input).val()) stockValue = $(input).val();
+            if ($(input).val() == "") setUnlimitedState(input);
+        });
+    }))
 });
-
-$(window).trigger("DOMContentLoaded.form_type.stock");

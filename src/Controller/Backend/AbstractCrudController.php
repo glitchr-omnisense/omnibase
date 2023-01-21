@@ -355,6 +355,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return $entityDto;
     }
 
+    protected $entityCollection;
+    protected $responseParameters;
     public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore
     {
         $this->entityDto        = $responseParameters->get("entity");

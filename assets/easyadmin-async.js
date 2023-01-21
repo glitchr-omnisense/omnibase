@@ -14,38 +14,3 @@ window.addEventListener('load', function(event) {
     //     trigger: 1
     //   });
 });
-
-{/* <script>
-$(function () {
-    $('[data-toggle="popover"]').popover({html:true})
-    $('[data-toggle="tooltip"]').tooltip({trigger:"manual", html:true})
-
-    $('[data-toggle="tooltip"]').on('click.persistent', function () { $(this).tooltip('toggle'); });
-    $('[data-toggle="tooltip"]').on('mouseleave.persistent', function ()
-    {
-        $(this).data("hover", false);
-        setTimeout(function () {
-            if(!$(this).data("hover") && !$("#"+this.getAttribute("aria-describedby")).data("hover"))  {
-                $("#"+this.getAttribute("aria-describedby")).off('mouseenter.persistent');
-                $("#"+this.getAttribute("aria-describedby")).off('mouseleave.persistent');
-                $(this).tooltip('hide');
-            }
-        }.bind(this), 500);
-    });
-
-    $('[data-toggle="tooltip"]').on('mouseenter.persistent', function ()
-    {
-        var that = this;
-        $(this).data("hover", true);
-        if(!$(this).attr("aria-describedby")) {
-
-            $(this).tooltip('show');
-            $("#"+this.getAttribute("aria-describedby")).on('mouseenter.persistent', function () { $(this).data("hover", true ); });
-            $("#"+this.getAttribute("aria-describedby")).on('mouseleave.persistent', function () { $(this).data("hover", false); $(that).trigger("mouseleave.persistent"); });
-        }
-
-        tooltip = $('[data-toggle="tooltip"]').not(this);
-        tooltip.tooltip('hide');
-    });
-});
-</script> */}

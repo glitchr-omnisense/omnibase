@@ -1,59 +1,42 @@
+window.addEventListener("load.form_type", function () {
 
-console.log("domです");
+    $("[data-avatar-field]").each(function () {
 
-$(window).on("DOMContentLoaded.form_type.avatar").off();
-$(window).on("DOMContentLoaded.form_type.avatar", function () {
+        var el = this;
+        var id = el.getAttribute("data-avatar-field");
 
-    console.log("exec");
+        var cropper = el.getAttribute("data-avatar-cropper") || null;
+        if (cropper) {
 
-    $(window).off("load.form_type.avatar");
-    $(window).on("load.form_type.avatar", function () {
+            $(el).find("#"+id+"_file").on("change", function() {
 
-        console.log("loadです");
-
-        document.querySelectorAll("[data-avatar-field]").forEach(function (el) {
-
-            var id = el.getAttribute("data-avatar-field");
-
-            var cropper = el.getAttribute("data-avatar-cropper") || null;
-            if (cropper) {
-
-                $("#"+id+"_file").on("change.avatar", function() {
-
-                    var display = $("#"+id+"_file").value !== "" ? "flex" : "none";
-                    $("#"+id+"_deleteBtn2").css("display", display);
-                });
-
-            } else {
-
-                $("#"+id+"_raw").on("change.avatar", function() {
-
-                    var display = $("#"+id+"_raw").value !== "" ? "flex" : "none";
-                    $("#"+id+"_deleteBtn2").css("display", display);
-                });
-            }
-
-            $('#'+id+'_figcaption').on('click.avatar', function() {
-                $('#'+id+'_raw').trigger("click");
-            });
-            
-            $("#"+id+"_deleteBtn2").on("click.avatar", function() {
-
-                $("#"+id+"_raw").value = '';
-                $("#"+id+"_deleteBtn").trigger("click");
+                var display = $("#"+id+"_file")[0].value !== "" ? "flex" : "none";
+                $(el).find("#"+id+"_deleteBtn2").css("display", display);
             });
 
-            $("#"+id+"_deleteBtn").on("click.avatar", function() {
+        } else {
 
-                $("#"+id+"_raw").value = '';
-                $("#"+id+"_deleteBtn2").css("display", "none");
+            $(el).find("#"+id+"_raw").on("change", function() {
+
+                var display = $("#"+id+"_raw")[0].value ? "flex" : "none";
+                $(el).find("#"+id+"_deleteBtn2").css("display", display);
             });
+        }
 
+        $(el).find('#'+id+'_figcaption').on('click', function() {
+            $(el).find('#'+id+'_raw').trigger("click");
+        });
+        
+        $(el).find("#"+id+"_deleteBtn2").on("click", function() {
+
+            $(el).find("#"+id+"_raw")[0].value = '';
+            $(el).find("#"+id+"_deleteBtn").trigger("click");
         });
 
+        $(el).find("#"+id+"_deleteBtn").on("click", function() {
+
+            $(el).find("#"+id+"_raw")[0].value = '';
+            $(el).find("#"+id+"_deleteBtn2").css("display", "none");
+        });
     });
-
-    $(window).trigger("load.form_type.avatar");
 });
-
-$(window).trigger("DOMContentLoaded.form_type.avatar");

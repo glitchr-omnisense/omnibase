@@ -54,6 +54,42 @@ namespace {
         }, $input);
     }
 
+    // Value (1) => 0 degrees: the correct orientation, no adjustment is required.
+    // Value (2) => 0 degrees, mirrored: image has been flipped back-to-front.
+    // Value (3) => 180 degrees: image is upside down.
+    // Value (4) => 180 degrees, mirrored: image has been flipped back-to-front and is upside down.
+    // Value (5) => 90 degrees: image has been flipped back-to-front and is on its side.
+    // Value (6) => 90 degrees, mirrored: image is on its side.
+    // Value (7) => 270 degrees: image has been flipped back-to-front and is on its far side.
+    // Value (8) => 270 degrees, mirrored: image is on its far side.
+    function getimageorientation(string $fname): int { 
+
+        $exif = exif_read_data($fname);
+        return $exif["Orientation"] ?? 1;
+    }
+
+    function imagedimswap(string $fname): bool { return getimageorientation($fname) > 4; } 
+
+    function image_fix_orientation(&$image, $fname) {
+        $exif = exif_read_data($fname);
+        
+        if (!empty($exif['Orientation'])) {
+            switch ($exif['Orientation']) {
+                case 3:
+                    $image = imagerotate($image, 180, 0);
+                    break;
+                
+                case 6:
+                    $image = imagerotate($image, 90, 0);
+                    break;
+                
+                case 8:
+                    $image = imagerotate($image, -90, 0);
+                    break;
+            }
+        }
+    }
+
     function start_timer() { $_SERVER["APP_TIMER"] = microtime(true); }
     function get_lap() // ms
     {

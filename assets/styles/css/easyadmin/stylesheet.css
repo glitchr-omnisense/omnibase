@@ -7,6 +7,11 @@ html, body { scroll-padding-top: 11em; }
 
 .row>* { padding-left:0;}
 
+.sf-minitoolbar {
+    background-color: var(--sidebar-bg) !important;
+}
+.sf-minitoolbar svg path { fill: var(--sidebar-menu-color) !important; }
+
 .d-inline .dropdown:after { margin-left:0px; }
 .d-inline .dropdown-toggle { background-color:transparent; margin-right:1px; }
 .d-inline .dropdown-toggle:active, .d-inline .dropdown-toggle:focus, .d-inline .dropdown-toggle.show {

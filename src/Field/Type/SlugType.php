@@ -15,6 +15,15 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class SlugType extends AbstractType implements AutovalidateInterface
 {
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
 
     public function __construct(Environment $twig, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -64,7 +73,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
         // Check if path is reacheable..
         if($options["target"] !== null && str_starts_with($options["target"], ".")) {
 
-            $view->ancestor = $view->parent;
+            $view->vars["ancestor"] = $view->parent;
 
             $target = $form->getParent();
             $targetPath = substr($options["target"], 1);
@@ -76,7 +85,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             while($ancestor->parent !== null)
                 $ancestor = $ancestor->parent;
 
-            $view->ancestor = $ancestor;
+            $view->vars["ancestor"] = $ancestor;
 
             $target = $form->getParent();
             while($target && ($target->getViewData() instanceof Collection || $target->getViewData() === null))

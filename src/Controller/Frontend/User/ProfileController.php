@@ -16,7 +16,21 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class ProfileController extends AbstractController
 {
-
+    /**
+     * @var FormProxyInterface
+     */
+    protected $formProxy;
+    
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+    
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+    
     public function __construct(EntityManagerInterface $entityManager, FormProxyInterface $formProxy)
     {
         $this->formProxy = $formProxy;

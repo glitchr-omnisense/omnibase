@@ -100,14 +100,27 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     }
 
     private $sourceMeta;
-    public function getNaturalWidth(): ?int { return $this->getSourceMeta()[0] ?? 0; }
-    public function getNaturalHeight(): ?int { return $this->getSourceMeta()[1] ?? 0; }
+    public function getNaturalWidth(): ?int { return $this->getSourceMeta()["width"] ?? 0; }
+    public function getNaturalHeight(): ?int { return $this->getSourceMeta()["height"] ?? 0; }
     public function getSourceMeta(): array|null|false
     {
         $sourceFile = $this->getSourceFile();
         if($sourceFile === null) return null;
 
-        $this->sourceMeta = $this->sourceMeta ?? getimagesize($sourceFile->getPathname());
+        if(empty($this->sourceMeta)) {
+        
+            $imagesize = getimagesize($sourceFile->getPathname());
+            $this->sourceMeta = [
+                "width" => $imagesize[0],
+                "height" => $imagesize[1], 
+                "type" => $imagesize[2], 
+                "bits" => $imagesize["bits"],
+                "channels" => $imagesize["channels"],
+                "mime" => $imagesize["mime"],
+                "orientation" => getimageorientation($sourceFile->getPathname()),
+            ];
+        }
+
         return $this->sourceMeta;
     }
 

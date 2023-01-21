@@ -239,7 +239,7 @@
 {%- block slug_widget -%}
 
 {# Search for target inside form based on parent including translation #}
-{% set targetForm = form.ancestor %}
+{% set targetForm = form.vars.ancestor %}
 {% for child in target %}
 
     {% set targetForm = targetForm[child] %}
@@ -1030,7 +1030,7 @@
 {%- block cropper_widget -%}
 
 {# Search for target inside form based on parent including translation #}
-{% set targetForm = form.ancestor %}
+{% set targetForm = form.vars.ancestor %}
 {% for child in target %}
 
     {% set targetForm = targetForm[child] %}
@@ -1044,7 +1044,7 @@
     {% endif %}
 {% endfor %}
 
-{% set quadrantForm = form.ancestor %}
+{% set quadrantForm = form.vars.ancestor %}
 {% for child in quadrant %}
 
     {% set quadrantForm = quadrantForm[child] %}

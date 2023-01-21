@@ -184,7 +184,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
      */
     protected $width0;
     public function getNaturalWidth(): ?int { return $this->getImage() ? $this->getImage()->getNaturalWidth() : 0; }
-    public function getWidth (?int $width = null): ?int { return $this->isNormalized() ? $this->width0 * ($width ?? $this->getNaturalWidth()) : $this->width0; }
+    public function getWidth (?int $width = null): ?int { return (int) ($this->isNormalized() ? $this->width0 * ($width ?? $this->getNaturalWidth()) : $this->width0); }
     public function getWidth0(): ?float { return $this->width0; }
     public function setWidth0(float $width0): self
     {
@@ -197,7 +197,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
      */
     protected $height0;
     public function getNaturalHeight(): ?int { return $this->getImage() ? $this->getImage()->getNaturalHeight() : 0; }
-    public function getHeight (?int $height = null): ?int{ return $this->isNormalized() ? $this->height0 * ($height ?? $this->getNaturalHeight()) : $this->height0; }
+    public function getHeight (?int $height = null): ?int{ return (int) ($this->isNormalized() ? $this->height0 * ($height ?? $this->getNaturalHeight()) : $this->height0); }
     public function getHeight0(): ?float { return $this->height0; }
     public function setHeight0(float $height0): self
     {

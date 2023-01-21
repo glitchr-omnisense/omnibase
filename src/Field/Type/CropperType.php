@@ -21,9 +21,33 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Traversable;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-
 class CropperType extends AbstractType implements DataMapperInterface
 {
+    /**
+     * @var FormFactory
+     */
+    protected $formFactory;
+
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
+    /**
+     * @var PropertyAccessor
+     */
+    protected $propertyAccessor;
+
     public function getBlockPrefix(): string { return 'cropper'; }
 
     public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, Environment $twig)
@@ -125,7 +149,8 @@ class CropperType extends AbstractType implements DataMapperInterface
         while($ancestor->parent !== null)
             $ancestor = $ancestor->parent;
 
-        $view->ancestor = $ancestor;
+        
+        $view->vars["ancestor"] = $ancestor;
 
         //
         // Check if target path is reacheable..

@@ -9,6 +9,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
 {
+    /**
+     * @var Environment
+     */
+    protected $twig;
+
     public function getBlockPrefix(): string { return 'number2'; }
     public function __construct(Environment $twig)
     {
