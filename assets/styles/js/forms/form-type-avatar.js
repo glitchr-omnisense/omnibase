@@ -4,7 +4,7 @@ window.addEventListener("load.form_type", function () {
 
         var el = this;
         var id = el.getAttribute("data-avatar-field");
-       
+
         var cropper = el.getAttribute("data-avatar-cropper") || null;
         if (cropper) {
 

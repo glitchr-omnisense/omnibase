@@ -77,12 +77,12 @@ class Translator implements TranslatorInterface
     public function trans(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true):string
     {
         if(!$id) return $id;
-
-        $domainFallback = false;
+        
+        $domainFallback = null;
         if($id instanceof TranslatableMessage) {
-
-            $domainFallback = $id->getDomain();
-            $domain ??= $domainFallback;
+            
+            $domainFallback = $domain;
+            $domain = $id->getDomain();
             $parameters = array_merge($id->getParameters(), $parameters);
             $id = $id->getMessage();
         }
@@ -115,9 +115,10 @@ class Translator implements TranslatorInterface
                 $ret = $this->translator->trans($ret, $parameters, $domainFallback, $locale);
                 if(preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) return $id;
             }
-    
+
             return $ret;
         }
+
 
         // Replace parameter between brackets
         $bracketList = self::STRUCTURE_BRACKETLIST;
@@ -178,10 +179,8 @@ class Translator implements TranslatorInterface
             }
         }
 
-        if ($trans == $id && $customId) {
-
-            return ($domain && $startsWithDomainTag ? "@".$domain.".".$id : $id);
-        }
+        if ($trans == $id && $customId)
+            $trans = $domain && $startsWithDomainTag ? "@".$domain.".".$id : $id;
 
         return trim($trans ?? "");
     }
