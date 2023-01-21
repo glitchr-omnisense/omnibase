@@ -1,13 +1,10 @@
 window.addEventListener("load.form_type", function () {
 
-    console.log("LOAD");
-
     $("[data-avatar-field]").each(function () {
 
         var el = this;
         var id = el.getAttribute("data-avatar-field");
-        console.log("YES");
-
+       
         var cropper = el.getAttribute("data-avatar-cropper") || null;
         if (cropper) {
 
@@ -27,7 +24,6 @@ window.addEventListener("load.form_type", function () {
         }
 
         $(el).find('#'+id+'_figcaption').on('click', function() {
-            console.log("AH");
             $(el).find('#'+id+'_raw').trigger("click");
         });
         
