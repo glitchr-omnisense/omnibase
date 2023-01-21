@@ -172,6 +172,21 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
             }
         };
 
+        var truncate = function (fullStr, strLen, separator) {
+            if (fullStr.length <= strLen) return fullStr;
+
+            separator = separator || '...';
+
+            var sepLen = separator.length,
+                charsToShow = strLen - sepLen,
+                frontChars = Math.ceil(charsToShow/2),
+                backChars = Math.floor(charsToShow/2);
+
+            return fullStr.substr(0, frontChars) + 
+                separator + 
+                fullStr.substr(fullStr.length - backChars);
+        };
+
         var startAjaxRequest = function(index) {
             var tbody = document.querySelector('.sf-toolbar-ajax-request-list');
             if (!tbody) {
@@ -215,10 +230,10 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
             if ('GET' === request.method) {
                 var pathLink = document.createElement('a');
                 pathLink.setAttribute('href', request.url);
-                pathLink.textContent = request.url;
+                pathLink.textContent = truncate(request.url, 30);
                 pathCell.appendChild(pathLink);
             } else {
-                pathCell.textContent = request.url;
+                pathCell.textContent = truncate(request.url, 30);
             }
             pathCell.setAttribute('title', request.url);
             row.appendChild(pathCell);

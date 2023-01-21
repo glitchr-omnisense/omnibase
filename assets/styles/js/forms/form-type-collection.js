@@ -47,7 +47,6 @@ window.addEventListener("load.collection_type", function () {
 
             var deleteFn = function() {
 
-                console.log("DELETE ACTION", this);
                 $(this).remove();
                 
                 var l = o.dataset.numItems = $(o).find(".form-collection-item").length;
@@ -115,7 +114,7 @@ window.addEventListener("load.collection_type", function () {
             $(u).collapse("show");
 
             $(document).trigger("collection.item-added");
-            console.log(document.querySelectorAll("button.form-collection-delete-button"));
+            
             document.querySelectorAll("button.form-collection-delete-button").forEach(deleteAction);
         });
     }
