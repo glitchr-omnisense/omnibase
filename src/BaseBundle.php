@@ -265,7 +265,15 @@ class BaseBundle extends Bundle
         foreach ($classes as $input => $output) {
 
             // Autowire base repositories
-            if (class_exists($input) && !class_exists($output) && !array_key_exists($input, self::$aliasList)) {
+            $inputExists = false;
+            try { $inputExists = class_exists($input); }
+            catch (\ErrorException $e) { }
+
+            $outputExists = false;
+            try { $outputExists = class_exists($output); }
+            catch (\ErrorException $e) { }
+
+            if ($inputExists && !$outputExists && !array_key_exists($input, self::$aliasList)) {
 
                 class_alias($input, $output);
 
