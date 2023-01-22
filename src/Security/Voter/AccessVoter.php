@@ -57,7 +57,8 @@ class AccessVoter extends Voter
      * @var MaternityUnit 
      * */
     protected $maternityUnit;
-    
+
+    protected ?array $urlExceptions;
     public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocaleProviderInterface $localeProvider, MaintenanceProviderInterface $maintenanceProvider, MaternityUnitInterface $maternityUnit)
     {
         $this->requestStack   = $requestStack;
@@ -68,6 +69,12 @@ class AccessVoter extends Voter
         $this->localeProvider = $localeProvider;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->maternityUnit    = $maternityUnit;
+
+        $this->urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getLocale());
+        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getLang());
+        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getDefaultLocale());
+        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getDefaultLang());
+        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", null) ?? [];
     }
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -122,13 +129,7 @@ class AccessVoter extends Voter
                 if(!$isRestrictedFirewall) return true;
 
                 $url = parse_url($url);
-                $urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getLocale());
-                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getLang());
-                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getDefaultLocale());
-                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getDefaultLang());
-                $urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", null) ?? [];
-
-                foreach($urlExceptions as $urlException) {
+                foreach($this->urlExceptions as $urlException) {
 
                     $exception = true;
 
