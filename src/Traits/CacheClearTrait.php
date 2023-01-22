@@ -9,6 +9,18 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
 trait CacheClearTrait
 {
+    protected function checkCache(SymfonyStyle $io): void
+    {
+        $Xdebug  = extension_loaded('xdebug') ? '<info>✓</info>' : '<error>✗</error>';
+        $APCu    = extension_loaded('apc') && ini_get('apc.enabled') ? '<info>✓</info>' : '<error>✗</error>';
+        $OPcache = extension_loaded('Zend OPcache') ? '<info>✓</info>' : '<error>✗</error>';
+
+        $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver might differ)".PHP_EOL);
+        $io->write("        [".$Xdebug."] Xdebug", true);
+        $io->write("        [".$APCu."] APCu", true);
+        $io->write("        [".$OPcache."] OPcache", true);
+    }
+
     protected function customFeatureWarnings(SymfonyStyle $io): void
     {
         $useCustomRouter     = $this->parameterBag->get("base.router.use_custom");
@@ -113,7 +125,7 @@ trait CacheClearTrait
         $diskSpace = disk_total_space(".");
         $remainingSpace = $diskSpace - $freeSpace;
         $percentSpace = round(100*$remainingSpace/$diskSpace, 2);
-        $diskSpaceStr = 'Disk space information: '. byte2str($freeSpace) . ' / ' . byte2str($diskSpace) . " available".PHP_EOL."(".$percentSpace." % used)";
+        $diskSpaceStr = 'Disk space information: '. byte2str($freeSpace) . ' / ' . byte2str($diskSpace) . " available (".$percentSpace." % used)";
 
         $memoryLimit = str2dec(ini_get("memory_limit"));
         $memoryLimitStr = $memoryLimit > 1 ? 'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(DECIMAL_PREFIX, 0, 3)) : "";

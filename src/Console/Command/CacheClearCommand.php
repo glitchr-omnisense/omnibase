@@ -97,6 +97,7 @@ EOF
             $this->phpConfigCheck($io);
             $this->diskAndMemoryCheck($io);
             $this->customFeatureWarnings($io);
+            $this->checkCache($io);
             
             $this->testFile = $this->cacheDir."/.test";
             $this->testFileExists = file_exists($this->testFile);
