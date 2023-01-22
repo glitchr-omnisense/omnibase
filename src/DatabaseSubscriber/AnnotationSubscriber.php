@@ -1,4 +1,4 @@
-<?php
+	<?php
 
 namespace Base\DatabaseSubscriber;
 
@@ -54,7 +54,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
     public function loadClassMetadata( LoadClassMetadataEventArgs $event )
     {
         // needs to be booted to be aware of custom doctrine types.
-        if(!BaseBundle::isBooted()) return;
+        if(!BaseBundle::getInstance()->hasBooted()) return;
 
         $className     = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
@@ -179,7 +179,6 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)
     {
-        $v = get_lap();
         $entity         = $event->getObject();
 
         $className      = get_class($entity);

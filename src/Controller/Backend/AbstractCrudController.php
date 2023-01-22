@@ -3,6 +3,7 @@
 namespace Base\Controller\Backend;
 
 use Base\Backend\Config\Extension;
+use Base\BaseBundle;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\IdField;
 use Base\Service\Model\IconizeInterface;
@@ -104,7 +105,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getEntityFqcn(): string
     {
         $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
-        $entityFqcn = get_alias(preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
+        $entityFqcn = BaseBundle::getInstance()->getAlias(preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
         self::$crudController[$entityFqcn] = get_called_class();
         return $entityFqcn;
     }
@@ -163,8 +164,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function setDiscriminatorMapAttribute(Action $action)
     {
-        $entity     = get_alias($this->getEntityFqcn());
-        $rootEntity = get_alias($this->classMetadataManipulator->getRootEntityName($entity));
+        $entity     = BaseBundle::getInstance()->getAlias($this->getEntityFqcn());
+        $rootEntity = BaseBundle::getInstance()->getAlias($this->classMetadataManipulator->getRootEntityName($entity));
         $actionDto = $action->getAsDto();
 
         $discriminatorMap = $this->configureDiscriminatorMap($this->classMetadataManipulator->getDiscriminatorMap($entity), $rootEntity, $entity);
@@ -178,7 +179,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         foreach($discriminatorMap as $key => $class) {
 
-            $class = get_alias($class);
+            $class = BaseBundle::getInstance()->getAlias($class);
 
             if(is_abstract($class)) continue;
 

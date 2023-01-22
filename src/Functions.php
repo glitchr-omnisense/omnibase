@@ -4,9 +4,6 @@ namespace {
 
     use Base\BaseBundle;
 
-    function get_alias(array|object|string|null $arrayOrObjectOrClass): string { return BaseBundle::getAlias($arrayOrObjectOrClass); }
-    function alias_exists(mixed $objectOrClass): bool { return BaseBundle::hasAlias($objectOrClass); }
-
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
 

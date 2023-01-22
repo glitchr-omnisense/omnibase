@@ -107,7 +107,7 @@ class IntegritySubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if(BaseBundle::isBroken() && $event->isMainRequest())
+        if(BaseBundle::getInstance()->isBroken() && $event->isMainRequest())
             throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?");
 
         $token = $this->tokenStorage->getToken();

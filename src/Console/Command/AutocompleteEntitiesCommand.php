@@ -83,8 +83,8 @@ class AutocompleteEntitiesCommand extends Command
         } else {
 
             $entity = array_filter(array_merge(
-                BaseBundle::getAllClasses($baseLocation."/Entity"),
-                BaseBundle::getAllClasses("./src/Entity"),
+                BaseBundle::getInstance()->getAllClasses($baseLocation."/Entity"),
+                BaseBundle::getInstance()->getAllClasses("./src/Entity"),
             ), fn($c) => class_implements_interface($c, AutocompleteInterface::class));
 
             if($entity) $output->section()->writeln("Entity candidate list: ".$entityClass);

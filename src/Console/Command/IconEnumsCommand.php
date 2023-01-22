@@ -24,8 +24,8 @@ class IconEnumsCommand extends Command
         $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
         $enumRestriction = $input->getOption('enum') ?? "";
         $enums = array_merge(
-            BaseBundle::getAllClasses($baseLocation."/Enum"),
-            BaseBundle::getAllClasses("./src/Enum"),
+            BaseBundle::getInstance()->getAllClasses($baseLocation."/Enum"),
+            BaseBundle::getInstance()->getAllClasses("./src/Enum"),
         );
 
         if($enums) $output->section()->writeln("Enum list: ".$enumRestriction);

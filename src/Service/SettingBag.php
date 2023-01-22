@@ -84,7 +84,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     }
 
     public function all   (?string $locale = null) : array   { return $this->get(null, $locale); }
-    public function allRaw($useCache = BaseBundle::CACHE, $onlyLinkedBag = false) : array  { return $this->getRaw(null, $useCache, $onlyLinkedBag); }
+    public function allRaw($useCache = BaseBundle::USE_CACHE, $onlyLinkedBag = false) : array  { return $this->getRaw(null, $useCache, $onlyLinkedBag); }
     public function __call($name, $_) { return $this->get("base.settings.".$name); }
 
     public function getEnvironment(): ?string { return $this->environment; }
@@ -176,7 +176,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return array_filter($settings);
     }
 
-    public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::CACHE, bool $onlyLinkedBag = false)
+    public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::USE_CACHE, bool $onlyLinkedBag = false)
     {
         $useSettingBag = $this->parameterBag->get("base.parameter_bag.use_setting_bag") ?? false;
         if(!$useSettingBag)
@@ -213,7 +213,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             
             $cacheDriver = $this->entityManager->getConfiguration()->getResultCacheImpl();
             $cacheDriver->deleteAll();
-        
+
             return $useCache ? $this->getRaw($path, false) : [];
         
         } // Cache fallback
@@ -238,7 +238,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $setting;
     }
 
-    public function getRawScalar(null|string|array $path = null, bool $useCache = BaseBundle::CACHE)
+    public function getRawScalar(null|string|array $path = null, bool $useCache = BaseBundle::USE_CACHE)
     {
         if(is_array($paths = $path)) {
 
@@ -267,7 +267,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     }
 
     protected array $settingBag = [];
-    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = BaseBundle::CACHE): array
+    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = BaseBundle::USE_CACHE): array
     {
         if(is_array($paths = $path)) {
 
@@ -298,7 +298,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     }
 
     public function clearAll() { return $this->clear(null); }
-    public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::CACHE)
+    public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
         if(is_array($paths = $path)) {
 
@@ -324,7 +324,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
     }
 
-    public function set(string $path, $value, ?string $locale = null, $useCache = BaseBundle::CACHE)
+    public function set(string $path, $value, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
         $setting = $this->generateRaw($path, $locale);
         if($setting->isLocked())

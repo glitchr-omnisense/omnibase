@@ -27,12 +27,12 @@ class TranslationEntitiesCommand extends Command
         $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
         $entityRestriction = $input->getOption('entity') ?? "";
         $entities = array_merge(
-            BaseBundle::getAllNamespacesAndClasses("./src/Entity"),
-            BaseBundle::getAllNamespacesAndClasses($baseLocation."/Entity"),
+            BaseBundle::getInstance()->getAllNamespacesAndClasses("./src/Entity"),
+            BaseBundle::getInstance()->getAllNamespacesAndClasses($baseLocation."/Entity"),
         );
         $namespaces = array_merge(
-            BaseBundle::getAllNamespaces("./src/Entity"),
-            BaseBundle::getAllNamespaces($baseLocation."/Entity"),
+            BaseBundle::getInstance()->getAllNamespaces("./src/Entity"),
+            BaseBundle::getInstance()->getAllNamespaces($baseLocation."/Entity"),
         );
 
         $maxLength = [];

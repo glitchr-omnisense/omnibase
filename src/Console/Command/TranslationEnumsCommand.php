@@ -26,8 +26,8 @@ class TranslationEnumsCommand extends Command
         $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
         $enumRestriction = $input->getOption('enum') ?? "";
         $enums = array_merge(
-            BaseBundle::getAllClasses("./src/Enum"),
-            BaseBundle::getAllClasses($baseLocation."/Enum"),
+            BaseBundle::getInstance()->getAllClasses("./src/Enum"),
+            BaseBundle::getInstance()->getAllClasses($baseLocation."/Enum"),
         );
 
         $maxLength = 0;

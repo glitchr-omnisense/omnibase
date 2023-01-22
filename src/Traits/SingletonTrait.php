@@ -10,16 +10,8 @@ trait SingletonTrait
 
     protected function __construct() { }
 
-    public static function hasInstance()
-    {
-        return !self::$_instance;
-    }
-
-    public static function setInstance($instance)
-    {
-        self::$_instance = $instance;
-    }
-
+    public static function hasInstance() { return self::$_instance !== null; }
+    public static function setInstance($instance) { self::$_instance = $instance; }
     public static function getInstance(bool $instanciateIfNotFound = true): ?self
     {
         if ($instanciateIfNotFound && !self::$_instance)

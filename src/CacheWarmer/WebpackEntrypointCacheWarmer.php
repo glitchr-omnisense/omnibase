@@ -12,6 +12,7 @@ class WebpackEntrypointCacheWarmer extends AbstractSimpleCacheWarmer
 {
     public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
     {
+        if(!$parameterBag->get("base.twig.use_custom")) return;
         if(!$entrypointLookup) return;
         
         // Extract [app] tags

@@ -252,7 +252,7 @@ class IntlSubscriber implements EventSubscriberInterface
             $classMetadata->mapManyToOne([
                 'fieldName'   => 'translatable',
                 'inversedBy'  => 'translations',
-                'cache' => BaseBundle::CACHE ? [
+                'cache' => BaseBundle::USE_CACHE ? [
                     "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName())."__translatable",
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ] : null,

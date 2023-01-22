@@ -121,7 +121,11 @@ class ClassMetadataManipulator extends AbstractSimpleCache
     public function getDoctrineType(?string $type)
     {
         if(!$type) return $type;
-        return \Doctrine\DBAL\Types\Type::getType($type);
+        
+        try { $doctrineType = \Doctrine\DBAL\Types\Type::getType($type); }
+        catch (\Exception $e) { throw new \LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so.", $e->getCode(), $e); }
+
+        return $doctrineType;
     }
 
     public function getPrimaryKey($entity) { return $this->getClassMetadata($entity)->getSingleIdentifierFieldName(); }

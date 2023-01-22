@@ -42,7 +42,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             if($this->maxDefinition == null) {
 
                 $helper = $this->getHelper('question');
-                $definitions = BaseBundle::getAllClasses(BaseBundle::getBundleLocation()."/Imagine/Filter/Basic/Definition");
+                $definitions = BaseBundle::getInstance()->getAllClasses(BaseBundle::getInstance()->getBundleLocation()."/Imagine/Filter/Basic/Definition");
                 $question = new ChoiceQuestion('Please select a resolution class to be used for renormalization.', $definitions, false);
 
                 $definition = $helper->ask($input, $output, $question);

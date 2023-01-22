@@ -18,13 +18,13 @@ class BaseMappingCommand extends Command
 {
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $appList = BaseBundle::getAllClasses("./src", "App");
+        $appList = BaseBundle::getInstance()->getAllClasses("./src", "App");
         $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
         $baseList = array_merge(
-            BaseBundle::getAllClasses($baseLocation."/Enum", "Base"),
-            BaseBundle::getAllClasses($baseLocation."/Form", "Base"),
-            BaseBundle::getAllClasses($baseLocation."/Entity", "Base"),
-            BaseBundle::getAllClasses($baseLocation."/Repository", "Base")
+            BaseBundle::getInstance()->getAllClasses($baseLocation."/Enum", "Base"),
+            BaseBundle::getInstance()->getAllClasses($baseLocation."/Form", "Base"),
+            BaseBundle::getInstance()->getAllClasses($baseLocation."/Entity", "Base"),
+            BaseBundle::getInstance()->getAllClasses($baseLocation."/Repository", "Base")
         );
 
         $nAlias     = 0;

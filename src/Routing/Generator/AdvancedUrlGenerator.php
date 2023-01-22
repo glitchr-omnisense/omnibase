@@ -29,7 +29,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         parent::__construct($compiledRoutes, $context, $logger, $defaultLocale);
         
         $this->compiledRoutes = $compiledRoutes;
-        $this->cachedRoutes   = BaseBundle::CACHE && $this->getRouter()->getCache()
+        $this->cachedRoutes   = BaseBundle::USE_CACHE && $this->getRouter()->getCache()
             ? ($this->getRouter()->getCacheRoutes()->get() ?? []) : [];
     }
 

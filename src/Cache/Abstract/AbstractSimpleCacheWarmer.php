@@ -31,7 +31,7 @@ abstract class AbstractSimpleCacheWarmer extends AbstractPhpFileCacheWarmer impl
 
     protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter): bool
     {
-        if (!BaseBundle::CACHE) return false;
+        if (!BaseBundle::USE_CACHE) return false;
         if (!$this->cacheFile) return false;
 
         if (is_file($this->cacheFile))

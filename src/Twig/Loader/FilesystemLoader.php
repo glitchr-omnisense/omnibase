@@ -42,35 +42,32 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         // 2/ Infinite loop when using {%use%}
         $projectDir = $baseService->getProjectDir();
         $useCustomLoader = $baseService->getParameterBag("base.twig.use_custom");
-        if($useCustomLoader) {
 
-            $bundlePath = $baseService->getParameterBag("base.twig.default_path");
-            parent::__construct([], $bundlePath);
+        $bundlePath = $baseService->getParameterBag("base.twig.default_path");
+        parent::__construct([], $bundlePath);
 
-            $chainLoader = $this->twig->getLoader();
-            if(!$chainLoader instanceof ChainLoader) $loaders = [$this];
-            else {
+        $chainLoader = $this->twig->getLoader();
+        if(!$chainLoader instanceof ChainLoader) $loaders = [$this];
+        else {
 
-                $loaders = $chainLoader->getLoaders();
-                $loaders[] = $this;
+            $loaders = $chainLoader->getLoaders();
+            $loaders[] = $this;
 
-                // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
-                if(($mainLoader = $loaders[0]) )
-                    $mainLoader->prependPath($bundlePath."/easyadmin", "EasyAdmin");
-            }
-
-            if($baseService->getRouter()->isProfiler()) array_unshift($loaders, $defaultLoader);
-            else $loaders[] = $defaultLoader;
-
-            $chainLoader = new ChainLoader($loaders);
-            $twig->setLoader($chainLoader);
-
-            // Add @Twig, @Assets and @Layout variables
-            $this->prependPath($bundlePath."/inspector", "WebProfiler");
-            $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
-            $this->prependPath($bundlePath);
+            // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
+            if(($mainLoader = $loaders[0]) )
+                $mainLoader->prependPath($bundlePath."/easyadmin", "EasyAdmin");
         }
 
+        if($useCustomLoader) array_unshift($loaders, $defaultLoader);
+        else $loaders[] = $defaultLoader;
+
+        $chainLoader = new ChainLoader($loaders);
+        $twig->setLoader($chainLoader);
+
+        // Add @Twig, @Assets and @Layout variables
+        $this->prependPath($bundlePath."/inspector", "WebProfiler");
+        $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
+        $this->prependPath($bundlePath);
 
         $this->prependPath($projectDir . "/src", "App");
         $this->prependPath($projectDir . "/src/Controller", "Controller");

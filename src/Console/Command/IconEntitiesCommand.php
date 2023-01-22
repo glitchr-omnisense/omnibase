@@ -74,8 +74,8 @@ class IconEntitiesCommand extends Command
         } else {
 
             $entities = array_filter(array_merge(
-                BaseBundle::getAllClasses($baseLocation."/Entity"),
-                BaseBundle::getAllClasses("./src/Entity"),
+                BaseBundle::getInstance()->getAllClasses($baseLocation."/Entity"),
+                BaseBundle::getInstance()->getAllClasses("./src/Entity"),
             ), fn($c) => class_implements_interface($c, IconizeInterface::class));
 
             if($entities) $output->section()->writeln("Entity list: ".$entityClass);
