@@ -46,21 +46,16 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $bundlePath = $baseService->getParameterBag("base.twig.default_path");
         parent::__construct([], $bundlePath);
 
-        $chainLoader = $this->twig->getLoader();
-        if(!$chainLoader instanceof ChainLoader) $loaders = [$this];
-        else {
+        $loaders = $this->twig->getLoader();
+        if($loaders instanceof ChainLoader) $loaders = $loaders->getLoaders();
+        else $loaders = [$loaders];
 
-            $loaders = $chainLoader->getLoaders();
-            $loaders[] = $this;
+        $loaders[] = $this;
 
-            // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
-            if(($mainLoader = $loaders[0]) )
-                $mainLoader->prependPath($bundlePath."/easyadmin", "EasyAdmin");
-        }
-
-        if($useCustomLoader) array_unshift($loaders, $defaultLoader);
+        // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
+        if(!$useCustomLoader) array_unshift($loaders, $defaultLoader);
         else $loaders[] = $defaultLoader;
-
+       
         $chainLoader = new ChainLoader($loaders);
         $twig->setLoader($chainLoader);
 
