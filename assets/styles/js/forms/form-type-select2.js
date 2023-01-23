@@ -135,7 +135,12 @@ window.addEventListener("load.form_type", function () {
 
                 term = options.data.term || '';
                 page = options.data.page || '';
-                if(options.data.term == ($('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val())) {
+
+                var search = $(field).attr("last-search") || "";
+                var typing = term != search;
+                if (typing) page = "1.0";
+
+                if(options.data.term == $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val()) {
 
                     //
                     // Retrieve cache if exists
@@ -147,12 +152,12 @@ window.addEventListener("load.form_type", function () {
                 } else {
 
                     // Prevent loosing last search..
-                    $(field).attr("last-search", ($('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val()));
+                    $(field).attr("last-search", $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val());
                 }
 
                 //
                 // Compute debouncing (to avoid frequent requests)
-                options["delay"] = (firstCall ? 0 : typingDelay);
+                options["delay"] = (firstCall || !typing ? 1 : typingDelay);
 
                 function debounce(t, fn) {
 

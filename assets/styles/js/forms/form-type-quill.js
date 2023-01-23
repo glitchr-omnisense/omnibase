@@ -122,7 +122,7 @@ window.addEventListener("load.form_type", function () {
             //     }
             // };
 
-        var quillContent = el.innerHTML.replaceAll("<p><br></p>", "").replaceAll("<br>", "<br>\n");
+        var quillContent = el.innerHTML.trim().replaceAll('/^<p><br><\/p>/ig', "").replaceAll("<br>", "<br>\n");
             el.innerHTML = quillContent;
 
         var quillEditor = new Quill('#'+editorId, quill);
@@ -154,7 +154,7 @@ window.addEventListener("load.form_type", function () {
 
                 disableHTML = !disableHTML;
             }
-
+ 
             quillContent = quillEditor.html();
 
             if (quillContent == "<p><br></p>")

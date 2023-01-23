@@ -30,7 +30,8 @@ class Pagination implements PaginationInterface, Iterator, Countable
     protected $pageRange = 0;
 
     protected $template = "@Base/paginator/sliding.html.twig";
-
+    protected $parameterName;
+    
     public function __construct(array|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
     {
         if($arrayOrQuery instanceof Query) {

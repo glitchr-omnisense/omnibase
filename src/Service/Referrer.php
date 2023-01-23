@@ -31,6 +31,13 @@ class Referrer implements ReferrerInterface
     public function isVetoed(?string $routeName)
     {
         if(!$routeName) return false;
+
+        if($this->router->isUX($routeName))
+            return true;
+
+        if($this->router->isProfiler($routeName))
+            return true;
+
         if(RescueFormAuthenticator::isSecurityRoute($routeName))
             return true;
 

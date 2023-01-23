@@ -523,6 +523,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public const MAX_ANCHOR = 6;
     public function getContentWithAnchors(array $options = [], $suffix = "", $max = self::MAX_ANCHOR): ?string
     {
+        if(!$this->content) return $this->content;
+        
         $encoding = mb_detect_encoding($this->content);
 
         $dom = new \DOMDocument('1.0', $encoding);

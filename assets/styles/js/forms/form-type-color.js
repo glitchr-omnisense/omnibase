@@ -14,7 +14,11 @@ window.addEventListener("load.form_type", function () {
     document.querySelectorAll("[data-color-field]").forEach((function (el) {
 
         el.style.backgroundColor = el.value;
-        var pickr = new Pickr(Object.assign({}, JSON.parse(el.getAttribute("data-color-pickr"))));
+
+        var pickrOptions = JSON.parse(el.getAttribute("data-color-pickr"));
+            pickrOptions["default"] = el.value;
+
+        var pickr = new Pickr(Object.assign({}, pickrOptions));
             pickr.on('change', (color, instance) => {
 
                 var hexa = color.toHEXA().toString();

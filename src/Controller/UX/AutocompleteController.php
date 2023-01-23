@@ -103,11 +103,9 @@ class AutocompleteController extends AbstractController
 
                 do {
 
-                    $book = $this->paginator->paginate($entries, $page);
-                    if($page > $book->getTotalPages()+1)
-                        throw $this->createNotFoundException("Page Not Found");
-
                     $bookIsFull = false;
+                    $book = $this->paginator->paginate($entries, $page);
+                    if($page > $book->getTotalPages()+1) break;
 
                     foreach($book as $index => $result) {
 
@@ -193,11 +191,9 @@ class AutocompleteController extends AbstractController
             $index0 = -1;
             do {
 
-                $book = $this->paginator->paginate($entries, $page, $pageSize);
-                if($page > $book->getTotalPages()+1)
-                    throw $this->createNotFoundException("Page Not Found");
-
                 $bookIsFull = false;
+                $book = $this->paginator->paginate($entries, $page, $pageSize);
+                if($page > $book->getTotalPages()+1) break;
 
                 foreach($book as $index => $result) {
 
