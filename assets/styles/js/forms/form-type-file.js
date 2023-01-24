@@ -66,6 +66,18 @@ window.addEventListener("load.form_type", function () {
                     $('#'+id+'-modal').modal('hide');
                     accepted();
                 });
+
+                $("#"+id+"-cancel").on("click", function (e) {
+
+                    $('#'+id+'-modal').modal('hide');
+                    reject();
+                });
+
+                $("#"+id+"-close").on("click", function (e) {
+
+                    $('#'+id+'-modal').modal('hide');
+                    reject();
+                });
             };
 
             var el       = document.getElementById(id+"_dropzone");

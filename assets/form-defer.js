@@ -6,6 +6,7 @@ import './styles/js/form.js';
 import './styles/js/forms/form-type-array.js';
 import './styles/js/forms/form-type-avatar.js';
 import './styles/js/forms/form-type-attribute.js';
+import './styles/js/forms/form-type-button.js';
 import './styles/js/forms/form-type-boolean.js';
 import './styles/js/forms/form-type-collection.js';
 import './styles/js/forms/form-type-color.js';

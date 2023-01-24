@@ -44,5 +44,16 @@ window.addEventListener("load.form_type", function () {
 
             $("#"+id).trigger("click");
         });
+
+        $("#"+id+"-cancel").on("click", function (e) {
+
+            $('#'+id+'-modal').modal('hide');
+            onConfirmation = false;
+        });
+        $("#"+id+"-close").on("click", function (e) {
+
+            $('#'+id+'-modal').modal('hide');
+            onConfirmation = false;
+        });
     }));
 });

@@ -840,6 +840,10 @@
             <tag name="form.type" />
             <argument type="service" id="twig" />
         </service>
+        <service id="Base\Field\Type\ButtonType">
+            <tag name="form.type" />
+            <argument type="service" id="twig" />
+        </service>
 
         <service id="Base\Field\Type\RouteType">
             <tag name="form.type" />

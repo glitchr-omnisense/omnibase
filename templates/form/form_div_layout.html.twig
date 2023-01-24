@@ -287,6 +287,58 @@
     </div>
 {%- endblock -%}
 
+{%- block button2_widget -%}
+
+    {% set attr = attr|merge({
+        'data-button-field'          : form.vars.id,
+        'data-button-confirmation'   : form.vars.confirmation
+    }) %}
+
+    {%- if label is empty -%}
+        {%- if label_format is not empty -%}
+            {% set label = label_format|replace({
+                '%name%': name,
+                '%id%': id,
+            }) %}
+        {%- elseif label is not same as(false) -%}
+            {% set label = name|humanize %}
+        {%- endif -%}
+    {%- endif -%}
+
+    <button type="{{ type|default('button') }}" {{ block('button_attributes') }}>
+        {%- if translation_domain is same as(false) -%}
+            {%- if label_html is same as(false) -%}
+                {{- label -}}
+            {%- else -%}
+                {{- label|raw -}}
+            {%- endif -%}
+        {%- else -%}
+            {%- if label_html is same as(false) -%}
+                {{- label|trans(label_translation_parameters, translation_domain) -}}
+            {%- else -%}
+                {{- label|trans(label_translation_parameters, translation_domain)|raw -}}
+            {%- endif -%}
+        {%- endif -%}
+    </button>
+
+    {% if form.vars.confirmation %}
+    <div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                {{ "@fields.boolean.text"|trans }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="{{ form.vars.id }}-cancel" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
+                <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
+            </div>
+        </div>
+    </div>
+    </div>
+    {% endif %}
+
+{%- endblock button2_widget -%}
+
 {%- block boolean_row -%}
 
     {% if form.vars.switch %}
@@ -321,14 +373,14 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ form.vars.id }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" id="{{ form.vars.id }}-close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="{{ form.vars.id }}-modal-label">{{ "@fields.boolean.title" | trans([form.vars.label]) }}</h4>
             </div>
             <div class="modal-body">
                 {{ "@fields.boolean.text"|trans }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="$('#{{ form.vars.id }}-modal').modal('hide');">{{ "@fields.boolean.button.cancel"|trans }}</button>
+                <button type="button" class="btn btn-default" id="{{ form.vars.id }}-confirm" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
                 <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
             </div>
         </div>
@@ -413,8 +465,8 @@
                         {% endif %}
                         </div>
                         <div>
-                            <button type="button" class="btn btn-secondary" id="{{id}}_modalClose">Cancel</button>
-                            <button type="button" class="btn btn-primary" id="{{id}}_modalSave">Save changes</button>
+                            <button type="button" class="btn btn-secondary" id="{{id}}_modalClose">{{ "@fields.boolean.button.cancel"|trans }}</button>
+                            <button type="button" class="btn btn-primary" id="{{id}}_modalSave">{{ "@fields.boolean.button.confirm"|trans }}</button>
                         </div>
                     </div>
                 </div>
@@ -537,7 +589,7 @@
 <div class="modal-dialog" role="document">
     <div class="modal-content">
         <div class="modal-header">
-            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ form.vars.id }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="{{ form.vars.id }}-modal-label">{{ "@fields.fileupload.dropzone.title"|trans }}</h4>
         </div>
         <div class="modal-body" id="{{ form.vars.id}}-text"></div>
