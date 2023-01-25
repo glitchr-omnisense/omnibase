@@ -2,6 +2,7 @@
 
 namespace Base\Twig\Loader;
 
+use Base\Routing\RouterInterface;
 use Twig\Loader\ChainLoader;
 use Twig\Environment;
 
@@ -23,12 +24,18 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
     protected $twig;
 
     /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
      * @param string|array $paths    A path or an array of paths where to look for templates
      * @param string|null  $bundlePath The root path common to all relative paths (null for getcwd())
      */
-    public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable, BaseService $baseService)
+    public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, RouterInterface $router, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable, BaseService $baseService)
     {
         $this->twig = $twig;
+        $this->router = $router;
 
         // Add base service to the default variables
         $this->twig->addGlobal("server", $_SERVER);
@@ -60,7 +67,9 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $twig->setLoader($chainLoader);
 
         // Add @Twig, @Assets and @Layout variables
-        $this->prependPath($bundlePath."/inspector", "WebProfiler");
+        if(!$this->router->isProfiler())
+            $this->prependPath($bundlePath."/inspector", "WebProfiler");
+
         $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
         $this->prependPath($bundlePath);
 

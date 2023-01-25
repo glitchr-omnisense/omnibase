@@ -657,7 +657,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                                 if (tagAssistantFirst) {
 
                                     if (tagAssistantBlock.length == 0) {
-                                        tagAssistantBlock = '{{ include("@WebProfiler/Profiler/toolbar_item.html.twig", { link: false, name: 'gtm', status: 'normal' }) }}';
+                                        tagAssistantBlock = '{{ include("@WebProfiler/Profiler/toolbar_item.html.twig", { link: false, name: 'gtm', status: 'normal' })|replace({"\n": "", "\r": "", "\t": ""}) }}';
                                         tagAssistantBlock = document.createRange().createContextualFragment(tagAssistantBlock);
 
                                         var toolbarLastEntry = document.querySelectorAll(".sf-toolbar-block-right");

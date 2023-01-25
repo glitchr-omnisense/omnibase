@@ -388,10 +388,10 @@ class SelectType extends AbstractType implements DataMapperInterface
                     if(!array_key_exists($label, $choices)) $choices[$label] = $id;
                     else {
 
-                        for($id = 2; array_key_exists($label ."/" . $id, $choices); $id++)
+                        for($ii = 2; array_key_exists($label ."/" . $ii, $choices); $ii++)
                             continue;
 
-                        $choices[$label ."/" . $id] = $id;
+                        $choices[$label ."/" . $ii] = $id;
                     }
                 }
 
@@ -429,7 +429,6 @@ class SelectType extends AbstractType implements DataMapperInterface
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
-
             $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
             if(!$options["multiple"]) $dataChoices = $classRepository->cacheOneById($dataChoices);
             else {
@@ -455,12 +454,12 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
         if($viewData instanceof PersistentCollection) {
-            
+
             $mappedBy =  $viewData->getMapping()["mappedBy"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
             $oldData = $viewData->toArray();
 
-            $mapping = $viewData->getMapping(); // Evict caches and collection caches.
+            $mapping = $viewData->getMapping();
             foreach(array_diff_object($oldData, $dataChoices) as $entry) {
 
                 if(!$isOwningSide && $mappedBy) {
@@ -681,8 +680,8 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //
             // Format preselected values
-            $selectedData  = [];
             $dataset = $data instanceof Collection ? $data->toArray() : ( !is_array($data) ? [$data] : $data );
+            $selectedData  = $dataset;
 
             $innerType = get_class($form->getConfig()->getType()->getInnerType());
             $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, $dataset, &$options, &$selectedData) : Generator {
@@ -733,9 +732,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                     foreach($dataset as $data)
                         $entry["selected"] |= ($choices === $data);
 
-                    if($entry["selected"])
-                        $selectedData[]  = $entry["id"];
-
                     yield $i => $entry;
                 }
 
@@ -769,5 +765,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             // NB: Sorting elements is not working at the moment for multivalue SelectType, reason why I disable it here..
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
         }
+
     }
 }

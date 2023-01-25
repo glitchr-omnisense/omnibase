@@ -15,7 +15,7 @@ trait CacheClearTrait
         $APCu    = extension_loaded('apc') && ini_get('apc.enabled') ? '<info>✓</info>' : '<error>✗</error>';
         $OPcache = extension_loaded('Zend OPcache') ? '<info>✓</info>' : '<error>✗</error>';
 
-        $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver might differ)".PHP_EOL);
+        $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver extensions might differ)".PHP_EOL);
         $io->write("        [".$Xdebug."] Xdebug", true);
         $io->write("        [".$APCu."] APCu", true);
         $io->write("        [".$OPcache."] OPcache", true);

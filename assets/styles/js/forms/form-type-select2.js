@@ -14,7 +14,6 @@ function highlight_search(text, search) {
 window.addEventListener("load.form_type", function () {
 
     var localCache = {};
-    var dropdown = [];
 
     document.querySelectorAll("[data-select2-field]").forEach((function (el) {
 
@@ -71,6 +70,40 @@ window.addEventListener("load.form_type", function () {
             return {term: lastTerm || term || args.term, page: page};
         }
 
+        function orderFn(selectedEntries) {
+
+            // Pre-order based on selected data
+            var ul = $(el.nextElementSibling).find("ul.select2-selection__rendered");
+            var search = ul.children(".select2-search");
+                search.detach();
+            var li = ul.children(".select2-selection__choice");
+                li.detach();
+
+            var data = $(field).select2("data");
+            var unsorted = $(field).select2("data");
+
+            var output = [];
+            selectedEntries.forEach(function (id) {
+
+                var index = data.findIndex(element => element.id == id);
+                ul.append(li[index]);
+                output.push(id);
+                unsorted[index] = null;
+            });
+
+            unsorted.filter(x => x != null).forEach(function(u){
+
+                var index = data.findIndex(element => element.id == u.id);
+                ul.append(li[index]);
+                output.push(u.id);
+            });
+
+            if(search)
+                ul.append(search);
+
+            return output;
+        }
+
         var processResults = function(data) {
 
             page = data["pagination"]["page"] || page;
@@ -118,7 +151,7 @@ window.addEventListener("load.form_type", function () {
             select2["template"]          = "template"          in select2 ? Function('return ' + select2["template"]         )() : defaultTemplate;
             select2["templateResult"]    = "templateResult"    in select2 ? Function('return ' + select2["templateResult"]   )() : defaultTemplate;
             select2["templateSelection"] = "templateSelection" in select2 ? Function('return ' + select2["templateSelection"])() : defaultTemplate;
-
+            
         if("ajax" in select2) {
 
             select2["ajax"]["data"] = "data" in select2["ajax"] ? Function('return ' + select2["ajax"]["data"])() : data;
@@ -169,7 +202,6 @@ window.addEventListener("load.form_type", function () {
 
                     //
                     // Default call with ajax request
-                    dropdown = [];
                     firstCall = false;
 
                     //
@@ -204,11 +236,6 @@ window.addEventListener("load.form_type", function () {
         }
 
         //
-        // Pre-populated data
-        // if(select2["data"].length != 0) $(field).empty();
-        $(field).val(select2["selected"] || []).trigger("change");
-
-        //
         // Apply required option
         select2["containerCssClass"] = select2["containerCssClass"] + ($(field).attr('required') ? 'required' : '');
 
@@ -216,6 +243,14 @@ window.addEventListener("load.form_type", function () {
         $(field).select2(select2).on("select2:unselecting", function(e) {
 
             $(this).data('state', 'unselected');
+
+        }).on("select2:select", function(e) {
+
+            select2["selected"] = orderFn(select2["selected"]);
+
+        }).on("select2:unselect", function(e) {
+
+            select2["selected"] = orderFn(select2["selected"]);
 
         }).on("select2:open", function(e) {
 
@@ -247,11 +282,10 @@ window.addEventListener("load.form_type", function () {
         $(field).parent().find('input.select2-search__field').off();
         $(field).parent().find('input.select2-search__field').on("input", function() { page = "1.0"; });
 
-        dropdown = $(field).select2("data");
-
         var sortable = el.getAttribute("data-select2-sortable") || false;
         if(sortable) {
 
+            // Initialize sorting feature
             var choices = $(el.nextElementSibling).find("ul.select2-selection__rendered");
                 choices.sortable({
                     containment: 'parent',
@@ -273,6 +307,9 @@ window.addEventListener("load.form_type", function () {
                         });
                     },
                 });
+
+            select2["selected"] = orderFn(select2["selected"]);
         }
+
     }));
 });
