@@ -14,6 +14,11 @@ window.addEventListener("load.form_type", function () {
 
                 return false;
             });
+
+            $("#"+id+"-cancel").on("click", function (e) {
+
+                $('#'+id+'-modal').modal('hide');
+            });
         }
     }));
 });
