@@ -13,29 +13,26 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * @var PersistentCollection
      */
-    protected $persistentCollection = null;
-    
-    protected $array;
     protected $ordering;
     public function __construct(ArrayCollection|array $array = [], array $ordering = [])
     {
+        parent::__construct($array instanceof ArrayCollection ? $array->toArray() : $array);
         $this->ordering = $ordering;
-        $this->array = $array; // Goal was to lazy load.. but not working yet.
+        // $this->array = $array; // Goal was to lazy load.. but not working yet.
 
-        parent::__construct($this->array instanceof ArrayCollection ? $this->array->toArray() : $this->array);
     }
 
     public function getOrdering() { return $this->ordering; }
     public function applyOrdering() {
 
-        // Lazy load.
+        // Lazy load ?
         // if($this->array instanceof ArrayCollection)
         //     parent::__construct($this->array->toArray());
 
         if(!is_identity($this->ordering)) {
 
             $elements = parent::toArray();
-            if(empty($elements)) return $this; 
+            if(empty($elements)) return $this;
 
             if(count($elements) < count($this->ordering))
                 $elements = array_pad($elements, count($this->ordering), null);
@@ -44,7 +41,6 @@ class OrderedArrayCollection extends ArrayCollection
             $elements = array_filter($elements, fn($e) => $e !== null);
 
             parent::clear();
-
             foreach($elements as $element)
                 parent::add($element);
 

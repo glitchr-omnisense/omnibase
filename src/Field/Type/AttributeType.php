@@ -30,6 +30,7 @@ use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
 use Base\Twig\Environment;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 class AttributeType extends AbstractType implements DataMapperInterface
 {
@@ -42,6 +43,16 @@ class AttributeType extends AbstractType implements DataMapperInterface
      * @var FormFactory
      */
     protected $formFactory = null;
+
+    /**
+     * @var Environment
+     */
+    protected $twig = null;
+
+    /**
+     * @var PropertyAccessorInterface
+     */
+    protected $propertyAccessor = null;
 
     public function getBlockPrefix(): string { return 'attribute'; }
 

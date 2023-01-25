@@ -209,10 +209,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
                 $settings = $settings->getResult();
 
         } catch(TableNotFoundException  $e) { throw $e; }
-          catch(EntityNotFoundException $e) { 
-            
-            $cacheDriver = $this->entityManager->getConfiguration()->getResultCacheImpl();
-            $cacheDriver->deleteAll();
+          catch(EntityNotFoundException $e) {
 
             return $useCache ? $this->getRaw($path, false) : [];
         

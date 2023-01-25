@@ -79,12 +79,15 @@ abstract class EnumType extends Type implements SelectInterface
         if($inheritance) $values = $refl->getConstants();
         else $values = array_diff($refl->getConstants(),$refl->getParentClass()->getConstants());
 
-        if(!$preserve_keys) $values = array_values($values);
+        if($preserve_keys) asort($values);
+        else {
+            $values = array_values($values);
+            sort($values);
+        }
 
         if(!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values)
             throw new \Exception("\"".get_called_class()."\" is empty");
 
-        asort($values);
         return $values;
     }
 
@@ -165,6 +168,7 @@ abstract class EnumType extends Type implements SelectInterface
         if($platform instanceof SqlitePlatform) return "TEXT";
             
         $values = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
+
         return "ENUM(".implode(", ", $values).")";
     }
 

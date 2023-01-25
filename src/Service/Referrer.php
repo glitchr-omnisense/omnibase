@@ -72,7 +72,7 @@ class Referrer implements ReferrerInterface
         $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
         $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
 
-        if(!$targetRoute && !$this->isVetoed($targetRoute)) {
+        if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
@@ -104,6 +104,6 @@ class Referrer implements ReferrerInterface
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
-        return $targetPath ? $targetPath : null;
+        return $targetRoute ? $targetPath : null;
     }
 }

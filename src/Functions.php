@@ -510,20 +510,33 @@ namespace {
             );
         }
     }
-
-
-    function debug_backtrace_short()
+    
+    function debug_backtrace_short(?string $file = null, ?string $class = null, ?string $func = null)
     {
         $backtrace = [];
-        foreach(debug_backtrace() as $key => $trace) {
 
-            $backtrace[$key] = [];
+        $debug_backtrace = debug_backtrace();
+        foreach($debug_backtrace as $key => $trace) {
+
+            $entry = "";
             if(array_key_exists("file", $trace))
-                $backtrace[$key][] = $trace["file"].":".$trace["line"];
+                $entry = $trace["file"].":".$trace["line"];
 
-            $backtrace[$key][] =
+            $entry .= " >> ".
                 (array_key_exists("class"   , $trace) ? $trace["class"   ]."::" : "").
                 (array_key_exists("function", $trace) ? $trace["function"]."()" : "");
+
+            $backtrace[$key] = $entry;
+
+            $autostop  = ($file  && array_key_exists("file"  , $trace)   && $trace["file"]   == $file);
+            $autostop &= ($class && array_key_exists("class" , $trace)   && $trace["class"]  == $class);
+            $autostop &= ($func  && array_key_exists("function", $trace) && $trace["function"] == $func);
+
+            $autostop |= ($file  && str_starts_with($backtrace[$key], $file));
+            if($autostop && $key < count($debug_backtrace)-1) {
+                $backtrace[$key+1] = "[..]";
+                break;
+            }
         }
 
         return $backtrace;
@@ -1562,6 +1575,23 @@ namespace {
     define("FORMAT_LOWERCASE",    3); // lorem ipsum dolor sit amet
     define("FORMAT_UPPERCASE",    4); // LOREM IPSUM DOLOR SIT AMET
 
+    function array_any($array, ...$values) {
+
+        if(empty($values)) return true;
+        foreach($values as $value)
+            if(in_array($value, $array)) return true;
+
+        return false;
+    }
+
+    function array_every($array, ...$values) {
+
+        foreach($values as $value)
+            if(!in_array($value, $array)) return false;
+
+        return true;
+    }
+
     function call_user_func_with_defaults(callable $fn, ...$args): mixed
     {
         $reflectionFn = new ReflectionFunction($fn);
@@ -2354,6 +2384,9 @@ namespace {
 
     function array_order(array $array, array $reference)
     {
+        if(!array_every($array, ...$reference) || count($array) != count($reference))
+            throw new Exception("Bijective array requested.");
+
         $order = [];
         foreach($reference as $value) {
 
@@ -2361,15 +2394,16 @@ namespace {
             $array = array_key_removes($array, end($order));
         }
 
-        return array_merge($order, array_values($array));
+        return array_merge(array_values($array), $order);
     }
 
     function is_identity(?array $array)
     {
+        $i = 0;
         foreach($array ?? [] as $key => $value) {
 
-            if(is_array($value)) return ($value[$key] ?? $key) === $key;
-            else return $key === $value;
+            if(is_array($value) && !is_identity($value)) return false;
+            else if ($i++ !== $value) return false;
         }
 
         return true;

@@ -8,24 +8,27 @@ use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Base\Database\Repository\ServiceEntityRepository;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface
+class UserRepository extends ServiceEntityRepository implements UserLoaderInterface, UserProviderInterface, PasswordUpgraderInterface
 {
-    public function loadUserByIdentifier(string $email) : ?UserInterface {
+    public function supportsClass(string $class) { return is_instanceof($class, User::class); }
+    public function loadUserByIdentifier(string $identifier) : UserInterface
+    {
+        return $this->findOneByEmail($identifier);
+    }
 
-        return $this->getEntityManager()->createQuery(
-            'SELECT u
-                FROM App\Entity\User u
-                WHERE u.email = :email'
-        )
-            ->setParameter('email', $email)
-            ->getOneOrNullResult();
+    public function refreshUser(UserInterface $user) : ?UserInterface
+    {
+        $user = $this->cacheOneByEmail($user->getEmail());
+        return $user?->isKicked() ? null : $user;
     }
 
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void

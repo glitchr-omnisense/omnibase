@@ -9,6 +9,7 @@ use Base\Annotations\AnnotationReader;
 use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\Entity\Extension\Ordering;
+use Base\Entity\User;
 use Base\Enum\EntityAction;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\ArrayType;
@@ -92,11 +93,11 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     {
         $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
         $this->addOrderedColumnIfNotSet($classMetadata, $property);
-        
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $orderingRepository = $this->getRepository(Ordering::class);
 
-        $className = array_transforms(function($k, $e) use ($property) : ?array {
+        $className = array_transforms(function ($k, $e) use ($property): ?array {
 
             list($c, $p) = explode("::", $e);
             return $p === $property ? [$k, $c] : null;
@@ -104,17 +105,26 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         }, $this->getOrderedColumns($entity));
 
         $className = first($className);
-        if($className === null) return;
+        if ($className === null) return;
 
-        try { $entityValue = $classMetadata->getFieldValue($entity, $property); }
-        catch (Exception $e) { return; }
+        try {
+            $entityValue = $classMetadata->getFieldValue($entity, $property);
+        } catch (Exception $e) {
+            return;
+        }
 
-        $cacheDriver = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
-        $cacheDriver->deleteAll();
+        $shift = 0;
+        $orderedIndexes = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+        $orderedIndexes = $orderedIndexes?->getEntityData()[$property] ?? [];
+        $orderedIndexes = array_transforms(function ($k, $v) use (&$shift): ?array {
 
-        $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
-        $data = $ordering?->getEntityData() ?? [];
-        $orderedIndexes = $data[$property] ?? [];
+            if (is_int($v))
+                return [$k - $shift, $v];
+
+            $shift++;
+            return null;
+
+        }, array_values($orderedIndexes));
 
         $nEntries = $entityValue instanceof Collection ? $entityValue->count() : count($entityValue ?? []);
         while(count($orderedIndexes) < $nEntries)
@@ -122,8 +132,10 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
         if(is_array($entityValue)) {
 
-            $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
-            if($this->order == "DESC") $entityValue = array_reverse($entityValue);
+            $entityValue = array_flip(array_transforms(fn($k,$v):array => [$entityValue[$k],$v], $orderedIndexes));
+            ksort($entityValue);
+
+            if ($this->order == "DESC") $entityValue = array_reverse($entityValue);
 
             $propertyAccessor->setValue($entity, $property, $entityValue);
 
@@ -139,8 +151,10 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
     public function payload(string $action, string $className, array $properties, object $entity): array
     {
+        $cache = $this->getEntityManager()->getCache();
         $orderingRepository = $this->getEntityManager()->getRepository(Ordering::class);
-        
+        $classMetadataManipulator = $this->getClassMetadataManipulator();
+
         $id = spl_object_id($entity);
         switch($action) {
 
@@ -152,10 +166,24 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 $data = [];
                 foreach($properties as $property) {
 
+                    //NB: Evict in AbstractExtension doesn't seems to be working.. TBC
+                    if($cache) {
+
+                        $cache->evictEntity($className, $entity->getId());
+                        if ($this->getClassMetadata($className)->hasAssociation($property))
+                            $cache->evictCollection($className, $property, $entity->getId());
+                    }
+
                     $value = $propertyAccessor->getValue($entity, $property);
-                    // TBD: Implement case for array.. this one might be a bit more complicate.. (periodical cycles)
-                    /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
-                    else*/ if($value instanceof Collection) {
+                    if($classMetadataManipulator->hasField($className, $property) && !$classMetadataManipulator->hasAssociation($className, $property)) {
+
+                        $fieldType = $classMetadataManipulator->getTypeOfField($className, $property);
+                        $doctrineType = $classMetadataManipulator->getDoctrineType($fieldType);
+
+                        if($classMetadataManipulator->isSetType($doctrineType))
+                            $data[$property] = array_values(array_flip($doctrineType::getOrderingKeys($value)));
+
+                    } else if($value instanceof Collection) {
 
                         $data[$property] = $value->toArray();
                         $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);
@@ -170,11 +198,13 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id]   = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+                $this->ordering[$className][$id] ??= $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
                 $this->ordering[$className][$id] ??= new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 
-                break;
+                $orderingId = $this->ordering[$className][$id]->getId();
+                if($orderingId) $cache->evictEntity(Ordering::class, $orderingId);
+
 
             case EntityAction::DELETE:
                 break;
