@@ -118,9 +118,10 @@
                     <div>{{ thread.excerpt | highlight(model.excerpt, -1) | default(thread.excerpt) | raw }}</div>
                     {% endif %}
 
-                    {% if thread.content %}
+                    {% set threadContent = thread.content |striptags | highlight(model.content, 25) %}
+                    {% if not threadContent is empty %}
                     <hr>
-                    <div class="ql-editor">{{ thread.content |striptags | highlight(model.content, 25) | default(thread.content) |raw }}</div>
+                    <div class="ql-editor">{{ threadContent|raw }}</div>
                     {% endif %}
 
                     <p>
