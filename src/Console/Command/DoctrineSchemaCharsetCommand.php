@@ -74,10 +74,10 @@ class DoctrineSchemaCharsetCommand extends Command
         $updateTables = $input->getOption("update-tables");
 
         $charsetDefault = $this->readDatabaseVariable("character_set_database");
-        $charset = $input->getOption("charset") ?? $charsetDefault ?? $params["charset"];
+        $charset = $input->getOption("charset") ?? $params["charset"] ?? $charsetDefault;
         
         $collateDefault = $this->readDatabaseVariable("collation_database");
-        $collate = $input->getOption("collate") ?? $collateDefault ?? $params["collate"];
+        $collate = $input->getOption("collate") ?? $params["defaultTableOptions"]["collate"] ?? $collateDefault;
 
         $output->writeln("");
         $updateDb = $update && (($charset != $charsetDefault) || ($collate != $collateDefault));
