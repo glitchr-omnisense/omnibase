@@ -35,9 +35,6 @@ class Referrer implements ReferrerInterface
         if($this->router->isUX($routeName))
             return true;
 
-        if($this->router->isProfiler($routeName))
-            return true;
-
         if(RescueFormAuthenticator::isSecurityRoute($routeName))
             return true;
 

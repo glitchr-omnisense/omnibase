@@ -2,12 +2,11 @@
 
 namespace Base\Database\Annotation;
 
-use App\Entity\Article\Article;
-use App\Entity\Gallery\Gallery;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Entity\EntityExtensionInterface;
+use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Base\Entity\User;
 use Base\Enum\EntityAction;
@@ -51,9 +50,9 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             $isArray = is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, JsonType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
             // SetType is not supported yet.. There is a sorting issue with Select2
-            // $isSet  = is_instanceof($doctrineType, SetType::class);
+             $isSet  = is_instanceof($doctrineType, SetType::class);
 
-            if(/*!$isSet &&*/ !$isArray && !$isToMany)
+            if(!$isSet && !$isArray && !$isToMany)
                 return false;
 
             $siblingAnnotations = $this->getAnnotationReader()->getDefaultPropertyAnnotations($object->getName(), OrderBy::class);
@@ -107,11 +106,8 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $className = first($className);
         if ($className === null) return;
 
-        try {
-            $entityValue = $classMetadata->getFieldValue($entity, $property);
-        } catch (Exception $e) {
-            return;
-        }
+        try { $entityValue = $classMetadata->getFieldValue($entity, $property); }
+        catch (Exception $e) { return; }
 
         $shift = 0;
         $orderedIndexes = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
@@ -145,6 +141,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
             $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
             $reflProp->setAccessible(true);
+
             $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap() ?? [], $orderedIndexes));
         }
     }
@@ -186,11 +183,15 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                     } else if($value instanceof Collection) {
 
                         $data[$property] = $value->toArray();
-                        $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);
+                        $nData = count($data[$property]);
+
+                        $dataIdentifier = array_filter(array_map(fn($e) => $e->getId(), $data[$property]));
                         uasort($dataIdentifier, fn($a,$b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1)));
 
-                        $data[$property] = array_flip(array_keys($dataIdentifier));
+                        $data[$property] = array_flip($dataIdentifier);
                         ksort($data[$property]);
+
+                        $data[$property] = array_pad(array_values($data[$property]), $nData, null);
                     }
 
                     if(array_key_exists($property, $data) && is_identity($data[$property]))
@@ -199,12 +200,11 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
                 $this->ordering[$className][$id] ??= $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
-                $this->ordering[$className][$id] ??= new Ordering();
+                $this->ordering[$className][$id] ??= $this->ordering[$className][$id] = new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 
                 $orderingId = $this->ordering[$className][$id]->getId();
                 if($orderingId) $cache->evictEntity(Ordering::class, $orderingId);
-
 
             case EntityAction::DELETE:
                 break;

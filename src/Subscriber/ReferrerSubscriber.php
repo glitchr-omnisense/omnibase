@@ -7,6 +7,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Routing\RouterInterface;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 use Base\Service\ParameterBagInterface;
@@ -58,12 +59,14 @@ class ReferrerSubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
         if($this->router->isProfiler()) return;
+        if($this->router->isUX()) return;
 
         $referrerPath = strval($this->referrer);
         $referrerRoute = $this->router->getRouteName($referrerPath);
         if($this->isException($referrerRoute)) $this->referrer->clear();
 
         $currentRoute = $this->getCurrentRouteName($event);
+
         if(!$this->isException($currentRoute) && !$this->router->isSecured($event->getRequest()))
             $this->referrer->setUrl($event->getRequest()->getUri());
     }
