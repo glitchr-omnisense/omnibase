@@ -9,6 +9,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
+use Base\Entity\Extension\Ordering;
 use Base\Service\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -175,8 +176,8 @@ class ServiceEntityParser
     protected function __findAll        (                      ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
     protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)
     {
-        $results = $this->__findBy   ($criteria, $orderBy                                     , null     , null   , $groupBy, $selectAs)->getResult();
-        return first($results); // Issue when using cache if using findOneBy with LIMIT;
+        $results = $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs);
+        return $results->getOneOrNullResult();
     }
 
     protected function __findLastOneBy  (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findOneBy($criteria, array_merge($orderBy, ['id' => 'DESC']),                        $groupBy, $selectAs) ?? null; }
@@ -1344,6 +1345,7 @@ class ServiceEntityParser
         throw new Exception("Failed to build expression \"".$field."\": ".$fieldValue);
     }
 
+    protected static $i = 0;
     protected function getQueryBuilder(array $criteria = [], array $orderBy = [], $limit = null, $offset = null, array $groupBy = [], array $selectAs = []): ?QueryBuilder
     {
         /**
@@ -1439,13 +1441,14 @@ class ServiceEntityParser
         $aliasRoot = $options["alias"]    ?? self::ALIAS_ENTITY;
         $required  = $options["required"] ?? false;
 
-        $depth     = $options["depth"]    ?? 2;
+        $depth     = $options["depth"]    ?? 4;
         if($depth-- < 1) return $qb->getQuery();
 
         $joinList = $options["join"] ?? array_combine($this->eagerly ?? [], array_fill(0, count($this->eagerly ?? []), []));
         $joinList = array_key_removes_numerics(array_inflate(".", $joinList));
 
         if($classMetadata === null) $classMetadata = $this->classMetadata;
+
         foreach($classMetadata->getAssociationMappings() as $associationMapping) {
 
             if($associationMapping["fetch"] == ClassMetadataInfo::FETCH_EAGER) continue;
@@ -1489,7 +1492,8 @@ class ServiceEntityParser
             if($targetEntityCacheable && array_key_exists($associationMapping["fieldName"], $joinList)) {
 
                 $this->leftJoin($qb, $aliasExpr);
-                // $qb->addSelect($aliasIdentifier);
+                $qb->addSelect($aliasIdentifier);
+
                 $newOptions = [
                     "alias"    => $aliasIdentifier,
                     "required" => $required,
@@ -1534,8 +1538,8 @@ class ServiceEntityParser
         if($groupBy) $query->setCacheable(false); // @TODO, if groupBy is used, cache is disabled.. id column not stored for some reasons.
 
         $query->useQueryCache($this->cacheable);
-        // $query->disableResultCache(); // Disable by default
-
+        $query->setCacheRegion($this->classMetadata->cache["region"] ?? null);
+//        dump($this->classMetadata->getName(). " << ". $query->getCacheRegion());
         //
         // Apply custom output walker to all entities (some join may relates to translatable entities)
         if(class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class))

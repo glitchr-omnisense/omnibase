@@ -7,7 +7,8 @@ use Base\Enum\UserRole;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\FormFactory;
 use Base\Form\FormProxyInterface;
-use Base\Service\BaseService;
+use Base\Routing\RouterInterface;
+use Base\Service\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,18 +17,24 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class FormTypeExtension extends AbstractTypeExtension
 {
     /**
-     * @var BaseService
-     */
-    protected $baseService;
-
-    /**
      * @var FormFactory
      */
     protected $formFactory;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
 
     /**
      * @var FormProxyInterface
@@ -38,12 +45,19 @@ class FormTypeExtension extends AbstractTypeExtension
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;
+    /**
+     * @var AuthorizationCheckerInterface
+     */
+    protected $authorizationChecker;
 
-    public function __construct(BaseService $baseService, FormFactory $formFactory, FormProxyInterface $formProxy, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(RouterInterface $router, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, FormFactory $formFactory, FormProxyInterface $formProxy, ClassMetadataManipulator $classMetadataManipulator)
     {
-        $this->baseService = $baseService;
-        $this->formFactory = $formFactory;
-        $this->formProxy = $formProxy;
+        $this->parameterBag = $parameterBag;
+        $this->authorizationChecker = $authorizationChecker;
+
+        $this->router       = $router;
+        $this->formFactory  = $formFactory;
+        $this->formProxy    = $formProxy;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -58,8 +72,8 @@ class FormTypeExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'form2'          => $this->baseService->getParameterBag("base.twig.use_form2"),
-            'easyadmin'      => $this->baseService->getParameterBag("base.twig.use_ea"),
+            'form2'          => $this->parameterBag->get("base.twig.use_form2"),
+            'easyadmin'      => $this->parameterBag->get("base.twig.use_ea"),
             'form_flow'         => true,
             'form_flow_id'      => '_flow_token',
             'validation_entity' => null,
@@ -89,7 +103,7 @@ class FormTypeExtension extends AbstractTypeExtension
         if($options["use_advanced_form"] ?? false) 
             $this->formProxy->useAdvancedForm();
     
-        if($this->baseService->isDebug() && $this->baseService->isGranted(UserRole::SUPERADMIN) && $this->baseService->getRouter()->isEasyAdmin()) {
+        if($this->authorizationChecker->isGranted(UserRole::ADMIN) && $this->router->isEasyAdmin()) {
             $this->markDbProperties($view, $form, $options);
             $this->markOptions($view, $form, $options);
         }
