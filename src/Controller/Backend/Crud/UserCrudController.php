@@ -40,7 +40,7 @@ class UserCrudController extends UserActionCrudController
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
             $impersonate = null;
-            if($switchRole && $this->isGranted($switchRole) && !$this->getEntityFqcn() instanceof LoginRestrictionInterface && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
+            if($switchRole && $this->isGranted($switchRole) && !is_instanceof($this->getEntityFqcn(), LoginRestrictionInterface::class)  && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
 
                 $propertyAccessor =  PropertyAccess::createPropertyAccessor();
                 if($propertyAccessor->isReadable($entity, User::__DEFAULT_IDENTIFIER__))
