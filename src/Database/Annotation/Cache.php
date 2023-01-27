@@ -5,6 +5,8 @@ namespace Base\Database\Annotation;
 use Attribute;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\TranslatableInterface;
+use Base\Entity\Extension\Ordering;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -88,7 +90,8 @@ final class Cache extends AbstractAnnotation
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
-        $region = $this->region ?? $this->getEntityManager()->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->name);
+        $region = $this->region ?? $this->getEntityManager()->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName);
+
         switch($this->usage) {
 
             case self::READ_ONLY:
@@ -106,7 +109,7 @@ final class Cache extends AbstractAnnotation
 
             case AnnotationReader::TARGET_CLASS:
 
-                $classMetadata->cache = $classMetadata->cache ?? [
+                $classMetadata->cache = [
                     "usage"  => $usage,
                     "region" => $region,
                 ];
@@ -114,7 +117,8 @@ final class Cache extends AbstractAnnotation
                 foreach($classMetadata->associationMappings as $property => $associationMapping) {
 
                     $isTargetEntityCached = !empty($this->getAnnotationReader()->getClassAnnotations($associationMapping["targetEntity"], self::class));
-                    if(!$isTargetEntityCached) continue;
+                    if(!$isTargetEntityCached)
+                        continue;
 
                     $this->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
                 }

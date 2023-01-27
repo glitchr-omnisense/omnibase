@@ -58,7 +58,7 @@ class AutocompleteController extends AbstractController
     public function Main(Request $request, string $hashid): Response
     {
         $dict    = $this->obfuscator->decode($hashid);
-        if($dict === null) { 
+        if($dict === null) {
 
             $array = ["status" => "Unexpected request"];
             return new JsonResponse($array, 500);
@@ -74,7 +74,7 @@ class AutocompleteController extends AbstractController
             $format = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
         $token   = $dict["token"] ?? null;
-        $tokenName = $dict["token_name"] ?? null;    
+        $tokenName = $dict["token_name"] ?? null;
         if(!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
 
             $array = ["status" => "Invalid token. Please refresh the page and try again"];

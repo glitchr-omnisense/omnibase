@@ -2,7 +2,9 @@
 
 namespace {
 
-    use Base\BaseBundle;
+    function         dumpif(...$variadic) { \Base\BaseBundle::dump("", ...$variadic); }
+    function  enable_dumpif() { \Base\BaseBundle::enableDump(""); }
+    function disable_dumpif() { \Base\BaseBundle::disableDump(""); }
 
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
@@ -59,27 +61,27 @@ namespace {
     // Value (6) => 90 degrees, mirrored: image is on its side.
     // Value (7) => 270 degrees: image has been flipped back-to-front and is on its far side.
     // Value (8) => 270 degrees, mirrored: image is on its far side.
-    function getimageorientation(string $fname): int { 
+    function getimageorientation(string $fname): int {
 
         $exif = exif_read_data($fname);
         return $exif["Orientation"] ?? 1;
     }
 
-    function imagedimswap(string $fname): bool { return getimageorientation($fname) > 4; } 
+    function imagedimswap(string $fname): bool { return getimageorientation($fname) > 4; }
 
     function image_fix_orientation(&$image, $fname) {
         $exif = exif_read_data($fname);
-        
+
         if (!empty($exif['Orientation'])) {
             switch ($exif['Orientation']) {
                 case 3:
                     $image = imagerotate($image, 180, 0);
                     break;
-                
+
                 case 6:
                     $image = imagerotate($image, 90, 0);
                     break;
-                
+
                 case 8:
                     $image = imagerotate($image, -90, 0);
                     break;
@@ -174,7 +176,7 @@ namespace {
 
         $subdomain = ($domain && $subdomain) ? $subdomain . "." : null;
         $machine   = ($domain && $machine  ) ? $machine . "." : null;
-        $port      = ($domain && $port != 80 && $port != 443) ? ":".$port : null;
+        $port      = ($domain && $port && $port != 80 && $port != 443) ? ":".$port : null;
 
         $query     =  $query ? "?".$query : null;
 
@@ -210,7 +212,7 @@ namespace {
             if(filter_var($parse["host"], FILTER_VALIDATE_IP) ) $parse["ip"] = $parse["host"];
             if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) $parse["ipv4"] = $parse["host"];
             if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) $parse["ipv6"] = $parse["host"];
-    
+
             //
             // Check if hostname
             if(preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
@@ -411,7 +413,11 @@ namespace {
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $verify_ssl);
 
         $data = curl_exec($curl);
+
+        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
+
+        if($code > 400) throw new LogicException("Failed to fetch \"$url\": error $code received.");
 
         return $data;
     }
@@ -439,10 +445,10 @@ namespace {
     function to_array(object $class) {
 
         $array = array_transforms(
-            fn($k,$v):array => [str_replace("\x00".get_class($class)."\x00", "", $k), $v], 
+            fn($k,$v):array => [str_replace("\x00".get_class($class)."\x00", "", $k), $v],
             (array) $class
         );
-        
+
         return $array;
     }
     function in_class(object $class, mixed $needle) {
@@ -510,7 +516,16 @@ namespace {
             );
         }
     }
-    
+
+    function format_sql(string $sql): string
+    {
+        return trim(str_replace(
+            ["SELECT", ",", "FROM", "WHERE", "INNER", "RIGHT", "LEFT"],
+            [PHP_EOL."SELECT".PHP_EOL." ", ",".PHP_EOL." ", PHP_EOL."FROM".PHP_EOL." ", PHP_EOL."WHERE".PHP_EOL." ", PHP_EOL."  INNER", PHP_EOL."  RIGHT", PHP_EOL."  LEFT"],
+            $sql
+        ));
+    }
+
     function debug_backtrace_short(?string $file = null, ?string $class = null, ?string $func = null)
     {
         $backtrace = [];
@@ -615,7 +630,7 @@ namespace {
         $quotient = (int) ($num / ($divider ** $factor));
         $diff = $factor - count($unitPrefix) + 1;
         if($diff > 0) $quotient *= $divider ** $diff;
-        
+
         return strval($factor > 0 ? $quotient.@mb_ucfirst($unitPrefix[$factor] ?? end($unitPrefix)) : $num);
     }
 
@@ -944,7 +959,7 @@ namespace {
     }
 
     function dir_empty(string $dir): bool { return !file_exists($dir) || (is_dir($dir) && !(new \FilesystemIterator($dir))->valid()); }
-    
+
     function mime_content_type2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT)
     {
         // Search by looking at the header if url format
@@ -2255,7 +2270,14 @@ namespace {
 
     function str_blankspace(int $length) { return $length < 1 ? "" : str_repeat(" ", $length); }
     function usort_column(array &$array, string $column, callable $fn):bool { return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null)); }
-    function usort_key(array $array, array $ordering = []):array { return array_replace(array_flip($ordering), $array); }
+    function usort_key(array $array, array $ordering = []):array
+    {
+        $ordering = array_flip($ordering);
+        ksort($ordering);
+
+        return array_replace(array_flip($ordering), $array);
+    }
+
     function usort_startsWith(array &$array, string|array $startingWith)
     {
         if(!is_array($startingWith)) $startingWith = [$startingWith];
@@ -2426,17 +2448,54 @@ namespace {
         return (integer) $diff->format( "%R%a" );
     }
 
+    function ceil_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta + $modulo);
+    }
+
+    function floor_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta);
+    }
+
+    function round_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta + ($delta < $modulo/2 ? 0 : $modulo));
+    }
+
     function datetime_is_between(null|string|int|DateTime $datetime, null|string|int|DateTime $dt1 = null, null|string|int|DateTime $dt2 = null)
     {
         $datetime  = cast_datetime($datetime);
         if($datetime === null) return false;
 
         $datetime1 = cast_datetime($dt1);
-        $datetime2 = cast_datetime($dt2);
-
         if($datetime1 !== null && $datetime <= $datetime1) return false;
+
+        $datetime2 = cast_datetime($dt2);
         if($datetime2 !== null && $datetime > $datetime2) return false;
-        return true;
+
+        return $datetime1 != null || $datetime1 != null;
     }
 
     function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null) {
@@ -2535,7 +2594,7 @@ namespace {
             throw new Exception("First element of array-callable must be a class name or object instance");
 
         }
-        
+
         if(is_object($func))
             return spl_object_hash($func);
 

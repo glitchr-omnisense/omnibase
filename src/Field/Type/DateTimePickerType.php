@@ -35,7 +35,7 @@ class DateTimePickerType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            
+
             // PHP Datetime format:
             // This format is replacing the shitty HTML5_FORMAT :-)
             "format" => "yyyy-MM-dd HH:mm:ss",
@@ -44,8 +44,8 @@ class DateTimePickerType extends AbstractType
             "required" => false,
             'use_advanced_form' => true,
 
+            "debug" => false,
             "datetimepicker" => [
-                // "debug" => true,
                 "keepOpen" => true,
                 "locale" => $this->localeProvider->getLang(),
                 "format" => "YYYY-MM-DD HH:mm:ss", // JS Datetime Format
@@ -64,6 +64,7 @@ class DateTimePickerType extends AbstractType
         // Datetime picker Options
         $dateTimePickerOpts = $options["datetimepicker"];
         $dateTimePickerOpts["defaultDate"] = $view->vars["value"];
+        $dateTimePickerOpts["debug"] = $options["debug"];
 
         $view->vars["datetimepicker"] = json_encode($dateTimePickerOpts);
     }

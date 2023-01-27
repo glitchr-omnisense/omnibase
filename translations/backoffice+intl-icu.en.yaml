@@ -1,6 +1,5 @@
-backoffice:
-  title: "Backoffice"
-  subtitle: "Manage your website from this page"
+title: "BO"
+subtitle: "Manage your website from this page"
 
 crud:
   user:

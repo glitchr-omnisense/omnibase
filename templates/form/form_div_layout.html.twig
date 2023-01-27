@@ -782,7 +782,7 @@
 
         <div class="accordion form-collection-item">
             <div class="accordion-item">
-                <h2 class="accordion-header">
+                <h2 class="accordion-header" id="{{ id }}-heading" >
 
                     {# `is_empty` is used because some internal keys are marked by a starting "_" #}
                     {% set is_empty = empty(form.children|keys|filter((v, k) => not str_starts_with(v, '_') )) %}
@@ -794,7 +794,7 @@
                     <a target='_blank' class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{ _href|url_decode|replace({'{0}': (form.vars.value.id)}) }}">
                     {%- else -%}
                     <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ is_empty ? 'style="cursor:default;"' : '' }}
-                            type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+                            type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse" aria-expanded="{{ collapsed ? false : true}}" aria-controls="{{ id }}-collapse">
                     {%- endif -%}
 
                     {%- if linkable and not html -%}
@@ -832,7 +832,7 @@
                 </h2>
 
                 {% if not is_empty %}
-                <div id="{{ id }}-contents" class="accordion-collapse collapse {{ collapsed ? '' : 'show'}}">
+                <div id="{{ id }}-collapse" class="accordion-collapse collapse {{ collapsed ? '' : 'show'}}">
                     <div class="accordion-body">
                         {{ form_widget(form, {attr:attr}) }}
                     </div>
@@ -986,7 +986,7 @@
         <div class="accordion form-array-item">
             <div class="accordion-item">
                 <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse">
                         <i class="fas fa-fw fa-chevron-right form-array-item-collapse-marker"></i>
                         {{ form_widget(form, {attr:attr}) }}
                     </button>
@@ -1004,7 +1004,7 @@
 {%- block array_empty -%}
     <div class="empty array-empty">
         {% if not form.vars.allow_add %}
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse">
             <i class="fas fw fa-chevron-right form-array-item-collapse-marker"></i>
             {{"@fields.array.empty"|trans}}
         </button>

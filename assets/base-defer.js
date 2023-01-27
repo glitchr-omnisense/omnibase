@@ -1,9 +1,11 @@
 
 import '@glitchr/imaginejs';
 
-import { Tooltip, Modal, Popover } from 'bootstrap';
+import Tooltip from 'bootstrap/js/dist/tooltip';
 $(window).on("load.tooltip", function() { $('[data-toggle="tooltip"]').tooltip({html:true}) });
 $(window).on("onbeforeunload.tooltip",function() { $("div[id^='tooltip']").hide().remove(); });
+
+import Popover from 'bootstrap/js/dist/popover';
 $(window).on("load.popover", function() { $('[data-toggle="popover"]').popover({html:true}) });
 $(window).on("onbeforeunload.popover",function() { $("div[id^='popover']").hide().remove(); });
 

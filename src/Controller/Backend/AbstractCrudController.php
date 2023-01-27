@@ -318,16 +318,15 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $entity = $this->getEntity();
         if(!$entity) return $extension;
 
-        $entityLabel = mb_ucfirst($this->translator->transEntity($entity, null, AbstractDashboardController::TRANSLATION_ENTITY));
+        $entityLabel = mb_ucfirst($this->translator->transEntity($entity));
         if($entityLabel) $extension->setTitle($entityLabel);
-
         $entityLabel ??= $this->getEntityLabelInSingular();
         if($entityLabel) $entityLabel = mb_ucfirst($entityLabel);
 
         if ($entity) {
 
             $entityLabel = mb_ucfirst($this->translator->transEntity(get_class($entity), null, Translator::NOUN_SINGULAR));
-            $extension->setTitle(mb_ucfirst($this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
+            $extension->setTitle(mb_ucfirst(is_stringeable($entity) ? (string) $entity : $this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
@@ -335,9 +334,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $entityText = $entityLabel ." ID #".$entity->getId();
             try { # Try to link without route parameter
 
-                if($entity instanceof LinkableInterface) 
+                if($entity instanceof LinkableInterface)
                     $entityText = $entityLabel ." ID <a href='".$entity->__toLink()."'>#".$entity->getId()."</a>";
-            
+
             } catch(\Exception $e) { }
 
             $extension->setText($entityText);

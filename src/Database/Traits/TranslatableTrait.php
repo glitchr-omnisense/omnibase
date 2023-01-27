@@ -2,7 +2,6 @@
 
 namespace Base\Database\Traits;
 
-use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslationInterface;
 
@@ -117,6 +116,7 @@ trait TranslatableTrait
                 if($translation) break;
             }
 
+
             // Search for compatible lang
             if($translation == null) {
 
@@ -139,7 +139,6 @@ trait TranslatableTrait
 
             $translation = new $translationClass;
             $translation->setLocale($normLocale);
-
             $this->addTranslation($translation);
         }
 

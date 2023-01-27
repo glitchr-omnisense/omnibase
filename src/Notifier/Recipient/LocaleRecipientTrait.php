@@ -4,7 +4,7 @@ namespace Base\Notifier\Recipient;
 
 trait LocaleRecipientTrait
 {
-    private $locale;
+    private string $locale;
 
     public function getLocale(): string
     {

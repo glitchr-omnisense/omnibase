@@ -149,7 +149,6 @@ class CropperType extends AbstractType implements DataMapperInterface
         while($ancestor->parent !== null)
             $ancestor = $ancestor->parent;
 
-        
         $view->vars["ancestor"] = $ancestor;
 
         //

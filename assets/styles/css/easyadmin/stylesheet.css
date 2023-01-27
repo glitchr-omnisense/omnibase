@@ -218,6 +218,15 @@ form fieldset legend { font-size: 11pt; }
     position:relative;
 }
 
+.dropdown-user-details .img-fluid { margin-right: 10px; }
+.user-menu-wrapper .dropdown-menu .dropdown-user-details img.user-avatar
+{
+    height: 39px;
+    max-width: 39px;
+    width: auto;
+    object-fit: cover;
+}
+
 .ea-sidebar-width-compact #header-logo { visibility:hidden; }
 .ea-sidebar-width-compact .navbar { display:none; }
 .ea-sidebar-width-compact .main-header { padding-top:7em; }
@@ -843,8 +852,6 @@ form .row button[type="submit"] { margin: 1em 0; }
 .ea-dark-scheme .form-switch .form-check-input:checked, .ea-dark-scheme .form-switch .form-check-input:checked { border-color:unset; }
 .ea-dark-scheme .form-switch .form-check-input:checked, .ea-dark-scheme .form-switch .form-check-input:checked { background-color: var(--form-switch-checked-bg); }
 
-.accordion-button:not(.collapsed) { color: var(--form-label-color) !important; }
-.accordion-button { background-color: var(--sidebar-bg) !important; }
 .form-collection { border: 1px solid var(--content-top-border-color); }
 .form-collection-add-button:hover { background-color: #5768bc55; }
 .ts-control {
@@ -1122,6 +1129,11 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-submenu-color); }
     overflow:hidden;
 }
 
+.bootstrap-datetimepicker-widget table thead tr:first-child th:hover { background: var(--button-bg); }
+.bootstrap-datetimepicker-widget table td span:hover, .bootstrap-datetimepicker-widget table td i:hover { background: var(--button-bg); }
+.bootstrap-datetimepicker-widget table td span.active, .bootstrap-datetimepicker-widget table td i.active { background: var(--button-bg); }
+.bootstrap-datetimepicker-widget table td.day:hover, .bootstrap-datetimepicker-widget table td.hour:hover, .bootstrap-datetimepicker-widget table td.minute:hover, .bootstrap-datetimepicker-widget table td.second:hover { background: var(--button-bg); }
+
 .user-menu hr { display:none; }
 .actions a:last-child { margin-right:10px; }
 
@@ -1139,7 +1151,7 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-submenu-color); }
 
 .sidebar-wrapper { border-top:1px solid var(--content-top-border-color); }
 .form-control.is-valid, .was-validated .form-control:valid { background-image: none; }
-.form-control::placeholder { color:inherit; }
+.form-control::placeholder { opacity:0.5; }
 .content-top .content-search .content-search-icon { color:inherit; }
 .content-top .content-search .form-widget
 {

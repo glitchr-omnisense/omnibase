@@ -6,38 +6,32 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\PersistentCollection;
 
 class OrderedArrayCollection extends ArrayCollection
 {
-    /**
-     * @var PersistentCollection
-     */
+    /**  * @var array */
     protected $ordering;
     public function __construct(ArrayCollection|array $array = [], array $ordering = [])
     {
         parent::__construct($array instanceof ArrayCollection ? $array->toArray() : $array);
-        $this->ordering = $ordering;
-        // $this->array = $array; // Goal was to lazy load.. but not working yet.
 
+        $this->ordering = $ordering;
     }
 
     public function getOrdering() { return $this->ordering; }
     public function applyOrdering() {
 
-        // Lazy load ?
-        // if($this->array instanceof ArrayCollection)
-        //     parent::__construct($this->array->toArray());
-
         if(!is_identity($this->ordering)) {
 
             $elements = parent::toArray();
+            uksort($elements, fn($a,$b) => $elements[$a]->getId() <=> $elements[$b]->getId());
+
             if(empty($elements)) return $this;
 
             if(count($elements) < count($this->ordering))
                 $elements = array_pad($elements, count($this->ordering), null);
 
-            $elements = array_map(fn($i) => $elements[$i] ?? null, $this->ordering);
+            $elements = usort_key(array_values($elements), $this->ordering);
             $elements = array_filter($elements, fn($e) => $e !== null);
 
             parent::clear();
@@ -76,7 +70,7 @@ class OrderedArrayCollection extends ArrayCollection
     public function map(Closure $func):static                { $this->applyOrdering(); return parent::map($func); }
     public function filter(Closure $p):static                { $this->applyOrdering(); return parent::filter($p); }
     public function forAll(Closure $p):bool                  { $this->applyOrdering(); return parent::forAll($p); }
-    public function partition(Closure $p)                    { $this->applyOrdering(); return parent::partition($p); }
+    public function partition(Closure $p):array              { $this->applyOrdering(); return parent::partition($p); }
     public function __toString()                             { $this->applyOrdering(); return parent::__toString(); }
     public function clear():void                             { $this->applyOrdering(); parent::clear(); }
     public function slice($offset, $length = null): array    { $this->applyOrdering(); return parent::slice($offset, $length); }

@@ -28,6 +28,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function getBaseDir(?string $locale = null, ?string $environment = null): string;
     public function getHost(?string $locale = null, ?string $environment = null): string;
+    public function getHostFallback(?string $locale = null, ?string $environment = null): string;
     public function getMachine(?string $locale = null, ?string $environment = null): ?string;
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string;
     public function getDomain(?string $locale = null, ?string $environment = null): string;

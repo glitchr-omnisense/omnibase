@@ -336,7 +336,7 @@ class ImageService extends FileService implements ImageServiceInterface
         // Apply image resolution limitation
         if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
             throw new NotFoundHttpException("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
-        
+
         //
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));

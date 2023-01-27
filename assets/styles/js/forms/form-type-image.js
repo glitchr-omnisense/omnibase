@@ -1,6 +1,8 @@
 import Cropper from 'cropperjs/dist/cropper.min.js';
 import 'cropperjs/dist/cropper.min.css';
 
+import Modal from 'bootstrap/js/dist/modal';
+
 window.addEventListener("load.form_type", function () {
 
     function formatBytes(bytes, decimals = 2) {

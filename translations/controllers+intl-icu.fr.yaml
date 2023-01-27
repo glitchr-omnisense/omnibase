@@ -17,7 +17,7 @@ thread_search:
 
 
 security_birthdate:
-  title: 
+  title:
     default: "Le site ouvre bientot ses portes !"
     appointment: "À vos agendas, rendez-vous pris"
     open: "Bienvenue !&nbsp;<a href=\"{0}\">Entrer sur le site</a>"
@@ -25,7 +25,7 @@ security_birthdate:
 
 app_index:
   title: Retour au site
-  
+
 locale_changeto:
   action: "Le site est à présent en {0}"
 security_login:

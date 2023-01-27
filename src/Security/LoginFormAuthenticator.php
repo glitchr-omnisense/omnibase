@@ -4,6 +4,7 @@ namespace Base\Security;
 
 use App\Entity\User;
 use App\Enum\UserRole;
+use App\Repository\UserRepository;
 use Base\Routing\RouterInterface;
 use Base\Service\ReferrerInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -132,13 +133,11 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         // Check if target path provided via $_POST..
         $targetPath = $this->referrer;
         $request->getSession()->remove("_target_path");
-        
-        if ($targetPath->getUrl() && $targetPath->sameSite() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath)) {
-            
-            $targetName = $this->router->getRouteName((string) $targetPath);
-            return $this->router->redirectToRoute($targetName);
-        }
 
+        if ($targetPath->getUrl() && $targetPath->sameSite() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath))
+        {
+            return $this->router->redirect($targetPath->getUrl());
+        }
         $defaultTargetPath = $request->getSession()->get('_security.'.$this->router->getRouteFirewall()->getName().'.target_path');
         return $this->router->redirectToRoute($this->router->getRouteName($defaultTargetPath ?? "/"));
     }

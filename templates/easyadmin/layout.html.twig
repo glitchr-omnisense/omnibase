@@ -14,11 +14,11 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noodp, noimageindex, notranslate, nocache" />
         <meta content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" name="viewport">
-        <meta name="description" content="{{ (_content_title ?? base.settings.get('base.settings.title.backoffice')['_self'] ?? null) }}" />
+        <meta name="description" content="{{ (_content_title ?? null) }}" />
     {% endblock head_metas %}
 
     {% set page_title_block_output %}{% block page_title %}{{ _content_title }}{% endblock %}{% endset %}
-    <title>{{ [(block('page_title_block_output') ?? _content_title|striptags|raw), base.settings.get("base.settings.title.backoffice")["_self"] ?? null]|uniq|join_if_exists(" - ") }}</title>
+    <title>{{ ["["~("@backoffice.title"|trans)~"]", (block('page_title_block_output') ?? _content_title|striptags|raw)]|uniq|join_if_exists(" ") }}</title>
 
     {% block configured_stylesheets %}
         {{ include('@EasyAdmin/includes/_css_assets.html.twig', { assets: ea.assets.cssAssets ?? [] }, with_context = false) }}
@@ -34,25 +34,11 @@
         {{ encore_entry_script_tags('base') }}
         {{ encore_entry_script_tags('form') }}
         {{ encore_entry_script_tags('easyadmin') }}
-        <script>
-            window.addEventListener("load", function()
-            {
-                [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]')).map(function (el) { return new bootstrap.Tooltip(el) });
-                [].slice.call(document.querySelectorAll('[data-toggle="popover"]')).map(function (el) { return new bootstrap.Popover(el) });
-            });
-
-            window.addEventListener("onbeforeunload", function()
-            {
-                [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]')).map(function (el) { return el.hide().remove(); });
-                [].slice.call(document.querySelectorAll('[data-toggle="popover"]')).map(function (el) { return el.hide().remove(); });
-            });
-        </script>
     {% endblock head_javascript %}
 
     {% block configured_javascripts %}
         {{ include('@EasyAdmin/includes/_js_assets.html.twig', { assets: ea.assets.jsAssets ?? [] }, with_context = false) }}
         {{ include('@EasyAdmin/includes/_encore_script_tags.html.twig', { assets: ea.assets.webpackEncoreAssets ?? [] }, with_context = false) }}
-
     {% endblock %}
 
     {% if 'rtl' == ea.i18n.textDirection %}
@@ -360,12 +346,12 @@
                                             <h1 class="title">
                                             {% set url = ea.crud is not null and ea.crud.getCurrentPage() == "detail" ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
                                             {% set isHtml = _content_title != (_content_title|striptags) %}
-                                           
+
                                             {% if url is not empty and not isHtml %}<a href="{{url}}">{% endif %}
                                                 {{ _content_title|raw }}
                                             {% if url is not empty %}</a>{% endif %}
 
-                                            {% set _content_help = block('content_help') ?? null %}                                           
+                                            {% set _content_help = block('content_help') ?? null %}
                                             {% if _content_help is not empty %}
                                                 {{ _content_help|raw }}
                                             {% else %}
