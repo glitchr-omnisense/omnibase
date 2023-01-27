@@ -219,7 +219,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 if($specialGrant) {
 
                     // If not let them know that this page is locked for others
-                    if($this->authorizationChecker->isGranted("ROLE_SUPERADMIN")) {
+                    if($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isBackend()) {
 
                         $notification = new Notification("access_restricted.".$restrictionType.".message");
                         $notification->send("warning");
