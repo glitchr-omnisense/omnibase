@@ -91,7 +91,7 @@ class SecuritySubscriber implements EventSubscriberInterface
      * @var SettingBag
      */
     private $settingBag;
-    
+
     /**
      * @var LocaleProvider
      */
@@ -167,7 +167,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
-            
+
                  if(!$adminAccess) $restrictionType = "admin_restriction";
             else if(!$userAccess)  $restrictionType = "user_restriction";
             else $restrictionType = "public_restriction";
@@ -219,13 +219,15 @@ class SecuritySubscriber implements EventSubscriberInterface
                 if($specialGrant) {
 
                     // If not let them know that this page is locked for others
-                    $notification = new Notification("access_restricted.".$restrictionType.".message");
-                    $notification->send("warning");
+                    if($this->authorizationChecker->isGranted("ROLE_SUPERADMIN")) {
+
+                        $notification = new Notification("access_restricted.".$restrictionType.".message");
+                        $notification->send("warning");
+                    }
 
                     return true;
                 }
 
-                dump($this->router->getRouteName(), $routeRestriction);
                 $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction)) : null;
                 $response ??= $this->router->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
@@ -250,7 +252,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $token = $this->tokenStorage->getToken();
-        
+
         /**
          * @var User
          */
@@ -379,7 +381,7 @@ class SecuritySubscriber implements EventSubscriberInterface
          */
         $user = $event->getUser();
         if ($user instanceof BaseUser) {
-            
+
             if (!$user->isPersistent()) {
 
                 $notification = new Notification("login.social", [$user]);
