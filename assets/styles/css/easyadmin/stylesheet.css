@@ -1132,7 +1132,7 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-submenu-color); }
 .bootstrap-datetimepicker-widget table td.day:hover, .bootstrap-datetimepicker-widget table td.hour:hover, .bootstrap-datetimepicker-widget table td.minute:hover, .bootstrap-datetimepicker-widget table td.second:hover { background: var(--button-bg); }
 
 .user-menu-wrapper .dropdown-menu .dropdown-user-details .user-avatar {
-    margin-right: auto
+    margin: 0 0.25em;
 }
 .user-menu hr { display:none; }
 .actions a:last-child { margin-right:10px; }
