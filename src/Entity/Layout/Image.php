@@ -108,12 +108,12 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         if($sourceFile === null) return null;
 
         if(empty($this->sourceMeta)) {
-        
+
             $imagesize = getimagesize($sourceFile->getPathname());
             $this->sourceMeta = [
                 "width" => $imagesize[0],
-                "height" => $imagesize[1], 
-                "type" => $imagesize[2], 
+                "height" => $imagesize[1],
+                "type" => $imagesize[2],
                 "bits" => $imagesize["bits"],
                 "channels" => $imagesize["channels"],
                 "mime" => $imagesize["mime"],

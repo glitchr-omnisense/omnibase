@@ -22,7 +22,8 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
     public function supportsClass(string $class) { return is_instanceof($class, User::class); }
     public function loadUserByIdentifier(string $identifier) : UserInterface
     {
-        return $this->findOneByEmail($identifier);
+        $user = $this->findOneByEmail($identifier);
+        return $user;
     }
 
     public function refreshUser(UserInterface $user) : ?UserInterface
