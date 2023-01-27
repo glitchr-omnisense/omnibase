@@ -118,7 +118,10 @@ class UploaderEntitiesCommand extends Command
             }
         }
 
-        $msg = ' [OK] '.$nTotalFields.' fields found: '.$nTotalFiles.' file(s); '.$nTotalOrphans.' orphan(s) !';
+        $orphanStr = null;
+        if($this->orphans) $orphanStr = '; '.$nTotalOrphans.' orphan(s)';
+
+        $msg = ' [OK] '.$nTotalFields.' fields found: '.$nTotalFiles.' file(s)'.$orphanStr.' ! ';
         $output->writeln('');
         $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
         $output->writeln($msg);
@@ -202,9 +205,10 @@ class UploaderEntitiesCommand extends Command
     {
         $publicPath = $annotation->getFlysystem()->getPublic("", $annotation->getStorage());
         $filesystem = Uploader::getFlysystem($annotation->getStorage());
-        foreach ($fileList as $file)
-            $filesystem->delete(str_lstrip($file, $publicPath));
 
+        foreach ($fileList as $file) {
+            $filesystem->delete(str_lstrip(realpath($file), realpath($publicPath)));
+        }
         return true;
     }
 
