@@ -1,7 +1,5 @@
-backoffice:
-  title: "Backoffice"
-  subtitle: "Administre ton site internet d'ici !"
-
+title: "BO"
+subtitle: "Administre ton site internet d'ici !"
 
 Home: Accueil
 Back to website: Retour au site

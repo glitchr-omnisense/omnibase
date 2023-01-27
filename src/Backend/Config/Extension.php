@@ -36,6 +36,7 @@ class Extension
     public function getTitle    (?string $pageName = null): ?string { return $this->getFallback("title", $pageName); }
     public function setTitle($title, ?string $pageName = null)
     {
+        dumpif($title, $pageName, debug_backtrace_short("/Users/glitchr/Sites/example/vendor/glitchr/base-bundle/src/Controller/Backend/AbstractDashboardController.php"));
         $this->title[$pageName ?? self::PAGE_DEFAULT] = $title;
         return $this;
     }

@@ -78,12 +78,13 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
 
-        /**
-         * @var Query
-         */
-        
-        $onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay());
-        $onlineUsers = $onlineUsers->enableResultCache(User::getOnlineDelay())->getResult();
+        // This request has variable datetime this will nto be cached
+        // @TODO Round within absolute timegate; 15:00; 15:05, 15:10 etc..
+        $onlineUsers = $user ?
+            $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) :
+            $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay());
+
+        $onlineUsers = $onlineUsers->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
 
         $this->twig->addGlobal("user_analytics", array_merge($this->twig->getGlobals()["user_analytics"] ?? [], [

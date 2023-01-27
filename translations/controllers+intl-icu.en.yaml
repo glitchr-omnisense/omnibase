@@ -71,7 +71,7 @@ security_maintenance:
   progress: "Progression {0}%"
 
 backoffice:
-  title: "Administration"
+  title: "[BO]"
   excerpt: ""
 
 backoffice_settings:
