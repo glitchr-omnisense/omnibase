@@ -28,7 +28,7 @@ class ImageCrudController extends AbstractCrudController
 
             $extension->setImage($entity->getSource());
 
-            $class = "thread.".mb_strtolower(camel2snake(class_basename($entity)));
+            $class = mb_strtolower(camel2snake($entity));
             $entityLabel = $this->translator->trans($class.".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
             if($entityLabel == $class.".".Translator::NOUN_SINGULAR) $entityLabel = null;
             else $extension->setTitle(mb_ucwords($entityLabel));
