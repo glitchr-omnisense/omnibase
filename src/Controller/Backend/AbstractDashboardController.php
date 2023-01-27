@@ -298,7 +298,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.birthdate"                           => ["form_type" => DateTimePickerType::class],
             "base.settings.birthdate.redirect_on_deny"          => ["form_type" => BooleanType::class],
             "base.settings.access_restriction.redirect_on_deny" => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class, "required" => false],
-            "base.settings.access_restriction.anonymous_access" => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
+            "base.settings.access_restriction.public_access"    => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
             "base.settings.access_restriction.user_access"      => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
             "base.settings.access_restriction.admin_access"     => ["roles" => "ROLE_EDITOR", "form_type" => BooleanType::class],
             "base.settings.maintenance"                         => ["form_type" => BooleanType::class],

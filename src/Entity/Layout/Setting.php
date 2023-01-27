@@ -23,7 +23,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-tools"]; }
 
-    public function __toString() { return $this->getPath() ?? ""; }
+    public function __toString() { return $this->getLabel() ?? ""; }
     public function __construct(string $path, $value = null, $locale = null)
     {
         $this->setLocked(false);

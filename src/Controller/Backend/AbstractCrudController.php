@@ -334,9 +334,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $entityText = $entityLabel ." ID #".$entity->getId();
             try { # Try to link without route parameter
 
-                if($entity instanceof LinkableInterface) 
+                if($entity instanceof LinkableInterface)
                     $entityText = $entityLabel ." ID <a href='".$entity->__toLink()."'>#".$entity->getId()."</a>";
-            
+
             } catch(\Exception $e) { }
 
             $extension->setText($entityText);
