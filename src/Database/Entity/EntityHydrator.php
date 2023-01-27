@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\ArrayType;
 
+use Base\Service\LocaleProvider;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
@@ -136,7 +137,7 @@ class EntityHydrator implements EntityHydratorInterface
         $data = $entity ?? [];
         $data = $data instanceof Collection ? $data->toArray() : $data;
         if(is_object($data)) {
-            
+
             $data = array_transforms(
                 function($k, $e) use ($aggregateModel, $data) :array {
 
@@ -493,17 +494,27 @@ class EntityHydrator implements EntityHydratorInterface
 
         // Fetch or hydrate association
         $association = $values instanceof Collection ? $values : new ArrayCollection($values === null ? [] : (is_array($values) ? $values : [$values]));
-        foreach ($association as $key => $value) {
+
+        $array = $association->toArray();
+        $association->clear();
+
+        foreach ($array as $key => $value) {
 
             if (is_array($value))
-                $association[$key] = $this->hydrate($mapping['targetEntity'], $value, [], $aggregateModel);
+                $value = $this->hydrate($mapping['targetEntity'], $value, [], $aggregateModel);
             else if ($targetEntity = $this->findAssociation($mapping['targetEntity'], $value))
-                $association[$key] = $targetEntity;
+                $value = $targetEntity;
 
             // Special case: the setter makes loosing the custom keyname (Perhaps one might implement an extends..)
-            if(class_implements_interface($association[$key], TranslationInterface::class))
-                $association[$key]->setLocale($key);
+            if(class_implements_interface($value, TranslationInterface::class)) {
+                $key = LocaleProvider::normalize($key);
+                $value->setLocale($key);
+            }
+
+            $association->set($key, $value);
         }
+
+        // $association = $associationNormalized;
 
         // Fix identification in owning side definition
         $isOwningSide = $mapping["isOwningSide"];

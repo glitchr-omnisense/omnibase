@@ -211,7 +211,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
                     $form->get("intl")->setData($intlData);
                 }
             }
-
         });
     }
 

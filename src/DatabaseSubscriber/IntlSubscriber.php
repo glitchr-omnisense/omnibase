@@ -2,8 +2,6 @@
 
 namespace Base\DatabaseSubscriber;
 
-use Doctrine\ORM\EntityManager;
-
 use Base\BaseBundle;
 use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
@@ -31,12 +29,12 @@ class IntlSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @var EntityManagerInterface 
+     * @var EntityManagerInterface
      */
     protected $entityManager;
 
     /**
-     * @var LocaleProviderInterface 
+     * @var LocaleProviderInterface
      */
     protected $localeProvider;
     public function getLocaleProvider() { return $this->localeProvider; }
@@ -50,7 +48,7 @@ class IntlSubscriber implements EventSubscriberInterface
     public function postLoad(LifecycleEventArgs $args)
     {
         $uow = $this->entityManager->getUnitOfWork();
-        
+
         $object = $args->getObject();
         $this->upgradeIntl($object);
 
@@ -141,7 +139,7 @@ class IntlSubscriber implements EventSubscriberInterface
     public function loadClassMetadata(LoadClassMetadataEventArgs $loadClassMetadataEventArgs): void
     {
         $classMetadata = $loadClassMetadataEventArgs->getClassMetadata();
-        
+
         if ($classMetadata->reflClass === null)
             return; // Class has not yet been fully built, ignore this event
 

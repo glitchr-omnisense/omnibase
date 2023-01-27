@@ -8,7 +8,7 @@ use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
-use Base\Entity\User;
+
 use Base\Enum\EntityAction;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\ArrayType;
@@ -141,7 +141,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
             $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
             $reflProp->setAccessible(true);
-
             $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap() ?? [], $orderedIndexes));
         }
     }
@@ -194,12 +193,8 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                         $data[$property] = array_pad(array_values($data[$property]), $nData, null);
                     }
 
-                    if(array_key_exists($property, $data)) {
-
-                        $data[$property] = array_filter($data[$property]); //Remove null entries
-                        if(is_identity($data[$property]))
-                            unset($data[$property]);
-                    }
+                    if(array_key_exists($property, $data) && is_identity(array_filter($data[$property])))
+                        unset($data[$property]);
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];

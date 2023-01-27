@@ -32,8 +32,13 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
+
+// @TODO
+// IN CASE A VARIANT IS ADDED WHILE THE MAIN ARTICLE IS ALREADY IN DATABASE, DOCTRINE IS RETURNING THIS EXCEPTION (ACKNOWLEDGE)
+//   [Doctrine\ORM\ORMInvalidArgumentException]
+//   A new entity was found through the relationship 'Base\Entity\Thread#parent' that was not configured to cascade persist operations for entity: Heronry. To solve t
+//   his issue: Either explicitly call EntityManager#persist() on this unknown entity or configure cascade persist this association in the mapping for example @ManyTo
+//   One(..,cascade={"persist"}).
 
 #[AsCommand(name:'doctrine:database:import', aliases:[], description:'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
@@ -61,6 +66,15 @@ class DoctrineDatabaseImportCommand extends Command
     const PARENT_NOT_FOUND    =  2;
     const ALREADY_IN_DATABASE =  3;
 
+    /**
+     * @var Notifier
+     */
+    protected $notifier;
+
+    /**
+     * @var Serializer
+     */
+    protected $serializer;
     public function __construct(
         LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         EntityHydrator $entityHydrator, ClassMetadataManipulator $classMetadataManipulator, Notifier $notifier)
@@ -69,7 +83,7 @@ class DoctrineDatabaseImportCommand extends Command
 
         $this->entityHydrator = $entityHydrator;
         $this->notifier       = $notifier;
-       
+
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->classMetadataManipulator->setGlobalTrackingPolicy(ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT);
         $this->serializer = new Serializer([], [
@@ -527,7 +541,6 @@ class DoctrineDatabaseImportCommand extends Command
                                 $inDatabase |= ($targetRepository->findOneBy([$targetFieldName => $targetValue]) !== null);
                         }
 
-
                         if($inDatabase) $state = self::ALREADY_IN_DATABASE;
                         else if($this->classMetadataManipulator->hasRecursiveAssociation($entity, $entityParentColumn)) {
 
@@ -711,7 +724,7 @@ class DoctrineDatabaseImportCommand extends Command
             $progressBar->finish();
         }
 
-        $output->section()->writeln("\n\n Updating database schema...");
+        $output->section()->writeln("\n\n Updating database...");
         $output->section()->writeln("\n\t <info>".$totalNewEntries."</info> entries were added\n");
 
         $msg = ' [OK] Database content imported successfully! ';

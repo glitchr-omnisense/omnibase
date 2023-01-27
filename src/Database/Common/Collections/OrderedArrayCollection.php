@@ -6,17 +6,15 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\PersistentCollection;
 
 class OrderedArrayCollection extends ArrayCollection
 {
-    /**
-     * @var PersistentCollection
-     */
+    /**  * @var array */
     protected $ordering;
     public function __construct(ArrayCollection|array $array = [], array $ordering = [])
     {
         parent::__construct($array instanceof ArrayCollection ? $array->toArray() : $array);
+
         $this->ordering = $ordering;
     }
 
@@ -26,12 +24,14 @@ class OrderedArrayCollection extends ArrayCollection
         if(!is_identity($this->ordering)) {
 
             $elements = parent::toArray();
+            uksort($elements, fn($a,$b) => $elements[$a]->getId() <=> $elements[$b]->getId());
+
             if(empty($elements)) return $this;
 
             if(count($elements) < count($this->ordering))
                 $elements = array_pad($elements, count($this->ordering), null);
 
-            $elements = usort_key($elements, $this->ordering);
+            $elements = usort_key(array_values($elements), $this->ordering);
             $elements = array_filter($elements, fn($e) => $e !== null);
 
             parent::clear();
