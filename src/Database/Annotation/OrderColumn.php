@@ -194,13 +194,17 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                         $data[$property] = array_pad(array_values($data[$property]), $nData, null);
                     }
 
-                    if(array_key_exists($property, $data) && is_identity($data[$property]))
-                        unset($data[$property]);
+                    if(array_key_exists($property, $data)) {
+
+                        $data[$property] = array_filter($data[$property]); //Remove null entries
+                        if(is_identity($data[$property]))
+                            unset($data[$property]);
+                    }
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
                 $this->ordering[$className][$id] ??= $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
-                $this->ordering[$className][$id] ??= $this->ordering[$className][$id] = new Ordering();
+                $this->ordering[$className][$id] ??= new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 
                 $orderingId = $this->ordering[$className][$id]->getId();

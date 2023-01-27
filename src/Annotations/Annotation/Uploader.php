@@ -330,7 +330,7 @@ class Uploader extends AbstractAnnotation
                 $compatibleMimeType |= preg_match( "/".str_replace("/", "\/", $mimeType)."/", $file->getMimeType());
 
             if(!$compatibleMimeType)
-                throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for field \"$fieldName\" in ".get_class($entity)." ".$entityId." (expected: \"".implode(", ", $this->mimeTypes)."\").");
+	            throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for field \"$fieldName\" in ".get_class($entity)." ".$entityId." (expected: \"".implode(", ", $this->mimeTypes)."\").");
 
             //
             // Upload files

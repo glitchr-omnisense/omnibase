@@ -21,7 +21,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
      * @var EntityManagerInterface
      */
     protected $entityManager;
-    
+
     /**
      * @var EntityExtensionInterface
      */

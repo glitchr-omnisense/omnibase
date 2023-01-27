@@ -66,7 +66,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
         if(!$useCustomLoader) array_unshift($loaders, $defaultLoader);
         else $loaders[] = $defaultLoader;
-       
+
         $chainLoader = new ChainLoader($loaders);
         $twig->setLoader($chainLoader);
 
