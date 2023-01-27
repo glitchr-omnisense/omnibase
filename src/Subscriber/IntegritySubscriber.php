@@ -11,6 +11,7 @@ use Base\Security\RescueFormAuthenticator;
 use Base\BaseBundle;
 use Base\Routing\RouterInterface;
 use Doctrine\DBAL\Exception as DoctrineException;
+use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Doctrine\ORM\PersistentCollection;
@@ -99,8 +100,10 @@ class IntegritySubscriber implements EventSubscriberInterface
     public function onException(ExceptionEvent $event)
     {
         $throwable = $event->getThrowable();
+        $instanceOf = ($throwable instanceof TypeError || $throwable instanceof DoctrineException ||
+                       $throwable instanceof ErrorException || $throwable instanceof InvalidArgumentException ||
+                       $throwable instanceof EntityNotFoundException);
 
-        $instanceOf = ($throwable instanceof TypeError || $throwable instanceof DoctrineException || $throwable instanceof ErrorException || $throwable instanceof InvalidArgumentException);
         if($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace()))
             throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
     }
@@ -124,7 +127,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
-       
+
         if(!$integrity) {
 
             if($token) {
@@ -235,7 +238,7 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         $marshaller = $this->vault->getMarshaller();
         if($marshaller == null) return true;
- 
+
         $session = $this->requestStack->getSession();
         if (!$session->get("_integrity/secret")) return false;
 
