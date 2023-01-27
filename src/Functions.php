@@ -2,7 +2,9 @@
 
 namespace {
 
-    use Base\BaseBundle;
+    function         dumpif(...$variadic) { \Base\BaseBundle::dump("", ...$variadic); }
+    function  enable_dumpif() { \Base\BaseBundle::enableDump(""); }
+    function disable_dumpif() { \Base\BaseBundle::disableDump(""); }
 
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");

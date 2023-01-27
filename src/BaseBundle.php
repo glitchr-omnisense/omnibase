@@ -107,6 +107,15 @@ class BaseBundle extends Bundle
         $this->boot = true;
     }
 
+    protected static array $dumpEnabled = [];
+    public static function enableDump(string $scope)  { self::$dumpEnabled[$scope] = true;  }
+    public static function disableDump(string $scope) { self::$dumpEnabled[$scope] = false; }
+    public static function dump($scope, ...$variadic)
+    {
+        if(self::$dumpEnabled[$scope] ?? false)
+            dump(...$variadic);
+    }
+
     public function bootDoctrine():bool
     {
         /**
