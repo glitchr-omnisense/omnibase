@@ -7,6 +7,7 @@ use BadMethodCallException;
 use Base\Entity\User\Notification;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
+use Base\Notifier\Recipient\TimezoneRecipientInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Doctrine\DBAL\Exception as DoctrineException;
@@ -365,7 +366,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $this->localeProvider->setLocale($locale);
 
             // Send notification with proper timezone
-            $timezone = $recipient instanceof TimezoneRecipientInterface ? $recipient->getTimezone() : null;
+            $timezone = $recipient instanceof TimezoneRecipientInterface ? $recipient->getTimezone() : "UTC";
             date_default_timezone_set($timezone);
 
             // Payload..
