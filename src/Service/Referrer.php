@@ -45,9 +45,13 @@ class Referrer implements ReferrerInterface
     public function clear() { return $this->setUrl(null); }
     public function setUrl(?string $url)
     {
+        if($this->isVetoed($this->router->getRouteName($url)))
+            return $this;
+
         $this->requestStack->getMainRequest()->getSession()->remove('_security.main.target_path');    // Internal definition by firewall
         $this->requestStack->getMainRequest()->getSession()->remove('_security.account.target_path'); // Internal definition by firewall
         $this->requestStack->getMainRequest()->getSession()->set('_target_path', $url);
+
         return $this;
     }
 

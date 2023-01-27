@@ -133,11 +133,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $targetPath = $this->referrer;
         $request->getSession()->remove("_target_path");
         
-        if ($targetPath->getUrl() && $targetPath->sameSite() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath)) {
-            
-            $targetName = $this->router->getRouteName((string) $targetPath);
-            return $this->router->redirectToRoute($targetName);
-        }
+        if ($targetPath->getUrl() && $targetPath->sameSite() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath))
+            return $this->router->redirect($targetPath->getUrl());
 
         $defaultTargetPath = $request->getSession()->get('_security.'.$this->router->getRouteFirewall()->getName().'.target_path');
         return $this->router->redirectToRoute($this->router->getRouteName($defaultTargetPath ?? "/"));

@@ -58,7 +58,7 @@ class ReferrerSubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
-        if($this->router->isProfiler()) return;
+        if($this->router->isWdt()) return;
         if($this->router->isUX()) return;
 
         $referrerPath = strval($this->referrer);
