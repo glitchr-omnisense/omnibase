@@ -63,7 +63,7 @@ window.addEventListener("load.form_type", function () {
 
             data["width"]  = Math.min(data["width"], naturalWidth);
             data["height"] = Math.min(data["height"], naturalHeight);
-            
+
             cropper.setData(data);
         }
 

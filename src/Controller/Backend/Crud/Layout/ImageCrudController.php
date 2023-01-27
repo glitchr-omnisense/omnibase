@@ -16,6 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 
 class ImageCrudController extends AbstractCrudController
 {
@@ -42,9 +43,28 @@ class ImageCrudController extends AbstractCrudController
         return $extension;
     }
 
+    public function batchActionDelete(BatchActionDto $batchActionDto)
+    {
+        foreach ($batchActionDto->getEntityIds() as $id) {
+            $entity = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
+
+            $this->entityManager->remove($entity);
+            $this->entityManager->flush($entity);
+        }
+
+        return $this->redirect($batchActionDto->getReferrerUrl());
+    }
+
     public function configureActions(Actions $actions): Actions
     {
+
+        $batchActionDelete = Action::new('batchActionDelete', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_delete', 'fa fa-trash-alt')
+            ->linkToCrudAction('batchActionDelete')
+            ->addCssClass('btn btn-primary text-danger');
+
         return parent::configureActions($actions)
+            ->addBatchAction($batchActionDelete)
+            ->setPermission($batchActionDelete, 'ROLE_ADMIN')
             ->remove(Crud::PAGE_INDEX, Action::NEW);
     }
 

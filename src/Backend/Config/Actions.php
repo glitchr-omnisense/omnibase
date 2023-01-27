@@ -69,7 +69,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
         }
 
         if (Action::GOTO_PREV === $actionName) {
-            return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'EasyAdminBundle'))
+            return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'backoffice'))
                 ->setCssClass('action-'.Action::GOTO_PREV)
                 ->addCssClass('btn btn-secondary action-save')
                 ->displayAsLink()
@@ -92,7 +92,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
         }
 
         if (Action::GOTO_NEXT === $actionName) {
-            return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'EasyAdminBundle'))
+            return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'backoffice'))
                 ->setCssClass('action-'.Action::GOTO_NEXT)
                 ->addCssClass('btn btn-secondary action-save')
                 ->displayAsLink()

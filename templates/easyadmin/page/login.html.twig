@@ -2,9 +2,11 @@
 {# This template checks for 'ea' variable existence because it can
    be used in a EasyAdmin Dashboard controller, where 'ea' is defined
    or from any other Symfony controller, where 'ea' is not defined #}
-{% extends ea is defined ? ea.templatePath('layout') : '@EasyAdmin/page/login.html.twig' %}
+{% extends ea is defined ? ea.templatePath('layout') : '!@EasyAdmin/page/login.html.twig' %}
 {% trans_default_domain ea is defined ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? '@messages') %}
 
+{% block page_title %}{{ (page_title ?? ea.dashboardTitle ?? ('@forms.login.title'|trans))|raw }}{% endblock %}
+{% block page_title_block_output %}{{ block("page_title")}}{% endblock%}
 {% block head_favicon %}
     <link rel="shortcut icon" href="{{ asset(ea.dashboardFaviconPath) }}">
 {% endblock %}
@@ -234,8 +236,6 @@
         .alert.alert-info { display: flex; align-items: center; }
     </style>
 {% endblock %}
-
-{% block page_title %}{{ (page_title ?? ea.dashboardTitle ?? ('@forms.login.title'|trans))|raw }}{% endblock %}
 
 {% block flash_messages %}
     {{ include(ea.templatePath('flash_messages')) }}

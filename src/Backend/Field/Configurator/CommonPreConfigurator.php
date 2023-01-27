@@ -22,7 +22,7 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
      * @var TranslatorInterface
      */
     protected $translator;
-    
+
     public function __construct(PropertyAccessor $propertyAccessor, EntityFactory $entityFactory, TranslatorInterface $translator)
     {
         $this->translator = $translator;
@@ -35,7 +35,7 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
         $label = $this->buildLabelOption($field, $translationDomain, $context->getCrud()->getCurrentPage(), $entityDto);
         $field->setLabel($label);
 
-        if($this->propertyAccessor->isReadable($entityDto->getInstance(), $field->getProperty()))
+        if($entityDto->getInstance() && $this->propertyAccessor->isReadable($entityDto->getInstance(), $field->getProperty()))
             parent::configure($field, $entityDto, $context);
     }
 

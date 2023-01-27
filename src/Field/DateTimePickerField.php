@@ -6,8 +6,6 @@ use Base\Field\Type\DateTimePickerType;
 use DateTime;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Form\Type\TextEditorType;
-use \Symfony\Component\Validator\Constraints\Length;
 
 final class DateTimePickerField implements FieldInterface
 {
@@ -56,11 +54,19 @@ final class DateTimePickerField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/datetime.html.twig')
             ->setFormType(DateTimePickerType::class)
             ->addCssClass('field-datetime')
+            ->setDebug(false)
+
             // the proper default values of these options are set on the Crud class
             ->setCustomOption(self::OPTION_DATE_PATTERN, null)
             ->setCustomOption(self::OPTION_TIME_PATTERN, null)
             ->setCustomOption(self::OPTION_TIMEZONE, null)
             ->setCustomOption(self::OPTION_WIDGET, self::WIDGET_TEXT);
+    }
+
+    public function setDebug(bool $debug = true) : self
+    {
+        $this->setFormTypeOptionIfNotSet("debug", $debug);
+        return $this;
     }
 
     /**

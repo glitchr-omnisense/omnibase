@@ -1,3 +1,9 @@
+
+
+// NB: Collapse must be loaded in app.js for every layout
+// ISSUE WITH COLLAPSE.... Not closing when an other istance of collapse has been started
+// import Collapse from 'bootstrap/js/dist/collapse';
+
 window.addEventListener("load.collection_type", function () {
 
     var updateCollectionItemCssClasses = function (e) {
@@ -48,7 +54,7 @@ window.addEventListener("load.collection_type", function () {
             var deleteFn = function() {
 
                 $(this).remove();
-                
+
                 var l = o.dataset.numItems = $(o).find(".form-collection-item").length;
                 if (l == 0) {
 
@@ -63,10 +69,8 @@ window.addEventListener("load.collection_type", function () {
                 updateCollectionItemCssClasses(o);
             };
 
-            $(o).find(f).on('hidden.bs.collapse', deleteFn);
-            setTimeout(function() {
-                $(o).find(f).each(deleteFn); 
-            }, 200);
+            $(o).find(f).on('hidden.bs.collapsed', deleteFn);
+            setTimeout(function() { $(o).find(f).each(deleteFn); }, 500);
 
             $(o).find(f).each(function() {
 
@@ -114,7 +118,7 @@ window.addEventListener("load.collection_type", function () {
             $(u).collapse("show");
 
             $(document).trigger("collection.item-added");
-            
+
             document.querySelectorAll("button.form-collection-delete-button").forEach(deleteAction);
         });
     }
