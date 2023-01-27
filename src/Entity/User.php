@@ -120,8 +120,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $email  = $this->getUserIdentifier() . " <".$this->getEmail().">";
         $phone  = $this->getPhone() ?? '';
         $locale = $this->getLocale();
+        $timezone = $this->getTimezone();
 
-        return new Recipient($email, $phone, $locale);
+        return new Recipient($email, $phone, $locale, $timezone);
     }
 
     public function logout()

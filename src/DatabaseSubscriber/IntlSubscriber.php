@@ -187,13 +187,13 @@ class IntlSubscriber implements EventSubscriberInterface
 
                 $classMetadata->cache = $classMetadata->cache ?? null;
                 $classMetadata->cache = [
-                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
 
                 $classMetadata->associationMappings["translations"]["cache"] = $classMetadata->cache ?? null;
                 $classMetadata->associationMappings["translations"]["cache"] = [
-                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
             }
@@ -202,7 +202,7 @@ class IntlSubscriber implements EventSubscriberInterface
 
             $classMetadata->cache = $classMetadata->cache ?? null;
             $classMetadata->cache = [
-                "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                 "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
             ];
 
@@ -210,7 +210,7 @@ class IntlSubscriber implements EventSubscriberInterface
                 'fieldName' => 'translations',
                 'mappedBy' => 'translatable',
                 'cache' => [
-                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName())."__translations",
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName)."__translations",
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ],
                 'indexBy' => TranslatableWalker::LOCALE,
@@ -236,7 +236,7 @@ class IntlSubscriber implements EventSubscriberInterface
                 $classMetadata->associationMappings["translatable"]["sourceEntity"] = $classMetadata->getName();
                 $classMetadata->cache = $classMetadata->cache ?? null;
                 $classMetadata->cache = [
-                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
             }
@@ -245,7 +245,7 @@ class IntlSubscriber implements EventSubscriberInterface
 
             $classMetadata->cache = $classMetadata->cache ?? null;
             $classMetadata->cache = [
-                "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                 "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
             ];
 
@@ -253,7 +253,7 @@ class IntlSubscriber implements EventSubscriberInterface
                 'fieldName'   => 'translatable',
                 'inversedBy'  => 'translations',
                 'cache' => BaseBundle::USE_CACHE ? [
-                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName())."__translatable",
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName)."__translatable",
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ] : null,
                 'cascade'     => ['persist', 'merge'],

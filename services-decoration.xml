@@ -54,7 +54,6 @@
             <argument type="service" id="twig" />
             <argument type="service" id="twig.app_variable" />
             <argument type="service" id="twig.random_variable" />
-            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/>

@@ -130,7 +130,6 @@ class BaseService implements RuntimeExtensionInterface
         ClassMetadataManipulator $classMetadataManipulator,
         AdminUrlGenerator $adminUrlGenerator)
     {
-
         $this->setInstance($this);
         $this->startTime($kernel->getStartTime());
 

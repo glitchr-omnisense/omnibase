@@ -3,6 +3,7 @@
 namespace Base\Twig\Loader;
 
 use Base\Routing\RouterInterface;
+use Base\Traits\BaseTrait;
 use Twig\Loader\ChainLoader;
 use Twig\Environment;
 
@@ -18,6 +19,7 @@ use Exception;
  */
 class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 {
+    use BaseTrait;
     /**
      * @var Environment
      */
@@ -32,10 +34,12 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
      * @param string|array $paths    A path or an array of paths where to look for templates
      * @param string|null  $bundlePath The root path common to all relative paths (null for getcwd())
      */
-    public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, RouterInterface $router, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable, BaseService $baseService)
+    public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, RouterInterface $router, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable)
     {
         $this->twig = $twig;
         $this->router = $router;
+
+        $baseService = $this->getService();
 
         // Add base service to the default variables
         $this->twig->addGlobal("server", $_SERVER);

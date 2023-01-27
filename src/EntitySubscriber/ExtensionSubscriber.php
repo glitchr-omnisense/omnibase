@@ -4,12 +4,15 @@ namespace Base\EntitySubscriber;
 
 use Base\Database\Entity\EntityExtension;
 
+use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Enum\EntityAction;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\Common\EventArgs;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class ExtensionSubscriber implements EventSubscriberInterface
@@ -35,7 +38,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
     public function getSubscribedEvents(): array
     {
         return [
-            Events::onFlush, Events::postPersist
+            Events::onFlush, Events::postPersist, Events::loadClassMetadata
         ];
     }
 
@@ -45,6 +48,20 @@ class ExtensionSubscriber implements EventSubscriberInterface
         $this->entityExtension = $entityExtension;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
+    }
+
+    public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)
+    {
+        $classMetadata = $eventArgs->getClassMetadata();
+        if($classMetadata->name != AbstractExtension::class) return;
+
+        $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
+
+        $name = $namingStrategy->classToTableName(AbstractExtension::class) . '_unique';
+        $classMetadata->table['uniqueConstraints'][$name]["columns"] = array_unique(array_merge(
+            $classMetadata->table['uniqueConstraints'][$name]["columns"] ?? [],
+            ["entityClass", "entityId"]
+        ));
     }
 
     protected $scheduledEntityInsertions = [];

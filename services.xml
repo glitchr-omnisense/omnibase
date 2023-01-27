@@ -644,7 +644,9 @@
         <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
         <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
         <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="form.factory" />
             <argument type="service" id="form.proxy" />
             <argument type="service" id="base.database.metadata_manipulator" />

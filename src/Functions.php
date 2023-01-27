@@ -2,7 +2,9 @@
 
 namespace {
 
-    use Base\BaseBundle;
+    function         dumpif(...$variadic) { \Base\BaseBundle::dump("", ...$variadic); }
+    function  enable_dumpif() { \Base\BaseBundle::enableDump(""); }
+    function disable_dumpif() { \Base\BaseBundle::disableDump(""); }
 
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
@@ -174,7 +176,7 @@ namespace {
 
         $subdomain = ($domain && $subdomain) ? $subdomain . "." : null;
         $machine   = ($domain && $machine  ) ? $machine . "." : null;
-        $port      = ($domain && $port != 80 && $port != 443) ? ":".$port : null;
+        $port      = ($domain && $port && $port != 80 && $port != 443) ? ":".$port : null;
 
         $query     =  $query ? "?".$query : null;
 
@@ -510,7 +512,16 @@ namespace {
             );
         }
     }
-    
+
+    function format_sql(string $sql): string
+    {
+        return trim(str_replace(
+            ["SELECT", ",", "FROM", "WHERE", "INNER", "RIGHT", "LEFT"],
+            [PHP_EOL."SELECT".PHP_EOL." ", ",".PHP_EOL." ", PHP_EOL."FROM".PHP_EOL." ", PHP_EOL."WHERE".PHP_EOL." ", PHP_EOL."  INNER", PHP_EOL."  RIGHT", PHP_EOL."  LEFT"],
+            $sql
+        ));
+    }
+
     function debug_backtrace_short(?string $file = null, ?string $class = null, ?string $func = null)
     {
         $backtrace = [];
@@ -2255,7 +2266,14 @@ namespace {
 
     function str_blankspace(int $length) { return $length < 1 ? "" : str_repeat(" ", $length); }
     function usort_column(array &$array, string $column, callable $fn):bool { return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null)); }
-    function usort_key(array $array, array $ordering = []):array { return array_replace(array_flip($ordering), $array); }
+    function usort_key(array $array, array $ordering = []):array
+    {
+        $ordering = array_flip($ordering);
+        ksort($ordering);
+
+        return array_replace(array_flip($ordering), $array);
+    }
+
     function usort_startsWith(array &$array, string|array $startingWith)
     {
         if(!is_array($startingWith)) $startingWith = [$startingWith];
@@ -2426,17 +2444,54 @@ namespace {
         return (integer) $diff->format( "%R%a" );
     }
 
+    function ceil_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta + $modulo);
+    }
+
+    function floor_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta);
+    }
+
+    function round_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta + ($delta < $modulo/2 ? 0 : $modulo));
+    }
+
     function datetime_is_between(null|string|int|DateTime $datetime, null|string|int|DateTime $dt1 = null, null|string|int|DateTime $dt2 = null)
     {
         $datetime  = cast_datetime($datetime);
         if($datetime === null) return false;
 
         $datetime1 = cast_datetime($dt1);
-        $datetime2 = cast_datetime($dt2);
-
         if($datetime1 !== null && $datetime <= $datetime1) return false;
+
+        $datetime2 = cast_datetime($dt2);
         if($datetime2 !== null && $datetime > $datetime2) return false;
-        return true;
+
+        return $datetime1 != null || $datetime1 != null;
     }
 
     function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null) {

@@ -2,6 +2,7 @@
 
 namespace Base\Service;
 
+use AsyncAws\Core\Exception\LogicException;
 use Base\Database\Type\SetType;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -236,7 +237,7 @@ class Translator implements TranslatorInterface
 
     protected function transPerms(string $id, array|string $options = [], ?array $parameters = [], ?string $domain = null, ?string $locale = null)
     {
-        if(!is_array($options)) $options = [$options];
+        if(!is_array($options)) $options = array_filter([$options]);
 
         $politeness = null;
              if(in_array(self::POLITENESS_PLAIN,  $options)) $politeness = self::POLITENESS_PLAIN;
@@ -265,6 +266,10 @@ class Translator implements TranslatorInterface
 
             $trans = $this->transQuiet(mb_strtolower($id.$permutation), $parameters, $domain, $locale);
             if($trans !== null) break;
+        }
+
+        if(!$trans && empty($options)) {
+            throw new \LogicException("No translation found for \"@".$domain.".".$id."\" and no permutation option provided");
         }
 
         return $trans ? mb_ucfirst($trans) : mb_strtolower($id.implode("", $in));
@@ -358,12 +363,12 @@ class Translator implements TranslatorInterface
         $class  = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
         $class  = implode(".", array_slice(explode(".",$class), 0, $offset));
 
-        return $class ? $this->transPermExists($class.$value, $options, self::DOMAIN_ENUM) : null;
+        return $class ? $this->transPermExists($class.$value, $options, self::DOMAIN_ENUM) : false;
     }
 
     public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): ?string
     {
-        if(!is_array($options)) $options = [$options];
+        if(!is_array($options)) $options = array_filter([$options]);
         if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
 
         $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);

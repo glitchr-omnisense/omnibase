@@ -20,7 +20,7 @@ class LocaleProvider extends AbstractSimpleCache implements LocaleProviderInterf
     {
         $this->parameterBag = $parameterBag;
         $this->translator   = $translator;
-        
+
         parent::__construct($cacheDir);
     }
 
