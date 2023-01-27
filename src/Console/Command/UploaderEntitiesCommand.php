@@ -16,11 +16,22 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'uploader:entities', aliases:[], description:'')]
 class UploaderEntitiesCommand extends Command
 {
+    protected ?string $entityName;
+    protected ?string $property;
+    protected ?string $uuid;
+
+    protected ?bool $orphans;
+    protected ?bool $deleteOrphans;
+
+    protected $propertyAnnotations;
+    protected $baseEntities;
+    protected $appEntities;
+
     protected function configure(): void
     {
         $this->addOption('entity',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific entity ?');
         $this->addOption('property', null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific property ?');
-        $this->addOption('uuid', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific uuid ?');
+        $this->addOption('uuid'    , null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific uuid ?');
 
         $this->addOption('orphans',        false, InputOption::VALUE_NONE, 'Do you want to get orphans ?');
         $this->addOption('delete-orphans', false, InputOption::VALUE_NONE, 'Do you want to delete orphans ?');
@@ -87,7 +98,7 @@ class UploaderEntitiesCommand extends Command
                 else $output->section()->writeln("\t     $class::$field <ln>".count($fileList)." file(s) found.</ln>", OutputInterface::VERBOSITY_VERBOSE);
 
                 foreach($fileList as $file)
-                    $output->section()->writeln("\t           <ln>* ./".str_lstrip($file,$publicPath)."</ln>", OutputInterface::VERBOSITY_DEBUG);
+                    $output->section()->writeln("\t           <ln>* .".str_lstrip(realpath($file),realpath($publicPath))."</ln>", OutputInterface::VERBOSITY_DEBUG);
 
                 if($this->orphans || $this->deleteOrphans) {
 
@@ -97,7 +108,7 @@ class UploaderEntitiesCommand extends Command
 
                     $output->section()->writeln("\t           <info>Looking for orphan files</info> in $publicPath <warning>$nOrphans orphan file(s) found.</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                     foreach($orphanFiles as $file)
-                        $output->section()->writeln("\t           <warning>* ./".str_lstrip($file,$publicPath)."</warning>", OutputInterface::VERBOSITY_DEBUG);
+                        $output->section()->writeln("\t           <warning>* .".str_lstrip(realpath($file),realpath($publicPath))."</warning>", OutputInterface::VERBOSITY_DEBUG);
 
                     if ($this->deleteOrphans) {
 

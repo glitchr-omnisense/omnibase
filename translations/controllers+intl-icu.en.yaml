@@ -34,7 +34,7 @@ security_logout:
 
 app_index:
   title: Return to website
-  
+
 security_register:
   validation_required: This account requires to be verified
 
@@ -44,7 +44,7 @@ user_settings:
   title: "My Settings"
 
 security_birthdate:
-  title: 
+  title:
     default: "We will soon be online"
     appointment: "Please take note, launch time"
     open: "We are open !&nbsp;<a href=\"{0}\">Go to the website</a>"
@@ -71,7 +71,7 @@ security_maintenance:
   progress: "Progression {0}%"
 
 backoffice:
-  title: "[BO]"
+  title: "Backoffice"
   excerpt: ""
 
 backoffice_settings:
