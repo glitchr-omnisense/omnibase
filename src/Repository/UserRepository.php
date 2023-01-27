@@ -6,6 +6,7 @@ use Base\Entity\User;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 
 use Base\Database\Repository\ServiceEntityRepository;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -22,7 +23,10 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
     public function supportsClass(string $class) { return is_instanceof($class, User::class); }
     public function loadUserByIdentifier(string $identifier) : UserInterface
     {
-        return $this->findOneByEmail($identifier);
+        $user = $this->findOneByEmail($identifier);
+        if($user === null) throw new UserNotFoundException();
+        
+        return $user;
     }
 
     public function refreshUser(UserInterface $user) : ?UserInterface
