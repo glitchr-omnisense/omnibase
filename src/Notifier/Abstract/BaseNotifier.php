@@ -353,8 +353,28 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
     public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void
     {
-        if ($this->enable)
-            $this->notifier->send($notification, ...$recipients);
+        if (!$this->enable) return;
+
+        $localeBak = $this->localeProvider->getLocale();
+        $timezoneBak = date_default_timezone_get();
+
+        foreach($recipients as $recipient) {
+
+            // Send notification with proper locale
+            $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
+            $this->localeProvider->setLocale($locale);
+
+            // Send notification with proper timezone
+            $timezone = $recipient instanceof TimezoneRecipientInterface ? $recipient->getTimezone() : null;
+            date_default_timezone_set($timezone);
+
+            // Payload..
+            $this->notifier->send($notification, $recipient);
+        }
+
+        // Put back previous locale and timezone
+        $this->localeProvider->setLocale($localeBak);
+        date_default_timezone_set($timezoneBak);
     }
 
     public function sendUsers(Notification $notification, RecipientInterface ...$recipients)
@@ -386,14 +406,9 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $notification->setChannels($channels);
             $notification->markAsReadIfNeeded($channels);
 
-            // Send notification with proper locale
-            $localeBak = $this->localeProvider->getLocale();
-            $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
-            $this->localeProvider->setLocale($locale);
-
+            // Payload...
             $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
-            $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);
@@ -421,14 +436,9 @@ abstract class BaseNotifier implements BaseNotifierInterface
             if (empty($channels)) continue;
             $notification->setChannels($channels);
 
-            // Send notification with proper locale
-            $localeBak = $this->localeProvider->getLocale();
-            $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
-            $this->localeProvider->setLocale($locale);
-
+            // Payload...
             $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
-            $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);
@@ -458,14 +468,9 @@ abstract class BaseNotifier implements BaseNotifierInterface
             if (empty($channels)) return $this;
             $notification->setChannels($channels);
 
-            // Send notification with proper locale
-            $localeBak = $this->localeProvider->getLocale();
-            $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
-            $this->localeProvider->setLocale($locale);
-
+            // Payload..
             $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
-            $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);

@@ -1048,7 +1048,7 @@ class ServiceEntityParser
                 if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]))
                     $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
 
-                $fieldValue = (new \DateTime("now"))->modify($subtract);
+                $fieldValue = round_datetime(new \DateTime("now"), $subtract);
             }
         }
 

@@ -4,9 +4,10 @@ namespace Base\Notifier\Recipient;
 
 use Base\Service\LocaleProvider;
 
-class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implements LocaleRecipientInterface
+class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implements LocaleRecipientInterface, TimezoneRecipientInterface
 {
     use LocaleRecipientTrait;
+    use TimezoneRecipientTrait;
 
     public function __toString() {
 
@@ -17,14 +18,17 @@ class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implemen
         return $technicalRecipientStr;
     }
 
-    public function __construct(?string $email = null, ?string $phone = null, ?string $locale = null)
+    public function __construct(?string $email = null, ?string $phone = null, ?string $locale = null, ?string $timezone = null)
     {
         parent::__construct($email ?? '', $phone ?? '');
 
         if(!$locale)
             $locale = LocaleProvider::getDefaultLocale();
+        if(!$timezone)
+            $timezone = "UTC";
 
         $this->locale = $locale;
+        $this->timezone = $timezone;
     }
 
     /**
@@ -33,6 +37,16 @@ class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implemen
     public function locale(string $locale): self
     {
         $this->locale = $locale;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function timezone(string $timezone): self
+    {
+        $this->timezone = $timezone;
 
         return $this;
     }

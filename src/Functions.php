@@ -2444,17 +2444,54 @@ namespace {
         return (integer) $diff->format( "%R%a" );
     }
 
+    function ceil_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta + $modulo);
+    }
+
+    function floor_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta);
+    }
+
+    function round_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    {
+        $datetime  = cast_datetime($datetime);
+        $precision = cast_datetime($precision);
+
+        $timestamp = $datetime->format("U");
+        $modulo = abs($precision->format("U") - time());
+        $delta = $timestamp % $modulo;
+
+        return $datetime->setTimestamp($timestamp - $delta + ($delta < $modulo/2 ? 0 : $modulo));
+    }
+
     function datetime_is_between(null|string|int|DateTime $datetime, null|string|int|DateTime $dt1 = null, null|string|int|DateTime $dt2 = null)
     {
         $datetime  = cast_datetime($datetime);
         if($datetime === null) return false;
 
         $datetime1 = cast_datetime($dt1);
-        $datetime2 = cast_datetime($dt2);
-
         if($datetime1 !== null && $datetime <= $datetime1) return false;
+
+        $datetime2 = cast_datetime($dt2);
         if($datetime2 !== null && $datetime > $datetime2) return false;
-        return true;
+
+        return $datetime1 != null || $datetime1 != null;
     }
 
     function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null) {
