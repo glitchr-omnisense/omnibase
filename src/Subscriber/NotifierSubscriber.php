@@ -48,7 +48,7 @@ class NotifierSubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
-        if(!$this->authorizationChecker->isGranted(UserRole::ADMIN)) return;
+        if(!$this->authorizationChecker->isGranted(UserRole::SUPERADMIN)) return;
 
         $notification = null;
         if ($this->debug && !$this->notifier->hasLoopback()) $notification = new Notification("@notifications.notifier.no_loopback");

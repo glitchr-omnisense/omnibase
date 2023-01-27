@@ -25,7 +25,7 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
     {
         $user = $this->findOneByEmail($identifier);
         if($user === null) throw new UserNotFoundException();
-        
+
         return $user;
     }
 

@@ -221,9 +221,6 @@ form fieldset legend { font-size: 11pt; }
 .dropdown-user-details .img-fluid { margin-right: 10px; }
 .user-menu-wrapper .dropdown-menu .dropdown-user-details img.user-avatar
 {
-    height: 39px;
-    max-width: 39px;
-    width: auto;
     object-fit: cover;
 }
 
@@ -243,8 +240,8 @@ form fieldset legend { font-size: 11pt; }
 }
 .online-user-wrapper img.user-avatar,
 .user-menu-wrapper img.user-avatar {
-    height: 30px;
-    max-width: 30px;
+    height: 40px;
+    max-width: 40px;
     width: auto;
     background-color: #FFF5;
 }
@@ -261,8 +258,8 @@ form fieldset legend { font-size: 11pt; }
 
 .dropdown-user-details .img-fluid, .user-details .img-fluid
 {
-    width:30px;
-    height:30px;
+    width:40px;
+    height:40px;
     overflow:hidden;
     border:1px solid  var(--content-top-border-color);
     border-radius: var(--border-radius);
@@ -1134,6 +1131,9 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-submenu-color); }
 .bootstrap-datetimepicker-widget table td span.active, .bootstrap-datetimepicker-widget table td i.active { background: var(--button-bg); }
 .bootstrap-datetimepicker-widget table td.day:hover, .bootstrap-datetimepicker-widget table td.hour:hover, .bootstrap-datetimepicker-widget table td.minute:hover, .bootstrap-datetimepicker-widget table td.second:hover { background: var(--button-bg); }
 
+.user-menu-wrapper .dropdown-menu .dropdown-user-details .user-avatar {
+    margin: 0 0.25em;
+}
 .user-menu hr { display:none; }
 .actions a:last-child { margin-right:10px; }
 

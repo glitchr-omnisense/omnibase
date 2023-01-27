@@ -40,7 +40,7 @@ class UserCrudController extends UserActionCrudController
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
             $impersonate = null;
-            if($switchRole && $this->isGranted($switchRole) && !$this->getEntityFqcn() instanceof LoginRestrictionInterface && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
+            if($switchRole && $this->isGranted($switchRole) && !is_instanceof($this->getEntityFqcn(), LoginRestrictionInterface::class)  && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
 
                 $propertyAccessor =  PropertyAccess::createPropertyAccessor();
                 if($propertyAccessor->isReadable($entity, User::__DEFAULT_IDENTIFIER__))
@@ -65,7 +65,7 @@ class UserCrudController extends UserActionCrudController
 
             yield BooleanField::new("isApproved")->withConfirmation()->showInline();
             yield AvatarField::new('avatar')->setColumns(2)->hideOnDetail()->setCropper();
- 
+
             yield RoleField::new('roles')->setColumns(5);
             yield EmailField::new('email')->setColumns(5);
 

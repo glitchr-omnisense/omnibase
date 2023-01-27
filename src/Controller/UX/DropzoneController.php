@@ -34,10 +34,10 @@ class DropzoneController extends AbstractController
      * @var ObfuscatorInterface
      */
     protected $obfuscator;
-    
+
     /** * @var string */
     protected $cacheDir;
-    
+
     /**
      * @var TranslatorInterface
      */
@@ -47,7 +47,7 @@ class DropzoneController extends AbstractController
      * @var \Symfony\Component\Filesystem\Filesystem
      */
     protected $filesystem;
-    
+
     public function __construct(TranslatorInterface $translator, CacheInterface $cache, ObfuscatorInterface $obfuscator, string $cacheDir)
     {
         $this->cache      = $cache;
@@ -122,24 +122,22 @@ class DropzoneController extends AbstractController
         if(!file_exists($file->getPathname()))
             return new Response("Uploaded file lost in the limbo.", 500);
 
-        dump($file->getPathname(), $file->getRealPath());
-        
         if(!move_uploaded_file($file->getRealPath(), $filePath))
             return new Response($this->translator->trans("fileupload.error.cant_write", [], "fields"), 500);
 
-        $fnExpiry = function($expiry, $uuid) use ($cacheDir) {
+        // $fnExpiry = function($expiry, $uuid) use ($cacheDir) {
 
-            if($expiry > time()) return true;
+        //     if($expiry > time()) return true;
 
-            if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
-                return new Response("Invalid uuid.", 500);
+        //     if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
+        //         return new Response("Invalid uuid.", 500);
 
-            $fname = $cacheDir."/".$uuid;
-            if(file_exists($fname)) unlink($fname);
+        //     $fname = $cacheDir."/".$uuid;
+        //     if(file_exists($fname)) unlink($fname);
 
-            return false;
-        };
-       
+        //     return false;
+        // };
+
         // @TODO Implement a cleaning command..
         // $cacheDropzone = $this->cache->getItem("cache:dropzone");
         // if($cacheDropzone->isHit()) { // If cache found and didn't expired
@@ -153,12 +151,12 @@ class DropzoneController extends AbstractController
         //     foreach($dropzone as $uuid => $_)
         //         if(file_exists($cacheDir."/".$uuid)) unlink($cacheDir."/".$uuid);
         // }
-        
+
         // $dropzone[(string) $fileUuid] = time() + self::CACHE_DURATION;
         // $cacheDropzone->set($dropzone);
         // $cacheDropzone->expiresAfter(self::CACHE_DURATION);
         // $this->cache->save($cacheDropzone);
-        
+
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
@@ -168,7 +166,7 @@ class DropzoneController extends AbstractController
      * @Route("/ux/dropzone/{hashid}/{uuid}", name="ux_dropzone_preview")
      */
     public function Preview(string $hashid, string $uuid): Response
-    {        
+    {
         $config = $this->obfuscator->decode($hashid);
         $token = $config["token"] ?? null;
         if(!$token) throw new InvalidCsrfTokenException();
