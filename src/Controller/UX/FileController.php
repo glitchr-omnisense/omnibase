@@ -171,6 +171,7 @@ class FileController extends AbstractController
             $ratio0 = $ratio/($naturalWidth/$naturalHeight);
 
             $imageCrop = $this->imageCropRepository->cacheOneByRatio0ClosestTo($ratio0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+
         }
 
         // Providing a "width:height" information
@@ -188,8 +189,8 @@ class FileController extends AbstractController
             if($ratio0 == 0) throw $this->createNotFoundException();
 
             $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
-
         }
+
 
         //
         // Apply filter
@@ -289,7 +290,7 @@ class FileController extends AbstractController
         // Extract parameters
         $config = $this->imageService->resolve($hashid);
         if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
-        
+
         $filters = $config["filters"] ?? [];
         $options = $config["options"] ?? [];
         $path    = $config["path"] ?? null;
@@ -297,7 +298,6 @@ class FileController extends AbstractController
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
         if(!$extensions) throw $this->createNotFoundException();
-
         if ($extension == null || !in_array($extension, $extensions))
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
