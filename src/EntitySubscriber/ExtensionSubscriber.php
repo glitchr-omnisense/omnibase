@@ -92,8 +92,12 @@ class ExtensionSubscriber implements EventSubscriberInterface
         $this->scheduledEntityDeletions  = array_unique_object($this->scheduledEntityDeletions);
 
         $this->entriesPendingForIds = $this->payload(EntityAction::INSERT, $this->scheduledEntityInsertions);
-        $this->payload(EntityAction::UPDATE, $this->scheduledEntityUpdates);
-        $this->payload(EntityAction::DELETE, $this->scheduledEntityDeletions);
+        foreach($this->payload(EntityAction::UPDATE, $this->scheduledEntityUpdates) as $id => $array) {
+            $this->entriesPendingForIds[$id] = array_unique_object(array_merge($this->entriesPendingForIds[$id] ?? [], $array));
+        }
+        foreach($this->payload(EntityAction::DELETE, $this->scheduledEntityDeletions) as $id => $array) {
+            array_key_removes($this->entriesPendingForIds, $id);
+        }
     }
 
     public function postPersist(EventArgs $args)
@@ -103,10 +107,18 @@ class ExtensionSubscriber implements EventSubscriberInterface
             $this->entityManager->getCache()->evictEntity(get_class($newEntity), $newEntity->getId());
 
         $uow = $this->entityManager->getUnitOfWork();
-        foreach($this->scheduledEntityInsertions as $entity) {
 
-            $id = spl_object_id($entity);
-            foreach($this->entriesPendingForIds[$id] ?? [] as $entry)
+        $splObjectIdInsertions = array_map(fn($e) => spl_object_id($e), $this->scheduledEntityInsertions);
+        $splObjectIdUpdates    = array_map(fn($e) => spl_object_id($e), $this->scheduledEntityUpdates);
+        foreach($this->entriesPendingForIds as $id => $entries) {
+
+            if( ($key = array_search($id, $splObjectIdUpdates)) !== false)
+                $entity = $this->scheduledEntityUpdates[$key];
+            else if( ($key = array_search($id, $splObjectIdInsertions)) !== false)
+                $entity = $this->scheduledEntityInsertions[$key];
+            else throw new \LogicException("Entry pending for id not found in the scheduled entity");
+
+            foreach($entries as $entry)
                 $uow->scheduleExtraUpdate($entry, ['entityId' => [null, $entity->getId()]]);
         }
     }
@@ -125,9 +137,8 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
                 foreach($extension::get($entity) as $column) {
 
-                    list($className, $property) = explode("::", $column);
+                    list($className, $_) = explode("::", $column);
                     if(!is_instanceof($entity, $className)) continue;
-                    // if(!array_key_exists($property, $uow->getEntityChangeSet($entity))) continue;
 
                     $matches[$className] = $matches[$className] ?? [];
                     $matches[$className][] = $column;
@@ -153,9 +164,8 @@ class ExtensionSubscriber implements EventSubscriberInterface
                         }
 
                         $entry->setEntityClass($className);
-                        $entry->setEntityId($entity->getId());
+                        $entry->setEntityId($entry->getEntityId() ?? $entity->getId());
                         $entry->setAction($action);
-
                         switch($action) {
 
                             case EntityAction::INSERT:

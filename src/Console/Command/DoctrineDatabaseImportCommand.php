@@ -101,11 +101,16 @@ class DoctrineDatabaseImportCommand extends Command
             $fieldName = explodeByArray([":", "["], $propertyPath)[0];
             if (preg_match('/(.*)\:explode\((.*)\)(.*)/', $propertyPath, $matches)) {
 
-                $propertyPath    = $matches[1].$matches[3] ?? "";
-                $entrySeparator = $matches[2];
+                $propertyPath   = $matches[1].$matches[3] ?? "";
+                $entrySeparator = str_split($matches[2]);
 
-                if(!is_array($entry))
-                    $entry = array_map(fn($v) => $v ? trim($v) : ($v === "" ? null : $v), explode($entrySeparator, str_rstrip(trim($entry), $entrySeparator)));
+                if(!is_array($entry)) {
+
+                    $entry = array_filter(array_map(
+                        fn($v) => trim(str_strip(trim($v), $entrySeparator)),
+                        explodeByArray($entrySeparator, str_strip(trim($entry), $entrySeparator))
+                    ));
+                }
             }
 
             $propertyName = preg_replace("/\:[^\.]*/", "", $propertyPath);

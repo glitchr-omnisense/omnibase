@@ -37,7 +37,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @Blameable(on="create", impersonator=true)
+     * @Blameable(on={"create", "update"}, impersonator=true)
      * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $impersonator;
@@ -46,7 +46,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(onDelete="SET NULL")
-     * @Blameable(on="create")
+     * @Blameable(on={"create", "update"})
      */
     protected $initiator;
     public function getInitiator(): ?User { return $this->initiator; }

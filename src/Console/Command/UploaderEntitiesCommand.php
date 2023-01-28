@@ -108,7 +108,7 @@ class UploaderEntitiesCommand extends Command
 
                     $output->section()->writeln("\t           <info>Looking for orphan files</info> in $publicPath <warning>$nOrphans orphan file(s) found.</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                     foreach($orphanFiles as $file)
-                        $output->section()->writeln("\t           <warning>* .".str_lstrip(realpath($file),realpath($publicPath))."</warning>", OutputInterface::VERBOSITY_DEBUG);
+                        $output->section()->writeln("\t           <warning>* .".str_lstrip(realpath($file),realpath($publicPath))."</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
 
                     if ($this->deleteOrphans) {
 
@@ -124,7 +124,7 @@ class UploaderEntitiesCommand extends Command
 
             if($noPropertyFound) {
 
-                $output->section()->writeln("             $class::$field <warning>not declared in this class..</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
+                $output->section()->writeln("             $class::$field <warning>not declared in this class..</warning>", OutputInterface::VERBOSITY_DEBUG);
                 $nTotalFields--;
             }
         }

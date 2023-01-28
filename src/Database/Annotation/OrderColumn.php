@@ -49,8 +49,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
             $isArray = is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, JsonType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
-            // SetType is not supported yet.. There is a sorting issue with Select2
-             $isSet  = is_instanceof($doctrineType, SetType::class);
+            $isSet  = is_instanceof($doctrineType, SetType::class);
 
             if(!$isSet && !$isArray && !$isToMany)
                 return false;
@@ -198,7 +197,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id] ??= $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+                $this->ordering[$className][$id] ??= $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
                 $this->ordering[$className][$id] ??= new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 
