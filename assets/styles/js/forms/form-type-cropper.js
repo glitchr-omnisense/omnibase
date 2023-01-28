@@ -24,14 +24,6 @@ window.addEventListener("load.form_type", function () {
             $("#"+id+"_actions").removeClass("hidden");
         };
 
-        $("#"+id+"_x"     ).prop("disabled", true);
-        $("#"+id+"_y"     ).prop("disabled", true);
-        $("#"+id+"_width" ).prop("disabled", true);
-        $("#"+id+"_height").prop("disabled", true);
-        $("#"+id+"_scaleX").prop("disabled", true);
-        $("#"+id+"_scaleY").prop("disabled", true);
-        $("#"+id+"_rotate").prop("disabled", true);
-
         var updateCropper = function() {
 
             // Expand on negative value
@@ -221,13 +213,13 @@ window.addEventListener("load.form_type", function () {
                             cropper.setData(data);
                         });
 
-                    $("#"+id+"_x"     ).removeAttr("disabled");
-                    $("#"+id+"_y"     ).removeAttr("disabled");
-                    $("#"+id+"_width" ).removeAttr("disabled");
-                    $("#"+id+"_height").removeAttr("disabled");
-                    $("#"+id+"_scaleX").removeAttr("disabled");
-                    $("#"+id+"_scaleY").removeAttr("disabled");
-                    $("#"+id+"_rotate").removeAttr("disabled");
+                    // $("#"+id+"_x"     ).removeAttr("disabled");
+                    // $("#"+id+"_y"     ).removeAttr("disabled");
+                    // $("#"+id+"_width" ).removeAttr("disabled");
+                    // $("#"+id+"_height").removeAttr("disabled");
+                    // $("#"+id+"_scaleX").removeAttr("disabled");
+                    // $("#"+id+"_scaleY").removeAttr("disabled");
+                    // $("#"+id+"_rotate").removeAttr("disabled");
 
                     $("#"+id+"_actions button[data-cropper-reset]")
                         .off("click.cropper")

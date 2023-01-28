@@ -2,7 +2,7 @@
 
 // NB: Collapse must be loaded in app.js for every layout
 // ISSUE WITH COLLAPSE.... Not closing when an other istance of collapse has been started
-// import Collapse from 'bootstrap/js/dist/collapse';
+import Collapse from 'bootstrap/js/dist/collapse';
 
 window.addEventListener("load.collection_type", function () {
 
