@@ -10,8 +10,10 @@ trait SimpleCacheTrait
 {
     public function __construct(string $cacheDir)
     {
-        $cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
-        $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));
+        $phpCacheFile = $cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
+        $fsCacheFile = $cacheDir."/pools/simple/fs/".str_replace(['\\', '/'], ['__', '_'], static::class);
+        $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $fsCacheFile)));
+
         $this->warmUp($cacheDir);
     }
     
@@ -32,6 +34,7 @@ trait SimpleCacheTrait
 
     public function getCache(string $key, mixed $fallback = null, $deferred = false): mixed
     {
+
         if(!$this->hasCache($key))
             $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $deferred);
 

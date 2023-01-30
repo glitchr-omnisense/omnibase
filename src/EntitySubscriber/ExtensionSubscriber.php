@@ -184,7 +184,6 @@ class ExtensionSubscriber implements EventSubscriberInterface
                                     $this->entityManager->persist($entry);
                                     $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 }
-
                                 break;
 
                             case EntityAction::DELETE:

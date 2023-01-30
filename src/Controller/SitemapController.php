@@ -15,7 +15,7 @@ class SitemapController extends AbstractController
     use BaseTrait;
 
     /**
-     * @Route("/sitemap.{extension}", name="ux_sitemap", requirements={"hashid"="xml|txt"})
+     * @Route("/sitemap.{extension}", name="ux_sitemap", requirements={"extension"="xml|txt"})
      */
     public function Main(string $extension, Request $request, SitemapperInterface $sitemap): Response
     {

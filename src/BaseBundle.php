@@ -24,6 +24,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -61,8 +62,8 @@ class BaseBundle extends Bundle
 
     public function warmUp()
     {
-        $needsWarmup = !file_exists($this->getCacheDir()."/base_bundle.php");
-        self::$cache = new PhpArrayAdapter($this->getCacheDir() . "/base_bundle.php", new FilesystemAdapter());
+        $needsWarmup = !file_exists($this->getCacheDir()."/pools/base/bundle.php");
+        self::$cache = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter());
         self::$filePaths = self::$filePaths ?? self::$cache->getItem('base.file_paths')->get() ?? [];
         self::$classes = self::$classes ?? self::$cache->getItem('base.classes')->get() ?? [];
         self::$aliasList = self::$aliasList ?? self::$cache->getItem('base.alias_list')->get() ?? [];
@@ -99,6 +100,11 @@ class BaseBundle extends Bundle
 
     public function boot()
     {
+        if (!extension_loaded('imagick'))
+            throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
+        if (!extension_loaded('igbinary'))
+            throw new EnvNotFoundException('Application requires `igbinary`, but it is not enabled.');
+
         if(!self::$cache)
             $this->warmUp();
 

@@ -4,19 +4,36 @@ namespace Base\Service;
 
 use Base\BaseBundle;
 use Base\Cache\Abstract\AbstractSimpleCache;
+use Base\Repository\Layout\ImageRepository;
 use Base\Service\Model\Obfuscator\CompressionInterface;
 use Hashids\Hashids;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV5;
 
 class Obfuscator extends AbstractSimpleCache implements ObfuscatorInterface
 {
     protected string $uuid;
+    protected array $compressions = [];
 
-    protected $compressions = [];
+    protected $compression;
     protected int $level = -1;
     protected int $maxLength = 0;
     protected ?string $encoding;
+
+    public function warmUp(string $cacheDir): array { return []; }
+
+    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir)
+    {
+        $this->uuid        = $parameterBag->get("base.obfuscator.uuid") ?? Uuid::NAMESPACE_URL;
+
+        $this->compression = $parameterBag->get("base.obfuscator.compression") ?? "null";
+        $this->maxLength   = $parameterBag->get("base.obfuscator.max_length");
+        $this->level       = $parameterBag->get("base.obfuscator.level");
+        $this->encoding    = $parameterBag->get("base.obfuscator.encoding");
+
+        parent::__construct($cacheDir);
+    }
 
     public function addCompression(CompressionInterface $compression): self
     {
@@ -61,20 +78,6 @@ class Obfuscator extends AbstractSimpleCache implements ObfuscatorInterface
         return $compression;
     }
 
-    public function warmUp(string $cacheDir): array { return []; }
-
-    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir)
-    {
-        $this->uuid        = $parameterBag->get("base.obfuscator.uuid") ?? Uuid::NAMESPACE_URL;
-
-        $this->compression = $parameterBag->get("base.obfuscator.compression") ?? "null";
-        $this->maxLength   = $parameterBag->get("base.obfuscator.max_length");
-        $this->level       = $parameterBag->get("base.obfuscator.level");
-        $this->encoding    = $parameterBag->get("base.obfuscator.encoding");
-
-        parent::__construct($cacheDir);
-    }
-
     public function isShort() { return $this->uuid !== null; }
     public function getUuid(string $name): ?UuidV5
     {
@@ -90,8 +93,9 @@ class Obfuscator extends AbstractSimpleCache implements ObfuscatorInterface
             return $this->getCompression($this->compression)->encode($data);
 
         $identifier = $this->getUuid($data);
-        if (BaseBundle::USE_CACHE && $this->hasCache("/Identifiers/" . $identifier))
+        if (BaseBundle::USE_CACHE && $this->hasCache("/Identifiers/" . $identifier)) {
             return $identifier;
+        }
 
         $this->setCache("/Identifiers/".$identifier, $this->getCompression($this->compression)->encode($data));
         return $identifier;
@@ -107,7 +111,8 @@ class Obfuscator extends AbstractSimpleCache implements ObfuscatorInterface
         }
 
         $data = $this->getCompression($this->compression)->decode($data);
-        if($data) return unserialize($data);
+        try { if($data) return unserialize($data); }
+        catch (\ErrorException $e) { }
 
         if(Uuid::isValid($uuid) && BaseBundle::USE_CACHE)
             $this->deleteCache("/Identifiers/".$uuid);

@@ -94,29 +94,30 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function resolveParameters(?array $routeParameters = null): ?array
     {
-        if($routeParameters !== null) {
+        if ($routeParameters === null){
 
-            // Use either parameters or $_SERVER variables to determine the host to provide
-            $scheme    = array_pop_key("_scheme"  , $routeParameters) ?? $this->getRouter()->getScheme();
-            $host      = array_pop_key("_host"    , $routeParameters) ?? $this->getRouter()->getHost();
-            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getRouter()->getBaseDir();
-
-            $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
-            $parse["base_dir"] = $baseDir;
-           
-            if($parse && array_key_exists("host", $parse))
-                $this->getContext()->setHost($parse["host"]);
-            if($parse && array_key_exists("base_dir", $parse))
-                $this->getContext()->setBaseUrl($parse["base_dir"]);
+            $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()); // Make sure also it gets the basic context
 
         } else {
 
-            $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()); // Make sure also it gets the basic context
-            if($parse && array_key_exists("host", $parse))
-                $this->getContext()->setHost($parse["host"]);
-            if($parse && array_key_exists("base_dir", $parse))
-                $this->getContext()->setBaseUrl($parse["base_dir"]);
+            // Use either parameters or $_SERVER variables to determine the host to provide
+            $scheme    = array_pop_key("_scheme"  , $routeParameters) ?? $this->getRouter()->getScheme();
+            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getRouter()->getBaseDir();
+            $host      = array_pop_key("_host"    , $routeParameters) ?? $this->getRouter()->getHost();
+            $port      = array_pop_key("_port"    , $routeParameters) ?? explode(":", $host)[1] ?? $this->getRouter()->getPort();
+            $host      = explode(":", $host)[0].":".$port;
+
+            $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
+            $parse["base_dir"] = $baseDir;
         }
+
+        if($parse && array_key_exists("host", $parse))
+            $this->getContext()->setHost($parse["host"]);
+        if($parse && array_key_exists("base_dir", $parse))
+            $this->getContext()->setBaseUrl($parse["base_dir"]);
+
+        $this->getContext()->setHttpPort($parse["port"] ?? 80);
+        $this->getContext()->setHttpsPort($parse["port"] ?? 443);
 
         return $routeParameters;
     }

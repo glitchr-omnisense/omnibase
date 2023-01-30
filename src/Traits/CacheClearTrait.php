@@ -153,6 +153,7 @@ trait CacheClearTrait
         $phpConfig = php_ini_loaded_file();
         $maxSize = UploadedFile::getMaxFilesize();
         $maxPathLength = constant("PHP_MAXPATHLEN");
+
         $io->note(
             "Loaded PHP Configuration: ".$phpConfig."".PHP_EOL."(might differ from webserver)\n".
             "Maximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX)."\n".

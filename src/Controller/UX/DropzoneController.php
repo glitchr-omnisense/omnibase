@@ -66,11 +66,11 @@ class DropzoneController extends AbstractController
     /**
      * Controller example
      *
-     * @Route("/ux/dropzone/{hashid}", name="ux_dropzone")
+     * @Route("/ux/dropzone/{data}", name="ux_dropzone")
      */
-    public function Main(Request $request, $hashid = null): Response
+    public function Main(Request $request, $data = null): Response
     {
-        $config = $this->obfuscator->decode($hashid);
+        $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
         if(!$token || !$this->isCsrfTokenValid("dropzone", $token))
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
@@ -163,11 +163,11 @@ class DropzoneController extends AbstractController
     /**
      * Controller example
      *
-     * @Route("/ux/dropzone/{hashid}/{uuid}", name="ux_dropzone_preview")
+     * @Route("/ux/dropzone/{data}/{uuid}", name="ux_dropzone_preview")
      */
-    public function Preview(string $hashid, string $uuid): Response
+    public function Preview(string $data, string $uuid): Response
     {
-        $config = $this->obfuscator->decode($hashid);
+        $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
         if(!$token) throw new InvalidCsrfTokenException();
 
@@ -202,11 +202,11 @@ class DropzoneController extends AbstractController
     /**
      * Controller example
      *
-     * @Route("/ux/dropzone/{hashid}/{uuid}/delete", name="ux_dropzone_delete")
+     * @Route("/ux/dropzone/{data}/{uuid}/delete", name="ux_dropzone_delete")
      */
-    public function Delete(string $hashid, string $uuid): Response
+    public function Delete(string $data, string $uuid): Response
     {
-        $config = $this->obfuscator->decode($hashid);
+        $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
         if(!$token) throw new InvalidCsrfTokenException();
 

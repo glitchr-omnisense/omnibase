@@ -15,9 +15,9 @@ abstract class AbstractIconAdapter extends AbstractSimpleCache implements IconAd
 
     public function __construct(string $cacheDir)
     {
-        $cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], IconProvider::class).".php";
+        $phpCacheFile = $cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], IconProvider::class).".php";
 
-        $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));
+        $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter()));
         $this->warmUp($cacheDir);
     }
 

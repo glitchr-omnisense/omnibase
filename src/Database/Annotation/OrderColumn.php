@@ -198,8 +198,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                 if(!array_key_exists($className, $this->ordering))
                     $this->ordering[$className] = [];
-                if(!array_key_exists($id, $this->ordering[$className]))
-                    $this->ordering[$className][$id] = null;
 
                 if(!empty($data)) {
 

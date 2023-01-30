@@ -13,7 +13,7 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
 
     public function __construct() { $this->shellVerbosity = getenv("SHELL_VERBOSITY"); }
 
-    public function isOptional():bool { return false; }
+    public function isOptional():bool { return true; }
     public function warmUp($cacheDir): array
     {
         if($this->shellVerbosity > 0 && php_sapi_name() == "cli")

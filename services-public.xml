@@ -9,7 +9,8 @@
         <service id="referrer" alias="Base\Service\Referrer" />
         <service id="Base\Service\ReferrerInterface" alias="referrer"/>
 
-        <service id="base.command" alias="Base\Console\Command" />
+        <service id="console" alias="Base\Console\Console" />
+        <service id="Base\Console\ConsoleInterface" alias="console"/>
 
         <service id="base.service" alias="Base\Service\BaseService" />
         <service id="base.service.icon" alias="Base\Service\IconProvider" />

@@ -352,8 +352,8 @@ class FileType extends AbstractType implements DataMapperInterface
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));
 
             $token  = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $hashid = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
-            $view->vars["ajax"]     = $this->router->generate("ux_dropzone", ["hashid" => $hashid]);
+            $data = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
+            $view->vars["ajax"]     = $this->router->generate("ux_dropzone", ["data" => $data]);
 
             $options["dropzone"]["url"] = $view->vars["ajax"];
 

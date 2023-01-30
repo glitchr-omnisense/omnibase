@@ -163,27 +163,20 @@ class FileService implements FileServiceInterface
             $path = $path ?? array_pop_key("path", $config);
         }
 
-        $data = $this->obfuscate($path, $config);
-        if(!$data) return null;
-
-        // Append data
-        $proxyRouteParameters["data"] = $data;
-
         $extension = array_pop_key("extension", $config);
         if ($extension !== null) $extension = first($this->getExtensions($path));
         if ($extension !== null) $proxyRouteParameters["extension"] = $extension;
 
-        // Add custom _host if found
-        $host = array_pop_key("_host", $config);
+        $host = array_pop_key("_host", $config); // Use custom _host if found
+        $referenceType = array_pop_key("reference_type", $config); // Get reference type
+        $data = $this->obfuscate($path, $config);
+        if(!$data) return null;
+
         if ($host !== null) $proxyRouteParameters["_host"] = $host;
+        $proxyRouteParameters["data"] = $data;
 
-        $variadic = [];
-        $variadic[] = $proxyRoute;
-        $variadic[] = $proxyRouteParameters;
-
-        $referenceType = array_pop_key("reference_type", $config);
+        $variadic = [$proxyRoute, $proxyRouteParameters];
         if($referenceType !== null) $variadic[] = $referenceType;
-
         return $this->router->generate(...$variadic);
     }
 

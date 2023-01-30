@@ -618,7 +618,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             if($options["autocomplete"]) {
 
                 $selectOpts["ajax"] = [
-                    "url" => $this->router->generate($options["autocomplete_endpoint"], array_merge($options["autocomplete_endpoint_parameters"], ["hashid" => $hash])),
+                    "url" => $this->router->generate($options["autocomplete_endpoint"], array_merge($options["autocomplete_endpoint_parameters"], ["data" => $hash])),
                     "type" => $options["autocomplete_type"],
                     "delay" => $options["autocomplete_delay"],
                     "dataType" => "json",

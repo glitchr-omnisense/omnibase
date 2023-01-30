@@ -57,8 +57,10 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractSimpleCac
 
         // This class already inherits from AbstractTagRenderer..
         $this->cacheDir = $cacheDir;
-        $cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
-        $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));
+
+        $phpCacheFile = $cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
+        $fsCacheFile = $cacheDir."/pools/simple/fs/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
+        $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $fsCacheFile)));
 
         $this->warmUp($cacheDir);
     }

@@ -78,7 +78,9 @@ namespace {
     // Value (8) => 270 degrees, mirrored: image is on its far side.
     function getimageorientation(string $fname): int {
 
-        $exif = exif_read_data($fname);
+        try { $exif = exif_read_data($fname); }
+        catch(\ErrorException $e) { return 1; }
+
         return $exif["Orientation"] ?? 1;
     }
 
@@ -123,6 +125,7 @@ namespace {
 
         $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
 
+        if($request_uri == "https://example.local:8000example.local")exit(1);
         return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
 
@@ -1413,10 +1416,10 @@ namespace {
     function pathinfo_extension(string $path, ?string $extension = null)
     {
         $info = pathinfo($path);
-        $extension = $extension ?? $info["extension"];
+        $extension = $extension ?? $info["extension"] ?? "";
 
         $dirname = $info['dirname'] ? $info['dirname'] . "/" : '';
-        return $dirname . $info['filename'] . '.' . $extension;
+        return $dirname . $info['filename'] . ($extension ? "." .$extension : "");
     }
 
     function pathinfo_relationship(string $path):?string

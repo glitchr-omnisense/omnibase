@@ -9,6 +9,7 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Routing\RouterInterface;
+use Imagine\Exception\NotSupportedException;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
 use Exception;
@@ -95,7 +96,7 @@ class ImageService extends FileService implements ImageServiceInterface
     public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image"    , [], $path, array_merge($config, ["filters" => $filters])); }
     public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
-        $supports_webp  = array_pop_key("webp", $config) ?? browser_supports_webp();
+        $supports_webp   = array_pop_key("webp", $config) ?? browser_supports_webp();
 
         $extension = array_pop_key("extension", $config) ?? first($this->getExtensions($path));
         if($extension) $supports_webp &= ($extension != "svg");
@@ -307,7 +308,7 @@ class ImageService extends FileService implements ImageServiceInterface
         $pathRelative = $this->flysystem->stripPrefix($output, $storage);
         $pathCache = $pathRelative;
 
-        // NB: Encode path using hashid only: make sure the path is matching route generator
+        // NB: Encode path using hash only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over
         // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
         // $pathCache    = path_suffix($pathRelative, $pathExtras  );

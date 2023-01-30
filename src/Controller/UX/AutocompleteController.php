@@ -53,11 +53,11 @@ class AutocompleteController extends AbstractController
     }
 
     /**
-     * @Route("/autocomplete/{hashid}", name="ux_autocomplete")
+     * @Route("/autocomplete/{data}", name="ux_autocomplete")
      */
-    public function Main(Request $request, string $hashid): Response
+    public function Main(Request $request, string $data): Response
     {
-        $dict    = $this->obfuscator->decode($hashid);
+        $dict    = $this->obfuscator->decode($data);
         if($dict === null) {
 
             $array = ["status" => "Unexpected request"];
@@ -161,11 +161,11 @@ class AutocompleteController extends AbstractController
     }
 
     /**
-     * @Route("/autocomplete/{provider}/{pageSize}/{hashid}", name="ux_autocomplete_icons")
+     * @Route("/autocomplete/{provider}/{pageSize}/{data}", name="ux_autocomplete_icons")
      */
-    public function Icons(Request $request, string $provider, int $pageSize, string $hashid): Response
+    public function Icons(Request $request, string $provider, int $pageSize, string $data): Response
     {
-        $dict     = $this->obfuscator->decode($hashid);
+        $dict     = $this->obfuscator->decode($data);
 
         $token    = $dict["token"] ?? null;
         $html     = $dict["html"] ?? true;

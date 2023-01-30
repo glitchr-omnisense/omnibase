@@ -92,6 +92,7 @@ EOF
     {
         $io = new SymfonyStyle($input, $output);
         $noExtension = $input->getOption('no-extension') ?? true;
+
         if(!$noExtension) {
 
             $this->phpConfigCheck($io);
@@ -103,6 +104,11 @@ EOF
             $this->testFileExists = file_exists($this->testFile);
         }
 
+        $noWarmup          = $input->getOption('no-warmup');
+        $noOptionalWarmers = $input->getOption('no-optional-warmers') || $noWarmup;
+        if (!$noOptionalWarmers) $io->write("\n // <info>All</info> cache warmers requested.", true);
+        else $io->write("\n // Optional cache warmers disabled.", true);
+
         $this->cacheClearCommand->setApplication($this->getApplication());
         $ret = $this->cacheClearCommand->execute($input, $output);
 
@@ -112,6 +118,14 @@ EOF
             $this->doubleCacheClearCheck($io);
             $this->generateSymlinks($io);
             $this->technicalSupportCheck($io);
+        }
+
+        if($noWarmup) $io->warning("Warm up is disabled.", true);
+        else if ($noOptionalWarmers) {
+
+            $environment = $this->parameterBag->get("kernel.environment");
+            if (str_starts_with($environment, "prod")) $io->warning("Optional warmers disabled !");
+            else $io->note("Optional warmers disabled !");
         }
 
         return $ret;
