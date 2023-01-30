@@ -196,13 +196,20 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                         unset($data[$property]);
                 }
 
-                if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id] ??= $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
-                $this->ordering[$className][$id] ??= new Ordering();
-                $this->ordering[$className][$id]->setEntityData($data);
+                if(!array_key_exists($className, $this->ordering))
+                    $this->ordering[$className] = [];
+                if(!array_key_exists($id, $this->ordering[$className]))
+                    $this->ordering[$className][$id] = null;
 
-                $orderingId = $this->ordering[$className][$id]->getId();
-                if($orderingId) $cache->evictEntity(Ordering::class, $orderingId);
+                if(!empty($data)) {
+
+                    $this->ordering[$className][$id] ??= $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
+                    $this->ordering[$className][$id] ??= new Ordering();
+                    $this->ordering[$className][$id]->setEntityData($data);
+
+                    $orderingId = $this->ordering[$className][$id]->getId();
+                    if ($orderingId) $cache->evictEntity(Ordering::class, $orderingId);
+                }
 
             case EntityAction::DELETE:
                 break;

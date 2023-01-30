@@ -428,9 +428,19 @@
             <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
         </service>
 
+        <service id="Base\Service\Model\Obfuscator\AbstractCompression"></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\NullCompression"    parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\ZlibCompression"    parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\GzipCompression"    parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\DeflateCompression" parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\HashidsCompression" parent="Base\Service\Model\Obfuscator\AbstractCompression">
+            <tag name="obfuscator.compression" />
+            <bind key="$secret">%kernel.secret%</bind>
+        </service>
         <service id="Base\Service\Obfuscator"   public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
         <service id="Base\Service\FileService"  public="true">
@@ -493,12 +503,12 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
-        <service id="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
-        <service id="Base\Service\Model\CurrencyApi\Fixer"            parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Service\Model\CurrencyApi\AbstractApi"      parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Service\Model\CurrencyApi\ExchangeRatesApi" parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Service\Model\CurrencyApi\CurrencyLayer"    parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi">
-            <tag name="base.currency_api" />
+        <service id="Base\Service\Model\Currency\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
+        <service id="Base\Service\Model\Currency\Api\Fixer"            parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
+        <service id="Base\Service\Model\Currency\Api\AbstractApi"      parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
+        <service id="Base\Service\Model\Currency\Api\ExchangeRatesApi" parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
+        <service id="Base\Service\Model\Currency\Api\CurrencyLayer"    parent="Base\Service\Model\Currency\AbstractCurrencyApi">
+            <tag name="currency.api" />
             <!-- <bind key="$metadata">%base.currency_api.currency_layer%</bind> -->
         </service>
 

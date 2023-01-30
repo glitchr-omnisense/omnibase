@@ -15,7 +15,6 @@
         <service id="base.service.icon" alias="Base\Service\IconProvider" />
         <service id="base.service.sharer" alias="Base\Service\Sharer" />
 
-
         <service id="twig.html_renderer" alias="Base\Twig\Renderer\Adapter\HtmlTagRenderer" />
         <service id="twig.encore_renderer" alias="Base\Twig\Renderer\Adapter\EncoreTagRenderer" />
         

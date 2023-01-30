@@ -23,15 +23,30 @@ namespace {
 
         $subPath = $dirname . "/";
         $last = strlen($basename);
+
         for($i = 0, $cursor = 0, $N = count($length); $i < $N; $i++ ) {
 
             if($cursor > $last) break;
             $subPath .= substr($basename, $cursor, $length[$i]) . "/";
             $cursor += $length[$i];
+
         }
 
         $subPath .= substr($basename, $cursor);
         return str_strip($subPath, "./", "/");
+    }
+
+    function format_uuid(string $uuid):string|false {
+
+        $uuid = str_replace("-", "", $uuid);
+        if(!preg_match("/[a-f0-9]{32}/i", $uuid)) return false;
+
+        return
+            substr($uuid, 0 , 8)."-".
+            substr($uuid, 8 , 4)."-".
+            substr($uuid, 12, 4)."-".
+            substr($uuid, 16, 4)."-".
+            substr($uuid, 20, 12);
     }
 
     function typeof(mixed $input): string { return gettype($input); }
@@ -2470,6 +2485,43 @@ namespace {
         $delta = $timestamp % $modulo;
 
         return $datetime->setTimestamp($timestamp - $delta);
+    }
+
+    function is_length_safe(string $directory): bool
+    {
+        $maxPathLength = constant("PHP_MAXPATHLEN");
+        return strlen($directory) <= $maxPathLength;
+    }
+
+    function mkdir_length_safe(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool
+    {
+        if(is_length_safe($directory))
+            return mkdir($directory, $permissions, $recursive, $context);
+
+        $ls = getcwd();
+        $directory = str_lstrip($directory, $ls);
+        if(str_starts_with($directory, "/"))
+            chdir("/");
+
+        $directories = explode("/", $directory);
+        foreach($directories as $directory) {
+
+            if(!$directory) continue;
+            if(!is_length_safe($directory)) {
+                //throw new LogicException("Directory name is too long. (PHP_MAXPATHLEN = ".constant("PHP_MAXPATHLEN").")");
+                return false;
+            }
+
+            if(!file_exists($directory))
+                shell_exec("mkdir -p ".$directory);
+            if(!is_dir($directory))
+                throw new LogicException("\"".getcwd()."/".$directory."\" is a file.");
+
+            chdir($directory);
+        }
+
+        chdir($ls);
+        return true;
     }
 
     function round_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime

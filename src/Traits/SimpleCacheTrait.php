@@ -19,9 +19,15 @@ trait SimpleCacheTrait
     {
         return str_replace(['\\', '/'], ['__', '___'], $realClassName);
     }
+
     public function hasCache(string $key): bool
     {
         return $this->cache != null && $this->cache->hasItem($this->getCacheKey(static::class.$key));
+    }
+
+    public function deleteCache(string $key): bool
+    {
+        return $this->cache != null && $this->cache->deleteItem($this->getCacheKey(static::class.$key));
     }
 
     public function getCache(string $key, mixed $fallback = null, $deferred = false): mixed

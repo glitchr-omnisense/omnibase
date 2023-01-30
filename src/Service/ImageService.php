@@ -9,6 +9,7 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Routing\RouterInterface;
+use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
 use Exception;
 use Imagine\Filter\Basic\Autorotate;
@@ -215,9 +216,11 @@ class ImageService extends FileService implements ImageServiceInterface
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        $hashid = $this->obfuscator->encode($config);
-        $hashid = path_subdivide($hashid, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
-        return $hashid;
+        $data = $this->obfuscator->encode($config);
+        if($this->obfuscator->isShort()) $data = path_subdivide(str_replace("-", "", $data), 5, 2);
+        else $data = path_subdivide($data, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
+
+        return $data;
     }
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
@@ -229,9 +232,9 @@ class ImageService extends FileService implements ImageServiceInterface
         return parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
     }
 
-    public function resolve(string $hashid, array $filters = []): array
+    public function resolve(string $data, array $filters = []): array
     {
-        $config = parent::resolve($hashid) ?? [];
+        $config = parent::resolve($data) ?? [];
         $config["filters"]  = array_merge($config["filters"] ?? [], $filters);
         return $config;
     }
@@ -240,8 +243,13 @@ class ImageService extends FileService implements ImageServiceInterface
     {
         if(!file_exists($file)) {
 
-            if(!$this->fallback)
-                throw new NotFoundHttpException($file ? "Image \"$file\" not found." : "Empty path provided.");
+            if(!$this->fallback) {
+
+                throw is_length_safe($file) ?
+                    new NotFoundHttpException($file ? "Image \"".str_shorten($file, 50, SHORTEN_MIDDLE)."\" not found." : "Empty path provided.") :
+                    new \LogicException("Image \"".str_shorten($file, 50, SHORTEN_MIDDLE)."\" overflowed the PHP_MAXPATHLEN (= ".constant("PHP_MAXPATHLEN").") limit. Maybe use a compress option (\"gzcompress\",\"gzdeflate\",\"gzencode\") ?")
+                ;
+            }
 
             $file = $this->noImage;
             array_pop_key("http_cache", $headers);
@@ -257,7 +265,7 @@ class ImageService extends FileService implements ImageServiceInterface
     {
         if(!is_array($filters)) $filters = [$filters];
 
-       //
+        //
         // Resolve nested paths
         $options = $this->resolve($path, $filters);
         $path    = $config["path"]    ?? $options["path"]    ?? $path; // Cache directory location
@@ -390,6 +398,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
             if(!$this->flysystem->fileExists($pathCache, $localCache)) {
 
+                $maxExecutionTime = ini_get('max_execution_time');
                 set_time_limit($this->timeout);
 
                 $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
@@ -401,10 +410,18 @@ class ImageService extends FileService implements ImageServiceInterface
                     return $this->noImage;
                 }
 
-                $this->flysystem->mkdir(dirname($pathCache), $localCache);
-                $this->flysystem->write($pathCache, file_get_contents($filteredPath), $localCache);
+                try {
 
-                set_time_limit(30);
+                    $this->flysystem->mkdir(dirname($pathCache), $localCache);
+                    $this->flysystem->write($pathCache, file_get_contents($filteredPath), $localCache);
+
+                } catch(\League\Flysystem\UnableToCreateDirectory $e) {
+
+                    $localDir = $this->flysystem->prefixPath("", $localCache);
+                    mkdir_length_safe($localDir."/".dirname($pathCache), 0777, true);
+                }
+
+                set_time_limit($maxExecutionTime);
 
                 if($formatter->getPath() === null) unlink_tmpfile($filteredPath);
             }

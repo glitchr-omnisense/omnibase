@@ -1,11 +1,11 @@
 <?php
 
-namespace Base\Service\Model;
+namespace Base\Service\Model\Currency;
 
 interface CurrencyApiInterface
 {
     public static function getName(): string;
-    public function supports(): bool;
+    public function supports(string $key): bool;
 
     public function getPriority(): int;
     public function getOptions(): array;

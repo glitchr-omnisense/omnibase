@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Routing\RouterInterface;
+use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
@@ -146,11 +147,11 @@ class FileService implements FileServiceInterface
         $routeMatch = $this->router->getRouteMatch($path) ?? [];
         if(array_key_exists("_route", $routeMatch) && $routeMatch["_route"] == $proxyRoute) {
 
-            $hashid = $routeMatch["hashid"];
+            $data = $routeMatch["data"];
             $config["options"] = $config["options"] ?? [];
             $config["local_cache"] = $config["local_cache"] ?? null;
 
-            if ( ($pathConfig = $this->obfuscator->decode($hashid)) ) {
+            if ( ($pathConfig = $this->obfuscator->decode($data)) ) {
 
                 $path = $pathConfig["path"] ?? $path;
                 $config["path"] = $path;
@@ -162,11 +163,11 @@ class FileService implements FileServiceInterface
             $path = $path ?? array_pop_key("path", $config);
         }
 
-        $hashid = $this->obfuscate($path, $config);
-        if(!$hashid) return null;
+        $data = $this->obfuscate($path, $config);
+        if(!$data) return null;
 
-        // Append hashid
-        $proxyRouteParameters["hashid"] = $hashid;
+        // Append data
+        $proxyRouteParameters["data"] = $data;
 
         $extension = array_pop_key("extension", $config);
         if ($extension !== null) $extension = first($this->getExtensions($path));
@@ -186,15 +187,19 @@ class FileService implements FileServiceInterface
         return $this->router->generate(...$variadic);
     }
 
-    public function resolve(string $hashid): ?array
+    public function resolve(string $data): ?array
     {
         $config = [];
-        $match = $this->router->getRouteMatch($hashid);
-        $hashid = $match && array_key_exists("hashid", $match) ? $match["hashid"] : $hashid;
-        $hashid = str_replace("/", "", $hashid);
+        $match = $this->router->getRouteMatch($data);
+        $data = $match && array_key_exists("data", $match) ? $match["data"] : $data;
 
-        $decodedHashid = $this->obfuscator->decode($hashid);
-        foreach($decodedHashid ?? [] as $key => $el)
+        $uuid = format_uuid(str_replace("/", "-", $data));
+        if(Uuid::isValid($uuid)) $data = $uuid;
+        else $data = str_replace("/", "", $data);
+
+        $data = $this->obfuscator->decode($data);
+
+        foreach($data ?? [] as $key => $el)
             $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;
 
         if(array_key_exists("path", $config ?? [])) {

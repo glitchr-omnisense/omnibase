@@ -13,6 +13,7 @@ use Base\DependencyInjection\Compiler\AnnotationPass;
 use Base\DependencyInjection\Compiler\CurrencyApiPass;
 use Base\DependencyInjection\Compiler\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;
+use Base\DependencyInjection\Compiler\ObfuscatorCompressionPass;
 use Base\DependencyInjection\Compiler\SharerPass;
 use Base\DependencyInjection\Compiler\TagRendererPass;
 use Base\Traits\SingletonTrait;
@@ -213,6 +214,7 @@ class BaseBundle extends Bundle
         $container->addCompilerPass(new SharerPass());
         $container->addCompilerPass(new CurrencyApiPass());
         $container->addCompilerPass(new TagRendererPass());
+        $container->addCompilerPass(new ObfuscatorCompressionPass());
 
         /* Register aliased repositories */
         foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {

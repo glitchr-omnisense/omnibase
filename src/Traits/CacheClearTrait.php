@@ -93,6 +93,7 @@ trait CacheClearTrait
         else
             $io->write(" - Custom DB features <info>'base.database.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
 
+        $io->write("", true,SymfonyStyle::VERBOSITY_VERBOSE);
     }
     
     //
@@ -151,7 +152,11 @@ trait CacheClearTrait
     {
         $phpConfig = php_ini_loaded_file();
         $maxSize = UploadedFile::getMaxFilesize();
-        $io->note("Loaded PHP Configuration: ".$phpConfig."".PHP_EOL."(might differ from webserver)\nMaximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX));
+        $maxPathLength = constant("PHP_MAXPATHLEN");
+        $io->note(
+            "Loaded PHP Configuration: ".$phpConfig."".PHP_EOL."(might differ from webserver)\n".
+            "Maximum uploadable filesize: ".byte2str($maxSize, BINARY_PREFIX)."\n".
+            "Maximum path length: ".$maxPathLength." characters");
     }
 
     protected function technicalSupportCheck(SymfonyStyle $io): void

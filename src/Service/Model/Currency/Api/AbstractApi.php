@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Service\Model\CurrencyApi;
+namespace Base\Service\Model\Currency\Api;
 
-use Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi;
+use Base\Service\Model\Currency\AbstractCurrencyApi;
 
 // Endpoint: https://exchange-rates.abstractapi.com
 class AbstractApi extends AbstractCurrencyApi

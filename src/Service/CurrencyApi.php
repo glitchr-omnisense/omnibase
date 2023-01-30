@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Service\Model\CurrencyApiInterface;
+use Base\Service\Model\Currency\CurrencyApiInterface;
 use Swap\Builder;
 
 class CurrencyApi

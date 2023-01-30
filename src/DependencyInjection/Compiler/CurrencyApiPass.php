@@ -17,7 +17,7 @@ class CurrencyApiPass implements CompilerPassInterface
 
         $definition = $container->findDefinition(CurrencyApi::class);
 
-        $taggedServices = $container->findTaggedServiceIds('base.currency_api');
+        $taggedServices = $container->findTaggedServiceIds('currency.api');
         foreach ($taggedServices as $id => $tags)
             $definition->addMethodCall('addProvider', [new Reference($id)]);
     }
