@@ -58,37 +58,6 @@ class AutocompleteController extends AbstractController
     }
 
     /**
-     * @Route("/autocomplete/currency/{source}/{target}/{data}", name="ux_autocomplete_forex")
-     */
-    public function Forex(Request $request, string $source, string $target, string $data): Response
-    {
-        $dict = $this->obfuscator->decode($data);
-
-        $token = $dict["token"] ?? null;
-        $tokenName = $dict["token_name"] ?? null;
-        if (!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
-
-            $array = ["status" => "Invalid token. Please refresh the page and try again"];
-            return new JsonResponse($array, 500);
-        }
-
-        try { $rate = $this->tradingMarket->getLatest($source, $target); }
-        catch (ChainException $e) {
-
-            $array = ["status" => "Invalid request"];
-            return new JsonResponse($array, 500);
-        }
-
-        $array = [
-            "source" => $source,
-            "target" => $target,
-            "rate" => $rate
-        ];
-
-        return new JsonResponse($array);
-    }
-
-    /**
      * @Route("/autocomplete/{data}", name="ux_autocomplete")
      */
     public function Main(Request $request, string $data): Response
@@ -194,6 +163,38 @@ class AutocompleteController extends AbstractController
 
         $array = ["status" => "Invalid request"];
         return new JsonResponse($array, 500);
+    }
+
+
+    /**
+     * @Route("/autocomplete/currency/{source}/{target}/{data}", name="ux_autocomplete_forex")
+     */
+    public function Forex(Request $request, string $source, string $target, string $data): Response
+    {
+        $dict = $this->obfuscator->decode($data);
+
+        $token = $dict["token"] ?? null;
+        $tokenName = $dict["token_name"] ?? null;
+        if (!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
+
+            $array = ["status" => "Invalid token. Please refresh the page and try again"];
+            return new JsonResponse($array, 500);
+        }
+
+        try { $rate = $this->tradingMarket->getLatest($source, $target); }
+        catch (ChainException $e) {
+
+            $array = ["status" => "Invalid request"];
+            return new JsonResponse($array, 500);
+        }
+
+        $array = [
+            "source" => $source,
+            "target" => $target,
+            "rate" => $rate
+        ];
+
+        return new JsonResponse($array);
     }
 
 

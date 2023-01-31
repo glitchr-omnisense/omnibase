@@ -189,10 +189,6 @@ class AnnotationReader extends AbstractSimpleCache
         if (in_array($path, $this->paths)) return $this;
 
         if (!file_exists($path)) return $this;
-            //throw new Exception("Path not found: \"".$path."\"");
-
-//        dump($path, BaseBundle::getInstance()->getAllClasses($path));
-//        exit(1);
         foreach (BaseBundle::getInstance()->getAllClasses($path) as $annotation)
             $this->addAnnotationName($annotation);
 

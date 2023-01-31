@@ -2,6 +2,7 @@
 
 namespace Base\Database\Mapping;
 
+use App\Entity\Marketplace\Sales\Region;
 use Base\Cache\Abstract\AbstractSimpleCache;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
@@ -361,15 +362,18 @@ class ClassMetadataManipulator extends AbstractSimpleCache
         if ($entity instanceof Proxy)
             $entity->__load();
 
+        if(class_implements_interface($entity, TranslatableInterface::class)) {
+            $fieldValue = $entity->getTranslations();
+            $fieldName  = implode(".", $fieldPath);
+            $fieldPath = "";
+        }
+
         if($this->hasField($entity, $fieldName))
-           $fieldValue = $classMetadata->getFieldValue($entity, $fieldName);
+            $fieldValue = $classMetadata->getFieldValue($entity, $fieldName);
         else {
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             $fieldValue = $propertyAccessor->getValue($entity, $fieldName);
         }
-
-        if(class_implements_interface($fieldValue, TranslatableInterface::class))
-            $fieldValue = $fieldValue->getTranslations();
 
         if(is_array($fieldValue)) {
 

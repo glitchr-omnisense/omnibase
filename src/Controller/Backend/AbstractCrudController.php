@@ -105,7 +105,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getEntityFqcn(): string
     {
         $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
-        $entityFqcn = BaseBundle::getInstance()->getAlias(preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
+
+        try {
+            $entityFqcn = BaseBundle::getInstance()->getAlias(preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
+        } catch( \ErrorException $e) { throw new \LogicException("Failed to find Entity FQCN from \"".get_called_class()."\" CRUD controller..\nDid you remove the Entity but kept the CRUD controller ?", 500 ); }
         self::$crudController[$entityFqcn] = get_called_class();
         return $entityFqcn;
     }
@@ -322,15 +325,18 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if($entityLabel) $extension->setTitle($entityLabel);
         $entityLabel ??= $this->getEntityLabelInSingular();
         if($entityLabel) $entityLabel = mb_ucfirst($entityLabel);
-
         if ($entity) {
 
             $entityLabel = mb_ucfirst($this->translator->transEntity(get_class($entity), null, Translator::NOUN_SINGULAR));
-            $extension->setTitle(mb_ucfirst(is_stringeable($entity) ? (string) $entity : $this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
+            if(is_stringeable($entity) && (string) $entity != get_class($entity))
+                $entityLabel = (string) $entity;
+
+            $extension->setTitle(mb_ucfirst(is_stringeable($entity) ? $entityLabel : $this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
 
+            dump($entityLabel);
             $entityText = $entityLabel ." ID #".$entity->getId();
             try { # Try to link without route parameter
 
@@ -339,6 +345,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
             } catch(\Exception $e) { }
 
+            dump($entityText);
             $extension->setText($entityText);
         }
 

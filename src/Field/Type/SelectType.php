@@ -139,9 +139,12 @@ class SelectType extends AbstractType implements DataMapperInterface
             'choice_value'     => function($value)              { return $value; },   // Return key code
             'choice_label'     => function($value, $label, $id) { return $label; },   // Return translated label
 
-            'select2'          => [],
-            'theme'            => "bootstrap4",
-            'empty_data'       => null,
+            'select2'                   => [],
+            "select2-template"          => null,
+            "select2-templateResult"    => null,
+            "select2-templateSelection" => null,
+            'theme'                     => "bootstrap4",
+            'empty_data'                => null,
 
             // Generic parameters
             'placeholder'        => "@fields.select.placeholder",
@@ -164,7 +167,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             "dropdownCssClass"   => null,
             "containerCssClass"  => null,
 
-            'html'               => false,
+            'use_html'               => false,
             'href'               => null,
             'use_advanced_form' => true,
 
@@ -305,7 +308,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                             $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
                         $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, [
-                            "html" => $options["html"],
+                            "html" => $options["use_html"],
                             "format" => $entryFormat
                         ]);
 
@@ -367,7 +370,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                             $format = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
                         $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, [
-                            "html" => $options["html"],
+                            "html" => $options["use_html"],
                             "format" => $format
                         ]);
 
@@ -604,7 +607,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "fields"     => $options["autocomplete_fields"],
                 "filters"    => $options["choice_filter"],
                 'capitalize' => $options["capitalize"],
-                "html"       => $options["html"],
+                "html"       => $options["use_html"],
                 "token_name" => $tokenName,
                 "token"      => $token
             ];
@@ -615,6 +618,12 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Prepare select2 options
             $selectOpts = $options["select2"];
             $selectOpts["multiple"] = $options["multiple"] ? "multiple" : "";
+            if($options["select2-template"])
+                $selectOpts["template"] = $options["select2-template"];
+            if($options["select2-templateResult"])
+                $selectOpts["templateResult"] = $options["select2-templateResult"];
+            if($options["select2-templateSelection"])
+                $selectOpts["templateSelection"] = $options["select2-templateSelection"];
             if($options["autocomplete"]) {
 
                 $selectOpts["ajax"] = [
@@ -622,7 +631,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     "type" => $options["autocomplete_type"],
                     "delay" => $options["autocomplete_delay"],
                     "dataType" => "json",
-                    "html" => $options["html"],
+                    "html" => $options["use_html"],
                     "cache" => true
                 ];
 
@@ -716,7 +725,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                         $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
                     $entry = $this->autocomplete->resolve($entry, $options["class"] ?? $innerType, [
-                        "html" => $options["html"],
+                        "html" => $options["use_html"],
                         "format" => $entryFormat
                     ]);
 

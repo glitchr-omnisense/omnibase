@@ -43,6 +43,7 @@ final class NumberConfigurator implements FieldConfiguratorInterface
             $formatterAttributes['fraction_digit'] = $scale;
         }
 
+        $field->setFormTypeOption("value", $value);
         $field->setFormattedValue($this->intlFormatter->formatNumber($value, $formatterAttributes));
     }
 

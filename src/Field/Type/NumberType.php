@@ -32,7 +32,8 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["min"]          = $options["min"];
         $view->vars["max"]          = $options["max"];
         $view->vars["disabled"]     = $options["disabled"];
-        $view->vars["autocomplete"]     = $options["autocomplete"];
+        $view->vars["autocomplete"] = $options["autocomplete"];
+        $view->vars["value"]        = $form->getData() ?? $options["value"] ?? 0;
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -50,7 +51,8 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
             "max" => null,
             "autocomplete" => false,
             "keyUp" => true,
-            "keyDown" => true
+            "keyDown" => true,
+            "value" => 0
         ]);
     }
 

@@ -7,6 +7,7 @@ function is_dict(v) {
 
 function highlight_search(text, search) {
 
+    if(search == "") return text;
     var reg = new RegExp(search, 'gi');
     return text.replace(reg, function(str) {return '<mark>'+str+'</mark>'});
 }
@@ -21,6 +22,9 @@ window.addEventListener("load.form_type", function () {
         var page = "1.0";
         var field = $("#"+el.getAttribute("data-select2-field"));
         var defaultTemplate = function(option) {
+
+            if(option.id == null)
+                return option.text;
 
             var dataAttribute = "";
             $(option["data"]).each(function(key, value)
@@ -53,11 +57,12 @@ window.addEventListener("load.form_type", function () {
 
             term = $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val();
 
-            var highlightSearch = highlight_search(option.html ? option.html : ((iconAttributes ? '<i '+ iconAttributes + '></i> ' : '') + (option.text) ), term);
+            var icon = iconAttributes ? '<i '+ iconAttributes + '></i> ' : '';
             var externalLink = (href ? '<span><a target="_blank" href="'+href+'"><i class=\"fas fa-external-link-square-alt\"></i></span>' : '');
+            var highlightSearch = option.html ? option.html : (icon + highlight_search(option.text, term) + externalLink);
             var shiftAttribute = ' style="margin-left:calc('+tab+' * '+depth+')" class=\"select2-selection__entry\" '+dataAttribute;
 
-            return $('<span '+shiftAttribute+'><span>' + highlightSearch + externalLink + '</span></span>');
+            return $('<span '+shiftAttribute+'><span>' + highlightSearch + '</span></span>');
         };
 
         var data = function (args)
@@ -151,6 +156,10 @@ window.addEventListener("load.form_type", function () {
             select2["templateResult"]    = "templateResult"    in select2 ? Function('return ' + select2["templateResult"]   )() : defaultTemplate;
             select2["templateSelection"] = "templateSelection" in select2 ? Function('return ' + select2["templateSelection"])() : defaultTemplate;
 
+            select2["escapeMarkup"] = function(markup) {
+                return markup;
+            };
+
         if("ajax" in select2) {
 
             select2["ajax"]["data"] = "data" in select2["ajax"] ? Function('return ' + select2["ajax"]["data"])() : data;
@@ -233,6 +242,11 @@ window.addEventListener("load.form_type", function () {
                 });
             }
         }
+
+        //
+        // Pre-populated data
+        // if(select2["data"].length != 0) $(field).empty();
+        $(field).val(select2["selected"] || []).trigger("change");
 
         //
         // Apply required option
