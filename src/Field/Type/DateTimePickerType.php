@@ -46,11 +46,9 @@ class DateTimePickerType extends AbstractType
 
             "debug" => false,
             "datetimepicker" => [
-                "keepOpen" => true,
+                "enableTime" => true,
                 "locale" => $this->localeProvider->getLang(),
-                "format" => "YYYY-MM-DD HH:mm:ss", // JS Datetime Format
-                "sideBySide" => true,
-                "allowInputToggle" => true
+                "dateFormat" => "Y-m-d H:i",
             ]
         ]);
     }
@@ -63,8 +61,6 @@ class DateTimePickerType extends AbstractType
         //
         // Datetime picker Options
         $dateTimePickerOpts = $options["datetimepicker"];
-        $dateTimePickerOpts["defaultDate"] = $view->vars["value"];
-        $dateTimePickerOpts["debug"] = $options["debug"];
 
         $view->vars["datetimepicker"] = json_encode($dateTimePickerOpts);
     }
