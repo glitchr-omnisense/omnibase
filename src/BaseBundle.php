@@ -5,6 +5,7 @@ namespace Base;
 $_SERVER["APP_TIMER"] = microtime(true);
 include_once("Functions.php");
 
+use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
 use App\Entity\User;
 use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
@@ -170,6 +171,13 @@ class BaseBundle extends Bundle
             ->addFilter("vault_filter", VaultFilter::class);
         $entityManagerConfig
             ->addCustomNumericFunction("rand", \Base\Database\Function\Rand::class);
+        $entityManagerConfig
+            ->addCustomStringFunction(DqlFunctions\JsonExtract::FUNCTION_NAME, DqlFunctions\JsonExtract::class);
+        $entityManagerConfig
+            ->addCustomStringFunction(DqlFunctions\JsonSearch::FUNCTION_NAME, DqlFunctions\JsonSearch::class);
+        $entityManagerConfig
+            ->addCustomStringFunction(DqlFunctions\JsonContains::FUNCTION_NAME, DqlFunctions\JsonContains::class);
+
         $entityManagerConfig->setDefaultQueryHint(
             Query::HINT_CUSTOM_TREE_WALKERS, [/* No default tree walker for the moment */]
         );

@@ -1057,7 +1057,7 @@ class ServiceEntityParser
 
             $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
-                    if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
+                 if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
             else if($tableOperator == self::OPTION_ENDING_WITH      ) $fieldValue = "%".$fieldValue;
             else if($tableOperator == self::OPTION_NOT_STARTING_WITH) $fieldValue = $fieldValue."%";
             else if($tableOperator == self::OPTION_NOT_ENDING_WITH  ) $fieldValue = "%".$fieldValue;
@@ -1234,6 +1234,7 @@ class ServiceEntityParser
 
             } else if(is_array($fieldValue)) {
 
+                //marco
                 if(!empty($fieldValue))
                     $qb->setParameter($fieldID, $fieldValue);
 
@@ -1262,6 +1263,7 @@ class ServiceEntityParser
 
             } else if (is_array($fieldValue)) {
 
+                //marco
                      if($tableOperator == self::OPTION_EQUAL)     $fnExpr = "in";
                 else if($tableOperator == self::OPTION_NOT_EQUAL) $fnExpr = "notIn";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);

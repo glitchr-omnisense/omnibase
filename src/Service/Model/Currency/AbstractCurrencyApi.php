@@ -6,6 +6,11 @@ use Base\Service\SettingBag;
 
 abstract class AbstractCurrencyApi implements CurrencyApiInterface
 {
+    /**
+     * @var SettingBag
+     */
+    protected $settingBag;
+
     protected ?string $key;
     public function __construct(SettingBag $settingBag)
     {

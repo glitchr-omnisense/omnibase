@@ -30,6 +30,14 @@ class TradingMarket implements TradingMarketInterface
         return null;
     }
 
+    protected ?string $defaultCurrency = null;
+    public function getDefaultCurrency(): ?string { return $this->defaultCurrency; }
+    public function setDefaultCurrency(string $defaultCurrency)
+    {
+        $this->defaultCurrency = $defaultCurrency;
+        return $this;
+    }
+
     public function addProvider(CurrencyApiInterface $provider): self
     {
         $this->providers[get_class($provider)] = $provider;
