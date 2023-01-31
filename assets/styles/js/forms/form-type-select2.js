@@ -52,13 +52,12 @@ window.addEventListener("load.form_type", function () {
             });
 
             term = $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val();
-            option.text = option.text.replace("<mark>", "").replace("</mark>", "");
 
-            if (highlight && term) option.text = highlight_search(option.text, term);
-            return $('<span style="margin-left:calc('+tab+' * '+depth+')" class=\"select2-selection__entry\" '+dataAttribute+'><span>' +
-                        (option.html ? option.html : (iconAttributes ? '<i '+ iconAttributes + '></i> ' : '') + (option.text) + "</span>" +
-                        (href ? '<span><a target="_blank" href="'+href+'"><i class=\"fas fa-external-link-square-alt\"></i></span>' : '') +
-                    '</span>'));
+            var highlightSearch = highlight_search(option.html ? option.html : ((iconAttributes ? '<i '+ iconAttributes + '></i> ' : '') + (option.text) ), term);
+            var externalLink = (href ? '<span><a target="_blank" href="'+href+'"><i class=\"fas fa-external-link-square-alt\"></i></span>' : '');
+            var shiftAttribute = ' style="margin-left:calc('+tab+' * '+depth+')" class=\"select2-selection__entry\" '+dataAttribute;
+
+            return $('<span '+shiftAttribute+'><span>' + highlightSearch + externalLink + '</span></span>');
         };
 
         var data = function (args)
@@ -151,7 +150,7 @@ window.addEventListener("load.form_type", function () {
             select2["template"]          = "template"          in select2 ? Function('return ' + select2["template"]         )() : defaultTemplate;
             select2["templateResult"]    = "templateResult"    in select2 ? Function('return ' + select2["templateResult"]   )() : defaultTemplate;
             select2["templateSelection"] = "templateSelection" in select2 ? Function('return ' + select2["templateSelection"])() : defaultTemplate;
-            
+
         if("ajax" in select2) {
 
             select2["ajax"]["data"] = "data" in select2["ajax"] ? Function('return ' + select2["ajax"]["data"])() : data;

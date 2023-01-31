@@ -508,6 +508,7 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
+        <service id="Base\Service\TradingMarket" />
         <service id="Base\Service\Model\Currency\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
         <service id="Base\Service\Model\Currency\Api\Fixer"            parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
         <service id="Base\Service\Model\Currency\Api\AbstractApi"      parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
@@ -883,6 +884,7 @@
             <argument type="service" id="router" />
         </service>
 
+        <service id="Base\Field\Type\ForexType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /><argument type="service" id="base.service.icon" /></service>
         <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
 
@@ -966,6 +968,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="obfuscator" />
+            <argument type="service" id="trading_market" />
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.paginator" />

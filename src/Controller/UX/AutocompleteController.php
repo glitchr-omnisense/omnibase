@@ -3,12 +3,16 @@
 namespace Base\Controller\UX;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Service\CurrencyApi;
 use Base\Service\Model\Autocomplete;
+use Base\Service\Model\Currency\CurrencyApiInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
+use Base\Service\TradingMarketInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
+use Exchanger\Exception\ChainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,13 +47,45 @@ class AutocompleteController extends AbstractController
      */
     protected $autocomplete;
 
-    public function __construct(ObfuscatorInterface $obfuscator, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(ObfuscatorInterface $obfuscator, TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->obfuscator = $obfuscator;
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->tradingMarket = $tradingMarket;
         $this->paginator = $paginator;
         $this->autocomplete = new Autocomplete($translator);
+    }
+
+    /**
+     * @Route("/autocomplete/currency/{source}/{target}/{data}", name="ux_autocomplete_forex")
+     */
+    public function Forex(Request $request, string $source, string $target, string $data): Response
+    {
+        $dict = $this->obfuscator->decode($data);
+
+        $token = $dict["token"] ?? null;
+        $tokenName = $dict["token_name"] ?? null;
+        if (!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
+
+            $array = ["status" => "Invalid token. Please refresh the page and try again"];
+            return new JsonResponse($array, 500);
+        }
+
+        try { $rate = $this->tradingMarket->getLatest($source, $target); }
+        catch (ChainException $e) {
+
+            $array = ["status" => "Invalid request"];
+            return new JsonResponse($array, 500);
+        }
+
+        $array = [
+            "source" => $source,
+            "target" => $target,
+            "rate" => $rate
+        ];
+
+        return new JsonResponse($array);
     }
 
     /**
@@ -159,6 +195,7 @@ class AutocompleteController extends AbstractController
         $array = ["status" => "Invalid request"];
         return new JsonResponse($array, 500);
     }
+
 
     /**
      * @Route("/autocomplete/{provider}/{pageSize}/{data}", name="ux_autocomplete_icons")

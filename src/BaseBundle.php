@@ -10,7 +10,7 @@ use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
 use Base\Database\Type\UTCDateTimeType;
 use Base\DependencyInjection\Compiler\AnnotationPass;
-use Base\DependencyInjection\Compiler\CurrencyApiPass;
+use Base\DependencyInjection\Compiler\TradingMarketPass;
 use Base\DependencyInjection\Compiler\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;
 use Base\DependencyInjection\Compiler\ObfuscatorCompressionPass;
@@ -218,7 +218,7 @@ class BaseBundle extends Bundle
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());
-        $container->addCompilerPass(new CurrencyApiPass());
+        $container->addCompilerPass(new TradingMarketPass());
         $container->addCompilerPass(new TagRendererPass());
         $container->addCompilerPass(new ObfuscatorCompressionPass());
 
