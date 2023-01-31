@@ -82,7 +82,6 @@ class ColumnAlias extends AbstractAnnotation
         $column = $this->column;
         $alias  = $property ?? $this->alias;
 
-        // if(self::$i > 10) exit(1);
         $this->bind($entity, $column, $alias);
     }
 

@@ -43,6 +43,7 @@
         "symfony/monolog-bundle": "^3.1",
 
         "symfony/twig-bundle": "^6.0",
+        "symfony/workflow": "^6.0",
 
         "scheb/2fa": "^6.0",
         "twig/twig": "^3.0",

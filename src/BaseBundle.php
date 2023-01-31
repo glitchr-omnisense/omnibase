@@ -9,13 +9,14 @@ use App\Entity\User;
 use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
 use Base\Database\Type\UTCDateTimeType;
-use Base\DependencyInjection\Compiler\AnnotationPass;
-use Base\DependencyInjection\Compiler\TradingMarketPass;
-use Base\DependencyInjection\Compiler\EntityExtensionPass;
-use Base\DependencyInjection\Compiler\IconProviderPass;
-use Base\DependencyInjection\Compiler\ObfuscatorCompressionPass;
-use Base\DependencyInjection\Compiler\SharerPass;
-use Base\DependencyInjection\Compiler\TagRendererPass;
+use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
+use Base\DependencyInjection\Compiler\Pass\TradingMarketPass;
+use Base\DependencyInjection\Compiler\Pass\EntityExtensionPass;
+use Base\DependencyInjection\Compiler\Pass\IconProviderPass;
+use Base\DependencyInjection\Compiler\Pass\ObfuscatorCompressionPass;
+use Base\DependencyInjection\Compiler\Pass\SharerPass;
+use Base\DependencyInjection\Compiler\Pass\TagRendererPass;
+use Base\DependencyInjection\Compiler\Pass\WorkflowPass;
 use Base\Traits\SingletonTrait;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
@@ -221,6 +222,7 @@ class BaseBundle extends Bundle
         $container->addCompilerPass(new TradingMarketPass());
         $container->addCompilerPass(new TagRendererPass());
         $container->addCompilerPass(new ObfuscatorCompressionPass());
+        $container->addCompilerPass(new WorkflowPass());
 
         /* Register aliased repositories */
         foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {

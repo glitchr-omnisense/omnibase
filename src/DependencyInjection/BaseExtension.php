@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 class BaseExtension extends Extension
 {
@@ -60,6 +61,8 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(CompressionInterface::class)->addTag('obfuscator.compressor');
 
         $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
+        $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
+
     }
 
     public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = "")

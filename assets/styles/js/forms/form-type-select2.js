@@ -7,7 +7,7 @@ function is_dict(v) {
 
 function highlight_search(text, search) {
 
-    if(search == "") return text;
+    if(!search) return text;
     var reg = new RegExp(search, 'gi');
     return text.replace(reg, function(str) {return '<mark>'+str+'</mark>'});
 }
@@ -156,9 +156,9 @@ window.addEventListener("load.form_type", function () {
             select2["templateResult"]    = "templateResult"    in select2 ? Function('return ' + select2["templateResult"]   )() : defaultTemplate;
             select2["templateSelection"] = "templateSelection" in select2 ? Function('return ' + select2["templateSelection"])() : defaultTemplate;
 
-            select2["escapeMarkup"] = function(markup) {
-                return markup;
-            };
+            // select2["escapeMarkup"] = function(markup) {
+            //     return markup;
+            // };
 
         if("ajax" in select2) {
 
@@ -245,7 +245,7 @@ window.addEventListener("load.form_type", function () {
 
         //
         // Pre-populated data
-        // if(select2["data"].length != 0) $(field).empty();
+        if(select2["data"].length != 0) $(field).empty();
         $(field).val(select2["selected"] || []).trigger("change");
 
         //
@@ -259,11 +259,13 @@ window.addEventListener("load.form_type", function () {
 
         }).on("select2:select", function(e) {
 
-            select2["selected"] = orderFn(select2["selected"]);
+            if(!select2["multivalue"])
+                select2["selected"] = orderFn(select2["selected"]);
 
         }).on("select2:unselect", function(e) {
 
-            select2["selected"] = orderFn(select2["selected"]);
+            if(!select2["multivalue"])
+                select2["selected"] = orderFn(select2["selected"]);
 
         }).on("select2:open", function(e) {
 
@@ -296,7 +298,7 @@ window.addEventListener("load.form_type", function () {
         $(field).parent().find('input.select2-search__field').on("input", function() { page = "1.0"; });
 
         var sortable = el.getAttribute("data-select2-sortable") || false;
-        if(sortable) {
+        if(!select2["multivalue"] && sortable) {
 
             // Initialize sorting feature
             var choices = $(el.nextElementSibling).find("ul.select2-selection__rendered");

@@ -125,7 +125,6 @@ namespace {
 
         $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
 
-        if($request_uri == "https://example.local:8000example.local")exit(1);
         return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
 

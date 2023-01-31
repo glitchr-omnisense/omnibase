@@ -56,6 +56,7 @@ html, body { scroll-padding-top: 11em; }
 .dropdown-settings .dropdown-item.active { box-shadow: none; }
 .dropdown .dropdown-appearance-button { display:flex; }
 
+.field-country .country-flag:last-child { margin-right:0; }
 .field-country .country-flag {
     border-radius: 5px;
     box-shadow: none;

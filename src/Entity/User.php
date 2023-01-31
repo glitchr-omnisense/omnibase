@@ -19,6 +19,7 @@ use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
+use Symfony\Component\Intl\Timezones;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Base\Validator\Constraints as AssertBase;
@@ -139,7 +140,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public static function getCookie(string $key = null)
     {
-        $cookie = json_decode($_COOKIE[self::__DEFAULT_COOKIE__] ?? "", true);
+        $cookie = json_decode($_COOKIE[self::__DEFAULT_COOKIE__] ?? "", true) ?? [];
+        if(array_key_exists("timezone", $cookie))
+            $cookie["country"] = Timezones::getCountryCode($cookie["timezone"]);
 
         if(!isset($cookie)) return null;
         if(!isset($key) || empty($key)) return $cookie;
@@ -261,7 +264,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $timezone;
-
+    public function getCountryCode(): string { return Timezones::getCountryCode($this->getTimezone()); }
     public function getTimezone(): string { return $this->timezone ?? "UTC"; }
     public function setTimezone(string $timezone = null): self
     {
