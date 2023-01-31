@@ -11,6 +11,7 @@ use Base\Database\TranslatableInterface;
 use Base\Database\Walker\TranslatableWalker;
 use Base\Entity\Extension\Ordering;
 use Base\Service\Model\IntlDateTime;
+use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Mapping\ClassMetadata;
