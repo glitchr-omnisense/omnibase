@@ -2,6 +2,7 @@
 
 namespace Base\Database\Mapping;
 
+use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use App\Entity\Marketplace\Sales\Region;
 use Base\Cache\Abstract\AbstractSimpleCache;
 use Base\Database\Mapping\ClassMetadataCompletor;
@@ -332,6 +333,8 @@ class ClassMetadataManipulator extends AbstractSimpleCache
 
     public function getFieldValue($entity, string|array $fieldPath): mixed
     {
+        if($fieldPath == "") return $entity;
+
         // Prepare field path information
         if(is_string($fieldPath)) $fieldPath = explode(".", $fieldPath);
         if(empty($fieldPath)) throw new \Exception("No field path provided for \"".get_class($entity)."\" ");
@@ -362,7 +365,8 @@ class ClassMetadataManipulator extends AbstractSimpleCache
         if ($entity instanceof Proxy)
             $entity->__load();
 
-        if(class_implements_interface($entity, TranslatableInterface::class)) {
+        if(class_implements_interface($entity, TranslatableInterface::class) && $fieldName == "translations") {
+
             $fieldValue = $entity->getTranslations();
             $fieldName  = implode(".", $fieldPath);
             $fieldPath = "";
