@@ -1432,13 +1432,14 @@ class ServiceEntityParser
 
                     array_unshift($newField, $entryID);
 
-                    $queryExpr = $this->buildQueryExpr($queryBuilder, $newField, $entryValue);
-                    if($queryExpr == null) continue;
+                    $queryExprPart = $this->buildQueryExpr($queryBuilder, $newField, $entryValue);
+                    if($queryExprPart == null) continue;
 
                     // In case of association field, compare value directly
-                    if ($this->classMetadata->hasAssociation($entryID)) $queryBuilder->andWhere($queryExpr);
+                    if ($this->classMetadata->hasAssociation($entryID)) $queryBuilder->andWhere($queryExprPart);
                     // If standard field, check for partial information
-                    else $queryExpr[] = $queryExpr;
+                    else $queryExpr[] = $queryExprPart;
+
                 }
 
                 $queryExpr = empty($queryExpr) ? null : $queryBuilder->expr()->orX(...$queryExpr);
