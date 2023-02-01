@@ -56,6 +56,8 @@
   border-radius: 0.2rem;
   padding: 0;
   padding-right: 5px;
+  padding-top:1px;
+  padding-bottom:1px;
   cursor: pointer;
   float: left;
   margin-top: 0.45em;

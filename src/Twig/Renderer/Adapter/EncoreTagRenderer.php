@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Renderer\Adapter;
 
-use Base\Cache\Abstract\AbstractSimpleCacheInterface;
+use Base\Cache\Abstract\AbstractLocalCacheInterface;
 
 use Twig\Environment;
 use Base\Twig\AssetPackage;
@@ -23,7 +23,7 @@ use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
 use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
 
-class EncoreTagRenderer extends AbstractTagRenderer implements AbstractSimpleCacheInterface
+class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCacheInterface
 {
     /**
      * @var Packages

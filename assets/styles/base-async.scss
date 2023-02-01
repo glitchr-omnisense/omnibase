@@ -1299,6 +1299,7 @@ input.required:after, textarea.required:after, select.required:after {
 .select2-selection__choice .select2-selection__entry { margin:0 0.25em !important; }
 .select2-selection--vertical .select2-selection__choice  { width:calc(100% - 40px); display:flex; justify-content: start !important; }
 .select2-selection--vertical.select2-selection--multiple .select2-selection__choice  { padding:0.35em !important; }
+.select2-selection.select2-selection--multiple:not(.select2-selection--vertical) .select2-selection__choice  { padding:0.075em !important; }
 
 .input-group-text .btn,
 .input-group-text .btn:not(:disabled):not(.disabled):not(.btn-link):hover,
@@ -1312,7 +1313,9 @@ select.form-select2:empty { height: 38px; }
 .form-stock input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .form-stock input[type=number] { -moz-appearance: textfield; }
 
-.form-money .input-group-text  { padding-top:4px; font-weight:bold; }
+.form-money .item-selected { background: #EEE8; }
+
+.form-money .input-group-text  { font-weight:bold; }
 .form-money a.dropdown-item { cursor: pointer; }
 .form-money input { text-align:right; }
 

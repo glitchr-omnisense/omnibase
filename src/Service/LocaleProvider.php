@@ -2,14 +2,14 @@
 
 namespace Base\Service;
 
-use Base\Cache\Abstract\AbstractSimpleCache;
+use Base\Cache\Abstract\AbstractLocalCache;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 
-class LocaleProvider extends AbstractSimpleCache implements LocaleProviderInterface
+class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterface
 {
     public const UNIVERSAL = "xx_XX";
 

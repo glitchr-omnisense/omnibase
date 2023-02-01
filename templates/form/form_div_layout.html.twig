@@ -1338,20 +1338,25 @@
             </button>
         {% else %}
             {% set code     = currency %}
+            {% set currency_list = currency_list|filter(c => c != code) %}
+
             {% set label    = currency_label[code] ?? code %}
             {% set exchange = currency_exchange[code] ?? 1 %}
-            <button id="{{form.vars.id}}-btn" class="input-group-text dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{label}}</button>
+            <button id="{{form.vars.id}}-btn" class="input-group-text {{ currency_list is not empty ? "dropdown-toggle" : "" }}" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{label}}</button>
+            {% if currency_list is not empty %}
             <ul id="{{form.vars.id}}-list" class="dropdown-menu dropdown-menu-end" >
 
-                <li id="{{form.vars.id}}-selected" data-label="{{label}}" data-code="{{code}}" data-exchange="{{ exchange }}"><a class="dropdown-item">{{label}}</a></li>
+                <li id="{{form.vars.id}}-selected" class="item-selected" data-label="{{label}}" data-code="{{code}}" data-exchange="{{ exchange }}"><a class="dropdown-item">{{label}}</a></li>
                 <li><hr class="dropdown-divider"></li>
 
+                <li class="item" data-label="{{label}}" data-code="{{code}}" data-exchange="1.0"><a class="text-right dropdown-item">{{label}}</a></li>
                 {% for code in currency_list %}
                     {% set label    = currency_label[code] ?? code %}
                     {% set exchange = currency_exchange[code] ?? 1 %}
                     <li class="item" data-label="{{label}}" data-code="{{code}}" data-exchange="{{ exchange }}"><a class="text-right dropdown-item">{{label}}</a></li>
                 {% endfor %}
             </ul>
+            {% endif %}
         {% endif %}
     </div>
 </div>

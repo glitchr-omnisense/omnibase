@@ -131,34 +131,34 @@
             <bind key="$debug">%kernel.debug%</bind>
         </service>
 
-        <service id="Base\Cache\Abstract\AbstractSimpleCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
-        <service id="Base\Cache\Abstract\AbstractSimpleCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
+        <service id="Base\Cache\Abstract\AbstractLocalCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
+        <service id="Base\Cache\Abstract\AbstractLocalCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
 
         <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="setting_bag" /></service>
         <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
-        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer">
+        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.service.icon" />
         </service>
-        <service id="Base\CacheWarmer\LocaleCacheWarmer"      public="true" parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer">
+        <service id="Base\CacheWarmer\LocaleCacheWarmer"      public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="locale_provider" />
         </service>
-        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer"><tag name="kernel.cache_warmer" />
+        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig.encore_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup[_default]" on-invalid="null" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
-        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"     parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer" public="true">
+        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"     parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
             <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
             <argument type="service" id="base.annotation_reader" />
         </service>
-        <service id="Base\CacheWarmer\MetadataCacheWarmer" parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer" public="true">
+        <service id="Base\CacheWarmer\MetadataCacheWarmer" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
-        <service id="Base\CacheWarmer\ImageCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer">
+        <service id="Base\CacheWarmer\ImageCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="console" />
         </service>
@@ -187,13 +187,13 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Service\LocaleProvider" parent="Base\Cache\Abstract\AbstractSimpleCache" public="true">
+        <service id="Base\Service\LocaleProvider" parent="Base\Cache\Abstract\AbstractLocalCache" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
         </service>
 
-        <service id="Base\Cache\SimpleCache" parent="Base\Cache\Abstract\AbstractSimpleCache" public="true" />
+        <service id="Base\Cache\SimpleCache" parent="Base\Cache\Abstract\AbstractLocalCache" public="true" />
 
         <service id="Base\Service\MaintenanceProvider" public="true">
             <argument type="service" id="router" />
@@ -508,7 +508,10 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
-        <service id="Base\Service\TradingMarket" />
+        <service id="Base\Service\TradingMarket">
+            <argument type="service" id="simple_cache" />
+            <argument type="service" id="http_client" />
+        </service>
         <service id="Base\Service\Model\Currency\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
         <service id="Base\Service\Model\Currency\Api\Fixer"            parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
         <service id="Base\Service\Model\Currency\Api\AbstractApi"      parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
@@ -611,7 +614,12 @@
             <tag name="twig.extension" />
             <argument type="service" id="router" />
             <bind key="$projectDir">%kernel.project_dir%</bind>
-       </service>
+        </service>
+
+        <service id="Base\Twig\Extension\TradingMarketTwigExtension" public="true">
+            <tag name="twig.extension" />
+            <argument type="service" id="trading_market" />
+        </service>
 
         <service id="Base\Twig\Renderer\AbstractRenderer">
             <argument type="service" id="twig" />
@@ -923,7 +931,7 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
         </service>
-        <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="twig" /></service>
+        <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="trading_market" /></service>
         <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="twig" /></service>
         <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="twig" /></service>
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" />

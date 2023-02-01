@@ -361,7 +361,7 @@ namespace {
 
 
     function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
-    function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
+    function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace($separator.$separator, $separator, str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', str_replace(" ", $separator,$input))))); }
     function snake2camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
 
     function preg_match_array(string $pattern, array $subject) {
@@ -1969,6 +1969,16 @@ namespace {
         $array = array_key_removes($array, $key);
 
         return $entry;
+    }
+
+    function array_key_startsWith(array $array, string $needle): array
+    {
+        return array_transforms(fn($k,$v):?array => str_starts_with($k, $needle) ? [$k,$v] : null, $array);
+    }
+
+    function array_key_endsWith(array $array): array
+    {
+        return array_transforms(fn($k,$v):?array => str_ends_with($k, $needle) ? [$k,$v] : null, $array);
     }
 
     function array_keys_recursive(array $array): array

@@ -11,7 +11,7 @@ use Exception;
 
 use App\Entity\User;
 use Base\BaseBundle;
-use Base\Cache\Abstract\AbstractSimpleCache;
+use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Routing\RouterInterface;
@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
-class AnnotationReader extends AbstractSimpleCache
+class AnnotationReader extends AbstractLocalCache
 {
     use SingletonTrait;
 
@@ -282,7 +282,7 @@ class AnnotationReader extends AbstractSimpleCache
             }
         }
 
-        $this->setCache("/Targets", $this->annotationTargets, true);
+        $this->setCache("/Targets", $this->annotationTargets, null, true);
         return $this->annotationTargets[$className] ?? [];
     }
 
@@ -301,7 +301,7 @@ class AnnotationReader extends AbstractSimpleCache
                 $classAncestor = $parentClass;
 
             $this->classAncestors[$className] = $classAncestor;
-            $this->setCache("/Ancestors", $this->classAncestors, true);
+            $this->setCache("/Ancestors", $this->classAncestors, null, true);
         }
 
         return $this->classAncestors[$className];
@@ -380,7 +380,7 @@ class AnnotationReader extends AbstractSimpleCache
                 $this->classAnnotations[$reflClass->name][] = $annotation;
             }
 
-            $this->setCache("/ClassAnnotations", $this->classAnnotations, true);
+            $this->setCache("/ClassAnnotations", $this->classAnnotations, null, true);
         }
 
         return $this->filterClassAnnotations($reflClass->name, $annotationNames);
@@ -447,7 +447,7 @@ class AnnotationReader extends AbstractSimpleCache
                 }
             }
 
-            $this->setCache("/MethodAnnotations", $this->methodAnnotations, true);
+            $this->setCache("/MethodAnnotations", $this->methodAnnotations, null,true);
         }
 
         return $this->filterMethodAnnotations($reflClass->name, $annotationNames);
@@ -517,7 +517,7 @@ class AnnotationReader extends AbstractSimpleCache
                 }
             }
 
-            $this->setCache("/PropertyAnnotations", $this->propertyAnnotations, true);
+            $this->setCache("/PropertyAnnotations", $this->propertyAnnotations, null,true);
         }
 
         return $this->filterPropertyAnnotations($reflClass->name, $annotationNames);
@@ -672,7 +672,7 @@ class AnnotationReader extends AbstractSimpleCache
             if (($parentClassName = get_parent_class($reflClass->getName())))
                 $this->classHierarchies[$reflClass->getName()] = $parentClassName;
 
-            $this->setCache("/Hierarchies", $this->classHierarchies, true);
+            $this->setCache("/Hierarchies", $this->classHierarchies, null,true);
         }
 
 

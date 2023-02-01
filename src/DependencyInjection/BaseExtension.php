@@ -3,7 +3,7 @@
 namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
-use Base\Cache\Abstract\AbstractSimpleCacheInterface;
+use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\EntityDispatcher\EventDispatcherInterface;
 use Base\Service\Model\Currency\CurrencyApiInterface;
@@ -55,7 +55,7 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
         $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
-        $container->registerForAutoconfiguration(AbstractSimpleCacheInterface::class)->addTag('base.simple_cache');
+        $container->registerForAutoconfiguration(AbstractLocalCacheInterface::class)->addTag('base.simple_cache');
 
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('currency.api');
         $container->registerForAutoconfiguration(CompressionInterface::class)->addTag('obfuscator.compressor');

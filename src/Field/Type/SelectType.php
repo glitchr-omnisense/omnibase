@@ -403,8 +403,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $choices = $dataChoices;
             }
 
-            //
-            // Note for later: when disabling select2, it might happend that the label of the label of selected entries are wrong
             $formOptions = [
                 'choices'  => array_unique($choices),
                 'multiple' => $options["multiple"]
@@ -641,7 +639,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $selectOpts["ajax"]["processResults"] = $options["autocomplete_processResults"];
             }
 
-
             if(!array_key_exists("minimumResultsForSearch", $selectOpts))
                      $selectOpts["minimumResultsForSearch"] = $options["minimumResultsForSearch"];
             if(!array_key_exists("closeOnSelect", $selectOpts))
@@ -689,8 +686,15 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //
             // Format preselected values
-            $dataset = $data instanceof Collection ? $data->toArray() : ( !is_array($data) ? [$data] : $data );
-            $selectedData  = $dataset;
+            $dataset = [];
+            if($options["choice_loader"] === null) {
+
+                $dataset   = $data instanceof Collection ? $data->toArray() : null;
+                $dataset ??= !is_array($data) ? [$data] : $data;
+            }
+
+            $selectedData   = $data instanceof Collection ? $data->toArray() : null;
+            $selectedData ??= $data !== null && !is_array($data) ? [$data] : $data ?? [];
 
             $innerType = get_class($form->getConfig()->getType()->getInnerType());
             $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, $dataset, &$options, &$selectedData) : Generator {

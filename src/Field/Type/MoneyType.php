@@ -2,9 +2,15 @@
 
 namespace Base\Field\Type;
 
+use AsyncAws\Core\Exception\LogicException;
+use Base\Service\TradingMarketInterface;
 use Base\Twig\Environment;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\Intl\Currencies;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
@@ -13,7 +19,27 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     public const LABEL_ONLY = 1;
     public const LABELCODE_ONLY = 2;
 
-    public function __construct(Environment $twig) { $this->twig = $twig; }
+    /**
+     * @var TradingMarketInterface
+     */
+    protected $tradingMarket;
+    public function __construct(TradingMarketInterface $tradingMarket) { $this->tradingMarket = $tradingMarket; }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        parent::configureOptions($resolver);
+        $resolver->setDefaults([
+            "currency_target"   => false,
+            "currency_label"    => self::LABEL_ONLY,
+            "currency_exchange" => null,
+            'currency_list'     => null,
+            "use_swap"          => false
+        ]);
+    }
+
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $targetPath = explode(".", $options["currency_target"]);
@@ -39,46 +65,71 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
         // Build view and other options
         parent::buildView($view, $form, $options);
         $view->vars["scale"] = $options["scale"];
+
         $view->vars["currency"] = $options["currency"];
-        $view->vars["currency_list"] = array_unique(array_merge([$options["currency"]], $options["currency_list"]));
-        $view->vars["currency_exchange"] = ["USD" => 1, "EUR" => 0.90];
+
+        if ($options["currency_list"] === null)
+            $options["currency_list"] = array_keys($this->tradingMarket->getFallback($options["currency"]));
+
+        $view->vars["currency_list"] = array_values(array_unique(array_merge([$options["currency"]], $options["currency_list"] ?? [])));
+        foreach($view->vars["currency_list"] as $currency) {
+
+            if(!Currencies::exists($view->vars["currency"]))
+                throw new LogicException("Currency \"\" not referenced in \"". Currencies::class."\"");
+        }
+
+        $view->vars["currency_exchange"] = $options["currency_exchange"];
+        if($view->vars["currency_exchange"] === null) {
+
+            $view->vars["currency_exchange"] = [];
+            foreach($view->vars["currency_list"] as $currency) {
+
+                if($view->vars["currency"] == $currency) {
+                    $view->vars["currency_exchange"][$currency] = 1.0;
+                    continue;
+                }
+
+                $exchangeRate = $this->tradingMarket->get($view->vars["currency"], $currency, ["use_swap" => $options["use_swap"]]);
+                    if(!$exchangeRate) continue;
+
+                $view->vars["currency_exchange"][$currency] = $exchangeRate->getValue();
+            }
+        }
+
+        $view->vars["currency_list"] = array_values(array_intersect($view->vars["currency_list"], array_keys($view->vars["currency_exchange"])));
 
         switch($options["currency_label"]) {
+
             case self::CODE_ONLY:
-                $view->vars["currency_label"] = [
-                    "USD" => "USD",
-                    "EUR" => "EUR"
-                ];
-            break;
+                $view->vars["currency_label"] = array_combine($view->vars["currency_list"], $view->vars["currency_list"]);
+                break;
 
             default:
             case self::LABEL_ONLY:
-                $view->vars["currency_label"] = [
-                    "USD" => "\$US",
-                    "EUR" => "€"
-                ];
-            break;
+                $view->vars["currency_label"] = array_combine(
+                    $view->vars["currency_list"],
+                    array_map(fn($c) => Currencies::getSymbol($c), $view->vars["currency_list"])
+                );
+
+                break;
 
             case self::LABELCODE_ONLY:
-                $view->vars["currency_label"] = [
-                    "USD" => "\$US (USD)",
-                    "EUR" => "€ (EUR)"
-                ];
-            break;
+                $view->vars["currency_label"] = array_combine(
+                    $view->vars["currency_list"],
+                    array_map(fn($c) => Currencies::getSymbol($c) . " (".$c.")", $view->vars["currency_list"])
+                );
+                break;
+
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        parent::configureOptions($resolver);
-        $resolver->setDefaults([
-            "currency_target"   => false,
-            "currency_label"    => self::LABEL_ONLY,
-            "currency_exchange" => ["USD" => 1, "EUR" => 0.90],
-            'currency_list'     => ["USD", "EUR"],
-        ]);
+        parent::buildForm($builder, $options); // TODO: Change the autogenerated stub
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
+
+            $form = $event->getForm();
+            $event->setData(str_replace([" ", ","], ["", "."], $event->getData()));
+        });
     }
 }

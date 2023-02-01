@@ -44,7 +44,7 @@ class ThreadIntl implements TranslationInterface
     }
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(type="array")
      * @OrderColumn
      */
     protected $keywords = [];

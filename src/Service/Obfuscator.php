@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\BaseBundle;
-use Base\Cache\Abstract\AbstractSimpleCache;
+use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Repository\Layout\ImageRepository;
 use Base\Service\Model\Obfuscator\CompressionInterface;
 use Hashids\Hashids;
@@ -11,7 +11,7 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV5;
 
-class Obfuscator extends AbstractSimpleCache implements ObfuscatorInterface
+class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 {
     protected string $uuid;
     protected array $compressions = [];

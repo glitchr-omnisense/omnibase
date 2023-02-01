@@ -4,7 +4,7 @@ namespace Base\Database\Mapping;
 
 use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use App\Entity\Marketplace\Sales\Region;
-use Base\Cache\Abstract\AbstractSimpleCache;
+use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
@@ -34,7 +34,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class ClassMetadataManipulator extends AbstractSimpleCache
+class ClassMetadataManipulator extends AbstractLocalCache
 {
     /**
      * @var ManagerRegistry
@@ -875,6 +875,6 @@ class ClassMetadataManipulator extends AbstractSimpleCache
     
     public function saveCompletors()
     {
-        $this->setCache("/Completors", self::$completors, true);
+        $this->setCache("/Completors", self::$completors, null,true);
     }
 }

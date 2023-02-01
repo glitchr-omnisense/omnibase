@@ -336,7 +336,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
 
-            dump($entityLabel);
+            $entityLabel = mb_ucfirst($this->translator->transEntity(get_class($entity), null, Translator::NOUN_SINGULAR));
             $entityText = $entityLabel ." ID #".$entity->getId();
             try { # Try to link without route parameter
 
@@ -345,7 +345,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
             } catch(\Exception $e) { }
 
-            dump($entityText);
             $extension->setText($entityText);
         }
 

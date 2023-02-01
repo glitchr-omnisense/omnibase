@@ -16,7 +16,7 @@ trait SimpleCacheTrait
 
         $this->warmUp($cacheDir);
     }
-    
+
     protected function getCacheKey(string $realClassName): string
     {
         return str_replace(['\\', '/'], ['__', '___'], $realClassName);
@@ -27,21 +27,25 @@ trait SimpleCacheTrait
         return $this->cache != null && $this->cache->hasItem($this->getCacheKey(static::class.$key));
     }
 
-    public function deleteCache(string $key): bool
+    public function deleteCache(?string $key = null): bool
     {
-        return $this->cache != null && $this->cache->deleteItem($this->getCacheKey(static::class.$key));
+        if($key == null)
+            return $this->cache?->clear() ?? false;
+
+        return $this->cache?->deleteItem($this->getCacheKey(static::class.$key)) ?? false;
     }
 
-    public function getCache(string $key, mixed $fallback = null, $deferred = false): mixed
+    public function getCache(?string $key = null, mixed $fallback = null, int|\DateInterval|null $ttl = null, $deferred = false): mixed
     {
+         if($key === null) return $this->cache;
 
-        if(!$this->hasCache($key))
-            $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $deferred);
+         if(!$this->hasCache($key))
+            $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $ttl, $deferred);
 
         return $this->cache?->getItem($this->getCacheKey(static::class.$key))->get();
     }
 
-    public function setCache(CacheItemPoolInterface|string $cacheOrKey, mixed $value = null, bool $deferred = false)
+    public function setCache(CacheItemPoolInterface|string $cacheOrKey, mixed $value = null, int|\DateInterval|null $ttl = null, bool $deferred = false)
     {
         if($cacheOrKey instanceof CacheItemPoolInterface) {
 
@@ -51,6 +55,7 @@ trait SimpleCacheTrait
 
         $item = $this->cache->getItem($this->getCacheKey(static::class.$cacheOrKey));
         $item->set($value);
+        $item->expiresAfter($ttl);
 
         if($deferred) $this->cache->saveDeferred($item);
         else $this->cache->save($item);
@@ -67,10 +72,9 @@ trait SimpleCacheTrait
         return $this;
     }
 
-    public function executeOnce(callable $fn): mixed
+    public function executeOnce(callable $fn, int|\DateInterval|null $ttl = null): mixed
     {
         $keyCache = "/ExecuteOnce/".callable_hash($fn);
-        return $this->getCache($keyCache, $fn);
-
+        return $this->getCache($keyCache, $fn, $ttl);
     }
 }

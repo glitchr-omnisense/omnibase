@@ -13,6 +13,7 @@ final class MoneyField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_CURRENCY = 'currency';
+    public const OPTION_SWAP = 'use_swap';
     public const OPTION_CURRENCY_PROPERTY_PATH = 'currencyPropertyPath';
     public const OPTION_NUM_DECIMALS = 'numDecimals';
     public const OPTION_STORED_AS_CENTS = 'storedAsCents';
@@ -36,6 +37,13 @@ final class MoneyField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/money.html.twig');
     }
 
+    public function useSwap(bool $swap = true): self
+    {
+        $this->setFormTypeOption(self::OPTION_SWAP, $swap);
+
+        return $this;
+    }
+
     public function setCurrency(string $currencyCode): self
     {
         if (!Currencies::exists($currencyCode)) {
@@ -56,13 +64,13 @@ final class MoneyField implements FieldInterface
 
     public function showCurrencyCode(bool $show = true): self
     {
-        $this->setFormTypeOption("money_code", $show);
+        $this->setFormTypeOption("currency_code", $show);
         return $this;
     }
 
-    public function setMoneyList(bool $moneyList = null): self
+    public function setCurrencyList(array $moneyList = []): self
     {
-        $this->setFormTypeOption("money_list", $moneyList);
+        $this->setFormTypeOption("currency_list", $moneyList);
         return $this;
     }
 

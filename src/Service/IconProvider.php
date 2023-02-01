@@ -4,14 +4,14 @@ namespace Base\Service;
 
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
-use Base\Cache\Abstract\AbstractSimpleCache;
+use Base\Cache\Abstract\AbstractLocalCache;
 
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\RouterInterface;
 
-class IconProvider extends AbstractSimpleCache
+class IconProvider extends AbstractLocalCache
 {
     /**
      * @var AnnotationReader

@@ -2,6 +2,6 @@
 
 namespace Base\CacheWarmer;
 
-use Base\Cache\Abstract\AbstractSimpleCacheWarmer;
+use Base\Cache\Abstract\AbstractLocalCacheWarmer;
 
-class LocaleCacheWarmer extends AbstractSimpleCacheWarmer { }
+class LocaleCacheWarmer extends AbstractLocalCacheWarmer { }
