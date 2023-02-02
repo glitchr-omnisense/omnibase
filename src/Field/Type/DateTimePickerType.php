@@ -38,7 +38,7 @@ class DateTimePickerType extends AbstractType
 
             // PHP Datetime format:
             // This format is replacing the shitty HTML5_FORMAT :-)
-            "format" => "yyyy-MM-dd HH:mm:ss",
+            "format" => "yyyy-MM-dd HH:mm",
             "html5"  => false,
             "widget" => "single_text",
             "required" => false,
@@ -48,7 +48,7 @@ class DateTimePickerType extends AbstractType
             "datetimepicker" => [
                 "enableTime" => true,
                 "locale" => $this->localeProvider->getLang(),
-                "dateFormat" => "Y-m-d H:i",
+                "dateFormat" => "Y-m-d H:i", // Format must match... between format option and dateFormat (JS Format)
             ]
         ]);
     }

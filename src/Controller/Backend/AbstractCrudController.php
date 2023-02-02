@@ -331,7 +331,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             if(is_stringeable($entity) && (string) $entity != get_class($entity))
                 $entityLabel = (string) $entity;
 
-            $extension->setTitle(mb_ucfirst(is_stringeable($entity) ? $entityLabel : $this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
+            $extension->setTitle(mb_ucfirst(is_stringeable($entity) && $entityLabel ? $entityLabel : $this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
