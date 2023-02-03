@@ -1,5 +1,5 @@
 import '@glitchr/lightbox2';
-import '@glitchr/cookie-consent';
+import '@glitchr/cookie';
 import '@glitchr/clipboardjs';
 
 import './styles/base-async.scss';

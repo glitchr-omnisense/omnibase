@@ -3,7 +3,7 @@
 namespace Base\DatabaseSubscriber;
 
 use Base\BaseBundle;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
@@ -34,15 +34,15 @@ class IntlSubscriber implements EventSubscriberInterface
     protected $entityManager;
 
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
-    protected $localeProvider;
-    public function getLocaleProvider() { return $this->localeProvider; }
+    protected $localizer;
+    public function getLocalizer() { return $this->localizer; }
 
-    public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider)
+    public function __construct(EntityManagerInterface $entityManager, LocalizerInterface $localizer)
     {
         $this->entityManager  = $entityManager;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
     }
 
     public function postLoad(LifecycleEventArgs $args)

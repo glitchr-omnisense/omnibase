@@ -16,7 +16,7 @@
     "flatpickr": "^4.6",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@glitchr/clipboardjs": "^1.0",
-    "@glitchr/cookie-consent": "^1.0",
+    "@glitchr/cookie": "^1.0",
     "@glitchr/dockjs": "^1.0",
     "@glitchr/imaginejs": "^1.0",
     "@glitchr/lightbox2": "^1.0",

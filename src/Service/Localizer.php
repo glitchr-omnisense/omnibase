@@ -6,15 +6,34 @@ use Base\Cache\Abstract\AbstractLocalCache;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Countries;
+use Symfony\Component\Intl\Currencies;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
+use Symfony\Component\Intl\Timezones;
 
-class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterface
+class Localizer extends AbstractLocalCache implements LocalizerInterface
 {
-    public const UNIVERSAL = "xx_XX";
+    public const LOCALE_FORMAT = "xx_XX";
 
     protected $requestStack = null;
     protected $parameterBag = null;
+
+    protected static $isLate = null; // Turns on when on kernel request
+    public static function isLate(): bool { return is_string(self::$isLate) ? true : self::$isLate ?? false; }
+    public static function markAsLate(?string $location = null)
+    {
+        $backtrace = debug_backtrace()[1] ?? null;
+        $location = ($backtrace ? $backtrace['class']."::".$backtrace['function'] : true);
+        self::$isLate = $location;
+    }
+
+    protected bool $localeHasChanged = false;
+    public function localeHasChanged() { return $this->localeHasChanged; }
+    public function markAsChanged()
+    {
+        $this->localeHasChanged = true;
+        return $this;
+    }
 
     public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, string $cacheDir)
     {
@@ -29,9 +48,9 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
 
     public function warmUp(string $cacheDir): bool
     {
-        self::$locales          = $this->getCache("/Locales", self::getLocales());
-        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalize($this->translator->getFallbackLocales());
-        self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($this->parameterBag->get("kernel.default_locale"));
+        self::$locales          = $this->getCache("/Localize/Locales", self::getLocales());
+        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalizeLocale($this->translator->getFallbackLocales());
+        self::$defaultLocale    = self::$defaultLocale   ?? self::normalizeLocale($this->parameterBag->get("kernel.default_locale"));
         
         return true;
     }
@@ -44,13 +63,13 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
     public const SEPARATOR = "-";
     public static function __toLocale (string $locale, ?string $separator = self::SEPARATOR): string
     {
-        $lang    = self::__toLang($locale);
-        $country = self::__toCountry($locale);
+        $lang    = self::__toLocaleLang($locale);
+        $country = self::__toLocaleCountry($locale);
 
         return $lang.$separator.$country;
     }
 
-    public static function __toLang (string $locale): string
+    public static function __toLocaleLang (string $locale): string
     {
         $lang = $locale ? substr($locale,0,2) : null;
         if ($lang === null || !array_key_exists($lang, self::getLocales()))
@@ -59,12 +78,12 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
         return $lang;
     }
 
-    public static function __toCountry (string $locale): string
+    public static function __toLocaleCountry (string $locale): string
     {
         $defaultCountry     = self::getDefaultLocale() ? substr(self::getDefaultLocale(),3,2) : null;
         $availableCountries = array_transforms(fn($k, $l):array => $l !== null ? [substr($l,0,2), [substr($l,3,2)]] : null, self::getAvailableLocales());
 
-        $lang           = self::__toLang($locale);
+        $lang           = self::__toLocaleLang($locale);
         $langCountries  = $availableCountries[$lang] ?? self::getLocales()[$lang] ?? [];
 
         $country = substr($locale,3,2);
@@ -102,10 +121,10 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
         if(in_array($locale, $availableLocales) && $locale == $preferredLocale) return true;
 
         if(in_array($preferredLocale, $availableLocales ?? $this->getAvailableLocales()) &&
-           $this->__toLang($locale) == $this->__toLang($preferredLocale)) {
+           $this->__toLocaleLang($locale) == $this->__toLocaleLang($preferredLocale)) {
 
-            $availableLangs = array_map(fn($l) => $this->__toLang($l), $availableLocales ?? $this->getAvailableLocales());
-            $defaultLangKey = array_search($this->__toLang($preferredLocale), $availableLangs);
+            $availableLangs = array_map(fn($l) => $this->__toLocaleLang($l), $availableLocales ?? $this->getAvailableLocales());
+            $defaultLangKey = array_search($this->__toLocaleLang($preferredLocale), $availableLangs);
             $defaultLocaleKey = array_search($preferredLocale, $availableLocales);
 
             return $defaultLangKey == $defaultLocaleKey;
@@ -114,21 +133,11 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
         return false;
     }
 
-    protected static $isLate = null; // Turns on when on kernel request
-    public static function isLate(): bool { return is_string(self::$isLate) ? true : self::$isLate ?? false; }
-    public static function markAsLate(?string $location = null)
-    {
-        $backtrace = debug_backtrace()[1] ?? null;
-        $location = ($backtrace ? $backtrace['class']."::".$backtrace['function'] : true);
-        self::$isLate = $location;
-    }
-
-    protected static $i = 0;
     public function getLocale(?string $locale = null): string {
 
-        return self::normalize($locale ?? $this->translator->getLocale());
+        return self::normalizeLocale($locale ?? $this->translator->getLocale());
     }
-    
+
     public function setLocale(string $locale, ?Request $request = null)
     {
         $currentLocale = $this->getLocale();
@@ -147,15 +156,7 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
 
         $this->translator->setLocale(substr_replace($locale, "_", 2, 1));
 
-        $this->hasChanged = $currentLocale !== $locale;
-        return $this;
-    }
-
-    protected bool $hasChanged = false;
-    public function hasChanged() { return $this->hasChanged; }
-    public function markAsChanged()
-    {
-        $this->hasChanged = true;
+        $this->localeHasChanged = $currentLocale !== $locale;
         return $this;
     }
 
@@ -166,35 +167,35 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
     {
         return array_filter(array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales ?? [])));
     }
-    public static function getDefaultLang(): ?string { return self::$defaultLocale ? substr(self::$defaultLocale,0,2) : null; }
-    public static function getFallbackLangs(): array { return array_map(fn($l) => self::__toLang($l), self::$fallbackLocales); }
-    public static function getAvailableLangs(): array
+    public static function getDefaultLocaleLang(): ?string { return self::$defaultLocale ? substr(self::$defaultLocale,0,2) : null; }
+    public static function getFallbackLocaleLangs(): array { return array_map(fn($l) => self::__toLocaleLang($l), self::$fallbackLocales); }
+    public static function getAvailableLocaleLangs(): array
     {
-        return array_unique(array_merge([self::getDefaultLang()], self::getFallbackLangs() ?? []));
+        return array_unique(array_merge([self::getDefaultLocaleLang()], self::getFallbackLocaleLangs() ?? []));
     }
-    public static function getDefaultCountry(): ?string  { return self::$defaultLocale ? substr(self::$defaultLocale,3,2) : null; }
-    public static function getFallbackCountries(): array { return array_map(fn($l) => self::__toCountry($l), self::$fallbackLocales); }
-    public static function getAvailableCountries(): array
+    public static function getDefaultLocaleCountry(): ?string  { return self::$defaultLocale ? substr(self::$defaultLocale,3,2) : null; }
+    public static function getFallbackLocaleCountries(): array { return array_map(fn($l) => self::__toLocaleCountry($l), self::$fallbackLocales); }
+    public static function getAvailableLocaleCountries(): array
     {
-        return array_unique(array_merge([self::getDefaultCountry()], self::getFallbackCountries() ?? []));
-    }
-
-    public function getLangName(?string $locale = null): ?string { return Languages::getName($this->getLang($locale)); }
-    public function getLang(?string $locale = null): string
-    {
-        if($locale === null) $locale = $this->getLocale();
-        return self::__toLang($locale);
+        return array_unique(array_merge([self::getDefaultLocaleCountry()], self::getFallbackLocaleCountries() ?? []));
     }
 
-    public function getCountryName(?string $locale = null): string { return Countries::getName($this->getCountry($locale)); }
-    public function getCountry(?string $locale = null): string
+    public function getLocaleLangName(?string $locale = null): ?string { return Languages::getName($this->getLocaleLang($locale)); }
+    public function getLocaleLang(?string $locale = null): string
     {
         if($locale === null) $locale = $this->getLocale();
-        return self::__toCountry($locale);
+        return self::__toLocaleLang($locale);
+    }
+
+    public function getLocaleCountryName(?string $locale = null): string { return Countries::getName($this->getLocaleCountry($locale)); }
+    public function getLocaleCountry(?string $locale = null): string
+    {
+        if($locale === null) $locale = $this->getLocale();
+        return self::__toLocaleCountry($locale);
     }
 
     protected static $cacheLocales = [];
-    public static function normalize(string|array $locale, string $separator = self::SEPARATOR): string|array
+    public static function normalizeLocale(string|array $locale, string $separator = self::SEPARATOR): string|array
     {
         //
         // Shape array elements
@@ -202,7 +203,7 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
 
             $locales = [];
             foreach($locale as $l)
-                $locales[] = self::normalize($l, $separator);
+                $locales[] = self::normalizeLocale($l, $separator);
 
             return $locales;
         }
@@ -234,5 +235,50 @@ class LocaleProvider extends AbstractLocalCache implements LocaleProviderInterfa
 
         self::$cacheLocales[$locale] = $lang.self::SEPARATOR.$country;
         return self::$cacheLocales[$locale];
+    }
+
+
+    /**
+     * @var string
+     */
+    protected string $timezone;
+    public function getTimezone(): string { return $this->timezone ?? self::getDefaultTimezone(); }
+    public function setTimezone(string $timezone): self {
+
+        $this->timezone = in_array($timezone, timezone_identifiers_list()) ? $timezone : $this->getDefaultTimezone();
+        return $this;
+    }
+
+    public static function getDefaultTimezone(): string { return "UTC"; }
+    public static function getAvailableTimezones(): array { return timezone_identifiers_list(); }
+    public static function __toGMT(string $timezone): string { Timezones::getGmtOffset($timezone); }
+    public static function __toTimezone(string $countryCode)
+    {
+        $alpha2country = Countries::getAlpha2Code($countryCode);
+        return \DateTimeZone::listIdentifiers(\DateTimeZone::PER_COUNTRY, $alpha2country);
+    }
+
+    /**
+     * @var string
+     */
+    protected string $country;
+    public function getCountry(): string { return $this->country ?? $this->getLocaleCountry(); }
+    public function getCountryName(?string $displayLocale = null) { return \Locale::getDisplayRegion($this->countryCode, $displayLocale); }
+    public function setCountry(string $countryCode): self
+    {
+        $this->country = in_array($countryCode, Countries::getCountryCodes()) ? $countryCode : $this->getLocaleCountry();
+        return $this;
+    }
+
+    /**
+     * @var string
+     */
+    protected string $currency;
+    public static function __toSymbol(string $currency) { return Currencies::getSymbol($currency); }
+    public function getCurrency(): string { return $this->currency ?? $this->getLocaleCountry(); }
+    public function setCurrency(string $currency): self
+    {
+        $this->currency = Currencies::exists($currency) ? $currency : "USD";
+        return $this;
     }
 }

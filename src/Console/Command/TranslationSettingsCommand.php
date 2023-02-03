@@ -4,8 +4,8 @@ namespace Base\Console\Command;
 
 use Base\Console\Command;
 use Base\Service\BaseService;
-use Base\Service\LocaleProvider;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\Localizer;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
 use Base\Service\TranslatorInterface;
@@ -23,10 +23,10 @@ class TranslationSettingsCommand extends Command
      */
     protected $settingBag;
     
-    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+    public function __construct(LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         SettingBagInterface $settingBag)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->settingBag = $settingBag;
     }
 
@@ -43,8 +43,8 @@ class TranslationSettingsCommand extends Command
         $path = $input->getOption('path');
 
         $locale = $input->getOption('locale');
-        $locale = $locale ? $this->localeProvider->getLocale($locale) : null;
-        $availableLocales = LocaleProvider::getAvailableLocales();
+        $locale = $locale ? $this->localizer->getLocale($locale) : null;
+        $availableLocales = Localizer::getAvailableLocales();
         if($locale && !in_array($locale, $availableLocales))
             throw new \Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
 

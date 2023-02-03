@@ -13,7 +13,7 @@ use Base\Field\Type\ImageType;
 use Base\Field\Type\TranslationType;
 use Base\Form\Common\AbstractType;
 use Base\Service\SettingBag;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 
@@ -33,19 +33,19 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
     protected $settingBag;
 
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;
 
-    public function __construct(SettingBag $settingBag, LocaleProvider $localeProvider, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(SettingBag $settingBag, Localizer $localizer, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->settingBag = $settingBag;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -179,7 +179,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                     "fields" => $fields,
                     "autoload" => false,
                     "multiple" => true,
-                    "required_locales" => [$this->localeProvider->getDefaultLocale()],
+                    "required_locales" => [$this->localizer->getDefaultLocale()],
                     "translation_class" => SettingIntl::class,
                 ]);
 
@@ -192,7 +192,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                     "fields" => $fields,
                     "autoload" => false,
                     "multiple" => true,
-                    "locale" => $this->localeProvider->getDefaultLocale(),
+                    "locale" => $this->localizer->getDefaultLocale(),
                     "single_locale" => true,
                     "translation_class" => SettingIntl::class,
                 ]);

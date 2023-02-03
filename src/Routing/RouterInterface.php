@@ -40,7 +40,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getRequest(): ?Request;
     public function getEnvironment(): string;
     public function getLocale (?string $locale = null): string;
-    public function getLang(?string $lang = null): string;
+    public function getLocaleLang(?string $lang = null): string;
 
     public function getContext(): RequestContext;
     public function setContext(RequestContext $context);

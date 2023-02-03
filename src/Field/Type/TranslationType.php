@@ -6,7 +6,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -29,9 +29,9 @@ use UnexpectedValueException;
 class TranslationType extends AbstractType implements DataMapperInterface
 {
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
-    protected $localeProvider = null;
+    protected $localizer = null;
 
     /**
      * @var Environment
@@ -46,15 +46,15 @@ class TranslationType extends AbstractType implements DataMapperInterface
      */
     protected $classMetadataManipulator = null;
 
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, Environment $twig)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocalizerInterface $localizer, Environment $twig)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->twig = $twig;
     }
 
     public function getBlockPrefix(): string { return 'translatable'; }
-    public function getDefaultLocale() { return $this->localeProvider->getDefaultLocale(); }
+    public function getDefaultLocale() { return $this->localizer->getDefaultLocale(); }
 
     /**
      * {@inheritdoc}
@@ -64,13 +64,13 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
             'label' => false,
 
-            'locale'            => $this->localeProvider->getLocale(),
+            'locale'            => $this->localizer->getLocale(),
             'locale_options'    => [],
 
             'single_locale'     => false,
-            'default_locale'    => $this->localeProvider->getDefaultLocale(),
+            'default_locale'    => $this->localizer->getDefaultLocale(),
             'required_locales'  =>  [],
-            'available_locales' => $this->localeProvider->getAvailableLocales(),
+            'available_locales' => $this->localizer->getAvailableLocales(),
 
             'by_reference' => false,
             'empty_data'   => fn(FormInterface $form) => new ArrayCollection,
@@ -219,11 +219,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 $view->vars["nonempty_locales"][] = $locale;
         }
 
-        $view->vars["compatible_locale"] = $this->localeProvider->getDefaultLocale();
-        foreach($this->localeProvider->getAvailableLocales() as $availableLocale) {
+        $view->vars["compatible_locale"] = $this->localizer->getDefaultLocale();
+        foreach($this->localizer->getAvailableLocales() as $availableLocale) {
 
-            if($availableLocale == $this->localeProvider->getDefaultLocale()) continue;
-            if($this->localeProvider->compatibleLocale($this->localeProvider->getLocale(), $availableLocale, $view->vars["nonempty_locales"]))
+            if($availableLocale == $this->localizer->getDefaultLocale()) continue;
+            if($this->localizer->compatibleLocale($this->localizer->getLocale(), $availableLocale, $view->vars["nonempty_locales"]))
                 $view->vars["compatible_locale"] = $availableLocale;
         }
 

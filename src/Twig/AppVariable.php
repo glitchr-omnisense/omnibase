@@ -3,7 +3,7 @@
 namespace Base\Twig;
 
 use Base\Service\ReferrerInterface;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Base\Service\SettingBag;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\ProxyTrait;
@@ -66,20 +66,20 @@ class AppVariable
     public $backoffice;
 
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    public $localeProvider;
+    public $localizer;
     
     public function __construct(
         \Symfony\Bridge\Twig\AppVariable $appVariable, EasyAdminVariable $ea, RandomVariable $random, SiteVariable $site, EmailVariable $email, BackofficeVariable $backoffice,
         SettingBag $settingBag, ParameterBagInterface $parameterBag,
-        ReferrerInterface $referrer, Environment $twig, LocaleProvider $localeProvider)
+        ReferrerInterface $referrer, Environment $twig, Localizer $localizer)
     {
         $this->settingBag     = $settingBag;
         $this->referrer       = $referrer;
         $this->twig           = $twig;
         $this->parameterBag   = $parameterBag;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
 
         $this->backoffice = $backoffice;
         $this->random     = $random;
@@ -104,9 +104,9 @@ class AppVariable
 
     public function locale()  {
         return [
-            "_self"  => $this->localeProvider->getLocale(),
-            "lang"    => $this->localeProvider->getLang(),
-            "country" => $this->localeProvider->getCountry()
+            "_self"  => $this->localizer->getLocale(),
+            "lang"    => $this->localizer->getLocaleLang(),
+            "country" => $this->localizer->getLocaleCountry()
         ];
     }
 }

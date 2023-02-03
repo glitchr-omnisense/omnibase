@@ -5,7 +5,7 @@ namespace Base\Security\Voter;
 use Base\Routing\RouterInterface;
 use Base\Security\LoginFormAuthenticator;
 use Base\Security\RescueFormAuthenticator;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -26,21 +26,21 @@ class RouteVoter extends Voter
      * */
     protected $parameterBag;
     /** 
-     * @var LocaleProvider 
+     * @var Localizer 
      * */
-    protected $localeProvider;
+    protected $localizer;
 
     protected ?array $permittedHosts;
-    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider)
+    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, LocalizerInterface $localizer)
     {
         $this->router       = $router;
         $this->parameterBag = $parameterBag;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
 
-        $this->permittedHosts   = array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLocale());
-        $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLang());
-        $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getDefaultLocale());
-        $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getDefaultLang());
+        $this->permittedHosts   = array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localizer->getLocale());
+        $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localizer->getLocaleLang());
+        $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localizer->getDefaultLocale());
+        $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localizer->getDefaultLocaleLang());
         $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", null) ?? [];
         $this->permittedHosts = array_transforms(fn($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $this->permittedHosts);
 

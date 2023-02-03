@@ -6,7 +6,7 @@ use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST;
 use RuntimeException;
@@ -15,9 +15,9 @@ use Doctrine\ORM\Events;
 class TranslatableWalker extends SqlWalker
 {
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var string
@@ -30,7 +30,7 @@ class TranslatableWalker extends SqlWalker
     public function __construct($query, $parserResult, array $queryComponents)
     {
         parent::__construct($query, $parserResult, $queryComponents);
-        $this->localeProvider = $this->getLocaleProvider();
+        $this->localizer = $this->getLocalizer();
     }
 
     public function walkFromClause($fromClause): string
@@ -91,12 +91,12 @@ class TranslatableWalker extends SqlWalker
         return $sql;
     }
 
-    protected function getLocaleProvider(): LocaleProvider
+    protected function getLocalizer(): Localizer
     {
         foreach ($this->getEntityManager()->getEventManager()->getListeners(Events::loadClassMetadata) as $listener) {
 
             if ($listener instanceof IntlSubscriber)
-                return $listener->getLocaleProvider();
+                return $listener->getLocalizer();
         }
 
         throw new RuntimeException('Locale provider not found.');

@@ -12,7 +12,7 @@ use Base\Service\BaseService;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -78,7 +78,7 @@ trait BaseTrait
     public static function getEntityHydrator(): ?EntityHydrator          { return (self::class === BaseService::class) ? BaseService::$entityHydrator : BaseService::getEntityHydrator(); }
     public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$imageService   : BaseService::getImageService(); }
     public static function getIconProvider()  : ?IconProvider            { return (self::class === BaseService::class) ? BaseService::$iconProvider   : BaseService::getIconProvider(); }
-    public static function getLocaleProvider(): ?LocaleProviderInterface { return (self::class === BaseService::class) ? BaseService::$localeProvider : BaseService::getLocaleProvider(); }
+    public static function getLocalizer(): ?LocalizerInterface { return (self::class === BaseService::class) ? BaseService::$localizer : BaseService::getLocalizer(); }
     public static function getRouter()        : ?RouterInterface         { return (self::class === BaseService::class) ? BaseService::$router         : BaseService::getRouter(); }
     public static function getFirewallMap()   : ?FirewallMapInterface    { return (self::class === BaseService::class) ? BaseService::$firewallMap    : BaseService::getFirewallMap(); }
     public static function getTwig()          : ?Environment             { return (self::class === BaseService::class) ? BaseService::$twig           : BaseService::getTwig(); }

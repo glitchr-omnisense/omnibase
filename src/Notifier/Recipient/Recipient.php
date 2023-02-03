@@ -2,7 +2,7 @@
 
 namespace Base\Notifier\Recipient;
 
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 
 class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implements LocaleRecipientInterface, TimezoneRecipientInterface
 {
@@ -23,7 +23,7 @@ class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implemen
         parent::__construct($email ?? '', $phone ?? '');
 
         if(!$locale)
-            $locale = LocaleProvider::getDefaultLocale();
+            $locale = Localizer::getDefaultLocale();
         if(!$timezone)
             $timezone = "UTC";
 

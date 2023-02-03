@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 
@@ -19,16 +19,16 @@ class DateTimePickerType extends AbstractType
     /** @var ParameterBagInterface */
     protected $parameterBag;
 
-    /** @var LocaleProvider */
-    protected $localeProvider;
+    /** @var Localizer */
+    protected $localizer;
 
     /** @var Environment */
     protected $twig;
 
-    public function __construct(ParameterBagInterface $parameterBag, Environment $twig, LocaleProviderInterface $localeProvider)
+    public function __construct(ParameterBagInterface $parameterBag, Environment $twig, LocalizerInterface $localizer)
     {
         $this->parameterBag = $parameterBag;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->twig = $twig;
     }
 
@@ -47,7 +47,7 @@ class DateTimePickerType extends AbstractType
             "debug" => false,
             "datetimepicker" => [
                 "enableTime" => true,
-                "locale" => $this->localeProvider->getLang(),
+                "locale" => $this->localizer->getLocaleLang(),
                 "dateFormat" => "Y-m-d H:i",
             ]
         ]);

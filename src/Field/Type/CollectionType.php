@@ -64,6 +64,7 @@ class CollectionType extends AbstractType
             'prototype_data' => null,
             'prototype_name' => '__prototype__',
             'group' => true,
+            'checkbox' => false,
             'row_group' => true,
             'entry_collapsed' => true,
             'entry_type' => TextType::class,

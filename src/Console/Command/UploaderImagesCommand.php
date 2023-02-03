@@ -6,7 +6,7 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Controller\UX\FileController;
 use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Service\ImageServiceInterface;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,10 +35,10 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
 
     protected $defaultFormats = [];
     public function __construct(
-        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         ImageServiceInterface $imageService, FileController $fileController)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->imageService   = $imageService;
         $this->fileController = $fileController;
 

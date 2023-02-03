@@ -6,7 +6,7 @@ use Base\Traits\CacheClearTrait;
 use Base\Console\Command;
 use Base\Notifier\Notifier;
 use Base\Service\Flysystem;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,10 +54,10 @@ class CacheClearCommand extends Command
     protected $router;
     
     public function __construct(
-        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
+        LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
         SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, RouterInterface $router, string $projectDir, string $cacheDir)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
 
         $this->flysystem = $flysystem;

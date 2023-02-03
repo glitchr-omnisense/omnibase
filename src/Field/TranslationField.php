@@ -3,7 +3,7 @@
 namespace Base\Field;
 
 use Base\Field\Type\TranslationType;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
@@ -109,7 +109,7 @@ class TranslationField implements FieldInterface
     }
     public function renderSingleLocale(?string $singleLocale = null): self
     {
-        $singleLocale = $singleLocale ?? LocaleProvider::getDefaultLocale();
+        $singleLocale = $singleLocale ?? Localizer::getDefaultLocale();
         $this->setFormTypeOption("single_locale", $singleLocale);
         return $this;
     }

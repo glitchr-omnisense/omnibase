@@ -1,0 +1,17 @@
+<div class="timezone-dropdown dropdown">
+    <button class="btn dropdown-toggle" type="button" id="dropdown-timezone" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-globe"></i>
+    </button>
+    <ul class="dropdown-menu {{ class|default("") }}" aria-labelledby="dropdown-timezone">
+    <li class="dropdown-label">
+        <span>{{ '@localizer.timezone._plural'|trans }}</span>
+    </li>
+    {% for timezone in available_timezones %}
+        {% set current = (timezone == current_timezone) ? "active" : null %}
+        <li><a href="{{ path("_switch_timezone", {_timezone: timezone|lang}) }}" {{ html_attributes({"class": "dropdown-item "~current}) }}>
+            <img class="country-flag" width="100%" height="100%" alt="{{timezone|country}}" src="{{asset('bundles/base/images/flags/'~(timezone|country)~'.svg')}}"> {{ timezone|lang_name|capitalize }}
+        </a></li>
+    {% endfor %}
+    </ul>
+</div>
+

@@ -65,7 +65,7 @@ final class TradingMarketTwigExtension extends AbstractExtension
 
         if($applyRate) {
 
-            $targetCurrency = $this->tradingMarket->getRenderedCurrency();
+            $targetCurrency = $this->tradingMarket->getRenderedCurrency() ?? $currency;
             $rate = $this->tradingMarket->getFallback($currency, $targetCurrency)?->getValue();
 
             if($rate !== null) $currency = $targetCurrency;
@@ -77,7 +77,7 @@ final class TradingMarketTwigExtension extends AbstractExtension
 
     public function applyCurrencyRate($amount, string $currency, array $attrs = [], string $locale = null): ?float
     {
-        $targetCurrency = $this->tradingMarket->getRenderedCurrency();
+        $targetCurrency = $this->tradingMarket->getRenderedCurrency() ?? $currency;
         $rate = $this->tradingMarket->getFallback($currency, $targetCurrency)?->getValue();
         if($rate === null) return null;
 

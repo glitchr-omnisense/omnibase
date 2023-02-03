@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Renderer;
 
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Twig\Environment;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -16,9 +16,9 @@ abstract class AbstractTagRenderer implements TagRendererInterface
     protected $twig;
 
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var SluggerInterface
@@ -33,10 +33,10 @@ abstract class AbstractTagRenderer implements TagRendererInterface
     protected array $defaultScriptAttributes;
     protected array $defaultLinkAttributes;
 
-    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag)
+    public function __construct(Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag)
     {
         $this->twig = $twig;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->slugger = $slugger;
 
         $this->parameterBag = $parameterBag;

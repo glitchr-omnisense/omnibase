@@ -1,6 +1,10 @@
 
 import '@glitchr/imaginejs';
 
+import Button from 'bootstrap/js/dist/tooltip';
+
+import "./styles/js/button";
+
 import Tooltip from 'bootstrap/js/dist/tooltip';
 $(window).on("load.tooltip", function() { $('[data-toggle="tooltip"]').tooltip({html:true}) });
 $(window).on("onbeforeunload.tooltip",function() { $("div[id^='tooltip']").hide().remove(); });

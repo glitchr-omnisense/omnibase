@@ -11,7 +11,7 @@ use Base\Console\Command;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\BaseService;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,10 +26,10 @@ class IconEntitiesCommand extends Command
      */
     protected $classMetadataManipulator;
     
-    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+    public function __construct(LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         ClassMetadataManipulator $classMetadataManipulator)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 

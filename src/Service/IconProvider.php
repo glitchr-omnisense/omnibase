@@ -22,19 +22,19 @@ class IconProvider extends AbstractLocalCache
      */
     protected $imageService;
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
     /**
      * @var Router
      */
     protected $router;
 
-    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, LocaleProviderInterface $localeProvider, RouterInterface $router, string $cacheDir)
+    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir)
     {
         $this->annotationReader = $annotationReader;
         $this->imageService = $imageService;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->router = $router;
 
         parent::__construct($cacheDir);
@@ -69,14 +69,14 @@ class IconProvider extends AbstractLocalCache
     {
         if($this->routeIcons && $route === null) return $this->routeIcons;
 
-        return $this->routeIcons[$route.".".$this->localeProvider->getLang()]
+        return $this->routeIcons[$route.".".$this->localizer->getLocaleLang()]
             ?? $this->routeIcons[$route]
 
-            ?? $this->routeIcons[$route.".default.".$this->localeProvider->getLang()]
+            ?? $this->routeIcons[$route.".default.".$this->localizer->getLocaleLang()]
             ?? $this->routeIcons[$route.".default"]
 
-            ?? $this->routeIcons[$route.".".$this->localeProvider->getDefaultLang()]
-            ?? $this->routeIcons[$route.".default.".$this->localeProvider->getDefaultLang()]
+            ?? $this->routeIcons[$route.".".$this->localizer->getDefaultLocaleLang()]
+            ?? $this->routeIcons[$route.".default.".$this->localizer->getDefaultLocaleLang()]
             ?? null;
     }
 
