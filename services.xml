@@ -1036,6 +1036,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
         </service>
 
+        <service id="Base\Field\Configurator\LocaleConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\TextConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\QuillConfigurator">
             <tag name="ea.field_configurator" />

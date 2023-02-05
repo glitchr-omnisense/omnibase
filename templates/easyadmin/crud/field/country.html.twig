@@ -3,10 +3,10 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% if field.value is iterable %}
     {% for value in field.value %}
-        <span class="badge badge-secondary"><img class="country-flag" src="{{asset('bundles/base/images/flags/'~value~'.svg')}}"></span>
+        <span class="badge badge-secondary"><img class="country-flag" src="{{asset('bundles/base/images/flags/'~(value|country)~'.svg')}}"></span>
     {% endfor %}
 {% elseif field.value is not null %}
-    <img class="country-flag" src="{{asset('bundles/base/images/flags/'~field.value~'.svg')}}"> {{ field.formattedValue ?? '' }}
+    <span class="badge badge-secondary"><img class="country-flag" src="{{asset('bundles/base/images/flags/'~(field.value|country)~'.svg')}}"></span>
 {% else %}
     <span class="badge badge-secondary">{{field.formattedValue ?? '-'}}</span>
 {% endif %}
