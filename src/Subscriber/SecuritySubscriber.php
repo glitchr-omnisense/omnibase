@@ -15,7 +15,7 @@ use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
 use Base\Routing\RouterInterface;
 use Base\Security\RescueFormAuthenticator;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\MaternityUnitInterface;
 
@@ -93,9 +93,9 @@ class SecuritySubscriber implements EventSubscriberInterface
     private $settingBag;
 
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    private $localeProvider;
+    private $localizer;
 
     /**
      * @var Translator
@@ -110,7 +110,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         RequestStack $requestStack,
         ReferrerInterface $referrer,
         SettingBagInterface $settingBag,
-        LocaleProvider $localeProvider,
+        Localizer $localizer,
         RouterInterface $router,
         ParameterBagInterface $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
@@ -122,7 +122,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->translator  = $translator;
         $this->router  = $router;
 
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->userRepository = $userRepository;
 
         $this->maternityUnit = $maternityUnit;
@@ -212,7 +212,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             // If not, then user is redirected to a specific route
             $routeRestriction = $this->settingBag->getScalar("base.settings.access_restriction.redirect_on_deny") ?? [];
             foreach($routeRestriction as $i => $route)
-                $routeRestriction[$i] = str_rstrip($route, ".".$this->localeProvider->getDefaultLang());
+                $routeRestriction[$i] = str_rstrip($route, ".".$this->localizer->getDefaultLocaleLang());
 
             if (!in_array($this->router->getRouteName(), $routeRestriction)) {
 
@@ -424,7 +424,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        if($this->maintenanceProvider->redirectOnDeny($event, $this->localeProvider->getLocale())) {
+        if($this->maintenanceProvider->redirectOnDeny($event, $this->localizer->getLocale())) {
             if($this->profiler) $this->profiler->disable();
             $event->stopPropagation();
         }
@@ -434,7 +434,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        if($this->maternityUnit->redirectOnDeny($event, $this->localeProvider->getLocale())) {
+        if($this->maternityUnit->redirectOnDeny($event, $this->localizer->getLocale())) {
             if($this->profiler) $this->profiler->disable();
             $event->stopPropagation();
         }

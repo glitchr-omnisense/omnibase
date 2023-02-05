@@ -1,0 +1,9 @@
+<div class="timezone-default">
+    <span class="label">{{ "@localizer.timezone._singular"|trans }}</span>
+    <ul class="timezone">
+    {% for timezone in available_timezones %}
+        {% set current = (timezone == current_timezone) ? "active" : null %}
+        <li><a href="{{ path("_switch_timezone", {_timezone: timezone}) }}" {{ html_attributes({"class":current}) }}>{{timezone}}</a></li>
+    {% endfor %}
+    </ul>
+</div>

@@ -7,7 +7,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Service\Model\Autocomplete;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
@@ -68,8 +68,8 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var AuthorizationChecker */
     protected $authorizationChecker;
 
-    /** @var LocaleProvider */
-    protected $localeProvider;
+    /** @var Localizer */
+    protected $localizer;
 
     /** @var AdminUrlGenerator */
     protected $adminUrlGenerator;
@@ -86,7 +86,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function __construct(
         FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator,
         ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager,
-        LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator,
+        Localizer $localizer, AdminUrlGenerator $adminUrlGenerator,
         Environment $twig, AuthorizationChecker $authorizationChecker, ObfuscatorInterface $obfuscator, ParameterBagInterface $parameterBag, RouterInterface $router)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -99,7 +99,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->authorizationChecker = $authorizationChecker;
 
         $this->formFactory = $formFactory;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->router = $router;
 
@@ -461,6 +461,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $oldData = $viewData->toArray();
 
             $mapping = $viewData->getMapping();
+            if(!is_array($dataChoices)) $dataChoices = [$dataChoices];
             foreach(array_diff_object($oldData, $dataChoices) as $entry) {
 
                 if(!$isOwningSide && $mappedBy) {
@@ -670,7 +671,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $selectOpts["multivalue"] = $options["multivalue"];
 
             if(!array_key_exists("language", $selectOpts))
-                $selectOpts["language"] = $this->localeProvider->getLang($this->localeProvider->getLocale($options["language"]));
+                $selectOpts["language"] = $this->localizer->getLocaleLang($this->localizer->getLocale($options["language"]));
 
             if(!array_key_exists("tokenSeparators", $selectOpts))
                      $selectOpts["tokenSeparators"] = $selectOpts["tokenSeparators"] ?? $options["tokenSeparators"];

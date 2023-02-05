@@ -32,9 +32,9 @@ class Sitemapper implements SitemapperInterface
     protected $router;
 
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var MimeTypes
@@ -45,11 +45,11 @@ class Sitemapper implements SitemapperInterface
     protected string $hostname = "";
     protected array $urlset = [];
 
-    public function __construct(Environment $twig, AnnotationReader $annotationReader, RouterInterface $router, LocaleProviderInterface $localeProvider)
+    public function __construct(Environment $twig, AnnotationReader $annotationReader, RouterInterface $router, LocalizerInterface $localizer)
     {
         $this->twig             = $twig;
         $this->router           = $router;
-        $this->localeProvider   = $localeProvider;
+        $this->localizer   = $localizer;
         $this->annotationReader = $annotationReader;
 
         $this->mimeTypes        = new MimeTypes();
@@ -105,7 +105,7 @@ class Sitemapper implements SitemapperInterface
         $sitemapEntry->setLastMod($sitemap->getLastMod());
         $sitemapEntry->setChangeFreq($sitemap->getChangeFreq());
 
-        $locale = $this->localeProvider->getLocale($routeParameters["_locale"] ?? $routeRequirements["_locale"] ?? null);
+        $locale = $this->localizer->getLocale($routeParameters["_locale"] ?? $routeRequirements["_locale"] ?? null);
         $sitemapEntry->setLocale($locale);
 
         $this->urlset[$routeName.".".md5(serialize($routeParameters))] = $sitemapEntry;

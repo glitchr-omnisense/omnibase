@@ -1,0 +1,10 @@
+lang:
+    _singular: Langue
+    _plural: Langues
+country:
+    _singular: Pays
+    _plural: Pays
+
+timezone:
+    _singular: Fuseau horaire
+    _plural: Fuseaux horaires

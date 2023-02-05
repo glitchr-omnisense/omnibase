@@ -3,7 +3,7 @@
 namespace Base\Routing\Matcher;
 
 use Base\Routing\Generator\AdvancedUrlGenerator;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Base\Traits\BaseTrait;
 use Exception;
 use Generator;
@@ -70,7 +70,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
             if($_routeName !== $routeName && !str_starts_with($_routeName, $routeName."."))
                 return null;
 
-            $_routeNameWithoutLocale = str_rstrip($_routeName, ".".LocaleProvider::getDefaultLang());
+            $_routeNameWithoutLocale = str_rstrip($_routeName, ".".Localizer::getDefaultLocaleLang());
             if($_routeName != $_routeNameWithoutLocale)
                 yield null => $_routeNameWithoutLocale;
 

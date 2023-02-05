@@ -9,7 +9,7 @@ use Base\Routing\RouterInterface;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
 use Base\Service\ImageServiceInterface;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
 use Twig\Environment;
@@ -86,13 +86,13 @@ trait BaseCommonTrait {
     }
 
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
-    protected static $localeProvider = null;
-    public static function setLocaleProvider(?LocaleProviderInterface $localeProvider) {  self::$localeProvider = $localeProvider; }
+    protected static $localizer = null;
+    public static function setLocalizer(?LocalizerInterface $localizer) {  self::$localizer = $localizer; }
 
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
     protected static $tokenStorage = null;
     public static function setTokenStorage(?TokenStorageInterface $tokenStorage) {  self::$tokenStorage = $tokenStorage; }

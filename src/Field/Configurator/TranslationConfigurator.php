@@ -8,7 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use Base\Field\TranslationField;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -23,19 +23,19 @@ class TranslationConfigurator implements FieldConfiguratorInterface
     protected $classMetadataManipulator;
 
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
-    private $localeProvider;
+    private $localizer;
 
     /**
      * @var PropertyAccessor
      */
     private $propertyAccessor;
 
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocalizerInterface $localizer)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -64,8 +64,8 @@ class TranslationConfigurator implements FieldConfiguratorInterface
                 $typeClass = $childField->getTypeClass()->getName();
                 if($this->classMetadataManipulator->hasField($typeClass, $fieldName)) {
 
-                    $entity = $childField->get($this->localeProvider->getLocale());
-                    if (!$entity) $entity = $childField->get($this->localeProvider->getDefaultLocale());
+                    $entity = $childField->get($this->localizer->getLocale());
+                    if (!$entity) $entity = $childField->get($this->localizer->getDefaultLocale());
 
                     $value = ($entity ? $this->propertyAccessor->getValue($entity, $fieldName) : null);
                     $renderAsHtml = $field->getCustomOption(TranslationField::OPTION_RENDER_AS_HTML);

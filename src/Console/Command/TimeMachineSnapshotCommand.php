@@ -4,7 +4,7 @@ namespace Base\Console\Command;
 
 use BackupManager\Filesystems\Destination;
 use Base\Console\Command;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TimeMachineInterface;
 use Base\Service\FlysystemInterface;
@@ -30,10 +30,10 @@ class TimeMachineSnapshotCommand extends Command
     protected $flysystem;
 
     public function __construct(
-        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         TimeMachineInterface $timeMachine, FlysystemInterface $flysystem)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->timeMachine = $timeMachine;
         $this->flysystem = $flysystem;
     }

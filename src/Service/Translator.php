@@ -171,12 +171,12 @@ class Translator implements TranslatorInterface
             }
 
             // Fallback in production
-            if($locale != LocaleProvider::getDefaultLocale() && !$this->isDebug) {
+            if($locale != Localizer::getDefaultLocale() && !$this->isDebug) {
 
                 if ($trans == $id)
-                    $trans = $this->transQuiet($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
+                    $trans = $this->transQuiet($id, $parameters, $domain, Localizer::getDefaultLocale());
                 if ($trans == $id && $domainFallback !== false)
-                    $trans = $this->transQuiet($id, $parameters, $domainFallback, LocaleProvider::getDefaultLocale());
+                    $trans = $this->transQuiet($id, $parameters, $domainFallback, Localizer::getDefaultLocale());
             }
         }
 
@@ -212,7 +212,7 @@ class Translator implements TranslatorInterface
     public function transExists(TranslatableMessage|string $id, ?string $domain = null, ?string $locale = null, bool $localeCountry = true):bool
     {
         $locale  ??= $this->getLocale();
-        $catalogue = $this->translator->getCatalogue($localeCountry ? LocaleProvider::__toLocale($locale, "_") : LocaleProvider::__toLang($locale));
+        $catalogue = $this->translator->getCatalogue($localeCountry ? Localizer::__toLocale($locale, "_") : Localizer::__toLocaleLang($locale));
         if($id instanceof TranslatableMessage) {
             $domain ??= $id->getDomain();
             $id       = $id->getMessage();

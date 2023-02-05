@@ -4,7 +4,7 @@ namespace Base\Routing;
 
 use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use InvalidArgumentException;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
@@ -43,9 +43,9 @@ class AdvancedRouter implements RouterInterface
     protected $parameterBag;
 
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var AssetExtension
@@ -81,11 +81,11 @@ class AdvancedRouter implements RouterInterface
     protected bool $keepMachine;
     protected bool $keepSubdomain;
     
-    public function getLang   (?string $lang   = null) :string { return $this->localeProvider->getLang($lang);     }
-    public function getLocale (?string $locale = null) :string { return $this->localeProvider->getLocale($locale); }
+    public function getLocaleLang   (?string $lang   = null) :string { return $this->localizer->getLocaleLang($lang);     }
+    public function getLocale (?string $locale = null) :string { return $this->localizer->getLocale($locale); }
     public function getEnvironment()                   :string { return $this->environment; }
 
-    public function __construct(Router $router, RequestStack $requestStack, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider, AssetExtension $assetTwigExtension, CacheInterface $cache, string $debug, string $environment)
+    public function __construct(Router $router, RequestStack $requestStack, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, AssetExtension $assetTwigExtension, CacheInterface $cache, string $debug, string $environment)
     {
         $this->debug  = $debug;
         $this->environment = $environment;
@@ -96,7 +96,7 @@ class AdvancedRouter implements RouterInterface
 
         $this->requestStack       = $requestStack;
         $this->parameterBag       = $parameterBag;
-        $this->localeProvider     = $localeProvider;
+        $this->localizer     = $localizer;
         $this->assetTwigExtension = $assetTwigExtension;
 
         $this->cache             = $cache;
@@ -280,7 +280,7 @@ class AdvancedRouter implements RouterInterface
 
         $generator = $this->getGenerator();
         $matcher   = $this->getMatcher();
-        $lang      = $this->localeProvider->getLang();
+        $lang      = $this->localizer->getLocaleLang();
 
         $compiledRoutes = $generator->getCompiledRoutes();
         $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName.".".$lang] ?? null;
@@ -305,10 +305,10 @@ class AdvancedRouter implements RouterInterface
 
     protected function getHostParameters(?string $locale = null, ?string $environment = null): ?array
     {
-        $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getDefaultLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getDefaultLang($locale));
+        $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getDefaultLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getDefaultLocaleLang($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", null) ?? [];
 
         if($environment)
@@ -380,7 +380,7 @@ class AdvancedRouter implements RouterInterface
 
         $routeMatch = $this->getRouteMatch($routeUrl) ?? [];
 
-        $isLocalized = ($routeMatch["_locale"] ?? false) && $routeMatch["_locale"] != $this->localeProvider->getDefaultLang();
+        $isLocalized = ($routeMatch["_locale"] ?? false) && $routeMatch["_locale"] != $this->localizer->getDefaultLocaleLang();
         return $routeMatch ? $routeMatch["_route"] . ($isLocalized ? "." . $routeMatch["_locale"] : "") : null;
     }
 
@@ -427,7 +427,7 @@ class AdvancedRouter implements RouterInterface
 
     public function getRouteHash(string $routeNameOrUrl): string
     {
-        return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localeProvider->getLang();
+        return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localizer->getLocaleLang();
     }
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse

@@ -4,7 +4,7 @@ namespace Base\Twig\Variable;
 
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\MaternityUnitInterface;
 use Base\Service\SitemapperInterface;
@@ -26,9 +26,9 @@ class SiteVariable
      */
     protected $translator;
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
     /**
      * @var MaintenanceProvider
      */
@@ -46,7 +46,7 @@ class SiteVariable
         RouterInterface $router,
         SitemapperInterface $sitemapper,
         TranslatorInterface $translator,
-        LocaleProviderInterface $localeProvider,
+        LocalizerInterface $localizer,
         BaseService $baseService,
         MaintenanceProviderInterface $maintenanceProvider,
         MaternityUnitInterface $maternityUnit)
@@ -54,7 +54,7 @@ class SiteVariable
         $this->router = $router;
         $this->translator = $translator;
         $this->baseService = $baseService;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->maternityUnit = $maternityUnit;
         $this->sitemapper = $sitemapper;
@@ -63,7 +63,7 @@ class SiteVariable
     public function index() { return $this->baseService->getIndexPage(); }
     public function meta     (array $meta = [], ?string $locale = null) : array
     {
-        $locale ??= $this->localeProvider->getLocale();
+        $locale ??= $this->localizer->getLocale();
         return array_merge($this->baseService->getMeta($locale), $meta);
     }
 

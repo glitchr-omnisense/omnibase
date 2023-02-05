@@ -73,10 +73,13 @@ class Extension
     }
 
     protected array $image;
+    protected array $imageAttributes;
     public function getImage(?string $pageName = null): ?string { return $this->getFallback("image", $pageName); }
-    public function setImage(?string $image, ?string $pageName = null)
+    public function getImageAttributes(?string $pageName = null): ?array { return $this->getFallback("imageAttributes", $pageName); }
+    public function setImage(?string $image, array $attrs = [], ?string $pageName = null)
     {
         $this->image[$pageName ?? self::PAGE_DEFAULT] = $image;
+        $this->imageAttributes[$pageName ?? self::PAGE_DEFAULT] = $attrs;
         return $this;
     }
 

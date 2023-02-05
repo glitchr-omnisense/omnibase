@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\ArrayType;
 
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
@@ -507,7 +507,7 @@ class EntityHydrator implements EntityHydratorInterface
 
             // Special case: the setter makes loosing the custom keyname (Perhaps one might implement an extends..)
             if(class_implements_interface($value, TranslationInterface::class)) {
-                $key = LocaleProvider::normalize($key);
+                $key = Localizer::normalizeLocale($key);
                 $value->setLocale($key);
             }
 

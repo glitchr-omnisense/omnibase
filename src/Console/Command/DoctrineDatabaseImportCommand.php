@@ -12,7 +12,7 @@ use Base\Database\Type\SetType;
 
 use Base\Service\Model\GraphInterface;
 use Base\Notifier\Notifier;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
@@ -76,10 +76,10 @@ class DoctrineDatabaseImportCommand extends Command
      */
     protected $serializer;
     public function __construct(
-        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         EntityHydrator $entityHydrator, ClassMetadataManipulator $classMetadataManipulator, Notifier $notifier)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
 
         $this->entityHydrator = $entityHydrator;
         $this->notifier       = $notifier;

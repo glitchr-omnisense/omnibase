@@ -31,7 +31,7 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="referrer" />
             <argument type="service" id="twig" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Routing\RouterInterface" alias="Base\Routing\AdvancedRouter"/>
@@ -40,7 +40,7 @@
             <argument type="service" id=".inner" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="twig.extension.assets" />
             <argument type="service" id="cache.adapter" />
             <bind key="$debug">%kernel.debug%</bind>
@@ -65,7 +65,7 @@
 
         <service id="Base\Twig\Environment" parent="twig" decorates="twig">
             <argument type="service" id="request_stack" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
         </service>

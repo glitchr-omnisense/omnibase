@@ -620,6 +620,13 @@ namespace {
         return $randomString;
     }
 
+    function rotate_str(int $n = 1)
+    {
+        return substr($str, -$n) . substr($str, 0, -$n);
+    }
+
+
+
     const     BIT_PREFIX = array("b");
     const    BYTE_PREFIX = array("B", "O", "o");
     const  BINARY_PREFIX = array("", "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi");

@@ -3,7 +3,7 @@
 namespace Base\Security\Voter;
 
 use App\Entity\User;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\maternityUnitInterface;
 use Base\Service\ParameterBagInterface;
@@ -38,9 +38,9 @@ class AccessVoter extends Voter
      * */
     protected $parameterBag;
     /** 
-     * @var LocaleProvider 
+     * @var Localizer 
      * */
-    protected $localeProvider;
+    protected $localizer;
     /** 
      * @var SettingBag 
      * */
@@ -59,21 +59,21 @@ class AccessVoter extends Voter
     protected $maternityUnit;
 
     protected ?array $urlExceptions;
-    public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocaleProviderInterface $localeProvider, MaintenanceProviderInterface $maintenanceProvider, MaternityUnitInterface $maternityUnit)
+    public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocalizerInterface $localizer, MaintenanceProviderInterface $maintenanceProvider, MaternityUnitInterface $maternityUnit)
     {
         $this->requestStack   = $requestStack;
         $this->router         = $router;
         $this->settingBag     = $settingBag;
         $this->parameterBag   = $parameterBag;
         $this->firewallMap    = $firewallMap;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->maternityUnit    = $maternityUnit;
 
-        $this->urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getLocale());
-        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getLang());
-        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getDefaultLocale());
-        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localeProvider->getDefaultLang());
+        $this->urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
+        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocaleLang());
+        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocale());
+        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocaleLang());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", null) ?? [];
     }
 
@@ -140,15 +140,15 @@ class AccessVoter extends Voter
 
                     $locale = $urlException["locale"] ?? null;
                     if($locale !== null)
-                        $exception &= $locale == $this->localeProvider->getLocale() ;
+                        $exception &= $locale == $this->localizer->getLocale() ;
 
                     $country = $urlException["country"] ?? null;
                     if($country !== null)
-                        $exception &= $country == $this->localeProvider->getCountry() ;
+                        $exception &= $country == $this->localizer->getLocaleCountry() ;
 
                     $lang = $urlException["lang"] ?? null;
                     if($lang !== null)
-                        $exception &= $lang == $this->localeProvider->getLang() ;
+                        $exception &= $lang == $this->localizer->getLocaleLang() ;
 
                     $scheme = $urlException["scheme"] ?? null;
                     if($scheme !== null)

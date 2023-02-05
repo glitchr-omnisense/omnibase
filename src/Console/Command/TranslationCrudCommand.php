@@ -4,7 +4,7 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Base\Service\Translator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -43,8 +43,8 @@ class TranslationCrudCommand extends Command
         $action = $input->getOption('action');
 
         $locale = $input->getOption('locale');
-        $locale = $locale ? $this->localeProvider->getLocale($locale) : null;
-        $availableLocales = LocaleProvider::getAvailableLocales();
+        $locale = $locale ? $this->localizer->getLocale($locale) : null;
+        $availableLocales = Localizer::getAvailableLocales();
         if($locale && !in_array($locale, $availableLocales))
             throw new \Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
 

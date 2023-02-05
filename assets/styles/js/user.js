@@ -20,22 +20,22 @@ function getUser()
 
 //
 // Save user information
-CookieConsent.ready();
-CookieConsent.setCookie("user", "necessary", getUser(), 30*24*3600, true);
+Cookie.ready();
+Cookie.set("USER", "INFO", getUser(), 30*24*3600, true);
 
 window.addEventListener('DOMContentLoaded', function(event) {
 
-    CookieConsent.setCookie("user", "necessary", getUser(), 30*24*3600, true);
+    Cookie.set("USER", "INFO", getUser(), 30*24*3600, true);
 
-    window.addEventListener('resize', () => CookieConsent.setCookie("user", "necessary", getUser(), 30*24*3600));
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => CookieConsent.setCookie("user", "necessary", getUser(), 30*24*3600));
+    window.addEventListener('resize', () => Cookie.set("USER", "INFO", getUser(), 30*24*3600));
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => Cookie.set("USER", "INFO", getUser(), 30*24*3600));
 
     Clipboard.ready();
 });
 
 $(window).on("load", function ()
 {
-    CookieConsent.onConfirm(function()
+    Cookie.onConfirm(function()
     {
         $("#gdpr-cookie").removeClass("fa-cookie").addClass("fa-cookie-bite");
         $("#gdpr-icon"  ).removeClass("far fa-circle").addClass("far fa-check-circle").removeClass("fas fa-exclamation-circle");
@@ -43,7 +43,7 @@ $(window).on("load", function ()
         $("#gdpr-text"  ).removeClass("open");
     });
 
-    CookieConsent.onDeny(function()
+    Cookie.onDeny(function()
     {
         $("#gdpr-cookie").removeClass("fa-cookie-bite").addClass("fa-cookie");
         $("#gdpr-icon"  ).removeClass("far fa-check-circle").addClass("fas fa-exclamation-circle").removeClass("far fa-circle");
@@ -51,7 +51,7 @@ $(window).on("load", function ()
         $("#gdpr-text"  ).addClass("open");
     });
 
-    CookieConsent.onCheck(function()
+    Cookie.onCheck(function()
     {
         $("#gdpr-cookie").removeClass("fa-cookie-bite").addClass("fa-cookie");
         $("#gdpr-icon"  ).removeClass("far fa-check-circle").removeClass("fas fa-exclamation-circle").addClass("far fa-circle");
@@ -59,9 +59,9 @@ $(window).on("load", function ()
         $("#gdpr-text"  ).removeClass("open");
     });
 
-    CookieConsent.ready();
-    $("#gdpr").on("swalk:ask",     () => CookieConsent.refresh(null));
-    $("#gdpr").on("swalk:close",   () => CookieConsent.refresh());
-    $("#gdpr").on("swalk:confirm", () => CookieConsent.change(true));
-    $("#gdpr").on("swalk:deny"   , () => CookieConsent.change(false));
+    Cookie.ready();
+    $("#gdpr").on("swalk:ask",     () => Cookie.refresh(null));
+    $("#gdpr").on("swalk:close",   () => Cookie.refresh());
+    $("#gdpr").on("swalk:confirm", () => Cookie.setConsent(true));
+    $("#gdpr").on("swalk:deny"   , () => Cookie.setConsent(false));
 });

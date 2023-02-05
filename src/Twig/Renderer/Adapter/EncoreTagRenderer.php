@@ -11,7 +11,7 @@ use Base\Traits\SimpleCacheTrait;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Asset\Packages;
 use Base\Service\ParameterBagInterface;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Twig\Renderer\AbstractTagRenderer;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
@@ -45,13 +45,13 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     use SimpleCacheTrait;
 
     public function __construct(
-        Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag,
+        Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag,
         ?EntrypointLookupCollectionInterface $entrypointLookupCollection, Packages $packages, string $publicDir, string $cacheDir)
     {
         $this->entrypointLookupCollection = $entrypointLookupCollection;
         if( $this->entrypointLookupCollection == null) return;
 
-        parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
+        parent::__construct($twig, $localizer, $slugger, $parameterBag);
         $this->publicDir = $publicDir;
         $this->packages = $packages;
 

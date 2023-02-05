@@ -1,4 +1,3 @@
-
 //
 // Apply form validation
 window.addEventListener('load', function(event) {

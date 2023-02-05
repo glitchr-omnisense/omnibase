@@ -1,0 +1,10 @@
+lang:
+    _singular: Language
+    _plural: Languages
+country:
+    _singular: Country
+    _plural: Countries
+
+timezone:
+    _singular: Timezone
+    _plural: Timezones

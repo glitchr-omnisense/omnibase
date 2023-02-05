@@ -18,8 +18,8 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     protected $settingBag;
     /** @var AuthorizationChecker */
     protected $authorizationChecker;
-    /** @var LocaleProvider */
-    protected $localeProvider;
+    /** @var Localizer */
+    protected $localizer;
     /** @var TokenStorage */
     protected $tokenStorage;
 
@@ -28,12 +28,12 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     protected $uptime = 0;
     protected $downtime = 0;
 
-    public function __construct(RouterInterface $router, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider, TokenStorageInterface $tokenStorage)
+    public function __construct(RouterInterface $router, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, TokenStorageInterface $tokenStorage)
     {
         $this->router = $router;
 
         $this->settingBag = $settingBag;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
         $this->parameterBag = $parameterBag;
@@ -84,7 +84,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     {
         $this->parseLockPath();
 
-        if(filter_var($this->settingBag->getScalar("base.settings.maintenance", $this->localeProvider->getLocale()))) return true;
+        if(filter_var($this->settingBag->getScalar("base.settings.maintenance", $this->localizer->getLocale()))) return true;
         if($this->lockPath && file_exists($this->lockPath)) return true;
 
         return false;

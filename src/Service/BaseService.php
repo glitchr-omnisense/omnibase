@@ -117,7 +117,7 @@ class BaseService implements RuntimeExtensionInterface
         ParameterBagInterface $parameterBag,
         NotifierInterface $notifier,
         FormFactoryInterface $formFactory,
-        LocaleProviderInterface $localeProvider,
+        LocalizerInterface $localizer,
 
         SettingBag $settingBag,
         ImageService $imageService,
@@ -148,7 +148,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->setImageService($imageService);
         $this->setIconProvider($iconProvider);
         $this->setSettingBag($settingBag);
-        $this->setLocaleProvider($localeProvider);
+        $this->setLocalizer($localizer);
         $this->setTwig($twig);
         $this->setRouter($router);
         $this->setFirewallMap($firewallMap);
@@ -253,7 +253,7 @@ class BaseService implements RuntimeExtensionInterface
 
     public function createForm($type, $data = null, array $options = []): FormInterface { return $this->formFactory->create($type, $data, $options); }
 
-    public function getLocale(?string $locale = null) { return self::getLocaleProvider()->getLocale($locale); }
+    public function getLocale(?string $locale = null) { return self::getLocalizer()->getLocale($locale); }
 
     public function getSalt()   { return $this->getSecret(); }
     public function getSecret() { return $this->getParameterBag("kernel.secret"); }

@@ -3,7 +3,7 @@
 namespace Base\Twig\Renderer\Adapter;
 
 use Base\Routing\RouterInterface;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Twig\Environment;
 use Base\Twig\Renderer\AbstractTagRenderer;
@@ -25,9 +25,9 @@ class HtmlTagRenderer extends AbstractTagRenderer
      */
     protected $router;
 
-    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, RouterInterface $router)
+    public function __construct(Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, RouterInterface $router)
     {
-        parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
+        parent::__construct($twig, $localizer, $slugger, $parameterBag);
         $this->requestStack = $requestStack;
         $this->router = $router;
     }
@@ -128,10 +128,10 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $extension = implode(".", array_reverse($extension));
             $basename  = implode(".", $basename);
 
-            $lang           = $this->localeProvider->getLang();
-            $defaultLang    = $this->localeProvider->getDefaultLang();
-            $locale         = str_replace("-", "_", $this->localeProvider->getLocale());
-            $defaultLocale  = str_replace("-", "_", $this->localeProvider->getDefaultLocale());
+            $lang           = $this->localizer->getLocaleLang();
+            $defaultLang    = $this->localizer->getDefaultLocaleLang();
+            $locale         = str_replace("-", "_", $this->localizer->getLocale());
+            $defaultLocale  = str_replace("-", "_", $this->localizer->getDefaultLocale());
 
             if($this->twig->getLoader()->exists($basename.".".$locale.".".$extension))
                 $name = $basename.".".$locale.".".$extension;

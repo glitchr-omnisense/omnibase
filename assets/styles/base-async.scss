@@ -34,11 +34,18 @@
     .ql-align-center img { float: none; }
 }
 
+.timezone-dropdown .timezone,
 .locale-dropdown .locale { display:flex; list-style: none; }
+.timezone-dropdown .timezone li,
 .locale-dropdown .locale li { padding: 0 0.25em !important; }
+.timezone-dropdown .timezone li:first-child,
 .locale-dropdown .locale li:first-child { border:0; }
+.timezone-dropdown .timezone li,
 .locale-dropdown .locale li { font-weight: normal; }
+.timezone-dropdown .timezone li.active,
 .locale-dropdown .locale li.active { font-weight: bold; }
+.locale-dropdown .dropdown-menu,
+.timezone-dropdown .dropdown-menu { max-height: 200px; overflow: scroll !important; }
 
 .badge { display: inline-flex; }
 .badge > span:before { border-right:1px solid black; padding:0 0.25em 0 0.5em; }
@@ -133,9 +140,13 @@ form .label-wrapper {
 
 .select2-container--bootstrap4 .select2-results__group { color: inherit; }
 
+.timezone-dropdown .dropdown-item,
 .locale-dropdown .dropdown-item { border-radius: 0.25em; padding: 0.5em; }
+.timezone-dropdown .dropdown-item .country-flag ,
 .locale-dropdown .dropdown-item .country-flag { margin-right:0.5em; }
+.timezone-dropdown button i,
 .locale-dropdown button i { margin-right:0.25em; }
+.timezone-dropdown button,
 .locale-dropdown button
 {
     display:flex;
