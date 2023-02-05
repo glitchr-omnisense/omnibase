@@ -47,7 +47,7 @@ class DateTimePickerType extends AbstractType
             "debug" => false,
             "datetimepicker" => [
                 "enableTime" => true,
-                "locale" => $this->localeProvider->getLang(),
+                "locale" => $this->localizer->getLocaleLang(),
                 "dateFormat" => "Y-m-d H:i", // Format must match... between format option and dateFormat (JS Format)
             ]
         ]);
