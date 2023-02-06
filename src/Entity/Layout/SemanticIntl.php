@@ -31,7 +31,7 @@ class SemanticIntl implements TranslationInterface
     }
 
     /**
-     * @ORM\Column(type="array")
+     * @ORM\Column(type="json")
      * @OrderColumn
      */
     protected $keywords = [];
@@ -40,17 +40,6 @@ class SemanticIntl implements TranslationInterface
     {
         $this->keywords = $keywords;
 
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $url;
-    public function getUrl(): ?string { return $this->url; }
-    public function setUrl(?string $url): self
-    {
-        $this->url = $url;
         return $this;
     }
 }

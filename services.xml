@@ -871,6 +871,7 @@
         <service id="Base\Field\Type\RouteType">
             <tag name="form.type" />
             <argument type="service" id="router" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Field\Type\SelectType">

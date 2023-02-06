@@ -17,6 +17,12 @@
   order:1;
 }
 
+.select2-container--bootstrap4 .select2-selection--single
+{
+  height:auto !important;
+  min-height: calc(1.5em + .75rem + 2px)!important
+}
+
 .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow b {
   top: 60%;
   border-color: #FFF8 transparent transparent transparent;
@@ -30,6 +36,11 @@
   position: absolute;
 }
 
+.select2-container .select2-selection--single
+{
+  height:auto !important;
+  min-height:28px;
+}
 .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
   line-height: calc(1.5em + 0.75rem);
 }

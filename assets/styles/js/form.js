@@ -4,6 +4,7 @@ window.addEventListener('load', function(event) {
 
     dispatchEvent(new Event("load.form_type"));
     dispatchEvent(new Event("load.collection_type"));
+    dispatchEvent(new Event("load.array_type"));
 });
 
 window.addEventListener('load', function(event) {

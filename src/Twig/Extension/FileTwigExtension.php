@@ -16,6 +16,7 @@ use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use Twig\TwigTest;
 
 final class FileTwigExtension extends AbstractExtension
 {
@@ -49,7 +50,17 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFunction('lightbox', [ImageService::class,   'lightbox'], ["is_safe" => ['all']]),
             new TwigFunction('image',    [ImageService::class,   'image']),
 
+            new TwigFunction('file_exists',    'file_exists'),
+            new TwigFunction('image',    [ImageService::class,   'image']),
+
             new TwigFunction('asset',   [AdvancedRouter::class, 'getAssetUrl']),
+        ];
+    }
+
+    public function getTests()
+    {
+        return [
+            new TwigTest('ondisk', [$this, 'onDisk'])
         ];
     }
 
@@ -89,6 +100,11 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFilter('thumbnail_noclone ', [ImageService::class, 'thumbnail_noclone ']),
             new TwigFilter('thumbnail_upscale ', [ImageService::class, 'thumbnail_upscale ']),
         ];
+    }
+
+    public function onDisk(string $file): bool
+    {
+        return file_exists(sanitize_url($this->projectDir."/public/".$file));
     }
 
     public function urlify(LinkableInterface|string|null $urlOrPath, ?string $label = null, array $attributes = [])

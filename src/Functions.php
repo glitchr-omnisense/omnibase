@@ -903,8 +903,11 @@ namespace {
     function last(object|array &$array)  { return end($array)   ?? null; }
     function tail(object|array &$array, int $length = -1, bool $preserve_keys = false):array  { return array_slice($array, -min(count($array)-1, $length), null, $preserve_keys); }
 
-    function first(object|array|null $array)  { return $array ? begin($array) : null; }
-    function second(object|array|null $array) { return $array ? ($array[1] ?? null) : null; }
+    function first (object|array|null $array) { return $array ? begin($array) : null; }
+    function second(object|array|null $array) { return first (tail($array)); }
+    function third (object|array|null $array) { return second(tail($array)); }
+    function fourth(object|array|null $array) { return third (tail($array)); }
+    function fifth (object|array|null $array) { return fourth(tail($array)); }
 
     function distance(array $arr1, array $arr2)
     {
