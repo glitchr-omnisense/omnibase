@@ -183,6 +183,11 @@ margin-bottom:1em;
 
 fieldset .form-group { padding: 0; }
 
+.badge { 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 form fieldset .badge.badge-secondary { background-color: var(--sidebar-bg); }
 form fieldset
 {
