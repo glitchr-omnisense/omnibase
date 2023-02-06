@@ -11,6 +11,7 @@ use Base\Service\ImageService;
 use Base\Service\Obfuscator;
 use Base\Twig\Environment;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
+use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
 use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -67,8 +68,10 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFilter('mimetype',       [FileService::class, 'getMimeType']),
             new TwigFilter('extensions',     [FileService::class, 'getExtensions']),
 
-            new TwigFilter('embed',          [$this, 'embed'], ['needs_environment' => true, 'needs_context' => true]),
-            new TwigFilter('url',            [$this, 'url'], ['needs_context' => true]),
+            new TwigFilter('inline_css_email', [$this, 'inline_css_email'], ['needs_context' => true, "is_safe" => ['all']]),
+            new TwigFilter('embed',            [$this, 'embed'], ['needs_environment' => true, 'needs_context' => true]),
+            new TwigFilter('url',              [$this, 'url'], ['needs_context' => true]),
+
             new TwigFilter('asset',          [AdvancedRouter::class, 'getAssetUrl']),
             new TwigFilter('filesize',       [FileService::class,    'filesize']),
             new TwigFilter('obfuscate',      [Obfuscator::class,     'encode']),
@@ -123,6 +126,17 @@ final class FileTwigExtension extends AbstractExtension
         $referenceType = $email instanceof WrappedTemplatedEmail ? AdvancedRouter::ABSOLUTE_URL : $referenceType;
 
         return trim($this->router->getUrl($name, $parameters, $referenceType));
+    }
+
+    public function inline_css_email(array $context, string $body, string ...$css): string
+    {
+        static $inliner;
+        if (null === $inliner) {
+            $inliner = new CssToInlineStyles();
+        }
+    
+        $email = $context["email"] ?? null;
+        return $email ? $inliner->convert($body, implode("\n", $css)) : $body;
     }
 
     public function embed(Environment $twig, array $context, string $src)
