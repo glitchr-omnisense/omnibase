@@ -40,12 +40,13 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFunction('embed',   [$this, 'embed'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('url',     [$this, 'url'], ['needs_context' => true]),
 
-            new TwigFunction('iconify', [IconProvider::class,   'iconify'], ["is_safe" => ['all']]),
-            new TwigFunction('imagify', [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
-            new TwigFunction('urlify',  [$this, 'urlify' ], ["is_safe" => ['all']]),
-            new TwigFunction('linkify', [$this, 'linkify' ], ["is_safe" => ['all']]),
-            new TwigFunction('lightbox',[ImageService::class,   'lightbox'], ["is_safe" => ['all']]),
-            new TwigFunction('image',   [ImageService::class,   'image']),
+            new TwigFunction('iconify',  [IconProvider::class,   'iconify'], ["is_safe" => ['all']]),
+            new TwigFunction('imagify',  [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
+            new TwigFunction('imageset', [ImageService::class, 'imageSet'], ["is_safe" => ['all']]),
+            new TwigFunction('urlify',   [$this, 'urlify' ], ["is_safe" => ['all']]),
+            new TwigFunction('linkify',  [$this, 'linkify' ], ["is_safe" => ['all']]),
+            new TwigFunction('lightbox', [ImageService::class,   'lightbox'], ["is_safe" => ['all']]),
+            new TwigFunction('image',    [ImageService::class,   'image']),
 
             new TwigFunction('asset',   [AdvancedRouter::class, 'getAssetUrl']),
         ];
@@ -57,6 +58,7 @@ final class FileTwigExtension extends AbstractExtension
         [
             new TwigFilter('iconify',        [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFilter('imagify',        [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
+            new TwigFilter('imageset',       [ImageService::class, 'imageSet'], ["is_safe" => ['all']]),
             new TwigFilter('urlify',         [$this, 'urlify' ], ["is_safe" => ['all']]),
             new TwigFilter('linkify',        [$this, 'linkify' ], ["is_safe" => ['all']]),
 

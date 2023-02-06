@@ -50,7 +50,7 @@ class SpamChecker implements SpamCheckerInterface
         $this->debug        = $debug;
     }
 
-    public function getLocaleLang()
+    public function getLang()
     {
         $defaultLocale = $this->parameterBag->get("kernel.default_locale");
         $fallbacks = $this->translator->getFallbackLocales();

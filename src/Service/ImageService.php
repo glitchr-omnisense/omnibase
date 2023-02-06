@@ -104,6 +104,16 @@ class ImageService extends FileService implements ImageServiceInterface
         return $supports_webp ? $this->webp($path, $filters, $config) : $this->image($path, $filters, array_merge($config, ["extension" => $extension]));
     }
 
+    public function imageSet(null|array|string $path, ...$srcset): ?string
+    {
+        if(!$path) return null;
+        if(is_array($path)) return array_map(fn($s) => $this->imageSet($s), $path);
+
+        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
+        return str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
+    }
+
     public function imagify(null|array|string $path, array $attributes = [], ...$srcset): ?string
     {
         if(!$path) return $path;
