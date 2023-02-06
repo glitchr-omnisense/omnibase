@@ -15,7 +15,6 @@ use Base\Field\Type\SelectType;
 use Base\Field\Type\TranslationType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
@@ -24,7 +23,7 @@ use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
 
 use Base\Database\Mapping\Factory\ClassMetadataFactory;
-
+use Doctrine\Persistence\Proxy;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -71,7 +70,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         if(!is_string($entityOrClassOrMetadata) || !class_exists($entityOrClassOrMetadata)) return false;
 
-        return !$this->getEntityManager()->getMetadataFactory()->isTransient($entityOrClassOrMetadata);
+        return !$this->getEntityManager()->getMetadataFactory()->isTransient($entityOrClassOrMetadata) || is_instanceof($entityOrClassOrMetadata, Proxy::class);
     }
 
     public function isEnumType($entityOrClassOrMetadata) : bool
