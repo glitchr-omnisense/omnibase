@@ -27,9 +27,10 @@ class EmailVariable
 
     public function homepage() { return $this->baseService->getIndexPage(); }
 
-    public function title()  { return $this->baseService->getEmail()["title"]  ?? null; }
-    public function slogan() { return $this->baseService->getEmail()["slogan"] ?? null; }
-    public function logo()   { return $this->baseService->getEmail()["logo"]   ?? null; }
+    public function title() :?string { return $this->baseService->getEmail()["title"]  ?? null; }
+    public function slogan():?string { return $this->baseService->getEmail()["slogan"] ?? null; }
+    public function logo()  :?string { return $this->baseService->getEmail()["logo"]   ?? null; }
+    public function address(?string $locale = null):?string { return $this->baseService->getEmail()["address"] ?? null; }
 
     public function age(?string $locale = null) : string { return $this->maternityUnit->getAge($locale); }
 }

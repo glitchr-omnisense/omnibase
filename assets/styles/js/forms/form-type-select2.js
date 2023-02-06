@@ -12,9 +12,11 @@ function highlight_search(text, search) {
     return text.replace(reg, function(str) {return '<mark>'+str+'</mark>'});
 }
 
-window.addEventListener("load.form_type", function () {
+var localCache = {};
+var localCacheSelected = {};
+var localCacheData = {};
 
-    var localCache = {};
+window.addEventListener("load.form_type", function () {
 
     document.querySelectorAll("[data-select2-field]").forEach((function (el) {
 
@@ -156,9 +158,13 @@ window.addEventListener("load.form_type", function () {
             select2["templateResult"]    = "templateResult"    in select2 ? Function('return ' + select2["templateResult"]   )() : defaultTemplate;
             select2["templateSelection"] = "templateSelection" in select2 ? Function('return ' + select2["templateSelection"])() : defaultTemplate;
 
-            // select2["escapeMarkup"] = function(markup) {
-            //     return markup;
-            // };
+        if(!(el.getAttribute("data-select2-field") in localCache))
+            localCache[el.getAttribute("data-select2-field")] = {};
+
+        if(el.getAttribute("data-select2-field") in localCacheSelected)
+            select2["selected"] = localCacheSelected[el.getAttribute("data-select2-field")];
+        if(el.getAttribute("data-select2-field") in localCacheData)
+            select2["data"] = localCacheData[el.getAttribute("data-select2-field")];
 
         if("ajax" in select2) {
 
@@ -187,8 +193,8 @@ window.addEventListener("load.form_type", function () {
                     // Retrieve cache if exists
                     var index = field.attr("id")+":"+term+":"+page;
 
-                    if(options.cache && index in localCache)
-                        return success(localCache[index]);
+                    if(options.cache && index in localCache[el.getAttribute("data-select2-field")])
+                        return success(localCache[el.getAttribute("data-select2-field")][index]);
 
                 } else {
 
@@ -218,11 +224,11 @@ window.addEventListener("load.form_type", function () {
                     options.data.term = term;
                     options.data.page = page;
 
-                    if(options.cache && index in localCache)
-                        return success(localCache[index]);
+                    if(options.cache && index in localCache[el.getAttribute("data-select2-field")])
+                        return success(localCache[el.getAttribute("data-select2-field")][index]);
 
                     return $.ajax(options)
-                                .done((_response) => localCache[index] = _response)
+                                .done((_response) => localCache[el.getAttribute("data-select2-field")][index] = _response)
                                 .done(success)
                                 .fail(function(_response) 
                                 {        
@@ -236,7 +242,7 @@ window.addEventListener("load.form_type", function () {
                                     $('body > .select2-container .loading-results .select2-selection__entry')
                                         .html("<span style='color:red;'>"+msg+"</span>");
 
-                                    delete localCache[index];
+                                    delete localCache[el.getAttribute("data-select2-field")][index];
                                 })
                                 .fail(failure);
                 });
@@ -245,6 +251,7 @@ window.addEventListener("load.form_type", function () {
 
         //
         // Pre-populated data
+
         if(select2["data"].length != 0) $(field).empty();
         $(field).val(select2["selected"] || []).trigger("change");
 
@@ -262,10 +269,20 @@ window.addEventListener("load.form_type", function () {
             if(!select2["multivalue"])
                 select2["selected"] = orderFn(select2["selected"]);
 
+            // Remove search field content after hitting enter
+            $('body > .select2-container input.select2-search__field').focus().val("");
+            $(field).parent().find('input.select2-search__field').val("");
+
+            localCacheSelected[el.getAttribute("data-select2-field")] = select2["selected"];
+            localCacheData[el.getAttribute("data-select2-field")] = select2["data"];
+
         }).on("select2:unselect", function(e) {
 
             if(!select2["multivalue"])
                 select2["selected"] = orderFn(select2["selected"]);
+
+            localCacheSelected[el.getAttribute("data-select2-field")] = select2["selected"];
+            localCacheData[el.getAttribute("data-select2-field")] = select2["data"];
 
         }).on("select2:open", function(e) {
 
@@ -285,6 +302,9 @@ window.addEventListener("load.form_type", function () {
             $(document).off("keyup.select2");
 
             page = "1.0";
+
+            localCacheSelected[el.getAttribute("data-select2-field")] = select2["selected"];
+            localCacheData[el.getAttribute("data-select2-field")] = select2["data"];
 
         }).on("select2:closing", function(e) {
 

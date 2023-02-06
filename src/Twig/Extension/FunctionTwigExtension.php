@@ -98,6 +98,8 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('property_accessor',            [$this, "property_accessor"]),
             new TwigFunction('cast',          "cast"),
 
+            new TwigFunction('mailto',       [$this, 'mailto'], ["is_safe" => ['all']]),
+
             new TwigFunction('addslashes',  'addslashes'),
             new TwigFunction('enum', [$this, 'enum']),
             new TwigFunction('colorify', [$this, 'colorify']),
@@ -124,6 +126,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('at',          'at'),
             new TwigFilter('count_leaves',  'count_leaves'),
 
+            new TwigFilter('mailto',       [$this, 'mailto'], ["is_safe" => ['all']]),
             new TwigFilter('datetime',       [$this, 'datetime'],   ['needs_environment' => true]),
             new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),
             new TwigFilter('progress',       [$this, 'progress'],   ['needs_environment' => true, "is_safe" => ["all"]]),
@@ -144,6 +147,9 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('mb_ucfirst',     'mb_ucfirst'),
             new TwigFilter('mb_ucwords',     'mb_ucwords'),
             new TwigFilter('second',         "second"),
+            new TwigFilter('third',         "third"),
+            new TwigFilter('fourth',         "fourth"),
+            new TwigFilter('fifth',         "fifth"),
             new TwigFilter('empty',          "empty"),
 
             new TwigFilter('colorify',            [$this, 'colorify']),
@@ -498,5 +504,10 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         return '';
+    }
+
+    public function mailto(string $address, string $label)
+    {
+        return "<a href='mailto:".$address."'>".$label."</a>";
     }
 }

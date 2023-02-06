@@ -33,6 +33,11 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
      */
     protected bool $cache = false;
 
+    /**
+     * @var bool
+     */
+    protected bool $warmup = false;
+
     protected $defaultFormats = [];
     public function __construct(
         LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,

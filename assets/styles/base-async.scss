@@ -584,8 +584,9 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
 }
 
 .form-array-item { border-top:0px solid lightgrey; }
-.form-array-item-first { border-top: 0px !important; }
-.form-array-item-last { border-top: 0px !important;border-bottom: 0px !important; }
+.form-array .form-array-items .form-array-item:first-of-type { border-top:0; }
+.form-array .form-array-items .form-array-item{ border-top:1px solid lightgrey; }
+.form-array .form-array-items .form-array-item:last-of-type{ border-bottom:1px solid lightgrey; }
 
 .form-array
 {

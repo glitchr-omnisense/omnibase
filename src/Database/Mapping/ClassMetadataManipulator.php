@@ -188,7 +188,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
                 ];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
-            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array")
+            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array" || $this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "json")
                 $validFields[$fieldName] = ["form_type" => SelectType::class, "tags" => true];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "integer")
                 $validFields[$fieldName] = ["form_type" => NumberType::class];
@@ -209,7 +209,9 @@ class ClassMetadataManipulator extends AbstractLocalCache
             if(is_array($fields[$fieldName]) && !empty($fields[$fieldName])) {
 
                 $fields[$fieldName]["form_type"] = $fields[$fieldName]["form_type"] ?? $validFields[$fieldName]["form_type"] ?? null;
+
                 $validFields[$fieldName] = $fields[$fieldName] ?? $validFields[$fieldName] ?? [];
+
                 unset($fields[$fieldName]);
             }
         }

@@ -394,16 +394,21 @@ position: relative;
 }
 
 .basicLightbox img { max-height: 90vh; }
+.form-email {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .field-email-icon {
-
-background-color: var(--gray-200);
-color: var(--gray-600);
-border-radius:100%;
-font-size:14pt;
-width:14pt;
-padding:0.15em;
-margin:0.15em;
-margin-left:0;
+    background-color: var(--badge-secondary-bg);
+    color: var(--badge-secondary-color);
+    border-radius:100%;
+    font-size:14pt;
+    width:14pt;
+    padding:0.15em;
+    margin:0.15em;
+    margin-left:0;
+    margin-right:0.3em;
 }
 
 .dropdown-menu .dropdown-toggle { margin:auto; }
@@ -1150,8 +1155,14 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-submenu-color); }
     border:1px solid var(--sidebar-border-color);
     border-bottom: 0;
 }
-.form-array { border:1px solid var(--sidebar-bg); }
-.form-array .form-array-inline{ border:1px solid var(--sidebar-bg); }
+
+.form-array .accordion-button .form-group { padding: 3px; }
+.form-array .form-array-items .form-array-item:first-of-type { border-top:0; }
+.form-array .form-array-items .form-array-item{ border-top:1px solid var(--sidebar-border-color); }
+.form-array .form-array-items .form-array-item:last-of-type{ border-bottom:1px solid var(--sidebar-border-color); }
+
+.form-array { border:1px solid var(--sidebar-border-color); }
+.form-array .form-array-inline{ border:1px solid var(--sidebar-border-color); }
 .form-attribute .form-attribute-items { border:  1px solid var(--sidebar-border-color); }
 .content-header .page-actions { max-width: 750px; flex-wrap:wrap; justify-content:flex-end; }
 .content-header .page-actions .btn-group { margin:0.25em; }
