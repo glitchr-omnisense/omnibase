@@ -2455,11 +2455,10 @@ namespace {
 
     function is_identity(?array $array)
     {
-        $i = 0;
         foreach($array ?? [] as $key => $value) {
 
             if(is_array($value) && !is_identity($value)) return false;
-            else if ($i++ !== $value) return false;
+            else if ($key !== $value) return false;
         }
 
         return true;
