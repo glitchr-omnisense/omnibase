@@ -59,7 +59,7 @@ class FormProcessor implements FormProcessorInterface
         else $this->form->setData($formData ?? $data);
         
         foreach($this->form->all() as $childName => $child) // @TODO Use array_map_recursive()
-            $child->setData($array[$childName]);
+            $child->setData($array[$childName] ?? null);
 
         return $this;
     }

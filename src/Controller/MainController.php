@@ -4,13 +4,17 @@ namespace Base\Controller;
 
 use Base\BaseBundle;
 
+use Base\Enum\UserRole;
+use Base\Form\FormProcessorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
 
 use  Base\Service\BaseService;
 use  Base\Service\SettingBag;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class MainController extends AbstractController
 {
@@ -25,7 +29,7 @@ class MainController extends AbstractController
     /**
      * Controller example
      *
-     * @Route("/", name="welcome")
+     * @Route("/", name="app_welcome")
      */
     public function Index(): Response
     {
@@ -38,4 +42,5 @@ class MainController extends AbstractController
         include \dirname(__DIR__).'/Resources/views/welcome.html.php';
         return new Response(ob_get_clean(), Response::HTTP_NOT_FOUND);
     }
+
 }

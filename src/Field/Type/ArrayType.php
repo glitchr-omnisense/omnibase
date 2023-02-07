@@ -25,7 +25,7 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
-class ArrayType extends CollectionType
+class ArrayType extends CollectionType implements DataMapperInterface
 {
     /**
      * @var ClassMetadataManipulator
@@ -94,34 +94,38 @@ class ArrayType extends CollectionType
 //                $data = $event->getData();
 //                $form = $event->getForm();
 //
-////                dump($data, $form);
+//                dump($data, $form);
+////                exit(1);
+////
+//////                dump($data, $form);
 //                $entry = 0;
 //                foreach($data as $key => $value)
 //                {
 //                    $form->add($entry, ChoiceType::class, [ "choices" => [] ]);
 //                    $childForm = $form->get($entry++);
-////                    dump($options["prototype_key"]);
-////                    dump($options["prototype_id"]);
-////                    dump([$options["prototype_key"] => $key, $options["prototype_id"] => $value]);
-////
-////                    $childForm->setData();
+//                    dump($options["prototype_key"]);
+//                    dump($options["prototype_id"]);
+//                    dump([$options["prototype_key"] => $key, $options["prototype_id"] => $value]);
+//
+//                    $childForm->setData();
 ////                    exit(1);
 //                }
-////                if($data) {
-////
-////                    $array = [];
-////                    foreach($data as $id => $element) {
-////
-////                        $form->add($element["__prototype_key__"], ChoiceType::class);
-////                        $childForm = $form->get($element["__prototype_key__"], TextType::class);
-////                        $childForm->setData($element["__prototype_id__"]);
-////
-////                        $array[$element["__prototype_key__"]] = $element["__prototype_id__"];
-////                    }
-////
-////                    $form->setData($array);
-////                }
-////
+//
+//                if($data) {
+//
+//                    $array = [];
+//                    foreach($data as $id => $element) {
+//
+//                        $form->add($element["__prototype_key__"], ChoiceType::class);
+//                        $childForm = $form->get($element["__prototype_key__"], TextType::class);
+//                        $childForm->setData($element["__prototype_id__"]);
+//
+//                        $array[$element["__prototype_key__"]] = $element["__prototype_id__"];
+//                    }
+//
+//                    $form->setData($array);
+//                }
+//////
 ////                dump($form->all(), $form->getParent());
 //            });
 
@@ -140,16 +144,16 @@ class ArrayType extends CollectionType
         $view->vars["pattern"] = $options["pattern"];
         $view->vars["placeholder"] = $options["placeholder"];
     }
-//
-//    public function mapDataToForms($viewData, \Traversable $forms): void
-//    {
-//        dump(iterator_to_array($forms));
-//        dump($viewData);
-//    }
-//
-//    public function mapFormsToData(\Traversable $forms, &$viewData): void
-//    {
-//        dump(iterator_to_array($forms));
-//        dump($viewData);
-//    }
+
+    public function mapDataToForms($viewData, \Traversable $forms): void
+    {
+        dump(iterator_to_array($forms));
+        dump($viewData);
+    }
+
+    public function mapFormsToData(\Traversable $forms, &$viewData): void
+    {
+        dump(iterator_to_array($forms));
+        dump($viewData);
+    }
 }

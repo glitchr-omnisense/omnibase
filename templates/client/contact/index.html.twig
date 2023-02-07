@@ -1,0 +1,24 @@
+{% extends 'layout1.html.twig' %}
+
+{% block title %}Contact{% endblock %}
+{% block content %}
+    <article class="wrapper">
+
+        {{ form_start(form, {'attr': {'class': "form-inline"}}) }}
+
+        <div class="d-flex justify-content-center flex-row flex-wrap">
+            <h1 class="me-3">{{ '@messages.search.title'|trans }}</h1>
+            <div class="input-group w-auto me-3">
+                <div class="form-outline">
+                    {{ form_widget(form.name, {'attr': {'placeholder': '@messages.search.placeholder'|trans}, value: form.vars.value.name }) }}
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        {{ form_end(form) }}
+
+    </article>
+{% endblock %}

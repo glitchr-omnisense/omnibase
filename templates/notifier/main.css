@@ -12,17 +12,15 @@
 }
 
 
-.wrapper {
-    width: 100%;
-}
+/*.wrapper {*/
+/*    width: 100%;*/
+/*}*/
 
 #outlook a {
     padding: 0;
 }
 
 body {
-    width: 100% !important;
-    min-width: 100%;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     margin: 0;
@@ -108,8 +106,7 @@ table.body {
 }
 
 table.container {
-    width: 580px;
-    margin: 0 auto;
+    margin: 1em auto;
     text-align: inherit;
 }
 

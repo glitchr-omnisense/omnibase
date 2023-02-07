@@ -14,8 +14,9 @@ class RouteCrudController extends WidgetCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName,
-        ["id" => fn() => yield ArrayField::new('routeParameters')->setColumns(6)->setPatternFieldName("url")->useAssociativeKeys()->setLabel("Route")->hideOnIndex()],
-        ["id" => fn() => yield RouteField::new('routeName')->setColumns(6)->hideOnIndex()],
-        fn() => yield ArrayField::new('routeParameters')->setPatternFieldName("url")->setLabel("Route")->onlyOnIndex(), $args);
+        ["id" => function() {
+            yield RouteField::new('routeName')->setColumns(6)->hideOnIndex();
+            yield ArrayField::new('routeParameters')->setColumns(6)/*->setPatternFieldName("routeName")*/->useAssociativeKeys()->setLabel("Route")->hideOnIndex();
+        }]);
     }
 }

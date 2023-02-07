@@ -13,6 +13,11 @@ class Notifier extends BaseNotifier
     {
         $notification = new Notification("email.html.twig");
         $notification->setUser($user);
+
+        $url = null;
+        if(!str_ends_with($this->router->getRouteName(), "_send"))
+            $url = $this->router->generate($this->router->getRouteName()."_send");
+
         $notification->setContext([
             "importance" => "high",
             "markdown"   => false,
@@ -25,6 +30,9 @@ class Notifier extends BaseNotifier
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     Proin blandit et lorem sed bibendum.
                     Nam eu urna placerat, rhoncus nulla id, mollis nisi.",
+
+            "action_url" => $url,
+            "action_text" => "Send email",
 
             "content" => $_GET["content"] ?? "<b>ABC.</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     Proin blandit et lorem sed bibendum.
