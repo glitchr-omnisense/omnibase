@@ -517,6 +517,7 @@ body {
     align-items: center;
 }
 
+.badge.badge-secondary { align-items: center; }
 .datagrid td.text-left   > span.badges { justify-content: flex-start; }
 .datagrid td.text-center > span.badges { justify-content: center;  }
 .datagrid td.text-right  > span.badges { justify-content: flex-end;  }
