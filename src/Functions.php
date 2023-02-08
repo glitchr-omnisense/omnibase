@@ -2208,8 +2208,9 @@ namespace {
         return array_intersect_key($array, $arrayMask);
     }
 
-    function object_hydrate(object $object, array $vars)
+    function object_hydrate(object $object, ?array $vars = null)
     {
+        if($vars === null) return $object;
         $reflClass      = new ReflectionClass($object);
 
         do {
