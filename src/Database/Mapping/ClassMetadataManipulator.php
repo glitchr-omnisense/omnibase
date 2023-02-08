@@ -50,7 +50,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
      */
     protected array $globalExcludedFields;
 
-    protected static string $cacheDir;
+    protected static ?string $cacheDir = null;
 
     public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, ?string $cacheDir = null, array $globalExcludedFields = ['id', 'translatable', 'locale'])
     {
@@ -124,7 +124,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         if(!$type) return $type;
         
         try { $doctrineType = \Doctrine\DBAL\Types\Type::getType($type); }
-        catch (\Exception $e) { throw new \LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so.", $e->getCode(), $e); }
+        catch (\Exception $e) { throw new \LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e); }
 
         return $doctrineType;
     }

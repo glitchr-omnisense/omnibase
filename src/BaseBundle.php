@@ -171,11 +171,15 @@ class BaseBundle extends Bundle
             ->addFilter("vault_filter", VaultFilter::class);
         $entityManagerConfig
             ->addCustomNumericFunction("rand", \Base\Database\Function\Rand::class);
-        $entityManagerConfig
-            ->addCustomStringFunction(DqlFunctions\JsonExtract::FUNCTION_NAME, DqlFunctions\JsonExtract::class);
-        $entityManagerConfig
+
+        if(class_exists(DqlFunctions\JsonExtract::class))
+            $entityManagerConfig
+                ->addCustomStringFunction(DqlFunctions\JsonExtract::FUNCTION_NAME, DqlFunctions\JsonExtract::class);
+        if(class_exists(DqlFunctions\JsonSearch::class))
+            $entityManagerConfig
             ->addCustomStringFunction(DqlFunctions\JsonSearch::FUNCTION_NAME, DqlFunctions\JsonSearch::class);
-        $entityManagerConfig
+        if(class_exists(DqlFunctions\JsonContains::class))
+            $entityManagerConfig
             ->addCustomStringFunction(DqlFunctions\JsonContains::FUNCTION_NAME, DqlFunctions\JsonContains::class);
 
         $entityManagerConfig->setDefaultQueryHint(
