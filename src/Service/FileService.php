@@ -2,6 +2,7 @@
 
 namespace Base\Service;
 
+use Base\Controller\UX\FileController;
 use Base\Routing\RouterInterface;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
@@ -45,6 +46,11 @@ class FileService implements FileServiceInterface
     /** * @var string */
     protected string $publicDir;
 
+    /**
+     * @var FileController
+     */
+    protected $fileController;
+
     public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
         $this->twig       = $twig;
@@ -55,6 +61,11 @@ class FileService implements FileServiceInterface
         $this->publicDir  = $flysystem->getPublicDir();
 
         $this->mimeTypes = new MimeTypes();
+    }
+
+    public function setController(FileController $fileController) {
+        $this->fileController = $fileController;
+        return $this;
     }
 
     public function getProjectDir() { return $this->projectDir; }

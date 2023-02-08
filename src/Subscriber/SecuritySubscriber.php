@@ -228,7 +228,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                     return true;
                 }
 
-                $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction)) : null;
+                $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction) ?? $this->router->getRoute(RescueFormAuthenticator::PENDING_ROUTE)) : null;
                 $response ??= $this->router->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
                 if($event) $event->setResponse($response);

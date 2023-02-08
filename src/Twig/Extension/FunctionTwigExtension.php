@@ -14,7 +14,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Type;
 use ReflectionFunction;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
+use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Twig\Environment;
+use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -103,7 +105,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('addslashes',  'addslashes'),
             new TwigFunction('enum', [$this, 'enum']),
             new TwigFunction('colorify', [$this, 'colorify']),
-
+            new TwigFunction('email_preview',   [$this, 'email'], ['needs_context' => true])
         ];
     }
 
@@ -154,6 +156,11 @@ final class FunctionTwigExtension extends AbstractExtension
 
             new TwigFilter('colorify',            [$this, 'colorify']),
         ];
+    }
+
+    public function email(array $context)
+    {
+        return !array_key_exists("email", $context);
     }
 
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }

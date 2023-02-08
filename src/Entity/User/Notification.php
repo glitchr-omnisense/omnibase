@@ -320,7 +320,17 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $htmlTemplate = $this->getHtmlTemplate();
         $context      = $this->getContext();
 
-        return new Response($htmlTemplate ? $this->getTwig()->render($htmlTemplate, $context) : $this->getContent());
+        if($htmlTemplate) {
+
+            $context = array_merge( // Make sure notification context for html template got images pre-rendered
+                $context,           // e.g. when sending emails..
+                ["warmup" => $context["warmup"] ?? true]
+            );
+
+            return new Response($this->getTwig()->render($htmlTemplate, $context));
+        }
+
+        return new Response($this->getContent());
     }
 
     public function send(string $importance = null, RecipientInterface ...$recipients)

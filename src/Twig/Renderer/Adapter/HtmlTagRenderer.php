@@ -176,7 +176,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
         }
 
         try { return $this->twig->load($name)->render($context); }
-        catch (LoaderError $e) { throw new RuntimeException("File not found `".$name."` in any of the provided templates", $e->getCode(), $e); }
+        catch (LoaderError $e) { throw new RuntimeException("Failed to render `".$name."`", $e->getCode(), $e); }
     }
 
     public function renderFallback(Response $response): Response

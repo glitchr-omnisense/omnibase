@@ -2,6 +2,7 @@
 
 namespace Base\Service;
 
+use Base\Controller\UX\FileController;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
@@ -92,8 +93,16 @@ class ImageService extends FileService implements ImageServiceInterface
     public function getMaximumQuality() { return $this->maxQuality; }
     public function isWebpEnabled() { return $this->enableWebp; }
 
-    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->generate("ux_imageWebp", [], $path, array_merge($config, ["filters" => $filters])); }
-    public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image"    , [], $path, array_merge($config, ["filters" => $filters])); }
+    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->generate("ux_imageWebp", [], $path, array_merge($config, ["filters" => $filters]));
+    }
+
+    public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image"    , [], $path, array_merge($config, ["filters" => $filters]));
+    }
+
     public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
         $supports_webp   = array_pop_key("webp", $config) ?? browser_supports_webp();
@@ -102,6 +111,60 @@ class ImageService extends FileService implements ImageServiceInterface
         if($extension) $supports_webp &= ($extension != "svg");
 
         return $supports_webp ? $this->webp($path, $filters, $config) : $this->image($path, $filters, array_merge($config, ["extension" => $extension]));
+    }
+
+    public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
+    {
+        $filters[] = new CropFilter(
+            $x, $y,
+            $width, $height,
+            $position
+        );
+
+        $config = array_key_removes($config, "width", "height", "x", "y", "position");
+        return $this->imagine($path, $filters, $config);
+    }
+
+    public function thumbnailInset   (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET])); }
+    public function thumbnailOutbound(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND])); }
+    public function thumbnailNoclone (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE])); }
+    public function thumbnailUpscale (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE])); }
+    public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        $filters[] = new ThumbnailFilter(
+            $width, $height ?? null,
+            $config["mode"]  ?? ImageInterface::THUMBNAIL_INSET,
+            $config["resampling"] ?? ImageInterface::FILTER_UNDEFINED
+        );
+
+        $config = array_key_removes($config, "width", "height", "mode", "resampling");
+        return $this->imagine($path, $filters, $config);
+    }
+
+    public function obfuscate(string|null $path, array $config = [], array $filters = []): ?string
+    {
+        if($path === null ) return null;
+        $path = "/".str_strip($path, $this->router->getAssetUrl(""));
+
+        $config["path"] = $path;
+        $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
+        $config["local_cache"] = $config["local_cache"] ?? null;
+        if(!empty($filters)) $config["filters"] = $filters;
+
+        while ( ($pathConfig = $this->obfuscator->decode(basename($path))) ) {
+
+            $path = $pathConfig["path"] ?? $path;
+            $config["path"] = $path;
+            $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
+            $config["options"] = array_merge_recursive($pathConfig["options"] ?? [], $config["options"] ?? []);
+            $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
+        }
+
+        $data = $this->obfuscator->encode($config);
+        if($this->obfuscator->isShort()) $data = path_subdivide(str_replace("-", "", $data), 5, 2);
+        else $data = path_subdivide($data, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
+
+        return $data;
     }
 
     public function imageSet(null|array|string $path, ...$srcset): ?string
@@ -139,8 +202,7 @@ class ImageService extends FileService implements ImageServiceInterface
         array $attributes = [],
         array|string $lightboxId = null,
         array|string $lightboxTitle = null,
-        array $lightboxAttributes = [],
-        ...$srcset): ?string
+        array $lightboxAttributes = [], ...$srcset): ?string
     {
         $lightboxPathType = gettype($path);
         $lightboxIdType = gettype($lightboxId);
@@ -180,67 +242,29 @@ class ImageService extends FileService implements ImageServiceInterface
         ]);
     }
 
-    public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
-    {
-        $filters[] = new CropFilter(
-            $x, $y,
-            $width, $height,
-            $position
-        );
-
-        $config = array_key_removes($config, "width", "height", "x", "y", "position");
-        return $this->imagine($path, $filters, $config);
-    }
-
-    public function thumbnail_inset   (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET])); }
-    public function thumbnail_outbound(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND])); }
-    public function thumbnail_noclone (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE])); }
-    public function thumbnail_upscale (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE])); }
-    public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null
-    {
-        $filters[] = new ThumbnailFilter(
-            $width, $height ?? null,
-            $config["mode"]  ?? ImageInterface::THUMBNAIL_INSET,
-            $config["resampling"] ?? ImageInterface::FILTER_UNDEFINED
-        );
-
-        $config = array_key_removes($config, "width", "height", "mode", "resampling");
-        return $this->imagine($path, $filters, $config);
-    }
-
-    public function obfuscate(string|null $path, array $config = [], array $filters = []): ?string
-    {
-        if($path === null ) return null;
-        $path = "/".str_strip($path, $this->router->getAssetUrl(""));
-
-        $config["path"] = $path;
-        $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
-        $config["local_cache"] = $config["local_cache"] ?? null;
-        if(!empty($filters)) $config["filters"] = $filters;
-
-        while ( ($pathConfig = $this->obfuscator->decode(basename($path))) ) {
-
-            $path = $pathConfig["path"] ?? $path;
-            $config["path"] = $path;
-            $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
-            $config["options"] = array_merge_recursive($pathConfig["options"] ?? [], $config["options"] ?? []);
-            $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
-        }
-
-        $data = $this->obfuscator->encode($config);
-        if($this->obfuscator->isShort()) $data = path_subdivide(str_replace("-", "", $data), 5, 2);
-        else $data = path_subdivide($data, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
-
-        return $data;
-    }
-
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
     {
         if(!$path) return null;
 
-        $config["filters"] ??= [];
+        $warmup = array_pop_key("warmup", $config);
 
-        return parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
+        $config["filters"] ??= [];
+        $routeUrl = parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
+
+        // Call controller to warmup image
+        if($warmup && $this->fileController !== null) {
+
+            $routeMatch = $this->router->getRouteMatch($routeUrl);
+
+            list($className, $controllerName) = array_pad(explode("::", $routeMatch["_controller"] ?? ""), 2, null);
+            if(is_instanceof($className, get_class($this->fileController)) && $controllerName) {
+
+                $routeParameters = array_key_removes($routeMatch, "_route", "_controller");
+                $this->fileController->{$controllerName}(...$routeParameters);
+            }
+        }
+
+        return $routeUrl;
     }
 
     public function resolve(string $data, array $filters = []): array

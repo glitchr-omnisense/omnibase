@@ -552,4 +552,12 @@ class SecurityController extends AbstractController
             'is_born'    => $maternityUnit->isBorn()
         ]);
     }
+
+    /**
+     * @Route({"fr": "/est/bientot/disponible", "en": "/is/soon/available"}, name="app_pending")
+     */
+    public function Pending(): Response
+    {
+        return $this->render('@Base/security/pending.html.twig');
+    }
 }
