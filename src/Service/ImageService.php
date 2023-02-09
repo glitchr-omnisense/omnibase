@@ -57,8 +57,8 @@ class ImageService extends FileService implements ImageServiceInterface
     protected string $maxResolution;
     /** @var string */
     protected string $maxQuality;
-    /** @var ?bool */
-    protected ?bool $noImage;
+    /** @var ?string */
+    protected ?string $noImage;
     /** @var ?bool */
     protected ?bool $debug;
 
