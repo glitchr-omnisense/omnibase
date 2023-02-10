@@ -14,9 +14,9 @@
 {% endblock %}
 
 {% block form_end %}
-        {% if not render_rest is defined or render_rest %}
-            {{ form_rest(form) }}
-        {% endif %}
+    {% if not render_rest is defined or render_rest %}
+        {{ form_rest(form) }}
+    {% endif %}
     </form>
 {% endblock %}
 
@@ -577,7 +577,7 @@
     {%- set row_attr = row_attr|merge({'class': 'form-text text-muted' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
     {{ form_errors(form.raw, {row_attr:row_attr}) }}
 
-    {% if multiple %}
+    {% if multiple and form.vars.dropzone %}
     <div id="{{id}}_metadata" class="form-text text-muted">
         <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.fileupload.dropzone.spinner'|trans }}</div>
     </div>

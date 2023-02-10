@@ -134,7 +134,7 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        return $this->render('@Base/security/login.html.twig', [
+        return $this->render('security/login.html.twig', [
             "identifier" => $lastUsername,
             "form" => $formProcessor->getForm()->createView(),
             "last_username" => $lastUsername,
@@ -195,8 +195,9 @@ class SecurityController extends AbstractController
     /**
      * @Route("/register", name="security_register")
      */
-    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ParameterBagInterface $parameterBag): Response {
-
+    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ParameterBagInterface $parameterBag): Response
+    {
+//        dump(2);
         // If already connected..
         if (($user = $this->getUser()) && $user->isPersistent()) {
 
@@ -228,7 +229,7 @@ class SecurityController extends AbstractController
 
                     $notification = new Notification("register.notify_admins");
                     $notification->setUser($newUser);
-                    $notification->setHtmlTemplate("@Base/security/email/register_notifyAdmins.html.twig",["new_user" => $newUser]);
+                    $notification->setHtmlTemplate("security/email/register_notifyAdmins.html.twig",["new_user" => $newUser]);
                     $notification->sendAdmins("email");
                 }
     
@@ -241,7 +242,7 @@ class SecurityController extends AbstractController
 
             ->onDefault(function(FormProcessorInterface $formProcessor) {
 
-                return $this->render('@Base/security/register.html.twig', [
+                return $this->render('security/register.html.twig', [
                     'form' => $formProcessor->getForm()->createView(),
                     'user' => $formProcessor->getData()
                 ]);
@@ -280,7 +281,7 @@ class SecurityController extends AbstractController
 
                 $notification = new Notification('verifyEmail.check');
                 $notification->setUser($user);
-                $notification->setHtmlTemplate("@Base/security/email/verify_email.html.twig", ["token" => $verifyEmailToken]);
+                $notification->setHtmlTemplate("security/email/verify_email.html.twig", ["token" => $verifyEmailToken]);
                 $notification->send("success")->send("urgent");
             }
         }
@@ -359,7 +360,7 @@ class SecurityController extends AbstractController
 
                 $notification = new Notification("adminApproval.required");
                 $notification->setUser($user);
-                $notification->setHtmlTemplate("@Base/security/email/admin_approval.html.twig",["token" => $adminApprovalToken]);
+                $notification->setHtmlTemplate("security/email/admin_approval.html.twig",["token" => $adminApprovalToken]);
                 $notification->sendAdmins("low")->send("success");
             }
         }
@@ -460,7 +461,7 @@ class SecurityController extends AbstractController
                     $resetPasswordToken = new Token("reset-password", 3600);
                     $resetPasswordToken->setUser($user);
 
-                    $notification->setHtmlTemplate("@Base/security/email/reset_password.html.twig", ["token" => $resetPasswordToken]);
+                    $notification->setHtmlTemplate("security/email/reset_password.html.twig", ["token" => $resetPasswordToken]);
                     $notification->setUser($user);
                     $notification->send("email");
                 }
@@ -470,7 +471,7 @@ class SecurityController extends AbstractController
             $notification->send("success");
         }
 
-        return $this->render('@Base/security/reset_password_request.html.twig', [
+        return $this->render('security/reset_password_request.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -520,7 +521,7 @@ class SecurityController extends AbstractController
                 return $authenticateUser;
             }
 
-            return $this->render('@Base/security/reset_password.html.twig', ['form' => $form->createView()]);
+            return $this->render('security/reset_password.html.twig', ['form' => $form->createView()]);
         }
     }
 
@@ -531,7 +532,7 @@ class SecurityController extends AbstractController
      */
     public function Maintenance(MaintenanceProviderInterface $maintenanceProvider): Response
     {
-        return $this->render('@Base/security/maintenance.html.twig', [
+        return $this->render('security/maintenance.html.twig', [
             'remainingTime' => $maintenanceProvider->getRemainingTime(),
             'percentage'    => $maintenanceProvider->getPercentage(),
             'downtime'      => $maintenanceProvider->getDowntime(),
@@ -547,7 +548,7 @@ class SecurityController extends AbstractController
      */
     public function Birth(MaternityUnitInterface $maternityUnit): Response
     {
-        return $this->render('@Base/security/birthdate.html.twig', [
+        return $this->render('security/birthdate.html.twig', [
             'birthdate'  => $maternityUnit->getBirthdate(),
             'is_born'    => $maternityUnit->isBorn()
         ]);
@@ -558,6 +559,6 @@ class SecurityController extends AbstractController
      */
     public function Pending(): Response
     {
-        return $this->render('@Base/security/pending.html.twig');
+        return $this->render('security/pending.html.twig');
     }
 }

@@ -231,7 +231,7 @@ final class FileTwigExtension extends AbstractExtension
             $contentType = mime_content_type($twig->getLoader()->getSourceContext($src)->getPath());
 
             $url = explode("/", $twig->getLoader()->getSourceContext($src)->getName());
-            $prefix = str_rstrip($path, implode("/", tail($url)));
+            $prefix = str_rstrip($path, [implode("/", tail($url)), "/"]);
 
         } catch ( LoaderError $e) {
 
@@ -239,6 +239,7 @@ final class FileTwigExtension extends AbstractExtension
         }
 
         $email = $options["email"] ?? $context["email"] ?? null;
+
         return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : str_lstrip($path, [
             $prefix,
             $this->projectDir."/public",

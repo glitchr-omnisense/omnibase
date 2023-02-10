@@ -36,6 +36,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="form.proxy" />
+            <argument type="service" id="base.notifier" />
         </service>
 
         <service id="Base\Controller\LocalizerController">
@@ -53,6 +54,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+            <argument type="service" id="request_stack" />
             <argument type="service" id="flysystem" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="Base\Repository\Layout\ImageCropRepository" />

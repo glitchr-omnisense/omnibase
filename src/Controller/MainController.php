@@ -16,6 +16,9 @@ use  Base\Service\BaseService;
 use  Base\Service\SettingBag;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
+/**
+ * @Route(priority = -1)
+ * */
 class MainController extends AbstractController
 {
     protected $service;

@@ -407,7 +407,7 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('debug')
                             ->defaultValue(false)
                             ->end()
-                        ->booleanNode('profiler')
+                        ->booleanNode('disable_profiler')
                             ->defaultValue(true)
                             ->end()
                         ->scalarNode('max_quality')

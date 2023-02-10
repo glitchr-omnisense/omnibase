@@ -62,7 +62,7 @@ class ProfileController extends AbstractController
                 ->setData($user)
                 ->onDefault(function(FormProcessorInterface $formProcessor) use ($user) {
 
-                    return $this->render('@Base/client/user/profile_edit.html.twig', [
+                    return $this->render('client/user/profile_edit.html.twig', [
                         'user' => $user, 
                         "form" => $formProcessor->getForm()->createView()
                     ]);
@@ -95,6 +95,6 @@ class ProfileController extends AbstractController
                 return $this->redirectToRoute('user_search');
         }
 
-        return $this->render('@Base/client/user/profile_show.html.twig', ['user' => $user]);
+        return $this->render('client/user/profile_show.html.twig', ['user' => $user]);
     }
 }

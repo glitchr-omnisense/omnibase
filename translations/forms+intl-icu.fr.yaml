@@ -22,6 +22,18 @@ login:
     noAccount: "Pas encore de compte ?"
     forgotPassword: "Mot de passe oublié ?"
 
+contact:
+    title: Formulaire de contact
+    fields:
+        name: Votre nom
+        email: Votre email
+        subject: Le sujet
+        message: Votre message..
+        attachments: Les pièces jointes
+        submit: Envoyer votre message !
+        reset: .. ou l'effacer en cliquant ici
+
+
 resetPassword:
     title: "Réinitialiser votre mot de passe"
     descriptionRequest: "Si tu as oublié ton mot de passe ou si tu veux le réinitialiser, tu es au bon endroit !.

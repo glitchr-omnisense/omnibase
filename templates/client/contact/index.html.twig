@@ -1,24 +1,74 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}Contact{% endblock %}
+{% block title %}{{ '@controllers.base_contact.title'|trans }}{% endblock %}
 {% block content %}
-    <article class="wrapper">
 
-        {{ form_start(form, {'attr': {'class': "form-inline"}}) }}
+    <div class="wrapper sticky-easein show" style="transition: all 0.25s ease 0.25s;">
+        <h1 class="title">{{ '@controllers.base_contact.title'|trans }}</h1>
+        <div class="excerpt">{{ '@controllers.base_contact.description'|trans }}</div>
+    </div>
 
-        <div class="d-flex justify-content-center flex-row flex-wrap">
-            <h1 class="me-3">{{ '@messages.search.title'|trans }}</h1>
-            <div class="input-group w-auto me-3">
-                <div class="form-outline">
-                    {{ form_widget(form.name, {'attr': {'placeholder': '@messages.search.placeholder'|trans}, value: form.vars.value.name }) }}
+    {% block contact %}{% endblock %}
+
+    {% block contact_form %}
+        <article class="wrapper contact-form">
+
+            {{ form_start(form, {'attr': {'class': "form-inline"}}) }}
+
+            <div class="row">
+                <div class="col-md-8 mb-4">
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h2 class="mb-0">{{ '@forms.contact.title'|trans }}</h2>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col d-flex justify-content-center">
+                                    {{ form_errors(form) }}
+                                </div>
+                            </div>
+
+                            <!-- 2 column grid layout with text inputs for the first and last names -->
+                            <div class="row mb-4">
+                                <div class="col">
+                                    {{ form_widget(form.name, {'attr': {'placeholder': '@forms.contact.fields.name'|trans}, value: form.vars.value.name }) }}
+                                </div>
+                                <div class="col">
+                                    {{ form_widget(form.email, {'attr': {'placeholder': '@forms.contact.fields.email'|trans}, value: form.vars.value.email }) }}
+                                </div>
+                            </div>
+
+                            <!-- Text input -->
+                            <div class="row mb-4">
+                                <div class="col">
+                                    {{ form_widget(form.subject, {'attr': {'placeholder': '@forms.contact.fields.subject'|trans}, value: form.vars.value.subject }) }}
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col">
+                                    {{ form_widget(form.message, {'attr': {'placeholder': '@forms.contact.fields.message'|trans}, value: form.vars.value.message }) }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col">
+                                    {{ form_widget(form.attachments, {'attr': {'placeholder': '@forms.contact.fields.attachements'|trans} }) }}
+                                </div>
+                            </div>
+
+                            <!-- Checkbox -->
+                            <div class="d-flex justify-content-center mb-2">
+                                <div class="col">
+                                    {{ form_widget(form.submit, {"attr": {"class":"btn btn-primary"}, "name":'@forms.contact.fields.submit'|trans}) }}
+                                    {{ form_widget(form.reset, {"attr": {"class":"btn btn-outline-primary"}, "name":'@forms.contact.fields.reset'|trans}) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </div>
+                {{ form_end(form) }}
+        </article>
+    {% endblock %}
 
-        {{ form_end(form) }}
-
-    </article>
 {% endblock %}

@@ -22,6 +22,18 @@ login:
     noAccount: "Don't have an account?"
     forgotPassword: "Forgot your password?"
 
+contact:
+    title: Contact form
+    fields:
+        name: Your name
+        email: Your email
+        subject: Subject
+        attachments: Some optional attachments
+        message: Please write your message here
+        submit: Send it !
+        reset: .. or erase everything.
+
+
 resetPassword:
     title: "Reset your password"
     descriptionRequest: "If you forgot your password or just want to reset it, please enter your email address ! 

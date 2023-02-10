@@ -21,6 +21,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @Route(priority = -1)
+ * */
 class AutocompleteController extends AbstractController
 {
     use BaseTrait;
@@ -63,11 +66,7 @@ class AutocompleteController extends AbstractController
     public function Main(Request $request, string $data): Response
     {
         $dict    = $this->obfuscator->decode($data);
-        if($dict === null) {
-
-            $array = ["status" => "Unexpected request"];
-            return new JsonResponse($array, 500);
-        }
+        if($dict === null) return new JsonResponse("Unexpected request", 500);
 
         $fields  = $dict["fields"] ?? null;
         $filters = $dict["filters"] ?? null;
@@ -82,8 +81,7 @@ class AutocompleteController extends AbstractController
         $tokenName = $dict["token_name"] ?? null;
         if(!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
 
-            $array = ["status" => "Invalid token. Please refresh the page and try again"];
-            return new JsonResponse($array, 500);
+            return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
         }
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
@@ -161,8 +159,7 @@ class AutocompleteController extends AbstractController
             return new JsonResponse($array);
         }
 
-        $array = ["status" => "Invalid request"];
-        return new JsonResponse($array, 500);
+        return new JsonResponse("Invalid request", 500);
     }
 
 
@@ -177,15 +174,13 @@ class AutocompleteController extends AbstractController
         $tokenName = $dict["token_name"] ?? null;
         if (!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
 
-            $array = ["status" => "Invalid token. Please refresh the page and try again"];
-            return new JsonResponse($array, 500);
+            return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
         }
 
         try { $rate = $this->tradingMarket->getLatest($source, $target); }
         catch (ChainException $e) {
 
-            $array = ["status" => "Invalid request"];
-            return new JsonResponse($array, 500);
+            return new JsonResponse("Invalid request", 500);
         }
 
         $array = [
@@ -270,7 +265,6 @@ class AutocompleteController extends AbstractController
             return new JsonResponse($array);
         }
 
-        $array = ["status" => "Invalid request"];
-        return new JsonResponse($array, 500);
+        return new JsonResponse("Invalid request", 500);
     }
 }

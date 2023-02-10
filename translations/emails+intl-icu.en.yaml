@@ -10,6 +10,16 @@ unsubscribe:  "Click <a href=\"{0}\">here</a> to unsubscribe"
 returnIndex:  "Click <a href=\"{0}\">here</a> to return to home page"
 itWorks: "It works!"
 
+contact:
+  subject: "Contact page: new message"
+  excerpt: "This is a message from \"{0}\"."
+  content: "<b>{0}</b>. {1}"
+
+contact_confirmation:
+  subject: "Message confirmation !"
+  excerpt: "We just received the message you sent us earlier today. Here is a transcript of your message"
+  content: "<b>{0}</b>. {1}"
+
 resetPassword:
   subject: "Reset your password"
   content:

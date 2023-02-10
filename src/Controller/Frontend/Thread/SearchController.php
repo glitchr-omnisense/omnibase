@@ -33,7 +33,7 @@ class SearchController extends AbstractController
             ->setData($this->formProxy->get("thread:searchbar")?->getData())
             ->onDefault(function(FormProcessorInterface $formProcessor) {
 
-                return $this->render('@Base/client/thread/search.html.twig', [
+                return $this->render('client/thread/search.html.twig', [
                     "form" => $formProcessor->getForm()->createView(),
                     "form_data" => $formProcessor->getForm()->getData()
                 ]);
@@ -68,7 +68,7 @@ class SearchController extends AbstractController
                     return $aRepository->getHierarchy() < $bRepository->getHierarchy() ? -1 : 1;
                 });
     
-                return $this->render('@Base/client/thread/search.html.twig', [
+                return $this->render('client/thread/search.html.twig', [
                     "form" => $formProcessor->getForm()->createView(),
                     "model" => $data,
                     "threads" => $threads,

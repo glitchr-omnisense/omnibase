@@ -4,12 +4,13 @@ namespace Base\Notifier;
 
 use App\Entity\User;
 use Base\Entity\User\Notification;
+use Base\Form\Model\ContactModel;
 use Base\Notifier\Abstract\BaseNotifier;
 use Symfony\Component\Routing\Router;
 
 class Notifier extends BaseNotifier
 {
-    public function testEmail(User $user): Notification
+    public function testEmail(?User $user): Notification
     {
         $notification = new Notification("email.html.twig");
         $notification->setUser($user);
@@ -22,7 +23,6 @@ class Notifier extends BaseNotifier
             "importance" => "high",
             "markdown"   => false,
             "exception" => null,
-            "raw" => true,
 
             "subject" => $_GET["subject"] ?? $this->translator->trans('@emails.itWorks'),
 
@@ -62,5 +62,40 @@ class Notifier extends BaseNotifier
     public function userVerificationEmail(User $user)
     {
 
+    }
+
+    public function contactEmail(ContactModel $contactModel)
+    {
+        $notification = new Notification("email.html.twig");
+        foreach($this->getAdminRecipients() as $adminRecipient)
+            $notification->addRecipient($adminRecipient);
+
+        foreach($contactModel->attachments ?? [] as $file)
+            $notification->addAttachment($file);
+
+        $notification->setContext([
+
+            "importance" => "high",
+            "replyTo" => $contactModel->getRecipient(),
+            "subject" => $this->translator->trans("@emails.contact.subject"),
+            "excerpt" => $this->translator->trans("@emails.contact.excerpt", [$contactModel->name]),
+            "content" => $this->translator->trans("@emails.contact.content", [$contactModel->subject, $contactModel->message]),
+        ]);
+
+        return $notification;
+    }
+
+    public function contactEmailConfirmation(ContactModel $contactModel)
+    {
+        $notification = new Notification("email.html.twig");
+        $notification->addRecipient($contactModel->getRecipient());
+
+        $notification->setContext([
+            "subject" => $this->translator->trans("@emails.contact_confirmation.subject", [$contactModel->name]),
+            "excerpt" => $this->translator->trans("@emails.contact_confirmation.excerpt", []),
+            "content" => $this->translator->trans("@emails.contact_confirmation.content", [$contactModel->subject, $contactModel->message]),
+        ]);
+
+        return $notification;
     }
 }

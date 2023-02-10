@@ -10,6 +10,7 @@ use Base\Service\MaternityUnitInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
 use DateTime;
+use Symfony\Component\Routing\Router;
 
 class SiteVariable
 {
@@ -74,11 +75,12 @@ class SiteVariable
     public function logo()   { return $this->baseService->getSite()["logo"]   ?? null; }
 
     public function scheme   (?string $locale = null) : ?string { return $this->router->getScheme($locale);    }
-    public function host     (?string $locale = null) : ?string { return $this->router->getHostname($locale);  }
+    public function host     (?string $locale = null) : ?string { return $this->router->getHost($locale);  }
+    public function port     (?string $locale = null) : ?string { return $this->router->getPort($locale);  }
     public function domain   (?string $locale = null) : ?string { return $this->router->getDomain($locale);    }
     public function subdomain(?string $locale = null) : ?string { return $this->router->getSubdomain($locale); }
     public function base_dir (?string $locale = null) : string  { return $this->router->getBaseDir($locale);   }
-
+    public function url      (?string $nameOrUrl = "", array $routeParameters = [],  ?string $locale = null) : string  { return $this->router->getUrl($nameOrUrl, $routeParameters, Router::ABSOLUTE_URL); }
     public function under_maintenance() : bool { return $this->maintenanceProvider->isUnderMaintenance(); }
 
     public function birthdate(?string $locale = null) : DateTime { return $this->maternityUnit->getBirthdate($locale); }

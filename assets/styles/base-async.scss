@@ -161,11 +161,17 @@ hr { margin: 0.5rem 0; }
 .form-collection-link-button,
 .form-collection-delete-button {  padding-left:4px; }
 
-.field-raw > input:focus { border: 1px solid var(--sidebar-border-color) !important;  }
-
+.field-raw > input:focus { border: 1px solid #ced4da !important;  }
 
 .form-collection-buttons i { font-size:14pt; }
 
+.deleteBtn {
+    position: absolute;
+    right: 0;
+    min-width: 38px;
+    display: flex;
+    justify-content: center;
+}
 .form-collection-buttons > *:first-child { margin-left:0; }
 .form-collection-buttons > * { margin-left:0.25em; }
 .form-collection-buttons > button { margin-left:0.5em; }
@@ -196,7 +202,7 @@ textarea { min-height:150px !important; }
     border-radius: 10px;
     padding:0.75em;
     width:100%;
-    border-radius: 5px !important;
+    border-radius: 5px;
 }
 
 .btn-raw {
@@ -211,6 +217,7 @@ mark {
     padding:0;
 }
 
+.half { width:50%; }
 .select2-container .select2-selection--multiple .select2-selection__rendered { padding-left:5px; }
 
 .was-validated .form-group:not(.has-error) .ql-container,

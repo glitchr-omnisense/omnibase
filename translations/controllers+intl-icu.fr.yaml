@@ -19,6 +19,15 @@ security_pending:
   title: "C'est pour bientôt !"
   description: "Le site est encore en cours de construction.<br/>La page que vous cherchez est actuellement en cours de fabrication."
 
+base_contact:
+  title: Page de contact
+  description:
+    Vous avez une question ou un retour à nous faire parvenir ? Décrochez votre téléphone ou complètez le formulaire ci-dessous.
+    Nous ne manquerons pas de revenir vers vous dès que possible.
+
+  follow_us: Suivez-vous sur..
+
+
 security_birthdate:
   title:
     default: "Le site ouvre bientot ses portes !"

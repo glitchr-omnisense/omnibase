@@ -10,6 +10,16 @@ unsubscribe:  "Pour se désabonner <a href=\"{0}\">cliquez ici</a>"
 returnIndex:  "Click <a href=\"{0}\">here</a> to return to home page"
 itWorks: "Ça fonctionne !"
 
+contact:
+  subject: "Contact: nouveau message reçu"
+  excerpt: "Ce message a été écrit par \"{0}\"."
+  content: "<b>{0}</b>. {1}"
+
+contact_confirmation:
+  subject: "Message bien reçu, {0}"
+  excerpt: "Nous venons de recevoir votre message. Ci-après la transcription de ce que vous nous avez écrit"
+  content: "<b>{0}</b>. {1}"
+
 resetPassword:
     subject: "Réinitialiser ton mot de passe"
     content: Tu as reçu cet email car tu as demandé une réinitialisation de mot de passe.

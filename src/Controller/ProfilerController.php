@@ -33,7 +33,7 @@ class ProfilerController extends AbstractController
     }
 
     /**
-     * @Route("/_email", name="_profiler_email")
+     * @Route("/_profiler/email", name="_profiler_email", priority=1)
      */
     public function Email(): Response
     {
@@ -41,7 +41,7 @@ class ProfilerController extends AbstractController
     }
 
     /**
-     * @Route("/_email/send", name="_profiler_email_send")
+     * @Route("/_profiler/email/send", name="_profiler_email_send", priority=1)
      */
     public function SendEmail(): Response
     {

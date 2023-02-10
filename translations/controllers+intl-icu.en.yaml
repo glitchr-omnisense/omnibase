@@ -15,6 +15,13 @@ thread_search:
   found: "{0} found in \"{1}\""
   placeholder: "Search here.."
 
+base_contact:
+  title: Have questions? Shoot us an Email.
+  description:
+    Have a question for us, or feedback? Please pick up your phone and call us, or fill out the form below to reach us.
+    We will reply as soon as possible.
+  follow_us: Follow us on..
+
 thread:
   in: "{0} dans \"{1}\""
   more: "Voir plus.."

@@ -24,7 +24,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-/* "abstract" (remove because of routes) */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
     /**

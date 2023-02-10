@@ -51,7 +51,8 @@ abstract class BaseNotifier implements BaseNotifierInterface
             throw new AccessException("Templated notification \"".static::class."::$method\" must return a \"".Notification::class."\" object.");
 
         $arguments = [];
-        if($action == "send") $arguments = [$notification->getImportance()];
+        if ($action == "send")
+            $arguments = [$notification->getImportance()];
 
         return $notification->$action(...$arguments);
     }
@@ -383,7 +384,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Set importance of the notification
         $this->markAsAdmin(false);
 
-        $prevRecipient = $notification->getRecipient();
+        $prevRecipient = $notification->getRecipients();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
@@ -392,11 +393,11 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         // Determine recipient information
         $browserNotificationOnce = false;
-        foreach ($recipients as $i => $recipient) {
+        foreach (array_unique($recipients) as $i => $recipient) {
 
             // Set selected channels, if any
             $channels    = $this->getUserChannels($notification->getImportance(), $recipient);
-            if (!$recipient instanceof NoRecipient && empty($channels))
+            if (empty($channels))
                 throw new Exception("No valid channel for the notification \"".$notification->getBacktrace()."\" sent with \"".$notification->getImportance()."\"");
 
             // Only send browser notification once
@@ -408,12 +409,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $notification->markAsReadIfNeeded($channels);
 
             // Payload...
-            $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
         }
 
         $notification->setChannels($prevChannels);
-        $notification->setRecipient($prevRecipient);
         $notification->setSentAt(new \DateTime("now"));
 
         return $this;
@@ -424,11 +423,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Set importance of the notification
         $this->markAsAdmin(false);
 
-        $prevRecipient = $notification->getRecipient();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
-        foreach ($recipients as $recipient) {
+        foreach (array_unique($recipients) as $recipient) {
 
             // Determine channels
             $channels   = array_intersect($channels, $this->getUserChannels($notification->getImportance(), $recipient));
@@ -438,12 +436,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $notification->setChannels($channels);
 
             // Payload...
-            $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
         }
 
         $notification->setChannels($prevChannels);
-        $notification->setRecipient($prevRecipient);
         $notification->setSentAt(new \DateTime("now"));
 
         return $this;
@@ -455,14 +451,13 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $this->markAsAdmin(true, $notification);
 
         // Reset channels and keep here them for later use
-        $prevRecipient = $notification->getRecipient();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
         // Back up channels and importance variables..
         // to be restored at the end of the method
         $recipients = $this->getAdminRecipients() ?? [new NoRecipient()];
-        foreach($recipients as $recipient) {
+        foreach(array_unique($recipients) as $recipient) {
 
             // Set selected channels, if any
             $channels    = $this->getAdminChannels($notification->getImportance(), $recipient);
@@ -470,12 +465,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $notification->setChannels($channels);
 
             // Payload..
-            $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
         }
 
         $notification->setChannels($prevChannels);
-        $notification->setRecipient($prevRecipient);
 
         $this->markAsAdmin(false);
         return $this;

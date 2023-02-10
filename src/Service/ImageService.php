@@ -71,7 +71,7 @@ class ImageService extends FileService implements ImageServiceInterface
     {
         parent::__construct($twig, $router, $obfuscator, $flysystem);
 
-        $this->profiler      = $parameterBag->get("base.images.profiler") ? $profiler : null;
+        $this->profiler      = $profiler;
 
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg    = $imagineSvg;
@@ -290,7 +290,8 @@ class ImageService extends FileService implements ImageServiceInterface
             array_pop_key("http_cache", $headers);
         }
 
-        if ($this->profiler !== null)
+        $useProfiler = $headers["profiler"] ?? true;
+        if ($this->profiler !== null && !$useProfiler)
             $this->profiler->disable();
 
         return parent::serve($file, $status, $headers);

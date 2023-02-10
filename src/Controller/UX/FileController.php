@@ -11,6 +11,8 @@ use Base\Repository\Layout\ImageCropRepository;
 use Base\Service\FileService;
 use Base\Service\Flysystem;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,7 +22,7 @@ use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
-/** @Route("", name="ux_") */
+/** @Route("", name="ux_", priority=-1) */
 class FileController extends AbstractController
 {
     use BaseTrait;
@@ -51,21 +53,27 @@ class FileController extends AbstractController
     protected $profiler;
 
     /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
      * @var ?bool
      */
     protected $localCache;
 
-    public function __construct(Flysystem $flysystem, ImageService $imageService, ImageCropRepository $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
+    public function __construct(RequestStack $requestStack, Flysystem $flysystem, ImageService $imageService, ImageCropRepository $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
     {
         $this->imageCropRepository = $imageCropRepository;
 
         $this->imageService = $imageService;
         $this->profiler = $profiler;
 
-        $this->fileService  = cast($imageService, FileService::class);
+        $this->fileService = cast($imageService, FileService::class);
         $this->flysystem   = $flysystem;
 
-        $this->localCache = $localCache;
+        $this->localCache    = $localCache;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -73,7 +81,8 @@ class FileController extends AbstractController
      */
     public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
     {
-        if ($this->profiler !== null)
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $ixUX)
             $this->profiler->disable();
 
         $cacheless = $this->localCache == false ? "_cacheless" : "";
@@ -198,7 +207,9 @@ class FileController extends AbstractController
 
         $output = pathinfo_extension($data."/".$identifier, $extension);
         $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
@@ -254,7 +265,8 @@ class FileController extends AbstractController
         $output = pathinfo_extension($data."/image", "webp");
         $path = $this->imageService->filter($config["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
 
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
@@ -277,7 +289,9 @@ class FileController extends AbstractController
 
         $output = pathinfo_extension($data."/image", "svg");
         $path = $this->imageService->filter($config["path"], new SvgFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
-        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
@@ -313,7 +327,8 @@ class FileController extends AbstractController
             exit(1);
         }
 
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
 }

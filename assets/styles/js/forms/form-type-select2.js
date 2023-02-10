@@ -233,11 +233,7 @@ window.addEventListener("load.form_type", function () {
                                 .fail(function(_response) 
                                 {        
                                     var msg = "Unexpected response received.";            
-                                    if(_response) {
-                                        
-                                        var response = JSON.parse(_response.responseText);
-                                        msg = response["status"];
-                                    }
+                                    if(_response) msg = _response.responseJSON;
 
                                     $('body > .select2-container .loading-results .select2-selection__entry')
                                         .html("<span style='color:red;'>"+msg+"</span>");
