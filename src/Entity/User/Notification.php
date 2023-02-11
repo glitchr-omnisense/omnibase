@@ -6,6 +6,8 @@ use App\Entity\User;
 use Base\Notifier\Abstract\BaseNotificationInterface;
 use Base\Service\Model\IconizeInterface;
 
+use Symfony\Component\Notifier\Notification\Notification as SymfonyNotification;
+
 use Base\Service\BaseService;
 use Google\Service\Analytics\Upload;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
@@ -23,6 +25,7 @@ use Symfony\Component\Notifier\Notification\SmsNotificationInterface;
 use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Notifier\Recipient\NoRecipient;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
+use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 
 use Base\Traits\BaseTrait;
@@ -44,9 +47,21 @@ use App\Repository\User\NotificationRepository;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  */
-class Notification extends \Symfony\Component\Notifier\Notification\Notification implements BaseNotificationInterface, SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface, IconizeInterface
+class Notification extends SymfonyNotification implements BaseNotificationInterface, SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface, IconizeInterface
 {
     use BaseTrait;
+
+    public function __toPrune(?RecipientInterface $recipient = null): SymfonyNotification
+    {
+        $symfonyNotification = new SymfonyNotification($this->getSubject(), $this->getChannels($recipient));
+        if($this->getException())
+            $symfonyNotification->exception($this->getException());
+
+        return $symfonyNotification
+            ->content($this->getContent())
+            ->emoji($this->getEmoji())
+            ->importance($this->getImportance());
+    }
 
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-bell"]; }
@@ -78,15 +93,11 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function getUser() : ?User { return $this->user; }
     public function setUser(?User $user): self
     {
-        if ($this->user) {
+        if ($this->user)
             $this->user->removeNotification($this);
-            $this->removeContextKey("user");
-        }
 
-        if(($this->user = $user) ) {
+        if(($this->user = $user) )
             $this->user->addNotification($this);
-            $this->addContextKey("user", $this->user);
-        }
 
         return $this;
     }
@@ -199,7 +210,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function markAsReadIfNeeded(array $channels = [])
     {
         $options = [];
-        foreach(BaseService::getNotifier()->getOptions() as $option)
+        foreach($this->getNotifier()->getOptions() as $option)
             $options[$option["channel"]] = $option;
 
         foreach($this->channels as $channel) {
@@ -307,7 +318,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $this->recipients = [];
 
         // Inject service from base class..
-        if (BaseService::getNotifier() == null)
+        if ($this->getNotifier() == null)
             throw new Exception("Notifier not found in User class");
 
         // Notification variables
@@ -377,7 +388,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
 
         $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
-        BaseService::getNotifier()->sendUsers($this, ...array_unique($recipients));
+        $this->getNotifier()->sendUsers($this, ...array_unique($recipients));
 
         return $this;
     }
@@ -396,7 +407,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
 
         $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
-        BaseService::getNotifier()->sendUsersBy($channels, $this, ...array_unique($recipients));
+        $this->getNotifier()->sendUsersBy($channels, $this, ...array_unique($recipients));
 
         return $this;
     }
@@ -404,7 +415,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function sendAdmins(string $importance)
     {
         $this->setImportance($importance);
-        BaseService::getNotifier()->sendAdmins($this);
+        $this->getNotifier()->sendAdmins($this);
 
         return $this;
     }
@@ -417,7 +428,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
     public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
     {
-        $notifier = BaseService::getNotifier();
+        $notifier = $this->getNotifier();
         $notification = EmailMessage::fromNotification($this, $recipient, $transport);
 
         /**
@@ -447,7 +458,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $content = $this->getContent();
         }
 
-        if(BaseService::getNotifier()->isTest($recipient)) {
+        if($this->getNotifier()->isTest($recipient)) {
 
             $fwd .= "Test: ";
             $email = mailparse($recipient->getEmail());
@@ -496,7 +507,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             if(!str_starts_with($value, "cid:")) continue;
 
             list($cid, $path) = explode(":", $value);
-            $email->embed(fopen(BaseService::getProjectDir() . "/" . $path, 'rb'), $path);
+            $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $path);
         }
 
 
@@ -527,21 +538,18 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
     public function asChatMessage(RecipientInterface $recipient, string $transport = null): ?ChatMessage
     {
-        $chatMessage = ChatMessage::fromNotification($this, $recipient, $transport);
-
-        $user = ($this->user ? $this->user->getUsername() : "User \"".User::getIp()."\"");
+        $chatMessage = ChatMessage::fromNotification($this->__toPrune(), $recipient, $transport);
 
         $fwd = "";
         $content = $this->getContent();
-        $user = $this->user ?? "User \"" . User::getIp() . "\"";
+        $userIdentifier = $this->user->__toString();
 
         if($this->isMarkAsAdmin()) {
 
             $fwd = "Fwd: ";
-            $user = $this->user ?? "User \"" . User::getIp() . "\"";
-            $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";
+            $content = $userIdentifier . " forwarded its notification: \"" . $this->getContent() . "\"";
 
-        } else if(in_array($recipient, $this->getRecipients()) && BaseService::getNotifier()->isTest($recipient)) {
+        } else if(in_array($recipient, $this->getRecipients()) && $this->getNotifier()->isTest($recipient)) {
 
             $user = $recipient;
             $fwd = "Fwd: [TEST:".$recipient."] ";
@@ -550,7 +558,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         switch ($transport) {
             case 'discord':
-                $chatMessage->options(new DiscordOptions(["username" => $user]));
+                $chatMessage->options(new DiscordOptions(["username" => $userIdentifier]));
         }
 
         $chatMessage->subject($fwd . "[" . $this->getSubject(). "] " . $content);

@@ -40,13 +40,17 @@ abstract class BaseNotifier implements BaseNotifierInterface
 {
     public function __call   ($method, $arguments) : mixed
     {
-        $action = str_starts_with($method, "render") ? "render" : (str_starts_with($method, "send") ? "send" : null);
+        $action   = str_starts_with($method, "render") ? "render" : null;
+        $action ??= str_starts_with($method, "sendAdmins") ? "sendAdmins" : null;
+        $action ??= str_starts_with($method, "send") ? "send" : null;
         if(!$action)
-            throw new AccessException("Unexpected action received. Templated notification \"$method\" should starts with either  \"send\" or \"render\".");
+            throw new AccessException("Unexpected action received. Templated notification \"$method\" should starts with either  \"send\", \"sendAdmins\", or \"render\".");
 
         $method = lcfirst(substr($method, strlen($action)));
         if(!method_exists($this::class, $method))
             throw new AccessException("Templated notification \"$method\" not found in class \"".get_class($this)."\".");
+        if(str_starts_with($method, "admin"))
+            throw new AccessException("Templated notification \"".$this::class."::$method\" starts with \"admins\". This is a reserved word in \"".self::class."\"");
 
         $notification = $this->$method(...$arguments);
         if(!$notification instanceof Notification)
@@ -54,6 +58,8 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         $arguments = [];
         if ($action == "send")
+            $arguments = [$notification->getImportance()];
+        if ($action == "sendAdmins")
             $arguments = [$notification->getImportance()];
 
         return $notification->$action(...$arguments);

@@ -849,6 +849,7 @@
         </service>
         <service id="Base\EntitySubscriber\UserSubscriber">
             <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.notifier" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="router" />

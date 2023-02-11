@@ -74,7 +74,7 @@ final class FileTwigExtension extends AbstractExtension
         ];
     }
 
-    public function getTests()
+    public function getTests(): array
     {
         return [
             new TwigTest('ondisk', [$this, 'onDisk'])

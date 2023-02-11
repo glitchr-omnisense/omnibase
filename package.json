@@ -14,6 +14,9 @@
   "dependencies": {
     "@eastdesire/jscolor": "^2.5.1",
     "flatpickr": "^4.6",
+
+    "@glitchr/ajaxer": "^1.0",
+    "@glitchr/breakpoints": "^1.0",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@glitchr/clipboardjs": "^1.0",
     "@glitchr/cookie": "^1.0",

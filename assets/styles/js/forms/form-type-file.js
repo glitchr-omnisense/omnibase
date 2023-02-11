@@ -334,7 +334,7 @@ window.addEventListener("load.form_type", function () {
             });
 
             rawType.on('change', function() {
-                if( rawType.val() !== '') deleteBtn.css('display', 'block');
+                if( rawType.val() !== '') deleteBtn.css('display', 'flex');
                 else deleteBtn.css('display', 'none');
             });
         }

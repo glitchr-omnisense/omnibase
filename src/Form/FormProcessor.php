@@ -68,7 +68,15 @@ class FormProcessor implements FormProcessorInterface
     {
         if($entity == null) return $entity;
 
-        return $this->getEntityHydrator()->hydrate($entity, $this->form->getData(), [], EntityHydrator::CLASS_METHODS|EntityHydrator::FETCH_ASSOCIATIONS);
+        $ignoredFields = [];
+        $data = $this->form->getData();
+        foreach($this->form as $childName => $child) {
+
+            if(!$child->getConfig()->getMapped())
+                $ignoredFields[] = $childName;
+        }
+
+        return $this->getEntityHydrator()->hydrate($entity, $data, $ignoredFields, EntityHydrator::CLASS_METHODS|EntityHydrator::FETCH_ASSOCIATIONS);
     }
 
     protected $onDefaultCallback;

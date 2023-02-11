@@ -16,6 +16,11 @@
     white-space: pre-line;
 }
 
+.fileupload .label-wrapper {
+    padding: 0 !important;
+}
+.avatarupload .field-raw { display:none; }
+
 @media all and (max-width: 470px) {
     
     .ql-editor img
@@ -976,6 +981,7 @@ input.required:after, textarea.required:after, select.required:after {
 
 .form-check .form-check-input.form-switch {
     width: 2.5em !important;
+    min-width:40px;
     margin: auto 0.5em;
 }
 

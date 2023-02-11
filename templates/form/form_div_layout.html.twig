@@ -36,6 +36,7 @@
     {% if badges is not empty or labelTrim is not empty %}
     <div class="label-wrapper">
         {% if labelTrim is not empty %}
+
             {{- label|raw -}}
             {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value %}
             <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
@@ -544,6 +545,13 @@
 
         {% if (allow_reupload or value is null) %}
         <div class="input-group field-raw">
+
+            <div class="input-group-prepend">
+                <span class="input-group-text">
+                    {{ form_label(form)}}
+                </span>
+            </div>
+
             {% if allow_url %} <div class="input-group-text">{{ "fas fa-paperclip"|iconify|first|raw }}</div>{% endif %}
             {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({'class': (files is empty ? 'last' : "") ~ (form.raw.vars.attr.class is defined ? ' ' ~ form.raw.vars.attr.class : ''), accept: mime_types|join(',') }) }) }}
             {% if allow_delete and not form.vars.disabled %}

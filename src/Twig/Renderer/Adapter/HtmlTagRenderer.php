@@ -117,6 +117,17 @@ class HtmlTagRenderer extends AbstractTagRenderer
     public function render(string $name, array $context = []): string
     {
         //
+        // Load breakpoint stylesheets
+        $breakpoints = $this->parameterBag->get("base.twig.breakpoints") ?? [];
+        $breakpointStylesheet = $this->twig->load("breakpoints.css.twig")->render([
+            "breakpoints" => $breakpoints
+        ]);
+
+        if($breakpointStylesheet) {
+            $this->addHtmlContent("stylesheets:before", "<style>" . $breakpointStylesheet . "</style>");
+        }
+
+        //
         // Make sure to load localized twig template, if available.
         if(str_ends_with($name, ".twig")) {
 
@@ -156,7 +167,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $formats = [];
             $breakpoints = $this->parameterBag->get("base.twig.breakpoints") ?? [];
             foreach($breakpoints as $breakpoint)
-                $formats[$breakpoint["name"]] = $breakpoint["media"];
+                $formats[$breakpoint["name"]] = $breakpoint["media"] ?? "all";
 
             foreach($formats as $format => $media) {
 

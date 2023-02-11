@@ -39,6 +39,7 @@ use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 
 class SecurityController extends AbstractController
 {
@@ -197,7 +198,6 @@ class SecurityController extends AbstractController
      */
     public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ParameterBagInterface $parameterBag): Response
     {
-//        dump(2);
         // If already connected..
         if (($user = $this->getUser()) && $user->isPersistent()) {
 
@@ -236,7 +236,7 @@ class SecurityController extends AbstractController
                 $this->entityManager->persist($newUser);
                 $this->entityManager->flush();
 
-                $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
+                $userAuthenticator->authenticateUser($newUser, $authenticator, $request, [new RememberMeBadge()]);
                 return $this->redirectToRoute('user_profile');
             })
 
