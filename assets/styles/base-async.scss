@@ -785,7 +785,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .tab-pane { padding:1em; }
 .input-group-text { height: 100%; min-height: 38px; }
 
-input.required:after, textarea.required:after, select.required:after {
+.required:after {
     bottom: 4px;
     color: #dc2626;
     content: "•";
@@ -935,6 +935,7 @@ input.required:after, textarea.required:after, select.required:after {
     min-width: calc(120px + 5%);
 }
 
+.imageupload .field-raw .input-group-prepend { display: none; }
 .avatarupload input[type="file"] { display: none; }
 .avatarupload .fileupload .deleteBtn { display:none !important; }
 .avatarupload figure

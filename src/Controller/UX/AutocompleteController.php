@@ -14,6 +14,7 @@ use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Exchanger\Exception\ChainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -50,7 +51,7 @@ class AutocompleteController extends AbstractController
      */
     protected $autocomplete;
 
-    public function __construct(ObfuscatorInterface $obfuscator, TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(ObfuscatorInterface $obfuscator, TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
     {
         $this->obfuscator = $obfuscator;
         $this->entityManager = $entityManager;
@@ -58,6 +59,7 @@ class AutocompleteController extends AbstractController
         $this->tradingMarket = $tradingMarket;
         $this->paginator = $paginator;
         $this->autocomplete = new Autocomplete($translator);
+        $this->profiler = $profiler;
     }
 
     /**
@@ -65,6 +67,10 @@ class AutocompleteController extends AbstractController
      */
     public function Main(Request $request, string $data): Response
     {
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX)
+            $this->profiler->disable();
+
         $dict    = $this->obfuscator->decode($data);
         if($dict === null) return new JsonResponse("Unexpected request", 500);
 
@@ -166,8 +172,12 @@ class AutocompleteController extends AbstractController
     /**
      * @Route("/autocomplete/currency/{source}/{target}/{data}", name="ux_autocomplete_forex")
      */
-    public function Forex(Request $request, string $source, string $target, string $data): Response
+    public function Forex(Request $request, string $source, string $target, string $data, ?Profiler $profiler = null): Response
     {
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX)
+            $this->profiler->disable();
+
         $dict = $this->obfuscator->decode($data);
 
         $token = $dict["token"] ?? null;
@@ -196,8 +206,12 @@ class AutocompleteController extends AbstractController
     /**
      * @Route("/autocomplete/{provider}/{pageSize}/{data}", name="ux_autocomplete_icons")
      */
-    public function Icons(Request $request, string $provider, int $pageSize, string $data): Response
+    public function Icons(Request $request, string $provider, int $pageSize, string $data, ?Profiler $profiler = null): Response
     {
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX)
+            $this->profiler->disable();
+
         $dict     = $this->obfuscator->decode($data);
 
         $token    = $dict["token"] ?? null;

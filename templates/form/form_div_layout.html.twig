@@ -38,8 +38,8 @@
         {% if labelTrim is not empty %}
 
             {{- label|raw -}}
-            {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value %}
-            <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
+            {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value.id is defined %}
+            <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id })}}" target='_blank'>
                 <i class="fas fa-external-link-square-alt"></i>
             </a>{% endif %}
 
@@ -151,7 +151,7 @@
 
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {%- set attr = attr|merge({'disabled': form.vars.disabled or (form.vars.is_inherited ?? false)} ) -%}
-    {%- set attr = attr|merge({'required': form.vars.required }) -%}
+{#    {%- set attr = attr|merge({'required': form.vars.required }) -%}#}
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
 

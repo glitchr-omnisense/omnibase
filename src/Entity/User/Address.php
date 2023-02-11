@@ -43,6 +43,53 @@ class Address implements IconizeInterface
         return $this;
     }
 
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $country;
+
+    public function getCountry(): ?string { return $this->country; }
+    public function setCountry(string $country): self
+    {
+        $this->country = $country;
+        return $this;
+    }
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $state;
+
+    public function getState(): ?string { return $this->state; }
+    public function setState(string $state): self
+    {
+        $this->state = $state;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $city;
+    public function getCity(): ?string { return $this->city; }
+    public function setCity(string $city): self
+    {
+        $this->city = $city;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $zipCode;
+    public function getZipCode(): ?string { return $this->zipCode; }
+    public function setZipCode(?string $zipCode): self
+    {
+        $this->zipCode = $zipCode;
+        return $this;
+    }
+
+
     /**
      * @ORM\Column(type="string", length=255)
      */
@@ -64,52 +111,6 @@ class Address implements IconizeInterface
     {
         $this->affix = $affix;
 
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    protected $zipCode;
-    public function getZipCode(): ?string { return $this->zipCode; }
-    public function setZipCode(?string $zipCode): self
-    {
-        $this->zipCode = $zipCode;
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $city;
-    public function getCity(): ?string { return $this->city; }
-    public function setCity(string $city): self
-    {
-        $this->city = $city;
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $state;
-
-    public function getState(): ?string { return $this->state; }
-    public function setState(string $state): self
-    {
-        $this->state = $state;
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $country;
-
-    public function getCountry(): ?string { return $this->country; }
-    public function setCountry(string $country): self
-    {
-        $this->country = $country;
         return $this;
     }
 

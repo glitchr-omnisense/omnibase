@@ -998,6 +998,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.paginator" />
             <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\UX\AutovalidateController">
