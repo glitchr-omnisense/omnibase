@@ -13,9 +13,8 @@ window.addEventListener('load', function(event) {
 
     $("form").on("submit", function(e) {
 
-        e.preventDefault();
-        if (this.getAttribute("disabled") == null)
-            this.submit();
+        if (this.getAttribute("disabled") != null)
+            e.preventDefault();
 
     }); // On pressing enter...
 
