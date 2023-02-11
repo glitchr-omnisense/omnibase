@@ -76,7 +76,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/* "abstract" (remove because of routes) */
+/**
+ * @Route(priority="-1")
+ */
 class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
     use WidgetTrait;
