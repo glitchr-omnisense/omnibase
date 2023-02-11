@@ -78,7 +78,8 @@ class FormTypeExtension extends AbstractTypeExtension
             'form_flow_id'      => '_flow_token',
             'validation_entity' => null,
             'use_model'         => false,
-            'use_advanced_form' => false
+            'use_advanced_form' => false,
+            'submit_on_enter'   => true
         ]);
 
         $resolver->setNormalizer('form_flow_id', function(Options $options, $value) {
@@ -93,6 +94,8 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
+        $this->submitOnEnter($view, $form, $options);
+
         $this->browseView( $view, $form, $options);
     }
 
@@ -102,7 +105,7 @@ class FormTypeExtension extends AbstractTypeExtension
         if($options["easyadmin"]) $this->applyEA($view, $form);
         if($options["use_advanced_form"] ?? false) 
             $this->formProxy->useAdvancedForm();
-    
+
         if($this->authorizationChecker->isGranted(UserRole::ADMIN) && $this->router->isEasyAdmin()) {
             $this->markDbProperties($view, $form, $options);
             $this->markOptions($view, $form, $options);
@@ -176,6 +179,15 @@ class FormTypeExtension extends AbstractTypeExtension
                 if($childView) $childView->vars["is_dbcolumn"] = true;
             }
         }
+    }
+
+    public function submitOnEnter(FormView $view, FormInterface $form, array $options) {
+
+        $submitOnEnter = $options["submit_on_enter"] ?? null;
+        if ($submitOnEnter || !$form->isRoot()) return;
+
+        $view->vars["attr"] ??= [];
+        $view->vars["attr"]["disabled"] = "";
     }
 
     public function markDbProperties(FormView $view, FormInterface $form, array $options) {

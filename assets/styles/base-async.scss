@@ -819,6 +819,7 @@ input.required:after, textarea.required:after, select.required:after {
     justify-content: center;
 }
 
+.form-cropper:not(.form-cropper-info) .form-cropper-fields { display: none; }
 .form-cropper .cropper-container { border-top-left-radius: 4px; }
 .form-cropper .cropper button { margin:0.5em 0.1em; }
 .form-cropper .cropper .cropper-actions { padding:0.5em 1em; }
@@ -833,6 +834,7 @@ input.required:after, textarea.required:after, select.required:after {
 
 .form-cropper .cropper {
 
+    width:100%;
     min-height: 350px;
     border-radius: 0;
     border-top-left-radius:4px;

@@ -386,7 +386,9 @@ class ImageService extends FileService implements ImageServiceInterface
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
         if($formatter === false)
-            throw new NotFoundHttpException("Last filter is missing.");
+            throw new NotFoundHttpException("No filter provided at least one must be provided (and must implement \"".FormatFilterInterface::class."\").");
+        if(!$formatter instanceof FormatFilterInterface)
+            throw new NotFoundHttpException("The last filter must implement \"".FormatFilterInterface::class."\"). A \"".get_class($formatter)."\" received.");
 
         //
         // Apply size limitation to bitmap only
@@ -425,7 +427,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
         //
         // Compute a response.. (if cache not found)
-        if ($config["local_cache"] ?? true) {
+        if ($config["local_cache"] ?? false) {
 
             $localCache = array_pop_key("local_cache", $config);
             if(!is_string($localCache)) $localCache = $this->localCache;

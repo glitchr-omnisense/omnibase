@@ -126,9 +126,9 @@ final class FileTwigExtension extends AbstractExtension
 
     public function imagine(array $context, array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
+        $config["local_cache"] ??= true;
         if(array_key_exists("warmup", $context))
             $config["warmup"] = $context["warmup"];
-
 
         $email = $context["email"] ?? null;
         if($email instanceof WrappedTemplatedEmail) {
@@ -141,6 +141,7 @@ final class FileTwigExtension extends AbstractExtension
 
     public function imagineCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
     {
+        $config["local_cache"] ??= true;
         if(array_key_exists("warmup", $context))
             $config["warmup"] = $context["warmup"];
 
@@ -159,6 +160,7 @@ final class FileTwigExtension extends AbstractExtension
     public function thumbnailUpscale (array $context, array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE])); }
     public function thumbnail(array $context, array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null
     {
+        $config["local_cache"] ??= true;
         if(array_key_exists("warmup", $context))
             $config["warmup"] = $context["warmup"];
 
@@ -173,7 +175,6 @@ final class FileTwigExtension extends AbstractExtension
 
     public function urlify(LinkableInterface|string|null $urlOrPath, ?string $label = null, array $attributes = [])
     {
-        
         $url   = $urlOrPath;
         $label = $label ?? $urlOrPath;
         if($urlOrPath instanceof LinkableInterface) {

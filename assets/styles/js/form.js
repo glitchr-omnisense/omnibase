@@ -11,7 +11,13 @@ window.addEventListener('load', function(event) {
 
     $("form.needs-validation input").on("invalid", (e) => e.preventDefault() );
 
-    $("form").on("submit", function() { this.submit(); }); // On pressing enter...
+    $("form").on("submit", function(e) {
+
+        e.preventDefault();
+        if (this.getAttribute("disabled") == null)
+            this.submit();
+
+    }); // On pressing enter...
 
     $("[type=submit]").on("click", function() {
 

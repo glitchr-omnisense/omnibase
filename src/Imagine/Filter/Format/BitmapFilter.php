@@ -81,7 +81,6 @@ class BitmapFilter implements BitmapFilterInterface
         }
 
         $image = $this->path === null ? $image : $image->save($this->path, $this->options);
-
         return $image;
     }
 }

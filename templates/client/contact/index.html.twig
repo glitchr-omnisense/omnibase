@@ -3,10 +3,12 @@
 {% block title %}{{ '@controllers.base_contact.title'|trans }}{% endblock %}
 {% block content %}
 
+    {% block contact_excerpt %}
     <div class="wrapper sticky-easein show" style="transition: all 0.25s ease 0.25s;">
         <h1 class="title">{{ '@controllers.base_contact.title'|trans }}</h1>
         <div class="excerpt">{{ '@controllers.base_contact.description'|trans }}</div>
     </div>
+    {% endblock %}
 
     {% block contact %}{% endblock %}
 
@@ -53,7 +55,7 @@
 
                             <div class="row mb-4">
                                 <div class="col">
-                                    {{ form_widget(form.attachments, {'attr': {'placeholder': '@forms.contact.fields.attachements'|trans} }) }}
+                                    {{ form_widget(form.attachments) }}
                                 </div>
                             </div>
 

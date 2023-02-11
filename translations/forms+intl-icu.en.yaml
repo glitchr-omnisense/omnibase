@@ -23,6 +23,7 @@ login:
     forgotPassword: "Forgot your password?"
 
 contact:
+    check: Thank you.
     title: Contact form
     fields:
         name: Your name

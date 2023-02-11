@@ -23,6 +23,7 @@ login:
     forgotPassword: "Mot de passe oublié ?"
 
 contact:
+    check: "Merci pour votre message."
     title: Formulaire de contact
     fields:
         name: Votre nom

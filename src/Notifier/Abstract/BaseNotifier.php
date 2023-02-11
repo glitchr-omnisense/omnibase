@@ -14,6 +14,8 @@ use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
 use Twig\Environment;
 
 use Doctrine\DBAL\Exception\DriverException;
@@ -43,12 +45,12 @@ abstract class BaseNotifier implements BaseNotifierInterface
             throw new AccessException("Unexpected action received. Templated notification \"$method\" should starts with either  \"send\" or \"render\".");
 
         $method = lcfirst(substr($method, strlen($action)));
-        if(method_exists(self::class, $method))
-            throw new AccessException("Templated notification \"".static::class."::$method\" not found in class \"".get_class($this)."\".");
+        if(!method_exists($this::class, $method))
+            throw new AccessException("Templated notification \"$method\" not found in class \"".get_class($this)."\".");
 
         $notification = $this->$method(...$arguments);
         if(!$notification instanceof Notification)
-            throw new AccessException("Templated notification \"".static::class."::$method\" must return a \"".Notification::class."\" object.");
+            throw new AccessException("Templated notification \"".$this::class."::$method\" must return a \"".Notification::class."\" object.");
 
         $arguments = [];
         if ($action == "send")
@@ -130,7 +132,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
     public function getTestRecipients(): array{ return $this->testRecipients; }
     
     public function getEnvironment() : Environment { return $this->twig; }
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy, EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
+    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
     {
         $this->twig          = $twig;
         $this->notifier      = $notifier;

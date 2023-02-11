@@ -7,8 +7,10 @@ use Base\Notifier\Abstract\BaseNotificationInterface;
 use Base\Service\Model\IconizeInterface;
 
 use Base\Service\BaseService;
+use Google\Service\Analytics\Upload;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\Notifier\Bridge\Discord\DiscordOptions;
 use Symfony\Component\Notifier\Message\EmailMessage;
@@ -91,7 +93,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
     protected $attachments = [];
     public function getAttachments(): array { return $this->attachments; }
-    public function addAttachment(File $attachment): self
+    public function addAttachment(UploadedFile $attachment): self
     {
         if(!in_array($attachment, $this->attachments))
             $this->attachments[] = $attachment;
@@ -99,7 +101,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         return $this;
     }
 
-    public function removeAttachment(File $attachment): self
+    public function removeAttachment(UploadedFile $attachment): self
     {
         array_remove($this->attachments, $attachment);
         return $this;
@@ -481,7 +483,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         foreach($attachments as $attachment) {
 
-            if(!$attachment instanceof File) continue;
+            if(!$attachment instanceof UploadedFile) continue;
+            dump($attachment);
             $email->embed($attachment->getContent(), $attachment->getClientOriginalName());
         }
 

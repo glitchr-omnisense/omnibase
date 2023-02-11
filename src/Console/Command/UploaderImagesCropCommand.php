@@ -184,8 +184,8 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 $extensions = $this->imageService->getExtensions($file);
                 $extension  = first($extensions);
 
-                $dataWebp = $this->imageService->imagine($file, [], ["webp" => true]);
-                $data     = $this->imageService->imagine($file, [], ["webp" => false, "extension" => $extension]);
+                $dataWebp = $this->imageService->imagine($file, [], ["webp" => true, "local_cache" => true]);
+                $data     = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
                 if($this->isCached($data)) {
 
                     $this->output->section()->writeln("             <warning>* Already cached main image \".".str_lstrip(realpath($file),realpath($publicDir))."\" .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);

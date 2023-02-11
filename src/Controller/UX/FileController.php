@@ -72,7 +72,7 @@ class FileController extends AbstractController
         $this->fileService = cast($imageService, FileService::class);
         $this->flysystem   = $flysystem;
 
-        $this->localCache    = $localCache;
+        $this->localCache    = $localCache ?? true;
         $this->requestStack = $requestStack;
     }
 
@@ -82,7 +82,7 @@ class FileController extends AbstractController
     public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        if ($this->profiler !== null && $ixUX)
+        if ($this->profiler !== null && $isUX)
             $this->profiler->disable();
 
         $cacheless = $this->localCache == false ? "_cacheless" : "";

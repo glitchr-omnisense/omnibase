@@ -178,7 +178,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 $extensions = $this->imageService->getExtensions($file);
                 $extension  = first($extensions);
 
-                $data = $this->imageService->imagine($file, [], ["webp" => false, "extension" => $extension]);
+                $data = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
                 if($this->isCached($data)) {
 
                     $this->output->section()->writeln("             <warning>* Already cached \".".str_lstrip(realpath($file),realpath($publicDir))."\".. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
@@ -188,14 +188,14 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                     $this->output->section()->writeln("             <info>* Warming up \".".str_lstrip(realpath($file),realpath($publicDir))."\".. (".($i+1)."/".$N.")</info>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->ibatch++;
 
-                    $data = $this->imageService->imagine($file, [], ["webp" => false, "warmup" => ($this->cache != null), "extension" => $extension]);
-                    $data = $this->imageService->imagine($file, [], ["webp" => true , "warmup" => ($this->cache != null)]);
+                    $data = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
+                    $data = $this->imageService->imagine($file, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
 
                     foreach($formats as $format) {
 
                         list($width, $height) = $format;
-                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => false, "warmup" => ($this->cache != null), "extension" => $extension]);
-                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => true , "warmup" => ($this->cache != null)]);
+                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
+                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
                     }
                 }
 

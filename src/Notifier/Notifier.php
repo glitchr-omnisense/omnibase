@@ -8,7 +8,7 @@ use Base\Form\Model\ContactModel;
 use Base\Notifier\Abstract\BaseNotifier;
 use Symfony\Component\Routing\Router;
 
-class Notifier extends BaseNotifier
+class Notifier extends BaseNotifier implements NotifierInterface
 {
     public function testEmail(?User $user): Notification
     {
