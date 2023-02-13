@@ -43,6 +43,10 @@ security_pending:
   title: "Coming soon !"
   description: "The site is still under construction.<br/>The page you are looking for is not ready yet. Please come back later !"
 
+security_pendingForApproval:
+  title: "Pending for approval"
+  description: "Your account {0} is currently pending for approval. One manager will soon have a look. Please come back later !"
+
 app_index:
   title: Return to website
 

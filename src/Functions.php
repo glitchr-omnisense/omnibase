@@ -36,6 +36,15 @@ namespace {
         return str_strip($subPath, "./", "/");
     }
 
+    function str_strip_chars(string $str)
+    {
+        return preg_replace("/[a-zA-Z]/", "", $str);
+    }
+    function str_strip_numbers(string $str)
+    {
+        return preg_replace("/[^a-zA-Z]/", "", $str);
+    }
+
     function format_uuid(string $uuid):string|false {
 
         $uuid = str_replace("-", "", $uuid);
@@ -603,7 +612,8 @@ namespace {
         return $str;
     }
 
-    function random_str(?int $length = null, ?string $chars = null): ?string
+    function rand_int(int $digits) { return rand(pow(10, $digits-1), pow(10, $digits)-1); }
+    function rand_str(?int $length = null, ?string $chars = null): ?string
     {
         if ($length === null)
             $length = 8;
@@ -2279,12 +2289,34 @@ namespace {
         return strtr($str,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
     }
 
-    function dec2alphabet(string $s)
+    function abc2dec(string $s): int {
+
+        $abc = array_flip(range('a', 'z'));
+        $dec = "";
+
+        foreach(str_split(strtolower($s)) as $c)
+            $dec .= $abc[$c];
+
+        return intval($dec);
+    }
+
+    function dec2abc(int $dec): int {
+
+        $dec = strval($dec);
+
+        $abc = "";
+        foreach(str_split($dec) as $c)
+            $abc .= chr($c);
+
+        return $abc;
+    }
+
+    function hexv2abc(string $s)
     {
         return strtr(strtoupper(base_convert($s, 10, 26)), "0123456789ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
-    function alphabet2dec(string $s)
+    function abc2hexv(string $s)
     {
         return base_convert(strtr(strtoupper($s), "0123456789ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 10, 26);
     }

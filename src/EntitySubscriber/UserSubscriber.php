@@ -123,7 +123,7 @@ class UserSubscriber implements EventSubscriberInterface
         if ($adminApprovalToken) {
 
             $adminApprovalToken->revoke();
-            $notification = $this->notifier->sendAdminsApprovalConfirmation($user);
+            $notification = $this->notifier->sendUserApprovalConfirmation($user);
         }
     }
 }

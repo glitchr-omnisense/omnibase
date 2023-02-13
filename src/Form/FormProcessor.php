@@ -3,11 +3,15 @@
 namespace Base\Form;
 
 use Base\Database\Entity\EntityHydrator;
+use Base\Field\Type\SubmitType;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\Traits\FormProcessorTrait;
 use Base\Traits\BaseTrait;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Form\ClickableInterface;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\SubmitButton;
+use Symfony\Component\Form\SubmitButtonTypeInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\FormInterface;
@@ -40,12 +44,18 @@ class FormProcessor implements FormProcessorInterface
 
     public function getData    (?string $childName = null): mixed {
 
-        $data = null;
-        if ($childName)
-            $data = $this->form->get($childName)?->getData();
-        
-        if ($data == null) 
-            $data = $this->form->getData();
+        $form = $childName ? $this->form->get($childName) : $this->form;
+        $data = $form?->getData();
+
+        // Special case for buttons
+        if($form && $data instanceof FormModelInterface) {
+
+            foreach ($form->all() as $childName => $child) { // @TODO Use array_map_recursive()
+
+                if (!$child instanceof ClickableInterface) continue;
+                object_hydrate($data, [$childName => $child->isClicked()]);
+            }
+        }
 
         return $data;
     }
@@ -57,7 +67,7 @@ class FormProcessor implements FormProcessorInterface
         $formData = $this->form->getData();
         if(is_object($this->form->getData())) $this->form->setData(object_hydrate($this->form->getData(), $array));
         else $this->form->setData($formData ?? $data);
-        
+
         foreach($this->form->all() as $childName => $child) // @TODO Use array_map_recursive()
             $child->setData($array[$childName] ?? null);
 
@@ -121,7 +131,11 @@ class FormProcessor implements FormProcessorInterface
         return $this->response;
     }
 
-    public function getDto(): FormModelInterface { return $this->getData(); }
+    public function getDto(): ?FormModelInterface {
+
+        $data = $this->getData();
+        return $data instanceof FormModelInterface ? $data : null;
+    }
 
 
     protected $entity;
@@ -219,7 +233,7 @@ class FormProcessor implements FormProcessorInterface
 
         if (!empty($token) && preg_match("/(.*)#([0-9]*)/", $token, $matches)) return $matches[1];
 
-        return random_str();
+        return rand_str();
     }
 
     public function addStep(callable $callback)

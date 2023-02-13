@@ -25,7 +25,16 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class ContactController extends AbstractController
 {
+    /**
+     * @var Notifier
+     */
+    protected $notifier;
+
+    /**
+     * @var FormProxy
+     */
     protected $formProxy;
+
     public function __construct(FormProxy $formProxy, Notifier $notifier)
     {
         $this->formProxy = $formProxy;

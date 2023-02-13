@@ -253,7 +253,6 @@ window.addEventListener("load.form_type", function () {
 
         //
         // Apply required option
-        select2["containerCssClass"] = select2["containerCssClass"] + ($(field).attr('required') ? 'required' : '');
 
         var parent = parent || $(field).parent();
         $(field).select2(select2).on("select2:unselecting", function(e) {

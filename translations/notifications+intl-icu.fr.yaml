@@ -17,10 +17,10 @@ login:
             first: "Bonsoir {0} !"
             back: "Re-bonsoir {0} !"
 
-    already: Oh, mais tu es déjà connecté !
+    already: Tu es déjà connecté !
     partial: Tu es partiellement connecté ! Une connexion complète est requise pour accéder à cette page
     full: "Authentication force requise pour cette action."
-    social: Salut ! Tu t'es bien connecté à ton compte {0}
+    social: Tu t'es bien connecté à ton compte {0}
 
     pending: "Ton compte est en attente de vérification par un administrateur"
     disabled: "Ce compte est actuellement désactivé. Un email d'activation vient d'être envoyé à son adresse"
@@ -63,7 +63,7 @@ maternityUnit:
     banner: Ce site n'est pas encore <b>publié</b>. La publication est prévue pour le {0} à {1}
 
 logout:
-    success: "{0} Tu es maintenant déconnecté."
+    success: "Aurevoir {0}, tu es maintenant déconnecté."
     already: "Bizarre, tu n'es pas connecté :)"
 
 resetPassword:
@@ -90,7 +90,7 @@ verifyEmail:
     success: "Ton adresse mail a bien été vérifiée, bravo !"
     check:   "Un email vient de t'être envoyé. Merci de confirmer ton adresse en cliquant sur le lien."
     already: "Ton compte est déjà validé!"
-    alreadySent: "Merci de vérifier ton compte, tu devrais avoir reçu un e-mail pour cela !<br/>Prochaine demande possible dans {0}."
+    alreadySent: "Merci de vérifier ton compte, tu devrais avoir reçu un e-mail pour cela !"
     resend:  "Un email de confirmation a déjà été envoyé ! Merci de patienter {0} avant la prochaine demande."
     invalidToken: "Jeton invalide. Nous ne pouvons pas confirmer ton adresse. Merci de renvoyer une demande."
 

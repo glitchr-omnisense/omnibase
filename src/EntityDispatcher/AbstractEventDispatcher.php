@@ -9,6 +9,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use Exception;
 
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 
 abstract class AbstractEventDispatcher implements EventDispatcherInterface
@@ -30,12 +31,18 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
      */ 
     protected $entityManager;
 
-    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydrator $entityHydrator, EntityManagerInterface $entityManager)
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydrator $entityHydrator, EntityManagerInterface $entityManager, RequestStack $requestStack)
     {
         $this->dispatcher    = $dispatcher;
         $this->entityManager = $entityManager;
         $this->entityHydrator = $entityHydrator;
 
+        $this->requestStack = $requestStack;
         $this->events        = [];
     }
 
@@ -86,12 +93,13 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         $reflush = false;
         $eventClass = $this->getEventClass();
 
+        $request = $this->requestStack->getCurrentRequest();
         foreach ($this->events[$id] as $eventName => $alreadyTriggered) {
 
             if($alreadyTriggered === false) continue;
 
             $this->events[$id][$eventName] = false;
-            $this->dispatcher->dispatch(new $eventClass($event), $eventName);
+            $this->dispatcher->dispatch(new $eventClass($event, $request), $eventName);
             $reflush = true;
         }
 

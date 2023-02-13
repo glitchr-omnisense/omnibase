@@ -343,6 +343,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             $roles[] = UserRole::USER;
 
         $this->roles = array_filter(array_unique($roles));
+        if (in_array(UserRole::MANAGER, $this->roles)) {
+            $this->approve();
+        }
 
         return $this;
     }
