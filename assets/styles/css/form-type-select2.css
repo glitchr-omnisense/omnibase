@@ -20,7 +20,7 @@
 .select2-container--bootstrap4 .select2-selection--single
 {
   height:auto !important;
-  min-height: calc(1.5em + .75rem + 2px)!important
+  min-height: 38px !important
 }
 
 .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow b {

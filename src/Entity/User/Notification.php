@@ -287,15 +287,33 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     /* Handle custom emails */
     protected string $htmlTemplate = "";
     public function getHtmlTemplate() { return $this->htmlTemplate; }
-    public function setHtmlTemplate(?string $htmlTemplate, array $context = [])
+    public function setHtmlTemplate(?string $htmlTemplate, array $htmlParameters = [])
     {
         $this->htmlTemplate = $htmlTemplate;
-
-        if(!empty($context))
-            $this->addContext($context);
+        foreach($htmlParameters as $key => $htmlParameter)
+            $this->addHtmlParameter($key, $htmlParameter);
 
         return $this;
     }
+
+    protected array $htmlParameters = [];
+    public function getHtmlParameters(): array { return $this->htmlParameters; }
+    public function setHtmlParameters(array $htmlParameters)
+    {
+        $this->htmlParameters = $htmlParameters;
+        return $this;
+    }
+    public function addHtmlParameter(string $key, $value)
+    {
+        $this->htmlParameters[$key] = $value;
+        return $this;
+    }
+    public function removeHtmlParameter(string $key)
+    {
+        array_remove($this->htmlParameters, $key);
+        return $this;
+    }
+
 
     public function getExcerpt() { return  $this->context["excerpt"] ?? ""; }
     public function setExcerpt(string $excerpt)
@@ -367,7 +385,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
                 "warmup" => $context["warmup"] ?? true, // e.g. when sending emails..
                 "attachments" => array_unique(array_merge($this->getAttachments(), $context["attachments"] ?? []))
 
-            ], $context);
+            ], $context, $this->getHtmlParameters());
 
             return new Response($this->getTwig()->render($htmlTemplate, $context));
         }
@@ -486,7 +504,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             "content"     => $content,
             "footer_text" => $footer,
             "recipient"   => $recipient
-        ]));
+        ]), $this->getHtmlParameters());
 
         // Append notification attachments
         $attachments = array_unique(array_merge($this->getAttachments(), $context["attachments"] ?? []));
@@ -495,7 +513,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         foreach($attachments as $attachment) {
 
             if(!$attachment instanceof UploadedFile) continue;
-            dump($attachment);
             $email->embed($attachment->getContent(), $attachment->getClientOriginalName());
         }
 
@@ -514,7 +531,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         // Render html template to get back email title..
         // I was hoping to replace content with html(), but this gets overriden by Symfony notification
         try { $htmlTemplate = $this->getTwig()->render($this->htmlTemplate, $context); }
-        catch(\RuntimeException $e) { throw new UnexpectedValueException("No html template found for \"$content\"", 500, $e); }
+        catch(\RuntimeException $e) { throw new UnexpectedValueException("Template \"$this->htmlTemplate\" not found.", 500, $e); }
 
         if(preg_match('/<title>(.*)<\/title>/ims', $htmlTemplate, $matches))
             $subject = trim($matches[1]);
@@ -542,7 +559,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
         $fwd = "";
         $content = $this->getContent();
-        $userIdentifier = $this->user->__toString();
+        $userIdentifier = $this->user->getUserIdentifier();
 
         if($this->isMarkAsAdmin()) {
 

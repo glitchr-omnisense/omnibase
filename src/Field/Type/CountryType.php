@@ -2,6 +2,7 @@
 
 namespace Base\Field\Type;
 
+use Base\Entity\User;
 use Base\Service\Model\SelectInterface;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -67,11 +68,13 @@ class CountryType extends SelectType implements SelectInterface
 
     public function configureOptions(OptionsResolver $resolver)
     {
+
         parent::configureOptions($resolver);
         $resolver->setDefaults([
             'choices' => $this->getChoices(),
             'alpha3' => false,
             "use_html" => true,
+            "empty_data" => User::getCookie("country") ?? null,
             'use_advanced_form' => true
         ]);
     }

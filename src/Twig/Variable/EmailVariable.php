@@ -25,7 +25,7 @@ class EmailVariable
         $this->maternityUnit = $maternityUnit;
     }
 
-    public function homepage() { return $this->baseService->getIndexPage(); }
+    public function homepage() { return $this->baseService->getRouteIndex(); }
 
     public function title() :?string { return $this->baseService->getEmail()["title"]  ?? null; }
     public function slogan():?string { return $this->baseService->getEmail()["slogan"] ?? null; }

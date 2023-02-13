@@ -65,7 +65,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         foreach($contactModel->attachments ?? [] as $file)
             $notification->addAttachment($file);
 
-        $notification->setContext([
+        $notification->setHtmlParameters([
 
             "importance" => "high",
             "replyTo" => $contactModel->getRecipient(),
@@ -83,7 +83,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification->setHtmlTemplate("email.html.twig");
         $notification->addRecipient($contactModel->getRecipient());
 
-        $notification->setContext([
+        $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.contact_confirmation.subject", [$contactModel->name]),
             "excerpt" => $this->translator->trans("@emails.contact_confirmation.excerpt", []),
             "content" => $this->translator->trans("@emails.contact_confirmation.content", [$contactModel->subject, $contactModel->message]),
@@ -95,10 +95,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function userAccountGoodbye(User $user) {
 
         $notification = new Notification("accountGoodbye.success");
-        $notification->setHtmlTemplate("email.html.twig");
         $notification->setUser($user);
 
-        $notification->setContext([
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.accountGoodbye.subject" , [$user]),
             "content" => $this->translator->trans("@emails.accountGoodbye.content"),
             "action_text" => $this->translator->trans("@emails.accountGoodbye.action_text"),
@@ -111,10 +111,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function registrationNotifyAdmins(User $user) {
 
         $notification = new Notification("verifyEmail.check");
-        $notification->setHtmlTemplate("email.html.twig");
         $notification->setUser($user);
 
-        $notification->setContext([
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.register_notifyAdmins.subject"),
             "content" => $this->translator->trans("@emails.register_notifyAdmins.content", [$user, $user->getEmail()]),
             "action_text" => $this->translator->trans("@emails.register_notifyAdmins.action_text", [$this->translator->transEntity($user)]),
@@ -127,10 +127,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function userApprovalRequest(User $user) {
 
         $notification = new Notification("adminApproval.required");
-        $notification->setHtmlTemplate("email.html.twig");
         $notification->setUser($user);
 
-        $notification->setContext([
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.adminApproval.subject" , [$user]),
             "content" => $this->translator->trans("@emails.adminApproval.content", [$user, $user->getId()]),
             "action_text" => $this->translator->trans("@emails.adminApproval.action_text"),
@@ -143,10 +143,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function userApprovalConfirmation(User $user) {
 
         $notification = new Notification("adminApproval.approval");
-        $notification->setHtmlTemplate("email.html.twig");
         $notification->setUser($user);
 
-        $notification->setContext([
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.adminApprovalConfirm.subject"),
             "content" => $this->translator->trans("@emails.adminApprovalConfirm.content", [$user]),
             "action_text" => $this->translator->trans("@emails.adminApprovalConfirm.action_text"),
@@ -159,10 +159,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function resetPasswordRequest(User $user, Token $token) {
 
         $notification = new Notification("resetPassword.success");
-        $notification->setHtmlTemplate("email.html.twig");
         $notification->setUser($user);
 
-        $notification->setContext([
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.resetPassword.subject"),
             "content" => $this->translator->trans("@emails.resetPassword.content"),
             "action_text" => $this->translator->trans("@emails.resetPassword.action_text"),
@@ -171,7 +171,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
 
         if($token->getLifetime() > 0 && $token->getLifetime() < 3600*24*7) {
 
-            $notification->addContextKey("footer_text",
+            $notification->addHtmlParameter("footer_text",
                 $this->translator->trans("@emails.resetPassword.expiry", [
                     $this->translator->transTime($token->getRemainingTime())
                 ])
@@ -184,10 +184,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function verificationEmail(User $user, Token $token)
     {
         $notification = new Notification("verifyEmail.check");
-        $notification->setHtmlTemplate("email.html.twig");
         $notification->setUser($user);
 
-        $notification->setContext([
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.verifyEmail.subject"),
             "content" => $this->translator->trans("@emails.verifyEmail.content"),
             "action_text" => $this->translator->trans("@emails.verifyEmail.action_text"),
@@ -196,7 +196,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
 
         if ($token->getLifetime() > 0 && $token->getLifetime() < 3600 * 24 * 7) {
 
-            $notification->addContextKey("footer_text",
+            $notification->addHtmlParameter("footer_text",
                 $this->translator->trans("@emails.verifyEmail.expiry", [
                     $this->translator->transTime($token->getRemainingTime())
                 ])
@@ -209,10 +209,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function userWelcomeBack(User $user, Token $token) {
 
         $notification = new Notification("accountWelcomeBack.success");
-        $notification->setHtmlTemplate("email.html.twig");
         $notification->setUser($user);
 
-        $notification->setContext([
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.accountWelcomeBack.subject"),
             "content" => $this->translator->trans("@emails.accountWelcomeBack.content"),
             "action_text" => $this->translator->trans("@emails.accountWelcomeBack.action_text"),

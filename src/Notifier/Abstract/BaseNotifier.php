@@ -327,10 +327,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
             // Replace email by email+ for user..
             // Users should not receive the default admin email sent by Symfony notifier
-            if (str_starts_with($channel, "email"  )) $channel = "email";
+            if (str_starts_with($channel, "email"  )) $channel = "email+";
 
             // I suppose admin should receive notification by email when user is browser notified.
-            else if (str_starts_with($channel, "browser")) $channel = "email";
+            else if (str_starts_with($channel, "browser")) $channel = "email+";
 
             // If no recipient, only browser notification is allowed to be sent.
             else if ($recipient instanceof NoRecipient) continue;
@@ -343,7 +343,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
             }
 
             // If recipient implement Email interface, check if email is available
-            else if (str_starts_with($channel, "email")) {
+            else if (str_starts_with($channel, "email+")) {
 
                 if( $recipient instanceof EmailRecipientInterface && empty($recipient->getEmail()) )
                     continue;
@@ -469,6 +469,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
             // Set selected channels, if any
             $channels    = $this->getAdminChannels($notification->getImportance(), $recipient);
+
             if (empty($channels)) return $this;
             $notification->setChannels($channels);
 

@@ -372,10 +372,11 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
+            <argument type="service" id="base.notifier" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="App\Repository\UserRepository" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
             <argument type="service" id="form.proxy" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
@@ -841,6 +842,7 @@
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="request_stack" />
         </service>
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">

@@ -20,7 +20,7 @@ login:
     already: "You are already logged in !"
     partial: "You're partially logged in ! Please sign in to get full access right."
     full: "Full authentication required for this action"
-    social : "Hi ! You just got connected to thought your {0} account"
+    social : "You just got connected to your {0} account"
 
     restricted: "Your user account has restricted access, you cannot use it to login"
     pending: "Your user account requires to be moderated by an administrator"
@@ -71,7 +71,7 @@ resetPassword:
     success: Your password has successfully been changed
 
 logout:
-    success: "{0} You're now disconnected."
+    success: "Bye {0}, you're now disconnected."
     already: "You're not logged in into your account anymore :D"
 
 register:

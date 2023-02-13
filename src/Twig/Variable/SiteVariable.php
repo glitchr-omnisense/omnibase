@@ -61,7 +61,7 @@ class SiteVariable
         $this->sitemapper = $sitemapper;
     }
 
-    public function index() { return $this->baseService->getIndexPage(); }
+    public function index() { return $this->baseService->getRouteIndex(); }
     public function meta     (array $meta = [], ?string $locale = null) : array
     {
         $locale ??= $this->localizer->getLocale();

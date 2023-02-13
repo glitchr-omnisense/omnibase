@@ -151,7 +151,7 @@
 
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {%- set attr = attr|merge({'disabled': form.vars.disabled or (form.vars.is_inherited ?? false)} ) -%}
-{#    {%- set attr = attr|merge({'required': form.vars.required }) -%}#}
+    {%- set attr = attr|merge({'required': form.vars.required }) -%}
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
 
@@ -331,7 +331,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" id="{{ form.vars.id }}-cancel" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
-                <button type="submit" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
+                <button type="{{ form.vars.type ?? "button" }}" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
             </div>
         </div>
     </div>
@@ -381,7 +381,7 @@
                 {{ "@fields.boolean.text"|trans }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" id="{{ form.vars.id }}-confirm" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
+                <button type="button" class="btn btn-default" id="{{ form.vars.id }}-cancel" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
                 <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
             </div>
         </div>

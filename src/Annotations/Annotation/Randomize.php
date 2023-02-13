@@ -41,7 +41,7 @@ class Randomize extends AbstractAnnotation
     {
         if ($this->getFieldValue($entity, $property) === null) {
 
-            $this->setFieldValue($entity, $property, random_str($this->length, $this->chars));
+            $this->setFieldValue($entity, $property, rand_str($this->length, $this->chars));
 
             if ($this->getUnitOfWork()->getEntityChangeSet($entity))
                 $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);

@@ -780,7 +780,7 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
 }
 
 .nav-tabs { padding-top:1em; }
-img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25em; width:30px; }
+img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25em; width:30px;border:1px solid #AAA3; margin-top: -1px; }
 .nav-link { background-color:transparent; }
 .tab-pane { padding:1em; }
 .input-group-text { height: 100%; min-height: 38px; }

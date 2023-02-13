@@ -61,25 +61,31 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
     public function create(string $type = FormType::class, mixed $data = null, array $options = [], array $listeners = []): FormInterface
     {
         $formModelClass = null;
-        if(array_key_exists("data_class", $options))
-            $formModelClass = $options["data_class"] ?? null;
-        else if(($options["use_model"] ?? false) && class_implements_interface($type, FormTypeInterface::class))
-            $formModelClass = $type::getModelClass();
-        else if(($options["use_model"] ?? false) && class_implements_interface($type, SymfonyFormTypeInterface::class))
-            $formModelClass = str_replace("\\Type\\", "\\Model\\", str_rstrip($type, "Type")."Model");
+        $useModel = ($options["use_model"] ?? false);
+        if($useModel) {
 
-        if($formModelClass && !class_implements_interface($formModelClass, FormModelInterface::class))
-            throw new Exception("Form model \"$formModelClass\" must implement \"".FormModelInterface::class."\". Please disable option `use_model` if you don't want to use DTO model schema");
+            if (array_key_exists("data_class", $options))
+                $formModelClass = $options["data_class"] ?? null;
+            else if ($useModel && class_implements_interface($type, FormTypeInterface::class))
+                $formModelClass = $type::getModelClass();
+            //else if(class_implements_interface($type, SymfonyFormTypeInterface::class))
 
-        if($formModelClass) {
+            $formModelClass ??= str_replace("\\Type\\", "\\Model\\", str_rstrip($type, "Type") . "Model");
+            if (!class_exists($formModelClass))
+                throw new Exception("Form model \"$formModelClass\" not found. Please disable option `use_model` if you don't want to use DTO model scheme");
+            if ($formModelClass && !class_implements_interface($formModelClass, FormModelInterface::class))
+                throw new Exception("Form model \"$formModelClass\" must implement \"" . FormModelInterface::class . "\". Please disable option `use_model` if you don't want to use DTO model scheme");
 
-            if(!$data) $data = cast_empty($formModelClass);
-            else if(is_array($data)) $data = cast_from_array($data, $formModelClass);
-            else $data = cast($data, $formModelClass);
+            if ($formModelClass) {
+
+                if (!$data) $data = cast_empty($formModelClass);
+                else if (is_array($data)) $data = cast_from_array($data, $formModelClass);
+                else $data = cast($data, $formModelClass);
+            }
         }
 
         $formBuilder = $this->createBuilder($type, $data, $options);
-        if ($formModelClass) {
+        if ($useModel && $formModelClass) {
 
             $formBuilder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
 

@@ -2,6 +2,7 @@
 
 namespace Base\Annotations;
 
+use Base\Database\Entity\EntityExtensionInterface;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\ORM\EntityManager;
 
@@ -38,6 +39,14 @@ class AnnotationReader extends AbstractLocalCache
         self::TARGET_METHOD,
         self::TARGET_PROPERTY
     ];
+
+    // Annotation pass..
+    protected $annotations = [];
+    public function addAnnotation($annotations): self
+    {
+        $this->annotations[get_class($annotations)] = $annotations;
+        return $this;
+    }
 
     /**
      * @var EntityManager
