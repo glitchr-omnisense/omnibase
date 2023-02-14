@@ -17,6 +17,9 @@
   order:1;
 }
 
+.select2-selection--single.required::after { display: none; }
+.select2-selection--multiple.required::after { display: none; }
+
 .select2-container--bootstrap4 .select2-selection--single
 {
   height:auto !important;
