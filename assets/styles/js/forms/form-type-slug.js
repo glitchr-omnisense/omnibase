@@ -74,7 +74,8 @@ window.addEventListener("load.form_type", function () {
                             return i === r && (i = " "), t + i.replace(n.remove || /[^\w\s$*_+~\.()'"!\-:@]+/g, "")
                         }), "").trim().replace(new RegExp("[\\s" + i + "]+", "g"), i);
 
-                        return r.lower && (a = a.toLowerCase()), r.strict && (a = a.replace(new RegExp("[^a-zA-Z0-9" + i + "]", "g"), "").replace(new RegExp("[\\s" + i + "]+", "g"), i)), a
+                        a = a.toLowerCase();
+                        return r.upper && (a = a.toUpperCase()), r.strict && (a = a.replace(new RegExp("[^a-zA-Z0-9" + i + "]", "g"), "").replace(new RegExp("[\\s" + i + "]+", "g"), i)), a
                 }
                 return n.extend = function (t) {
                     for (var n in t) e[n] = t[n]
@@ -150,7 +151,7 @@ window.addEventListener("load.form_type", function () {
                         if(!this.target) return;
 
                         var keep   = $(this.field).data("slug-keep") ?? "";
-                        var lower  = JSON.parse($(this.field).data("slug-lower") ?? "true");
+                        var upper  = JSON.parse($(this.field).data("slug-upper") ?? "true");
                         var strict = JSON.parse($(this.field).data("slug-strict") ?? "true");
                         var separator = $(this.field).data("slug-separator") ?? "-";
 
@@ -160,7 +161,7 @@ window.addEventListener("load.form_type", function () {
 
                         return trim(o(value ?? this.target.value, {
                             remove: new RegExp("[^A-Za-z0-9\s"+escapeRegExp(keep)+escapeRegExp(separator)+"]", "g"),
-                            lower: lower,
+                            upper: upper,
                             strict: strict,
                             separator : separator
                         }), separator)

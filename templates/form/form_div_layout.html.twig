@@ -259,7 +259,7 @@
     'data-slug-field': form.vars.id,
     'data-slug-keep': keep,
     'data-slug-strict': strict,
-    'data-slug-lower': lower,
+    'data-slug-upper': upper,
     'data-slug-separator': separator,
     'data-slug-lock': lock,
     'data-slug-target': targetForm.vars.id,
@@ -1070,8 +1070,10 @@
     {% set attr = attr|merge({"disabled": form.vars.disabled}) %}
 {% endif %}
 
-{% if form.vars.min %}{% set attr = attr|merge({"data-number-min": form.vars.min}) %}{% endif %}
-{% if form.vars.max %}{% set attr = attr|merge({"data-number-max": form.vars.max}) %}{% endif %}
+{% if form.vars.min    is defined %}{% set attr = attr|merge({"data-number-min": form.vars.min})       %}{% endif %}
+{% if form.vars.max    is defined %}{% set attr = attr|merge({"data-number-max": form.vars.max})       %}{% endif %}
+{% if form.vars.suffix is defined %}{% set attr = attr|merge({"data-number-suffix": form.vars.suffix}) %}{% endif %}
+{% if form.vars.prefix is defined %}{% set attr = attr|merge({"data-number-prefix": form.vars.prefix}) %}{% endif %}
 
 <div class="input-group form-number">
 

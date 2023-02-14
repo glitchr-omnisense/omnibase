@@ -10,6 +10,11 @@ final class NumberField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_MINIMUM = 'min';
+    public const OPTION_MAXIMUM = 'max';
+    public const OPTION_SUFFIX = 'suffix';
+    public const OPTION_PREFIX = 'prefix';
+
     public const OPTION_NUM_DECIMALS = 'numDecimals';
     public const OPTION_ROUNDING_MODE = 'roundingMode';
     public const OPTION_STORED_AS_STRING = 'storedAsString';
@@ -26,11 +31,16 @@ final class NumberField implements FieldInterface
             ->setFormType(NumberType::class)
             ->addCssClass('field-number')
             ->setDefaultColumns(3)
+            ->throttle(50)->step(1)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, null)
             ->setCustomOption(self::OPTION_ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP)
             ->setCustomOption(self::OPTION_STORED_AS_STRING, false);
     }
 
+    public function percentage(int $min, int $max): self
+    {
+        return $this->setMinimum($min)->setMaximum($max)->setSuffix("%");
+    }
     public function setNumDecimals(int $num): self
     {
         if ($num < 0) {
@@ -38,6 +48,27 @@ final class NumberField implements FieldInterface
         }
 
         $this->setCustomOption(self::OPTION_NUM_DECIMALS, $num);
+        return $this;
+    }
+
+    public function setMinimum(int $num): self
+    {
+        $this->setFormTypeOption(self::OPTION_MINIMUM, $num);
+        return $this;
+    }
+    public function setMaximum(int $num): self
+    {
+        $this->setFormTypeOption(self::OPTION_MAXIMUM, $num);
+        return $this;
+    }
+    public function setSuffix(string $suffix): self
+    {
+        $this->setFormTypeOption(self::OPTION_SUFFIX, $suffix);
+        return $this;
+    }
+    public function setPrefix(int $prefix): self
+    {
+        $this->setFormTypeOption(self::OPTION_PREFIX, $prefix);
         return $this;
     }
 

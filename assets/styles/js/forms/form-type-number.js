@@ -7,6 +7,8 @@ window.addEventListener("load.form_type", function () {
 
         var min = $(e).data("number-min");
         var max = $(e).data("number-max");
+        var suffix = $(e).data("number-suffix");
+        var prefix = $(e).data("number-prefix");
         var stepUp = $(e).data("number-up");
         var stepDown = $(e).data("number-down");
 
@@ -25,10 +27,12 @@ window.addEventListener("load.form_type", function () {
         // Do not necessarily display by default..
         // var numberValue = $(input).val() || 0;
         // if(numberValue === 0) $(input).val(0);
-
         var onClickUp = function() {
 
-            var val = parseFloat($(input).val());
+            var number = $(input).val().replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+            if(!number) number = 0;
+            var val = parseFloat(number);
+
             if (isNaN(val))
                 val = 0;
             if (val < parseFloat(max) || max === undefined)
@@ -42,7 +46,9 @@ window.addEventListener("load.form_type", function () {
 
         var onClickDown = function() {
 
-            var val = parseFloat($(input).val());
+            var number = $(input).val().replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+            var val = parseFloat(number);
+
             if (isNaN(val))
                 val = 0;
 
@@ -104,11 +110,30 @@ window.addEventListener("load.form_type", function () {
             if(invervalBtnDown) clearInterval(invervalBtnDown);
         });
 
-        $(input).off("input.number");
-        $(input).on("input.number", function() {
+        var format = function() {
 
-            if ($(input).val()) numberValue = $(input).val();
-            if ($(input).val() == "") setUnlimitedState(input);
+            var number = $(this).val();
+                number = number.replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+            if(!number) number = 0;
+
+            $(this).val(prefix+number+suffix);
+        };
+
+        $(input).off("input.number");
+        $(input).on("input.number", function () {
+
+            var number = $(input).val();
+                number = number.replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+            if(!number) number = 0;
+
+            console.log(number);
+            $(input).val(prefix+number+suffix);
         });
+
+        var number = $(input).val();
+            number = number.replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+        if(!number) number = 0;
+
+        $(input).val(prefix+number+suffix);
     }));
 });

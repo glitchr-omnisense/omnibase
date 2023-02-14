@@ -2,7 +2,12 @@
 
 namespace Base\Field\Type;
 
+use Base\Form\Transformer\StrippedNumberToLocalizedStringTransformer;
 use Base\Twig\Environment;
+use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\DataTransformer\NumberToLocalizedStringTransformer;
+use Symfony\Component\Form\Extension\Core\DataTransformer\StringToFloatTransformer;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -20,6 +25,22 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $this->twig = $twig;
     }
 
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder->addViewTransformer(new StrippedNumberToLocalizedStringTransformer(
+            $options["prefix"],
+            $options["suffix"],
+            $options['scale'],
+            $options['grouping'],
+            $options['rounding_mode'],
+            $options['html5'] ? 'en' : null
+        ));
+
+        if ('string' === $options['input']) {
+            $builder->addModelTransformer(new StringToFloatTransformer($options['scale']));
+        }
+    }
+
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
@@ -31,6 +52,8 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["throttleDown"] = $options["throttleDown"] ?? $options["throttle"];
         $view->vars["min"]          = $options["min"];
         $view->vars["max"]          = $options["max"];
+        $view->vars["suffix"]       = $options["suffix"];
+        $view->vars["prefix"]       = $options["prefix"];
         $view->vars["disabled"]     = $options["disabled"];
         $view->vars["autocomplete"] = $options["autocomplete"];
         $view->vars["value"]        = $form->getData() ?? $options["value"] ?? 0;
@@ -49,6 +72,8 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
             'throttle' => 10,
             "min" => null,
             "max" => null,
+            "suffix" => null,
+            "prefix" => null,
             "autocomplete" => false,
             "keyUp" => true,
             "keyDown" => true,

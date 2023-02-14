@@ -40,7 +40,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             ->setDefaults([
                 "separator" => "-",
                 "keep"   => null,
-                "lower"  => true,
+                "upper"  => true,
                 "lock"   => null,
                 "strict" => null,
                 "target" => null,
@@ -57,7 +57,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
     {
         $view->vars["keep"]      = $options["keep"]      ? preg_quote($options["keep"])      : null;
         $view->vars["separator"] = $options["separator"] ?$options["separator"] : null;
-        $view->vars["lower"]     = json_encode($options["lower"]);
+        $view->vars["upper"]     = json_encode($options["upper"]);
         $view->vars["strict"]    = json_encode($options["strict"]);
         $view->vars["lock"]      = json_encode($options["lock"]);
 

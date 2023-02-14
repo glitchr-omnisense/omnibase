@@ -539,10 +539,11 @@ body {
 
 .dropdown-menu.show, .dropdown-menu.bootstrap-datetimepicker-widget {
 
-    transition: all 500ms, opacity 0.5s;
+    transition: opacity 0.5s;
     transform-origin:top;
     opacity:1;
 }
+.field-country .country-flag { border: 0!important;}
 
 .nav-link {
     position: relative;

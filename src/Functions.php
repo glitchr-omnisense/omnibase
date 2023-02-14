@@ -864,7 +864,7 @@ namespace {
         $needleLength = strlen($needle);
         if(!$needleLength) return $haystack;
 
-        while(strlen($haystack) === strrpos($haystack, $needle) + $needleLength) {
+        while(strrpos($haystack, $needle) !== false && strlen($haystack) === strrpos($haystack, $needle) + $needleLength) {
 
             $haystack = substr($haystack, 0, strlen($haystack)-$needleLength);
             if(!$recursive) break;
@@ -892,7 +892,7 @@ namespace {
         $needleLength = strlen($needle);
         if(!$needleLength) return $haystack;
 
-        while(!empty($needle) && 0 === strpos($haystack, $needle)) {
+        while(strrpos($haystack, $needle) !== false && !empty($needle) && 0 === strpos($haystack, $needle)) {
             $haystack = substr($haystack, $needleLength);
             if(!$recursive) break;
         }

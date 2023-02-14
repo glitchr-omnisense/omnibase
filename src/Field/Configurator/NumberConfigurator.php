@@ -44,7 +44,7 @@ final class NumberConfigurator implements FieldConfiguratorInterface
         }
 
         $field->setFormTypeOption("value", $value);
-        $field->setFormattedValue($this->intlFormatter->formatNumber($value, $formatterAttributes));
+        $field->setFormattedValue($field->getFormTypeOption("prefix").$this->intlFormatter->formatNumber($value, $formatterAttributes).$field->getFormTypeOption("suffix"));
     }
 
     private function getRoundingModeAsString(int $mode): string
