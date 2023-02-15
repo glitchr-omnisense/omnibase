@@ -118,9 +118,20 @@ layout:
       _singular: attribut
       _plural: attributs
 
-      abstract_adapter:
-        _singular: attribut
-        _plural: attributs
+      common:
+        abstract_adapter:
+          _singular: attribute
+          _plural: attributes
+        abstract_rule_adapter:
+          _singular: règle
+          _plural: règles
+        abstract_action_adapter:
+          _singular: action
+          _plural: actions
+        abstract_scope_adapter:
+          _singular: "champ d'action"
+          _plural: "Champ d'actions"
+
       hyperpattern_adapter:
         _singular: "modèle de liens"
         _plural: "modèles de liens"
@@ -136,7 +147,7 @@ layout:
       textarea_adapter:
         _singular: "zone de texte"
         _plural: "zones de texte"
-      datetime_adapter:
+      date_time_adapter:
         _singular: "dateheure"
         _plural: "dateheures"
       percent_adapter:

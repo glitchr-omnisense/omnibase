@@ -40,7 +40,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             ->setDefaults([
                 "separator" => "-",
                 "keep"   => null,
-                "upper"  => true,
+                "upper"  => false,
                 "lock"   => null,
                 "strict" => null,
                 "target" => null,

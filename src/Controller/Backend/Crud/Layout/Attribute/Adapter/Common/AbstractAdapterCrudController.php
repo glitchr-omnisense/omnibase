@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Backend\Crud\Layout\Attribute\Adapter;
+namespace Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common;
 
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\AssociationField;

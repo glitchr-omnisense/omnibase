@@ -99,7 +99,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return $this;
     }
 
-    private $sourceMeta;
+    protected $sourceMeta;
     public function getNaturalWidth(): ?int { return $this->getSourceMeta()["width"] ?? 0; }
     public function getNaturalHeight(): ?int { return $this->getSourceMeta()["height"] ?? 0; }
     public function getSourceMeta(): array|null|false

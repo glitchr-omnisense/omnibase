@@ -21,6 +21,10 @@ use App\Entity\Layout\Widget\Attachment;
 use App\Entity\Layout\Widget\Set\Menu;
 use App\Entity\Layout\Widget\Page;
 
+use Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractActionAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractRuleAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 use Base\Entity\Layout\Image;
 use Base\Backend\Config\WidgetItem;
 use Base\Backend\Config\MenuItem;
@@ -38,7 +42,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Backend\Config\Extension;
-use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Widget\Link;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Service\Translator;
@@ -574,11 +578,24 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->setAction(Action::INDEX)
             ->set("filters[class][comparison]", "!=")
             ->set("filters[class][value]", "layoutWidget_slot")->generateUrl()),
-            WidgetItem::linkToCrud(Image::class),
-            WidgetItem::linkToCrud(AbstractAdapter::class),
+            WidgetItem::linkToCrud(Image::class)
         ]);
 
         if ($this->isGranted('ROLE_EDITOR')) {
+
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', null, 1));
+
+            $widgets = $this->addWidgetItem($widgets, "ATTRIBUTES", [
+                WidgetItem::linkToUrl(AbstractAdapter::class, AbstractAdapter::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()
+                    ->setController(AbstractAdapterCrudController::class)
+                    ->setAction(Action::INDEX)
+                    ->set("filters[class][comparison]", "=")
+                    ->set("filters[class][value]", "abstract_adapter")->generateUrl()),
+
+                WidgetItem::linkToCrud(AbstractRuleAdapter::class),
+                WidgetItem::linkToCrud(AbstractActionAdapter::class),
+                WidgetItem::linkToCrud(AbstractScopeAdapter::class)
+            ]);
 
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', null, 1));
             $widgets = $this->addWidgetItem($widgets, "THREADS", [
@@ -597,7 +614,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(TrashBall::class),
             ]);
 
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 2));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 1));
             $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
                 WidgetItem::linkToCrud(User::class),
                 WidgetItem::linkToCrud(UserGroup::class),

@@ -66,10 +66,10 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $resolver->setDefaults([
             'stepUp'  => null,
             'stepDown' => null,
-            'step' => 5,
+            'step' => 1,
             'throttleUp'  => null,
             'throttleDown' => null,
-            'throttle' => 10,
+            'throttle' => 50,
             "min" => null,
             "max" => null,
             "suffix" => null,

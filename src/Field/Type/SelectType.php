@@ -229,6 +229,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
             if(!$options["choices"] && $options["choice_loader"] === null) {
 
+
                 $options["choices"] = $this->formFactory->guessChoices($form, $options);
                 $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
 
@@ -565,18 +566,16 @@ class SelectType extends AbstractType implements DataMapperInterface
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
 
+                $data = array_map(fn($d) => $this->classMetadataManipulator->isEntity($d) ? $d->getId() : $d, $data);
                 $orderBy = array_flip($data ?? []);
                 $default = count($orderBy);
 
-                $viewData = [];
-                if($data)
-                    $viewData = $classRepository->cacheById($data, [])->getResult();
-
-                usort($viewData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+                $data = $classRepository->cacheById($data, [])->getResult();
+                usort($data, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
 
             } else {
 
-                $data = $classRepository->cacheOneById($data);
+                $data = $this->classMetadataManipulator->isEntity($data) ? $data : $classRepository->cacheOneById($data);
             }
 
             if(!$form->isSubmitted()) $form->setData($data);

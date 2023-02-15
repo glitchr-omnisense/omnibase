@@ -117,9 +117,20 @@ layout:
       _singular: attribute
       _plural: attributes
 
-      abstract_adapter:
-        _singular: attribute
-        _plural: attributes
+      common:
+        abstract_adapter:
+          _singular: attribute
+          _plural: attributes
+        abstract_rule_adapter:
+          _singular: rule
+          _plural: rules
+        abstract_action_adapter:
+          _singular: action
+          _plural: actions
+        abstract_scope_adapter:
+          _singular: scope
+          _plural: scopes
+
       color_adapter:
         _singular: "color"
         _plural: "color"
@@ -135,7 +146,7 @@ layout:
       textarea_adapter:
         _singular: "textarea"
         _plural: "textareas"
-      datetime_adapter:
+      date_time_adapter:
         _singular: "datetime"
         _plural: "datetimes"
       percent_adapter:

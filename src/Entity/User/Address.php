@@ -139,7 +139,7 @@ class Address implements IconizeInterface
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private $additional;
+    protected $additional;
     public function getAdditional(): ?string { return $this->additional; }
     public function setAdditional(?string $additional): self
     {

@@ -248,18 +248,20 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if(empty($value)) $value = null;
 
                 $childFormType = get_class($childForm->getConfig()->getType()->getInnerType());
-                switch($childFormType) {
-                    case ArrayType::class:
-                        if(is_serialized($value)) $value = unserialize($value);
-                        else $value = $value !== null && !is_array($value) ? [$value] : $value;
-                        break;
 
-                    case IntegerType::class:
-                    case NumberType::class:
-                    case PercentType::class:
-                        $value = intval($value);
-                        break;
+                if(is_instanceof($childFormType, ArrayType::class)) {
+
+                    if (is_serialized($value)) $value = unserialize($value);
+                    else $value = $value !== null && !is_array($value) ? [$value] : $value;
+
                 }
+
+                if(is_instanceof($childFormType, NumberType::class))
+                    $value = intval($value);
+                if(is_instanceof($childFormType, PercentType::class))
+                    $value = intval($value);
+                if(is_instanceof($childFormType, IntegerType::class))
+                    $value = intval($value);
 
                 $childForm->setData($value);
             }

@@ -163,9 +163,6 @@ pre {
 .label-wrapper .badge:not(.label) > i:first-child,
 .label-wrapper .badge:not(.label) > a:first-child i { font-size:13pt; }
 
-.badge:not(.label) > i:first-child,
-.badge:not(.label) > a:first-child i { margin-right:0.25em; }
-
 .badge:empty { display:none; }
 .badge+.badge { margin-left:0; }
 .field-boolean .badge { min-width:auto; }

@@ -150,7 +150,7 @@
     }) %}
 
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {%- set attr = attr|merge({'disabled': form.vars.disabled or (form.vars.is_inherited ?? false)} ) -%}
+    {%- set attr = attr|merge({'disabled': form.vars.disabled ?? (form.vars.is_inherited ?? false)} ) -%}
     {%- set attr = attr|merge({'required': form.vars.required }) -%}
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
@@ -182,6 +182,7 @@
                 <i class="fas fa-calendar-day"></i>
             </button>
         </div>
+
         {{ form_widget(form, {attr:attr}) }}
     </div>
 {% endblock datetimepicker_widget %}

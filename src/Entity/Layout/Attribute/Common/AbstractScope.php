@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Common;
 
+use Base\Annotations\Annotation\Uploader;
 use Base\Database\Annotation\DiscriminatorEntry;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -18,4 +19,16 @@ use Base\Database\Annotation\Cache;
  */
 abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
 {
+    public static function __iconizeStatic() : ?array { return ["fas fa-crosshairs"]; }
+
+    /**
+     * @ORM\Column(type="array")
+     */
+    protected $value;
+    public function getValue()     { return $this->value; }
+    public function setValue($value)
+    {
+        $this->value = $value;
+        return $this;
+    }
 }

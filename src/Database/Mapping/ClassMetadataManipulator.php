@@ -487,6 +487,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
         $collection ??= $this->isEntity($entityOrForm) ? null : $this->getClosestEntityCollection($entityOrForm);
         if(!$collection instanceof Collection) return null;
 
+        if($entity instanceof Fee) {
+
+        }
+
         if($collection instanceof PersistentCollection) {
 
             if($collection->getOwner() === null) return null;

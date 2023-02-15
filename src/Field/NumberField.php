@@ -31,7 +31,6 @@ final class NumberField implements FieldInterface
             ->setFormType(NumberType::class)
             ->addCssClass('field-number')
             ->setDefaultColumns(3)
-            ->throttle(50)->step(1)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, null)
             ->setCustomOption(self::OPTION_ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP)
             ->setCustomOption(self::OPTION_STORED_AS_STRING, false);

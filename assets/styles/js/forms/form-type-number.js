@@ -29,15 +29,16 @@ window.addEventListener("load.form_type", function () {
         // if(numberValue === 0) $(input).val(0);
         var onClickUp = function() {
 
-            var number = $(input).val().replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
-            if(!number) number = 0;
+            var number = $(input).val().replaceAll(/[^\d.,]+/ig, "");
             var val = parseFloat(number);
 
             if (isNaN(val))
                 val = 0;
-            if (val < parseFloat(max) || max === undefined)
+
+            if (val < parseFloat(max) || isNaN(parseFloat(max)))
                 val = val + Math.abs(parseFloat(stepUp ?? 1));
-            if (val > parseFloat(max) &&  max !== undefined)
+
+            if (val > parseFloat(max) && !isNaN(parseFloat(max)))
                 val = parseFloat(max);
 
             $(input).val(val);
@@ -46,16 +47,16 @@ window.addEventListener("load.form_type", function () {
 
         var onClickDown = function() {
 
-            var number = $(input).val().replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+            var number = $(input).val().replaceAll(/[^\d.,]+/ig, "");
             var val = parseFloat(number);
 
             if (isNaN(val))
                 val = 0;
 
-            if (val > parseFloat(min) || min === undefined)
+            if (val > parseFloat(min) || isNaN(parseFloat(min)))
                 val = val - Math.abs(parseFloat(stepDown ?? 1));
 
-            if (val < parseFloat(min) &&  min !== undefined)
+            if (val < parseFloat(min) && !isNaN(parseFloat(min)))
                 val = parseFloat(min);
 
             $(input).val(val);
@@ -124,9 +125,9 @@ window.addEventListener("load.form_type", function () {
 
             var number = $(input).val();
                 number = number.replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+
             if(!number) number = 0;
 
-            console.log(number);
             $(input).val(prefix+number+suffix);
         });
 

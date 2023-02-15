@@ -194,8 +194,8 @@ window.addEventListener("load.form_type", function () {
                 var targetCurrentSlug = slugger.target != undefined ? $(slugger.target).val() : $(slugger.field).val();
                 slugger.updateValue(targetCurrentSlug);
 
-                        if(lock === false ) slugger.unlock();
-                else if(lock === true ) slugger.lock();
+                     if(lock === false ) slugger.unlock();
+                else if(lock === true  ) slugger.lock();
                 else if(slugger.compute(targetCurrentSlug) == slugger.currentSlug) slugger.lock();
                 else slugger.unlock();
 
@@ -213,7 +213,8 @@ window.addEventListener("load.form_type", function () {
 
                     slugger.lockButton.addEventListener("click", function () {
 
-                        if(slugger.locked) slugger.updateValue();
+                        if(slugger.locked || targetCurrentSlug == "")
+                            slugger.updateValue();
 
                         var label = $('label[for="' + slugger.target.id + '"]');
                         var isTargetRequired = (slugger.locked ? slugger.field.getAttribute("required") : slugger.target.getAttribute("data-required")) == "required";

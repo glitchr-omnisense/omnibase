@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Repository\Layout\Attribute\Adapter;
+namespace Base\Repository\Layout\Attribute\Adapter\Common;
 
-use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 
 use Base\Database\Repository\ServiceEntityRepository;
 
@@ -15,5 +15,4 @@ use Base\Database\Repository\ServiceEntityRepository;
 
 class AbstractAdapterRepository extends ServiceEntityRepository
 {
-
 }

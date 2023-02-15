@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Entity\Layout\Attribute\Adapter;
+namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
@@ -16,7 +16,7 @@ use Doctrine\Common\Collections\Collection;
 use Base\Entity\Layout\Attribute\Common\AttributeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Attribute\Adapter\AbstractAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
 use Base\Database\Annotation\Cache;
 
 /**

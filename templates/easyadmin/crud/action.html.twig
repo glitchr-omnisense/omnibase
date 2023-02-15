@@ -183,7 +183,7 @@
                 <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
                     {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                     {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                    {{- label !=  static_call(crudEntity|url_decode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
+                    {{- static_call(crudEntity|url_decode, "getEntityLabelInSingular")|trans|mb_ucfirst -}}
                 </a></li>
 
             {% endfor %}

@@ -3,7 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Common;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Service\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
