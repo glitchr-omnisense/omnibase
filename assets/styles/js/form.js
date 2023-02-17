@@ -11,6 +11,29 @@ window.addEventListener('load', function(event) {
 
     $("form.needs-validation input").on("invalid", (e) => e.preventDefault() );
 
+    $(window).keydown(function(event){
+
+        if(event.keyCode == 13) {
+
+            var target = $(event.target);
+            var form = target.closest("form");
+
+            var submitter = undefined;
+            while(target.parent().length) {
+
+                submitter = $(target).find("button");
+                if(submitter.length) break;
+
+                target = target.parent();
+            }
+
+            event.preventDefault();
+
+            if(submitter.length) submitter.trigger("click");
+            return false;
+        }
+    });
+
     $("form").on("submit", function(e) {
 
         // Disable form

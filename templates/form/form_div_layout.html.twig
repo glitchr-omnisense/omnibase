@@ -159,6 +159,12 @@
     <div class="form-filesize form-text text-muted">{{"@fields.select.token_separator"|trans(["'"~form.vars.tokenSeparators|join("' '")~"'"])}}</div>
     {% endif %}
 
+    <div class="form-choice-thumbnail" id="{{ form.vars.id~"_label" }}">
+        {%- for image in form.vars.choice_thumbnails -%}
+        <label id="{{ form.vars.id~"_choice_"~loop.index }}" class="form-choice-thumbnail-label">{{ image|thumbnail(500,500)|imagify }}</label>
+        {%- endfor -%}
+    </div>
+
 {% endblock select2_widget %}
 
 {%- block discriminator_row -%}
@@ -791,7 +797,7 @@
 
         <div class="accordion form-collection-item">
             <div class="accordion-item">
-                <h2 class="accordion-header" id="{{ id }}-heading" >
+                <div class="accordion-header" id="{{ id }}-heading" >
 
                     {# `is_empty` is used because some internal keys are marked by a starting "_" #}
                     {% set is_empty = empty(form.children|keys|filter((v, k) => not str_starts_with(v, '_') )) %}
@@ -838,7 +844,7 @@
                             {{ delete_item_button }}
                         {% endif %}
                     </div>
-                </h2>
+                </div>
 
                 {% if not is_empty %}
                 <div id="{{ id }}-collapse" class="accordion-collapse collapse {{ collapsed ? '' : 'show'}}">
@@ -1061,6 +1067,7 @@
     "data-number-keyup": form.vars.keyUp,
     "data-number-keydown": form.vars.keyDown,
     "data-number-up": form.vars.stepUp ?? 1,
+    "data-number-divisor": form.vars.divisor ?? 1,
     "data-number-down": form.vars.stepDown ?? 1,
     "data-number-up-throttle": form.vars.throttleUp ?? 0,
     "data-number-down-throttle": form.vars.throttleDown ?? 0,

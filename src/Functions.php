@@ -2504,7 +2504,7 @@ namespace {
     {
         if($datetime === null) return null;
         return is_int($datetime)    ? (new DateTime())->setTimestamp($datetime) :
-             ( is_string($datetime) ?  new DateTime($datetime) : (clone $datetime));
+             ( is_string($datetime) ? (new DateTime())->modify($datetime) : (clone $datetime));
     }
 
     function daydiff(null|string|int|DateTime $datetime):?int
@@ -2523,8 +2523,8 @@ namespace {
         $precision = cast_datetime($precision);
 
         $timestamp = $datetime->format("U");
-        $modulo = abs($precision->format("U") - time());
-        $delta = $timestamp % $modulo;
+        $modulo = abs($precision->format("U") - (new DateTime())->format("U"));
+        $delta = $timestamp == $modulo ? 0 : $timestamp % $modulo;
 
         return $datetime->setTimestamp($timestamp - $delta + $modulo);
     }
@@ -2535,8 +2535,8 @@ namespace {
         $precision = cast_datetime($precision);
 
         $timestamp = $datetime->format("U");
-        $modulo = abs($precision->format("U") - time());
-        $delta = $timestamp % $modulo;
+        $modulo = abs($precision->format("U") - (new DateTime())->format("U"));
+        $delta = $timestamp == $modulo ? 0 : $timestamp % $modulo;
 
         return $datetime->setTimestamp($timestamp - $delta);
     }

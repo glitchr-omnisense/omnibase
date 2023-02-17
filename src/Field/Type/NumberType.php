@@ -2,6 +2,7 @@
 
 namespace Base\Field\Type;
 
+use Base\Form\Transformer\ScaleNumberTransformer;
 use Base\Form\Transformer\StrippedNumberToLocalizedStringTransformer;
 use Base\Twig\Environment;
 use Symfony\Component\Form\DataMapperInterface;
@@ -27,6 +28,7 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $builder->addViewTransformer(new ScaleNumberTransformer($options["divisor"]));
         $builder->addViewTransformer(new StrippedNumberToLocalizedStringTransformer(
             $options["prefix"],
             $options["suffix"],
@@ -51,12 +53,12 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["throttleUp"]   = $options["throttleUp"] ?? $options["throttle"];
         $view->vars["throttleDown"] = $options["throttleDown"] ?? $options["throttle"];
         $view->vars["min"]          = $options["min"];
+        $view->vars["divisor"]      = $options["divisor"];
         $view->vars["max"]          = $options["max"];
         $view->vars["suffix"]       = $options["suffix"];
         $view->vars["prefix"]       = $options["prefix"];
         $view->vars["disabled"]     = $options["disabled"];
         $view->vars["autocomplete"] = $options["autocomplete"];
-        $view->vars["value"]        = $form->getData() ?? $options["value"] ?? 0;
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -66,6 +68,7 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $resolver->setDefaults([
             'stepUp'  => null,
             'stepDown' => null,
+            'divisor' => 1,
             'step' => 1,
             'throttleUp'  => null,
             'throttleDown' => null,
@@ -77,7 +80,6 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
             "autocomplete" => false,
             "keyUp" => true,
             "keyDown" => true,
-            "value" => 0
         ]);
     }
 

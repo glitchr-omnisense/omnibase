@@ -43,8 +43,7 @@ final class NumberConfigurator implements FieldConfiguratorInterface
             $formatterAttributes['fraction_digit'] = $scale;
         }
 
-        $field->setFormTypeOption("value", $value);
-        $field->setFormattedValue($field->getFormTypeOption("prefix").$this->intlFormatter->formatNumber($value, $formatterAttributes).$field->getFormTypeOption("suffix"));
+        $field->setFormattedValue($field->getFormTypeOption("prefix").$this->intlFormatter->formatNumber($value*$field->getFormTypeOption("scaling_factor"), $formatterAttributes).$field->getFormTypeOption("suffix"));
     }
 
     private function getRoundingModeAsString(int $mode): string

@@ -595,6 +595,8 @@ class ServiceEntityParser
                 else if ( str_ends_with($by, self::OPTION_NOT_STARTING_WITH) ) $option = self::OPTION_NOT_STARTING_WITH;
                 else if ( str_ends_with($by, self::OPTION_NOT_ENDING_WITH)   ) $option = self::OPTION_NOT_ENDING_WITH;
 
+                else if ( str_ends_with($by, self::OPTION_OVER)              ) $option = self::OPTION_OVER;
+                else if ( str_ends_with($by, self::OPTION_NOT_OVER)          ) $option = self::OPTION_NOT_OVER;
                 else if ( str_ends_with($by, self::OPTION_YOUNGER)           ) $option = self::OPTION_YOUNGER;
                 else if ( str_ends_with($by, self::OPTION_YOUNGER_EQUAL)     ) $option = self::OPTION_YOUNGER_EQUAL;
                 else if ( str_ends_with($by, self::OPTION_WITHIN)            ) $option = self::OPTION_WITHIN;
@@ -1042,9 +1044,12 @@ class ServiceEntityParser
 
             if(is_numeric($fieldValue)) $fieldValue = ($fieldValue > 0 ? "+" : "-") . $fieldValue . " second" . ($fieldValue > 1 ? "s" : "");
 
+            if($fieldValue instanceof \DateTime && in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL]))
+                throw new Exception("Please use string or int with Older/Younger operands");
+
                 if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
-            else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
-            else {
+            else if($this->validateDate($fieldValue) && !$fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
+            else if(!$fieldValue instanceof \DateTime) {
 
                 $subtract = $fieldValue;
                 if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]))
@@ -1383,9 +1388,10 @@ class ServiceEntityParser
                 else if($tableOperator == self::OPTION_LOWER_EQUAL)   $fnExpr = "le";
                 else if($tableOperator == self::OPTION_YOUNGER)       $fnExpr = "gt";
                 else if($tableOperator == self::OPTION_YOUNGER_EQUAL) $fnExpr = "ge";
-                else if($tableOperator == self::OPTION_OVER)          $fnExpr = "le";
+                else if($tableOperator == self::OPTION_OVER)          $fnExpr = "lt";
                 else if($tableOperator == self::OPTION_NOT_OVER)      $fnExpr = "gt";
                 else if($tableOperator == self::OPTION_OLDER)         $fnExpr = "lt";
+                else if($tableOperator == self::OPTION_OLDER_EQUAL)   $fnExpr = "le";
                 else if($tableOperator == self::OPTION_WITHIN)        $fnExpr = "lt";
                 else if($tableOperator == self::OPTION_OLDER_EQUAL)   $fnExpr = "le";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
@@ -1592,7 +1598,7 @@ class ServiceEntityParser
 
         $query->useQueryCache($this->cacheable);
         $query->setCacheRegion($this->classMetadata->cache["region"] ?? null);
-//        dump($this->classMetadata->getName(). " << ". $query->getCacheRegion());
+
         //
         // Apply custom output walker to all entities (some join may relates to translatable entities)
         if(class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class))

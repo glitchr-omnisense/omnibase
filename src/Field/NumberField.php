@@ -15,6 +15,7 @@ final class NumberField implements FieldInterface
     public const OPTION_SUFFIX = 'suffix';
     public const OPTION_PREFIX = 'prefix';
 
+    public const OPTION_DIVISOR = 'divisor';
     public const OPTION_NUM_DECIMALS = 'numDecimals';
     public const OPTION_ROUNDING_MODE = 'roundingMode';
     public const OPTION_STORED_AS_STRING = 'storedAsString';
@@ -38,8 +39,15 @@ final class NumberField implements FieldInterface
 
     public function percentage(int $min, int $max): self
     {
-        return $this->setMinimum($min)->setMaximum($max)->setSuffix("%");
+        return $this->setMinimum($min)->setMaximum($max)->setDivisor(0.01)->setSuffix("%");
     }
+
+    public function setDivisor(int $num): self
+    {
+        $this->setFormTypeOption(self::OPTION_DIVISOR, $num);
+        return $this;
+    }
+
     public function setNumDecimals(int $num): self
     {
         if ($num < 0) {

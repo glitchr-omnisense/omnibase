@@ -31,7 +31,7 @@ use Base\Database\Annotation\Cache;
  * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
  */
 
-abstract class AbstractAdapter implements AbstractAdapterInterface, AutocompleteInterface, TranslatableInterface, IconizeInterface
+abstract class AbstractAdapter implements AttributeAdapterInterface, AutocompleteInterface, TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 

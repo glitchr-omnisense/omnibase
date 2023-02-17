@@ -10,7 +10,7 @@ window.addEventListener("load.form_type", function () {
         var selected = $("#"+id+"-selected");
         var list     = $("#"+id+"-list").find("li.item");
 
-        var amount       = $("#"+id).val();
+        var amount       = $("#"+id).val() || "1";
         var scale        = $(e).data("scale-field") || 0;
         var target       = $("#"+$(e).data("target-field"));
         var baseExchange = 1;
@@ -50,7 +50,15 @@ window.addEventListener("load.form_type", function () {
             return   addCommas(a)+decimal+addCommas(b);
         }
 
-        var decimal   = amount[amount.length - (scale+1)] || ".";
+
+        var decimal   = ".";
+        var decimalChar = amount[amount.length - (scale+1)];
+        if (decimalChar == ",")
+            decimal = decimalChar;
+
+        if(amount.indexOf(decimal) < 0)
+            amount = amount+"."+"".padStart(scale, '0');
+
         var num = str2num(amount, scale);
         input.val(num2str(num, scale, decimal));
 
@@ -62,7 +70,7 @@ window.addEventListener("load.form_type", function () {
         $(input).off("input");
         $(input).on("input", function() {
 
-            var val = input.val().replace(/[^0-9]/g, '');
+            var val = input.val().replace(/[^0-9\-]/g, '');
             var factor = 10**scale;
 
             input.val(num2str(parseInt(val)/factor, scale, decimal));

@@ -21,6 +21,10 @@ use Base\Database\Annotation\Cache;
 abstract class AbstractAction extends AbstractAttribute implements ActionInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-directions"]; }
+    public function apply(mixed $subject): mixed
+    {
+        return $this->adapter?->apply($this->getValue(), $subject) ?? $subject;
+    }
 
     /**
      * @ORM\Column(type="array")

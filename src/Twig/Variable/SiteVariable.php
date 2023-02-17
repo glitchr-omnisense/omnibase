@@ -2,6 +2,7 @@
 
 namespace Base\Twig\Variable;
 
+use Base\Entity\User;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LocalizerInterface;
@@ -86,6 +87,14 @@ class SiteVariable
     public function birthdate(?string $locale = null) : DateTime { return $this->maternityUnit->getBirthdate($locale); }
     public function is_born(?string $locale = null) : bool { return $this->maternityUnit->isBorn($locale); }
     public function age(?string $locale = null) : string { return $this->maternityUnit->getAge($locale); }
+
+    public function is_newcomer(int $within = 0): bool
+    {
+        $lastVisit = $_COOKIE["USER/LAST_VISIT"] ?? 0;
+        setcookie("USER/LAST_VISIT", time(), time()+$within);
+
+        return !$lastVisit;
+    }
 
     public function execution_time() { return $this->baseService->getExecutionTime(); }
 }

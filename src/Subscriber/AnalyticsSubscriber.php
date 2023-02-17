@@ -81,8 +81,8 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         // This request has variable datetime this will nto be cached
         // @TODO Round within absolute timegate; 15:00; 15:05, 15:10 etc..
         $onlineUsers = $user ?
-            $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) :
-            $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay());
+            $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) :
+            $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay());
 
         $onlineUsers = $onlineUsers->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);

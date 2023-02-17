@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
+use App\Entity\Marketplace\Sales\Attribute\Scope\TaxonAdapterAbstract;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
@@ -25,7 +26,12 @@ use Base\Database\Annotation\Cache;
  * @DiscriminatorEntry( value = "abstract_rule" )
  */
 
-abstract class AbstractRuleAdapter extends AbstractAdapter
+abstract class AbstractRuleAdapter extends AbstractAdapter implements RuleAdapterInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-poll"]; }
+
+    public function compliesWith(mixed $value, mixed $subject): bool {
+
+        throw new \InvalidArgumentException("Unsupported value (".(is_object($subject) ? get_class($subject) : gettype($subject)).") provided in ".str_replace("Proxies\__CG__\\", "", static::class));
+    }
 }

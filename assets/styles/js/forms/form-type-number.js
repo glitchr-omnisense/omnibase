@@ -29,10 +29,10 @@ window.addEventListener("load.form_type", function () {
         // if(numberValue === 0) $(input).val(0);
         var onClickUp = function() {
 
-            var number = $(input).val().replaceAll(/[^\d.,]+/ig, "");
+            var number = $(input).val().replaceAll(/[^\d.,\-]+/ig, "");
             var val = parseFloat(number);
 
-            if (isNaN(val))
+            if (isNaN(val) || !val)
                 val = 0;
 
             if (val < parseFloat(max) || isNaN(parseFloat(max)))
@@ -42,15 +42,15 @@ window.addEventListener("load.form_type", function () {
                 val = parseFloat(max);
 
             $(input).val(val);
-            $(input).trigger("input");
+            input[0].dispatchEvent(new Event("input"));
         }
 
         var onClickDown = function() {
 
-            var number = $(input).val().replaceAll(/[^\d.,]+/ig, "");
+            var number = $(input).val().replaceAll(/[^\d.,\-]+/ig, "");
             var val = parseFloat(number);
 
-            if (isNaN(val))
+            if (isNaN(val) || !val)
                 val = 0;
 
             if (val > parseFloat(min) || isNaN(parseFloat(min)))
@@ -60,7 +60,7 @@ window.addEventListener("load.form_type", function () {
                 val = parseFloat(min);
 
             $(input).val(val);
-            $(input).trigger("input");
+            input[0].dispatchEvent(new Event("input"));
         };
 
         // $(window).off("keydown.number."+id);
@@ -114,7 +114,7 @@ window.addEventListener("load.form_type", function () {
         var format = function() {
 
             var number = $(this).val();
-                number = number.replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+                number = number.replaceAll(/[^\d.,\-]+/ig, "").replaceAll(/^0/ig, "");
             if(!number) number = 0;
 
             $(this).val(prefix+number+suffix);
@@ -124,16 +124,22 @@ window.addEventListener("load.form_type", function () {
         $(input).on("input.number", function () {
 
             var number = $(input).val();
-                number = number.replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
+                number = number.replaceAll(/[^\d.,\-]+/ig, "").replaceAll(/^0/ig, "");
 
-            if(!number) number = 0;
+            if(isNaN(number) || !number) number = 0;
+            if (number > parseFloat(max))
+                number = max;
+            if (number < parseFloat(min))
+                number = min;
 
             $(input).val(prefix+number+suffix);
         });
 
         var number = $(input).val();
-            number = number.replaceAll(/[^\d.,]+/ig, "").replaceAll(/^0/ig, "");
-        if(!number) number = 0;
+            number = number.replaceAll(/[^\d.,\-]+/ig, "").replaceAll(/^0/ig, "");
+
+        if (isNaN(number) || !number)
+            number = 0;
 
         $(input).val(prefix+number+suffix);
     }));

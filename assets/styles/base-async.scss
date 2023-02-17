@@ -16,6 +16,44 @@
     white-space: pre-line;
 }
 
+.form-choice-thumbnail img
+{
+    object-fit:cover;
+    height:100px;
+}
+
+.form-choice-thumbnail:empty { display:none; }
+.form-choice-thumbnail
+{
+    display:flex;
+    flex-wrap:wrap;
+
+    border: 1px solid #ced4da;
+    border-radius: 3px;
+    margin: 1em 0;
+
+    overflow-x:scroll;
+}
+
+.form-number.input-group>.form-control
+{
+    flex: none;
+    width:auto;
+}
+.form-association .form-group > input {
+    width:auto;
+}
+.form-choice-thumbnail label.selected { border: 1px solid #ced4da; }
+.form-choice-thumbnail label:hover { border: 1px solid #b0b5ba; }
+.form-choice-thumbnail label
+{
+    cursor:pointer;
+    border: 1px solid transparent;
+    margin: 0.25em;
+    padding:4px;
+    border-radius: 4px;
+}
+
 .form-number input {
     text-align: right;
 }
@@ -60,7 +98,7 @@
 .avatarupload .field-raw { display:none; }
 
 @media all and (max-width: 470px) {
-    
+
     .ql-editor img
     {
         margin: auto;
@@ -566,6 +604,7 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
 {
     border-color: #1ea471;
 }
+
 .form-password-block .form-password-details
 {
     border: 1px solid lightgrey;

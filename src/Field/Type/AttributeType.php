@@ -202,10 +202,10 @@ class AttributeType extends AbstractType implements DataMapperInterface
                             "row_group" => false,
                             "autoload" => false,
                             "fields" => ["value" => $field],
-                            "class" => $options["class"]
+                            "class" => $options["class"],
                         ]);
 
-                        $form->get($code)->setData($unvData[$code]);
+                        $form->get($code)->setData(100);
                     }
                 }
 

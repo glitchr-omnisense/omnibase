@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
-interface AbstractAdapterInterface
+interface AttributeAdapterInterface
 {
     public static function getType(): string;
     public function getOptions(): array;

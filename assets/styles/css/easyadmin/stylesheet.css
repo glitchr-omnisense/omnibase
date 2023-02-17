@@ -16,6 +16,14 @@ html, body { scroll-padding-top: 11em; }
 }
 .sf-minitoolbar svg path { fill: var(--sidebar-menu-color) !important; }
 
+
+.form-choice-thumbnail label:hover {
+    border: 1px solid var(--sidebar-border-color);
+}
+.form-choice-thumbnail {
+    border: 1px solid var(--sidebar-border-color);
+}
+
 .d-inline .dropdown:after { margin-left:0px; }
 .d-inline .dropdown-toggle { background-color:transparent; margin-right:1px; }
 .d-inline .dropdown-toggle:active, .d-inline .dropdown-toggle:focus, .d-inline .dropdown-toggle.show {

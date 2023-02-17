@@ -38,20 +38,12 @@ final class MoneyConfigurator implements FieldConfiguratorInterface
         $numDecimals = $field->getCustomOption(MoneyField::OPTION_NUM_DECIMALS);
         $field->setFormTypeOption('scale', $numDecimals);
 
-        $storedAsCents = $field->getCustomOption(MoneyField::OPTION_STORED_AS_CENTS);
-        $field->setFormTypeOption('divisor', $storedAsCents ? 100 : 1);
-
         if ($currencyPropertyPath = $field->getCustomOption(MoneyField::OPTION_CURRENCY_PROPERTY_PATH))
             $field->setFormTypeOption("currency_target", $currencyPropertyPath);
 
         if (null === $field->getValue()) {
             return;
         }
-
-        $formattedValue = apply_callback(fn($v) =>
-            $this->intlFormatter->formatCurrency($storedAsCents ? $v / 100 : $v, $currencyCode, ['fraction_digit' => $numDecimals]),
-            $field->getValue()
-        );
 
         $field->setFormattedValue(empty($formattedValue) ? null : $formattedValue);
     }

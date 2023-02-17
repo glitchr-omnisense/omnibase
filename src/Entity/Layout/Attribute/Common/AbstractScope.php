@@ -5,6 +5,7 @@ namespace Base\Entity\Layout\Attribute\Common;
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\Annotation\DiscriminatorEntry;
 
+use Base\Entity\Thread\Taxon;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractScopeRepository;
 use Base\Database\Annotation\Cache;
@@ -20,6 +21,21 @@ use Base\Database\Annotation\Cache;
 abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-crosshairs"]; }
+    public function contains(mixed $subject): bool
+    {
+
+        if(!$this->adapter) return true;
+
+        $ret = false;
+        foreach($this->getValue() as $value) {
+
+            if(!$this->adapter->supports($value)) continue;
+            $ret |= $this->adapter->contains($value, $subject);
+            if($ret) break;
+        }
+
+        return $ret;
+    }
 
     /**
      * @ORM\Column(type="array")

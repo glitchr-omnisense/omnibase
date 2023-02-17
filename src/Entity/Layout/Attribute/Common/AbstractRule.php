@@ -22,6 +22,20 @@ use Base\Database\Annotation\Cache;
 abstract class AbstractRule extends AbstractAttribute implements RuleInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-poll"]; }
+    public function compliesWith(mixed $subject): bool
+    {
+        if(!$this->adapter) return true;
+
+        $ret = false;
+        foreach($this->getValue() as $value) {
+
+            if(!$this->adapter->supports($value)) continue;
+            $ret |= $this->adapter->compliesWith($value, $subject);
+            if($ret) break;
+        }
+
+        return $ret;
+    }
 
     /**
      * @ORM\Column(type="array")
