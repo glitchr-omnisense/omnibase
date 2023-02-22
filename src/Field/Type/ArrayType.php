@@ -48,6 +48,9 @@ class ArrayType extends CollectionType implements DataMapperInterface
             "associative" => null,
             "prototype_key" => null,
             "prototype_id" => null,
+            "allow_add" => true,
+            "allow_delete" => true,
+            'entry_type' => TextType::class,
             "pattern" => null,
             "length" => 0,
             "placeholder" => []

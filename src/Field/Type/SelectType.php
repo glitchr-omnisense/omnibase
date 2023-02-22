@@ -779,8 +779,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
         }
 
-        $view->vars["choices"]        = $options["choices"] ?? $dataset ?? [];
+        $view->vars["choices"]        = array_filter($options["choices"] ?? $dataset ?? []);
         $view->vars["data"]           = $selectedData;
+
         $view->vars["choice_thumbnails"] = is_callable($options["choice_thumbnails"])
             ? array_map(fn($c) => $options["choice_thumbnails"]($c), $view->vars["choices"] ?? [])
             : $options["choice_thumbnails"] ?? [];

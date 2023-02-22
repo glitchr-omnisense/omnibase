@@ -167,6 +167,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     "label"            => $options["label"],
                     "html"             => $options["html"],
                     'by_reference'     => false,
+                    'allow_object'     => true,
                     'length'           => $options["group"] ? $options["length"] : max(1, $options["length"]),
                     "group"            => $options["group"],
                     "row_group"        => $options["row_group"],

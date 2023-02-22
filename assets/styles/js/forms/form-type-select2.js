@@ -354,24 +354,48 @@ window.addEventListener("load.form_type", function () {
 
         //
         // Handle thumbnail selection
-        if($(field).val() <= thumbnails.length && $(field).val() > 0)
-            $(thumbnails[$(field).val()-1]).addClass("selected");
+        if(thumbnails.length) {
 
-        $(thumbnails).each(function() {
+            var options = $(field).find("option");
+            var thumbnailIds = [];
 
-            $(this).off("click.select2-thumbnail");
-            $(this).on("click.select2-thumbnail", function() {
+            if (typeof ($(field).val()) == "object") { // multiples
 
-                $(thumbnails).removeClass("selected");
-                $(this).addClass("selected");
-                if($(this).hasClass("selected")) {
+                var values = $(field).val();
+                $(values).each(function (i) {
 
-                    var i = $(this).attr("id").substring(el.getAttribute('id').length+1);
-                    var option = $("#"+el.getAttribute('id')).find("option")[parseInt(i) - 1];
-                    $(field).val(parseInt(option.value))[0].dispatchEvent(new Event("change"));
-                }
+                    var option = $(field).find("option[value=" + this + "]")[0];
+                    thumbnailIds.push(options.index(option));
+                });
+
+            } else {
+
+                var option = $(field).find("option[value=" + $(field).val() + "]")[0];
+                thumbnailIds.push(options.index(option));
+            }
+
+            $(thumbnailIds).each(function () {
+
+                if (this <= thumbnails.length)
+                    $(thumbnails[this]).addClass("selected");
             });
-        });
+
+            $(thumbnails).each(function () {
+
+                $(this).off("click.select2-thumbnail");
+                $(this).on("click.select2-thumbnail", function () {
+
+                    $(thumbnails).removeClass("selected");
+                    $(this).addClass("selected");
+                    if ($(this).hasClass("selected")) {
+
+                        var i = $(this).attr("id").substring(el.getAttribute('id').length + 1);
+                        var option = $("#" + el.getAttribute('id')).find("option")[parseInt(i)];
+                        $(field).val(parseInt(option.value))[0].dispatchEvent(new Event("change"));
+                    }
+                });
+            });
+        }
 
     }));
 });

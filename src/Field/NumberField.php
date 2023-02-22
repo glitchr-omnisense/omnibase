@@ -19,6 +19,7 @@ final class NumberField implements FieldInterface
     public const OPTION_NUM_DECIMALS = 'numDecimals';
     public const OPTION_ROUNDING_MODE = 'roundingMode';
     public const OPTION_STORED_AS_STRING = 'storedAsString';
+    public const OPTION_THROTTLE = 'throttle';
     /**
      * @param string|false|null $label
      */
@@ -42,9 +43,15 @@ final class NumberField implements FieldInterface
         return $this->setMinimum($min)->setMaximum($max)->setDivisor(0.01)->setSuffix("%");
     }
 
-    public function setDivisor(int $num): self
+    public function setDivisor(float $num): self
     {
         $this->setFormTypeOption(self::OPTION_DIVISOR, $num);
+        return $this;
+    }
+
+    public function setThrottle(int $num): self
+    {
+        $this->setFormTypeOption(self::OPTION_THROTTLE, $num);
         return $this;
     }
 

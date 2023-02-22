@@ -5,6 +5,7 @@ namespace Base\Traits;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
+use Base\Service\TradingMarketInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Notifier\Abstract\BaseNotifierInterface;
 use Base\Routing\RouterInterface;
@@ -85,6 +86,7 @@ trait BaseTrait
     public static function getNotifier()      : ?BaseNotifierInterface   { return (self::class === BaseService::class) ? BaseService::$notifier       : BaseService::getNotifier(); }
     public static function getTranslator()    : ?TranslatorInterface     { return (self::class === BaseService::class) ? BaseService::$translator     : BaseService::getTranslator(); }
     public static function getSlugger()       : ?SluggerInterface        { return (self::class === BaseService::class) ? BaseService::$slugger        : BaseService::getSlugger(); }
+    public static function getTradingMarket() : ?TradingMarketInterface  { return (self::class === BaseService::class) ? BaseService::$tradingMarket  : BaseService::getTradingMarket(); }
 
     public static function getParameterBag(string $key = "", ?array $bag = null)
     {

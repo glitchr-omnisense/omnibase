@@ -4,6 +4,7 @@ namespace Base\Traits;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
+use Base\Service\TradingMarketInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\SettingBag;
@@ -90,6 +91,12 @@ trait BaseCommonTrait {
      */
     protected static $localizer = null;
     public static function setLocalizer(?LocalizerInterface $localizer) {  self::$localizer = $localizer; }
+
+    /**
+     * @var TradingMarketInterface
+     */
+    protected static $tradingMarket = null;
+    public static function setTradingMarket(?TradingMarketInterface $tradingMarket) {  self::$tradingMarket = $tradingMarket; }
 
     /**
      * @var LocalizerInterface

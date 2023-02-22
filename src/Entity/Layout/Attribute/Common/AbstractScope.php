@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Common;
 
 use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Associate;
 use Base\Database\Annotation\DiscriminatorEntry;
 
 use Base\Entity\Thread\Taxon;
@@ -23,7 +24,6 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
     public static function __iconizeStatic() : ?array { return ["fas fa-crosshairs"]; }
     public function contains(mixed $subject): bool
     {
-
         if(!$this->adapter) return true;
 
         $ret = false;
@@ -39,12 +39,25 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
 
     /**
      * @ORM\Column(type="array")
+     * @Associate(metadata="class")
      */
     protected $value;
     public function getValue()     { return $this->value; }
     public function setValue($value)
     {
         $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $class;
+
+    public function getClass(): ?string { return $this->class; }
+    public function setClass(?string $class)
+    {
+        $this->class = $class;
         return $this;
     }
 }

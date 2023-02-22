@@ -161,7 +161,7 @@
 
     <div class="form-choice-thumbnail" id="{{ form.vars.id~"_label" }}">
         {%- for image in form.vars.choice_thumbnails -%}
-        <label id="{{ form.vars.id~"_choice_"~loop.index }}" class="form-choice-thumbnail-label">{{ image|thumbnail(500,500)|imagify }}</label>
+        <label id="{{ form.vars.id~"_choice_"~loop.index0 }}" class="form-choice-thumbnail-label">{{ image|thumbnail(500,500)|imagify }}</label>
         {%- endfor -%}
     </div>
 
@@ -782,8 +782,12 @@
     {% set href = form.vars.href ?? null %}
     {% if is_granted("ROLE_ADMIN") %}
         {% set href = href ?? (form.vars.value == "" ? null : app.ea.crudify(form.vars.value)) %}
+        {% if href is iterable %}
+            {% set href = form.vars.value ? (href[get_class(form.vars.value)] ?? null) : null %}
+            {% set href = href|url_decode %}
+        {% endif %}
         {% set href = href ? href|url_encode : null %}
-    {% endif %}
+        {% endif %}
 
     {% if group %}
 
@@ -811,7 +815,7 @@
                     <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ is_empty ? 'style="cursor:default;"' : '' }}
                             type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse" aria-expanded="{{ collapsed ? false : true}}" aria-controls="{{ id }}-collapse">
                     {%- endif -%}
-
+                        &nbsp;
                     {%- if linkable and not html -%}
                     <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
                     {% endif %}
@@ -846,13 +850,9 @@
                     </div>
                 </div>
 
-                {% if not is_empty %}
                 <div id="{{ id }}-collapse" class="accordion-collapse collapse {{ collapsed ? '' : 'show'}}">
-                    <div class="accordion-body">
-                        {{ form_widget(form, {attr:attr}) }}
-                    </div>
+                    <div class="accordion-body">{{ form_widget(form, {attr:attr}) }}</div>
                 </div>
-                {% endif %}
             </div>
         </div>
 
@@ -1030,11 +1030,28 @@
 
 {%- block stock_widget -%}
 
+
+{# Search for target inside form based on parent including translation #}
+{% set targetForm = form.vars.ancestor %}
+{% for child in target %}
+
+    {% set targetForm = targetForm[child] %}
+
+    {% if child == "translations" %}
+        {% if targetForm.vars.default_locale is defined and targetForm.vars.default_locale in targetForm|keys %}
+            {% set targetForm = targetForm[targetForm.vars.default_locale] %}
+        {% else %}
+            {% set targetForm = targetForm|first %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
 {% set attr = attr|merge({
     'data-stock-field': form.vars.id,
     'data-stock-unlimited': "@fields.stock.unlimited"|trans,
     "data-stock-up": form.vars.stepUp ?? 1,
     "data-stock-down": form.vars.stepDown ?? 1,
+    'data-stock-target': targetForm.vars.id,
     "data-stock-min": form.vars.min is defined and form.vars.max > 0 ? form.vars.max : 0,
 }) %}
 
@@ -1048,6 +1065,10 @@
             <i class="fas fa-box-open"></i>
         </button>
     </div>
+    {% if form.vars.target is not null %}
+    <div class="input-group-text" id="{{form.vars.id}}-current">0</div>
+    <div class="input-group-text">/</div>
+    {% endif %}
     {{ form_widget(form, {attr:attr}) }} {# NumberType is returning and input type text... #}
     {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}
     <div class="input-group-text">

@@ -14,6 +14,7 @@ window.addEventListener("load.form_type", function () {
 
         var keyUp = $(e).data("number-keyup");
         var keyDown = $(e).data("number-keydown");
+        var divisor = $(e).data("number-divisor");
 
         var throttleDown =  $(e).data("number-down-throttle");
         var throttleUp   =  $(e).data("number-up-throttle");
@@ -41,7 +42,9 @@ window.addEventListener("load.form_type", function () {
             if (val > parseFloat(max) && !isNaN(parseFloat(max)))
                 val = parseFloat(max);
 
-            $(input).val(val);
+            var scale = Math.log(scale) / Math.log(10);
+            $(input).val(Math.round(val, scale));
+
             input[0].dispatchEvent(new Event("input"));
         }
 
@@ -59,7 +62,9 @@ window.addEventListener("load.form_type", function () {
             if (val < parseFloat(min) && !isNaN(parseFloat(min)))
                 val = parseFloat(min);
 
+            val = divisor ? Math.round(val/divisor)*divisor : val;
             $(input).val(val);
+
             input[0].dispatchEvent(new Event("input"));
         };
 
@@ -137,6 +142,7 @@ window.addEventListener("load.form_type", function () {
 
         var number = $(input).val();
             number = number.replaceAll(/[^\d.,\-]+/ig, "").replaceAll(/^0/ig, "");
+            number = number.replaceAll(",", ".");
 
         if (isNaN(number) || !number)
             number = 0;

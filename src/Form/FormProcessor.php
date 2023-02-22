@@ -68,10 +68,13 @@ class FormProcessor implements FormProcessorInterface
 
         $formData = $this->form->getData();
         if(is_object($this->form->getData())) $this->form->setData(object_hydrate($this->form->getData(), $array));
-        else $this->form->setData($formData ?? $data);
+        else if(!$this->form->isSubmitted()) $this->form->setData($formData ?? $data);
 
-        foreach($this->form->all() as $childName => $child) // @TODO Use array_map_recursive()
-            $child->setData($array[$childName] ?? null);
+        if(!$this->form->isSubmitted()) {
+
+            foreach ($this->form->all() as $childName => $child) // @TODO Use array_map_recursive()
+                $child->setData($array[$childName] ?? null);
+        }
 
         return $this;
     }

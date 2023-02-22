@@ -6,12 +6,20 @@ window.addEventListener("load.form_type", function () {
         var unlimitedStr = $(e).data("stock-unlimited");
 
         var input = $("#"+id);
-
         var btn   = $("#"+id+"-btn");
         var btnDown = $("#"+id+"-down");
         var btnUp = $("#"+id+"-up");
 
         var icon  = $(btn).find("i");
+
+        var stock = parseInt(input.val());
+        var current = parseInt($("#"+$(e).data("stock-target")).val());
+        var currentEl = $("#"+id+"-current");
+            currentEl.text(current);
+
+        if(current/stock >= .90) currentEl.addClass("danger");
+        else if(current/stock >= .75) currentEl.addClass("warning");
+        else if(current >= 0.25) currentEl.addClass("ok");
 
         $(input).prop("placeholder", unlimitedStr);
         function isUnlimited(input) { return $(input).prop("disabled") && $(input).val() == ""; }
@@ -47,7 +55,6 @@ window.addEventListener("load.form_type", function () {
 
             if (isUnlimited(input)) stockValue = setLimitedState(input, stockValue);
             else stockValue = setUnlimitedState(input);
-
         });
 
         $(btnUp).off("click");

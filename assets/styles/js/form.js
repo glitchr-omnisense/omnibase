@@ -21,16 +21,19 @@ window.addEventListener('load', function(event) {
             var submitter = undefined;
             while(target.parent().length) {
 
-                submitter = $(target).find("button");
+                submitter = $(target).find("button[type=submit]");
                 if(submitter.length) break;
 
                 target = target.parent();
             }
 
-            event.preventDefault();
+            if(submitter.length) {
 
-            if(submitter.length) submitter.trigger("click");
-            return false;
+                event.preventDefault();
+                submitter.trigger("click");
+
+                return false;
+            }
         }
     });
 

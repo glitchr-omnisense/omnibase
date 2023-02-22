@@ -145,7 +145,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
         }
 
-        // Priority to route parameter locale
+         // Priority to route parameter locale
         if(array_key_exists("_locale", $routeParameters))
             $locale = $this->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
 

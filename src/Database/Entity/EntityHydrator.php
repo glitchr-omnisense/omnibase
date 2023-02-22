@@ -247,6 +247,7 @@ class EntityHydrator implements EntityHydratorInterface
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
         foreach ($this->classMetadataManipulator->getFieldNames($classMetadata) as $alias => $column) {
 
+            if($alias == $column) continue;
             $fn = function() use ($alias, $column) {
 
                 $aliasValue  = $this->$alias;

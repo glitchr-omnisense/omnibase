@@ -138,21 +138,6 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
             $annotations = $this->annotationReader->getAnnotations($className);
 
-            $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
-            foreach ($classAnnotations as $annotation) {
-
-                if (!is_subclass_of($annotation, AbstractAnnotation::class))
-                    continue;
-
-                if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation)))
-                    continue;
-
-                if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
-                    continue;
-
-                $annotation->onFlush($event, $classMetadata, $entity);
-            }
-
             $changeSet = $uow->getEntityChangeSet($entity);
             $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
             foreach ($propertyAnnotations as $property => $_) {
@@ -174,6 +159,21 @@ class AnnotationSubscriber implements EventSubscriberInterface {
                     $annotation->onFlush($event, $classMetadata, $entity, $property);
                 }
             }
+
+            $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+            foreach ($classAnnotations as $annotation) {
+
+                if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                    continue;
+
+                if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation)))
+                    continue;
+
+                if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
+                    continue;
+
+                $annotation->onFlush($event, $classMetadata, $entity);
+            }
         }
     }
 
@@ -188,21 +188,6 @@ class AnnotationSubscriber implements EventSubscriberInterface {
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
         $annotations    = $this->annotationReader->getAnnotations($className);
-
-        $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
-        foreach ($classAnnotations as $annotation) {
-
-            if (!is_subclass_of($annotation, AbstractAnnotation::class))
-                continue;
-
-            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation)))
-                continue;
-
-            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
-                continue;
-
-            $annotation->{$eventName}($event, $classMetadata, $entity);
-        }
 
         $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
         foreach ($propertyAnnotations as $property => $_) {
@@ -220,6 +205,21 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
                 $annotation->{$eventName}($event, $classMetadata, $entity, $property);
             }
+        }
+
+        $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+        foreach ($classAnnotations as $annotation) {
+
+            if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                continue;
+
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation)))
+                continue;
+
+            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
+                continue;
+
+            $annotation->{$eventName}($event, $classMetadata, $entity);
         }
     }
 

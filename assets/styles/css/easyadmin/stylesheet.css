@@ -7,10 +7,16 @@ html, body { scroll-padding-top: 11em; }
 
 .row>* { padding-left:0;}
 
+.page-apikey input, .page-settings input
+{
+    min-width:50%;
+    width:auto;
+}
+
 .content-top .content-search input[type=search][name=query] {
     background: transparent;
 }
-.mark, mark { background-color: var(--sidebar-border-color); }
+.mark, mark { background-color: var(--sidebar-border-color); color: var(--form-label-color); }
 .sf-minitoolbar {
     background-color: var(--sidebar-bg) !important;
 }

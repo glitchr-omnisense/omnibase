@@ -9,6 +9,10 @@ namespace {
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
 
+    function sign(int|float $n): string {
+        return ($n < 0) ? "-" : "+";
+    }
+
     const MAX_DIRSIZE = 255;
     function path_subdivide($path, int $subdivision, int|array $length = 1)
     {

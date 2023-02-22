@@ -45,4 +45,5 @@ class HyperlinkIntl implements TranslationInterface
         $this->value = $value;
         return $this;
     }
+
 }

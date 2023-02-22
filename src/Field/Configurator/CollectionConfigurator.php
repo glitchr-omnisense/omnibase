@@ -36,7 +36,6 @@ class CollectionConfigurator implements FieldConfiguratorInterface
         }
 
         $field->setFormTypeOptionIfNotSet('by_reference', false);
-        $field->setFormTypeOptionIfNotSet('delete_empty', true);
 
         // collection items range from a simple <input text> to a complex multi-field form
         // the 'entryIsComplex' setting tells if the collection item is so complex that needs a special

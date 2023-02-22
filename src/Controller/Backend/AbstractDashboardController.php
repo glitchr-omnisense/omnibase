@@ -81,7 +81,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @Route(priority="-1")
+ * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice", priority="-1")
  */
 class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
@@ -202,7 +202,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/backoffice", name="backoffice")
+     * @Route("/", name="")
      * @Iconize({"fas fa-fw fa-toolbox", "fas fa-fw fa-home"})
      */
     public function index(): Response
@@ -211,7 +211,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     }
 
     /**
-     * @Route("/backoffice/apikey", name="backoffice_apikey")
+     * @Route({"fr": "/clef-api", "en": "/api-key"}, name="_apikey")
      * @Iconize({"fas fa-fw fa-fingerprint", "fas fa-fw fa-key"})
      */
     public function ApiKey(Request $request, array $fields = []): Response
@@ -287,7 +287,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/backoffice/settings", name="backoffice_settings")
+     * @Route({"fr": "/parametres", "en": "/settings"}, name="_settings")
      * @Iconize("fas fa-fw fa-tools")
      */
     public function Settings(Request $request, array $fields = []): Response
@@ -327,6 +327,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
+
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
                 $this->settingBag->getRawScalar($fields, false)
@@ -352,7 +353,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/backoffice/widgets", name="backoffice_widgets")
+     * @Route({"fr": "/personnaliser", "en": "/widgets"}, name="_widgets")
      * @Iconize("fas fa-fw fa-th-large")
      */
     public function Widgets(Request $request, array $widgetSlots = []): Response

@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Common;
 
 use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Associate;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Service\Model\IconizeInterface;
@@ -24,27 +25,30 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
     public static function __iconizeStatic() : ?array { return ["fas fa-poll"]; }
     public function compliesWith(mixed $subject): bool
     {
-        if(!$this->adapter) return true;
-
-        $ret = false;
-        foreach($this->getValue() as $value) {
-
-            if(!$this->adapter->supports($value)) continue;
-            $ret |= $this->adapter->compliesWith($value, $subject);
-            if($ret) break;
-        }
-
-        return $ret;
+        return $this->adapter?->compliesWith($this->getValue(), $subject) ?? true;
     }
 
     /**
      * @ORM\Column(type="array")
+     * @Associate(metadata="class")
      */
     protected $value;
     public function getValue()     { return $this->value; }
     public function setValue($value)
     {
         $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $class;
+
+    public function getClass(): ?string { return $this->class; }
+    public function setClass(?string $class)
+    {
+        $this->class = $class;
         return $this;
     }
 }

@@ -37,8 +37,7 @@
 
 .form-number.input-group>.form-control
 {
-    flex: none;
-    width:auto;
+    flex-grow: 1;
 }
 .form-association .form-group > input {
     width:auto;
@@ -461,7 +460,7 @@ form.was-validated select:invalid ~ .select2-selection,
     font-weight:normal;
     border-radius: 0;
     flex: 1;
-    padding: 0.7rem 14px;
+    padding: 0.5rem 14px;
 }
 
 .array-empty .accordion-button:after { display: none }
@@ -504,7 +503,6 @@ input[type="file"]:not(.form-check-input).form-control { height: 38px !important
     flex: 1;
     padding: 0.45rem 14px !important;
 }
-
 
 .form-collection-items .accordion-button:after { display: none }
 .form-collection-items .accordion-button > i { transition: transform .2s ease-in-out }
@@ -1272,7 +1270,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     border-top: 0
 }
 
-.accordion-body {
+.accordion-body > .form-group:not(.hidden) {
     padding: 1rem 14px
 }
 
@@ -1422,6 +1420,10 @@ select.form-select2:empty { height: 38px; }
 .form-stock .input-group-text { padding-top:5px; }
 .form-stock input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .form-stock input[type=number] { -moz-appearance: textfield; }
+
+.form-stock .input-group-text.ok{ background-color: darkgreen; }
+.form-stock .input-group-text.warning{ background-color: darkorange; }
+.form-stock .input-group-text.danger{ background-color: darkred; }
 
 .form-money .item-selected { background: #EEE8; }
 

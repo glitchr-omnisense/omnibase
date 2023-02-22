@@ -3,7 +3,7 @@
 namespace Base\Entity\Layout;
 
 use Base\Annotations\Annotation\Uploader;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Database\Annotation\Associate;use Doctrine\ORM\Mapping as ORM;
 
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
@@ -23,6 +23,7 @@ class AttributeIntl implements TranslationInterface
      * @ORM\Column(type="array")
      * @AssertBase\File(max_size="2MB", groups={"new", "edit"})
      * @Uploader(storage="local.storage", max_size="2MB", missable=true)
+     * @Associate(metadata="class")
      */
     protected $value;
 
@@ -31,6 +32,18 @@ class AttributeIntl implements TranslationInterface
     public function setValue($value)
     {
         $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $class;
+
+    public function getClass(): ?string { return $this->class; }
+    public function setClass(?string $class)
+    {
+        $this->class = $class;
         return $this;
     }
 }

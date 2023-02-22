@@ -60,10 +60,11 @@ class AssociationConfigurator implements FieldConfiguratorInterface
 
         $field->setFormattedValue($field->getValue());
 
-        $href = [$field->getFormTypeOption("class") => AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"))];
+        $href = [];
 
         $fieldValue = $field->getValue();
         $classList = $fieldValue instanceof Collection ? array_unique($fieldValue->map(fn($e) => get_class($e))->toArray()) : array_filter([is_object($fieldValue) ? get_class($fieldValue) : null]);
+        $classList[$field->getFormTypeOption("class")] = $field->getFormTypeOption("class");
         foreach($classList as $classname) {
 
             $crudController = AbstractCrudController::getCrudControllerFqcn($classname);
