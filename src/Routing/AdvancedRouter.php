@@ -216,6 +216,22 @@ class AdvancedRouter implements RouterInterface
         return !empty($eaParents);
     }
 
+    public function factorize(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
+    {
+        $parsedUrl = parse_url($nameOrUrl);
+        $parameters = array_merge(
+            array_transforms(fn($k,$v):array => [explode("=", $v)[0], explode("=", $v)[1] ?? ""], explode("&", $parsedUrl["query"])),
+            $parameters
+        );
+
+        $routeName = $this->getRouteName($nameOrUrl);
+        $route = $this->getRoute($nameOrUrl);
+        foreach($parameters as $name => $value)
+            $route->setDefault(snake2camel($name), $value);
+
+        return $this->getUrl($routeName, $route->getDefaults(), $referenceType);
+    }
+
     public function getUrl(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         $nameOrUrl ??= get_url();

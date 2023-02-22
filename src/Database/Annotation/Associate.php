@@ -55,8 +55,12 @@ class Associate extends AbstractAnnotation
         if($metadata) {
 
             $reference = class_exists($this->metadata) ? $this->metadata : $metadata?->name;
-            if($metadata->name == $reference)
-                $propertyAccessor->setValue($entity, $property, is_object($value) ? $value->getId() : $value);
+            if($metadata->name == $reference) {
+
+                if(is_array($value)) $value = array_map(fn($v) => is_object($v) ? $v->getId() : $v, $value);
+                else $value = is_object($value) ? $value->getId() : $value;
+                $propertyAccessor->setValue($entity, $property,  $value);
+            }
         }
 
         if ($this->metadata && $propertyAccessor->isReadable($entity, $this->metadata)) {
