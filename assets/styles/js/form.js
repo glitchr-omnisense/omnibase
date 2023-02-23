@@ -57,7 +57,6 @@ window.addEventListener('load', function(event) {
 
                 e.preventDefault();
                 e.stopPropagation();
-
                 if (submitter != undefined)
                     $(submitter).removeClass("disabled").removeAttr("disabled");
             }

@@ -1,11 +1,9 @@
-
 import '@glitchr/ajaxer';
 import '@glitchr/breakpoints';
 
 import '@glitchr/imaginejs';
 
 import Button from 'bootstrap/js/dist/tooltip';
-
 import "./styles/js/button";
 
 import Tooltip from 'bootstrap/js/dist/tooltip';

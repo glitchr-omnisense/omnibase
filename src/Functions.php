@@ -239,33 +239,37 @@ namespace {
 
             //
             // Check if IP address provided
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP) ) $parse["ip"] = $parse["host"];
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) $parse["ipv4"] = $parse["host"];
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) $parse["ipv6"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP)) $parse["ip"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) $parse["ipv4"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) $parse["ipv6"] = $parse["host"];
 
             //
             // Check if hostname
-            if(preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
+            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
 
-                $parse["fqdn"] = $parse["host"].".";
+                $parse["fqdn"] = $parse["host"] . ".";
                 $parse["domain"] = $match[0];
 
-                $subdomain = str_rstrip($parse["host"], ".".$parse["domain"]);
+                $subdomain = str_rstrip($parse["host"], "." . $parse["domain"]);
                 if ($parse["domain"] !== $subdomain)
                     $parse["subdomain"] = $subdomain;
 
-                if(array_key_exists("subdomain", $parse)) {
+                if (array_key_exists("subdomain", $parse)) {
 
                     $list = explode(".", $parse["subdomain"]);
                     $parse["subdomain"] = array_pop($list);
 
-                    if(!empty($list))
+                    if (!empty($list))
                         $parse["machine"] = implode(".", $list);
                 }
 
                 $domain = explode(".", $match[0]);
-                $parse["sld"]   = first($domain);
-                $parse["tld"]   = implode(".", tail($domain));
+                $parse["sld"] = first($domain);
+                $parse["tld"] = implode(".", tail($domain));
+
+            } else if (preg_match('/^[a-z0-9][a-z0-9\-]{0,63}$/i', strtolower($parse["host"] ?? ""), $match)) {
+
+                $parse["domain"] = $match[0];
             }
         }
 
@@ -2242,6 +2246,8 @@ namespace {
 
         return $object;
     }
+
+    function cast_to_array(object $object) { return array_transforms(fn($k,$v):array => [str_lstrip($k,["\x00","+","*"]),$v], (array) $object); }
 
     function cast_from_array(array $array, string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"',serialize((object) $array) )); }
     function cast_empty(string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"', serialize((object) []) )); }
