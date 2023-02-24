@@ -16,9 +16,7 @@
         <a {% if linkUrl is not empty %} href="{{ linkUrl|trim('"') }}" {% endif %} class="{{ action.cssClass }}"
         {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
             data-toggle="tooltip" data-placement="bottom" title="{{- actionLabel ? actionLabel|mb_ucfirst : "" -}}">
-            <span class="btn-label">
-                <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
-            </span>
+                <i class="action-icon {{ action.icon|default("far fa-question-circle") }}"></i>
         </a>
     {% else %}
         <a {% if linkUrl is not empty %} href="{{ linkUrl|trim('"') }}" {% endif %} class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"

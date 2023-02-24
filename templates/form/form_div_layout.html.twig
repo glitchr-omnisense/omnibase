@@ -149,7 +149,7 @@
         'data-select2-highlight' : form.vars["highlight"]
     }) %}
 
-    {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {%- set attr = attr|merge({'class': 'form-select2' ~ (form.vars.choice_thumbnails|length ? " form-select2-thumbnails ") ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {%- set attr = attr|merge({'disabled': form.vars.disabled ?? (form.vars.is_inherited ?? false)} ) -%}
     {%- set attr = attr|merge({'required': form.vars.required }) -%}
 

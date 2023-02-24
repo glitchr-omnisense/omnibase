@@ -248,6 +248,8 @@ class EntityHydrator implements EntityHydratorInterface
         foreach ($this->classMetadataManipulator->getFieldNames($classMetadata) as $alias => $column) {
 
             if($alias == $column) continue;
+            if(snake2camel($alias) == snake2camel($column)) continue;
+            if(camel2snake($alias) == camel2snake($column)) continue;
             $fn = function() use ($alias, $column) {
 
                 $aliasValue  = $this->$alias;
