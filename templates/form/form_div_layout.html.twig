@@ -839,13 +839,11 @@
                     </div>
                 </h2>
 
-                {% if not is_empty %}
-                <div id="{{ id }}-collapse" class="accordion-collapse collapse {{ collapsed ? '' : 'show'}}">
+                <div id="{{ id }}-collapse" class="accordion-collapse collapse {{ collapsed or is_empty ? '' : 'show'}}">
                     <div class="accordion-body">
                         {{ form_widget(form, {attr:attr}) }}
                     </div>
                 </div>
-                {% endif %}
             </div>
         </div>
 

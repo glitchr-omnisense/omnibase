@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -51,7 +52,19 @@ class AutocompleteController extends AbstractController
      */
     protected $autocomplete;
 
-    public function __construct(ObfuscatorInterface $obfuscator, TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
+    /**
+     * @var TradingMarket
+     */
+    protected $tradingMarket;
+
+    
+    /**
+     * @var Profiler
+     */
+    protected $profiler;
+    
+    
+    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack,  TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
     {
         $this->obfuscator = $obfuscator;
         $this->entityManager = $entityManager;
@@ -60,6 +73,7 @@ class AutocompleteController extends AbstractController
         $this->paginator = $paginator;
         $this->autocomplete = new Autocomplete($translator);
         $this->profiler = $profiler;
+        $this->requestStack = $requestStack;
     }
 
     /**
