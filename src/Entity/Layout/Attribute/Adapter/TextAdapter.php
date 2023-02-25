@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Doctrine\ORM\Mapping as ORM;

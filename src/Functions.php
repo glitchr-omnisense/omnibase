@@ -9,6 +9,10 @@ namespace {
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
 
+    function sign(int|float $n): string {
+        return ($n < 0) ? "-" : "+";
+    }
+
     const MAX_DIRSIZE = 255;
     function path_subdivide($path, int $subdivision, int|array $length = 1)
     {
@@ -235,33 +239,37 @@ namespace {
 
             //
             // Check if IP address provided
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP) ) $parse["ip"] = $parse["host"];
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) $parse["ipv4"] = $parse["host"];
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) $parse["ipv6"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP)) $parse["ip"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) $parse["ipv4"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) $parse["ipv6"] = $parse["host"];
 
             //
             // Check if hostname
-            if(preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
+            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
 
-                $parse["fqdn"] = $parse["host"].".";
+                $parse["fqdn"] = $parse["host"] . ".";
                 $parse["domain"] = $match[0];
 
-                $subdomain = str_rstrip($parse["host"], ".".$parse["domain"]);
+                $subdomain = str_rstrip($parse["host"], "." . $parse["domain"]);
                 if ($parse["domain"] !== $subdomain)
                     $parse["subdomain"] = $subdomain;
 
-                if(array_key_exists("subdomain", $parse)) {
+                if (array_key_exists("subdomain", $parse)) {
 
                     $list = explode(".", $parse["subdomain"]);
                     $parse["subdomain"] = array_pop($list);
 
-                    if(!empty($list))
+                    if (!empty($list))
                         $parse["machine"] = implode(".", $list);
                 }
 
                 $domain = explode(".", $match[0]);
-                $parse["sld"]   = first($domain);
-                $parse["tld"]   = implode(".", tail($domain));
+                $parse["sld"] = first($domain);
+                $parse["tld"] = implode(".", tail($domain));
+
+            } else if (preg_match('/^[a-z0-9][a-z0-9\-]{0,63}$/i', strtolower($parse["host"] ?? ""), $match)) {
+
+                $parse["domain"] = $match[0];
             }
         }
 
@@ -864,7 +872,7 @@ namespace {
         $needleLength = strlen($needle);
         if(!$needleLength) return $haystack;
 
-        while(strlen($haystack) === strrpos($haystack, $needle) + $needleLength) {
+        while(strrpos($haystack, $needle) !== false && strlen($haystack) === strrpos($haystack, $needle) + $needleLength) {
 
             $haystack = substr($haystack, 0, strlen($haystack)-$needleLength);
             if(!$recursive) break;
@@ -892,7 +900,7 @@ namespace {
         $needleLength = strlen($needle);
         if(!$needleLength) return $haystack;
 
-        while(!empty($needle) && 0 === strpos($haystack, $needle)) {
+        while(strrpos($haystack, $needle) !== false && !empty($needle) && 0 === strpos($haystack, $needle)) {
             $haystack = substr($haystack, $needleLength);
             if(!$recursive) break;
         }
@@ -2239,6 +2247,8 @@ namespace {
         return $object;
     }
 
+    function cast_to_array(object $object) { return array_transforms(fn($k,$v):array => [str_lstrip($k,["\x00","+","*"]),$v], (array) $object); }
+
     function cast_from_array(array $array, string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"',serialize((object) $array) )); }
     function cast_empty(string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"', serialize((object) []) )); }
     function cast($object, $newClass, ...$args)
@@ -2504,7 +2514,7 @@ namespace {
     {
         if($datetime === null) return null;
         return is_int($datetime)    ? (new DateTime())->setTimestamp($datetime) :
-             ( is_string($datetime) ?  new DateTime($datetime) : (clone $datetime));
+             ( is_string($datetime) ? (new DateTime())->modify($datetime) : (clone $datetime));
     }
 
     function daydiff(null|string|int|DateTime $datetime):?int
@@ -2523,8 +2533,8 @@ namespace {
         $precision = cast_datetime($precision);
 
         $timestamp = $datetime->format("U");
-        $modulo = abs($precision->format("U") - time());
-        $delta = $timestamp % $modulo;
+        $modulo = abs($precision->format("U") - (new DateTime())->format("U"));
+        $delta = $timestamp == $modulo ? 0 : $timestamp % $modulo;
 
         return $datetime->setTimestamp($timestamp - $delta + $modulo);
     }
@@ -2535,8 +2545,8 @@ namespace {
         $precision = cast_datetime($precision);
 
         $timestamp = $datetime->format("U");
-        $modulo = abs($precision->format("U") - time());
-        $delta = $timestamp % $modulo;
+        $modulo = abs($precision->format("U") - (new DateTime())->format("U"));
+        $delta = $timestamp == $modulo ? 0 : $timestamp % $modulo;
 
         return $datetime->setTimestamp($timestamp - $delta);
     }

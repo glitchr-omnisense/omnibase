@@ -7,14 +7,33 @@ html, body { scroll-padding-top: 11em; }
 
 .row>* { padding-left:0;}
 
+.page-apikey input, .page-settings input
+{
+    min-width:50%;
+    width:auto;
+}
+
 .content-top .content-search input[type=search][name=query] {
     background: transparent;
 }
-.mark, mark { background-color: var(--sidebar-border-color); }
+.mark, mark { background-color: var(--sidebar-border-color); color: var(--form-label-color); }
 .sf-minitoolbar {
     background-color: var(--sidebar-bg) !important;
 }
 .sf-minitoolbar svg path { fill: var(--sidebar-menu-color) !important; }
+
+.content-header .page-actions
+{
+    display:block;
+}
+
+
+.form-choice-thumbnail label:hover {
+    border: 1px solid var(--sidebar-border-color);
+}
+.form-choice-thumbnail {
+    border: 1px solid var(--sidebar-border-color);
+}
 
 .d-inline .dropdown:after { margin-left:0px; }
 .d-inline .dropdown-toggle { background-color:transparent; margin-right:1px; }
@@ -539,10 +558,11 @@ body {
 
 .dropdown-menu.show, .dropdown-menu.bootstrap-datetimepicker-widget {
 
-    transition: all 500ms, opacity 0.5s;
+    transition: opacity 0.5s;
     transform-origin:top;
     opacity:1;
 }
+.field-country .country-flag { border: 0!important;}
 
 .nav-link {
     position: relative;

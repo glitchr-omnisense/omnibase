@@ -1,4 +1,3 @@
-
 // This is a "on" replacement to prepend an event to any other of its type
 $.fn.prependon = function(evtype, fnc) {
     $(this).each(function() {
@@ -12,6 +11,7 @@ $.fn.prependon = function(evtype, fnc) {
 }
 
 $.fn.confirmButton = function(options = {}) {
+
     // Function that creates a simple modal dialog that contains some placeholders to include custom messages
     function createDialog() {
         let $dialog = $('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">');
@@ -32,6 +32,7 @@ $.fn.confirmButton = function(options = {}) {
     }
 
     this.each(function() {
+
         if (this._back_onclick === undefined) {
             this._back_onclick = null;
         } else {

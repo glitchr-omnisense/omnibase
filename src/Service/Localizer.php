@@ -13,7 +13,7 @@ use Symfony\Component\Intl\Timezones;
 
 class Localizer extends AbstractLocalCache implements LocalizerInterface
 {
-    public const LOCALE_FORMAT = "xx_XX";
+    public const LOCALE_FORMAT = "xx-XX";
 
     protected $requestStack = null;
     protected $parameterBag = null;

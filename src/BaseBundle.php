@@ -88,7 +88,6 @@ class BaseBundle extends Bundle
             $this->getAllClasses($this->getBundleLocation() . "./Database/Annotation");
             $this->getAllClasses($this->getBundleLocation() . "./Annotations/Annotation");
 
-//            $this->getAllClasses($this->getSourceDir() . "./Annotation");
             $this->getAllClasses($this->getBundleLocation() . "./Enum");
             $this->getAllClasses($this->getSourceDir() . "./Enum");
 

@@ -10,9 +10,16 @@ final class NumberField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_MINIMUM = 'min';
+    public const OPTION_MAXIMUM = 'max';
+    public const OPTION_SUFFIX = 'suffix';
+    public const OPTION_PREFIX = 'prefix';
+
+    public const OPTION_DIVISOR = 'divisor';
     public const OPTION_NUM_DECIMALS = 'numDecimals';
     public const OPTION_ROUNDING_MODE = 'roundingMode';
     public const OPTION_STORED_AS_STRING = 'storedAsString';
+    public const OPTION_THROTTLE = 'throttle';
     /**
      * @param string|false|null $label
      */
@@ -31,6 +38,23 @@ final class NumberField implements FieldInterface
             ->setCustomOption(self::OPTION_STORED_AS_STRING, false);
     }
 
+    public function percentage(int $min, int $max): self
+    {
+        return $this->setMinimum($min)->setMaximum($max)->setDivisor(0.01)->setSuffix("%");
+    }
+
+    public function setDivisor(float $num): self
+    {
+        $this->setFormTypeOption(self::OPTION_DIVISOR, $num);
+        return $this;
+    }
+
+    public function setThrottle(int $num): self
+    {
+        $this->setFormTypeOption(self::OPTION_THROTTLE, $num);
+        return $this;
+    }
+
     public function setNumDecimals(int $num): self
     {
         if ($num < 0) {
@@ -38,6 +62,27 @@ final class NumberField implements FieldInterface
         }
 
         $this->setCustomOption(self::OPTION_NUM_DECIMALS, $num);
+        return $this;
+    }
+
+    public function setMinimum(int $num): self
+    {
+        $this->setFormTypeOption(self::OPTION_MINIMUM, $num);
+        return $this;
+    }
+    public function setMaximum(int $num): self
+    {
+        $this->setFormTypeOption(self::OPTION_MAXIMUM, $num);
+        return $this;
+    }
+    public function setSuffix(string $suffix): self
+    {
+        $this->setFormTypeOption(self::OPTION_SUFFIX, $suffix);
+        return $this;
+    }
+    public function setPrefix(int $prefix): self
+    {
+        $this->setFormTypeOption(self::OPTION_PREFIX, $prefix);
         return $this;
     }
 

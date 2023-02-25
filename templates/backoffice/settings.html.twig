@@ -6,7 +6,9 @@
 {% block content %}
 
 {% if form.children|length > 1 %}
+    <div class="page-settings">
     {{ form(form) }}
+    </div>
 {% else %}
     <div class="text-center">
     {{ "@controllers.backoffice_settings.empty"|trans }}

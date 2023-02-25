@@ -128,6 +128,8 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('at',          'at'),
             new TwigFilter('count_leaves',  'count_leaves'),
 
+            new TwigFilter('sign',      'sign'),
+
             new TwigFilter('mailto',       [$this, 'mailto'], ["is_safe" => ['all']]),
             new TwigFilter('datetime',       [$this, 'datetime'],   ['needs_environment' => true]),
             new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),

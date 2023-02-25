@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Symfony\Component\Form\Extension\Core\Type\PercentType;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -23,7 +24,7 @@ class PercentAdapter extends AbstractAdapter
     public function getOptions(): array { return []; }
     public function resolve(mixed $value): mixed { return $value; }
 
-    public function __construct(string $label, ?string $code = null, int $epsilon = 4, int $scale = 2)
+    public function __construct(string $label = "", ?string $code = null, int $epsilon = 4, int $scale = 2)
     {
         parent::__construct($label, $code);
         $this->setPrecision($epsilon);

@@ -2,6 +2,7 @@
 
 namespace Base\Controller\Backend\Crud\Layout\Attribute\Adapter;
 
+use Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController;
 use Base\Field\SelectField;
 use Base\Enum\SystemOfUnits\StandardUnits;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;

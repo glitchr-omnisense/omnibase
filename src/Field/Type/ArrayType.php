@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Entity\Layout\Attribute;
-use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
@@ -48,6 +48,9 @@ class ArrayType extends CollectionType implements DataMapperInterface
             "associative" => null,
             "prototype_key" => null,
             "prototype_id" => null,
+            "allow_add" => true,
+            "allow_delete" => true,
+            'entry_type' => TextType::class,
             "pattern" => null,
             "length" => 0,
             "placeholder" => []

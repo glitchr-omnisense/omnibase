@@ -118,6 +118,7 @@ class BaseService implements RuntimeExtensionInterface
         NotifierInterface $notifier,
         FormFactoryInterface $formFactory,
         LocalizerInterface $localizer,
+        TradingMarketInterface $tradingMarket,
 
         SettingBag $settingBag,
         ImageService $imageService,
@@ -149,6 +150,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->setIconProvider($iconProvider);
         $this->setSettingBag($settingBag);
         $this->setLocalizer($localizer);
+        $this->setTradingMarket($tradingMarket);
         $this->setTwig($twig);
         $this->setRouter($router);
         $this->setFirewallMap($firewallMap);

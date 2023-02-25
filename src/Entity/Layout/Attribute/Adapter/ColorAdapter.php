@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter;
 
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Service\Model\Color\Intl\Colors;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Field\Type\ColorType;

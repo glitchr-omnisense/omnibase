@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter;
 
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapterIntl;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

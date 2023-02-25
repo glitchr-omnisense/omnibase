@@ -11,35 +11,66 @@ window.addEventListener('load', function(event) {
 
     $("form.needs-validation input").on("invalid", (e) => e.preventDefault() );
 
+    $(window).keydown(function(event){
+
+        if(event.keyCode == 13) {
+
+            var target = $(event.target);
+            var form = target.closest("form");
+
+            var submitter = undefined;
+            while(target.parent().length) {
+
+                submitter = $(target).find("button[type=submit]");
+                if(submitter.length) break;
+
+                target = target.parent();
+            }
+
+            if(submitter.length) {
+
+                event.preventDefault();
+                submitter.trigger("click");
+
+                return false;
+            }
+        }
+    });
+
     $("form").on("submit", function(e) {
 
-        if (this.getAttribute("disabled") != null)
-            e.preventDefault();
+        // Disable form
+        if (this.getAttribute("disabled") != null) return e.preventDefault();
 
-    }); // On pressing enter...
+        // Disable submitter to avoid double submission..
+        var submitter = e.originalEvent.submitter || undefined;
+        if (submitter) {
 
-    $("[type=submit]").on("click", function() {
-
-        const style = getComputedStyle(document.body);
-
-        var form = $(".has-error").closest("form.needs-validation");
-        if(!form.length) form = $(this).closest("form.needs-validation");
-
-        if (!this.checkValidity()) {
-
-            event.preventDefault();
-            event.stopPropagation();
+            $(submitter).addClass('disabled');
+            $(".tooltip").remove();
+            $(".popover").remove();
         }
 
-        var el = $(form).find(":invalid, .has-error");
-        if (el.length) {
+        if ( $(this).hasClass("needs-validation") ) {
 
-            return $([document.documentElement, document.body]).animate(
-                {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
-                function() {
-                    form.addClass('was-validated');
-                }
-            );
+            if (!this.checkValidity()) {
+
+                e.preventDefault();
+                e.stopPropagation();
+                if (submitter != undefined)
+                    $(submitter).removeClass("disabled").removeAttr("disabled");
+            }
+
+            var el = $(this).find(":invalid, .has-error");
+            if (el.length) {
+
+                // Flag elements as..
+                const style = getComputedStyle(document.body);
+                $([document.documentElement, document.body]).animate(
+                    {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
+                    function () { $(this).addClass('was-validated'); }.bind(this)
+                );
+            }
         }
     });
 });

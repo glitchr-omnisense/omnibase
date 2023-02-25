@@ -2,7 +2,13 @@
 
 namespace Base\Field\Type;
 
+use Base\Form\Transformer\ScaleNumberTransformer;
+use Base\Form\Transformer\StrippedNumberToLocalizedStringTransformer;
 use Base\Twig\Environment;
+use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\DataTransformer\NumberToLocalizedStringTransformer;
+use Symfony\Component\Form\Extension\Core\DataTransformer\StringToFloatTransformer;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -20,6 +26,23 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $this->twig = $twig;
     }
 
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder->addViewTransformer(new ScaleNumberTransformer($options["divisor"]));
+        $builder->addViewTransformer(new StrippedNumberToLocalizedStringTransformer(
+            $options["prefix"],
+            $options["suffix"],
+            $options['scale'],
+            $options['grouping'],
+            $options['rounding_mode'],
+            $options['html5'] ? 'en' : null
+        ));
+
+        if ('string' === $options['input']) {
+            $builder->addModelTransformer(new StringToFloatTransformer($options['scale']));
+        }
+    }
+
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
@@ -30,10 +53,12 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["throttleUp"]   = $options["throttleUp"] ?? $options["throttle"];
         $view->vars["throttleDown"] = $options["throttleDown"] ?? $options["throttle"];
         $view->vars["min"]          = $options["min"];
+        $view->vars["divisor"]      = $options["divisor"];
         $view->vars["max"]          = $options["max"];
+        $view->vars["suffix"]       = $options["suffix"];
+        $view->vars["prefix"]       = $options["prefix"];
         $view->vars["disabled"]     = $options["disabled"];
         $view->vars["autocomplete"] = $options["autocomplete"];
-        $view->vars["value"]        = $form->getData() ?? $options["value"] ?? 0;
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -43,16 +68,18 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $resolver->setDefaults([
             'stepUp'  => null,
             'stepDown' => null,
-            'step' => 5,
+            'divisor' => 1,
+            'step' => 1,
             'throttleUp'  => null,
             'throttleDown' => null,
-            'throttle' => 10,
+            'throttle' => 50,
             "min" => null,
             "max" => null,
+            "suffix" => null,
+            "prefix" => null,
             "autocomplete" => false,
             "keyUp" => true,
             "keyDown" => true,
-            "value" => 0
         ]);
     }
 

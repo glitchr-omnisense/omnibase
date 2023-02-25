@@ -14,6 +14,7 @@ use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Exchanger\Exception\ChainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,15 +58,14 @@ class AutocompleteController extends AbstractController
      */
     protected $tradingMarket;
 
-    
     /**
      * @var Profiler
      */
     protected $profiler;
-    
-    
+
     public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack,  TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
     {
+        $this->requestStack = $requestStack;
         $this->obfuscator = $obfuscator;
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;

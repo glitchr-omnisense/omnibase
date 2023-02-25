@@ -175,6 +175,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         // Auto detect some fields..
         foreach($validFields as $fieldName => $field) {
 
+            if(str_starts_with($fieldName, "_") ) continue;
             if($fieldName == "id")
                 $validFields[$fieldName] = ["form_type" => HiddenType::class];
             else if($fieldName == "uuid")
@@ -486,6 +487,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         $collection ??= $this->isEntity($entityOrForm) ? null : $this->getClosestEntityCollection($entityOrForm);
         if(!$collection instanceof Collection) return null;
+
+        if($entity instanceof Fee) {
+
+        }
 
         if($collection instanceof PersistentCollection) {
 

@@ -247,17 +247,19 @@ window.addEventListener("load.form_type", function () {
 
         //
         // Pre-populated data
-
         if(select2["data"].length != 0) $(field).empty();
-        $(field).val(select2["selected"] || []).trigger("change");
+        $(field).val(select2["selected"] || [])[0].dispatchEvent(new Event("change"));
+
+        var thumbnails = $("[id^="+el.getAttribute('id')+"_]");
 
         //
         // Apply required option
-
         var parent = parent || $(field).parent();
         $(field).select2(select2).on("select2:unselecting", function(e) {
 
             $(this).data('state', 'unselected');
+
+        }).on("change", function(e) {
 
         }).on("select2:select", function(e) {
 
@@ -271,6 +273,10 @@ window.addEventListener("load.form_type", function () {
             localCacheSelected[el.getAttribute("data-select2-field")] = select2["selected"];
             localCacheData[el.getAttribute("data-select2-field")] = select2["data"];
 
+            $(thumbnails).removeClass("selected");
+            if($(field).val() <= thumbnails.length && $(field).val() > 0)
+                $(thumbnails[$(field).val()-1]).addClass("selected");
+
         }).on("select2:unselect", function(e) {
 
             if(!select2["multivalue"])
@@ -278,6 +284,9 @@ window.addEventListener("load.form_type", function () {
 
             localCacheSelected[el.getAttribute("data-select2-field")] = select2["selected"];
             localCacheData[el.getAttribute("data-select2-field")] = select2["data"];
+
+            if($(field).val() <= thumbnails.length && $(field).val() > 0)
+                $(thumbnails[$(field).val()-1]).removeClass("selected");
 
         }).on("select2:open", function(e) {
 
@@ -293,7 +302,7 @@ window.addEventListener("load.form_type", function () {
 
         }).on("select2:close", function(e) {
 
-            $(this).trigger("focusout");
+            this.dispatchEvent(new Event("focusout"));
             $(document).off("keyup.select2");
 
             page = "1.0";
@@ -313,6 +322,7 @@ window.addEventListener("load.form_type", function () {
         $(field).parent().find('input.select2-search__field').on("input", function() { page = "1.0"; });
 
         var sortable = el.getAttribute("data-select2-sortable") || false;
+
         if(!select2["multivalue"] && sortable) {
 
             // Initialize sorting feature
@@ -339,6 +349,52 @@ window.addEventListener("load.form_type", function () {
                 });
 
             select2["selected"] = orderFn(select2["selected"]);
+        }
+
+
+        //
+        // Handle thumbnail selection
+        if(thumbnails.length) {
+
+            var options = $(field).find("option");
+            var thumbnailIds = [];
+
+            if (typeof ($(field).val()) == "object") { // multiples
+
+                var values = $(field).val();
+                $(values).each(function (i) {
+
+                    var option = $(field).find("option[value=" + this + "]")[0];
+                    thumbnailIds.push(options.index(option));
+                });
+
+            } else {
+
+                var option = $(field).find("option[value=" + $(field).val() + "]")[0];
+                thumbnailIds.push(options.index(option));
+            }
+
+            $(thumbnailIds).each(function () {
+
+                if (this <= thumbnails.length)
+                    $(thumbnails[this]).addClass("selected");
+            });
+
+            $(thumbnails).each(function () {
+
+                $(this).off("click.select2-thumbnail");
+                $(this).on("click.select2-thumbnail", function () {
+
+                    $(thumbnails).removeClass("selected");
+                    $(this).addClass("selected");
+                    if ($(this).hasClass("selected")) {
+
+                        var i = $(this).attr("id").substring(el.getAttribute('id').length + 1);
+                        var option = $("#" + el.getAttribute('id')).find("option")[parseInt(i)];
+                        $(field).val(parseInt(option.value))[0].dispatchEvent(new Event("change"));
+                    }
+                });
+            });
         }
 
     }));

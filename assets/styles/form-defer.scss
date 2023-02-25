@@ -5,3 +5,5 @@
 
 @import 'css/form-type-dropzone.scss';
 @import 'css/form-type-datetimepicker.scss';
+
+.disabled { pointer-events: none; }

@@ -19,6 +19,13 @@ window.addEventListener("load.form_type", function () {
 
                 $('#'+id+'-modal').modal('hide');
             });
+
+            $("#"+id+"-confirm").on("click", function (e) {
+
+                setTimeout(function() {
+                    $('#' + id + '-modal').modal('hide');
+                },100);
+            });
         }
     }));
 });

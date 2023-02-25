@@ -12,6 +12,7 @@ class CollectionField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_ALLOW_ADD = 'allow_add';
+    public const OPTION_ALLOW_OBJECT = 'allow_object';
     public const OPTION_ALLOW_DELETE = 'allow_delete';
     public const OPTION_ENTRY_IS_COMPLEX = 'entryIsComplex';
     public const OPTION_ENTRY_TYPE = 'entry_type';
@@ -42,6 +43,13 @@ class CollectionField implements FieldInterface
     public function allowAdd(bool $allow = true): self
     {
         $this->setFormTypeOption(self::OPTION_ALLOW_ADD, $allow);
+
+        return $this;
+    }
+
+    public function allowObject(bool $allow = true): self
+    {
+        $this->setFormTypeOption(self::OPTION_ALLOW_OBJECT, $allow);
 
         return $this;
     }

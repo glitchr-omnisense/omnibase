@@ -14,6 +14,9 @@ final class StockField implements FieldInterface
     public const OPTION_ROUNDING_MODE = 'roundingMode';
     public const OPTION_STORED_AS_STRING = 'storedAsString';
     public const OPTION_ALLOW_INFINITY = "allowInfinity";
+
+    public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';
+
     /**
      * @param string|false|null $label
      */
@@ -26,10 +29,19 @@ final class StockField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/stock.html.twig')
             ->setFormType(StockType::class)
             ->addCssClass('field-stock')
+
+            ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)
+
             ->setCustomOption(self::OPTION_ALLOW_INFINITY, false)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, null)
             ->setCustomOption(self::OPTION_ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP)
             ->setCustomOption(self::OPTION_STORED_AS_STRING, false);
+    }
+
+    public function setTargetFieldName(string $fieldName): self
+    {
+        $this->setCustomOption(self::OPTION_TARGET_FIELD_NAME, $fieldName);
+        return $this;
     }
 
     public function step(float $step) { return $this->stepUp($step)->stepDown($step); }

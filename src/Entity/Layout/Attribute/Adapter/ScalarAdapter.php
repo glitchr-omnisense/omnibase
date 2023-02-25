@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Field\Type\NumberType;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -20,7 +21,13 @@ class ScalarAdapter extends AbstractAdapter
     public static function __iconizeStatic() : ?array { return ["fas fa-ruler-combined"]; }
 
     public static function getType(): string { return NumberType::class; }
-    public function getOptions(): array { return []; }
+    public function getOptions(): array { return [
+            "suffix" => $this->getUnit(),
+            "min" => $this->getMinimum(),
+            "max" => $this->getMaximum()
+        ];
+    }
+
     public function resolve(mixed $value): mixed { return $value; }
 
     public function __construct(string $label = "", ?string $code = null, ?int $unit = null, ?int $minimum = null, ?int $maximum = null)
