@@ -26,8 +26,8 @@ class EagerSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => [['onKernelRequest', 2048], ['onValidCache', 8]],
-            ConsoleEvents::COMMAND => ['onCommand', 2048]
+            KernelEvents::REQUEST  => [['onKernelRequest', 2049], ['onValidCache', 8]],
+            ConsoleEvents::COMMAND => ['onCommand', 2049]
         ];
     }
 
