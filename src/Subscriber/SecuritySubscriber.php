@@ -304,7 +304,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                 $response    = $event->getResponse();
                 $alreadyRedirected = $response && $response->getStatusCode() == 302;
-                $isException =  $this->router->isEasyAdmin() || $this->router->isProfiler();
+                $isException =  $this->router->isEasyAdmin() || $this->router->isProfiler() || !$this->router->isSecured();
 
                 if($alreadyRedirected || $isException) $callbackFn();
                 else $this->router->redirectToRoute("user_profile", [], 302, [
