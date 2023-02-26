@@ -9,15 +9,17 @@ window.addEventListener('load', function(event) {
 
 window.addEventListener('load', function(event) {
 
-    $("form.needs-validation input").on("invalid", (e) => e.preventDefault() );
+    $("form.needs-validation :input").on("invalid", (e) => e.preventDefault() );
 
-    $(window).keydown(function(event){
+    $("form :input").keydown(function(event){
 
         if(event.keyCode == 13) {
 
+            if(event.target.tagName == "TEXTAREA")
+                return true;
+            
             var target = $(event.target);
-            var form = target.closest("form");
-
+            
             var submitter = undefined;
             while(target.parent().length) {
 
@@ -25,13 +27,20 @@ window.addEventListener('load', function(event) {
                 if(submitter.length) break;
 
                 target = target.parent();
+
+                if(target.length && target[0].tagName == "FORM") {
+
+                    target.submit();
+                    break;
+                }
             }
 
-            if(submitter.length) {
+            if(submitter != undefined && submitter.length) {
 
                 event.preventDefault();
-                submitter.trigger("click");
+                event.stopPropagation();
 
+                submitter.trigger("click");
                 return false;
             }
         }
@@ -43,7 +52,7 @@ window.addEventListener('load', function(event) {
         if (this.getAttribute("disabled") != null) return e.preventDefault();
 
         // Disable submitter to avoid double submission..
-        var submitter = e.originalEvent.submitter || undefined;
+        var submitter = e.originalEvent ? e.originalEvent.submitter : undefined;
         if (submitter) {
 
             $(submitter).addClass('disabled');

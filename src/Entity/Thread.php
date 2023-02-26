@@ -72,7 +72,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->setTitle($title);
 
         $this->setState(ThreadState::DRAFT);
-        $this->setWorkflow(WorkflowState::SUBMITTED);
+        $this->setWorkflow(WorkflowState::APPROVED); // This will be changed, if spam checker enabled in subclass
 
         $this->slug = $slug;
 

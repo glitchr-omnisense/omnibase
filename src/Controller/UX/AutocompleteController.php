@@ -14,7 +14,6 @@ use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Exchanger\Exception\ChainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
