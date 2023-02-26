@@ -16,6 +16,12 @@
     white-space: pre-line;
 }
 
+.flash-messages .alert
+{
+    display: flex;
+    flex-direction: row;
+}
+
 @media all and (max-width: 470px) {
     
     .ql-editor img
