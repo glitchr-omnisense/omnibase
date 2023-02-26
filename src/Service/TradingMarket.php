@@ -87,8 +87,12 @@ class TradingMarket implements TradingMarketInterface
 
     public function addFallback(string $source, string $target, mixed $value, null|string|int|\DateTime $date = "now"): self
     {
+        $this->fallbacks[$source."/".$source] = $this->normalize($source, $source, 1.0, cast_datetime($date));
+        $this->fallbacks[$target."/".$target] = $this->normalize($target, $target, 1.0, cast_datetime($date));
+
         $this->fallbacks[$source."/".$target] = $this->normalize($source, $target, $value, cast_datetime($date));
         $this->fallbacks[$target."/".$source] = $this->normalize($target, $source,1./$value, cast_datetime($date));
+
         return $this;
     }
 

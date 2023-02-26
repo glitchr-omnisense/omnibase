@@ -5,8 +5,13 @@
 <article class="wrapper widget-page ">
     <h1>{{ page.headline }}</h1>
     <p>{{ page.excerpt|raw }}</p>
-    <div>{% if is_granted("ROLE_ADMIN") %}<a class="btn btn-outline-primary" href="{{app.ea.crudify(page)}}" target="_blank"><i class="fas fa-pencil-alt"></i> {{ '@EasyAdminBundle.action.edit'|trans|raw }}</a>{% endif %}</div>
-
+    <div>
+        {% if is_granted("ROLE_ADMIN") %}
+        <a class="btn btn-outline-primary" href="{{app.ea.crudify(page)}}" target="_blank">
+            <i class="fas fa-pencil-alt"></i> {{ '@EasyAdminBundle.action.edit'|trans|raw }}
+        </a>
+        {% endif %}
+    </div>
 
     <hr>
     <div class="ql-editor">{{ page.getContentWithAnchors({}, "<hr>")|default('@messages.page.empty'|trans)|raw }}</div>

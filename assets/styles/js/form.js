@@ -4,36 +4,82 @@ window.addEventListener('load', function(event) {
 
     dispatchEvent(new Event("load.form_type"));
     dispatchEvent(new Event("load.collection_type"));
+    dispatchEvent(new Event("load.array_type"));
 });
 
 window.addEventListener('load', function(event) {
 
-    $("form.needs-validation input").on("invalid", (e) => e.preventDefault() );
+    $("form.needs-validation :input").on("invalid", (e) => e.preventDefault() );
 
-    $("form").on("submit", function() { this.submit(); }); // On pressing enter...
+    $("form :input").keydown(function(event){
 
-    $("[type=submit]").on("click", function() {
+        if(event.keyCode == 13) {
 
-        const style = getComputedStyle(document.body);
+            if(event.target.tagName == "TEXTAREA")
+                return true;
+            
+            var target = $(event.target);
+            
+            var submitter = undefined;
+            while(target.parent().length) {
 
-        var form = $(".has-error").closest("form.needs-validation");
-        if(!form.length) form = $(this).closest("form.needs-validation");
+                submitter = $(target).find("button[type=submit]");
+                if(submitter.length) break;
 
-        if (!this.checkValidity()) {
+                target = target.parent();
 
-            event.preventDefault();
-            event.stopPropagation();
+                if(target.length && target[0].tagName == "FORM") {
+
+                    target.submit();
+                    break;
+                }
+            }
+
+            if(submitter != undefined && submitter.length) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                submitter.trigger("click");
+                return false;
+            }
+        }
+    });
+
+    $("form").on("submit", function(e) {
+
+        // Disable form
+        if (this.getAttribute("disabled") != null) return e.preventDefault();
+
+        // Disable submitter to avoid double submission..
+        var submitter = e.originalEvent ? e.originalEvent.submitter : undefined;
+        if (submitter) {
+
+            $(submitter).addClass('disabled');
+            $(".tooltip").remove();
+            $(".popover").remove();
         }
 
-        var el = $(form).find(":invalid, .has-error");
-        if (el.length) {
+        if ( $(this).hasClass("needs-validation") ) {
 
-            return $([document.documentElement, document.body]).animate(
-                {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
-                function() {
-                    form.addClass('was-validated');
-                }
-            );
+            if (!this.checkValidity()) {
+
+                e.preventDefault();
+                e.stopPropagation();
+                if (submitter != undefined)
+                    $(submitter).removeClass("disabled").removeAttr("disabled");
+            }
+
+            var el = $(this).find(":invalid, .has-error");
+            if (el.length) {
+
+                // Flag elements as..
+                const style = getComputedStyle(document.body);
+                $([document.documentElement, document.body]).animate(
+                    {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
+                    function () { $(this).addClass('was-validated'); }.bind(this)
+                );
+            }
         }
     });
 });

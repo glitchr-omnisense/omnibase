@@ -65,7 +65,7 @@ class LocalizerController extends AbstractController
             }
         }
 
-        return $this->redirect($this->router->getUrl($this->router->getIndexPage()));
+        return $this->redirect($this->router->getUrlIndex());
     }
 
     /**
@@ -102,6 +102,6 @@ class LocalizerController extends AbstractController
             }
         }
 
-        return $this->redirect($this->router->getUrl($this->router->getIndexPage()));
+        return $this->redirect($this->router->getUrlIndex());
     }
 }

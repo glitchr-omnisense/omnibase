@@ -39,18 +39,16 @@ class ProfilerSubscriber implements EventSubscriberInterface
 
     public function onKernelResponse(ResponseEvent $event)
     {
-        if ($this->router->isDebug()) {
+        if(!$this->router->isDebug())
+            return false;
+        if($this->router->isUX())
+            return false;
+        if (!$event->getRequest()->isXmlHttpRequest())
+            return false;
 
-            $request = $event->getRequest();
-            if ($request->isXmlHttpRequest()) {
+        $response = $event->getResponse();
+        $response->headers->set('Symfony-Debug-Toolbar-Replace', true);
 
-                $response = $event->getResponse();
-                $response->headers->set('Symfony-Debug-Toolbar-Replace', true);
-
-                return true;
-            }
-        }
-
-        return false;
+        return true;
     }
 }

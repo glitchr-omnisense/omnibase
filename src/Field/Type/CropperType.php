@@ -65,6 +65,8 @@ class CropperType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
             "data_class" => ImageCrop::class,
             "label" => false,
+            'cropper_info' => true,
+            'cropper_actions' => true,
             'cropper'     => [
                 "dragMode"     => "none",
                 "responsive"   => true,
@@ -126,7 +128,7 @@ class CropperType extends AbstractType implements DataMapperInterface
                 "xP"            => ["form_type" => HiddenType::class, "label" => "Pivot X (normalized)"],
                 "yP"            => ["form_type" => HiddenType::class, "label" => "Pivot Y (normalized)"],
 
-            ]), array_reverse($options["fields"]) ?? []));
+            ]), array_reverse($options["fields"] ?? [])));
 
             foreach($fields as $fieldName => $fieldOptions) {
 
@@ -200,6 +202,8 @@ class CropperType extends AbstractType implements DataMapperInterface
         }
 
         $view->vars['quadrant'] = $quadrantPath;
+        $view->vars["cropper_info"] = $options["cropper_info"];
+        $view->vars["cropper_actions"] = $options["cropper_actions"];
     }
 
     public function mapDataToForms($viewData, Traversable $forms)

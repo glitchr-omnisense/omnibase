@@ -1,0 +1,25 @@
+{% extends '@Base/client/contact/index.html.twig' %}
+
+{% block contact_form %}
+    <article class="wrapper contact-confirm">
+
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h2 class="mb-0">{{ '@forms.contact.title'|trans }}</h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="badge">
+                            <i class="fas fa-check"></i>
+                            <div class="message">{{ '@forms.contact.check'|trans }}</div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+    </article>
+{% endblock %}

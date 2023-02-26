@@ -145,7 +145,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
         }
 
-        // Priority to route parameter locale
+         // Priority to route parameter locale
         if(array_key_exists("_locale", $routeParameters))
             $locale = $this->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
 
@@ -217,6 +217,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $permittedHosts = "^$"; // Special case if both subdomain and machine are unallowed
 
         $parse = parse_url2($url);
+
         $allowedHost = empty($permittedHosts);
         foreach($permittedHosts as $permittedHost)
             $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);

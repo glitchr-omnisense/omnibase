@@ -15,7 +15,6 @@ use Base\Field\Type\SelectType;
 use Base\Field\Type\TranslationType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
@@ -24,7 +23,7 @@ use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
 
 use Base\Database\Mapping\Factory\ClassMetadataFactory;
-
+use Doctrine\Persistence\Proxy;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -51,7 +50,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
      */
     protected array $globalExcludedFields;
 
-    protected static string $cacheDir;
+    protected static ?string $cacheDir = null;
 
     public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, ?string $cacheDir = null, array $globalExcludedFields = ['id', 'translatable', 'locale'])
     {
@@ -71,7 +70,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         if(!is_string($entityOrClassOrMetadata) || !class_exists($entityOrClassOrMetadata)) return false;
 
-        return !$this->getEntityManager()->getMetadataFactory()->isTransient($entityOrClassOrMetadata);
+        return !$this->getEntityManager()->getMetadataFactory()->isTransient($entityOrClassOrMetadata) || is_instanceof($entityOrClassOrMetadata, Proxy::class);
     }
 
     public function isEnumType($entityOrClassOrMetadata) : bool
@@ -125,7 +124,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         if(!$type) return $type;
         
         try { $doctrineType = \Doctrine\DBAL\Types\Type::getType($type); }
-        catch (\Exception $e) { throw new \LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so.", $e->getCode(), $e); }
+        catch (\Exception $e) { throw new \LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e); }
 
         return $doctrineType;
     }
@@ -176,6 +175,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         // Auto detect some fields..
         foreach($validFields as $fieldName => $field) {
 
+            if(str_starts_with($fieldName, "_") ) continue;
             if($fieldName == "id")
                 $validFields[$fieldName] = ["form_type" => HiddenType::class];
             else if($fieldName == "uuid")
@@ -188,7 +188,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
                 ];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
-            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array")
+            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array" || $this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "json")
                 $validFields[$fieldName] = ["form_type" => SelectType::class, "tags" => true];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "integer")
                 $validFields[$fieldName] = ["form_type" => NumberType::class];
@@ -209,7 +209,9 @@ class ClassMetadataManipulator extends AbstractLocalCache
             if(is_array($fields[$fieldName]) && !empty($fields[$fieldName])) {
 
                 $fields[$fieldName]["form_type"] = $fields[$fieldName]["form_type"] ?? $validFields[$fieldName]["form_type"] ?? null;
+
                 $validFields[$fieldName] = $fields[$fieldName] ?? $validFields[$fieldName] ?? [];
+
                 unset($fields[$fieldName]);
             }
         }
@@ -485,6 +487,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         $collection ??= $this->isEntity($entityOrForm) ? null : $this->getClosestEntityCollection($entityOrForm);
         if(!$collection instanceof Collection) return null;
+
+        if($entity instanceof Fee) {
+
+        }
 
         if($collection instanceof PersistentCollection) {
 

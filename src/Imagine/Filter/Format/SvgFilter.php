@@ -2,12 +2,14 @@
 
 namespace Base\Imagine\Filter\Format;
 
+use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Imagine\FilterInterface;
 
+use Imagine\Image\Format;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
 
-class SvgFilter implements FilterInterface
+class SvgFilter implements FormatFilterInterface
 {
     protected array $filters;
     protected array $options;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Entity\Layout\Attribute\Adapter;
+namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
 use Doctrine\ORM\Mapping as ORM;
 

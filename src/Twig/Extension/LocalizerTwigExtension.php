@@ -29,7 +29,6 @@ final class LocalizerTwigExtension extends AbstractExtension
             new TwigFilter('lang_name',    [Localizer::class, 'getLocaleLangName']),
             new TwigFilter('country',      [Localizer::class, 'getLocaleCountry']),
             new TwigFilter('country_name', [Localizer::class, 'getLocaleCountryName']),
-
         ];
     }
 

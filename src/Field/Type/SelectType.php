@@ -131,13 +131,14 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //'query_builder'   => null,　// To be implemented if necessary... (currently relying on Autocomplete model and Association*Type..)
 
-            "disable"          => false,
-            'choices'          => null,
-            'choice_loader'    => null,
-            'choice_filter'    => false,
+            "disable"           => false,
+            'choices'           => null,
+            'choice_loader'     => null,
+            'choice_thumbnails' => [],
+            'choice_filter'     => false,
 
-            'choice_value'     => function($value)              { return $value; },   // Return key code
-            'choice_label'     => function($value, $label, $id) { return $label; },   // Return translated label
+            'choice_value'      => function($value)              { return $value; },   // Return key code
+            'choice_label'      => function($value, $label, $id) { return $label; },   // Return translated label
 
             'select2'                   => [],
             "select2-template"          => null,
@@ -565,18 +566,16 @@ class SelectType extends AbstractType implements DataMapperInterface
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
 
+                $data = array_map(fn($d) => $this->classMetadataManipulator->isEntity($d) ? $d->getId() : $d, $data);
                 $orderBy = array_flip($data ?? []);
                 $default = count($orderBy);
 
-                $viewData = [];
-                if($data)
-                    $viewData = $classRepository->cacheById($data, [])->getResult();
-
-                usort($viewData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+                $data = $classRepository->cacheById($data, [])->getResult();
+                usort($data, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
 
             } else {
 
-                $data = $classRepository->cacheOneById($data);
+                $data = $this->classMetadataManipulator->isEntity($data) ? $data : $classRepository->cacheOneById($data);
             }
 
             if(!$form->isSubmitted()) $form->setData($data);
@@ -779,6 +778,20 @@ class SelectType extends AbstractType implements DataMapperInterface
             // NB: Sorting elements is not working at the moment for multivalue SelectType, reason why I disable it here..
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
         }
+
+        $view->vars["choices"]        = array_filter($options["choices"] ?? $dataset ?? []);
+        $view->vars["data"]           = $selectedData;
+
+        $view->vars["choice_thumbnails"] = is_callable($options["choice_thumbnails"])
+            ? array_map(fn($c) => $options["choice_thumbnails"]($c), $view->vars["choices"] ?? [])
+            : $options["choice_thumbnails"] ?? [];
+
+        foreach($view->vars["choice_thumbnails"] as $key => $choice)
+            $view->vars["choice_thumbnails"][$key] = $this->classMetadataManipulator->isEntity($choice) ? $choice->getId() : $choice;
+        foreach($view->vars["choices"] as $key => $choice)
+            $view->vars["choices"][$key] = $this->classMetadataManipulator->isEntity($choice) ? $choice->getId() : $choice;
+        foreach($view->vars["data"] as $key => $choice)
+            $view->vars["data"][$key] = $this->classMetadataManipulator->isEntity($choice) ? $choice->getId() : $choice;
 
     }
 }

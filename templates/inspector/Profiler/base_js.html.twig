@@ -230,12 +230,14 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
             if ('GET' === request.method) {
                 var pathLink = document.createElement('a');
                 pathLink.setAttribute('href', request.url);
+                pathLink.setAttribute('target', "_blank");
                 pathLink.textContent = truncate(request.url, 25);
                 pathCell.appendChild(pathLink);
             } else {
                 pathCell.textContent = truncate(request.url, 25);
             }
             pathCell.setAttribute('title', request.url);
+
             row.appendChild(pathCell);
 
             var durationCell = document.createElement('td');

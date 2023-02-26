@@ -29,7 +29,7 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $this->generate($referenceType);
     }
 
-    public function __toString() { return $this->getTitle(); }
+    public function __toString() { return $this->getTitle() ?? ""; }
 
     public function __construct(?string $title = null, ?string $routeName = null, array $routeParameters = [])
     {

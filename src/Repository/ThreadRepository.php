@@ -6,6 +6,7 @@ use Base\Entity\Thread;
 use Base\Annotations\Traits\HierarchifyTrait;
 
 use Base\Database\Repository\ServiceEntityRepository;
+use Base\Enum\WorkflowState;
 
 /**
  * @method Thread|null find($id, $lockMode = null, $lockVersion = null)
@@ -20,7 +21,7 @@ class ThreadRepository extends ServiceEntityRepository
 
     public function countForChildrenIn($thread)
     {
-        $nDiscussions = $this->countByParent($thread, [], "", null, ["children"]);
+        $nDiscussions = $this->countByParentAndWorkflow($thread, WorkflowState::APPROVED, [], "", null, ["children"]);
 
         $nComments = [];
         foreach($nDiscussions as $entry)

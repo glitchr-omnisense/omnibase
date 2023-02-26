@@ -32,33 +32,37 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            "currency_target"   => false,
+            "currency_target"   => null,
             "currency_label"    => self::LABEL_ONLY,
             "currency_exchange" => null,
             'currency_list'     => null,
-            "use_swap"          => false
+            "use_swap"          => false,
+            "divisor"           => 100
         ]);
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $targetPath = explode(".", $options["currency_target"]);
+        $targetPath = $options["currency_target"] ? explode(".", $options["currency_target"]) : "";
         $view->vars['currency_target'] = $targetPath;
 
         // Check if child exists.. this just trigger an exception..
-        $target = $form->getParent();
-        foreach($targetPath as $path) {
+        if($options["currency_target"]) {
 
-            if(!$target->has($path))
-                throw new \Exception("Child path \"$path\" doesn't exists in \"".get_class($target->getViewData())."\".");
+            $target = $form->getParent();
+            foreach($targetPath as $path) {
 
-            $target = $target->get($path);
-            $targetType = $target->getConfig()->getType()->getInnerType();
+                if(!$target->has($path))
+                    throw new \Exception("Cannot determine currency.. Child path \"$path\" doesn't exists in \"".get_class($target->getViewData())."\".");
 
-            if($targetType instanceof TranslationType) {
-                $availableLocales = array_keys($target->all());
-                $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
-                $target = $target->get($locale);
+                $target = $target->get($path);
+                $targetType = $target->getConfig()->getType()->getInnerType();
+
+                if($targetType instanceof TranslationType) {
+                    $availableLocales = array_keys($target->all());
+                    $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
+                    $target = $target->get($locale);
+                }
             }
         }
 

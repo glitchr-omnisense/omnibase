@@ -61,7 +61,8 @@ final class TradingMarketTwigExtension extends AbstractExtension
     public function formatCurrency($amount, string $currency, array $attrs = [], string $locale = null): string
     {
         $rate = 1.00;
-        $applyRate = array_pop_key("use_rate", $attrs) ?? true;
+        $applyRate     = array_pop_key("use_rate", $attrs) ?? true;
+        $scalingFactor = array_pop_key("scale", $attrs) ?? 100;
 
         if($applyRate) {
 
@@ -72,7 +73,7 @@ final class TradingMarketTwigExtension extends AbstractExtension
             else $rate = 1.0;
         }
 
-        return $this->intlExtension->formatCurrency($amount*$rate, $currency, $attrs, $locale);
+        return $this->intlExtension->formatCurrency($amount*$rate / $scalingFactor, $currency, $attrs, $locale);
     }
 
     public function applyCurrencyRate($amount, string $currency, array $attrs = [], string $locale = null): ?float

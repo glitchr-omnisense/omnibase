@@ -2,7 +2,8 @@
 
 namespace Base\Entity\Layout\Attribute\Common;
 
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Associate;use Base\Database\Annotation\DiscriminatorEntry;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractActionRepository;
@@ -19,4 +20,33 @@ use Base\Database\Annotation\Cache;
  */
 abstract class AbstractAction extends AbstractAttribute implements ActionInterface
 {
+    public static function __iconizeStatic() : ?array { return ["fas fa-directions"]; }
+    public function apply(mixed $subject): mixed
+    {
+        return $this->adapter?->apply($this->getValue(), $subject) ?? $subject;
+    }
+
+    /**
+     * @ORM\Column(type="array")
+     * @Associate(metadata="class")
+     */
+    protected $value;
+    public function getValue()     { return $this->value; }
+    public function setValue($value)
+    {
+        $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $class;
+
+    public function getClass(): ?string { return $this->class; }
+    public function setClass(?string $class)
+    {
+        $this->class = $class;
+        return $this;
+    }
 }

@@ -15,6 +15,21 @@ thread_search:
   found: "\"{0}\" trouvé dans \"{1}\""
   placeholder: "Remplir ici.."
 
+security_pending:
+  title: "C'est pour bientôt !"
+  description: "Le site est encore en cours de construction.<br/>La page que vous cherchez est actuellement en cours de fabrication."
+
+security_pendingForApproval:
+  title: "Vérification en cours"
+  description: "Votre compte {0} est actuellement en cours de révision. Vous recevrez un email une fois le compte approuvé. Merci de revenir plus tard !"
+
+base_contact:
+  title: Page de contact
+  description:
+    Vous avez une question ou un retour à nous faire parvenir ? Décrochez votre téléphone ou complètez le formulaire ci-dessous.
+    Nous ne manquerons pas de revenir vers vous dès que possible.
+
+  follow_us: Suivez-vous sur..
 
 security_birthdate:
   title:

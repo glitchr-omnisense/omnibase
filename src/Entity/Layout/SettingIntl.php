@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Layout;
 
+use Base\Database\Annotation\Associate;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Validator\Constraints as AssertBase;
@@ -48,16 +49,14 @@ class SettingIntl implements TranslationInterface
     /**
      * @ORM\Column(type="array")
      * @Uploader(storage="local.storage", max_size="2MB", missable=true)
+     * @Associate(metadata="class")
      */
     protected $value;
-
-    public function getValue() { return Uploader::getPublic($this, "value") ?? $this->value; }
+    public function getValue()     { return Uploader::getPublic($this, "value") ?? $this->value; }
     public function getValueFile() { return Uploader::get($this, "value"); }
     public function setValue($value)
     {
-        $this->value  = $this->isEntity($value) ? $value->getId() : $value;
-        $this->setClass($this->isEntity($value) ? get_class($value) : null);
-
+        $this->value      = $value;
         return $this;
     }
 

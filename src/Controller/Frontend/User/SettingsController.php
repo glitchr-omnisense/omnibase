@@ -71,7 +71,7 @@ class SettingsController extends AbstractController
     public function Settings()
     {
         $user = $this->getUser();
-        return $this->render('@Base/client/user/settings.html.twig', ['user' => $user]);
+        return $this->render('client/user/settings.html.twig', ['user' => $user]);
     }
 
     /**
@@ -120,7 +120,7 @@ class SettingsController extends AbstractController
             }
         }
 
-        return $this->render('@Base/client/user/settings_2fa.html.twig', [
+        return $this->render('client/user/settings_2fa.html.twig', [
            'form' => $form->createView(),
            'user' => $this->getUser()
         ]);

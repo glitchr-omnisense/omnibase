@@ -33,14 +33,21 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
      */
     protected bool $cache = false;
 
+    /**
+     * @var bool
+     */
+    protected bool $warmup = false;
+
     protected $defaultFormats = [];
     public function __construct(
         LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         ImageServiceInterface $imageService, FileController $fileController)
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
-        $this->imageService   = $imageService;
         $this->fileController = $fileController;
+
+        $this->imageService   = $imageService;
+        $this->imageService->setController($fileController);
 
         $this->defaultFormats = $parameterBag->get("base.uploader.formats");
     }
@@ -171,7 +178,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 $extensions = $this->imageService->getExtensions($file);
                 $extension  = first($extensions);
 
-                $data = $this->imageService->imagine($file, [], ["webp" => false]);
+                $data = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
                 if($this->isCached($data)) {
 
                     $this->output->section()->writeln("             <warning>* Already cached \".".str_lstrip(realpath($file),realpath($publicDir))."\".. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
@@ -181,18 +188,14 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                     $this->output->section()->writeln("             <info>* Warming up \".".str_lstrip(realpath($file),realpath($publicDir))."\".. (".($i+1)."/".$N.")</info>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->ibatch++;
 
-                    if($this->cache) $this->fileController->Image($data, $extension);
-
-                    $data = $this->imageService->imagine($file, [], ["webp" => true]);
-                    if($this->cache) $this->fileController->ImageWebp($data);
+                    $data = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
+                    $data = $this->imageService->imagine($file, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
 
                     foreach($formats as $format) {
 
                         list($width, $height) = $format;
-                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => false]);
-                        if($this->cache) $this->fileController->Image($data, $extension);
-                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => true]);
-                        if($this->cache) $this->fileController->ImageWebp($data);
+                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
+                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
                     }
                 }
 

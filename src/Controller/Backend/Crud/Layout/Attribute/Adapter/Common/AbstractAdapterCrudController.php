@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Backend\Crud\Layout\Attribute\Adapter;
+namespace Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common;
 
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\AssociationField;
@@ -39,7 +39,6 @@ class AbstractAdapterCrudController extends AbstractCrudController
 
             yield TranslationField::new("label");
             yield TranslationField::new()->showOnIndex("help");
-            yield AssociationField::new("attributes")->justDisplay()->onlyOnIndex();
 
         }, $args);
     }

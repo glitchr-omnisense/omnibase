@@ -17,6 +17,9 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @Route(priority = -1)
+ * */
 class DropzoneController extends AbstractController
 {
     const CACHE_DURATION = 24*3600;

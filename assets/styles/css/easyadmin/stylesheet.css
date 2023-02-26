@@ -7,14 +7,33 @@ html, body { scroll-padding-top: 11em; }
 
 .row>* { padding-left:0;}
 
+.page-apikey input, .page-settings input
+{
+    min-width:50%;
+    width:auto;
+}
+
 .content-top .content-search input[type=search][name=query] {
     background: transparent;
 }
-.mark, mark { background-color: var(--sidebar-border-color); }
+.mark, mark { background-color: var(--sidebar-border-color); color: var(--form-label-color); }
 .sf-minitoolbar {
     background-color: var(--sidebar-bg) !important;
 }
 .sf-minitoolbar svg path { fill: var(--sidebar-menu-color) !important; }
+
+.content-header .page-actions
+{
+    display:block;
+}
+
+
+.form-choice-thumbnail label:hover {
+    border: 1px solid var(--sidebar-border-color);
+}
+.form-choice-thumbnail {
+    border: 1px solid var(--sidebar-border-color);
+}
 
 .d-inline .dropdown:after { margin-left:0px; }
 .d-inline .dropdown-toggle { background-color:transparent; margin-right:1px; }
@@ -186,8 +205,8 @@ fieldset .form-group { padding: 0; }
 form fieldset .badge.badge-secondary { background-color: var(--sidebar-bg); }
 form fieldset
 {
-padding: 0 2em;
-margin: 1em 0;
+    padding: 0 2em;
+    margin: 1em 0;
 }
 
 .page-wrapper fieldset { height: 100%; }
@@ -394,16 +413,21 @@ position: relative;
 }
 
 .basicLightbox img { max-height: 90vh; }
+.form-email {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .field-email-icon {
-
-background-color: var(--gray-200);
-color: var(--gray-600);
-border-radius:100%;
-font-size:14pt;
-width:14pt;
-padding:0.15em;
-margin:0.15em;
-margin-left:0;
+    background-color: var(--badge-secondary-bg);
+    color: var(--badge-secondary-color);
+    border-radius:100%;
+    font-size:14pt;
+    width:14pt;
+    padding:0.15em;
+    margin:0.15em;
+    margin-left:0;
+    margin-right:0.3em;
 }
 
 .dropdown-menu .dropdown-toggle { margin:auto; }
@@ -512,6 +536,7 @@ body {
     align-items: center;
 }
 
+.badge.badge-secondary { align-items: center; }
 .datagrid td.text-left   > span.badges { justify-content: flex-start; }
 .datagrid td.text-center > span.badges { justify-content: center;  }
 .datagrid td.text-right  > span.badges { justify-content: flex-end;  }
@@ -533,10 +558,11 @@ body {
 
 .dropdown-menu.show, .dropdown-menu.bootstrap-datetimepicker-widget {
 
-    transition: all 500ms, opacity 0.5s;
+    transition: opacity 0.5s;
     transform-origin:top;
     opacity:1;
 }
+.field-country .country-flag { border: 0!important;}
 
 .nav-link {
     position: relative;
@@ -1150,8 +1176,14 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-submenu-color); }
     border:1px solid var(--sidebar-border-color);
     border-bottom: 0;
 }
-.form-array { border:1px solid var(--sidebar-bg); }
-.form-array .form-array-inline{ border:1px solid var(--sidebar-bg); }
+
+.form-array .accordion-button .form-group { padding: 3px; }
+.form-array .form-array-items .form-array-item:first-of-type { border-top:0; }
+.form-array .form-array-items .form-array-item{ border-top:1px solid var(--sidebar-border-color); }
+.form-array .form-array-items .form-array-item:last-of-type{ border-bottom:1px solid var(--sidebar-border-color); }
+
+.form-array { border:1px solid var(--sidebar-border-color); }
+.form-array .form-array-inline{ border:1px solid var(--sidebar-border-color); }
 .form-attribute .form-attribute-items { border:  1px solid var(--sidebar-border-color); }
 .content-header .page-actions { max-width: 750px; flex-wrap:wrap; justify-content:flex-end; }
 .content-header .page-actions .btn-group { margin:0.25em; }

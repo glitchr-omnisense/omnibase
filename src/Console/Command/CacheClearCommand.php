@@ -111,7 +111,7 @@ EOF
 
         $this->cacheClearCommand->setApplication($this->getApplication());
         $ret = $this->cacheClearCommand->execute($input, $output);
-
+     
         if(!$noExtension) {
 
             $this->webpackCheck($io);            

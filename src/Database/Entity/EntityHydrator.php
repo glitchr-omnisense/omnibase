@@ -127,6 +127,7 @@ class EntityHydrator implements EntityHydratorInterface
         }
 
         $this->bindAliases($entity);
+
         return $entity;
     }
 
@@ -246,6 +247,9 @@ class EntityHydrator implements EntityHydratorInterface
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
         foreach ($this->classMetadataManipulator->getFieldNames($classMetadata) as $alias => $column) {
 
+            if($alias == $column) continue;
+            if(snake2camel($alias) == snake2camel($column)) continue;
+            if(camel2snake($alias) == camel2snake($column)) continue;
             $fn = function() use ($alias, $column) {
 
                 $aliasValue  = $this->$alias;
@@ -448,12 +452,13 @@ class EntityHydrator implements EntityHydratorInterface
                 if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
                     $this->hydrateAssociationToOne($entity, $propertyName, $mapping, $value, $aggregateModel);
 
-                if ($this->classMetadataManipulator->isToManySide($entity, $propertyName))
+                if ($this->classMetadataManipulator->isToManySide($entity, $propertyName)) {
                     $this->hydrateAssociationToMany($entity, $propertyName, $mapping, $value, $aggregateModel);
+                }
 
             } catch (Exception $e) {
 
-                throw new Exception($e->getMessage()." for \"".$propertyName."\" (".serialize($value).") in \"".strip_tags((string) $entity)."\"");
+                throw new Exception($e->getMessage()." for \"".$propertyName."\" (".serialize($value).") in \"".strip_tags((string) $entity)."\"", $e->getCode(), $e);
             }
         }
 
@@ -500,9 +505,12 @@ class EntityHydrator implements EntityHydratorInterface
 
         foreach ($array as $key => $value) {
 
-            if (is_array($value))
-                $value = $this->hydrate($mapping['targetEntity'], $value, [], $aggregateModel);
-            else if ($targetEntity = $this->findAssociation($mapping['targetEntity'], $value))
+            if (is_array($value)) {
+
+                $entityValue = $this->getPropertyValue($entity, $propertyName);
+                $value = $this->hydrate($entityValue->get($key) ?? $mapping['targetEntity'], $value, [], $aggregateModel);
+
+            } else if ($targetEntity = $this->findAssociation($mapping['targetEntity'], $value))
                 $value = $targetEntity;
 
             // Special case: the setter makes loosing the custom keyname (Perhaps one might implement an extends..)

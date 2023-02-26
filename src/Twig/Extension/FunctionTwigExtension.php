@@ -14,7 +14,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Type;
 use ReflectionFunction;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
+use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Twig\Environment;
+use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -98,10 +100,12 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('property_accessor',            [$this, "property_accessor"]),
             new TwigFunction('cast',          "cast"),
 
+            new TwigFunction('mailto',       [$this, 'mailto'], ["is_safe" => ['all']]),
+
             new TwigFunction('addslashes',  'addslashes'),
             new TwigFunction('enum', [$this, 'enum']),
             new TwigFunction('colorify', [$this, 'colorify']),
-
+            new TwigFunction('email_preview',   [$this, 'email'], ['needs_context' => true])
         ];
     }
 
@@ -124,6 +128,9 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('at',          'at'),
             new TwigFilter('count_leaves',  'count_leaves'),
 
+            new TwigFilter('sign',      'sign'),
+
+            new TwigFilter('mailto',       [$this, 'mailto'], ["is_safe" => ['all']]),
             new TwigFilter('datetime',       [$this, 'datetime'],   ['needs_environment' => true]),
             new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),
             new TwigFilter('progress',       [$this, 'progress'],   ['needs_environment' => true, "is_safe" => ["all"]]),
@@ -144,10 +151,18 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('mb_ucfirst',     'mb_ucfirst'),
             new TwigFilter('mb_ucwords',     'mb_ucwords'),
             new TwigFilter('second',         "second"),
+            new TwigFilter('third',         "third"),
+            new TwigFilter('fourth',         "fourth"),
+            new TwigFilter('fifth',         "fifth"),
             new TwigFilter('empty',          "empty"),
 
             new TwigFilter('colorify',            [$this, 'colorify']),
         ];
+    }
+
+    public function email(array $context)
+    {
+        return !array_key_exists("email", $context);
     }
 
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
@@ -498,5 +513,10 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         return '';
+    }
+
+    public function mailto(string $address, string $label)
+    {
+        return "<a href='mailto:".$address."'>".$label."</a>";
     }
 }

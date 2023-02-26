@@ -5,6 +5,7 @@ namespace Base\Controller\Backend;
 use Base\Backend\Config\Extension;
 use Base\BaseBundle;
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Entity\Layout\Widget\Link;
 use Base\Field\IdField;
 use Base\Service\Model\IconizeInterface;
 use Base\Routing\RouterInterface;
@@ -23,6 +24,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 
@@ -108,7 +110,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         try {
             $entityFqcn = BaseBundle::getInstance()->getAlias(preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
-        } catch( \ErrorException $e) { throw new \LogicException("Failed to find Entity FQCN from \"".get_called_class()."\" CRUD controller..\nDid you remove the Entity but kept the CRUD controller ?", 500 ); }
+        } catch( \ErrorException $e) {
+
+//            dump($entityFqcn, preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
+//            exit(1);
+
+            throw new \LogicException("Failed to find Entity FQCN from \"".get_called_class()."\" CRUD controller..\nDid you remove the Entity but kept the CRUD controller ?", 500 );
+        }
         self::$crudController[$entityFqcn] = get_called_class();
         return $entityFqcn;
     }
@@ -207,11 +215,42 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureActions(Actions $actions): Actions
     {
+        $batchActionDelete = Action::new('batchActionDelete', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_delete', 'fa fa-user-times')
+            ->linkToCrudAction('batchActionDelete')
+            ->addCssClass('btn btn-primary text-danger');
+
+        if(is_instanceof($this->getEntityFqcn(), LinkableInterface::class)) {
+
+            $linkToEntity = \Base\Backend\Config\Action::new('EntityPage', self::getEntityLabelInSingular(), "fas fa-fw fa-plug")
+                ->renderAsTooltip()
+                ->linkToUrl(fn($e) => $e->__toLink());
+
+            $actions
+                ->add(Action::INDEX, $linkToEntity);
+        }
+
         return $actions
                 ->update(Crud::PAGE_INDEX, Action::NEW ,    fn(Action $a) => $this->setDiscriminatorMapAttribute($a))
-                ->setPermission(Action::NEW, 'ROLE_ADMIN')
+
+                ->addBatchAction($batchActionDelete)
+
+                ->setPermission($batchActionDelete, 'ROLE_SUPERADMIN')
+                ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
                 ->setPermission(Action::EDIT, 'ROLE_ADMIN')
-                ->setPermission(Action::DELETE, 'ROLE_ADMIN');
+                ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
+;
+    }
+
+    public function batchActionDelete(BatchActionDto $batchActionDto)
+    {
+        foreach ($batchActionDto->getEntityIds() as $id) {
+            $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
+
+            $this->entityManager->remove($user);
+            $this->entityManager->flush($user);
+        }
+
+        return $this->redirect($batchActionDto->getReferrerUrl());
     }
 
     public function configureExtension(Extension $extension) : Extension

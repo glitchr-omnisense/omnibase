@@ -3,12 +3,16 @@ namespace Base\Field\Type;
 
 use Symfony\Component\Form\ButtonTypeInterface;
 use Symfony\Component\Form\Extension\Core\Type\BaseType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\Form\SubmitButtonTypeInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ButtonType extends BaseType implements ButtonTypeInterface
-{
+class ButtonType extends BaseType implements SubmitButtonTypeInterface // NB: A button is also a submit...
+{                                                                      //     If you change type attribute..
     public function getParent(): ?string
     {
         return \Symfony\Component\Form\Extension\Core\Type\ButtonType::class;
@@ -32,9 +36,10 @@ class ButtonType extends BaseType implements ButtonTypeInterface
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        parent::buildView($view, $form, $options);
         $view->vars = array_replace($view->vars, [
             "type" => $options["type"],
             "confirmation" => $options["confirmation"]
-        ]);        
+        ]);
     }
 }

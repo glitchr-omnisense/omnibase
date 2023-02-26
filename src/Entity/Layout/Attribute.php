@@ -5,7 +5,7 @@ namespace Base\Entity\Layout;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 
 use Doctrine\ORM\Mapping as ORM;

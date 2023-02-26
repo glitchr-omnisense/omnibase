@@ -154,6 +154,11 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
+
+            $options = $form->getConfig()->getOptions();
+            $options["class"]    = $this->formFactory->guessClass($event, $options);
+            $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
+
             if($options["multiple"]) {
 
                 $dataClass = $options["class"];
@@ -167,6 +172,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     "label"            => $options["label"],
                     "html"             => $options["html"],
                     'by_reference'     => false,
+                    'allow_object'     => true,
                     'length'           => $options["group"] ? $options["length"] : max(1, $options["length"]),
                     "group"            => $options["group"],
                     "row_group"        => $options["row_group"],
@@ -248,18 +254,20 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if(empty($value)) $value = null;
 
                 $childFormType = get_class($childForm->getConfig()->getType()->getInnerType());
-                switch($childFormType) {
-                    case ArrayType::class:
-                        if(is_serialized($value)) $value = unserialize($value);
-                        else $value = $value !== null && !is_array($value) ? [$value] : $value;
-                        break;
 
-                    case IntegerType::class:
-                    case NumberType::class:
-                    case PercentType::class:
-                        $value = intval($value);
-                        break;
+                if(is_instanceof($childFormType, ArrayType::class)) {
+
+                    if (is_serialized($value)) $value = unserialize($value);
+                    else $value = $value !== null && !is_array($value) ? [$value] : $value;
+
                 }
+
+                if(is_instanceof($childFormType, NumberType::class))
+                    $value = floatval($value);
+                if(is_instanceof($childFormType, PercentType::class))
+                    $value = intval($value);
+                if(is_instanceof($childFormType, IntegerType::class))
+                    $value = intval($value);
 
                 $childForm->setData($value);
             }

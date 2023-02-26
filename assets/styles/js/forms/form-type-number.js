@@ -7,11 +7,14 @@ window.addEventListener("load.form_type", function () {
 
         var min = $(e).data("number-min");
         var max = $(e).data("number-max");
+        var suffix = $(e).data("number-suffix");
+        var prefix = $(e).data("number-prefix");
         var stepUp = $(e).data("number-up");
         var stepDown = $(e).data("number-down");
 
         var keyUp = $(e).data("number-keyup");
         var keyDown = $(e).data("number-keydown");
+        var divisor = $(e).data("number-divisor");
 
         var throttleDown =  $(e).data("number-down-throttle");
         var throttleUp   =  $(e).data("number-up-throttle");
@@ -25,35 +28,44 @@ window.addEventListener("load.form_type", function () {
         // Do not necessarily display by default..
         // var numberValue = $(input).val() || 0;
         // if(numberValue === 0) $(input).val(0);
-
         var onClickUp = function() {
 
-            var val = parseFloat($(input).val());
-            if (isNaN(val))
+            var number = $(input).val().replaceAll(/[^\d.,\-]+/ig, "");
+            var val = parseFloat(number);
+
+            if (isNaN(val) || !val)
                 val = 0;
-            if (val < parseFloat(max) || max === undefined)
+
+            if (val < parseFloat(max) || isNaN(parseFloat(max)))
                 val = val + Math.abs(parseFloat(stepUp ?? 1));
-            if (val > parseFloat(max) &&  max !== undefined)
+
+            if (val > parseFloat(max) && !isNaN(parseFloat(max)))
                 val = parseFloat(max);
 
-            $(input).val(val);
-            $(input).trigger("input");
+            var scale = Math.log(scale) / Math.log(10);
+            $(input).val(Math.round(val, scale));
+
+            input[0].dispatchEvent(new Event("input"));
         }
 
         var onClickDown = function() {
 
-            var val = parseFloat($(input).val());
-            if (isNaN(val))
+            var number = $(input).val().replaceAll(/[^\d.,\-]+/ig, "");
+            var val = parseFloat(number);
+
+            if (isNaN(val) || !val)
                 val = 0;
 
-            if (val > parseFloat(min) || min === undefined)
+            if (val > parseFloat(min) || isNaN(parseFloat(min)))
                 val = val - Math.abs(parseFloat(stepDown ?? 1));
 
-            if (val < parseFloat(min) &&  min !== undefined)
+            if (val < parseFloat(min) && !isNaN(parseFloat(min)))
                 val = parseFloat(min);
 
+            val = divisor ? Math.round(val/divisor)*divisor : val;
             $(input).val(val);
-            $(input).trigger("input");
+
+            input[0].dispatchEvent(new Event("input"));
         };
 
         // $(window).off("keydown.number."+id);
@@ -104,11 +116,37 @@ window.addEventListener("load.form_type", function () {
             if(invervalBtnDown) clearInterval(invervalBtnDown);
         });
 
-        $(input).off("input.number");
-        $(input).on("input.number", function() {
+        var format = function() {
 
-            if ($(input).val()) numberValue = $(input).val();
-            if ($(input).val() == "") setUnlimitedState(input);
+            var number = $(this).val();
+                number = number.replaceAll(/[^\d.,\-]+/ig, "").replaceAll(/^0/ig, "");
+            if(!number) number = 0;
+
+            $(this).val(prefix+number+suffix);
+        };
+
+        $(input).off("input.number");
+        $(input).on("input.number", function () {
+
+            var number = $(input).val();
+                number = number.replaceAll(/[^\d.,\-]+/ig, "").replaceAll(/^0/ig, "");
+
+            if(isNaN(number) || !number) number = 0;
+            if (number > parseFloat(max))
+                number = max;
+            if (number < parseFloat(min))
+                number = min;
+
+            $(input).val(prefix+number+suffix);
         });
+
+        var number = $(input).val();
+            number = number.replaceAll(/[^\d.,\-]+/ig, "").replaceAll(/^0/ig, "");
+            number = number.replaceAll(",", ".");
+
+        if (isNaN(number) || !number)
+            number = 0;
+
+        $(input).val(prefix+number+suffix);
     }));
 });

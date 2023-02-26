@@ -12,7 +12,7 @@ class ArrayField extends CollectionField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_ASSOCIATIVE        = 'associative';
-    public const OPTION_LENGTH = 'length';
+    public const OPTION_LENGTH             = 'length';
     public const OPTION_PATTERN_FIELD_NAME = 'pattern';
     public const OPTION_PLACEHOLDER        = 'placeholder';
 

@@ -4,6 +4,7 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Database\Annotation\DiscriminatorEntry;
 
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\CountryAdapterRepository;
 use Base\Database\Annotation\Cache;

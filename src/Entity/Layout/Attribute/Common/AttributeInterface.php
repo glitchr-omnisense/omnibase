@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Common;
 
-use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 
 interface AttributeInterface
 {

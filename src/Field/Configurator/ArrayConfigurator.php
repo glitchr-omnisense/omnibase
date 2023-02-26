@@ -37,8 +37,6 @@ class ArrayConfigurator implements FieldConfiguratorInterface
             $field->setFormTypeOption('entry_options.attr.data-widget', 'autocomplete');
         }
 
-        $field->setFormTypeOptionIfNotSet('delete_empty', true);
-
         // TODO: check why this label (hidden by default) is not working properly
         // (generated values are always the same for all elements)
         // $field->setFormTypeOptionIfNotSet('entry_options.label', $field->getCustomOptions()->get(ArrayField::OPTION_SHOW_ENTRY_LABEL));

@@ -118,6 +118,7 @@ class BaseService implements RuntimeExtensionInterface
         NotifierInterface $notifier,
         FormFactoryInterface $formFactory,
         LocalizerInterface $localizer,
+        TradingMarketInterface $tradingMarket,
 
         SettingBag $settingBag,
         ImageService $imageService,
@@ -149,6 +150,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->setIconProvider($iconProvider);
         $this->setSettingBag($settingBag);
         $this->setLocalizer($localizer);
+        $this->setTradingMarket($tradingMarket);
         $this->setTwig($twig);
         $this->setRouter($router);
         $this->setFirewallMap($firewallMap);
@@ -167,7 +169,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
-    public function getIndexPage():string { return $this->getRouter()->getIndexPage(); }
+    public function getRouteIndex():string { return $this->getRouter()->getRouteIndex(); }
     public function getSite()
     {
         return [
@@ -187,9 +189,10 @@ class BaseService implements RuntimeExtensionInterface
     public function getEmail()
     {
         return [
-            "title"  => $this->getSettingBag()->getScalar("base.settings.title.email") ?? $this->getSettingBag()->getScalar("base.settings.title"),
-            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.email") ?? $this->getSettingBag()->getScalar("base.settings.slogan.email"),
-            "logo"   => $this->getSettingBag()->getScalar("base.settings.logo.email") ?? $this->getSettingBag()->getScalar("base.settings.logo.email")
+            "title"   => $this->getSettingBag()->getScalar("base.settings.title.email") ?? $this->getSettingBag()->getScalar("base.settings.title"),
+            "slogan"  => $this->getSettingBag()->getScalar("base.settings.slogan.email") ?? $this->getSettingBag()->getScalar("base.settings.slogan"),
+            "logo"    => $this->getSettingBag()->getScalar("base.settings.logo.email") ?? $this->getSettingBag()->getScalar("base.settings.logo"),
+            "address" => $this->getSettingBag()->getScalar("base.settings.mail")
         ];
     }
 
