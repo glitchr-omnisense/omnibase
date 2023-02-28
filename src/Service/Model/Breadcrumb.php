@@ -113,6 +113,8 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             )], $routeParameters);
 
             $label = $routeName ? $this->translator->trans("@controllers.".$transPath.".title", $transParameters) : null;
+            $label = preg_replace("/\{\w\}/", "", $label);
+            $label = str_rstrip($label, "#");
             if($label == "@controllers.".$transPath.".title") $label = "";
 
             $pageTitle = null;

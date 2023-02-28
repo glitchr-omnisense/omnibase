@@ -9,17 +9,15 @@ window.addEventListener('load', function(event) {
 
 window.addEventListener('load', function(event) {
 
-    $("form.needs-validation :input").on("invalid", (e) => e.preventDefault() );
-
     $("form :input").keydown(function(event){
 
         if(event.keyCode == 13) {
 
             if(event.target.tagName == "TEXTAREA")
                 return true;
-            
+
             var target = $(event.target);
-            
+
             var submitter = undefined;
             while(target.parent().length) {
 
@@ -46,6 +44,7 @@ window.addEventListener('load', function(event) {
         }
     });
 
+    $("form").addClass("needs-validation").attr("novalidate", "");
     $("form").on("submit", function(e) {
 
         // Disable form
@@ -66,6 +65,19 @@ window.addEventListener('load', function(event) {
 
                 e.preventDefault();
                 e.stopPropagation();
+
+                var invalid = $(this).find(".form-control:invalid");
+                if (invalid.length) {
+                    var navPane = $(invalid[0]).closest(".tab-pane");
+
+                    var navButton = $("#"+navPane.attr("aria-labelledby"));
+                        navButton.one('shown.bs.tab', function() {
+                            invalidRequiredField[0].reportValidity();
+                        });
+
+                    location.hash = navButton.data("bs-target");
+                }
+
                 if (submitter != undefined)
                     $(submitter).removeClass("disabled").removeAttr("disabled");
             }

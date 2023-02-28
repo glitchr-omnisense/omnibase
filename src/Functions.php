@@ -2226,9 +2226,11 @@ namespace {
         return array_intersect_key($array, $arrayMask);
     }
 
-    function object_hydrate(object $object, ?array $vars = null)
+    function object_hydrate(object $object, array|object|null $vars = null)
     {
         if($vars === null) return $object;
+        if(is_object($vars)) $vars = cast_to_array($vars);
+
         $reflClass      = new ReflectionClass($object);
 
         do {

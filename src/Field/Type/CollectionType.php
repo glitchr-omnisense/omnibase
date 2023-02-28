@@ -134,7 +134,7 @@ class CollectionType extends AbstractType
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
             $form = $event->getForm();
-            $data = $event->getData() ?? [];
+            $data = $event->getData() ?? $form->getParent()->getData() ?? [];
             foreach($data as $id => $entry) {
 
                 if (is_object($entry) && $options["allow_object"] == false)

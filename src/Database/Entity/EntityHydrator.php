@@ -458,7 +458,7 @@ class EntityHydrator implements EntityHydratorInterface
 
             } catch (Exception $e) {
 
-                throw new Exception($e->getMessage()." for \"".$propertyName."\" (".serialize($value).") in \"".strip_tags((string) $entity)."\"", $e->getCode(), $e);
+                throw $e;
             }
         }
 
@@ -529,8 +529,25 @@ class EntityHydrator implements EntityHydratorInterface
         if(!$isOwningSide) {
 
             $mappedBy =  $mapping["mappedBy"];
-            foreach($association as $entry)
-                $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
+
+            if($this->classMetadataManipulator->isManyToSide($entity, $propertyName)) {
+
+                $association = $association->toArray();
+                foreach ($association as $entry) {
+
+                    $collection = $this->propertyAccessor->getValue($entry, $mappedBy);
+                    if($collection instanceof Collection)
+                        $collection = $collection->toArray();
+
+                    $collection[] = $entity;
+                    $this->propertyAccessor->setValue($entry, $mappedBy, array_unique_object($collection));
+                }
+
+            } else {
+
+                foreach ($association as $entry)
+                    $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
+            }
         }
 
         // Commit association

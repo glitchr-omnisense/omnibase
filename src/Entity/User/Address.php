@@ -20,8 +20,14 @@ use Base\Database\Annotation\Cache;
 
 class Address implements IconizeInterface
 {
+    public function __toString() { return $this->streetAddress.", ".ucfirst($this->city).", ".$this->country; }
     public        function __iconize(): ?array { return null; }
     public static function __iconizeStatic(): ?array { return ["fas fa-address-card"]; }
+
+    public function __construct(Address $address)
+    {
+        object_hydrate($this, $address);
+    }
 
     /**
      * @ORM\Id
@@ -56,7 +62,7 @@ class Address implements IconizeInterface
         return $this;
     }
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $state;
 
@@ -79,7 +85,7 @@ class Address implements IconizeInterface
     }
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255)
      */
     protected $zipCode;
     public function getZipCode(): ?string { return $this->zipCode; }

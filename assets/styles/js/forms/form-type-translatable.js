@@ -102,7 +102,6 @@ window.addEventListener("load.form_type", function () {
                             focusTriggered = true;
                         }
                     });
-
                 });
 
                 $(optionalLocales).each(function() {
