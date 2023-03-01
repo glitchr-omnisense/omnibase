@@ -392,6 +392,13 @@ namespace {
         return $search;
     }
 
+
+    function is_null_object(?object $object)
+    {
+        if($object === null) return true;
+        return empty(array_filter(cast_to_array($object)));
+    }
+
     function array_unique_object(array $array): array
     {
         $unique = array_keys(array_unique(array_map(fn($e) => spl_object_hash($e), $array)));

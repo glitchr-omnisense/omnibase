@@ -13,6 +13,8 @@ html, body { scroll-padding-top: 11em; }
     width:auto;
 }
 
+.field-association .accordion-body { margin:0 1em !important; }
+
 .form-entity > .form-group { padding: 1em 0; }
 .form-entity > div { margin-bottom: 1.5em; }
 .form-entity > div:last-child { margin-bottom: 0em !important; }

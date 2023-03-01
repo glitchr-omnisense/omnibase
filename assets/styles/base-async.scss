@@ -7,6 +7,7 @@
 }
 
 .modal { position:absolute !important; }
+body > .modal-backdrop { display:none !important; }
 .ql-editor .ql-align-justify img { float: left; }
 .ql-editor .ql-align-center img { float: initial; }
 .ql-editor .ql-align-center { clear: both; text-align:center; }

@@ -10,6 +10,20 @@ $.fn.prependon = function(evtype, fnc) {
     })
 }
 
+$("[type=submit]").on("click", function(e) {
+
+    var closestForm = $(this).closest("form");
+    if (closestForm.length == 0) {
+
+        var form = $("form");
+        if(form.length == 1) {
+
+            var submitter = form.find("[type=submit]");
+            if(submitter.length == 1) submitter.click();
+        }
+    }
+});
+
 $.fn.confirmButton = function(options = {}) {
 
     // Function that creates a simple modal dialog that contains some placeholders to include custom messages
