@@ -19,6 +19,7 @@ use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
+use Symfony\Component\Intl\Timezones;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Base\Validator\Constraints as AssertBase;
@@ -32,7 +33,7 @@ use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\Annotation\Hashify;
 
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Base\Service\Model\IconizeInterface;
@@ -66,7 +67,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), array_filter($this->getRoles())); }
     public static function __iconizeStatic() : ?array { return ["fas fa-user"]; }
 
-    public const __DEFAULT_COOKIE__ = "user:necessary";
+    public const __COOKIE_IDENTIFIER__ = "USER/INFO";
     public const __DEFAULT_IDENTIFIER__ = "email";
 
     public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
@@ -139,7 +140,16 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public static function getCookie(string $key = null)
     {
-        $cookie = json_decode($_COOKIE[self::__DEFAULT_COOKIE__] ?? "", true);
+        $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
+        if(array_key_exists("timezone", $cookie)) {
+
+            $timezone = Timezones::getCountryCode($cookie["timezone"]);
+            if(!array_key_exists("country", $cookie) || $timezone != $cookie["country"]) {
+
+                $cookie["country"] = Timezones::getCountryCode($cookie["timezone"]);
+                User::setCookie("country", $cookie["country"]);
+            }
+        }
 
         if(!isset($cookie)) return null;
         if(!isset($key) || empty($key)) return $cookie;
@@ -149,7 +159,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public static function setCookie(string $key = null, $value, int $lifetime = 0)
     {
-        setcookie($key, $value, $lifetime > 0 ? time() + $lifetime : 0, "/");
+        $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
+        $cookie = array_merge($cookie, [$key => $value]);
+
+        setcookie(self::__COOKIE_IDENTIFIER__, json_encode($cookie), $lifetime > 0 ? time() + $lifetime : 0, "/");
     }
 
     public static function getBrowser(): ?string { return $_SERVER['HTTP_USER_AGENT'] ?? null; }
@@ -245,11 +258,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Assert\Locale(canonicalize = true)
      */
     protected $locale;
-    public function getLocale(): ?string { return $this->locale ?? LocaleProvider::__toLocale($this->getTranslator()->getLocale()); }
+    public function getLocale(): ?string { return $this->locale ?? Localizer::__toLocale($this->getTranslator()->getLocale()); }
     public function setLocale(?string $locale = null): self
     {
         if(empty($locale)) $locale = $this->locale ?? null;
-        $this->locale = $locale ?? LocaleProvider::__toLocale($this->getTranslator()->getLocale());
+        $this->locale = $locale ?? Localizer::__toLocale($this->getTranslator()->getLocale());
 
         if(!$this->locale)
             throw new MissingLocaleException("Missing locale.");
@@ -261,7 +274,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $timezone;
-
+    public function getCountryCode(): string { return Timezones::getCountryCode($this->getTimezone()); }
     public function getTimezone(): string { return $this->timezone ?? "UTC"; }
     public function setTimezone(string $timezone = null): self
     {
@@ -330,7 +343,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             $roles[] = UserRole::USER;
 
         $this->roles = array_filter(array_unique($roles));
-
         return $this;
     }
 

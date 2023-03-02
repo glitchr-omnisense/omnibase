@@ -17,6 +17,15 @@
   order:1;
 }
 
+.select2-selection--single.required::after { display: none; }
+.select2-selection--multiple.required::after { display: none; }
+
+.select2-container--bootstrap4 .select2-selection--single
+{
+  height:auto !important;
+  min-height: 38px !important
+}
+
 .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow b {
   top: 60%;
   border-color: #FFF8 transparent transparent transparent;
@@ -30,6 +39,11 @@
   position: absolute;
 }
 
+.select2-container .select2-selection--single
+{
+  height:auto !important;
+  min-height:28px;
+}
 .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
   line-height: calc(1.5em + 0.75rem);
 }
@@ -56,6 +70,8 @@
   border-radius: 0.2rem;
   padding: 0;
   padding-right: 5px;
+  padding-top:1px;
+  padding-bottom:1px;
   cursor: pointer;
   float: left;
   margin-top: 0.45em;
@@ -116,7 +132,7 @@
   transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
-  width: calc(100% + 1px);
+  width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -153,13 +169,19 @@
 }
 
 select.is-invalid~.select2-container--bootstrap4 .select2-selection,
-form.was-validated select:invalid~.select2-container--bootstrap4 .select2-selection {
-  border-color: #dc3545;
+form.was-validated select:invalid~.select2-container--bootstrap4 .select2-selection,
+form.was-validated select:invalid~.select2-container--bootstrap4 .select2-selection .select2-selection__placeholder
+{
+  border-color: #dc3545 !important;
+  color: #dc3545 !important;
 }
 
 select.is-valid~.select2-container--bootstrap4 .select2-selection,
-form.was-validated select:valid~.select2-container--bootstrap4 .select2-selection {
-  border-color: #28a745;
+form.was-validated select:valid~.select2-container--bootstrap4 .select2-selection,
+form.was-validated select:valid~.select2-container--bootstrap4 .select2-selection .select2-selection__placeholder
+{
+  border-color: #198754 !important;
+  color: #198754 !important;
 }
 
 .select2-container--bootstrap4 .select2-dropdown {

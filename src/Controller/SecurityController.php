@@ -5,7 +5,8 @@ namespace Base\Controller;
 use App\Entity\User;
 
 use Base\Entity\User\Notification;
-use Base\Service\BaseService;
+use Base\Notifier\NotifierInterface;
+use Base\Routing\RouterInterface;
 use Base\Security\LoginFormAuthenticator;
 
 use App\Form\Type\SecurityRegistrationType;
@@ -39,14 +40,10 @@ use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 
 class SecurityController extends AbstractController
 {
-    /**
-     * @var BaseService
-     */
-    protected $baseService;
-
     /**
      * @var Translator
      */
@@ -83,15 +80,17 @@ class SecurityController extends AbstractController
     protected $tokenRepository;
 
     public function __construct(
+        NotifierInterface $notifier,
         EntityManagerInterface $entityManager, TokenRepository $tokenRepository, UserRepository $userRepository,
-        BaseService $baseService, FormProxy $formProxy, TokenStorageInterface $tokenStorage,
+        RouterInterface $router, FormProxy $formProxy, TokenStorageInterface $tokenStorage,
         TranslatorInterface $translator, ParameterBagInterface $parameterBag)
     {
-        $this->baseService     = $baseService;
+        $this->router          = $router;
         $this->translator      = $translator;
         $this->tokenStorage    = $tokenStorage;
         $this->formProxy       = $formProxy;
         $this->parameterBag    = $parameterBag;
+        $this->notifier        = $notifier;
         
         $this->entityManager   = $entityManager;
         $this->userRepository  = $userRepository;
@@ -118,7 +117,7 @@ class SecurityController extends AbstractController
             $user->removeExpiredTokens();
             
             if($this->isGranted('IS_AUTHENTICATED_FULLY'))
-                return $this->redirect($referrer->getUrl() ?? $this->baseService->getAsset("/"));
+                return $this->redirect($referrer->getUrl() ?? $this->router->getUrlIndex());
 
             $notification = new Notification("login.partial");
             $notification->send("info");
@@ -134,7 +133,7 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        return $this->render('@Base/security/login.html.twig', [
+        return $this->render('security/login.html.twig', [
             "identifier" => $lastUsername,
             "form" => $formProcessor->getForm()->createView(),
             "last_username" => $lastUsername,
@@ -146,7 +145,7 @@ class SecurityController extends AbstractController
      * @Route("/logout", name="security_logout")
      * @Iconize("fas fa-fw fa-sign-out-alt")
      */
-    public function Logout(ReferrerInterface $referrer, Request $request)
+    public function Logout(Request $request, ReferrerInterface $referrer)
     {
         // If user is found.. go to the logout request page
         if($this->getUser()) {
@@ -159,10 +158,9 @@ class SecurityController extends AbstractController
         }
 
         // Check if the session is found.. meaning, the user just logged out
-        if($user = $this->baseService->removeSession("_user")) {
+        if($request->getSession()?->has("_user")) {
 
-            $message = "Bye bye $user !";
-
+            $user = $request->getSession()?->remove("_user");
             if( $user->isKicked()   ) {
 
                 $notification = new Notification("kickout", [$user]);
@@ -172,7 +170,7 @@ class SecurityController extends AbstractController
 
             } else {
 
-                $notification = new Notification("logout.success", [$message]);
+                $notification = new Notification("logout.success", [$user]);
                 $notification->send("info");
             }
 
@@ -181,7 +179,7 @@ class SecurityController extends AbstractController
         }
 
         // Redirect to previous page
-        return $this->redirect($referrer->getUrl() ?? $this->baseService->getAsset("/"));
+        return $this->redirect($referrer->getUrl() ?? $this->router->getUrlIndex());
     }
 
     /**
@@ -195,8 +193,8 @@ class SecurityController extends AbstractController
     /**
      * @Route("/register", name="security_register")
      */
-    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ParameterBagInterface $parameterBag): Response {
-
+    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ParameterBagInterface $parameterBag): Response
+    {
         // If already connected..
         if (($user = $this->getUser()) && $user->isPersistent()) {
 
@@ -224,24 +222,22 @@ class SecurityController extends AbstractController
                 if (($user = $this->getUser()) && $user->isVerified())
                     $newUser->verify($user->isVerified());
 
-                if($this->parameterBag->get("base.user.register.notify_admins")) {
-
-                    $notification = new Notification("register.notify_admins");
-                    $notification->setUser($newUser);
-                    $notification->setHtmlTemplate("@Base/security/email/register_notifyAdmins.html.twig",["new_user" => $newUser]);
-                    $notification->sendAdmins("email");
-                }
+                if ($newUser->isVerified() && $this->parameterBag->get("base.user.register.notify_admins"))
+                    $this->notifier->sendAdminsUserApprovalRequest($newUser);
     
                 $this->entityManager->persist($newUser);
                 $this->entityManager->flush();
 
-                $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
+                $rememberMeBadge = new RememberMeBadge();
+                $rememberMeBadge->enable();
+
+                $userAuthenticator->authenticateUser($newUser, $authenticator, $request, [$rememberMeBadge]);
                 return $this->redirectToRoute('user_profile');
             })
 
             ->onDefault(function(FormProcessorInterface $formProcessor) {
 
-                return $this->render('@Base/security/register.html.twig', [
+                return $this->render('security/register.html.twig', [
                     'form' => $formProcessor->getForm()->createView(),
                     'user' => $formProcessor->getData()
                 ]);
@@ -278,10 +274,8 @@ class SecurityController extends AbstractController
                 $verifyEmailToken = new Token("verify-email", 24*3600, 3600);
                 $verifyEmailToken->setUser($user);
 
-                $notification = new Notification('verifyEmail.check');
-                $notification->setUser($user);
-                $notification->setHtmlTemplate("@Base/security/email/verify_email.html.twig", ["token" => $verifyEmailToken]);
-                $notification->send("success")->send("urgent");
+                $notification = $this->notifier->sendVerificationEmail($user, $verifyEmailToken);
+                $notification->send("success");
             }
         }
 
@@ -292,7 +286,7 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/verify-email/{token}", name="security_verifyEmailWithToken")
-     * @IsGranted("IS_AUTHENTICATED_FULLY")
+     * @IsGranted("ROLE_USER")
      */
     public function VerifyEmailResponse(Request $request, string $token): Response
     {
@@ -357,10 +351,8 @@ class SecurityController extends AbstractController
                 $adminApprovalToken = new Token("admin-approval");
                 $adminApprovalToken->setUser($user);
 
-                $notification = new Notification("adminApproval.required");
-                $notification->setUser($user);
-                $notification->setHtmlTemplate("@Base/security/email/admin_approval.html.twig",["token" => $adminApprovalToken]);
-                $notification->sendAdmins("low")->send("success");
+                $notification = $this->notifier->sendAdminsUserApprovalRequest($user);
+                $notification->send("success");
             }
         }
 
@@ -380,7 +372,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("accountGoodbye.already");
             $notification->send("warning");
 
-            return $this->redirectToRoute($this->baseService->getRouteName("/"));
+            return $this->redirectToRoute($this->router->getRouteIndex());
 
         } else {
 
@@ -388,7 +380,7 @@ class SecurityController extends AbstractController
             $user->logout();
 
             $this->entityManager->flush();
-            return $this->redirectToRoute($this->baseService->getRouteName("/"));
+            return $this->redirectToRoute($this->router->getRouteIndex());
         }
     }
 
@@ -426,7 +418,7 @@ class SecurityController extends AbstractController
             $this->entityManager->flush();
         }
 
-        return $this->redirectToRoute($this->baseService->getRouteName("/"));
+        return $this->redirectToRoute($this->router->getRouteIndex());
     }
 
     /**
@@ -460,9 +452,7 @@ class SecurityController extends AbstractController
                     $resetPasswordToken = new Token("reset-password", 3600);
                     $resetPasswordToken->setUser($user);
 
-                    $notification->setHtmlTemplate("@Base/security/email/reset_password.html.twig", ["token" => $resetPasswordToken]);
-                    $notification->setUser($user);
-                    $notification->send("email");
+                    $this->notifier->sendResetPasswordRequest($user, $resetPasswordToken);
                 }
             }
 
@@ -470,7 +460,7 @@ class SecurityController extends AbstractController
             $notification->send("success");
         }
 
-        return $this->render('@Base/security/reset_password_request.html.twig', [
+        return $this->render('security/reset_password_request.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -496,7 +486,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("resetPassword.invalidToken");
             $notification->send("danger");
 
-            return $this->redirectToRoute($this->baseService->getRouteName("/"));
+            return $this->redirectToRoute($this->router->getRouteIndex());
 
         } else {
 
@@ -514,13 +504,17 @@ class SecurityController extends AbstractController
                 $notification = new Notification("resetPassword.success");
 
                 $this->entityManager->flush();
-                $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
+
+                $rememberMeBadge = new RememberMeBadge();
+                $rememberMeBadge->enable();
+
+                $userAuthenticator->authenticateUser($newUser, $authenticator, $request, [$rememberMeBadge]);
                 $notification->send("success");
 
                 return $authenticateUser;
             }
 
-            return $this->render('@Base/security/reset_password.html.twig', ['form' => $form->createView()]);
+            return $this->render('security/reset_password.html.twig', ['form' => $form->createView()]);
         }
     }
 
@@ -531,7 +525,7 @@ class SecurityController extends AbstractController
      */
     public function Maintenance(MaintenanceProviderInterface $maintenanceProvider): Response
     {
-        return $this->render('@Base/security/maintenance.html.twig', [
+        return $this->render('security/maintenance.html.twig', [
             'remainingTime' => $maintenanceProvider->getRemainingTime(),
             'percentage'    => $maintenanceProvider->getPercentage(),
             'downtime'      => $maintenanceProvider->getDowntime(),
@@ -547,9 +541,27 @@ class SecurityController extends AbstractController
      */
     public function Birth(MaternityUnitInterface $maternityUnit): Response
     {
-        return $this->render('@Base/security/birthdate.html.twig', [
+        return $this->render('security/birthdate.html.twig', [
             'birthdate'  => $maternityUnit->getBirthdate(),
             'is_born'    => $maternityUnit->isBorn()
         ]);
+    }
+
+    /**
+     * @Route({"fr": "/est/bientot/disponible", "en": "/is/soon/available"}, name="security_pending")
+     */
+    public function Pending(): Response
+    {
+        return $this->render('security/pending.html.twig');
+    }
+
+    /**
+     * @Route({"fr": "/en/attente/de/validation", "en": "/waiting/for/approval"}, name="security_pendingForApproval")
+     * @IsGranted("ROLE_USER")
+     */
+    public function PendingForApproval(): Response
+    {
+        if($this->getUser()->isApproved()) return $this->redirectToRoute("app_index");
+        return $this->render('security/pendingForApproval.html.twig');
     }
 }

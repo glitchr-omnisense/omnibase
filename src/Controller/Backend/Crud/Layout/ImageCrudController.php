@@ -26,7 +26,7 @@ class ImageCrudController extends AbstractCrudController
     {
         if($entity = $this->getEntity()) {
 
-            $extension->setImage($entity->getSource());
+            $extension->setImage($entity->getSource(), ["style" => "object-position: ".$entity->getQuadrantPosition().";"]);
 
             $class = mb_strtolower(camel2snake($entity));
             $entityLabel = $this->translator->trans($class.".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);

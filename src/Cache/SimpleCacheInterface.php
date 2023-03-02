@@ -2,8 +2,9 @@
 
 namespace Base\Cache;
 
-use Base\Cache\Abstract\AbstractSimpleCacheInterface;
+use Base\Cache\Abstract\AbstractLocalCacheInterface;
+use Psr\SimpleCache\CacheInterface;
 
-interface SimpleCacheInterface extends AbstractSimpleCacheInterface
+interface SimpleCacheInterface extends AbstractLocalCacheInterface, CacheInterface
 {
 }

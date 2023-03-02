@@ -9,6 +9,7 @@ use App\Repository\UserRepository;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\EntityDispatcher\Event\UserEvent;
+use Base\Notifier\NotifierInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,11 +34,17 @@ class UserSubscriber implements EventSubscriberInterface
      */
     protected $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage, RouterInterface $router){
+    /**
+     * @var NotifierInterface
+     */
+    protected $notifier;
+
+    public function __construct(NotifierInterface $notifier, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage, RouterInterface $router){
 
         $this->entityManager = $entityManager;
         $this->router        = $router;
         $this->tokenStorage  = $tokenStorage;
+        $this->notifier      = $notifier;
     }
 
     public static function getSubscribedEvents() : array
@@ -59,9 +66,8 @@ class UserSubscriber implements EventSubscriberInterface
         if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
         if(!$user instanceof BaseUser) return;
-        $notification = new Notification("accountWelcomeBack.success", [$user]);
-        $notification->setUser($user);
 
+        $notification = $this->notifier->sendUserWelcomeBack($user);
         if($this->tokenStorage->getToken()->getUser() == $user)
             $notification->send("success");
     }
@@ -71,11 +77,8 @@ class UserSubscriber implements EventSubscriberInterface
         $user = $event->getUser();
         if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
-        $notification = new Notification("accountGoodbye.success", [$user]);
-        $notification->setUser($user);
-        $notification->setHtmlTemplate("@Base/security/email/account_goodbye.html.twig");
-
-            $notification->send("success")->send("email");
+        $notification = $this->notifier->sendUserAccountGoodbye($user);
+        $notification->send("success");
     }
 
     public function onKickout(UserEvent $event) { }
@@ -104,11 +107,8 @@ class UserSubscriber implements EventSubscriberInterface
             $verifyEmailToken = new Token('verify-email', 3600);
             $user->addToken($verifyEmailToken);
 
-            $notification = new Notification('verifyEmail.check');
-            $notification->setUser($user);
-            $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
-
-            $notification->send("email")->send("success");
+            $notification = $this->notifier->sendVerificationEmail($user, $verifyEmailToken);
+            $notification->send("success");
         }
 
         $this->router->redirectToRoute("user_profile", [], 302);
@@ -123,11 +123,7 @@ class UserSubscriber implements EventSubscriberInterface
         if ($adminApprovalToken) {
 
             $adminApprovalToken->revoke();
-
-            $notification = new Notification("adminApproval.approval");
-            $notification->setUser($user);
-            $notification->setHtmlTemplate("@Base/security/email/admin_approval_confirm.html.twig");
-            $notification->send("email");
+            $notification = $this->notifier->sendUserApprovalConfirmation($user);
         }
     }
 }

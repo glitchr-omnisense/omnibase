@@ -2,21 +2,21 @@
 
 namespace Base\CacheWarmer;
 
-use Base\Cache\Abstract\AbstractSimpleCacheInterface;
-use Base\Cache\Abstract\AbstractSimpleCacheWarmer;
+use Base\Cache\Abstract\AbstractLocalCacheInterface;
+use Base\Cache\Abstract\AbstractLocalCacheWarmer;
 use Base\Service\IconProvider;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-class IconCacheWarmer extends AbstractSimpleCacheWarmer {
+class IconCacheWarmer extends AbstractLocalCacheWarmer {
 
     /**
-     * @var array[AbstractSimpleCacheInterface]
+     * @var array[AbstractLocalCacheInterface]
      */
     protected $adapters;
 
     public function __construct(IconProvider $iconProvider, string $cacheDir)
     {
-        $this->adapters = array_filter($iconProvider->getAdapters(), fn($a) => $a instanceof AbstractSimpleCacheInterface);
+        $this->adapters = array_filter($iconProvider->getAdapters(), fn($a) => $a instanceof AbstractLocalCacheInterface);
         parent::__construct($iconProvider, $cacheDir);
     }
 

@@ -13,7 +13,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-// e.g. Validate field while typing (todo..)
+/**
+ * @Route(priority = -1)
+ * */
 class AutovalidateController extends AbstractController
 {
     use BaseTrait;
@@ -54,8 +56,7 @@ class AutovalidateController extends AbstractController
             return new JsonResponse($array);
         }
 
-        $array = ["status" => "Invalid request"];
-        return new JsonResponse($array, 500);
+        return new JsonResponse("Invalid request", 500);
     }
 
 }

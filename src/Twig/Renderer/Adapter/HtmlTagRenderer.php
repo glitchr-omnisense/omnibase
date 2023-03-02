@@ -3,7 +3,7 @@
 namespace Base\Twig\Renderer\Adapter;
 
 use Base\Routing\RouterInterface;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Twig\Environment;
 use Base\Twig\Renderer\AbstractTagRenderer;
@@ -25,9 +25,9 @@ class HtmlTagRenderer extends AbstractTagRenderer
      */
     protected $router;
 
-    public function __construct(Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, RouterInterface $router)
+    public function __construct(Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, RouterInterface $router)
     {
-        parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
+        parent::__construct($twig, $localizer, $slugger, $parameterBag);
         $this->requestStack = $requestStack;
         $this->router = $router;
     }
@@ -117,6 +117,17 @@ class HtmlTagRenderer extends AbstractTagRenderer
     public function render(string $name, array $context = []): string
     {
         //
+        // Load breakpoint stylesheets
+        $breakpoints = $this->parameterBag->get("base.twig.breakpoints") ?? [];
+        $breakpointStylesheet = $this->twig->load("breakpoints.css.twig")->render([
+            "breakpoints" => $breakpoints
+        ]);
+
+        if($breakpointStylesheet) {
+            $this->addHtmlContent("stylesheets:before", "<style>" . $breakpointStylesheet . "</style>");
+        }
+
+        //
         // Make sure to load localized twig template, if available.
         if(str_ends_with($name, ".twig")) {
 
@@ -128,10 +139,10 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $extension = implode(".", array_reverse($extension));
             $basename  = implode(".", $basename);
 
-            $lang           = $this->localeProvider->getLang();
-            $defaultLang    = $this->localeProvider->getDefaultLang();
-            $locale         = str_replace("-", "_", $this->localeProvider->getLocale());
-            $defaultLocale  = str_replace("-", "_", $this->localeProvider->getDefaultLocale());
+            $lang           = $this->localizer->getLocaleLang();
+            $defaultLang    = $this->localizer->getDefaultLocaleLang();
+            $locale         = str_replace("-", "_", $this->localizer->getLocale());
+            $defaultLocale  = str_replace("-", "_", $this->localizer->getDefaultLocale());
 
             if($this->twig->getLoader()->exists($basename.".".$locale.".".$extension))
                 $name = $basename.".".$locale.".".$extension;
@@ -156,7 +167,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $formats = [];
             $breakpoints = $this->parameterBag->get("base.twig.breakpoints") ?? [];
             foreach($breakpoints as $breakpoint)
-                $formats[$breakpoint["name"]] = $breakpoint["media"];
+                $formats[$breakpoint["name"]] = $breakpoint["media"] ?? "all";
 
             foreach($formats as $format => $media) {
 
@@ -176,7 +187,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
         }
 
         try { return $this->twig->load($name)->render($context); }
-        catch (LoaderError $e) { throw new RuntimeException("File not found `".$name."` in any of the provided templates", $e->getCode(), $e); }
+        catch (LoaderError $e) { throw new RuntimeException("Failed to render `".$name."`", $e->getCode(), $e); }
     }
 
     public function renderFallback(Response $response): Response

@@ -2,12 +2,15 @@
 
 namespace Base\Field\Type;
 
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -56,7 +59,8 @@ class CollectionType extends AbstractType
         $resolver->setDefaults([
             'form2' => false,
             'length' => 0,
-            'allow_add' => true,
+            'allow_object' => false, // This is introduced because object should be stringeable, otherwise there will be some error turning it into string
+            'allow_add' => false,
             'allow_delete' => true,
             'html'      => false,
             'href' => null,
@@ -64,9 +68,10 @@ class CollectionType extends AbstractType
             'prototype_data' => null,
             'prototype_name' => '__prototype__',
             'group' => true,
+            'checkbox' => false,
             'row_group' => true,
             'entry_collapsed' => true,
-            'entry_type' => TextType::class,
+            'entry_type' => HiddenType::class,
             'entry_label' => function($i, $label)
             {
                 if($i === "__prototype__") return false;
@@ -90,7 +95,6 @@ class CollectionType extends AbstractType
             $value["label"] = false;
             return $value;
         });
-
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
             // Collection is always submitted regardless of its options..
@@ -126,6 +130,21 @@ class CollectionType extends AbstractType
             $builder->setAttribute('prototype', $prototype->getForm());
         }
 
+        // Prevent stringeable issue for entities...
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
+
+            $form = $event->getForm();
+            $data = $event->getData() ?? $form->getParent()->getData() ?? [];
+
+            foreach($data as $id => $entry) {
+
+                if (is_object($entry) && $options["allow_object"] == false)
+                    throw new \Exception("Object data are not allowed in collection unless you mark it as so.. (use `allow_object` option)");
+            }
+
+            $event->setData($data);
+        });
+
         // Resize collection according to length option
         if(is_int($options["length"]) && $options["length"] > 0) {
 
@@ -138,6 +157,7 @@ class CollectionType extends AbstractType
                     $data = array_pad($data, $options["length"], null);
 
                 $event->setData($data);
+
             });
         }
 

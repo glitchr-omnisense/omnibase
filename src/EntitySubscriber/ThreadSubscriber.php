@@ -12,6 +12,8 @@ class ThreadSubscriber implements EventSubscriberInterface
 {
     protected array $events;
 
+    protected $entityManager;
+    
     public function __construct(EntityManagerInterface $entityManager) 
     {
         $this->entityManager = $entityManager;

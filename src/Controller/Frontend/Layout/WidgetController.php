@@ -34,7 +34,7 @@ class WidgetController extends AbstractController
         if($page === null)
             throw new NotFoundException("Page requested doesn't exist.");
 
-        return $this->render("@Base/widget/page.html.twig", ["page" => $page]);
+        return $this->render("widget/page.html.twig", ["page" => $page]);
     }
 
     /**

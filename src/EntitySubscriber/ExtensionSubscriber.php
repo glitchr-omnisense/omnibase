@@ -118,8 +118,11 @@ class ExtensionSubscriber implements EventSubscriberInterface
                 $entity = $this->scheduledEntityInsertions[$key];
             else throw new \LogicException("Entry pending for id not found in the scheduled entity");
 
-            foreach($entries as $entry)
-                $uow->scheduleExtraUpdate($entry, ['entityId' => [null, $entity->getId()]]);
+            foreach($entries as $entry) {
+
+                if(empty($entry->getEntityData())) $uow->scheduleForDelete($entry);
+                else $uow->scheduleExtraUpdate($entry, ['entityId' => [null, $entity->getId()]]);
+            }
         }
     }
 
@@ -151,7 +154,6 @@ class ExtensionSubscriber implements EventSubscriberInterface
                         $properties[] = explode("::", $columns)[1];
 
                     $array = $extension->payload($action, $className, $properties, $entity);
-
                     foreach($array as $entry) {
 
                         if($entry === null) continue;
@@ -169,13 +171,14 @@ class ExtensionSubscriber implements EventSubscriberInterface
                         switch($action) {
 
                             case EntityAction::INSERT:
+
                                 $this->entityManager->persist($entry);
                                 $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 break;
 
                             case EntityAction::UPDATE:
 
-                                if($this->entityManager->contains($entry))
+                                if ($this->entityManager->contains($entry))
                                     $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 else {
                                     $this->entityManager->persist($entry);

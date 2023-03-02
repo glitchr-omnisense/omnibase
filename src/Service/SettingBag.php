@@ -36,7 +36,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     /**
      * @var LocalProvider
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var SettingRepository
@@ -68,7 +68,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return [ get_class($this) ];
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
+    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, LocalizerInterface $localizer, Packages $packages, CacheInterface $cache, string $environment)
     {
         $this->parameterBag      = $parameterBag;
         $this->entityManager     = $entityManager;
@@ -79,7 +79,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         $this->cacheSettingBag = $cache->getItem($this->cacheName);
 
         $this->packages       = $packages;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->environment    = $environment;
     }
 
@@ -223,7 +223,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function generateRaw(string $path, ?string $locale = null, bool $useCache = false): Setting
     {
-        $locale = $this->localeProvider->getLocale($locale);
+        $locale = $this->localizer->getLocale($locale);
         $setting = $this->getRawScalar($path, $useCache);
 
         if(!$setting instanceof Setting) {
@@ -276,22 +276,22 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
 
         $this->settingBag ??= $useCache && $this->cacheSettingBag !== null ? $this->cacheSettingBag->get() ?? [] : [];
-        if(array_key_exists($path.":".($locale ?? LocaleProvider::UNIVERSAL), $this->settingBag))
-            return $this->settingBag[$path.":".($locale ?? LocaleProvider::UNIVERSAL)];
+        if(array_key_exists($path.":".($locale ?? Localizer::LOCALE_FORMAT), $this->settingBag))
+            return $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)];
 
         try { $values = $this->getRaw($path, $useCache) ?? []; }
         catch (Exception $e) { throw $e; return []; }
 
-        $this->settingBag[$path.":".($locale ?? LocaleProvider::UNIVERSAL)] ??= array_map_recursive(function($v) use ($locale) {
+        $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)] ??= array_map_recursive(function($v) use ($locale) {
 
             if(!$v instanceof Setting) return $v;
-            return $v->translate($locale)?->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())?->getValue();
+            return $v->translate($locale)?->getValue() ?? $v->translate($this->localizer->getDefaultLocale())?->getValue();
 
         }, $values);
 
         if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
 
-        return $this->settingBag[$path.":".($locale ?? LocaleProvider::UNIVERSAL)];
+        return $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)];
     }
 
     public function clearAll() { return $this->clear(null); }

@@ -14,9 +14,9 @@
 {% endblock %}
 
 {% block form_end %}
-        {% if not render_rest is defined or render_rest %}
-            {{ form_rest(form) }}
-        {% endif %}
+    {% if not render_rest is defined or render_rest %}
+        {{ form_rest(form) }}
+    {% endif %}
     </form>
 {% endblock %}
 
@@ -36,9 +36,10 @@
     {% if badges is not empty or labelTrim is not empty %}
     <div class="label-wrapper">
         {% if labelTrim is not empty %}
+
             {{- label|raw -}}
-            {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value %}
-            <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
+            {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value.id is defined %}
+            <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id })}}" target='_blank'>
                 <i class="fas fa-external-link-square-alt"></i>
             </a>{% endif %}
 
@@ -148,8 +149,8 @@
         'data-select2-highlight' : form.vars["highlight"]
     }) %}
 
-    {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {%- set attr = attr|merge({'disabled': form.vars.disabled or (form.vars.is_inherited ?? false)} ) -%}
+    {%- set attr = attr|merge({'class': 'form-select2' ~ (form.vars.choice_thumbnails|length ? " form-select2-thumbnails ") ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {%- set attr = attr|merge({'disabled': form.vars.disabled ?? (form.vars.is_inherited ?? false)} ) -%}
     {%- set attr = attr|merge({'required': form.vars.required }) -%}
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
@@ -157,6 +158,12 @@
     {% if form.vars.tokenSeparators is defined %}
     <div class="form-filesize form-text text-muted">{{"@fields.select.token_separator"|trans(["'"~form.vars.tokenSeparators|join("' '")~"'"])}}</div>
     {% endif %}
+
+    <div class="form-choice-thumbnail" id="{{ form.vars.id~"_label" }}">
+        {%- for image in form.vars.choice_thumbnails -%}
+        <label id="{{ form.vars.id~"_choice_"~loop.index0 }}" class="form-choice-thumbnail-label">{{ image|thumbnail(500,500)|imagify }}</label>
+        {%- endfor -%}
+    </div>
 
 {% endblock select2_widget %}
 
@@ -181,6 +188,7 @@
                 <i class="fas fa-calendar-day"></i>
             </button>
         </div>
+
         {{ form_widget(form, {attr:attr}) }}
     </div>
 {% endblock datetimepicker_widget %}
@@ -258,7 +266,7 @@
     'data-slug-field': form.vars.id,
     'data-slug-keep': keep,
     'data-slug-strict': strict,
-    'data-slug-lower': lower,
+    'data-slug-upper': upper,
     'data-slug-separator': separator,
     'data-slug-lock': lock,
     'data-slug-target': targetForm.vars.id,
@@ -287,6 +295,11 @@
     </div>
 {%- endblock -%}
 
+{%- block button2_attributes -%}
+    id="{{ id ~ (form.vars.confirmation ? "-request" : "") }}" name="{{ full_name }}"{% if disabled %} disabled="disabled"{% endif -%}
+    {{ block('attributes') }}
+{%- endblock button2_attributes -%}
+
 {%- block button2_widget -%}
 
     {% set attr = attr|merge({
@@ -305,7 +318,7 @@
         {%- endif -%}
     {%- endif -%}
 
-    <button type="{{ type|default('button') }}" {{ block('button_attributes') }}>
+    <button type="{{ type|default('button') }}" {{ form.vars.confirmation ? block('button2_attributes') : block('button_attributes') }}>
         {%- if translation_domain is same as(false) -%}
             {%- if label_html is same as(false) -%}
                 {{- label -}}
@@ -330,7 +343,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" id="{{ form.vars.id }}-cancel" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
-                <button type="submit" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
+                <button type="{{ form.vars.type ?? "button" }}" class="btn btn-primary" {{ form.vars.confirmation ? block('button_attributes') : block('button2_attributes') }}>{{ "@fields.boolean.button.confirm"|trans }}</button>
             </div>
         </div>
     </div>
@@ -380,7 +393,7 @@
                 {{ "@fields.boolean.text"|trans }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" id="{{ form.vars.id }}-confirm" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
+                <button type="button" class="btn btn-default" id="{{ form.vars.id }}-cancel" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
                 <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
             </div>
         </div>
@@ -544,6 +557,13 @@
 
         {% if (allow_reupload or value is null) %}
         <div class="input-group field-raw">
+
+            <div class="input-group-prepend">
+                <span class="input-group-text">
+                    {{ form_label(form)}}
+                </span>
+            </div>
+
             {% if allow_url %} <div class="input-group-text">{{ "fas fa-paperclip"|iconify|first|raw }}</div>{% endif %}
             {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({'class': (files is empty ? 'last' : "") ~ (form.raw.vars.attr.class is defined ? ' ' ~ form.raw.vars.attr.class : ''), accept: mime_types|join(',') }) }) }}
             {% if allow_delete and not form.vars.disabled %}
@@ -577,7 +597,7 @@
     {%- set row_attr = row_attr|merge({'class': 'form-text text-muted' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
     {{ form_errors(form.raw, {row_attr:row_attr}) }}
 
-    {% if multiple %}
+    {% if multiple and form.vars.dropzone %}
     <div id="{{id}}_metadata" class="form-text text-muted">
         <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.fileupload.dropzone.spinner'|trans }}</div>
     </div>
@@ -619,6 +639,11 @@
     {{ form_label(form, null, {'required': form.vars.multiple ? false : required}) }}
 {%- endblock -%}
 
+{%- block association_widget -%}
+    {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control') %}
+    {% set attr = {"class": ""} | merge(attr) %}
+    {{ form_widget(form, {attr:attr}) }}
+{%- endblock -%}
 {%- block association_row -%}
 
     {% set hiddenOnly = true %}
@@ -655,7 +680,7 @@
         {%- set row_attr = row_attr|merge({'class': 'field-association' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
         <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
             {% if row_group %}
-                {%- set attr = attr|merge({'class': 'form-collection form-group-row' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+                {%- set attr = attr|merge({'class': 'form-collection  form-group-row ' ~ (not form.vars.group ? "form-collection-plain") ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
                 {{ form_label(form)}}
                 <div {{ block('widget_attributes') }}>
                     {{ form_widget(formChild) }}
@@ -767,8 +792,12 @@
     {% set href = form.vars.href ?? null %}
     {% if is_granted("ROLE_ADMIN") %}
         {% set href = href ?? (form.vars.value == "" ? null : app.ea.crudify(form.vars.value)) %}
+        {% if href is iterable %}
+            {% set href = form.vars.value ? (href[get_class(form.vars.value)] ?? null) : null %}
+            {% set href = href|url_decode %}
+        {% endif %}
         {% set href = href ? href|url_encode : null %}
-    {% endif %}
+        {% endif %}
 
     {% if group %}
 
@@ -782,7 +811,7 @@
 
         <div class="accordion form-collection-item">
             <div class="accordion-item">
-                <h2 class="accordion-header" id="{{ id }}-heading" >
+                <div class="accordion-header" id="{{ id }}-heading" >
 
                     {# `is_empty` is used because some internal keys are marked by a starting "_" #}
                     {% set is_empty = empty(form.children|keys|filter((v, k) => not str_starts_with(v, '_') )) %}
@@ -790,13 +819,13 @@
                     {% set linkable = _href is not null and form.vars.value is not null and is_empty %}
 
                     {% set html = form_parent(form).vars.html and form.vars.value is not null and method_exists(form.vars.value, "__autocomplete") %}
-                    {%- if linkable and not html -%}
+                    {%- if linkable and not html and _href -%}
                     <a target='_blank' class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{ _href|url_decode|replace({'{0}': (form.vars.value.id)}) }}">
                     {%- else -%}
                     <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ is_empty ? 'style="cursor:default;"' : '' }}
                             type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse" aria-expanded="{{ collapsed ? false : true}}" aria-controls="{{ id }}-collapse">
                     {%- endif -%}
-
+                        &nbsp;
                     {%- if linkable and not html -%}
                     <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
                     {% endif %}
@@ -808,7 +837,7 @@
                         {% if  label != false %}{{ label|default(value)|stringify }}{% endif %}
                     {% endif %}
 
-                    {{ linkable and not form_parent(form).vars.html ? "</a>": "</button>" }}
+                    {{ linkable and not form_parent(form).vars.html and _href ? "</a>": "</button>" }}
 
                     <div class="form-collection-buttons">
                         {% if form.vars.value is not null and not html %}
@@ -829,15 +858,11 @@
                             {{ delete_item_button }}
                         {% endif %}
                     </div>
-                </h2>
-
-                {% if not is_empty %}
-                <div id="{{ id }}-collapse" class="accordion-collapse collapse {{ collapsed ? '' : 'show'}}">
-                    <div class="accordion-body">
-                        {{ form_widget(form, {attr:attr}) }}
-                    </div>
                 </div>
-                {% endif %}
+
+                <div id="{{ id }}-collapse" class="accordion-collapse collapse  {{ collapsed or is_empty ? '' : 'show'}}">
+                    <div class="accordion-body">{{ form_widget(form, {attr:attr}) }}</div>
+                </div>
             </div>
         </div>
 
@@ -884,7 +909,7 @@
 {%- block array_row -%}
 
     {% if prototype is defined and not prototype.rendered %}
-        {% set prototype_row = form_row(prototype, {attr:{"class": "form-control form-inline"}}) %}
+        {% set prototype_row = form_row(prototype, {attr:{"class": "form-inline"}}) %}
         {% set attr = attr|merge({ 'data-prototype': prototype_row}) %}
     {% endif %}
 
@@ -904,7 +929,7 @@
     <div class="form-group">
         <span>{{- form_label(form) -}}</span>
 
-        {% if form.vars.pattern is not empty %}
+        {% if form.vars.pattern is not empty and form.vars.prototype|default([]) is empty %}
             <div class="input-group mb-3">
                 {% set pattern = pattern|preg_split("/{[0-9]*}/") %}
                 {% for key,formChild in form %}
@@ -956,12 +981,13 @@
 {%- endblock array_widget -%}
 
 {%- block array_entry_row -%}
-    {{ form_row(form) }}
+    {{ form_widget(form) }}
 {%- endblock array_entry_row -%}
 
 {%- block array_entry_widget -%}
 
     {% set pattern = form_parent(form).vars.pattern|default("") %}
+    {% set prototype = form_parent(form).vars.prototype|default([]) %}
     {% set placeholder = form_parent(form).vars.placeholder|default([])%}
     {% set key = form.vars.name|intval %}
 
@@ -969,7 +995,7 @@
         {% set attr = attr|merge({'placeholder': placeholder[key]}) %}
     {% endif %}
 
-    {% if pattern is not empty %}
+    {% if pattern is not empty and prototype is empty %}
 
         {{ form_widget(form, {attr:attr}) }}
 
@@ -1014,11 +1040,28 @@
 
 {%- block stock_widget -%}
 
+
+{# Search for target inside form based on parent including translation #}
+{% set targetForm = form.vars.ancestor %}
+{% for child in target %}
+
+    {% set targetForm = targetForm[child] %}
+
+    {% if child == "translations" %}
+        {% if targetForm.vars.default_locale is defined and targetForm.vars.default_locale in targetForm|keys %}
+            {% set targetForm = targetForm[targetForm.vars.default_locale] %}
+        {% else %}
+            {% set targetForm = targetForm|first %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
 {% set attr = attr|merge({
     'data-stock-field': form.vars.id,
     'data-stock-unlimited': "@fields.stock.unlimited"|trans,
     "data-stock-up": form.vars.stepUp ?? 1,
     "data-stock-down": form.vars.stepDown ?? 1,
+    'data-stock-target': targetForm.vars.id,
     "data-stock-min": form.vars.min is defined and form.vars.max > 0 ? form.vars.max : 0,
 }) %}
 
@@ -1032,6 +1075,10 @@
             <i class="fas fa-box-open"></i>
         </button>
     </div>
+    {% if form.vars.target is not null %}
+    <div class="input-group-text" id="{{form.vars.id}}-current">0</div>
+    <div class="input-group-text">/</div>
+    {% endif %}
     {{ form_widget(form, {attr:attr}) }} {# NumberType is returning and input type text... #}
     {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}
     <div class="input-group-text">
@@ -1051,6 +1098,7 @@
     "data-number-keyup": form.vars.keyUp,
     "data-number-keydown": form.vars.keyDown,
     "data-number-up": form.vars.stepUp ?? 1,
+    "data-number-divisor": form.vars.divisor ?? 1,
     "data-number-down": form.vars.stepDown ?? 1,
     "data-number-up-throttle": form.vars.throttleUp ?? 0,
     "data-number-down-throttle": form.vars.throttleDown ?? 0,
@@ -1061,8 +1109,10 @@
     {% set attr = attr|merge({"disabled": form.vars.disabled}) %}
 {% endif %}
 
-{% if form.vars.min %}{% set attr = attr|merge({"data-number-min": form.vars.min}) %}{% endif %}
-{% if form.vars.max %}{% set attr = attr|merge({"data-number-max": form.vars.max}) %}{% endif %}
+{% if form.vars.min    is defined %}{% set attr = attr|merge({"data-number-min": form.vars.min})       %}{% endif %}
+{% if form.vars.max    is defined %}{% set attr = attr|merge({"data-number-max": form.vars.max})       %}{% endif %}
+{% if form.vars.suffix is defined %}{% set attr = attr|merge({"data-number-suffix": form.vars.suffix}) %}{% endif %}
+{% if form.vars.prefix is defined %}{% set attr = attr|merge({"data-number-prefix": form.vars.prefix}) %}{% endif %}
 
 <div class="input-group form-number">
 
@@ -1124,7 +1174,7 @@
 
 {# todo: handle xhr errors #}
 {# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fas fa-fw fa-exclamation-circle'|iconify|first|raw)~" "~('@fields.cropper.error')~"</div>", #}
-<div class="form-group form-cropper">
+<div class="form-group form-cropper {{ cropper_info ? "form-cropper-info" : "" }}">
     <div class="cropper">
         <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine}}">
         <div id="{{ id }}_loader" class="loader">
@@ -1135,6 +1185,7 @@
             {% endif %}
             </div>
 
+        {% if cropper_actions %}
         <div class="hidden cropper-actions" id="{{ id }}_actions">
             <button class="btn btn-warning" type="button" data-cropper-reset="true">{{"fas fa-undo"|iconify|first|raw}}</button>
             {% for label,aspectRatio in form.vars.aspectRatios %}
@@ -1145,6 +1196,7 @@
                 <button class="btn btn-primary" type="button" data-aspect-ratio="NAN" data-labelledby="{{form.vars.id ~ "_label"}}" data-labelledby-value="">{{ "@fields.cropper.aspect_ratio.free"|trans }}</button>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 
     {%- set attr = attr|merge({'class': 'form-cropper-fields' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
@@ -1157,9 +1209,7 @@
 
 {% if not isNormalized and not isEmpty %}
 <hr>
-<div class="form-text text-muted text-danger">
-{{"@fields.cropper.not_normalized"|trans}}
-</div>
+<div class="form-text text-muted text-danger">{{"@fields.cropper.not_normalized"|trans}}</div>
 {% endif %}
 
 {%- endblock -%}
@@ -1338,20 +1388,25 @@
             </button>
         {% else %}
             {% set code     = currency %}
+            {% set currency_list = currency_list|filter(c => c != code) %}
+
             {% set label    = currency_label[code] ?? code %}
             {% set exchange = currency_exchange[code] ?? 1 %}
-            <button id="{{form.vars.id}}-btn" class="input-group-text dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{label}}</button>
+            <button id="{{form.vars.id}}-btn" class="input-group-text {{ currency_list is not empty ? "dropdown-toggle" : "" }}" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{label}}</button>
+            {% if currency_list is not empty %}
             <ul id="{{form.vars.id}}-list" class="dropdown-menu dropdown-menu-end" >
 
-                <li id="{{form.vars.id}}-selected" data-label="{{label}}" data-code="{{code}}" data-exchange="{{ exchange }}"><a class="dropdown-item">{{label}}</a></li>
+                <li id="{{form.vars.id}}-selected" class="item-selected" data-label="{{label}}" data-code="{{code}}" data-exchange="{{ exchange }}"><a class="dropdown-item">{{label}}</a></li>
                 <li><hr class="dropdown-divider"></li>
 
+                <li class="item" data-label="{{label}}" data-code="{{code}}" data-exchange="1.0"><a class="text-right dropdown-item">{{label}}</a></li>
                 {% for code in currency_list %}
                     {% set label    = currency_label[code] ?? code %}
                     {% set exchange = currency_exchange[code] ?? 1 %}
                     <li class="item" data-label="{{label}}" data-code="{{code}}" data-exchange="{{ exchange }}"><a class="text-right dropdown-item">{{label}}</a></li>
                 {% endfor %}
             </ul>
+            {% endif %}
         {% endif %}
     </div>
 </div>

@@ -3,7 +3,7 @@
 namespace Base\Console;
 
 use Base\Service\BaseService;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,9 +18,9 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 class Command extends SymfonyCommand
 {
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
-    protected $localeProvider;
+    protected $localizer;
     /**
      * @var TranslatorInterface
      */
@@ -38,9 +38,9 @@ class Command extends SymfonyCommand
      */
     protected $propertyAccessor;
 
-    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
+    public function __construct(LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
     {
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->translator     = $translator;
         $this->entityManager  = $entityManager;
         $this->parameterBag   = $parameterBag;
@@ -52,7 +52,7 @@ class Command extends SymfonyCommand
     protected function getTranslator(): TranslatorInterface         { return $this->translator;    }
     protected function getParameterBag(): ParameterBagInterface     { return $this->parameterBag;  }
     protected function getEntityManager(): EntityManagerInterface   { return $this->entityManager; }
-    protected function getLocaleProvider(): LocaleProviderInterface { return $this->localeProvider; }
+    protected function getLocalizer(): LocalizerInterface { return $this->localizer; }
 
     protected function configure(): void
     {

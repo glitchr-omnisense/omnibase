@@ -7,13 +7,9 @@
     <article class="wrapper extended">
         <div class="header">
 
-            <ul class="field-avatar">
-                <li>{{ user.getFormattedAvatar()|raw }}</li>
-            </ul>
+            <div class="text d-flex flex-column align-items-center">
 
-            <div class="text">
-
-                <h1>Member #{{ user.id }}: {{ user }}</h1>
+                <h1>Membre #{{ user.id }}: {{ user }}</h1>
 
                 <div class="info">
                     {{ '@messages.profile.registered'|trans([
@@ -23,6 +19,9 @@
 
                     - {% if app.user == user or is_granted("ROLE_ADMIN") %}
                         <a href="{{path('user_profileEdit', {'id':user.id})}}">Editer le profil</a>
+                    {% endif %}
+                    - {% if app.user == user %}
+                        <a href="{{ path('security_logout') }}">Se déconnecter</a>
                     {% endif %}
                 </div>
             </div>

@@ -3,20 +3,29 @@
 namespace Base\Controller\UX;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Service\CurrencyApi;
 use Base\Service\Model\Autocomplete;
+use Base\Service\Model\Currency\CurrencyApiInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
+use Base\Service\TradingMarketInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
+use Exchanger\Exception\ChainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @Route(priority = -1)
+ * */
 class AutocompleteController extends AbstractController
 {
     use BaseTrait;
@@ -43,26 +52,40 @@ class AutocompleteController extends AbstractController
      */
     protected $autocomplete;
 
-    public function __construct(ObfuscatorInterface $obfuscator, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
+    /**
+     * @var TradingMarket
+     */
+    protected $tradingMarket;
+
+    /**
+     * @var Profiler
+     */
+    protected $profiler;
+
+    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack,  TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
     {
+        $this->requestStack = $requestStack;
         $this->obfuscator = $obfuscator;
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->tradingMarket = $tradingMarket;
         $this->paginator = $paginator;
         $this->autocomplete = new Autocomplete($translator);
+        $this->profiler = $profiler;
+        $this->requestStack = $requestStack;
     }
 
     /**
-     * @Route("/autocomplete/{hashid}", name="ux_autocomplete")
+     * @Route("/autocomplete/{data}", name="ux_autocomplete")
      */
-    public function Main(Request $request, string $hashid): Response
+    public function Main(Request $request, string $data): Response
     {
-        $dict    = $this->obfuscator->decode($hashid);
-        if($dict === null) {
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX)
+            $this->profiler->disable();
 
-            $array = ["status" => "Unexpected request"];
-            return new JsonResponse($array, 500);
-        }
+        $dict    = $this->obfuscator->decode($data);
+        if($dict === null) return new JsonResponse("Unexpected request", 500);
 
         $fields  = $dict["fields"] ?? null;
         $filters = $dict["filters"] ?? null;
@@ -77,8 +100,7 @@ class AutocompleteController extends AbstractController
         $tokenName = $dict["token_name"] ?? null;
         if(!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
 
-            $array = ["status" => "Invalid token. Please refresh the page and try again"];
-            return new JsonResponse($array, 500);
+            return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
         }
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
@@ -156,16 +178,54 @@ class AutocompleteController extends AbstractController
             return new JsonResponse($array);
         }
 
-        $array = ["status" => "Invalid request"];
-        return new JsonResponse($array, 500);
+        return new JsonResponse("Invalid request", 500);
     }
 
+
     /**
-     * @Route("/autocomplete/{provider}/{pageSize}/{hashid}", name="ux_autocomplete_icons")
+     * @Route("/autocomplete/currency/{source}/{target}/{data}", name="ux_autocomplete_forex")
      */
-    public function Icons(Request $request, string $provider, int $pageSize, string $hashid): Response
+    public function Forex(Request $request, string $source, string $target, string $data, ?Profiler $profiler = null): Response
     {
-        $dict     = $this->obfuscator->decode($hashid);
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX)
+            $this->profiler->disable();
+
+        $dict = $this->obfuscator->decode($data);
+
+        $token = $dict["token"] ?? null;
+        $tokenName = $dict["token_name"] ?? null;
+        if (!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
+
+            return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
+        }
+
+        try { $rate = $this->tradingMarket->getLatest($source, $target); }
+        catch (ChainException $e) {
+
+            return new JsonResponse("Invalid request", 500);
+        }
+
+        $array = [
+            "source" => $source,
+            "target" => $target,
+            "rate" => $rate
+        ];
+
+        return new JsonResponse($array);
+    }
+
+
+    /**
+     * @Route("/autocomplete/{provider}/{pageSize}/{data}", name="ux_autocomplete_icons")
+     */
+    public function Icons(Request $request, string $provider, int $pageSize, string $data, ?Profiler $profiler = null): Response
+    {
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX)
+            $this->profiler->disable();
+
+        $dict     = $this->obfuscator->decode($data);
 
         $token    = $dict["token"] ?? null;
         $html     = $dict["html"] ?? true;
@@ -232,7 +292,6 @@ class AutocompleteController extends AbstractController
             return new JsonResponse($array);
         }
 
-        $array = ["status" => "Invalid request"];
-        return new JsonResponse($array, 500);
+        return new JsonResponse("Invalid request", 500);
     }
 }

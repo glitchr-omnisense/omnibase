@@ -156,7 +156,7 @@ trait FormGuessTrait
                     } else if($this->classMetadataManipulator->isEnumType($doctrineType)) {
                         return false;
                     } else {
-                        return $typeOfField == "array";
+                        return $typeOfField == "array" || $typeOfField == "json";
                     }
                 }
 

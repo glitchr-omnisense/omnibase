@@ -48,7 +48,7 @@ class SearchController extends AbstractController
             );
         }
         
-        return $this->render('@Base/client/user/search.html.twig', [
+        return $this->render('client/user/search.html.twig', [
             "form" => $formSearch->createView(),
             "form_data" => $formattedData ?? new UserSearchModel(),
             "users" => $users

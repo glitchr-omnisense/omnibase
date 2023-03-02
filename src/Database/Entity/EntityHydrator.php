@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\ArrayType;
 
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
@@ -127,6 +127,7 @@ class EntityHydrator implements EntityHydratorInterface
         }
 
         $this->bindAliases($entity);
+
         return $entity;
     }
 
@@ -246,6 +247,9 @@ class EntityHydrator implements EntityHydratorInterface
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
         foreach ($this->classMetadataManipulator->getFieldNames($classMetadata) as $alias => $column) {
 
+            if($alias == $column) continue;
+            if(snake2camel($alias) == snake2camel($column)) continue;
+            if(camel2snake($alias) == camel2snake($column)) continue;
             $fn = function() use ($alias, $column) {
 
                 $aliasValue  = $this->$alias;
@@ -448,12 +452,13 @@ class EntityHydrator implements EntityHydratorInterface
                 if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
                     $this->hydrateAssociationToOne($entity, $propertyName, $mapping, $value, $aggregateModel);
 
-                if ($this->classMetadataManipulator->isToManySide($entity, $propertyName))
+                if ($this->classMetadataManipulator->isToManySide($entity, $propertyName)) {
                     $this->hydrateAssociationToMany($entity, $propertyName, $mapping, $value, $aggregateModel);
+                }
 
             } catch (Exception $e) {
 
-                throw new Exception($e->getMessage()." for \"".$propertyName."\" (".serialize($value).") in \"".strip_tags((string) $entity)."\"");
+                throw $e;
             }
         }
 
@@ -500,14 +505,17 @@ class EntityHydrator implements EntityHydratorInterface
 
         foreach ($array as $key => $value) {
 
-            if (is_array($value))
-                $value = $this->hydrate($mapping['targetEntity'], $value, [], $aggregateModel);
-            else if ($targetEntity = $this->findAssociation($mapping['targetEntity'], $value))
+            if (is_array($value)) {
+
+                $entityValue = $this->getPropertyValue($entity, $propertyName);
+                $value = $this->hydrate($entityValue->get($key) ?? $mapping['targetEntity'], $value, [], $aggregateModel);
+
+            } else if ($targetEntity = $this->findAssociation($mapping['targetEntity'], $value))
                 $value = $targetEntity;
 
             // Special case: the setter makes loosing the custom keyname (Perhaps one might implement an extends..)
             if(class_implements_interface($value, TranslationInterface::class)) {
-                $key = LocaleProvider::normalize($key);
+                $key = Localizer::normalizeLocale($key);
                 $value->setLocale($key);
             }
 
@@ -521,8 +529,25 @@ class EntityHydrator implements EntityHydratorInterface
         if(!$isOwningSide) {
 
             $mappedBy =  $mapping["mappedBy"];
-            foreach($association as $entry)
-                $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
+
+            if($this->classMetadataManipulator->isManyToSide($entity, $propertyName)) {
+
+                $association = $association->toArray();
+                foreach ($association as $entry) {
+
+                    $collection = $this->propertyAccessor->getValue($entry, $mappedBy);
+                    if($collection instanceof Collection)
+                        $collection = $collection->toArray();
+
+                    $collection[] = $entity;
+                    $this->propertyAccessor->setValue($entry, $mappedBy, array_unique_object($collection));
+                }
+
+            } else {
+
+                foreach ($association as $entry)
+                    $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
+            }
         }
 
         // Commit association

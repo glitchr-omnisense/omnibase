@@ -12,10 +12,12 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface as SymfonyRouterInterface;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
+use Symfony\Contracts\EventDispatcher\Event;
 
 interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
 {
-    public function getIndexPage(): string;
+    public function getRouteIndex(): string;
+    public function getUrlIndex(): string;
 
     public function useAdvancedFeatures(): bool;
     public function isProfiler(mixed $request = null) :bool;
@@ -40,7 +42,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getRequest(): ?Request;
     public function getEnvironment(): string;
     public function getLocale (?string $locale = null): string;
-    public function getLang(?string $lang = null): string;
+    public function getLocaleLang(?string $lang = null): string;
 
     public function getContext(): RequestContext;
     public function setContext(RequestContext $context);
@@ -65,5 +67,6 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse;
     public function redirectToRoute(string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse;
+    public function redirectEvent(Event $event, string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): bool;
     public function reloadRequest(?Request $request = null): RedirectResponse;
 }

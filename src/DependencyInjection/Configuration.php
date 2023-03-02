@@ -8,6 +8,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter;
+use Symfony\Component\Uid\Uuid;
+
 class Configuration implements ConfigurationInterface
 {
     private $treeBuilder;
@@ -405,7 +407,7 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('debug')
                             ->defaultValue(false)
                             ->end()
-                        ->booleanNode('profiler')
+                        ->booleanNode('disable_profiler')
                             ->defaultValue(true)
                             ->end()
                         ->scalarNode('max_quality')
@@ -459,23 +461,27 @@ class Configuration implements ConfigurationInterface
                             ->end()
                     ->end()
                 ->end()
-                ->arrayNode('breadcrumb')->addDefaultsIfNotSet()
+                ->arrayNode('obfuscator')->addDefaultsIfNotSet()
                     ->children()
-                        ->integerNode('separator')
-                            ->info('Breadcrumb separator (if used by template)')
-                            ->defaultValue(" / ")
+                        ->integerNode('level')
+                            ->info('Compression level')
+                            ->defaultValue(-1)
                             ->end()
-                        ->integerNode('class_item')
-                            ->info('Breadcrumb item class attribute')
-                            ->defaultValue("breadcrumb-item")
+                        ->scalarNode('uuid')
+                            ->info('Use uuid shortening')
+                            ->defaultValue(Uuid::NAMESPACE_URL)
                             ->end()
-                        ->scalarNode('class')
-                            ->info('Breadcrumb class attribute')
-                            ->defaultValue("breadcrumb")
+                        ->integerNode('encoding')
+                            ->info('Compression encoding')
+                            ->defaultValue(null)
                             ->end()
-                        ->scalarNode('default_template')
-                            ->info('Default template used to display breadcrumb')
-                            ->defaultValue("@Base/breadcrumb/default.html.twig")
+                        ->integerNode('max_length')
+                            ->info('Decoding max length')
+                            ->defaultValue(0)
+                            ->end()
+                        ->scalarNode('compression')
+                            ->info('Compression algorithm')
+                            ->defaultValue("null")
                             ->end()
                     ->end()
                 ->end()

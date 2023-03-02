@@ -7,6 +7,9 @@
 
         <defaults />
 
+        <!-- NOTIFIER FIX -->
+        <service id="Symfony\Component\Notifier\Channel\ChannelPolicyInterface"  alias="notifier.channel_policy"/>
+
         <!-- TWIG FIX -->
         <service id="Symfony\Bridge\Twig\Extension\AssetExtension">
             <tag name="twig.runtime" />

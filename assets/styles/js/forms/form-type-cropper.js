@@ -250,6 +250,7 @@ window.addEventListener("load.form_type", function () {
 
                         xhr.onerror = function () { reject({status: xhr.status,statusText: xhr.statusText}); };
                         xhr.send();
+
                 });
             }
 

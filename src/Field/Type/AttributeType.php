@@ -7,6 +7,11 @@ use Base\Form\FormFactory;
 use InvalidArgumentException;
 use Base\Field\Type\SelectType;
 use Base\Entity\Layout\Attribute;
+use Base\Entity\Layout\Attribute\Common\AbstractRule;
+use Base\Entity\Layout\Attribute\Common\AbstractAction;
+use Base\Entity\Layout\Attribute\Common\AbstractScope;
+
+
 use Base\Field\Type\AssociationType;
 use Base\Field\Type\TranslationType;
 use Symfony\Component\Form\FormView;
@@ -28,7 +33,11 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractActionAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractRuleAdapter;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
+
 use Base\Twig\Environment;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
@@ -125,16 +134,24 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
-            $options["class"]  = $options["class"] ?? $this->formFactory->guessClass($event, $options);
+            $options["class"] ??= $this->formFactory->guessClass($event, $options);
             if(!is_instanceof($options["class"], AbstractAttribute::class))
                 $options["class"] = Attribute::class;
 
-            $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAdapter::class;
+            if(is_instanceof($options["class"], AbstractRule::class))
+                $options["abstract_class"] = AbstractRuleAdapter::class;
+            if(is_instanceof($options["class"], AbstractScope::class))
+                $options["abstract_class"] = AbstractScopeAdapter::class;
+            if(is_instanceof($options["class"], AbstractAction::class))
+                $options["abstract_class"] = AbstractActionAdapter::class;
+
+            $options["abstract_class"] ??= AbstractAdapter::class;
 
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 
             $form = $event->getForm();
+            $parentData = $form->getParent()?->getData();
             $form->add("choice", SelectType::class, [
                 "class"               => $options["abstract_class"],
                 "autocomplete_fields" => ["code" => $options["filter_code"]],
@@ -143,6 +160,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 "multivalue"          => $options["multivalue"],
                 "href"                => false,
 
+                "disable" => $parentData === null ? false : ($parentData->getId() === null),
                 "sortable"            => $options["sortable"],
                 "dropdownCssClass"    => "field-attribute-dropdown",
                 "containerCssClass"   => "field-attribute-selection"
@@ -163,16 +181,19 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                 //
                 // First process universal data..
-                $unvFields  = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), array_merge($v->getAdapter()->getOptions(), [
-                    "label" => $v->getAdapter()->getLabel(),
-                    "help" => $v->getAdapter()->getHelp(),
-                    "required" => false,
-                    "form_type" => $v->getAdapter()::getType()])
+                $unvFields  = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(),
+                    array_merge($v->getAdapter()->getOptions(), [
+                        "label" => $v->getAdapter()->getLabel(),
+                        "help" => $v->getAdapter()->getHelp(),
+                        "required" => false,
+
+                        "form_type" => $v->getAdapter()::getType(),]
+                    )
                 ] : null, $data);
 
                 if(!empty($unvFields)) {
 
-                    $unvData = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->getValue() ?? ""] : null, $data);
+                    $unvData = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->get() ?? ""] : null, $data);
                     foreach($unvFields as $code => $field) {
 
                         $form->add($code, AssociationType::class, [
@@ -181,10 +202,10 @@ class AttributeType extends AbstractType implements DataMapperInterface
                             "row_group" => false,
                             "autoload" => false,
                             "fields" => ["value" => $field],
-                            "class" => $options["class"]
+                            "class" => $options["class"],
                         ]);
 
-                        $form->get($code)->setData($unvData[$code]);
+                        $form->get($code)->setData(100);
                     }
                 }
 
@@ -295,8 +316,11 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 } else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAdapter::class);
             }
 
-            foreach($bakData as $data)
-                $data->clearTranslations();
+            foreach($bakData as $data) {
+
+                if($data instanceof TranslatableInterface)
+                    $data->clearTranslations();
+            }
 
             if($viewData instanceof PersistentCollection) {
 

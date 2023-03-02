@@ -5,7 +5,9 @@ namespace Base\Controller\Backend;
 use Base\Backend\Config\Extension;
 use Base\BaseBundle;
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Entity\Layout\Widget\Link;
 use Base\Field\IdField;
+use Base\Service\FileService;
 use Base\Service\Model\IconizeInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\Model\LinkableInterface;
@@ -23,6 +25,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 
@@ -78,6 +81,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         EntityManagerInterface $entityManager,
         RequestStack $requestStack,
         Extension $extension,
+        FileService $fileService,
         SettingBagInterface $settingBag,
         RouterInterface $router,
         TranslatorInterface $translator)
@@ -92,6 +96,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->settingBag = $settingBag;
         $this->router = $router;
+        $this->fileService = $fileService;
 
         $this->crud = null;
     }
@@ -105,7 +110,16 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getEntityFqcn(): string
     {
         $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
-        $entityFqcn = BaseBundle::getInstance()->getAlias(preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
+
+        try {
+            $entityFqcn = BaseBundle::getInstance()->getAlias(preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
+        } catch( \ErrorException $e) {
+
+//            dump($entityFqcn, preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
+//            exit(1);
+
+            throw new \LogicException("Failed to find Entity FQCN from \"".get_called_class()."\" CRUD controller..\nDid you remove the Entity but kept the CRUD controller ?", 500 );
+        }
         self::$crudController[$entityFqcn] = get_called_class();
         return $entityFqcn;
     }
@@ -204,11 +218,42 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureActions(Actions $actions): Actions
     {
+        $batchActionDelete = Action::new('batchActionDelete', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_delete', 'fa fa-user-times')
+            ->linkToCrudAction('batchActionDelete')
+            ->addCssClass('btn btn-primary text-danger');
+
+        if(is_instanceof($this->getEntityFqcn(), LinkableInterface::class)) {
+
+            $linkToEntity = \Base\Backend\Config\Action::new(\Base\Backend\Config\Action::GOTO, self::getEntityLabelInSingular(), "fas fa-fw fa-plug")
+                ->renderAsTooltip()
+                ->linkToUrl(fn($e) => $e->__toLink() ?? "");
+
+            $actions
+                ->add(Action::INDEX, $linkToEntity);
+        }
+
         return $actions
                 ->update(Crud::PAGE_INDEX, Action::NEW ,    fn(Action $a) => $this->setDiscriminatorMapAttribute($a))
-                ->setPermission(Action::NEW, 'ROLE_ADMIN')
+
+                ->addBatchAction($batchActionDelete)
+
+                ->setPermission($batchActionDelete, 'ROLE_SUPERADMIN')
+                ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
                 ->setPermission(Action::EDIT, 'ROLE_ADMIN')
-                ->setPermission(Action::DELETE, 'ROLE_ADMIN');
+                ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
+;
+    }
+
+    public function batchActionDelete(BatchActionDto $batchActionDto)
+    {
+        foreach ($batchActionDto->getEntityIds() as $id) {
+            $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
+
+            $this->entityManager->remove($user);
+            $this->entityManager->flush($user);
+        }
+
+        return $this->redirect($batchActionDto->getReferrerUrl());
     }
 
     public function configureExtension(Extension $extension) : Extension
@@ -295,7 +340,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                 $discriminatorValue = $this->classMetadataManipulator->getDiscriminatorValue($instance);
                 if($crudController && $discriminatorValue) {
 
-                    $url = $this->adminUrlGenerator
+                    $url = null;
+
+                    $closure = $action->getUrl();
+                    if($closure instanceof \Closure)
+                        $url = $action->getUrl()($instance);
+
+                    $url = $url ?? $this->adminUrlGenerator
                             ->unsetAll()
                             ->setController($crudController)
                             ->setEntityId($instance->getId())
@@ -322,15 +373,18 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if($entityLabel) $extension->setTitle($entityLabel);
         $entityLabel ??= $this->getEntityLabelInSingular();
         if($entityLabel) $entityLabel = mb_ucfirst($entityLabel);
-
         if ($entity) {
 
             $entityLabel = mb_ucfirst($this->translator->transEntity(get_class($entity), null, Translator::NOUN_SINGULAR));
-            $extension->setTitle(mb_ucfirst(is_stringeable($entity) ? (string) $entity : $this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
+            if(is_stringeable($entity) && (string) $entity != get_class($entity))
+                $entityLabel = (string) $entity;
+
+            $extension->setTitle(mb_ucfirst(is_stringeable($entity) && $entityLabel ? $entityLabel : $this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
 
+            $entityLabel = mb_ucfirst($this->translator->transEntity(get_class($entity), null, Translator::NOUN_SINGULAR));
             $entityText = $entityLabel ." ID #".$entity->getId();
             try { # Try to link without route parameter
 

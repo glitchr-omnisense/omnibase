@@ -15,6 +15,13 @@ thread_search:
   found: "{0} found in \"{1}\""
   placeholder: "Search here.."
 
+base_contact:
+  title: Have questions? Shoot us an Email.
+  description:
+    Have a question for us, or feedback? Please pick up your phone and call us, or fill out the form below to reach us.
+    We will reply as soon as possible.
+  follow_us: Follow us on..
+
 thread:
   in: "{0} dans \"{1}\""
   more: "Voir plus.."
@@ -31,6 +38,15 @@ security_login:
 
 security_logout:
   title: "Logout"
+
+security_pending:
+  title: "Coming soon !"
+  description: "The site is still under construction.<br/>The page you are looking for is not ready yet. Please come back later !"
+
+security_pendingForApproval:
+  title: "Pending for approval"
+  user_verify: "Please verify your account {0}. You should have received an email."
+  admin_approval: "Your account {0} is currently pending for approval. One manager will soon have a look. Please come back later !"
 
 app_index:
   title: Return to website

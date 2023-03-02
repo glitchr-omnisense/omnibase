@@ -1,24 +1,29 @@
-/*
- * Copyright (c) 2017 ZURB, inc. -- MIT License
- *
- * https://raw.githubusercontent.com/foundation/foundation-emails/v2.2.1/dist/foundation-emails.css
- */
 
-.wrapper {
-    width: 100%;
+.container.body_alert {
+    border-top: 4px solid #ec5840;
 }
+
+.container.body_warning {
+    border-top: 4px solid #ffae00;
+}
+
+.container.body_default {
+    border-top: 4px solid #aaaaaa;
+}
+
+
+/*.wrapper {*/
+/*    width: 100%;*/
+/*}*/
 
 #outlook a {
     padding: 0;
 }
 
 body {
-    width: 100% !important;
-    min-width: 100%;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     margin: 0;
-    Margin: 0;
     padding: 0;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -40,7 +45,6 @@ body {
 
 #backgroundTable {
     margin: 0;
-    Margin: 0;
     padding: 0;
     width: 100% !important;
     line-height: 100% !important;
@@ -67,7 +71,6 @@ a img {
 
 p {
     margin: 0 0 0 10px;
-    Margin: 0 0 0 10px;
 }
 
 table {
@@ -94,21 +97,16 @@ td {
 @media only screen {
     html {
         min-height: 100%;
-        background: #eaeaea;
     }
 }
 
 table.body {
-    background: #eaeaea;
     height: 100%;
     width: 100%;
 }
 
 table.container {
-    background: #fefefe;
-    width: 580px;
-    margin: 0 auto;
-    Margin: 0 auto;
+    margin: 1em auto;
     text-align: inherit;
 }
 
@@ -135,8 +133,6 @@ td.column,
 th.columns,
 th.column {
     margin: 0 auto;
-    Margin: 0 auto;
-    padding-left: 16px;
     padding-bottom: 16px;
 }
 
@@ -161,13 +157,6 @@ th.columns .columns center,
 th.column .column center,
 th.column .columns center {
     min-width: none !important;
-}
-
-td.columns.last,
-td.column.last,
-th.columns.last,
-th.column.last {
-    padding-right: 16px;
 }
 
 td.columns table:not(.button),
@@ -567,18 +556,6 @@ th.large-9 center {
 td.large-10,
 th.large-10 {
     width: 467.33333px;
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-td.large-10.first,
-th.large-10.first {
-    padding-left: 16px;
-}
-
-td.large-10.last,
-th.large-10.last {
-    padding-right: 16px;
 }
 
 .collapse>tbody>tr>td.large-10,
@@ -920,7 +897,6 @@ img.float-right {
 img.float-center,
 img.text-center {
     margin: 0 auto;
-    Margin: 0 auto;
     float: none;
     text-align: center;
 }
@@ -929,7 +905,6 @@ table.float-center,
 td.float-center,
 th.float-center {
     margin: 0 auto;
-    Margin: 0 auto;
     float: none;
     text-align: center;
 }
@@ -1000,7 +975,6 @@ a {
     font-weight: normal;
     padding: 0;
     margin: 0;
-    Margin: 0;
     text-align: left;
     line-height: 1.3;
 }
@@ -1016,7 +990,6 @@ h6 {
     font-family: Helvetica, Arial, sans-serif;
     font-weight: normal;
     margin-bottom: 10px;
-    Margin-bottom: 10px;
 }
 
 h1 {
@@ -1054,7 +1027,6 @@ th {
 
 p {
     margin-bottom: 10px;
-    Margin-bottom: 10px;
 }
 
 p.lead {
@@ -1065,8 +1037,6 @@ p.lead {
 p.subheader {
     margin-top: 4px;
     margin-bottom: 8px;
-    Margin-top: 4px;
-    Margin-bottom: 8px;
     font-weight: normal;
     line-height: 1.4;
     color: #8a8a8a;
@@ -1112,7 +1082,6 @@ h6 a:visited {
 pre {
     background: #eaeaea;
     margin: 30px 0;
-    Margin: 30px 0;
 }
 
 pre code {
@@ -1141,7 +1110,6 @@ table.hr th {
     border-bottom: 1px solid #0a0a0a;
     border-left: 0;
     margin: 20px auto;
-    Margin: 20px auto;
     clear: both;
 }
 
@@ -1152,7 +1120,6 @@ table.hr th {
 
 p+.stat {
     margin-top: -16px;
-    Margin-top: -16px;
 }
 
 span.preheader {
@@ -1171,7 +1138,6 @@ span.preheader {
 table.button {
     width: auto;
     margin: 8px 0 16px 0;
-    Margin: 8px 0 16px 0;
 }
 
 table.button table td {
@@ -1361,7 +1327,6 @@ table.button.warning:hover table a {
 
 table.callout {
     margin-bottom: 16px;
-    Margin-bottom: 16px;
 }
 
 th.callout-inner {
@@ -1480,8 +1445,6 @@ body.outlook p {
         -moz-box-sizing: border-box;
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
-        padding-left: 16px !important;
-        padding-right: 16px !important;
     }
     table.body .columns .column,
     table.body .columns .columns,
@@ -1565,57 +1528,46 @@ body.outlook p {
     table.body td.small-offset-1,
     table.body th.small-offset-1 {
         margin-left: 8.33333% !important;
-        Margin-left: 8.33333% !important;
     }
     table.body td.small-offset-2,
     table.body th.small-offset-2 {
         margin-left: 16.66667% !important;
-        Margin-left: 16.66667% !important;
     }
     table.body td.small-offset-3,
     table.body th.small-offset-3 {
         margin-left: 25% !important;
-        Margin-left: 25% !important;
     }
     table.body td.small-offset-4,
     table.body th.small-offset-4 {
         margin-left: 33.33333% !important;
-        Margin-left: 33.33333% !important;
     }
     table.body td.small-offset-5,
     table.body th.small-offset-5 {
         margin-left: 41.66667% !important;
-        Margin-left: 41.66667% !important;
     }
     table.body td.small-offset-6,
     table.body th.small-offset-6 {
         margin-left: 50% !important;
-        Margin-left: 50% !important;
     }
     table.body td.small-offset-7,
     table.body th.small-offset-7 {
         margin-left: 58.33333% !important;
-        Margin-left: 58.33333% !important;
     }
     table.body td.small-offset-8,
     table.body th.small-offset-8 {
         margin-left: 66.66667% !important;
-        Margin-left: 66.66667% !important;
     }
     table.body td.small-offset-9,
     table.body th.small-offset-9 {
         margin-left: 75% !important;
-        Margin-left: 75% !important;
     }
     table.body td.small-offset-10,
     table.body th.small-offset-10 {
         margin-left: 83.33333% !important;
-        Margin-left: 83.33333% !important;
     }
     table.body td.small-offset-11,
     table.body th.small-offset-11 {
         margin-left: 91.66667% !important;
-        Margin-left: 91.66667% !important;
     }
     table.body table.columns td.expander,
     table.body table.columns th.expander {

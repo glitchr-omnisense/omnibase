@@ -8,10 +8,18 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
     public const GOTO_NEXT = 'next';
     public const SEPARATOR = 'separator';
     public const GROUP = 'group';
+    public const GOTO = 'goto';
 
     public function renderAsTooltip()
     {
         $this->dto->addHtmlAttributes(['tooltip' => true]);
+
+        return $this;
+    }
+
+    public function targetBlank()
+    {
+        $this->dto->addHtmlAttributes(['target' => "_blank"]);
 
         return $this;
     }

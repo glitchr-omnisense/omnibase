@@ -9,27 +9,23 @@
         {% set linkUrl = app.request.get("referrer") ?? linkUrl %}
     {% endif %}
 
+    {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
+
     {% if linkUrl is not empty %}
-
-        {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
-
         {% set renderTooltip = action.htmlAttributes.tooltip ?? false %}
         {% if renderTooltip %}
-            <a href="{{ linkUrl }}" class="{{ action.cssClass }}"
+            <a {% if linkUrl is not empty %} href="{{ linkUrl|trim('"') }}" {% endif %} class="{{ action.cssClass }}
             {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
                 data-toggle="tooltip" data-placement="bottom" title="{{- actionLabel ? actionLabel|mb_ucfirst : "" -}}">
-                <span class="btn-label">
-                    <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
-                </span>
+                    <i class="action-icon {{ action.icon|default("far fa-question-circle") }}"></i>
             </a>
         {% else %}
-            <a href="{{ linkUrl }}" class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
+            <a {% if linkUrl is not empty %} href="{{ linkUrl|trim('"') }}" {% endif %} class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
             {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
                 <span>{{- actionLabel ? actionLabel|mb_ucfirst : "" -}}</span>
             </a>
         {% endif %}
-
     {% endif %}
 
 {% elseif 'separator' == action.htmlElement %}
@@ -183,7 +179,7 @@
                 <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
                     {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                     {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                    {{- label !=  static_call(crudEntity|url_decode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
+                    {{- static_call(crudEntity|url_decode, "getEntityLabelInSingular")|trans|mb_ucfirst -}}
                 </a></li>
 
             {% endfor %}

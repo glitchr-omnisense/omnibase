@@ -3,7 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -38,8 +38,8 @@ class TranslationControllersCommand extends Command
         }
 
         $locale = $input->getOption('locale');
-        $locale = $locale ? $this->localeProvider->getLocale($locale) : null;
-        $availableLocales = LocaleProvider::getAvailableLocales();
+        $locale = $locale ? $this->localizer->getLocale($locale) : null;
+        $availableLocales = Localizer::getAvailableLocales();
         if($locale && !in_array($locale, $availableLocales))
             throw new \Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
 

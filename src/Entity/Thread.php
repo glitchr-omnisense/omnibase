@@ -38,7 +38,6 @@ use DateTime;
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  *
@@ -56,7 +55,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public        function __iconize()       : ?array { return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-box"]; }
 
-    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? $this->getTranslator()->transEntity(self::class); }
+    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? $this->getTranslator()->transEntity(static::class); }
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
         $this->tags      = new ArrayCollection();
@@ -73,7 +72,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->setTitle($title);
 
         $this->setState(ThreadState::DRAFT);
-        $this->setWorkflow(WorkflowState::SUBMITTED);
+        $this->setWorkflow(WorkflowState::APPROVED); // This will be changed, if spam checker enabled in subclass
 
         $this->slug = $slug;
 
@@ -440,7 +439,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         if(!$keywords && $depth > 0)
             $keywords = ($this->getParent() ? $this->getParent()->getKeywords($locale, --$depth) : null);
 
-        return $keywords;
+        return $keywords ?? [];
     }
 
     public function setKeywords(array $keywords, ?string $locale = null, int $depth = 0)

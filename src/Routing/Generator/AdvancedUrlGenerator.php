@@ -40,12 +40,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if(($route = $this->getRouter()->getRoute($routeName))) {
 
             if($route->getHost()) $referenceType = self::ABSOLUTE_URL;
+
             if(str_contains($route->getHost().$route->getPath(), "{") && str_contains($route->getHost().$route->getPath(), "}")) {
 
                 if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
 
                     $parse = parse_url2(get_url());
-                    
+
                     $parameterNames = array_flip($matches[1]);
                     $routeParameters = array_merge(
                         array_intersect_key($parse, $parameterNames),
@@ -69,8 +70,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // Lookup for lang in current group
         $e = null;
         $routeParameters = array_filter($routeParameters, fn($p) => $p !== null);
-        if(!str_ends_with($routeName, ".".$this->getRouter()->getLang())) {
-            try { return parent::generate($routeName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType); }
+        if(!str_ends_with($routeName, ".".$this->getRouter()->getLocaleLang())) {
+
+            try { return sanitize_url(parent::generate($routeName.".".$this->getRouter()->getLocaleLang(), $routeParameters, $referenceType)); }
             catch (InvalidParameterException|RouteNotFoundException $_) { $e = $_; }
         }
 
@@ -80,11 +82,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         //
         // Lookup for lang in default group
         $routeGroups  = $this->getRouter()->getRouteGroups($routeName);
-        $routeDefaultName = array_filter($routeGroups, fn($r) => str_ends_with($r,".".$this->getRouter()->getLang()))[0] ?? null;
+        $routeDefaultName = array_filter($routeGroups, fn($r) => str_ends_with($r,".".$this->getRouter()->getLocaleLang()))[0] ?? null;
         if(!$routeDefaultName) throw $e;
 
-        if(!str_ends_with($routeDefaultName, ".".$this->getRouter()->getLang())) {
-            try { return parent::generate($routeDefaultName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType); }
+        if(!str_ends_with($routeDefaultName, ".".$this->getRouter()->getLocaleLang())) {
+            try { return sanitize_url(parent::generate($routeDefaultName.".".$this->getRouter()->getLocaleLang(), $routeParameters, $referenceType)); }
             catch (InvalidParameterException|RouteNotFoundException $_) { }
         }
 
@@ -94,29 +96,31 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function resolveParameters(?array $routeParameters = null): ?array
     {
-        if($routeParameters !== null) {
+        if ($routeParameters === null){
 
-            // Use either parameters or $_SERVER variables to determine the host to provide
-            $scheme    = array_pop_key("_scheme"  , $routeParameters) ?? $this->getRouter()->getScheme();
-            $host      = array_pop_key("_host"    , $routeParameters) ?? $this->getRouter()->getHost();
-            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getRouter()->getBaseDir();
-
-            $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
-            $parse["base_dir"] = $baseDir;
-           
-            if($parse && array_key_exists("host", $parse))
-                $this->getContext()->setHost($parse["host"]);
-            if($parse && array_key_exists("base_dir", $parse))
-                $this->getContext()->setBaseUrl($parse["base_dir"]);
+            $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()); // Make sure also it gets the basic context
 
         } else {
 
-            $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()); // Make sure also it gets the basic context
-            if($parse && array_key_exists("host", $parse))
-                $this->getContext()->setHost($parse["host"]);
-            if($parse && array_key_exists("base_dir", $parse))
-                $this->getContext()->setBaseUrl($parse["base_dir"]);
+            // Use either parameters or $_SERVER variables to determine the host to provide
+            $scheme    = array_pop_key("_scheme"  , $routeParameters) ?? $this->getRouter()->getScheme();
+            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getRouter()->getBaseDir();
+            $host      = array_pop_key("_host"    , $routeParameters) ?? $this->getRouter()->getHost();
+            $port      = array_pop_key("_port"    , $routeParameters) ?? explode(":", $host)[1] ?? $this->getRouter()->getPort();
+            $host      = explode(":", $host)[0].":".$port;
+
+            $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
+            $parse["base_dir"] = $baseDir;
         }
+
+        if($parse && array_key_exists("host", $parse))
+            $this->getContext()->setHost($parse["host"]);
+        if($parse && array_key_exists("base_dir", $parse))
+            $this->getContext()->setBaseUrl($parse["base_dir"]);
+
+        $this->getContext()->setHttpPort($parse["port"] ?? 80);
+        $this->getContext()->setHttpsPort($parse["port"] ?? 443);
+        $this->getContext()->setScheme($parse["scheme"] ?? "https");
 
         return $routeParameters;
     }
@@ -133,9 +137,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             catch (Exception $e ) { throw $e; }
         }
 
+
         //
         // Extract locale from route name if found
-        foreach($this->getLocaleProvider()->getAvailableLangs() as $lang) {
+        foreach($this->getLocalizer()->getAvailableLocaleLangs() as $lang) {
 
             if(str_ends_with($routeName, ".".$lang)) {
 
@@ -146,7 +151,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         // Priority to route parameter locale
         if(array_key_exists("_locale", $routeParameters))
-            $locale = $this->getLocaleProvider()->getLang($routeParameters["_locale"]);
+            $locale = $this->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
 
         $routeParameters = $this->resolveParameters($routeParameters);
 
@@ -162,9 +167,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeDefaultName = first($routeGroups);
         if(array_key_exists("_locale", $routeParameters)) {
 
-            $locale = $this->getLocaleProvider()->getLang($routeParameters["_locale"]);
+            $locale = $this->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
             if(!str_ends_with($routeName, ".".$locale))
-                $routeDefaultName .= ".".$this->getLocaleProvider()->getLang($routeParameters["_locale"]);
+                $routeDefaultName .= ".".$this->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
         }
 
         $routes = array_filter(array_transforms(fn($k, $routeName): array => [$routeName, $this->getRouter()->getRoute($routeName)], $routeGroups));
@@ -206,16 +211,17 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function format(string $url): string
     {
-        $permittedHosts   = array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getLocale());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getLang());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getDefaultLocale());
-        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocaleProvider()->getDefaultLang());
+        $permittedHosts   = array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocalizer()->getLocale());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocalizer()->getLocaleLang());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocalizer()->getDefaultLocale());
+        $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocalizer()->getDefaultLocaleLang());
         $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", null) ?? [];
         $permittedHosts = array_transforms(fn($k, $a): ?array => $a["env"] == $this->getRouter()->getEnvironment() ? [$k, $a["regex"]] : null, $permittedHosts);
         if(!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain())
             $permittedHosts = "^$"; // Special case if both subdomain and machine are unallowed
 
         $parse = parse_url2($url);
+
         $allowedHost = empty($permittedHosts);
         foreach($permittedHosts as $permittedHost)
             $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);

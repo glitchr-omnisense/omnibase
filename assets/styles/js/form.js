@@ -1,40 +1,97 @@
-
 //
 // Apply form validation
 window.addEventListener('load', function(event) {
 
     dispatchEvent(new Event("load.form_type"));
     dispatchEvent(new Event("load.collection_type"));
+    dispatchEvent(new Event("load.array_type"));
 });
 
 window.addEventListener('load', function(event) {
 
-    $("form.needs-validation input").on("invalid", (e) => e.preventDefault() );
+    $("form :input").keydown(function(event){
 
-    $("form").on("submit", function() { this.submit(); }); // On pressing enter...
+        if(event.keyCode == 13) {
 
-    $("[type=submit]").on("click", function() {
+            if(event.target.tagName == "TEXTAREA")
+                return true;
 
-        const style = getComputedStyle(document.body);
+            var target = $(event.target);
 
-        var form = $(".has-error").closest("form.needs-validation");
-        if(!form.length) form = $(this).closest("form.needs-validation");
+            var submitter = undefined;
+            while(target.parent().length) {
 
-        if (!this.checkValidity()) {
+                submitter = $(target).find("button[type=submit]");
+                if(submitter.length) break;
 
-            event.preventDefault();
-            event.stopPropagation();
+                target = target.parent();
+
+                if(target.length && target[0].tagName == "FORM") {
+
+                    target.submit();
+                    break;
+                }
+            }
+
+            if(submitter != undefined && submitter.length) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                submitter.trigger("click");
+                return false;
+            }
+        }
+    });
+
+    $("form").addClass("needs-validation").attr("novalidate", "");
+    $("form").on("submit", function(e) {
+
+        // Disable form
+        if (this.getAttribute("disabled") != null) return e.preventDefault();
+
+        // Disable submitter to avoid double submission..
+        var submitter = e.originalEvent ? e.originalEvent.submitter : undefined;
+        if (submitter) {
+
+            $(submitter).addClass('disabled');
+            $(".tooltip").remove();
+            $(".popover").remove();
         }
 
-        var el = $(form).find(":invalid, .has-error");
-        if (el.length) {
+        if ( $(this).hasClass("needs-validation") ) {
 
-            return $([document.documentElement, document.body]).animate(
-                {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
-                function() {
-                    form.addClass('was-validated');
+            if (!this.checkValidity()) {
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                var invalid = $(this).find(".form-control:invalid");
+                if (invalid.length) {
+                    var navPane = $(invalid[0]).closest(".tab-pane");
+
+                    var navButton = $("#"+navPane.attr("aria-labelledby"));
+                        navButton.one('shown.bs.tab', function() {
+                            invalidRequiredField[0].reportValidity();
+                        });
+
+                    location.hash = navButton.data("bs-target");
                 }
-            );
+
+                if (submitter != undefined)
+                    $(submitter).removeClass("disabled").removeAttr("disabled");
+            }
+
+            var el = $(this).find(":invalid, .has-error");
+            if (el.length) {
+
+                // Flag elements as..
+                const style = getComputedStyle(document.body);
+                $([document.documentElement, document.body]).animate(
+                    {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
+                    function () { $(this).addClass('was-validated'); }.bind(this)
+                );
+            }
         }
     });
 });

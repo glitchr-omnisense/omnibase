@@ -46,8 +46,9 @@ class Autocomplete
             if(!$text)
                 $text = is_stringeable($entry) ? strip_tags(strval($entry)) : $className . " #".$entry->getId();
 
-            $icons = $entry->__iconize() ?? [];
-
+            $icons = [];
+            if(class_implements_interface($entry, IconizeInterface::class))
+                $icons = $entry->__iconize();
             if(empty($icons) && class_implements_interface($entry, IconizeInterface::class))
                 $icons = $entry::__iconizeStatic();
 

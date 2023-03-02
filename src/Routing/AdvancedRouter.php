@@ -4,7 +4,7 @@ namespace Base\Routing;
 
 use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use InvalidArgumentException;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
@@ -13,7 +13,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\RouteCircularReferenceException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
@@ -21,6 +23,8 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
+use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
+use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Contracts\EventDispatcher\Event;
@@ -43,9 +47,9 @@ class AdvancedRouter implements RouterInterface
     protected $parameterBag;
 
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var AssetExtension
@@ -81,11 +85,11 @@ class AdvancedRouter implements RouterInterface
     protected bool $keepMachine;
     protected bool $keepSubdomain;
     
-    public function getLang   (?string $lang   = null) :string { return $this->localeProvider->getLang($lang);     }
-    public function getLocale (?string $locale = null) :string { return $this->localeProvider->getLocale($locale); }
+    public function getLocaleLang   (?string $lang   = null) :string { return $this->localizer->getLocaleLang($lang);     }
+    public function getLocale (?string $locale = null) :string { return $this->localizer->getLocale($locale); }
     public function getEnvironment()                   :string { return $this->environment; }
 
-    public function __construct(Router $router, RequestStack $requestStack, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider, AssetExtension $assetTwigExtension, CacheInterface $cache, string $debug, string $environment)
+    public function __construct(Router $router, RequestStack $requestStack, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, AssetExtension $assetTwigExtension, CacheInterface $cache, string $debug, string $environment)
     {
         $this->debug  = $debug;
         $this->environment = $environment;
@@ -96,7 +100,7 @@ class AdvancedRouter implements RouterInterface
 
         $this->requestStack       = $requestStack;
         $this->parameterBag       = $parameterBag;
-        $this->localeProvider     = $localeProvider;
+        $this->localizer     = $localizer;
         $this->assetTwigExtension = $assetTwigExtension;
 
         $this->cache             = $cache;
@@ -212,6 +216,22 @@ class AdvancedRouter implements RouterInterface
         return !empty($eaParents);
     }
 
+    public function factorize(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
+    {
+        $parsedUrl = parse_url($nameOrUrl);
+        $parameters = array_merge(
+            array_transforms(fn($k,$v):array => [explode("=", $v)[0], explode("=", $v)[1] ?? ""], explode("&", $parsedUrl["query"])),
+            $parameters
+        );
+
+        $routeName = $this->getRouteName($nameOrUrl);
+        $route = $this->getRoute($nameOrUrl);
+        foreach($parameters as $name => $value)
+            $route->setDefault(snake2camel($name), $value);
+
+        return $this->getUrl($routeName, $route->getDefaults(), $referenceType);
+    }
+
     public function getUrl(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         $nameOrUrl ??= get_url();
@@ -280,7 +300,7 @@ class AdvancedRouter implements RouterInterface
 
         $generator = $this->getGenerator();
         $matcher   = $this->getMatcher();
-        $lang      = $this->localeProvider->getLang();
+        $lang      = $this->localizer->getLocaleLang();
 
         $compiledRoutes = $generator->getCompiledRoutes();
         $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName.".".$lang] ?? null;
@@ -305,10 +325,10 @@ class AdvancedRouter implements RouterInterface
 
     protected function getHostParameters(?string $locale = null, ?string $environment = null): ?array
     {
-        $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getDefaultLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localeProvider->getDefaultLang($locale));
+        $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getDefaultLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getDefaultLocaleLang($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", null) ?? [];
 
         if($environment)
@@ -371,7 +391,8 @@ class AdvancedRouter implements RouterInterface
         return in_array($port, [80, 443]) ? null : $port;
     }
 
-    public function getIndexPage():string { return $this->parameterBag->get("base.site.index") ?? $this->getUrl("/"); }
+    public function getRouteIndex():string { return $this->parameterBag->get("base.site.index") ?? $this->getRouteName("/"); }
+    public function getUrlIndex():string { return $this->getUrl($this->getRouteIndex()); }
 
     public function getRouteName(?string $routeUrl = null): ?string
     {
@@ -380,7 +401,7 @@ class AdvancedRouter implements RouterInterface
 
         $routeMatch = $this->getRouteMatch($routeUrl) ?? [];
 
-        $isLocalized = ($routeMatch["_locale"] ?? false) && $routeMatch["_locale"] != $this->localeProvider->getDefaultLang();
+        $isLocalized = ($routeMatch["_locale"] ?? false) && $routeMatch["_locale"] != $this->localizer->getDefaultLocaleLang();
         return $routeMatch ? $routeMatch["_route"] . ($isLocalized ? "." . $routeMatch["_locale"] : "") : null;
     }
 
@@ -427,7 +448,7 @@ class AdvancedRouter implements RouterInterface
 
     public function getRouteHash(string $routeNameOrUrl): string
     {
-        return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localeProvider->getLang();
+        return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localizer->getLocaleLang();
     }
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
@@ -442,22 +463,49 @@ class AdvancedRouter implements RouterInterface
     {
         $routeNameBak = $routeName;
 
-        $event = null;
-        if(array_key_exists("event", $headers)) {
+        $callback = null;
+        if(array_key_exists("callback", $headers)) {
 
-            $event = $headers["event"];
-            if(! ($event instanceof Event) )
-                throw new InvalidArgumentException("header variable \"event\" must be ".Event::class.", currently: ".(is_object($event) ? get_class($event) : gettype($event)));
+            $callback = $headers["callback"];
+            if(!is_callable($callback))
+                throw new InvalidArgumentException("header variable \"callback\" must be callable, value received: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
 
-            unset($headers["event"]);
+            unset($headers["callback"]);
         }
+
+        $url   = $this->generate($routeName, $routeParameters) ?? $routeName;
+        $routeName = $this->getRouteName($url);
+        if (!$routeName) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
+
+        if($routeName == $this->getRouteName()) {
+
+            if($this->getRouteIndex() == $this->getRouteName())
+                throw new LogicException("Index page is not accessible.");
+
+            return $this->redirectToRoute($this->getRouteIndex());
+        }
+
+        $response = new RedirectResponse($url, $state, $headers);
+
+        // Callable action if redirection happens
+        if(is_callable($callback)) $callback();
+
+        return $response;
+    }
+
+    public function redirectEvent(Event $request, string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): bool
+    {
+        if(!method_exists($request, "setResponse"))
+            return false;
+
+        $routeNameBak = $routeName;
 
         $exceptions = [];
         if(array_key_exists("exceptions", $headers)) {
 
             $exceptions = $headers["exceptions"];
             if(!is_string($exceptions) && !is_array($exceptions))
-                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", currently: ".(is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
+                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", value received: ".(is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
 
             unset($headers["exceptions"]);
         }
@@ -467,7 +515,7 @@ class AdvancedRouter implements RouterInterface
 
             $callback = $headers["callback"];
             if(!is_callable($callback))
-                throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
+                throw new InvalidArgumentException("header variable \"callback\" must be callable, value received: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
 
             unset($headers["callback"]);
         }
@@ -477,16 +525,18 @@ class AdvancedRouter implements RouterInterface
         if (!$routeName) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
 
         $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
-        foreach($exceptions as $pattern)
-            if (preg_match($pattern, $this->getRouteName())) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
+        foreach($exceptions as $pattern) {
+
+            if (preg_match($pattern, $this->getRouteName()))
+                return false;
+        }
 
         $response = new RedirectResponse($url, $state, $headers);
-        if($event && method_exists($event, "setResponse")) $event->setResponse($response);
+        $request->setResponse($response);
 
         // Callable action if redirection happens
         if(is_callable($callback)) $callback();
-
-        return $response;
+        return true;
     }
 
     public function reloadRequest(?Request $request = null): RedirectResponse

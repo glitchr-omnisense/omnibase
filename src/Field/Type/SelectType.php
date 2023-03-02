@@ -7,7 +7,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Service\Model\Autocomplete;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
@@ -68,8 +68,8 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var AuthorizationChecker */
     protected $authorizationChecker;
 
-    /** @var LocaleProvider */
-    protected $localeProvider;
+    /** @var Localizer */
+    protected $localizer;
 
     /** @var AdminUrlGenerator */
     protected $adminUrlGenerator;
@@ -86,7 +86,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function __construct(
         FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator,
         ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager,
-        LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator,
+        Localizer $localizer, AdminUrlGenerator $adminUrlGenerator,
         Environment $twig, AuthorizationChecker $authorizationChecker, ObfuscatorInterface $obfuscator, ParameterBagInterface $parameterBag, RouterInterface $router)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -99,7 +99,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->authorizationChecker = $authorizationChecker;
 
         $this->formFactory = $formFactory;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->router = $router;
 
@@ -131,17 +131,21 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //'query_builder'   => null,　// To be implemented if necessary... (currently relying on Autocomplete model and Association*Type..)
 
-            "disable"          => false,
-            'choices'          => null,
-            'choice_loader'    => null,
-            'choice_filter'    => false,
+            "disable"           => false,
+            'choices'           => null,
+            'choice_loader'     => null,
+            'choice_thumbnails' => [],
+            'choice_filter'     => false,
 
-            'choice_value'     => function($value)              { return $value; },   // Return key code
-            'choice_label'     => function($value, $label, $id) { return $label; },   // Return translated label
+            'choice_value'      => function($value)              { return $value; },   // Return key code
+            'choice_label'      => function($value, $label, $id) { return $label; },   // Return translated label
 
-            'select2'          => [],
-            'theme'            => "bootstrap4",
-            'empty_data'       => null,
+            'select2'                   => [],
+            "select2-template"          => null,
+            "select2-templateResult"    => null,
+            "select2-templateSelection" => null,
+            'theme'                     => "bootstrap4",
+            'empty_data'                => null,
 
             // Generic parameters
             'placeholder'        => "@fields.select.placeholder",
@@ -164,7 +168,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             "dropdownCssClass"   => null,
             "containerCssClass"  => null,
 
-            'html'               => false,
+            'use_html'               => false,
             'href'               => null,
             'use_advanced_form' => true,
 
@@ -305,7 +309,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                             $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
                         $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, [
-                            "html" => $options["html"],
+                            "html" => $options["use_html"],
                             "format" => $entryFormat
                         ]);
 
@@ -367,7 +371,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                             $format = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
                         $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, [
-                            "html" => $options["html"],
+                            "html" => $options["use_html"],
                             "format" => $format
                         ]);
 
@@ -400,8 +404,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $choices = $dataChoices;
             }
 
-            //
-            // Note for later: when disabling select2, it might happend that the label of the label of selected entries are wrong
             $formOptions = [
                 'choices'  => array_unique($choices),
                 'multiple' => $options["multiple"]
@@ -460,6 +462,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $oldData = $viewData->toArray();
 
             $mapping = $viewData->getMapping();
+            if(!is_array($dataChoices)) $dataChoices = [$dataChoices];
             foreach(array_diff_object($oldData, $dataChoices) as $entry) {
 
                 if(!$isOwningSide && $mappedBy) {
@@ -563,18 +566,17 @@ class SelectType extends AbstractType implements DataMapperInterface
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
 
+                if($this->classMetadataManipulator->isEntity($data)) $data = [$data];
+                $data = array_map(fn($d) => $this->classMetadataManipulator->isEntity($d) ? $d->getId() : $d, $data);
                 $orderBy = array_flip($data ?? []);
                 $default = count($orderBy);
 
-                $viewData = [];
-                if($data)
-                    $viewData = $classRepository->cacheById($data, [])->getResult();
-
-                usort($viewData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+                $data = $classRepository->cacheById($data, [])->getResult();
+                usort($data, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
 
             } else {
 
-                $data = $classRepository->cacheOneById($data);
+                $data = $this->classMetadataManipulator->isEntity($data) ? $data : $classRepository->cacheOneById($data);
             }
 
             if(!$form->isSubmitted()) $form->setData($data);
@@ -604,7 +606,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "fields"     => $options["autocomplete_fields"],
                 "filters"    => $options["choice_filter"],
                 'capitalize' => $options["capitalize"],
-                "html"       => $options["html"],
+                "html"       => $options["use_html"],
                 "token_name" => $tokenName,
                 "token"      => $token
             ];
@@ -615,14 +617,20 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Prepare select2 options
             $selectOpts = $options["select2"];
             $selectOpts["multiple"] = $options["multiple"] ? "multiple" : "";
+            if($options["select2-template"])
+                $selectOpts["template"] = $options["select2-template"];
+            if($options["select2-templateResult"])
+                $selectOpts["templateResult"] = $options["select2-templateResult"];
+            if($options["select2-templateSelection"])
+                $selectOpts["templateSelection"] = $options["select2-templateSelection"];
             if($options["autocomplete"]) {
 
                 $selectOpts["ajax"] = [
-                    "url" => $this->router->generate($options["autocomplete_endpoint"], array_merge($options["autocomplete_endpoint_parameters"], ["hashid" => $hash])),
+                    "url" => $this->router->generate($options["autocomplete_endpoint"], array_merge($options["autocomplete_endpoint_parameters"], ["data" => $hash])),
                     "type" => $options["autocomplete_type"],
                     "delay" => $options["autocomplete_delay"],
                     "dataType" => "json",
-                    "html" => $options["html"],
+                    "html" => $options["use_html"],
                     "cache" => true
                 ];
 
@@ -631,7 +639,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                 if(!array_key_exists("autocomplete_processResults", $selectOpts) && $options["autocomplete_processResults"] !== null)
                     $selectOpts["ajax"]["processResults"] = $options["autocomplete_processResults"];
             }
-
 
             if(!array_key_exists("minimumResultsForSearch", $selectOpts))
                      $selectOpts["minimumResultsForSearch"] = $options["minimumResultsForSearch"];
@@ -664,7 +671,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $selectOpts["multivalue"] = $options["multivalue"];
 
             if(!array_key_exists("language", $selectOpts))
-                $selectOpts["language"] = $this->localeProvider->getLang($this->localeProvider->getLocale($options["language"]));
+                $selectOpts["language"] = $this->localizer->getLocaleLang($this->localizer->getLocale($options["language"]));
 
             if(!array_key_exists("tokenSeparators", $selectOpts))
                      $selectOpts["tokenSeparators"] = $selectOpts["tokenSeparators"] ?? $options["tokenSeparators"];
@@ -680,8 +687,15 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //
             // Format preselected values
-            $dataset = $data instanceof Collection ? $data->toArray() : ( !is_array($data) ? [$data] : $data );
-            $selectedData  = $dataset;
+            $dataset = [];
+            if($options["choice_loader"] === null) {
+
+                $dataset   = $data instanceof Collection ? $data->toArray() : null;
+                $dataset ??= !is_array($data) ? [$data] : $data;
+            }
+
+            $selectedData   = $data instanceof Collection ? $data->toArray() : null;
+            $selectedData ??= $data !== null && !is_array($data) ? [$data] : $data ?? [];
 
             $innerType = get_class($form->getConfig()->getType()->getInnerType());
             $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, $dataset, &$options, &$selectedData) : Generator {
@@ -716,7 +730,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                         $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
                     $entry = $this->autocomplete->resolve($entry, $options["class"] ?? $innerType, [
-                        "html" => $options["html"],
+                        "html" => $options["use_html"],
                         "format" => $entryFormat
                     ]);
 
@@ -765,6 +779,20 @@ class SelectType extends AbstractType implements DataMapperInterface
             // NB: Sorting elements is not working at the moment for multivalue SelectType, reason why I disable it here..
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
         }
+
+        $view->vars["choices"]        = array_filter($options["choices"] ?? $dataset ?? []);
+        $view->vars["data"]           = $selectedData;
+
+        $view->vars["choice_thumbnails"] = is_callable($options["choice_thumbnails"])
+            ? array_map(fn($c) => $options["choice_thumbnails"]($c), $view->vars["choices"] ?? [])
+            : $options["choice_thumbnails"] ?? [];
+
+        foreach($view->vars["choice_thumbnails"] as $key => $choice)
+            $view->vars["choice_thumbnails"][$key] = $this->classMetadataManipulator->isEntity($choice) ? $choice->getId() : $choice;
+        foreach($view->vars["choices"] as $key => $choice)
+            $view->vars["choices"][$key] = $this->classMetadataManipulator->isEntity($choice) ? $choice->getId() : $choice;
+        foreach($view->vars["data"] as $key => $choice)
+            $view->vars["data"][$key] = $this->classMetadataManipulator->isEntity($choice) ? $choice->getId() : $choice;
 
     }
 }

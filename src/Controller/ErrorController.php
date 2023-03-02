@@ -37,7 +37,7 @@ class ErrorController extends AbstractController
             $isPreview = $this->router->getRouteName() === "_preview_error";
 
             if ($this->baseService->isDevelopment() && !$isPreview) $response = $this->Rescue($exception);
-            else $response = $this->render("@Base/exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
+            else $response = $this->render("exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
 
         } catch(Error|Exception|ErrorException $fatalException) {
 

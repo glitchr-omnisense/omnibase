@@ -2,17 +2,16 @@
 
 namespace Base\Field\Type;
 
+use Base\Entity\User;
+use Base\Service\Model\SelectInterface;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\AbstractType;
 
-class CountryType extends AbstractType
+class CountryType extends SelectType implements SelectInterface
 {
-    public function getParent() : ?string { return SelectType::class; }
-    public function getBlockPrefix(): string { return 'country'; }
-
     private static $additionalList = [];
     private static $rejectCountryList = [ // Rejected just because missing flag.. to do later
         "AO", "AI", "AQ", "AW", "BM", "CW", "GS", "GI", "GL",
@@ -37,7 +36,7 @@ class CountryType extends AbstractType
         }
     }
 
-    public static function getName(bool $code)
+    public static function getName(string $code)
     {
         if(array_key_exists($code, self::$additionalList)) return self::$additionalList[$code];
         return Countries::getName($code);
@@ -58,15 +57,25 @@ class CountryType extends AbstractType
         return array_flip(self::getNames());
     }
 
+    public static function getIcon(string $id, int $index = -1): ?string
+    {
+        return null;
+    }
+
+    public static function getText(string $id): ?string { return self::getName($id); }
+    public static function getHtml(string $id): ?string { return "<img class='country-flag' src='/bundles/base/images/flags/".$id.".svg' alt='".$id."'> ".self::getName($id)."</>"; }
+    public static function getData(string $id): ?array { return []; }
+
     public function configureOptions(OptionsResolver $resolver)
     {
-        //            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"".$this->router->generate("bundles/base/flags/'+option.id+'.svg")."\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }"
 
+        parent::configureOptions($resolver);
         $resolver->setDefaults([
             'choices' => $this->getChoices(),
             'alpha3' => false,
+            "use_html" => true,
+            "empty_data" => User::getCookie("country") ?? null,
             'use_advanced_form' => true
         ]);
-
     }
 }

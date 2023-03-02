@@ -2,14 +2,16 @@
 
 namespace Base\Twig\Variable;
 
+use Base\Entity\User;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\MaternityUnitInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
 use DateTime;
+use Symfony\Component\Routing\Router;
 
 class SiteVariable
 {
@@ -26,9 +28,9 @@ class SiteVariable
      */
     protected $translator;
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
     /**
      * @var MaintenanceProvider
      */
@@ -46,7 +48,7 @@ class SiteVariable
         RouterInterface $router,
         SitemapperInterface $sitemapper,
         TranslatorInterface $translator,
-        LocaleProviderInterface $localeProvider,
+        LocalizerInterface $localizer,
         BaseService $baseService,
         MaintenanceProviderInterface $maintenanceProvider,
         MaternityUnitInterface $maternityUnit)
@@ -54,16 +56,16 @@ class SiteVariable
         $this->router = $router;
         $this->translator = $translator;
         $this->baseService = $baseService;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->maternityUnit = $maternityUnit;
         $this->sitemapper = $sitemapper;
     }
 
-    public function index() { return $this->baseService->getIndexPage(); }
+    public function index() { return $this->baseService->getRouteIndex(); }
     public function meta     (array $meta = [], ?string $locale = null) : array
     {
-        $locale ??= $this->localeProvider->getLocale();
+        $locale ??= $this->localizer->getLocale();
         return array_merge($this->baseService->getMeta($locale), $meta);
     }
 
@@ -74,16 +76,25 @@ class SiteVariable
     public function logo()   { return $this->baseService->getSite()["logo"]   ?? null; }
 
     public function scheme   (?string $locale = null) : ?string { return $this->router->getScheme($locale);    }
-    public function host     (?string $locale = null) : ?string { return $this->router->getHostname($locale);  }
+    public function host     (?string $locale = null) : ?string { return $this->router->getHost($locale);  }
+    public function port     (?string $locale = null) : ?string { return $this->router->getPort($locale);  }
     public function domain   (?string $locale = null) : ?string { return $this->router->getDomain($locale);    }
     public function subdomain(?string $locale = null) : ?string { return $this->router->getSubdomain($locale); }
     public function base_dir (?string $locale = null) : string  { return $this->router->getBaseDir($locale);   }
-
+    public function url      (?string $nameOrUrl = "", array $routeParameters = [],  ?string $locale = null) : string  { return $this->router->getUrl($nameOrUrl, $routeParameters, Router::ABSOLUTE_URL); }
     public function under_maintenance() : bool { return $this->maintenanceProvider->isUnderMaintenance(); }
 
     public function birthdate(?string $locale = null) : DateTime { return $this->maternityUnit->getBirthdate($locale); }
     public function is_born(?string $locale = null) : bool { return $this->maternityUnit->isBorn($locale); }
     public function age(?string $locale = null) : string { return $this->maternityUnit->getAge($locale); }
+
+    public function is_newcomer(int $within = 0): bool
+    {
+        $lastVisit = $_COOKIE["USER/LAST_VISIT"] ?? 0;
+        setcookie("USER/LAST_VISIT", time(), time()+$within);
+
+        return !$lastVisit;
+    }
 
     public function execution_time() { return $this->baseService->getExecutionTime(); }
 }

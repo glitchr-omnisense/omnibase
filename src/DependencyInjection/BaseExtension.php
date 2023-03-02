@@ -3,11 +3,13 @@
 namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
-use Base\Cache\Abstract\AbstractSimpleCacheInterface;
+use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\EntityDispatcher\EventDispatcherInterface;
+use Base\Service\Model\Currency\CurrencyApiInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
+use Base\Service\Model\Obfuscator\CompressionInterface;
 use Base\Twig\TagRendererInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -15,6 +17,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 class BaseExtension extends Extension
 {
@@ -52,10 +55,14 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
         $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
-        $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('base.currency_api');
-        $container->registerForAutoconfiguration(AbstractSimpleCacheInterface::class)->addTag('base.simple_cache');
+        $container->registerForAutoconfiguration(AbstractLocalCacheInterface::class)->addTag('base.simple_cache');
+
+        $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('currency.api');
+        $container->registerForAutoconfiguration(CompressionInterface::class)->addTag('obfuscator.compressor');
 
         $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
+        $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
+
     }
 
     public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = "")

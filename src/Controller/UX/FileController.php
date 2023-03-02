@@ -11,6 +11,8 @@ use Base\Repository\Layout\ImageCropRepository;
 use Base\Service\FileService;
 use Base\Service\Flysystem;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,7 +22,7 @@ use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
-/** @Route("", name="ux_") */
+/** @Route("", name="ux_", priority=-1) */
 class FileController extends AbstractController
 {
     use BaseTrait;
@@ -51,21 +53,27 @@ class FileController extends AbstractController
     protected $profiler;
 
     /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
      * @var ?bool
      */
     protected $localCache;
 
-    public function __construct(Flysystem $flysystem, ImageService $imageService, ImageCropRepository $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
+    public function __construct(RequestStack $requestStack, Flysystem $flysystem, ImageService $imageService, ImageCropRepository $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
     {
         $this->imageCropRepository = $imageCropRepository;
 
         $this->imageService = $imageService;
         $this->profiler = $profiler;
 
-        $this->fileService  = cast($imageService, FileService::class);
+        $this->fileService = cast($imageService, FileService::class);
         $this->flysystem   = $flysystem;
 
-        $this->localCache = $localCache;
+        $this->localCache    = $localCache ?? true;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -73,18 +81,20 @@ class FileController extends AbstractController
      */
     public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
     {
-        if ($this->profiler !== null)
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX)
             $this->profiler->disable();
 
-        return parent::redirectToRoute($route, $parameters, $status);
+        $cacheless = $this->localCache == false ? "_cacheless" : "";
+        return parent::redirectToRoute($route.$cacheless, $parameters, $status);
     }
 
     /**
-     * @Route("/contents/{hashid}", name="serve", requirements={"hashid"=".+"})
+     * @Route("/contents/{data}", name="serve", requirements={"data"=".+"})
      */
-    public function Serve($hashid): Response
+    public function Serve($data): Response
     {
-        $config = $this->fileService->resolve($hashid);
+        $config = $this->fileService->resolve($data);
         if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
 
         $path     = $config["path"];
@@ -99,43 +109,24 @@ class FileController extends AbstractController
     }
 
     /**
-     * @Route("/images/debug/{hashid}/image.{extension}", name="debug_imageExtension", requirements={"hashid"=".+"})
-     * @Route("/images/debug/{hashid}", name="debug_image", requirements={"hashid"=".+"})
-     * @IsGranted("ROLE_EDITOR")
+     * @Route("/images/cacheless/cropper/{identifier}/{data}/image.{extension}", name="imageCropExtension_cacheless", requirements={"data"=".+"})
+     * @Route("/images/cacheless/cropper/{identifier}/{data}", name="imageCrop_cacheless", requirements={"data"=".+"})
      */
-    public function ImageDebug($hashid, string $extension = null): Response
+    public function ImageCropCacheless($data, string $identifier, string $extension = null): Response
     {
-        return $this->Image($hashid, $extension, true);
+        $this->localCache = false;
+        return $this->ImageCrop($data, $identifier, $extension);
     }
 
     /**
-     * @Route("/images/cacheless/{hashid}/image.{extension}", name="imageExtension_cacheless", requirements={"hashid"=".+"})
-     * @Route("/images/cacheless/{hashid}", name="image_cacheless", requirements={"hashid"=".+"})
+     * @Route("/images/cropper/{identifier}/{data}/image.{extension}", name="imageCropExtension", requirements={"data"=".+"})
+     * @Route("/images/cropper/{identifier}/{data}", name="imageCrop", requirements={"data"=".+"})
      */
-    public function ImageCacheless($hashid, string $extension = null): Response
-    {
-        $this->localCache = false;
-        return $this->Image($hashid, $extension);
-    }
-    /**
-     * @Route("/images/cacheless/{identifier}/{hashid}/image.{extension}", name="imageCropExtension_cacheless", requirements={"hashid"=".+"})
-     * @Route("/images/cacheless/{identifier}/{hashid}", name="imageCrop_cacheless", requirements={"hashid"=".+"})
-     */
-    public function ImageCropCacheless($hashid, string $identifier, string $extension = null): Response
-    {
-        $this->localCache = false;
-        return $this->ImageCrop($hashid, $identifier, $extension);
-    }
-
-    /**
-     * @Route("/images/cropper/{identifier}/{hashid}/image.{extension}", name="imageCropExtension", requirements={"hashid"=".+"})
-     * @Route("/images/cropper/{identifier}/{hashid}", name="imageCrop", requirements={"hashid"=".+"})
-     */
-    public function ImageCrop($hashid, string $identifier, string $extension = null): Response
+    public function ImageCrop($data, string $identifier, string $extension = null): Response
     {
         //
         // Extract parameters
-        $config = $this->imageService->resolve($hashid);
+        $config = $this->imageService->resolve($data);
         if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
 
         $filters    = $config["filters"] ?? [];
@@ -146,9 +137,8 @@ class FileController extends AbstractController
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
         if(!$extensions) throw $this->createNotFoundException();
-
         if ($extension == null || !in_array($extension, $extensions))
-            return $this->redirectToRoute("ux_imageCropExtension", ["hashid" => $hashid, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+            return $this->redirectToRoute("ux_imageCropExtension", ["data" => $data, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
         //
         // Get the most accurate cropping
@@ -176,7 +166,7 @@ class FileController extends AbstractController
         // Providing a "width:height" information
         $width  = null;
         $height = null;
-        if($imageCrop === null && preg_match("/([0-9]*)[:x]([0-9]*)/", $identifier, $matches)) {
+        if($imageCrop === null && preg_match("/([0-9]+)[:x]([0-9]+)/", $identifier, $matches)) {
 
             $width   = $matches[1];
             $width0  = $width/$naturalWidth;
@@ -188,6 +178,7 @@ class FileController extends AbstractController
             if($ratio0 == 0) throw $this->createNotFoundException();
 
             $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+            $identifier = $imageCrop->getWidth()."x".$imageCrop->getHeight();
         }
 
         //
@@ -211,35 +202,59 @@ class FileController extends AbstractController
         // File should be access from default "image" route to spare some computing time
         // NB: These lines below are commented to keep the same url and cache the image
         // $config["identifier"] = $identifier;
-        // $hashid = $this->imageService->obfuscate($path, $config, $filters);
+        // $data = $this->imageService->obfuscate($path, $config, $filters);
+        if($imageCrop === null) $identifier = "image";
 
-        $output = pathinfo_extension($hashid."/image", $extension);
+        $output = pathinfo_extension($data."/".$identifier, $extension);
         $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
-     * @Route("/images/cacheless/{hashid}/image.webp", name="imageWebp_cacheless", requirements={"hashid"=".+"})
+     * @Route("/images/cacheless/{data}/image.webp", name="imageWebp_cacheless", requirements={"data"=".+"})
      */
-    public function ImageWebpCacheless($hashid): Response
+    public function ImageWebpCacheless($data): Response
     {
         $this->localCache = false;
-        return $this->ImageWebp($hashid);
+        return $this->ImageWebp($data);
     }
 
     /**
-     * @Route("/images/{hashid}/image.webp", name="imageWebp", requirements={"hashid"=".+"})
+     * @Route("/images/debug/{data}/image.{extension}", name="debug_imageExtension", requirements={"data"=".+"})
+     * @Route("/images/debug/{data}", name="debug_image", requirements={"data"=".+"})
+     * @IsGranted("ROLE_EDITOR")
      */
-    public function ImageWebp($hashid): Response
+    public function ImageDebug($data, string $extension = null): Response
     {
-        $config = $this->imageService->resolve($hashid);
+        return $this->Image($data, $extension, true);
+    }
+
+    /**
+     * @Route("/images/cacheless/{data}/image.{extension}", name="imageExtension_cacheless", requirements={"data"=".+"})
+     * @Route("/images/cacheless/{data}", name="image_cacheless", requirements={"data"=".+"})
+     */
+    public function ImageCacheless($data, string $extension = null): Response
+    {
+        $this->localCache = false;
+        return $this->Image($data, $extension);
+    }
+
+
+    /**
+     * @Route("/images/{data}/image.webp", name="imageWebp", requirements={"data"=".+"})
+     */
+    public function ImageWebp($data): Response
+    {
+        $config = $this->imageService->resolve($data);
         if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
 
         $webp = $config["webp"] ?? $this->imageService->isWebpEnabled();
-        if(!$webp) return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if(!$webp) return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
 
         $mimeType = $config["mimetype"] ?? $this->imageService->getMimeType($config["path"]);
-        if($mimeType == "image/svg+xml") return $this->redirectToRoute("ux_imageSvg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if($mimeType == "image/svg+xml") return $this->redirectToRoute("ux_imageSvg", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
 
         $options = $config["options"];
         $filters = $config["filters"];
@@ -247,46 +262,47 @@ class FileController extends AbstractController
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
-        $output = pathinfo_extension($hashid."/image", "webp");
+        $output = pathinfo_extension($data."/image", "webp");
         $path = $this->imageService->filter($config["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
 
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
-     * @Route("/images/{hashid}/image.svg", name="imageSvg", requirements={"hashid"=".+"})
+     * @Route("/images/{data}/image.svg", name="imageSvg", requirements={"data"=".+"})
      */
-    public function ImageSvg($hashid): Response
+    public function ImageSvg($data): Response
     {
-        $config = $this->imageService->resolve($hashid);
+        $config = $this->imageService->resolve($data);
         if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
 
         $filters = $config["filters"];
         $options = $config["options"];
 
         $mimeType = $config["mimetype"] ?? $this->imageService->getMimeType($config["path"]);
-        if($mimeType != "image/svg+xml") {
-
-            return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
-        }
+        if($mimeType != "image/svg+xml")
+            return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
-        $output = pathinfo_extension($hashid."/image", "svg");
+        $output = pathinfo_extension($data."/image", "svg");
         $path = $this->imageService->filter($config["path"], new SvgFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
-        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
-     * @Route("/images/{hashid}/image.{extension}", name="imageExtension", requirements={"hashid"=".+"})
-     * @Route("/images/{hashid}", name="image", requirements={"hashid"=".+"})
+     * @Route("/images/{data}/image.{extension}", name="imageExtension", requirements={"data"=".+"})
+     * @Route("/images/{data}", name="image", requirements={"data"=".+"})
      */
-    public function Image($hashid, string $extension = null, bool $debug = false): Response
+    public function Image($data, string $extension = null, bool $debug = false): Response
     {
         //
         // Extract parameters
-        $config = $this->imageService->resolve($hashid);
+        $config = $this->imageService->resolve($data);
         if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
 
         $filters = $config["filters"] ?? [];
@@ -298,24 +314,21 @@ class FileController extends AbstractController
         if(!$extensions) throw $this->createNotFoundException();
 
         if ($extension == null || !in_array($extension, $extensions))
-            return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
-
-        // Forward to image cropper
-        $identifier = $config["identifier"] ?? null;
-        if($identifier) return $this->ImageCrop($hashid, $identifier, $extension);
+            return $this->redirectToRoute("ux_imageExtension", ["data" => $data, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
-        $output = pathinfo_extension($hashid."/image", $extension);
+        $output = pathinfo_extension($data."/image", $extension);
         $path = $this->imageService->filter($config["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
         if($debug) {
 
-            dump($hashid, $config, $path);
+            dump($data, $config, $path);
             exit(1);
         }
 
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
 }

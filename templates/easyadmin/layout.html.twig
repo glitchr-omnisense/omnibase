@@ -307,7 +307,7 @@
                                 {% endif %}
 
                                 <div class="user-menu-wrapper">
-                                    {{ render_locale("locale_changeto", {"class": "dropdown-menu-end"}, "@Base/locale/dropdown-min.html.twig") }}
+                                    {{ render_locale({"class": "dropdown-menu-end"}, "@Base/localizer/locale_dropdownMin.html.twig") }}
                                 </div>
                             </div>
                         {% endblock content_top_header %}
@@ -331,8 +331,10 @@
                                             {{ _content_icon|raw }}
                                         {% else %}
                                             {% set image = ea_extra.image(ea.crud.getCurrentPage() ?? null)|default(null) %}
+                                            {% set image_attributes = ea_extra.imageAttributes(ea.crud.getCurrentPage() ?? null)|default([]) %}
                                             {% if image is not null %}
-                                                {{ asset(image)|thumbnail(500,500)|lightbox({class:"ea-extra-image", "lazy":true}, null, null, {class:"ea-extra"}) }}
+                                                {%- set image_attributes = image_attributes|merge({class:"ea-extra-image" ~ (row_attr.class is defined ? ' ' ~ row_attr.class : ''), "lazy":true} ) -%}
+                                                {{ asset(image)|thumbnail(500,500)|lightbox(image_attributes, null, null, {class:"ea-extra"}) }}
                                             {% else %}
                                                 {% if url is not empty %}<a href="{{url}}">{% endif %}
                                                 <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fas fa-icons") }}"></i>

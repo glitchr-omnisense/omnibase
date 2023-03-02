@@ -93,7 +93,6 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             if (!$helper->ask($input, $output, $question))
                 return Command::FAILURE;
 
-
             foreach($imageCrops as $imageCrop) {
 
                 $output->section()->writeln("             <warning>* Image #".$imageCrop->getImage()->getId()." \"".$imageCrop->getLabel()."\" .. (".($iProcess+1)."/".$nTotalCrops.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
@@ -185,20 +184,19 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 $extensions = $this->imageService->getExtensions($file);
                 $extension  = first($extensions);
 
-                $hashidWebp = $this->imageService->imagine($file, [], ["webp" => true]);
-                $hashid     = $this->imageService->imagine($file, [], ["webp" => false, "extension" => $extension]);
+                $dataWebp = $this->imageService->imagine($file, [], ["webp" => true, "local_cache" => true]);
+                $data     = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
+                if($this->isCached($data)) {
 
-                if($this->isCached($hashid)) {
-
-                    $this->output->section()->writeln("             <warning>* Already cached main image \"".str_lstrip($file,$publicDir)."\" .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("             <warning>* Already cached main image \".".str_lstrip(realpath($file),realpath($publicDir))."\" .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
 
                 } else {
 
-                    $this->output->section()->writeln("             <ln>* Warming up main image \"".str_lstrip($file,$publicDir)."\" .. (".($i+1)."/".$N.")</ln>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("             <ln>* Warming up main image \".".str_lstrip(realpath($file),realpath($publicDir))."\" .. (".($i+1)."/".$N.")</ln>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
 
-                    $this->fileController->ImageWebp($hashidWebp);
-                    $this->fileController->Image($hashid, $extension);
+                    if($this->cache) $this->fileController->ImageWebp($dataWebp);
+                    if($this->cache) $this->fileController->Image($data, $extension);
 
                     $this->ibatch++;
                 }
@@ -206,7 +204,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 foreach($imageCrops as $imageCrop) {
 
                     $identifier = $imageCrop->getSlug() ?? $imageCrop->getWidth()."x".$imageCrop->getHeight();
-                    if($this->isCached($hashid, $imageCrop)) {
+                    if($this->isCached($data, $imageCrop)) {
 
                         $this->output->section()->writeln("             <warning>  Already cached \"".str_lstrip($file,$publicDir)."\" (".$identifier.") .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
 
@@ -215,8 +213,8 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                         $this->output->section()->writeln("             <ln>  Warming up \"".str_lstrip($file,$publicDir)."\" (".$identifier.") .. (".($i+1)."/".$N.")</ln>", OutputInterface::VERBOSITY_VERBOSE);
                         $this->ibatch++;
 
-                        $this->fileController->ImageCrop($hashidWebp, $identifier, $extension);
-                        $this->fileController->ImageCrop($hashid, $identifier, $extension);
+                        if($this->cache) $this->fileController->ImageCrop($dataWebp, $identifier, $extension);
+                        if($this->cache) $this->fileController->ImageCrop($data, $identifier, $extension);
                     }
 
                     $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ".$identifier, OutputInterface::VERBOSITY_DEBUG);
@@ -227,13 +225,13 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         return Command::SUCCESS;
     }
 
-    public function isCached($hashid, $imageCrop = null)
+    public function isCached($data, $imageCrop = null)
     {
-        if($imageCrop == null) return parent::isCached($hashid);
+        if($imageCrop == null) return parent::isCached($data);
 
         //
         // Extract parameters
-        $args = $this->imageService->resolve($hashid);
+        $args = $this->imageService->resolve($data);
         if(!$args) return false;
 
         $filters = $args["filters"] ?? [];

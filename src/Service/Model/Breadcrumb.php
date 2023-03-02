@@ -113,6 +113,8 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             )], $routeParameters);
 
             $label = $routeName ? $this->translator->trans("@controllers.".$transPath.".title", $transParameters) : null;
+            $label = preg_replace("/\{\w\}/", "", $label);
+            $label = str_rstrip($label, "#");
             if($label == "@controllers.".$transPath.".title") $label = "";
 
             $pageTitle = null;
@@ -152,8 +154,10 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         if(!$urlPattern) return null; // No pattern
 
-        $urlParts        = explode("/", rtrim($url, "/"));
         $urlPatternParts = explode("/", rtrim($urlPattern, "/"));
+
+        $urlParts = explode("/", rtrim($url, "/"));
+        $urlParts = array_pad($urlParts, count($urlPatternParts), "");
         if(count($urlParts) > count($urlPatternParts))
             return null; // Url not matching pattern
 
@@ -167,7 +171,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
                 continue;
             }
 
-            if($pattern !== $urlParts[$key])
+            if($pattern !== ($urlParts[$key] ?? null))
                 return null; // Url not matching pattern
         }
 

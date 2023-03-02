@@ -2,6 +2,7 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Field\SlugField;
 use Base\Field\StockField;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
@@ -29,6 +30,9 @@ final class StockConfigurator implements FieldConfiguratorInterface
             $field->setFormattedValue("");
             return;
         }
+
+        $targetFieldName = $field->getCustomOption(StockField::OPTION_TARGET_FIELD_NAME);
+        $field->setFormTypeOption('target', $targetFieldName);
 
         $scale = $field->getCustomOption(StockField::OPTION_NUM_DECIMALS);
         $roundingMode = $field->getCustomOption(StockField::OPTION_ROUNDING_MODE);

@@ -196,13 +196,24 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                         unset($data[$property]);
                 }
 
-                if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id] ??= $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
-                $this->ordering[$className][$id] ??= new Ordering();
-                $this->ordering[$className][$id]->setEntityData($data);
+                if(!array_key_exists($className, $this->ordering))
+                    $this->ordering[$className] = [];
 
-                $orderingId = $this->ordering[$className][$id]->getId();
-                if($orderingId) $cache->evictEntity(Ordering::class, $orderingId);
+                $this->ordering[$className][$id] ??= $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);    
+                if ($this->ordering[$className][$id] !== null && empty($data)) {
+                    $this->ordering[$className][$id]->setEntityData([]);
+
+                    $orderingId = $this->ordering[$className][$id]->getId();
+                    if ($orderingId) $cache->evictEntity(Ordering::class, $orderingId);
+
+                } else if(!empty($data)) {
+
+                    $this->ordering[$className][$id] ??= new Ordering();
+                    $this->ordering[$className][$id]->setEntityData($data);
+
+                    $orderingId = $this->ordering[$className][$id]->getId();
+                    if ($orderingId) $cache->evictEntity(Ordering::class, $orderingId);
+                }
 
             case EntityAction::DELETE:
                 break;

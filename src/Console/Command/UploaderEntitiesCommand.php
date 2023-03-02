@@ -122,7 +122,7 @@ class UploaderEntitiesCommand extends Command
                 $this->postProcess($class, $field, $annotation, $fileList);
             }
 
-            if($noPropertyFound) {
+            if($noPropertyFound && !$this->property) {
 
                 $output->section()->writeln("             $class::$field <warning>not declared in this class..</warning>", OutputInterface::VERBOSITY_DEBUG);
                 $nTotalFields--;

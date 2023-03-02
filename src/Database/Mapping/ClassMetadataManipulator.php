@@ -2,7 +2,9 @@
 
 namespace Base\Database\Mapping;
 
-use Base\Cache\Abstract\AbstractSimpleCache;
+use App\Entity\Marketplace\Product\Extra\Wallpaper;
+use App\Entity\Marketplace\Sales\Region;
+use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
@@ -13,7 +15,6 @@ use Base\Field\Type\SelectType;
 use Base\Field\Type\TranslationType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
@@ -22,7 +23,7 @@ use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
 
 use Base\Database\Mapping\Factory\ClassMetadataFactory;
-
+use Doctrine\Persistence\Proxy;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -32,7 +33,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class ClassMetadataManipulator extends AbstractSimpleCache
+class ClassMetadataManipulator extends AbstractLocalCache
 {
     /**
      * @var ManagerRegistry
@@ -49,7 +50,7 @@ class ClassMetadataManipulator extends AbstractSimpleCache
      */
     protected array $globalExcludedFields;
 
-    protected static string $cacheDir;
+    protected static ?string $cacheDir = null;
 
     public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, ?string $cacheDir = null, array $globalExcludedFields = ['id', 'translatable', 'locale'])
     {
@@ -69,7 +70,7 @@ class ClassMetadataManipulator extends AbstractSimpleCache
 
         if(!is_string($entityOrClassOrMetadata) || !class_exists($entityOrClassOrMetadata)) return false;
 
-        return !$this->getEntityManager()->getMetadataFactory()->isTransient($entityOrClassOrMetadata);
+        return !$this->getEntityManager()->getMetadataFactory()->isTransient($entityOrClassOrMetadata) || is_instanceof($entityOrClassOrMetadata, Proxy::class);
     }
 
     public function isEnumType($entityOrClassOrMetadata) : bool
@@ -123,7 +124,7 @@ class ClassMetadataManipulator extends AbstractSimpleCache
         if(!$type) return $type;
         
         try { $doctrineType = \Doctrine\DBAL\Types\Type::getType($type); }
-        catch (\Exception $e) { throw new \LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so.", $e->getCode(), $e); }
+        catch (\Exception $e) { throw new \LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e); }
 
         return $doctrineType;
     }
@@ -174,6 +175,7 @@ class ClassMetadataManipulator extends AbstractSimpleCache
         // Auto detect some fields..
         foreach($validFields as $fieldName => $field) {
 
+            if(str_starts_with($fieldName, "_") ) continue;
             if($fieldName == "id")
                 $validFields[$fieldName] = ["form_type" => HiddenType::class];
             else if($fieldName == "uuid")
@@ -186,7 +188,7 @@ class ClassMetadataManipulator extends AbstractSimpleCache
                 ];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
-            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array")
+            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array" || $this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "json")
                 $validFields[$fieldName] = ["form_type" => SelectType::class, "tags" => true];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "integer")
                 $validFields[$fieldName] = ["form_type" => NumberType::class];
@@ -207,7 +209,9 @@ class ClassMetadataManipulator extends AbstractSimpleCache
             if(is_array($fields[$fieldName]) && !empty($fields[$fieldName])) {
 
                 $fields[$fieldName]["form_type"] = $fields[$fieldName]["form_type"] ?? $validFields[$fieldName]["form_type"] ?? null;
+
                 $validFields[$fieldName] = $fields[$fieldName] ?? $validFields[$fieldName] ?? [];
+
                 unset($fields[$fieldName]);
             }
         }
@@ -331,6 +335,8 @@ class ClassMetadataManipulator extends AbstractSimpleCache
 
     public function getFieldValue($entity, string|array $fieldPath): mixed
     {
+        if($fieldPath == "") return $entity;
+
         // Prepare field path information
         if(is_string($fieldPath)) $fieldPath = explode(".", $fieldPath);
         if(empty($fieldPath)) throw new \Exception("No field path provided for \"".get_class($entity)."\" ");
@@ -361,15 +367,19 @@ class ClassMetadataManipulator extends AbstractSimpleCache
         if ($entity instanceof Proxy)
             $entity->__load();
 
+        if(class_implements_interface($entity, TranslatableInterface::class) && $fieldName == "translations") {
+
+            $fieldValue = $entity->getTranslations();
+            $fieldName  = implode(".", $fieldPath);
+            $fieldPath = "";
+        }
+
         if($this->hasField($entity, $fieldName))
-           $fieldValue = $classMetadata->getFieldValue($entity, $fieldName);
+            $fieldValue = $classMetadata->getFieldValue($entity, $fieldName);
         else {
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             $fieldValue = $propertyAccessor->getValue($entity, $fieldName);
         }
-
-        if(class_implements_interface($fieldValue, TranslatableInterface::class))
-            $fieldValue = $fieldValue->getTranslations();
 
         if(is_array($fieldValue)) {
 
@@ -477,6 +487,10 @@ class ClassMetadataManipulator extends AbstractSimpleCache
 
         $collection ??= $this->isEntity($entityOrForm) ? null : $this->getClosestEntityCollection($entityOrForm);
         if(!$collection instanceof Collection) return null;
+
+        if($entity instanceof Fee) {
+
+        }
 
         if($collection instanceof PersistentCollection) {
 
@@ -867,6 +881,6 @@ class ClassMetadataManipulator extends AbstractSimpleCache
     
     public function saveCompletors()
     {
-        $this->setCache("/Completors", self::$completors, true);
+        $this->setCache("/Completors", self::$completors, null,true);
     }
 }

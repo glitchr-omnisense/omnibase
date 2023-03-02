@@ -48,6 +48,12 @@ final class SlugField implements FieldInterface
         return $this;
     }
 
+    public function uppercase(bool $upper = true): self
+    {
+        $this->setFormTypeOption("upper", $upper);
+        return $this;
+    }
+
     public function setUnlockConfirmationMessage(string $message): self
     {
         $this->setCustomOption(self::OPTION_UNLOCK_CONFIRMATION_MESSAGE, $message);

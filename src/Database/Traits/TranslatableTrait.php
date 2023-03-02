@@ -6,7 +6,7 @@ use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslationInterface;
 
 use Base\Service\BaseService;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
@@ -85,7 +85,7 @@ trait TranslatableTrait
     {
         if($translation !== null) {
 
-            $this->getTranslations()->set(LocaleProvider::normalize($translation->getLocale()), $translation);
+            $this->getTranslations()->set(Localizer::normalizeLocale($translation->getLocale()), $translation);
             $translation->setTranslatable($this);
         }
 
@@ -94,14 +94,14 @@ trait TranslatableTrait
 
     public function translate(?string $locale = null)
     {
-        $localeProvider = BaseService::getLocaleProvider();
-        if(!$localeProvider) return null;
+        $localizer = BaseService::getLocalizer();
+        if(!$localizer) return null;
 
-        $defaultLocale = $localeProvider->getDefaultLocale();
-        $availableLocales = $localeProvider->getAvailableLocales();
+        $defaultLocale = $localizer->getDefaultLocale();
+        $availableLocales = $localizer->getAvailableLocales();
 
         $locale = intval($locale) < 0 ? $defaultLocale : $locale;
-        $normLocale = $localeProvider->getLocale($locale); // Locale normalizer
+        $normLocale = $localizer->getLocale($locale); // Locale normalizer
         $translationClass = self::getTranslationEntityClass(true, false);
         $translations = $this->getTranslations();
 
@@ -121,7 +121,7 @@ trait TranslatableTrait
             if($translation == null) {
 
                 $locales = array_filter($translations->getKeys(), fn($l) => !in_array($l, $availableLocales));
-                $fallbackLocales = array_map(fn($l) => $localeProvider->getLocale($localeProvider->getLang($l)), $locales);
+                $fallbackLocales = array_map(fn($l) => $localizer->getLocale($localizer->getLocaleLang($l)), $locales);
 
                 foreach(array_keys($fallbackLocales, $normLocale) as $normKey)
                     $translation = $translations[$locales[$normKey]] ?? null;
@@ -270,7 +270,7 @@ trait TranslatableTrait
 
         //
         // Proxy getter method for current locale
-        $defaultLocale = BaseService::getLocaleProvider()->getDefaultLocale();
+        $defaultLocale = BaseService::getLocalizer()->getDefaultLocale();
         $entityIntl = $this->translate();
 
         $value = null;

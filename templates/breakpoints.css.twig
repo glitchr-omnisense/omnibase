@@ -1,0 +1,14 @@
+{% cache "breakpoints" %}
+body:before {
+    display: none;
+    visibility: hidden;
+}
+
+{%- for breakpoint in breakpoints -%}
+@media {{ (breakpoint.media ?? "all")|raw }} {
+    body:before {
+        content: "{{ breakpoint.name }}";
+    }
+}
+{%- endfor -%}
+{% endcache %}

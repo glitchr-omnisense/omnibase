@@ -1,0 +1,15 @@
+{% extends 'layout1.html.twig' %}
+
+{% block content %}
+    <div class="content">
+        <div class="glass block">
+
+            <main>
+                <section class="wrapper tab-content" id="pills-tabContent">
+                    <h1>{{ (app.site.title ?? ("@controllers.security_pending.title"|trans))|mb_ucwords }}</h1><br/>
+                    <p>{{ "@controllers.security_pending.description"|trans|raw}}</p>
+                </section>
+            </main>
+        </div>
+    </div>
+{% endblock %}

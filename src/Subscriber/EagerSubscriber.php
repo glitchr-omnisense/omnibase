@@ -8,6 +8,8 @@ use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
+use Symfony\Component\Workflow\Registry;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 class EagerSubscriber implements EventSubscriberInterface
 {
@@ -24,8 +26,8 @@ class EagerSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => [['onKernelRequest', 2048], ['onValidCache', 8]],
-            ConsoleEvents::COMMAND => ['onCommand', 2048]
+            KernelEvents::REQUEST  => [['onKernelRequest', 2049], ['onValidCache', 8]],
+            ConsoleEvents::COMMAND => ['onCommand', 2049]
         ];
     }
 

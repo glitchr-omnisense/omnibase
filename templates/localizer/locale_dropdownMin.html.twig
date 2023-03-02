@@ -1,0 +1,17 @@
+<div class="locale-dropdown dropdown">
+    <button class="btn dropdown-toggle" type="button" id="dropdown-locale" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-globe"></i>
+    </button>
+    <ul class="dropdown-menu {{ class|default("") }}" aria-labelledby="dropdown-locale">
+    <li class="dropdown-label">
+        <span>{{ '@localizer.lang._plural'|trans }}</span>
+    </li>
+    {% for locale in available_locales %}
+        {% set current = (locale == current_locale) ? "active" : null %}
+        <li><a href="{{ path("_switch_locale", {_locale: locale|lang}) }}" {{ html_attributes({"class": "dropdown-item "~current}) }}>
+            <img class="country-flag" width="100%" height="100%" alt="{{locale|country}}" src="{{asset('bundles/base/images/flags/'~(locale|country)~'.svg')}}"> {{ locale|lang_name|capitalize }}
+        </a></li>
+    {% endfor %}
+    </ul>
+</div>
+

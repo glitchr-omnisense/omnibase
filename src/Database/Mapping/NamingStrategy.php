@@ -17,6 +17,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     private $uniqueTableName = [];
     public function classToTableName($classNameWithNamespace) : string
     {
+        $x = $classNameWithNamespace;
         $classNameWithNamespace = !is_string($classNameWithNamespace) ? get_class($classNameWithNamespace) : $classNameWithNamespace;
         $classNameWithNamespace = class_exists($classNameWithNamespace)
             ? (new \ReflectionClass($classNameWithNamespace))->getName()

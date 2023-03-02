@@ -11,15 +11,21 @@ function highlight_search(text, search) {
     return text.replace(reg, function(str) {return '<mark>'+str+'</mark>'});
 }
 
-window.addEventListener("load.form_type", function () {
+var localCache = {};
+var localCacheSelected = {};
+var localCacheData = {};
 
-    var localCache = {};
+window.addEventListener("load.form_type", function () {
 
     document.querySelectorAll("[data-select2-field]").forEach((function (el) {
 
         var term = "";
         var page = "1.0";
         var field = $("#"+el.getAttribute("data-select2-field"));
+
+        // Prevent to keep containers when changing pages using ajax
+        $(field).parent().find(".select2-container").remove();
+
         var defaultTemplate = function(option) {
 
             if(option.id == null)
@@ -155,9 +161,13 @@ window.addEventListener("load.form_type", function () {
             select2["templateResult"]    = "templateResult"    in select2 ? Function('return ' + select2["templateResult"]   )() : defaultTemplate;
             select2["templateSelection"] = "templateSelection" in select2 ? Function('return ' + select2["templateSelection"])() : defaultTemplate;
 
-            // select2["escapeMarkup"] = function(markup) {
-            //     return markup;
-            // };
+        if(!(el.getAttribute("data-select2-field") in localCache))
+            localCache[el.getAttribute("data-select2-field")] = {};
+
+        if(el.getAttribute("data-select2-field") in localCacheSelected)
+            select2["selected"] = localCacheSelected[el.getAttribute("data-select2-field")];
+        if(el.getAttribute("data-select2-field") in localCacheData)
+            select2["data"] = localCacheData[el.getAttribute("data-select2-field")];
 
         if("ajax" in select2) {
 
@@ -186,8 +196,8 @@ window.addEventListener("load.form_type", function () {
                     // Retrieve cache if exists
                     var index = field.attr("id")+":"+term+":"+page;
 
-                    if(options.cache && index in localCache)
-                        return success(localCache[index]);
+                    if(options.cache && index in localCache[el.getAttribute("data-select2-field")])
+                        return success(localCache[el.getAttribute("data-select2-field")][index]);
 
                 } else {
 
@@ -217,12 +227,13 @@ window.addEventListener("load.form_type", function () {
                     options.data.term = term;
                     options.data.page = page;
 
-                    if(options.cache && index in localCache)
-                        return success(localCache[index]);
+                    if(options.cache && index in localCache[el.getAttribute("data-select2-field")])
+                        return success(localCache[el.getAttribute("data-select2-field")][index]);
 
                     return $.ajax(options)
-                                .done((_response) => localCache[index] = _response)
+                                .done((_response) => localCache[el.getAttribute("data-select2-field")][index] = _response)
                                 .done(success)
+<<<<<<< HEAD
                                 .fail(function(_response)
                                 {
                                     var msg = "Unexpected response received.";
@@ -231,11 +242,17 @@ window.addEventListener("load.form_type", function () {
                                         var response = JSON.parse(_response.responseText);
                                         msg = response["status"];
                                     }
+=======
+                                .fail(function(_response) 
+                                {        
+                                    var msg = "Unexpected response received.";            
+                                    if(_response) msg = _response.responseJSON;
+>>>>>>> dc53ddf1f5191f9573af739413677350a8053b81
 
                                     $('body > .select2-container .loading-results .select2-selection__entry')
                                         .html("<span style='color:red;'>"+msg+"</span>");
 
-                                    delete localCache[index];
+                                    delete localCache[el.getAttribute("data-select2-field")][index];
                                 })
                                 .fail(failure);
                 });
@@ -245,26 +262,53 @@ window.addEventListener("load.form_type", function () {
         //
         // Pre-populated data
         if(select2["data"].length != 0) $(field).empty();
+<<<<<<< HEAD
         $(field).val(select2["selected"] || []).trigger("change");
 
         //
         // Apply required option
         select2["containerCssClass"] = select2["containerCssClass"] + ($(field).attr('required') ? 'required' : '');
+=======
+        $(field).val(select2["selected"] || [])[0].dispatchEvent(new Event("change"));
+>>>>>>> dc53ddf1f5191f9573af739413677350a8053b81
 
+        var thumbnails = $("[id^="+el.getAttribute('id')+"_]");
+
+        //
+        // Apply required option
         var parent = parent || $(field).parent();
         $(field).select2(select2).on("select2:unselecting", function(e) {
 
             $(this).data('state', 'unselected');
+
+        }).on("change", function(e) {
 
         }).on("select2:select", function(e) {
 
             if(!select2["multivalue"])
                 select2["selected"] = orderFn(select2["selected"]);
 
+            // Remove search field content after hitting enter
+            $('body > .select2-container input.select2-search__field').focus().val("");
+            $(field).parent().find('input.select2-search__field').val("");
+
+            localCacheSelected[el.getAttribute("data-select2-field")] = select2["selected"];
+            localCacheData[el.getAttribute("data-select2-field")] = select2["data"];
+
+            $(thumbnails).removeClass("selected");
+            if($(field).val() <= thumbnails.length && $(field).val() > 0)
+                $(thumbnails[$(field).val()-1]).addClass("selected");
+
         }).on("select2:unselect", function(e) {
 
             if(!select2["multivalue"])
                 select2["selected"] = orderFn(select2["selected"]);
+
+            localCacheSelected[el.getAttribute("data-select2-field")] = select2["selected"];
+            localCacheData[el.getAttribute("data-select2-field")] = select2["data"];
+
+            if($(field).val() <= thumbnails.length && $(field).val() > 0)
+                $(thumbnails[$(field).val()-1]).removeClass("selected");
 
         }).on("select2:open", function(e) {
 
@@ -280,10 +324,13 @@ window.addEventListener("load.form_type", function () {
 
         }).on("select2:close", function(e) {
 
-            $(this).trigger("focusout");
+            this.dispatchEvent(new Event("focusout"));
             $(document).off("keyup.select2");
 
             page = "1.0";
+
+            localCacheSelected[el.getAttribute("data-select2-field")] = select2["selected"];
+            localCacheData[el.getAttribute("data-select2-field")] = select2["data"];
 
         }).on("select2:closing", function(e) {
 
@@ -323,6 +370,52 @@ window.addEventListener("load.form_type", function () {
                 });
 
             select2["selected"] = orderFn(select2["selected"]);
+        }
+
+
+        //
+        // Handle thumbnail selection
+        if(thumbnails.length) {
+
+            var options = $(field).find("option");
+            var thumbnailIds = [];
+
+            if (typeof ($(field).val()) == "object") { // multiples
+
+                var values = $(field).val();
+                $(values).each(function (i) {
+
+                    var option = $(field).find("option[value=" + this + "]")[0];
+                    thumbnailIds.push(options.index(option));
+                });
+
+            } else {
+
+                var option = $(field).find("option[value=" + $(field).val() + "]")[0];
+                thumbnailIds.push(options.index(option));
+            }
+
+            $(thumbnailIds).each(function () {
+
+                if (this <= thumbnails.length)
+                    $(thumbnails[this]).addClass("selected");
+            });
+
+            $(thumbnails).each(function () {
+
+                $(this).off("click.select2-thumbnail");
+                $(this).on("click.select2-thumbnail", function () {
+
+                    $(thumbnails).removeClass("selected");
+                    $(this).addClass("selected");
+                    if ($(this).hasClass("selected")) {
+
+                        var i = $(this).attr("id").substring(el.getAttribute('id').length + 1);
+                        var option = $("#" + el.getAttribute('id')).find("option")[parseInt(i)];
+                        $(field).val(parseInt(option.value))[0].dispatchEvent(new Event("change"));
+                    }
+                });
+            });
         }
 
     }));

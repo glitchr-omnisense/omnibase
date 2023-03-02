@@ -30,9 +30,12 @@ final class MoneyConfigurator implements FieldConfiguratorInterface
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $currencyCode = $this->getCurrency($field, $entityDto);
-        if (null !== $currencyCode && !Currencies::exists($currencyCode)) {
+        if(!$currencyCode) $currencyCode = "USD";
+
+        if (!Currencies::exists($currencyCode)) {
             throw new \InvalidArgumentException(sprintf('The "%s" value used as the currency of the "%s" money field is not a valid ICU currency code.', $currencyCode, $field->getProperty()));
         }
+
         $field->setFormTypeOption('currency', $currencyCode);
 
         $numDecimals = $field->getCustomOption(MoneyField::OPTION_NUM_DECIMALS);
@@ -49,7 +52,7 @@ final class MoneyConfigurator implements FieldConfiguratorInterface
         }
 
         $formattedValue = apply_callback(fn($v) =>
-            $this->intlFormatter->formatCurrency($storedAsCents ? $v / 100 : $v, $currencyCode, ['fraction_digit' => $numDecimals]),
+        $this->intlFormatter->formatCurrency($storedAsCents ? $v / 100 : $v, $currencyCode, ['fraction_digit' => $numDecimals]),
             $field->getValue()
         );
 

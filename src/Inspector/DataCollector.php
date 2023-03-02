@@ -180,6 +180,7 @@ class DataCollector extends AbstractDataCollector
         if(class_exists(BaseBundle::class))
             $data[$this->getBundleFormattedName(BaseBundle::class)] = [
                 'Environment name' => $this->baseService->getEnvironment(),
+                'Environment name' => $this->baseService->getEnvironment(),
                 'Development mode' => $this->baseService->isDevelopment(),
                 'Technical support' => $this->parameterBag->get("base.notifier.technical_support"),
                 'Router Class' => get_class($this->router),

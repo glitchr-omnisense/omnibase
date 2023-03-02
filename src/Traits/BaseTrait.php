@@ -5,6 +5,8 @@ namespace Base\Traits;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
+use Base\Service\Obfuscator;
+use Base\Service\TradingMarketInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Notifier\Abstract\BaseNotifierInterface;
 use Base\Routing\RouterInterface;
@@ -12,7 +14,7 @@ use Base\Service\BaseService;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -77,14 +79,16 @@ trait BaseTrait
     public static function getRequestStack()  : ?RequestStack            { return (self::class === BaseService::class) ? BaseService::$requestStack   : BaseService::getRequestStack(); }
     public static function getEntityHydrator(): ?EntityHydrator          { return (self::class === BaseService::class) ? BaseService::$entityHydrator : BaseService::getEntityHydrator(); }
     public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$imageService   : BaseService::getImageService(); }
+    public static function getObfuscator()    : ?Obfuscator              { return (self::class === BaseService::class) ? BaseService::$obfuscator     : BaseService::getObfuscator(); }
     public static function getIconProvider()  : ?IconProvider            { return (self::class === BaseService::class) ? BaseService::$iconProvider   : BaseService::getIconProvider(); }
-    public static function getLocaleProvider(): ?LocaleProviderInterface { return (self::class === BaseService::class) ? BaseService::$localeProvider : BaseService::getLocaleProvider(); }
+    public static function getLocalizer()     : ?LocalizerInterface      { return (self::class === BaseService::class) ? BaseService::$localizer      : BaseService::getLocalizer(); }
     public static function getRouter()        : ?RouterInterface         { return (self::class === BaseService::class) ? BaseService::$router         : BaseService::getRouter(); }
     public static function getFirewallMap()   : ?FirewallMapInterface    { return (self::class === BaseService::class) ? BaseService::$firewallMap    : BaseService::getFirewallMap(); }
     public static function getTwig()          : ?Environment             { return (self::class === BaseService::class) ? BaseService::$twig           : BaseService::getTwig(); }
     public static function getNotifier()      : ?BaseNotifierInterface   { return (self::class === BaseService::class) ? BaseService::$notifier       : BaseService::getNotifier(); }
     public static function getTranslator()    : ?TranslatorInterface     { return (self::class === BaseService::class) ? BaseService::$translator     : BaseService::getTranslator(); }
     public static function getSlugger()       : ?SluggerInterface        { return (self::class === BaseService::class) ? BaseService::$slugger        : BaseService::getSlugger(); }
+    public static function getTradingMarket() : ?TradingMarketInterface  { return (self::class === BaseService::class) ? BaseService::$tradingMarket  : BaseService::getTradingMarket(); }
 
     public static function getParameterBag(string $key = "", ?array $bag = null)
     {

@@ -117,7 +117,7 @@ class DiscriminatorEntry extends AbstractAnnotation
             $annotations = $annotations[AnnotationReader::TARGET_CLASS][$className];
             $annotation = $annotations ? end($annotations) : null;
             if($annotation === null)
-                throw new \Exception("@DiscriminatorEntry annotation not found for \"".$className."\".");
+                throw new \Exception("@DiscriminatorEntry annotation not found for \"".$className."\". Have you doom the cache ?");
 
             $discriminatorValues[$className] = $annotation->getValue($className);
         }

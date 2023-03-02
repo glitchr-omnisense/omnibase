@@ -83,12 +83,12 @@ class SelectConfigurator implements FieldConfiguratorInterface
                 $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
                 $dataClass = $dataClass ?? $defaultClass;
 
-                $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
-
                 if($key > $displayLimit) $formattedValues[$key] = $value;
                 else {
 
                     $formattedValues[$key] = $this->autocomplete->resolve($value, $dataClass);
+
+                    $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
                     if ($formattedValues[$key] && $dataClassCrudController)
                         $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
                 }
@@ -108,6 +108,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
             if ($formattedValues && $dataClassCrudController)
                 $formattedValues["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
         }
+
         $field->setFormattedValue($formattedValues);
 
         $fieldValue = $field->getValue();

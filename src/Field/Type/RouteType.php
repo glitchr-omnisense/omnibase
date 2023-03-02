@@ -3,6 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Field\Type\SelectType;
+use Base\Service\LocalizerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\ChoiceList;
 use Symfony\Component\Form\ChoiceList\Loader\CallbackChoiceLoader;
@@ -14,11 +15,17 @@ class RouteType extends AbstractType
 {
     /** @var RouterInterface */
     protected $router;
+    /** @var LocalizerInterface */
+    protected $localizer;
 
     public function getParent(): ?string { return SelectType::class; }
     public function getBlockPrefix(): string { return 'route'; }
 
-    public function __construct(RouterInterface $router) { $this->router = $router; }
+    public function __construct(RouterInterface $router, LocalizerInterface $localizer)
+    {
+        $this->router = $router;
+        $this->localizer = $localizer;
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -30,8 +37,24 @@ class RouteType extends AbstractType
                 return ChoiceList::loader($this, new CallbackChoiceLoader(function () {
 
                     return array_flip(array_transforms(
-                        fn($k, $r):array => [$k, "<b>Name:</b> ".strtolower($k)."<br/><b>Path:</b> ".$r->getPath()],
-                        $this->router->getRouteCollection()->all(),
+                        function($k, $r):?array {
+
+                            $lang = explode(".", $k);
+                            $lang = end($lang);
+
+                            $localized = in_array($lang, $this->localizer->getAvailableLocaleLangs());
+                            if($localized) {
+
+                                if ($lang != $this->localizer->getDefaultLocaleLang())
+                                    return null;
+
+                                $k = str_rstrip($k, ".".$lang);
+                                return [$k, "<b>Name:</b> ".strtolower($k.".{_locale}")."<br/><b>Path:</b> ".$r->getPath()];
+                            }
+
+                            return [$k, "<b>Name:</b> ".strtolower($k)."<br/><b>Path:</b> ".$r->getPath()];
+
+                        }, $this->router->getRouteCollection()->all()
                     ));
 
                 }), $routeList);

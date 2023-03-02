@@ -58,7 +58,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
         $routeName = (array_key_exists("extension", $routeParameters) ? "ux_imageExtension"     : "ux_image");
         $routeParameters = array_merge($routeParameters, [
-            "hashid" => $this->getImageService()->obfuscate($this->getSource(), [
+            "data" => $this->getImageService()->obfuscate($this->getSource(), [
                 "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
                 "salt"       => $this->getSalt()
             ], $filters),
@@ -99,7 +99,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return $this;
     }
 
-    private $sourceMeta;
+    protected $sourceMeta;
     public function getNaturalWidth(): ?int { return $this->getSourceMeta()["width"] ?? 0; }
     public function getNaturalHeight(): ?int { return $this->getSourceMeta()["height"] ?? 0; }
     public function getSourceMeta(): array|null|false
@@ -115,7 +115,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
                 "height" => $imagesize[1],
                 "type" => $imagesize[2],
                 "bits" => $imagesize["bits"],
-                "channels" => $imagesize["channels"],
+                "channels" => $imagesize["channels"] ?? null,
                 "mime" => $imagesize["mime"],
                 "orientation" => getimageorientation($sourceFile->getPathname()),
             ];

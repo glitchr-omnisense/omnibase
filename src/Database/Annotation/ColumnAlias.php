@@ -56,6 +56,10 @@ class ColumnAlias extends AbstractAnnotation
 
     public function bind($entity, $column, $alias)
     {
+        if($alias == $column) return;
+        if(snake2camel($alias) == snake2camel($column)) return;
+        if(camel2snake($alias) == camel2snake($column)) return;
+
         $fn = function() use ($alias, $column) {
 
             $aliasValue  = $this->$alias;
@@ -82,7 +86,6 @@ class ColumnAlias extends AbstractAnnotation
         $column = $this->column;
         $alias  = $property ?? $this->alias;
 
-        // if(self::$i > 10) exit(1);
         $this->bind($entity, $column, $alias);
     }
 

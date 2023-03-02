@@ -5,16 +5,19 @@ namespace Base;
 $_SERVER["APP_TIMER"] = microtime(true);
 include_once("Functions.php");
 
+use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
 use App\Entity\User;
 use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
 use Base\Database\Type\UTCDateTimeType;
-use Base\DependencyInjection\Compiler\AnnotationPass;
-use Base\DependencyInjection\Compiler\CurrencyApiPass;
-use Base\DependencyInjection\Compiler\EntityExtensionPass;
-use Base\DependencyInjection\Compiler\IconProviderPass;
-use Base\DependencyInjection\Compiler\SharerPass;
-use Base\DependencyInjection\Compiler\TagRendererPass;
+use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
+use Base\DependencyInjection\Compiler\Pass\TradingMarketPass;
+use Base\DependencyInjection\Compiler\Pass\EntityExtensionPass;
+use Base\DependencyInjection\Compiler\Pass\IconProviderPass;
+use Base\DependencyInjection\Compiler\Pass\ObfuscatorCompressionPass;
+use Base\DependencyInjection\Compiler\Pass\SharerPass;
+use Base\DependencyInjection\Compiler\Pass\TagRendererPass;
+use Base\DependencyInjection\Compiler\Pass\WorkflowPass;
 use Base\Traits\SingletonTrait;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
@@ -23,6 +26,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -60,8 +64,8 @@ class BaseBundle extends Bundle
 
     public function warmUp()
     {
-        $needsWarmup = !file_exists($this->getCacheDir()."/base_bundle.php");
-        self::$cache = new PhpArrayAdapter($this->getCacheDir() . "/base_bundle.php", new FilesystemAdapter());
+        $needsWarmup = !file_exists($this->getCacheDir()."/pools/base/bundle.php");
+        self::$cache = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter());
         self::$filePaths = self::$filePaths ?? self::$cache->getItem('base.file_paths')->get() ?? [];
         self::$classes = self::$classes ?? self::$cache->getItem('base.classes')->get() ?? [];
         self::$aliasList = self::$aliasList ?? self::$cache->getItem('base.alias_list')->get() ?? [];
@@ -98,6 +102,11 @@ class BaseBundle extends Bundle
 
     public function boot()
     {
+        if (!extension_loaded('imagick'))
+            throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
+        if (!extension_loaded('igbinary'))
+            throw new EnvNotFoundException('Application requires `igbinary`, but it is not enabled.');
+
         if(!self::$cache)
             $this->warmUp();
 
@@ -162,6 +171,17 @@ class BaseBundle extends Bundle
             ->addFilter("vault_filter", VaultFilter::class);
         $entityManagerConfig
             ->addCustomNumericFunction("rand", \Base\Database\Function\Rand::class);
+
+        if(class_exists(DqlFunctions\JsonExtract::class))
+            $entityManagerConfig
+                ->addCustomStringFunction(DqlFunctions\JsonExtract::FUNCTION_NAME, DqlFunctions\JsonExtract::class);
+        if(class_exists(DqlFunctions\JsonSearch::class))
+            $entityManagerConfig
+            ->addCustomStringFunction(DqlFunctions\JsonSearch::FUNCTION_NAME, DqlFunctions\JsonSearch::class);
+        if(class_exists(DqlFunctions\JsonContains::class))
+            $entityManagerConfig
+            ->addCustomStringFunction(DqlFunctions\JsonContains::FUNCTION_NAME, DqlFunctions\JsonContains::class);
+
         $entityManagerConfig->setDefaultQueryHint(
             Query::HINT_CUSTOM_TREE_WALKERS, [/* No default tree walker for the moment */]
         );
@@ -211,8 +231,10 @@ class BaseBundle extends Bundle
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());
-        $container->addCompilerPass(new CurrencyApiPass());
+        $container->addCompilerPass(new TradingMarketPass());
         $container->addCompilerPass(new TagRendererPass());
+        $container->addCompilerPass(new ObfuscatorCompressionPass());
+        $container->addCompilerPass(new WorkflowPass());
 
         /* Register aliased repositories */
         foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {

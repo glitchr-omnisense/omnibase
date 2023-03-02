@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Renderer\Adapter;
 
-use Base\Cache\Abstract\AbstractSimpleCacheInterface;
+use Base\Cache\Abstract\AbstractLocalCacheInterface;
 
 use Twig\Environment;
 use Base\Twig\AssetPackage;
@@ -11,7 +11,7 @@ use Base\Traits\SimpleCacheTrait;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Asset\Packages;
 use Base\Service\ParameterBagInterface;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Twig\Renderer\AbstractTagRenderer;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
@@ -23,7 +23,7 @@ use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
 use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
 
-class EncoreTagRenderer extends AbstractTagRenderer implements AbstractSimpleCacheInterface
+class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCacheInterface
 {
     /**
      * @var Packages
@@ -45,20 +45,22 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractSimpleCac
     use SimpleCacheTrait;
 
     public function __construct(
-        Environment $twig, LocaleProviderInterface $localeProvider, SluggerInterface $slugger, ParameterBagInterface $parameterBag,
+        Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag,
         ?EntrypointLookupCollectionInterface $entrypointLookupCollection, Packages $packages, string $publicDir, string $cacheDir)
     {
         $this->entrypointLookupCollection = $entrypointLookupCollection;
         if( $this->entrypointLookupCollection == null) return;
 
-        parent::__construct($twig, $localeProvider, $slugger, $parameterBag);
+        parent::__construct($twig, $localizer, $slugger, $parameterBag);
         $this->publicDir = $publicDir;
         $this->packages = $packages;
 
         // This class already inherits from AbstractTagRenderer..
         $this->cacheDir = $cacheDir;
-        $cacheFile = $cacheDir."/simple_cache/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
-        $this->setCache(new PhpArrayAdapter($cacheFile, new FilesystemAdapter()));
+
+        $phpCacheFile = $cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
+        $fsCacheFile = $cacheDir."/pools/simple/fs/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
+        $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $fsCacheFile)));
 
         $this->warmUp($cacheDir);
     }

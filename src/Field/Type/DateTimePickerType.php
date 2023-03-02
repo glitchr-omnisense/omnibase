@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 
@@ -19,16 +19,16 @@ class DateTimePickerType extends AbstractType
     /** @var ParameterBagInterface */
     protected $parameterBag;
 
-    /** @var LocaleProvider */
-    protected $localeProvider;
+    /** @var Localizer */
+    protected $localizer;
 
     /** @var Environment */
     protected $twig;
 
-    public function __construct(ParameterBagInterface $parameterBag, Environment $twig, LocaleProviderInterface $localeProvider)
+    public function __construct(ParameterBagInterface $parameterBag, Environment $twig, LocalizerInterface $localizer)
     {
         $this->parameterBag = $parameterBag;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->twig = $twig;
     }
 
@@ -38,7 +38,7 @@ class DateTimePickerType extends AbstractType
 
             // PHP Datetime format:
             // This format is replacing the shitty HTML5_FORMAT :-)
-            "format" => "yyyy-MM-dd HH:mm:ss",
+            "format" => "yyyy-MM-dd HH:mm",
             "html5"  => false,
             "widget" => "single_text",
             "required" => false,
@@ -46,11 +46,9 @@ class DateTimePickerType extends AbstractType
 
             "debug" => false,
             "datetimepicker" => [
-                "keepOpen" => true,
-                "locale" => $this->localeProvider->getLang(),
-                "format" => "YYYY-MM-DD HH:mm:ss", // JS Datetime Format
-                "sideBySide" => true,
-                "allowInputToggle" => true
+                "enableTime" => true,
+                "locale" => $this->localizer->getLocaleLang(),
+                "dateFormat" => "Y-m-d H:i", // Format must match... between format option and dateFormat (JS Format)
             ]
         ]);
     }
@@ -63,8 +61,6 @@ class DateTimePickerType extends AbstractType
         //
         // Datetime picker Options
         $dateTimePickerOpts = $options["datetimepicker"];
-        $dateTimePickerOpts["defaultDate"] = $view->vars["value"];
-        $dateTimePickerOpts["debug"] = $options["debug"];
 
         $view->vars["datetimepicker"] = json_encode($dateTimePickerOpts);
     }

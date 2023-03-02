@@ -15,10 +15,11 @@ use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
 use Base\Routing\RouterInterface;
 use Base\Security\RescueFormAuthenticator;
-use Base\Service\LocaleProvider;
+use Base\Service\Localizer;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\MaternityUnitInterface;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -93,9 +94,9 @@ class SecuritySubscriber implements EventSubscriberInterface
     private $settingBag;
 
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    private $localeProvider;
+    private $localizer;
 
     /**
      * @var Translator
@@ -110,7 +111,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         RequestStack $requestStack,
         ReferrerInterface $referrer,
         SettingBagInterface $settingBag,
-        LocaleProvider $localeProvider,
+        Localizer $localizer,
         RouterInterface $router,
         ParameterBagInterface $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
@@ -122,7 +123,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->translator  = $translator;
         $this->router  = $router;
 
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->userRepository = $userRepository;
 
         $this->maternityUnit = $maternityUnit;
@@ -212,7 +213,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             // If not, then user is redirected to a specific route
             $routeRestriction = $this->settingBag->getScalar("base.settings.access_restriction.redirect_on_deny") ?? [];
             foreach($routeRestriction as $i => $route)
-                $routeRestriction[$i] = str_rstrip($route, ".".$this->localeProvider->getDefaultLang());
+                $routeRestriction[$i] = str_rstrip($route, ".".$this->localizer->getDefaultLocaleLang());
 
             if (!in_array($this->router->getRouteName(), $routeRestriction)) {
 
@@ -228,7 +229,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                     return true;
                 }
 
-                $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction)) : null;
+                $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction) ?? $this->router->getRoute(RescueFormAuthenticator::PENDING_ROUTE)) : null;
                 $response ??= $this->router->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
                 if($event) $event->setResponse($response);
@@ -261,7 +262,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         // Notify user about the authentication method
         $exceptions = $this->parameterBag->get("base.access_restrictions.route_exceptions") ?? [];
-        $exceptions = array_merge($exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
+        $exceptions = array_merge($exceptions, ["/^(security|user|ux)_(?:.*)$/"]);
         if ($token instanceof SwitchUserToken) {
 
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
@@ -276,7 +277,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
 
             $this->referrer->setUrl($event->getRequest()->getUri());
-            $event->setResponse($this->router->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE));
+            $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
 
             $this->userRepository->flush($user);
             return $event->stopPropagation();
@@ -304,11 +305,10 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                 $response    = $event->getResponse();
                 $alreadyRedirected = $response && $response->getStatusCode() == 302;
-                $isException =  $this->router->isEasyAdmin() || $this->router->isProfiler();
+                $isException =  $this->router->isEasyAdmin() || $this->router->isProfiler() || !$this->router->isSecured();
 
                 if($alreadyRedirected || $isException) $callbackFn();
-                else $this->router->redirectToRoute("user_profile", [], 302, [
-                    "event" => $event,
+                else $this->router->redirectEvent($event, "user_profile", [], 302, [
                     "exceptions" => $exceptions,
                     "callback" => $callbackFn
                 ]);
@@ -329,12 +329,12 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             } else {
 
-                $this->router->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
-
-                    $notification = new Notification("login.pending");
-                    $notification->send("warning");
-                }]);
+                $this->router->redirectEvent($event, "security_pendingForApproval", [], 302,  ["exceptions" => $exceptions]);
             }
+
+        } else if($this->router->getRouteName() == "security_pendingForApproval") {
+
+            $this->router->redirectEvent($event, $this->router->getRouteIndex(), [], 302,  ["exceptions" => $exceptions]);
         }
     }
 
@@ -417,14 +417,14 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ($user instanceof User) // Just to remember username.. after logout & first redirection
             $this->requestStack->getSession()?->set("_user", $user);
 
-        return $this->router->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
+        $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_ROUTE, [], 302);
     }
 
     public function onMaintenanceRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
 
-        if($this->maintenanceProvider->redirectOnDeny($event, $this->localeProvider->getLocale())) {
+        if($this->maintenanceProvider->redirectOnDeny($event, $this->localizer->getLocale())) {
             if($this->profiler) $this->profiler->disable();
             $event->stopPropagation();
         }
@@ -434,7 +434,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        if($this->maternityUnit->redirectOnDeny($event, $this->localeProvider->getLocale())) {
+        if($this->maternityUnit->redirectOnDeny($event, $this->localizer->getLocale())) {
             if($this->profiler) $this->profiler->disable();
             $event->stopPropagation();
         }

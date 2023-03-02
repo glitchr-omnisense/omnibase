@@ -1,4 +1,5 @@
-import '@glitchr/datetime-picker'
+import 'flatpickr/dist/flatpickr.js';
+import 'flatpickr/dist/l10n';
 
 window.addEventListener("load.form_type", function () {
 
@@ -7,16 +8,6 @@ window.addEventListener("load.form_type", function () {
         var id             = el.getAttribute("data-datetimepicker-field");
         var datetimepicker = $(el).data('datetimepicker-options');
 
-        var parent = $('#'+id).parent();
-        $(parent).css('position', 'relative');
-
-        var isVisible = false;
-        $('#'+id+"-btn").off("click");
-        $('#'+id+"-btn").on("click", function() {
-            $('#'+id).datetimepicker(isVisible ? "hide" : "show");
-            isVisible = !isVisible;
-        });
-
-        $('#'+id).datetimepicker(datetimepicker);
+        flatpickr("#"+id, datetimepicker);
     }));
 });

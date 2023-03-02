@@ -12,8 +12,10 @@ use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
 use Twig\Environment;
 
 use Doctrine\DBAL\Exception\DriverException;
@@ -38,20 +40,29 @@ abstract class BaseNotifier implements BaseNotifierInterface
 {
     public function __call   ($method, $arguments) : mixed
     {
-        $action = str_starts_with($method, "render") ? "render" : (str_starts_with($method, "send") ? "send" : null);
+        $action   = str_starts_with($method, "render") ? "render" : null;
+        $action ??= str_starts_with($method, "sendAdmins") ? "sendAdmins" : null;
+        $action ??= str_starts_with($method, "send") ? "send" : null;
         if(!$action)
-            throw new AccessException("Unexpected action received. Templated notification \"$method\" should starts with either  \"send\" or \"render\".");
+            throw new AccessException("Unexpected action received. Templated notification \"$method\" should starts with either  \"send\", \"sendAdmins\", or \"render\".");
 
         $method = lcfirst(substr($method, strlen($action)));
-        if(method_exists(self::class, $method))
-            throw new AccessException("Templated notification \"".static::class."::$method\" not found in class \"".get_class($this)."\".");
+        if(!method_exists($this::class, $method))
+            throw new AccessException("Templated notification \"$method\" not found in class \"".get_class($this)."\".");
+        if(str_starts_with($method, "admin"))
+            throw new AccessException("Templated notification \"".$this::class."::$method\" starts with \"admins\". This is a reserved word in \"".self::class."\"");
 
         $notification = $this->$method(...$arguments);
+        if($notification == null) return $this;
         if(!$notification instanceof Notification)
-            throw new AccessException("Templated notification \"".static::class."::$method\" must return a \"".Notification::class."\" object.");
+            throw new AccessException("Templated notification \"".$this::class."::$method\" must return a \"".Notification::class."\" object.");
+
 
         $arguments = [];
-        if($action == "send") $arguments = [$notification->getImportance()];
+        if ($action == "send")
+            $arguments = [$notification->getImportance()];
+        if ($action == "sendAdmins")
+            $arguments = [$notification->getImportance()];
 
         return $notification->$action(...$arguments);
     }
@@ -87,9 +98,9 @@ abstract class BaseNotifier implements BaseNotifierInterface
     protected $router;
 
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var SettingBag
@@ -129,7 +140,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
     public function getTestRecipients(): array{ return $this->testRecipients; }
     
     public function getEnvironment() : Environment { return $this->twig; }
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy, EntityManager $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
+    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
     {
         $this->twig          = $twig;
         $this->notifier      = $notifier;
@@ -148,7 +159,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         $this->entityManager  = $entityManager;
         $this->settingBag     = $settingBag;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->translator     = $translator;
 
         $this->debug          = $debug;
@@ -318,10 +329,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
             // Replace email by email+ for user..
             // Users should not receive the default admin email sent by Symfony notifier
-            if (str_starts_with($channel, "email"  )) $channel = "email";
+            if (str_starts_with($channel, "email"  )) $channel = "email+";
 
             // I suppose admin should receive notification by email when user is browser notified.
-            else if (str_starts_with($channel, "browser")) $channel = "email";
+            else if (str_starts_with($channel, "browser")) $channel = "email+";
 
             // If no recipient, only browser notification is allowed to be sent.
             else if ($recipient instanceof NoRecipient) continue;
@@ -334,7 +345,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
             }
 
             // If recipient implement Email interface, check if email is available
-            else if (str_starts_with($channel, "email")) {
+            else if (str_starts_with($channel, "email+")) {
 
                 if( $recipient instanceof EmailRecipientInterface && empty($recipient->getEmail()) )
                     continue;
@@ -356,14 +367,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         if (!$this->enable) return;
 
-        $localeBak = $this->localeProvider->getLocale();
+        $localeBak = $this->localizer->getLocale();
         $timezoneBak = date_default_timezone_get();
 
         foreach($recipients as $recipient) {
 
             // Send notification with proper locale
-            $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
-            $this->localeProvider->setLocale($locale);
+            $locale = $this->localizer->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
+            $this->localizer->setLocale($locale);
 
             // Send notification with proper timezone
             $timezone = $recipient instanceof TimezoneRecipientInterface ? $recipient->getTimezone() : "UTC";
@@ -374,7 +385,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         }
 
         // Put back previous locale and timezone
-        $this->localeProvider->setLocale($localeBak);
+        $this->localizer->setLocale($localeBak);
         date_default_timezone_set($timezoneBak);
     }
 
@@ -383,7 +394,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Set importance of the notification
         $this->markAsAdmin(false);
 
-        $prevRecipient = $notification->getRecipient();
+        $prevRecipient = $notification->getRecipients();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
@@ -392,11 +403,11 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         // Determine recipient information
         $browserNotificationOnce = false;
-        foreach ($recipients as $i => $recipient) {
+        foreach (array_unique($recipients) as $i => $recipient) {
 
             // Set selected channels, if any
             $channels    = $this->getUserChannels($notification->getImportance(), $recipient);
-            if (!$recipient instanceof NoRecipient && empty($channels))
+            if (empty($channels))
                 throw new Exception("No valid channel for the notification \"".$notification->getBacktrace()."\" sent with \"".$notification->getImportance()."\"");
 
             // Only send browser notification once
@@ -408,12 +419,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $notification->markAsReadIfNeeded($channels);
 
             // Payload...
-            $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
         }
 
         $notification->setChannels($prevChannels);
-        $notification->setRecipient($prevRecipient);
         $notification->setSentAt(new \DateTime("now"));
 
         return $this;
@@ -424,11 +433,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Set importance of the notification
         $this->markAsAdmin(false);
 
-        $prevRecipient = $notification->getRecipient();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
-        foreach ($recipients as $recipient) {
+        foreach (array_unique($recipients) as $recipient) {
 
             // Determine channels
             $channels   = array_intersect($channels, $this->getUserChannels($notification->getImportance(), $recipient));
@@ -438,12 +446,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $notification->setChannels($channels);
 
             // Payload...
-            $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
         }
 
         $notification->setChannels($prevChannels);
-        $notification->setRecipient($prevRecipient);
         $notification->setSentAt(new \DateTime("now"));
 
         return $this;
@@ -455,27 +461,25 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $this->markAsAdmin(true, $notification);
 
         // Reset channels and keep here them for later use
-        $prevRecipient = $notification->getRecipient();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
         // Back up channels and importance variables..
         // to be restored at the end of the method
         $recipients = $this->getAdminRecipients() ?? [new NoRecipient()];
-        foreach($recipients as $recipient) {
+        foreach(array_unique($recipients) as $recipient) {
 
             // Set selected channels, if any
             $channels    = $this->getAdminChannels($notification->getImportance(), $recipient);
+
             if (empty($channels)) return $this;
             $notification->setChannels($channels);
 
             // Payload..
-            $notification->setRecipient($recipient);
             $this->send($notification, $recipient);
         }
 
         $notification->setChannels($prevChannels);
-        $notification->setRecipient($prevRecipient);
 
         $this->markAsAdmin(false);
         return $this;

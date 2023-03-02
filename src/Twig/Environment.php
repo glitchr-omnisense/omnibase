@@ -3,7 +3,7 @@
 namespace Base\Twig;
 
 use Base\Routing\RouterInterface;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Base\Twig\Renderer\TagRendererInterface;
@@ -32,21 +32,21 @@ class Environment extends TwigEnvironment
     protected $parameterBag;
 
     /**
-     * @var LocaleProviderInterface
+     * @var LocalizerInterface
      */
-    protected $localeProvider;
+    protected $localizer;
 
     /**
      * @var Environment
      */
     protected $environment;
     
-    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocaleProviderInterface $localeProvider, RouterInterface $router, ParameterBagInterface $parameterBag)
+    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocalizerInterface $localizer, RouterInterface $router, ParameterBagInterface $parameterBag)
     {
         $this->requestStack   = $requestStack;
         $this->router         = $router;
         $this->parameterBag   = $parameterBag;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
 
         parent::__construct($loader, $options);
     }

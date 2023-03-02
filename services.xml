@@ -24,11 +24,26 @@
             <argument type="service" id="setting_bag" />
         </service>
 
-        <service id="Base\Controller\LocaleController">
+        <service id="Base\Controller\ProfilerController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="base.notifier" />
+        </service>
+
+        <service id="Base\Controller\Frontend\ContactController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+            <argument type="service" id="form.proxy" />
+            <argument type="service" id="base.notifier" />
+        </service>
+
+        <service id="Base\Controller\LocalizerController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+            <argument type="service" id="localizer" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="router" />
             <argument type="service" id="referrer" />
@@ -39,6 +54,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+            <argument type="service" id="request_stack" />
             <argument type="service" id="flysystem" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="Base\Repository\Layout\ImageCropRepository" />
@@ -108,7 +124,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="assets.packages" />
             <argument type="service" id="cache.adapter" />
             <bind key="$environment">%kernel.environment%</bind>
@@ -124,39 +140,43 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="router" />
             <argument type="service" id="twig" />
             <argument type="service" id="setting_bag" />
             <bind key="$debug">%kernel.debug%</bind>
         </service>
 
-        <service id="Base\Cache\Abstract\AbstractSimpleCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
-        <service id="Base\Cache\Abstract\AbstractSimpleCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
+        <service id="Base\Cache\Abstract\AbstractLocalCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
+        <service id="Base\Cache\Abstract\AbstractLocalCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
 
         <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="setting_bag" /></service>
         <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
-        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer">
+        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.service.icon" />
         </service>
-        <service id="Base\CacheWarmer\LocaleCacheWarmer"      public="true" parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer">
+        <service id="Base\CacheWarmer\LocalizerCacheWarmer"      public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
             <tag name="kernel.cache_warmer" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
         </service>
-        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer"><tag name="kernel.cache_warmer" />
+        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig.encore_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup[_default]" on-invalid="null" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
-        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"     parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer" public="true">
+        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"     parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
             <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
             <argument type="service" id="base.annotation_reader" />
         </service>
-        <service id="Base\CacheWarmer\MetadataCacheWarmer" parent="Base\Cache\Abstract\AbstractSimpleCacheWarmer" public="true">
+        <service id="Base\CacheWarmer\MetadataCacheWarmer" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+        <service id="Base\CacheWarmer\ImageCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
+            <tag name="kernel.cache_warmer" />
+            <argument type="service" id="console" />
         </service>
 
         <service id="Base\Service\BaseService" public="true">
@@ -169,10 +189,12 @@
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="parameter_bag.hot" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="base.notifier" />
             <argument type="service" id="form.factory" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
+            <argument type="service" id="trading_market" />
+            <argument type="service" id="obfuscator" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="base.service.icon" />
@@ -183,20 +205,20 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Service\LocaleProvider" parent="Base\Cache\Abstract\AbstractSimpleCache" public="true">
+        <service id="Base\Service\Localizer" parent="Base\Cache\Abstract\AbstractLocalCache" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
         </service>
 
-        <service id="Base\Cache\SimpleCache" parent="Base\Cache\Abstract\AbstractSimpleCache" public="true" />
+        <service id="Base\Cache\SimpleCache" parent="Base\Cache\Abstract\AbstractLocalCache" public="true" />
 
         <service id="Base\Service\MaintenanceProvider" public="true">
             <argument type="service" id="router" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="security.token_storage" />
         </service>
 
@@ -234,8 +256,9 @@
         </service>
 
         <!-- Commands -->
+        <service id="Base\Console\Console" public="true"><argument type="service" id="kernel" /></service>
         <service id="Base\Console\Command" public="true">
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
@@ -351,10 +374,11 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
+            <argument type="service" id="base.notifier" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="App\Repository\UserRepository" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
             <argument type="service" id="form.proxy" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
@@ -362,9 +386,9 @@
         </service>
 
         <!-- Subscriber -->
-        <service id="Base\Subscriber\LocaleSubscriber">
+        <service id="Base\Subscriber\LocalizerSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="router" />
             <argument type="service" id="security.token_storage" />
         </service>
@@ -375,10 +399,6 @@
         </service>
 
         <service id="Base\Subscriber\FlashBagSubscriber">
-            <tag name="kernel.event_subscriber" />
-        </service>
-
-        <service id="Base\Subscriber\TimezoneSubscriber">
             <tag name="kernel.event_subscriber" />
         </service>
 
@@ -393,7 +413,7 @@
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
             <tag name="doctrine.event_subscriber" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\DatabaseSubscriber\TrackingPolicySubscriber">
@@ -420,7 +440,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="router" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Service\SemanticEnhancer"   public="true">
@@ -428,9 +448,19 @@
             <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
         </service>
 
+        <service id="Base\Service\Model\Obfuscator\AbstractCompression"></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\NullCompression"    parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\ZlibCompression"    parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\GzipCompression"    parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\DeflateCompression" parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
+        <service id="Base\Service\Model\Obfuscator\Compression\HashidsCompression" parent="Base\Service\Model\Obfuscator\AbstractCompression">
+            <tag name="obfuscator.compression" />
+            <bind key="$secret">%kernel.secret%</bind>
+        </service>
         <service id="Base\Service\Obfuscator"   public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
         <service id="Base\Service\FileService"  public="true">
@@ -477,7 +507,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="base.service.image" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="router" />
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
@@ -493,12 +523,16 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
-        <service id="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
-        <service id="Base\Service\Model\CurrencyApi\Fixer"            parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Service\Model\CurrencyApi\AbstractApi"      parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Service\Model\CurrencyApi\ExchangeRatesApi" parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Service\Model\CurrencyApi\CurrencyLayer"    parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi">
-            <tag name="base.currency_api" />
+        <service id="Base\Service\TradingMarket">
+            <argument type="service" id="simple_cache" />
+            <argument type="service" id="http_client" />
+        </service>
+        <service id="Base\Service\Model\Currency\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
+        <service id="Base\Service\Model\Currency\Api\Fixer"            parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
+        <service id="Base\Service\Model\Currency\Api\AbstractApi"      parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
+        <service id="Base\Service\Model\Currency\Api\ExchangeRatesApi" parent="Base\Service\Model\Currency\AbstractCurrencyApi"><tag name="currency.api" /></service>
+        <service id="Base\Service\Model\Currency\Api\CurrencyLayer"    parent="Base\Service\Model\Currency\AbstractCurrencyApi">
+            <tag name="currency.api" />
             <!-- <bind key="$metadata">%base.currency_api.currency_layer%</bind> -->
         </service>
 
@@ -543,7 +577,7 @@
             <argument type="service" id="setting_bag" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="security.firewall.map" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="base.service.maintenance" />
             <argument type="service" id="base.service.maternity_unit" />
         </service>
@@ -552,7 +586,7 @@
             <tag name="security.voter" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Database\Entity\EntityExtension" public="true" />
@@ -573,7 +607,7 @@
             <argument type="service" id="router" />
             <argument type="service" id="sitemap" />
             <argument type="service" id="translator" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="base.service" />
             <argument type="service" id="base.service.maintenance" />
             <argument type="service" id="base.service.maternity_unit" />
@@ -594,12 +628,19 @@
         <service id="Base\Twig\Extension\FileTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="router" />
+            <argument type="service" id="base.service.image" />
+            <argument type="service" id="Base\Controller\UX\FileController" />
             <bind key="$projectDir">%kernel.project_dir%</bind>
-       </service>
+        </service>
+
+        <service id="Base\Twig\Extension\TradingMarketTwigExtension" public="true">
+            <tag name="twig.extension" />
+            <argument type="service" id="trading_market" />
+        </service>
 
         <service id="Base\Twig\Renderer\AbstractRenderer">
             <argument type="service" id="twig" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="slugger" />
             <argument type="service" id="parameter_bag" />
         </service>
@@ -636,7 +677,8 @@
 
         <service id="Base\Twig\Extension\FormTwigExtension"        ><tag name="twig.extension" /><argument type="service" id="form.proxy" /></service>
         <service id="Base\Twig\Extension\WidgetTwigExtension"      ><tag name="twig.extension" /><argument type="service" id="base.widget_provider" /></service>
-        <service id="Base\Twig\Extension\LangTwigExtension"      ><tag name="twig.extension" /><argument type="service" id="locale_provider" /></service>
+        <service id="Base\Twig\Extension\LocalizerTwigExtension"   ><tag name="twig.extension" /><argument type="service" id="localizer" /></service>
+        <service id="Base\Twig\Extension\TranslatorTwigExtension"  ><tag name="twig.extension" /><argument type="service" id="localizer" /></service>
         <service id="Base\Twig\Extension\PaginatorTwigExtension"   ><tag name="twig.extension" /><argument type="service" id="translator" /></service>
         <service id="Base\Twig\Extension\BreadgrinderTwigExtension"><tag name="twig.extension" /><argument type="service" id="base.breadgrinder" /></service>
         <service id="Base\Twig\Extension\ShareTwigExtension"       ><tag name="twig.extension" /><argument type="service" id="base.service.sharer" /></service>
@@ -757,7 +799,7 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="referrer" />
             <argument type="service" id="setting_bag" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="base.service.maintenance" />
@@ -802,6 +844,7 @@
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="request_stack" />
         </service>
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">
@@ -810,6 +853,7 @@
         </service>
         <service id="Base\EntitySubscriber\UserSubscriber">
             <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.notifier" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="router" />
@@ -818,7 +862,7 @@
         <service id="Base\Form\Type\LayoutSettingListType">
             <tag name="form.type" />
             <argument type="service" id="setting_bag" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
         <service id="Base\Form\Type\LayoutWidgetListType">
@@ -834,7 +878,7 @@
         <service id="Base\Field\Type\TranslationType">
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="twig" />
         </service>
 
@@ -850,6 +894,7 @@
         <service id="Base\Field\Type\RouteType">
             <tag name="form.type" />
             <argument type="service" id="router" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Field\Type\SelectType">
@@ -859,7 +904,7 @@
             <argument type="service" id="translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="twig" />
             <argument type="service" id="security.authorization_checker" />
@@ -868,6 +913,7 @@
             <argument type="service" id="router" />
         </service>
 
+        <service id="Base\Field\Type\ForexType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /><argument type="service" id="base.service.icon" /></service>
         <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
 
@@ -906,13 +952,13 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
         </service>
-        <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="twig" /></service>
+        <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="trading_market" /></service>
         <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="twig" /></service>
         <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="twig" /></service>
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
         </service>
         <service id="Base\Field\Type\ColorType">
             <tag name="form.type" />
@@ -951,10 +997,13 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="obfuscator" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="trading_market" />
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.paginator" />
             <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\UX\AutovalidateController">
@@ -1010,6 +1059,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
         </service>
 
+        <service id="Base\Field\Configurator\LocaleConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\TextConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\QuillConfigurator">
             <tag name="ea.field_configurator" />
@@ -1050,7 +1100,7 @@
         <service id="Base\Field\Configurator\TranslationConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="locale_provider" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Field\Configurator\BooleanConfigurator">
@@ -1132,6 +1182,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="ea_extension" />
+            <argument type="service" id="base.service.file" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
@@ -1163,6 +1214,7 @@
         <service id="Base\Controller\Backend\Crud\Extension\RevisionCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
         <service id="Base\Controller\Backend\Crud\UserCrudController"              parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\User\AddressCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\GroupCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\NotificationCrudController" parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\PermissionCrudController"   parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
@@ -1188,17 +1240,21 @@
 
         <service id="Base\Controller\Backend\Crud\Layout\Attribute\HyperlinkCrudController"  parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"     parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\TextAdapterCrudController"         parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\ImageAdapterCrudController"        parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\DateTimeAdapterCrudController"     parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\ColorAdapterCrudController"        parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\ArrayAdapterCrudController"        parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\TextareaAdapterCrudController"     parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\PercentAdapterCrudController"      parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\DateTimeAdapterCrudController"   parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\NumberAdapterCrudController"       parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\ScalarAdapterCrudController"       parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\HyperpatternAdapterCrudController" parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"       parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\TextAdapterCrudController"            parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\ImageAdapterCrudController"           parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\DateTimeAdapterCrudController"        parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\ColorAdapterCrudController"           parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\ArrayAdapterCrudController"           parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\TextareaAdapterCrudController"        parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\PercentAdapterCrudController"         parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\DateTimeAdapterCrudController"        parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\NumberAdapterCrudController"          parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\ScalarAdapterCrudController"          parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\HyperpatternAdapterCrudController"    parent="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractActionAdapterCrudController" parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractRuleAdapterCrudController"   parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractScopeAdapterCrudController"  parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
     </services>
 </container>

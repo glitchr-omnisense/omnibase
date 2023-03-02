@@ -175,8 +175,12 @@ abstract class EnumType extends Type implements SelectInterface
     public function convertToPHPValue($value, AbstractPlatform $platform) : mixed { return $value; }
     public function convertToDatabaseValue($value, AbstractPlatform $platform) : mixed
     {
-        if ($value !== null && !in_array($value, $this->getPermittedValues()))
-            throw new \InvalidArgumentException("Invalid '".(is_array($value) ? implode(", ", $value) : $value)."' value.");
+        if (is_array($value)) {
+            throw new \InvalidArgumentException("Enum type \"".get_class($this)."\" is not expecting an array \"['" . (is_array($value) ? implode("', '", $value) : $value) . "'] received.");
+        }
+        if ($value !== null && !in_array($value, $this->getPermittedValues())) {
+            throw new \InvalidArgumentException("Invalid '" . (is_array($value) ? implode(", ", $value) : $value) . "' value. (Expected values are: ".implode(", ", $this->getPermittedValues()).")");
+        }
 
         return $value;
     }

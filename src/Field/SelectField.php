@@ -57,7 +57,7 @@ class SelectField implements FieldInterface
 
     public function useHtml(bool $useHtml = true)
     {
-        $this->setFormTypeOption("html", $useHtml);
+        $this->setFormTypeOption("use_html", $useHtml);
         return $this;
     }
 

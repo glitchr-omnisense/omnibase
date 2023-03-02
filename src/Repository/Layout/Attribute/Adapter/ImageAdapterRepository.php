@@ -4,6 +4,7 @@ namespace Base\Repository\Layout\Attribute\Adapter;
 
 use Base\Entity\Layout\Attribute\Adapter\ImageAdapter;
 
+use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
 use Base\Repository\Layout\AttributeRepository;
 
 /**
@@ -13,7 +14,7 @@ use Base\Repository\Layout\AttributeRepository;
  * @method ImageAdapter[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
  */
 
-class ImageAdapterRepository extends AttributeRepository
+class ImageAdapterRepository extends AbstractAdapterRepository
 {
 
 }

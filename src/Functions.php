@@ -9,6 +9,10 @@ namespace {
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
 
+    function sign(int|float $n): string {
+        return ($n < 0) ? "-" : "+";
+    }
+
     const MAX_DIRSIZE = 255;
     function path_subdivide($path, int $subdivision, int|array $length = 1)
     {
@@ -23,15 +27,39 @@ namespace {
 
         $subPath = $dirname . "/";
         $last = strlen($basename);
+
         for($i = 0, $cursor = 0, $N = count($length); $i < $N; $i++ ) {
 
             if($cursor > $last) break;
             $subPath .= substr($basename, $cursor, $length[$i]) . "/";
             $cursor += $length[$i];
+
         }
 
         $subPath .= substr($basename, $cursor);
         return str_strip($subPath, "./", "/");
+    }
+
+    function str_strip_chars(string $str)
+    {
+        return preg_replace("/[a-zA-Z]/", "", $str);
+    }
+    function str_strip_numbers(string $str)
+    {
+        return preg_replace("/[^a-zA-Z]/", "", $str);
+    }
+
+    function format_uuid(string $uuid):string|false {
+
+        $uuid = str_replace("-", "", $uuid);
+        if(!preg_match("/[a-f0-9]{32}/i", $uuid)) return false;
+
+        return
+            substr($uuid, 0 , 8)."-".
+            substr($uuid, 8 , 4)."-".
+            substr($uuid, 12, 4)."-".
+            substr($uuid, 16, 4)."-".
+            substr($uuid, 20, 12);
     }
 
     function typeof(mixed $input): string { return gettype($input); }
@@ -63,7 +91,9 @@ namespace {
     // Value (8) => 270 degrees, mirrored: image is on its far side.
     function getimageorientation(string $fname): int {
 
-        $exif = exif_read_data($fname);
+        try { $exif = exif_read_data($fname); }
+        catch(\ErrorException $e) { return 1; }
+
         return $exif["Orientation"] ?? 1;
     }
 
@@ -209,33 +239,37 @@ namespace {
 
             //
             // Check if IP address provided
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP) ) $parse["ip"] = $parse["host"];
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) $parse["ipv4"] = $parse["host"];
-            if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) $parse["ipv6"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP)) $parse["ip"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) $parse["ipv4"] = $parse["host"];
+            if (filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) $parse["ipv6"] = $parse["host"];
 
             //
             // Check if hostname
-            if(preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
+            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
 
-                $parse["fqdn"] = $parse["host"].".";
+                $parse["fqdn"] = $parse["host"] . ".";
                 $parse["domain"] = $match[0];
 
-                $subdomain = str_rstrip($parse["host"], ".".$parse["domain"]);
+                $subdomain = str_rstrip($parse["host"], "." . $parse["domain"]);
                 if ($parse["domain"] !== $subdomain)
                     $parse["subdomain"] = $subdomain;
 
-                if(array_key_exists("subdomain", $parse)) {
+                if (array_key_exists("subdomain", $parse)) {
 
                     $list = explode(".", $parse["subdomain"]);
                     $parse["subdomain"] = array_pop($list);
 
-                    if(!empty($list))
+                    if (!empty($list))
                         $parse["machine"] = implode(".", $list);
                 }
 
                 $domain = explode(".", $match[0]);
-                $parse["sld"]   = first($domain);
-                $parse["tld"]   = implode(".", tail($domain));
+                $parse["sld"] = first($domain);
+                $parse["tld"] = implode(".", tail($domain));
+
+            } else if (preg_match('/^[a-z0-9][a-z0-9\-]{0,63}$/i', strtolower($parse["host"] ?? ""), $match)) {
+
+                $parse["domain"] = $match[0];
             }
         }
 
@@ -344,7 +378,7 @@ namespace {
 
 
     function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
-    function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
+    function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace($separator.$separator, $separator, str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', str_replace(" ", $separator,$input))))); }
     function snake2camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
 
     function preg_match_array(string $pattern, array $subject) {
@@ -356,6 +390,13 @@ namespace {
         }
 
         return $search;
+    }
+
+
+    function is_null_object(?object $object)
+    {
+        if($object === null) return true;
+        return empty(array_filter(cast_to_array($object)));
     }
 
     function array_unique_object(array $array): array
@@ -586,7 +627,8 @@ namespace {
         return $str;
     }
 
-    function random_str(?int $length = null, ?string $chars = null): ?string
+    function rand_int(int $digits) { return rand(pow(10, $digits-1), pow(10, $digits)-1); }
+    function rand_str(?int $length = null, ?string $chars = null): ?string
     {
         if ($length === null)
             $length = 8;
@@ -602,6 +644,13 @@ namespace {
 
         return $randomString;
     }
+
+    function rotate_str(int $n = 1)
+    {
+        return substr($str, -$n) . substr($str, 0, -$n);
+    }
+
+
 
     const     BIT_PREFIX = array("b");
     const    BYTE_PREFIX = array("B", "O", "o");
@@ -830,7 +879,7 @@ namespace {
         $needleLength = strlen($needle);
         if(!$needleLength) return $haystack;
 
-        while(strlen($haystack) === strrpos($haystack, $needle) + $needleLength) {
+        while(strrpos($haystack, $needle) !== false && strlen($haystack) === strrpos($haystack, $needle) + $needleLength) {
 
             $haystack = substr($haystack, 0, strlen($haystack)-$needleLength);
             if(!$recursive) break;
@@ -858,7 +907,7 @@ namespace {
         $needleLength = strlen($needle);
         if(!$needleLength) return $haystack;
 
-        while(!empty($needle) && 0 === strpos($haystack, $needle)) {
+        while(strrpos($haystack, $needle) !== false && !empty($needle) && 0 === strpos($haystack, $needle)) {
             $haystack = substr($haystack, $needleLength);
             if(!$recursive) break;
         }
@@ -879,8 +928,11 @@ namespace {
     function last(object|array &$array)  { return end($array)   ?? null; }
     function tail(object|array &$array, int $length = -1, bool $preserve_keys = false):array  { return array_slice($array, -min(count($array)-1, $length), null, $preserve_keys); }
 
-    function first(object|array|null $array)  { return $array ? begin($array) : null; }
-    function second(object|array|null $array) { return $array ? ($array[1] ?? null) : null; }
+    function first (object|array|null $array) { return $array ? begin($array) : null; }
+    function second(object|array|null $array) { return first (tail($array)); }
+    function third (object|array|null $array) { return second(tail($array)); }
+    function fourth(object|array|null $array) { return third (tail($array)); }
+    function fifth (object|array|null $array) { return fourth(tail($array)); }
 
     function distance(array $arr1, array $arr2)
     {
@@ -1398,10 +1450,10 @@ namespace {
     function pathinfo_extension(string $path, ?string $extension = null)
     {
         $info = pathinfo($path);
-        $extension = $extension ?? $info["extension"];
+        $extension = $extension ?? $info["extension"] ?? "";
 
         $dirname = $info['dirname'] ? $info['dirname'] . "/" : '';
-        return $dirname . $info['filename'] . '.' . $extension;
+        return $dirname . $info['filename'] . ($extension ? "." .$extension : "");
     }
 
     function pathinfo_relationship(string $path):?string
@@ -1954,6 +2006,16 @@ namespace {
         return $entry;
     }
 
+    function array_key_startsWith(array $array, string $needle): array
+    {
+        return array_transforms(fn($k,$v):?array => str_starts_with($k, $needle) ? [$k,$v] : null, $array);
+    }
+
+    function array_key_endsWith(array $array): array
+    {
+        return array_transforms(fn($k,$v):?array => str_ends_with($k, $needle) ? [$k,$v] : null, $array);
+    }
+
     function array_keys_recursive(array $array): array
     {
         $keys = [];
@@ -2171,8 +2233,11 @@ namespace {
         return array_intersect_key($array, $arrayMask);
     }
 
-    function object_hydrate(object $object, array $vars)
+    function object_hydrate(object $object, array|object|null $vars = null)
     {
+        if($vars === null) return $object;
+        if(is_object($vars)) $vars = cast_to_array($vars);
+
         $reflClass      = new ReflectionClass($object);
 
         do {
@@ -2190,6 +2255,8 @@ namespace {
 
         return $object;
     }
+
+    function cast_to_array(object $object) { return array_transforms(fn($k,$v):array => [str_lstrip($k,["\x00","+","*"]),$v], (array) $object); }
 
     function cast_from_array(array $array, string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"',serialize((object) $array) )); }
     function cast_empty(string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"', serialize((object) []) )); }
@@ -2241,12 +2308,34 @@ namespace {
         return strtr($str,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
     }
 
-    function dec2alphabet(string $s)
+    function abc2dec(string $s): int {
+
+        $abc = array_flip(range('a', 'z'));
+        $dec = "";
+
+        foreach(str_split(strtolower($s)) as $c)
+            $dec .= $abc[$c];
+
+        return intval($dec);
+    }
+
+    function dec2abc(int $dec): int {
+
+        $dec = strval($dec);
+
+        $abc = "";
+        foreach(str_split($dec) as $c)
+            $abc .= chr($c);
+
+        return $abc;
+    }
+
+    function hexv2abc(string $s)
     {
         return strtr(strtoupper(base_convert($s, 10, 26)), "0123456789ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
-    function alphabet2dec(string $s)
+    function abc2hexv(string $s)
     {
         return base_convert(strtr(strtoupper($s), "0123456789ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 10, 26);
     }
@@ -2421,21 +2510,50 @@ namespace {
 
     function is_identity(?array $array)
     {
-        $i = 0;
         foreach($array ?? [] as $key => $value) {
 
             if(is_array($value) && !is_identity($value)) return false;
-            else if ($i++ !== $value) return false;
+            else if ($key !== $value) return false;
         }
 
         return true;
+    }
+
+    function dump_closure(Closure $c) {
+        $str = 'function (';
+        $r = new ReflectionFunction($c);
+        $params = array();
+        foreach($r->getParameters() as $p) {
+            $s = '';
+            if($p->isArray()) {
+                $s .= 'array ';
+            } else if($p->getClass()) {
+                $s .= $p->getClass()->name . ' ';
+            }
+            if($p->isPassedByReference()){
+                $s .= '&';
+            }
+            $s .= '$' . $p->name;
+            if($p->isOptional()) {
+                $s .= ' = ' . var_export($p->getDefaultValue(), TRUE);
+            }
+            $params []= $s;
+        }
+        $str .= implode(', ', $params);
+        $str .= '){' . PHP_EOL;
+        $lines = file($r->getFileName());
+
+        for($l = $r->getStartLine(); $l < $r->getEndLine(); $l++) {
+            $str .= $lines[$l];
+        }
+        return $str;
     }
 
     function cast_datetime(null|string|int|DateTime $datetime)
     {
         if($datetime === null) return null;
         return is_int($datetime)    ? (new DateTime())->setTimestamp($datetime) :
-             ( is_string($datetime) ?  new DateTime($datetime) : (clone $datetime));
+             ( is_string($datetime) ? (new DateTime())->modify($datetime) : (clone $datetime));
     }
 
     function daydiff(null|string|int|DateTime $datetime):?int
@@ -2454,8 +2572,8 @@ namespace {
         $precision = cast_datetime($precision);
 
         $timestamp = $datetime->format("U");
-        $modulo = abs($precision->format("U") - time());
-        $delta = $timestamp % $modulo;
+        $modulo = abs($precision->format("U") - (new DateTime())->format("U"));
+        $delta = $timestamp == $modulo ? 0 : $timestamp % $modulo;
 
         return $datetime->setTimestamp($timestamp - $delta + $modulo);
     }
@@ -2466,10 +2584,47 @@ namespace {
         $precision = cast_datetime($precision);
 
         $timestamp = $datetime->format("U");
-        $modulo = abs($precision->format("U") - time());
-        $delta = $timestamp % $modulo;
+        $modulo = abs($precision->format("U") - (new DateTime())->format("U"));
+        $delta = $timestamp == $modulo ? 0 : $timestamp % $modulo;
 
         return $datetime->setTimestamp($timestamp - $delta);
+    }
+
+    function is_length_safe(string $directory): bool
+    {
+        $maxPathLength = constant("PHP_MAXPATHLEN");
+        return strlen($directory) <= $maxPathLength;
+    }
+
+    function mkdir_length_safe(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool
+    {
+        if(is_length_safe($directory))
+            return mkdir($directory, $permissions, $recursive, $context);
+
+        $ls = getcwd();
+        $directory = str_lstrip($directory, $ls);
+        if(str_starts_with($directory, "/"))
+            chdir("/");
+
+        $directories = explode("/", $directory);
+        foreach($directories as $directory) {
+
+            if(!$directory) continue;
+            if(!is_length_safe($directory)) {
+                //throw new LogicException("Directory name is too long. (PHP_MAXPATHLEN = ".constant("PHP_MAXPATHLEN").")");
+                return false;
+            }
+
+            if(!file_exists($directory))
+                shell_exec("mkdir -p ".$directory);
+            if(!is_dir($directory))
+                throw new LogicException("\"".getcwd()."/".$directory."\" is a file.");
+
+            chdir($directory);
+        }
+
+        chdir($ls);
+        return true;
     }
 
     function round_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime

@@ -57,8 +57,8 @@ class ImageType extends FileType
         if(is_array($options["cropper"])) {
 
             $token  = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $hashid = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
-            $view->vars["ajax"]     = $this->router->generate("ux_dropzone", ["hashid" => $hashid]);
+            $data = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
+            $view->vars["ajax"]     = $this->router->generate("ux_dropzone", ["data" => $data]);
 
             if(!array_key_exists('viewMode',     $options["cropper"])) $options["cropper"]['viewMode']         = 2;
             if(!array_key_exists('autoCropArea', $options["cropper"])) $options["cropper"]['autoCropArea'] = true;

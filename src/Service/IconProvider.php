@@ -4,14 +4,14 @@ namespace Base\Service;
 
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
-use Base\Cache\Abstract\AbstractSimpleCache;
+use Base\Cache\Abstract\AbstractLocalCache;
 
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\RouterInterface;
 
-class IconProvider extends AbstractSimpleCache
+class IconProvider extends AbstractLocalCache
 {
     /**
      * @var AnnotationReader
@@ -22,19 +22,19 @@ class IconProvider extends AbstractSimpleCache
      */
     protected $imageService;
     /**
-     * @var LocaleProvider
+     * @var Localizer
      */
-    protected $localeProvider;
+    protected $localizer;
     /**
      * @var Router
      */
     protected $router;
 
-    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, LocaleProviderInterface $localeProvider, RouterInterface $router, string $cacheDir)
+    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir)
     {
         $this->annotationReader = $annotationReader;
         $this->imageService = $imageService;
-        $this->localeProvider = $localeProvider;
+        $this->localizer = $localizer;
         $this->router = $router;
 
         parent::__construct($cacheDir);
@@ -69,14 +69,14 @@ class IconProvider extends AbstractSimpleCache
     {
         if($this->routeIcons && $route === null) return $this->routeIcons;
 
-        return $this->routeIcons[$route.".".$this->localeProvider->getLang()]
+        return $this->routeIcons[$route.".".$this->localizer->getLocaleLang()]
             ?? $this->routeIcons[$route]
 
-            ?? $this->routeIcons[$route.".default.".$this->localeProvider->getLang()]
+            ?? $this->routeIcons[$route.".default.".$this->localizer->getLocaleLang()]
             ?? $this->routeIcons[$route.".default"]
 
-            ?? $this->routeIcons[$route.".".$this->localeProvider->getDefaultLang()]
-            ?? $this->routeIcons[$route.".default.".$this->localeProvider->getDefaultLang()]
+            ?? $this->routeIcons[$route.".".$this->localizer->getDefaultLocaleLang()]
+            ?? $this->routeIcons[$route.".default.".$this->localizer->getDefaultLocaleLang()]
             ?? null;
     }
 
