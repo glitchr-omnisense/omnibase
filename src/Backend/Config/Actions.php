@@ -112,7 +112,6 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
 
                     return $nextEntity ? $this->adminUrlGenerator->setEntityId($nextEntity->getId())->generateUrl() : "";
                 });
-
         }
 
         return parent::createBuiltInAction($pageName, $actionName);

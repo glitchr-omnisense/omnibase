@@ -126,6 +126,8 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('uniq',        'array_unique'),
             new TwigFilter('addslashes',  'addslashes'),
             new TwigFilter('at',          'at'),
+            new TwigFilter('ceil',          'ceil'),
+            new TwigFilter('floor',          'floor'),
             new TwigFilter('count_leaves',  'count_leaves'),
 
             new TwigFilter('sign',      'sign'),

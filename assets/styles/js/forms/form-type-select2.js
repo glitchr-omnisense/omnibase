@@ -23,6 +23,10 @@ window.addEventListener("load.form_type", function () {
         var term = "";
         var page = "1.0";
         var field = $("#"+el.getAttribute("data-select2-field"));
+
+        // Prevent to keep containers when changing pages using ajax
+        $(field).parent().find(".select2-container").remove();
+
         var defaultTemplate = function(option) {
 
             if(option.id == null)

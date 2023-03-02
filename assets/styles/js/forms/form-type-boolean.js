@@ -30,8 +30,10 @@ window.addEventListener("load.form_type", function () {
                     method: "PATCH",
                     headers: { "X-Requested-With": "XMLHttpRequest" }
                 }).then((function (t) {
+
                     checkbox.removeClass("invalid-feedback d-block");
                 })).then((function () {})).catch((function () {
+
                     checkbox.prop("checked", checkboxBak).addClass("invalid-feedback d-block");
                 }));
             }

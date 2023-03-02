@@ -21,7 +21,8 @@ security_pending:
 
 security_pendingForApproval:
   title: "Vérification en cours"
-  description: "Votre compte {0} est actuellement en cours de révision. Vous recevrez un email une fois le compte approuvé. Merci de revenir plus tard !"
+  user_verify: "Vous devriez avoir reçu un email, merci de vérifier votre compte {0} en cliquant sur le lien mis à disposition."
+  admin_approval: "Votre compte {0} est actuellement en cours de révision. Vous recevrez un email une fois le compte approuvé. Merci de revenir plus tard !"
 
 base_contact:
   title: Page de contact

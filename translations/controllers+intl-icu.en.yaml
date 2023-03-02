@@ -45,7 +45,8 @@ security_pending:
 
 security_pendingForApproval:
   title: "Pending for approval"
-  description: "Your account {0} is currently pending for approval. One manager will soon have a look. Please come back later !"
+  user_verify: "Please verify your account {0}. You should have received an email."
+  admin_approval: "Your account {0} is currently pending for approval. One manager will soon have a look. Please come back later !"
 
 app_index:
   title: Return to website

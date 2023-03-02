@@ -31,7 +31,6 @@ $(".copy-clipboard").on("click", function () {
     }
 });
 
-
 import Popover from 'bootstrap/js/dist/popover';
 $(window).on("load.popover", function() { $('[data-toggle="popover"]').popover({html:true}) });
 $(window).on("onbeforeunload.popover",function() { $("div[id^='popover']").hide().remove(); });

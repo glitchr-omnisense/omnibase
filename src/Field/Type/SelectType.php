@@ -566,6 +566,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
 
+                if($this->classMetadataManipulator->isEntity($data)) $data = [$data];
                 $data = array_map(fn($d) => $this->classMetadataManipulator->isEntity($d) ? $d->getId() : $d, $data);
                 $orderBy = array_flip($data ?? []);
                 $default = count($orderBy);

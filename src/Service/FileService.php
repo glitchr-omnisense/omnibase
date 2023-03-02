@@ -112,6 +112,7 @@ class FileService implements FileServiceInterface
         catch (InvalidArgumentException $e) { return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */ }
     }
 
+    public function linkable(array|string|null $path, array $config = []): array|string|null { return $this->generate("ux_serve", [], $path); }
     public function downloadable(array|string|null $path, array $config = []): array|string|null
     {
         $attachment = array_pop_key("attachment", $config);

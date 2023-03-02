@@ -53,8 +53,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
             throw new AccessException("Templated notification \"".$this::class."::$method\" starts with \"admins\". This is a reserved word in \"".self::class."\"");
 
         $notification = $this->$method(...$arguments);
+        if($notification == null) return $this;
         if(!$notification instanceof Notification)
             throw new AccessException("Templated notification \"".$this::class."::$method\" must return a \"".Notification::class."\" object.");
+
 
         $arguments = [];
         if ($action == "send")

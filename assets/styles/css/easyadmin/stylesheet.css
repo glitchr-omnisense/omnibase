@@ -13,6 +13,7 @@ html, body { scroll-padding-top: 11em; }
     width:auto;
 }
 
+.dropdown-menu .dropdown-item {margin:0.5em;}
 .field-association .accordion-body { margin:0 1em !important; }
 
 .form-entity > .form-group { padding: 1em 0; }

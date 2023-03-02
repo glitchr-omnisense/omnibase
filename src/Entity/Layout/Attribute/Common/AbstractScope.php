@@ -27,7 +27,8 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
         if(!$this->adapter) return true;
 
         $ret = false;
-        foreach($this->getValue() as $value) {
+        $values = is_array($this->getValue()) ? $this->getValue() : [$this->getValue()];
+        foreach($values as $value) {
 
             if(!$this->adapter->supports($value)) continue;
             $ret |= $this->adapter->contains($value, $subject);

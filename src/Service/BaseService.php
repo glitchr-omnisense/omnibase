@@ -119,6 +119,7 @@ class BaseService implements RuntimeExtensionInterface
         FormFactoryInterface $formFactory,
         LocalizerInterface $localizer,
         TradingMarketInterface $tradingMarket,
+        Obfuscator $obfuscator,
 
         SettingBag $settingBag,
         ImageService $imageService,
@@ -154,6 +155,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->setTwig($twig);
         $this->setRouter($router);
         $this->setFirewallMap($firewallMap);
+        $this->setObfuscator($obfuscator);
         $this->setParameterBag($parameterBag);
         $this->setTranslator($translator);
         $this->setSlugger($slugger);

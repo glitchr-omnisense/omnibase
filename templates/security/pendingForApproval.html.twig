@@ -6,8 +6,12 @@
 
             <main>
                 <section class="wrapper tab-content" id="pills-tabContent">
-                    <h1>{{ "@controllers.security_pendingForApproval.title"|trans|mb_ucwords }}</h1>
-                    <p>{{ "@controllers.security_pendingForApproval.description"|trans([app.user.email])|raw}}</p>
+                    <h1>{{ "@controllers.security_pendingForApproval.title"|trans|mb_ucwords }}</h1><br/>
+                    {% if not app.user.isVerified() %}
+                    <p>{{ "@controllers.security_pendingForApproval.user_verify"|trans([app.user.email])|raw}}</p>
+                    {% else %}
+                    <p>{{ "@controllers.security_pendingForApproval.admin_approval"|trans([app.user.email])|raw}}</p>
+                    {% endif %}
                 </section>
             </main>
         </div>

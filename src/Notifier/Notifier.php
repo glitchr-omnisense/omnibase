@@ -108,22 +108,6 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
-    public function registrationNotifyAdmins(User $user) {
-
-        $notification = new Notification("verifyEmail.check");
-        $notification->setUser($user);
-
-        $notification->setHtmlTemplate("email.html.twig");
-        $notification->setHtmlParameters([
-            "subject" => $this->translator->trans("@emails.register_notifyAdmins.subject"),
-            "content" => $this->translator->trans("@emails.register_notifyAdmins.content", [$user, $user->getEmail()]),
-            "action_text" => $this->translator->trans("@emails.register_notifyAdmins.action_text", [$this->translator->transEntity($user)]),
-            "action_url" => $user->__toLink()
-        ]);
-
-        return $notification;
-    }
-
     public function userApprovalRequest(User $user) {
 
         $notification = new Notification("adminApproval.required");

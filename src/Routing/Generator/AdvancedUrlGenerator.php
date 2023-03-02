@@ -40,12 +40,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if(($route = $this->getRouter()->getRoute($routeName))) {
 
             if($route->getHost()) $referenceType = self::ABSOLUTE_URL;
+
             if(str_contains($route->getHost().$route->getPath(), "{") && str_contains($route->getHost().$route->getPath(), "}")) {
 
                 if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
 
                     $parse = parse_url2(get_url());
-                    
+
                     $parameterNames = array_flip($matches[1]);
                     $routeParameters = array_merge(
                         array_intersect_key($parse, $parameterNames),
@@ -70,6 +71,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $e = null;
         $routeParameters = array_filter($routeParameters, fn($p) => $p !== null);
         if(!str_ends_with($routeName, ".".$this->getRouter()->getLocaleLang())) {
+
             try { return sanitize_url(parent::generate($routeName.".".$this->getRouter()->getLocaleLang(), $routeParameters, $referenceType)); }
             catch (InvalidParameterException|RouteNotFoundException $_) { $e = $_; }
         }
@@ -118,6 +120,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         $this->getContext()->setHttpPort($parse["port"] ?? 80);
         $this->getContext()->setHttpsPort($parse["port"] ?? 443);
+        $this->getContext()->setScheme($parse["scheme"] ?? "https");
 
         return $routeParameters;
     }
@@ -134,6 +137,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             catch (Exception $e ) { throw $e; }
         }
 
+
         //
         // Extract locale from route name if found
         foreach($this->getLocalizer()->getAvailableLocaleLangs() as $lang) {
@@ -145,7 +149,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
         }
 
-         // Priority to route parameter locale
+        // Priority to route parameter locale
         if(array_key_exists("_locale", $routeParameters))
             $locale = $this->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
 

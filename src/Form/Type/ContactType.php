@@ -3,13 +3,12 @@
 namespace Base\Form\Type;
 
 use Base\Field\Type\AvatarType;
-use Base\Field\Type\ButtonType;
 use Base\Field\Type\FileType;
 use Base\Field\Type\PasswordType;
+use Base\Field\Type\SubmitType;
 use Base\Form\Model\ContactModel;
 use Base\Form\Model\UserProfileModel;
 use Symfony\Component\Form\Extension\Core\Type\ResetType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -37,7 +36,7 @@ class ContactType extends AbstractType
         $builder->add('message', TextareaType::class);
         $builder->add('attachments', FileType::class, ["required" => false, "multiple" => true, "dropzone" => null
         ]);
-        $builder->add('submit', ButtonType::class, ["confirmation" => true]);
+        $builder->add('submit', SubmitType::class, ["confirmation" => true]);
         $builder->add('reset', ResetType::class);
     }
 }

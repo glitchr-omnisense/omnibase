@@ -274,7 +274,7 @@ class SecurityController extends AbstractController
                 $verifyEmailToken = new Token("verify-email", 24*3600, 3600);
                 $verifyEmailToken->setUser($user);
 
-                $notification = $this->notifier->sendVerificationEmail($newUser, $verifyEmailToken);
+                $notification = $this->notifier->sendVerificationEmail($user, $verifyEmailToken);
                 $notification->send("success");
             }
         }
@@ -351,7 +351,7 @@ class SecurityController extends AbstractController
                 $adminApprovalToken = new Token("admin-approval");
                 $adminApprovalToken->setUser($user);
 
-                $notification = $this->notifier->sendAdminsUserApprovalRequest($newUser);
+                $notification = $this->notifier->sendAdminsUserApprovalRequest($user);
                 $notification->send("success");
             }
         }
@@ -452,7 +452,7 @@ class SecurityController extends AbstractController
                     $resetPasswordToken = new Token("reset-password", 3600);
                     $resetPasswordToken->setUser($user);
 
-                    $this->notifier->sendResetPasswordRequest($newUser, $resetPasswordToken);
+                    $this->notifier->sendResetPasswordRequest($user, $resetPasswordToken);
                 }
             }
 
@@ -561,6 +561,7 @@ class SecurityController extends AbstractController
      */
     public function PendingForApproval(): Response
     {
+        if($this->getUser()->isApproved()) return $this->redirectToRoute("app_index");
         return $this->render('security/pendingForApproval.html.twig');
     }
 }

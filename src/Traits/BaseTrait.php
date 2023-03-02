@@ -5,6 +5,7 @@ namespace Base\Traits;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
+use Base\Service\Obfuscator;
 use Base\Service\TradingMarketInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Notifier\Abstract\BaseNotifierInterface;
@@ -78,8 +79,9 @@ trait BaseTrait
     public static function getRequestStack()  : ?RequestStack            { return (self::class === BaseService::class) ? BaseService::$requestStack   : BaseService::getRequestStack(); }
     public static function getEntityHydrator(): ?EntityHydrator          { return (self::class === BaseService::class) ? BaseService::$entityHydrator : BaseService::getEntityHydrator(); }
     public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$imageService   : BaseService::getImageService(); }
+    public static function getObfuscator()    : ?Obfuscator              { return (self::class === BaseService::class) ? BaseService::$obfuscator     : BaseService::getObfuscator(); }
     public static function getIconProvider()  : ?IconProvider            { return (self::class === BaseService::class) ? BaseService::$iconProvider   : BaseService::getIconProvider(); }
-    public static function getLocalizer(): ?LocalizerInterface { return (self::class === BaseService::class) ? BaseService::$localizer : BaseService::getLocalizer(); }
+    public static function getLocalizer()     : ?LocalizerInterface      { return (self::class === BaseService::class) ? BaseService::$localizer      : BaseService::getLocalizer(); }
     public static function getRouter()        : ?RouterInterface         { return (self::class === BaseService::class) ? BaseService::$router         : BaseService::getRouter(); }
     public static function getFirewallMap()   : ?FirewallMapInterface    { return (self::class === BaseService::class) ? BaseService::$firewallMap    : BaseService::getFirewallMap(); }
     public static function getTwig()          : ?Environment             { return (self::class === BaseService::class) ? BaseService::$twig           : BaseService::getTwig(); }

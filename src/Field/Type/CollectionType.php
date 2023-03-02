@@ -135,6 +135,7 @@ class CollectionType extends AbstractType
 
             $form = $event->getForm();
             $data = $event->getData() ?? $form->getParent()->getData() ?? [];
+
             foreach($data as $id => $entry) {
 
                 if (is_object($entry) && $options["allow_object"] == false)
@@ -156,6 +157,7 @@ class CollectionType extends AbstractType
                     $data = array_pad($data, $options["length"], null);
 
                 $event->setData($data);
+
             });
         }
 

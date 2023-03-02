@@ -159,7 +159,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $options["class"]    = $this->formFactory->guessClass($event, $options);
 
             $length = $options["group"] ? $options["length"] : max(1, $options["length"]);
-            $options["multiple"] = /*$length > 0 ? true :*/ $this->formFactory->guessMultiple($form, $options);
+            $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
 
             if($options["multiple"]) {
 
@@ -240,6 +240,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
 
         $data = $viewData;
+
         if ($data instanceof Collection) {
 
             $form = current(iterator_to_array($forms));
@@ -361,5 +362,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $viewData = current(iterator_to_array($forms))->getViewData();
         }
+
     }
 }

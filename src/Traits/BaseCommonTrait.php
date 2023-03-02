@@ -4,6 +4,7 @@ namespace Base\Traits;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
+use Base\Service\Obfuscator;
 use Base\Service\TradingMarketInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Routing\RouterInterface;
@@ -60,6 +61,14 @@ trait BaseCommonTrait {
     protected static $requestStack = null;
     public static function setRequestStack(RequestStack $requestStack) {
         self::$requestStack = $requestStack;
+    }
+
+    /**
+     * @var Obfuscator
+     */
+    protected static $obfuscator = null;
+    public static function setObfuscator(Obfuscator $obfuscator) {
+        self::$obfuscator = $obfuscator;
     }
 
     /**

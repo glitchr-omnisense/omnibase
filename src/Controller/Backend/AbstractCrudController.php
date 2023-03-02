@@ -7,6 +7,7 @@ use Base\BaseBundle;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Entity\Layout\Widget\Link;
 use Base\Field\IdField;
+use Base\Service\FileService;
 use Base\Service\Model\IconizeInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\Model\LinkableInterface;
@@ -80,6 +81,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         EntityManagerInterface $entityManager,
         RequestStack $requestStack,
         Extension $extension,
+        FileService $fileService,
         SettingBagInterface $settingBag,
         RouterInterface $router,
         TranslatorInterface $translator)
@@ -94,6 +96,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->settingBag = $settingBag;
         $this->router = $router;
+        $this->fileService = $fileService;
 
         $this->crud = null;
     }
@@ -221,9 +224,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         if(is_instanceof($this->getEntityFqcn(), LinkableInterface::class)) {
 
-            $linkToEntity = \Base\Backend\Config\Action::new('EntityPage', self::getEntityLabelInSingular(), "fas fa-fw fa-plug")
+            $linkToEntity = \Base\Backend\Config\Action::new(\Base\Backend\Config\Action::GOTO, self::getEntityLabelInSingular(), "fas fa-fw fa-plug")
                 ->renderAsTooltip()
-                ->linkToUrl(fn($e) => $e->__toLink());
+                ->linkToUrl(fn($e) => $e->__toLink() ?? "");
 
             $actions
                 ->add(Action::INDEX, $linkToEntity);
@@ -337,7 +340,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                 $discriminatorValue = $this->classMetadataManipulator->getDiscriminatorValue($instance);
                 if($crudController && $discriminatorValue) {
 
-                    $url = $this->adminUrlGenerator
+                    $url = null;
+
+                    $closure = $action->getUrl();
+                    if($closure instanceof \Closure)
+                        $url = $action->getUrl()($instance);
+
+                    $url = $url ?? $this->adminUrlGenerator
                             ->unsetAll()
                             ->setController($crudController)
                             ->setEntityId($instance->getId())
