@@ -44,7 +44,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     protected $settingRepository = null;
 
     protected ?string $environment;
-    
+
     /**
      * @var CacheInterface
      */
@@ -183,7 +183,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return [];
 
         $this->clear($path);
-        
+
         if(is_array($paths = $path)) {
 
             $settings = [];
@@ -212,7 +212,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
           catch(EntityNotFoundException $e) {
 
             return $useCache ? $this->getRaw($path, false) : [];
-        
+
         } // Cache fallback
 
         $values = $this->normalize($path, $settings);
@@ -249,7 +249,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this->getRaw($path, $useCache)["_self"] ?? null;
     }
 
-    public function getScalar(null|string|array $path, ?string $locale = null): string|array|object|null
+    public function getScalar(null|string|array $path, ?string $locale = null): mixed
     {
         if(is_array($paths = $path)) {
 
