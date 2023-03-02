@@ -233,21 +233,10 @@ window.addEventListener("load.form_type", function () {
                     return $.ajax(options)
                                 .done((_response) => localCache[el.getAttribute("data-select2-field")][index] = _response)
                                 .done(success)
-<<<<<<< HEAD
-                                .fail(function(_response)
-                                {
-                                    var msg = "Unexpected response received.";
-                                    if(_response) {
-
-                                        var response = JSON.parse(_response.responseText);
-                                        msg = response["status"];
-                                    }
-=======
                                 .fail(function(_response) 
                                 {        
                                     var msg = "Unexpected response received.";            
                                     if(_response) msg = _response.responseJSON;
->>>>>>> dc53ddf1f5191f9573af739413677350a8053b81
 
                                     $('body > .select2-container .loading-results .select2-selection__entry')
                                         .html("<span style='color:red;'>"+msg+"</span>");
@@ -262,15 +251,7 @@ window.addEventListener("load.form_type", function () {
         //
         // Pre-populated data
         if(select2["data"].length != 0) $(field).empty();
-<<<<<<< HEAD
-        $(field).val(select2["selected"] || []).trigger("change");
-
-        //
-        // Apply required option
-        select2["containerCssClass"] = select2["containerCssClass"] + ($(field).attr('required') ? 'required' : '');
-=======
         $(field).val(select2["selected"] || [])[0].dispatchEvent(new Event("change"));
->>>>>>> dc53ddf1f5191f9573af739413677350a8053b81
 
         var thumbnails = $("[id^="+el.getAttribute('id')+"_]");
 
