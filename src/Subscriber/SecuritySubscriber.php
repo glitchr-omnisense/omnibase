@@ -327,7 +327,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $user->approve();
                 $this->userRepository->flush($user);
 
-            } else {
+            } else if ($this->router->isSecured()) {
 
                 $this->router->redirectEvent($event, "security_pendingForApproval", [], 302,  ["exceptions" => $exceptions]);
             }

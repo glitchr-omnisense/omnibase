@@ -26,7 +26,7 @@ class Linkset extends Widget implements IconizeInterface, SetInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-layer-group"]; }
 
-    public function __construct(string $title, array $hyperlinks = [])
+    public function __construct(?string $title = null, array $hyperlinks = [])
     {
         $this->hyperlinks = new ArrayCollection($hyperlinks);
         parent::__construct($title);

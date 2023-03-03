@@ -27,7 +27,7 @@ class Menu extends Widget implements IconizeInterface, SetInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-compass"]; }
 
-    public function __construct(string $title)
+    public function __construct(?string $title = null)
     {
         parent::__construct($title);
         $this->items = new ArrayCollection();

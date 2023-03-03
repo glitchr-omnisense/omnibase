@@ -60,6 +60,16 @@ class SecurityController extends AbstractController
     protected $formProxy;
 
     /**
+     * @var Notifier
+     */
+    protected $notifier;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
      * @var ParameterBag
      */
     protected $parameterBag;
@@ -91,7 +101,7 @@ class SecurityController extends AbstractController
         $this->formProxy       = $formProxy;
         $this->parameterBag    = $parameterBag;
         $this->notifier        = $notifier;
-        
+
         $this->entityManager   = $entityManager;
         $this->userRepository  = $userRepository;
         $this->tokenRepository = $tokenRepository;
@@ -115,7 +125,7 @@ class SecurityController extends AbstractController
 
             // Remove expired tokens
             $user->removeExpiredTokens();
-            
+
             if($this->isGranted('IS_AUTHENTICATED_FULLY'))
                 return $this->redirect($referrer->getUrl() ?? $this->router->getUrlIndex());
 
@@ -127,7 +137,7 @@ class SecurityController extends AbstractController
         $formProcessor = $this->formProxy
             ->createProcessor("form:login", SecurityLoginType::class, ["identifier" => $lastUsername])
             ->handleRequest($request);
-            
+
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
         // last username entered by the user
@@ -217,14 +227,14 @@ class SecurityController extends AbstractController
                 $adminApprovalRequired = !$this->parameterBag->get("base.user.register.autoapprove") ?? false;
                 $newUser->approve(!$adminApprovalRequired);
                 $newUser->setPlainPassword($formProcessor->getData("plainPassword"));
-                
+
                 // Social account connection
                 if (($user = $this->getUser()) && $user->isVerified())
                     $newUser->verify($user->isVerified());
 
                 if ($newUser->isVerified() && $this->parameterBag->get("base.user.register.notify_admins"))
                     $this->notifier->sendAdminsUserApprovalRequest($newUser);
-    
+
                 $this->entityManager->persist($newUser);
                 $this->entityManager->flush();
 
@@ -286,10 +296,12 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/verify-email/{token}", name="security_verifyEmailWithToken")
-     * @IsGranted("ROLE_USER")
      */
-    public function VerifyEmailResponse(Request $request, string $token): Response
+    public function VerifyEmailResponse(Request $request, UserAuthenticatorInterface $userAuthenticator, LoginFormAuthenticator $authenticator, string $token): Response
     {
+        $token = $this->tokenRepository->findOneByValueAndName($token, "verify-email");
+        if($token) $userAuthenticator->authenticateUser($token->getUser(), $authenticator, $request);
+
         $user = $this->getUser();
         $user->removeExpiredTokens("verify-email");
 
@@ -302,7 +314,8 @@ class SecurityController extends AbstractController
         } else {
 
             $verifyEmailToken = $user->getValidToken("verify-email");
-            if (!$verifyEmailToken || $verifyEmailToken->get() != $token) {
+
+            if ($verifyEmailToken === null || $verifyEmailToken->get() != $token->get()) {
 
                 $notification = new Notification("verifyEmail.invalidToken");
                 $notification->setUser($user);
@@ -429,7 +442,7 @@ class SecurityController extends AbstractController
     public function ResetPasswordRequest(Request $request): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent()) {
-         
+
             $notification = new Notification("login.already");
             $notification->send("warning");
 

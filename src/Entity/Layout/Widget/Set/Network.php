@@ -27,7 +27,7 @@ class Network extends Widget implements IconizeInterface, SetInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-network-wired"]; }
 
-    public function __construct(string $title, array $routes = [])
+    public function __construct(?string $title = null, array $routes = [])
     {
         $this->routes = new ArrayCollection($routes);
         parent::__construct($title);

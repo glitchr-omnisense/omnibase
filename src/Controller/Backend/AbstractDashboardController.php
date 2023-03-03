@@ -203,7 +203,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/", name="")
+     * @Route("", name="")
      * @Iconize({"fas fa-fw fa-toolbox", "fas fa-fw fa-home"})
      */
     public function index(): Response

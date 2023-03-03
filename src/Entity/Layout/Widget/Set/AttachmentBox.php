@@ -26,7 +26,7 @@ class AttachmentBox extends Widget implements IconizeInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-boxes"]; }
 
-    public function __construct(string $title, array $attachments = [])
+    public function __construct(?string $title = null, array $attachments = [])
     {
         $this->attachments = new ArrayCollection($attachments);
         parent::__construct($title);

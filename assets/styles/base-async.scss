@@ -6,8 +6,8 @@
     max-height:400px;
 }
 
-.modal { position:absolute !important; }
-body > .modal-backdrop { display:none !important; }
+.modal { position:absolute; }
+body > .modal-backdrop { display:none ; }
 .ql-editor .ql-align-justify img { float: left; }
 .ql-editor .ql-align-center img { float: initial; }
 .ql-editor .ql-align-center { clear: both; text-align:center; }
@@ -452,6 +452,9 @@ form.was-validated select:invalid ~ .select2-selection,
     color: #5768bc;
 }
 
+.form-collection-items:last-of-type .accordion-item {
+    border-bottom:0;
+}
 .form-collection-items .accordion-item {
     background: transparent;
     border: 0;
@@ -1455,9 +1458,8 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .select2-selection__entry a > i { min-width:15px; margin-left:0.3em; }
 .select2-selection__rendered > .select2-selection__entry { margin:0 0.25em !important; }
 
-
 .select2-selection__choice .select2-selection__entry { margin:0 0.25em !important; }
-.select2-selection--vertical .select2-selection__choice  { width:calc(100% - 40px); display:flex; justify-content: start !important; }
+.select2-selection--vertical .select2-selection__choice  { width:calc(100%); display:flex; justify-content: start !important; }
 .select2-selection--vertical.select2-selection--multiple .select2-selection__choice  { padding:0.35em !important; }
 .select2-selection.select2-selection--multiple:not(.select2-selection--vertical) .select2-selection__choice  { padding:0.075em !important; }
 

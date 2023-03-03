@@ -794,9 +794,12 @@ body.ea-edit .content-header, body.ea-new .content-header {
 {
     padding: 0;
 }
+body > .modal-backdrop { display:block !important; }
+.modal { position:fixed !important; }
 
 .dropdown-item a { text-align:center; }
-.dropdown i, .action-index i, .action-edit i, .action-new i { margin: 0 0.25em; }
+.dropdown i { margin: 0 0.5em; }
+.action-index i, .action-edit i, .action-new i { margin: 0; }
 .dropdown a, .action-index a, .action-edit a, .action-new a { margin: 0; }
 .dropdown .dropdown-appearance-label { margin: 4px; }
 

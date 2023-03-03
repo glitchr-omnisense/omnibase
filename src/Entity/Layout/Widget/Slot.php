@@ -49,6 +49,7 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=Widget::class, cascade={"persist"})
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $widget;
     public function getWidget(): ?Widget { return $this->widget; }

@@ -134,7 +134,11 @@ class CollectionType extends AbstractType
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
             $form = $event->getForm();
-            $data = $event->getData() ?? $form->getParent()->getData() ?? [];
+            $data = $event->getData();
+            if($form->getName() == "_collection") // Special case from association type
+                $data ??= $form->getParent()->getData();
+
+            $data ??= [];
 
             foreach($data as $id => $entry) {
 

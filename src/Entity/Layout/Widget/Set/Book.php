@@ -26,7 +26,7 @@ class Book extends Widget implements IconizeInterface, SetInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-book"]; }
 
-    public function __construct(string $title, array $pages = [])
+    public function __construct(?string $title = null, array $pages = [])
     {
         $this->pages = new ArrayCollection($pages);
         parent::__construct($title);

@@ -97,6 +97,7 @@ class Widget implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Widget::class)
+     * @ORM\JoinColumn(onDelete="SET NULL")
      * @OrderColumn
      */
     protected $connexes;

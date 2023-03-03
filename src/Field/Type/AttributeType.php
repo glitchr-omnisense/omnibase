@@ -91,7 +91,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             'sortable'     => null,
 
             'allow_add'    => true,
-            'allow_delete' => true,
+            'allow_delete' => true
         ]);
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
