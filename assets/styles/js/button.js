@@ -13,13 +13,22 @@ $.fn.prependon = function(evtype, fnc) {
 $("[type=submit]").on("click", function(e) {
 
     var closestForm = $(this).closest("form");
+
     if (closestForm.length == 0) {
 
         var form = $("form");
-        if(form.length == 1) {
+        if(form.length != 1) {
+
+            var formName = $(this).attr("name").split("[")[0];
+            form = $("form[name="+formName+"]");
+            form = (form.length ? form[0] : undefined);
+        }
+
+        if(form.length > 0) {
 
             var submitter = form.find("[type=submit]");
-            if(submitter.length == 1) submitter.click();
+            if(submitter.length == 1) submitter.on("click");
+            else form.trigger("submit");
         }
     }
 });

@@ -4,12 +4,15 @@ window.addEventListener("load.form_type", function () {
 
         var id = el.getAttribute("data-button-field");
 
-        var onConfirmation        = el.getAttribute("data-button-confirmation") ?? false;
+        var onConfirmation = el.getAttribute("data-button-confirmation") ?? false;
+        var bubbleUp       = el.getAttribute("data-button-confirmation-bubbleup") ?? true;
         if(onConfirmation) {
 
             $("#"+id+"-request").on("click", function (e) {
 
-                $('#'+id+'-modal').modal('show');
+                if(bubbleUp) $('#'+id+'-modal').appendTo("body").modal('show');
+                else $('#'+id+'-modal').modal('show');
+
                 e.preventDefault();
 
                 return false;

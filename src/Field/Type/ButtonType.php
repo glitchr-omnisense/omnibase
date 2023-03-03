@@ -29,6 +29,7 @@ class ButtonType extends BaseType implements SubmitButtonTypeInterface // NB: A 
 
         $resolver->setDefault('auto_initialize', false);
         $resolver->setDefault('confirmation', false);
+        $resolver->setDefault('confirmation-bubbleup', true);
         $resolver->setDefault('label_html', true);
         $resolver->setDefault('use_advanced_form', true);
         $resolver->setDefault('type', "button");
@@ -39,7 +40,8 @@ class ButtonType extends BaseType implements SubmitButtonTypeInterface // NB: A 
         parent::buildView($view, $form, $options);
         $view->vars = array_replace($view->vars, [
             "type" => $options["type"],
-            "confirmation" => $options["confirmation"]
+            "confirmation" => $options["confirmation"],
+            "confirmation_bubbleup" => $options["confirmation-bubbleup"]
         ]);
     }
 }

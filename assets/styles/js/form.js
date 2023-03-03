@@ -9,7 +9,7 @@ window.addEventListener('load', function(event) {
 
 window.addEventListener('load', function(event) {
 
-    $("form :input").keydown(function(event){
+    $("form :input").on("keydown", function(event){
 
         if(event.keyCode == 13) {
 
@@ -28,7 +28,7 @@ window.addEventListener('load', function(event) {
 
                 if(target.length && target[0].tagName == "FORM") {
 
-                    target.submit();
+                    target.trigger("submit");
                     break;
                 }
             }

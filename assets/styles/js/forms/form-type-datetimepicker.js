@@ -9,5 +9,6 @@ window.addEventListener("load.form_type", function () {
         var datetimepicker = $(el).data('datetimepicker-options');
 
         flatpickr("#"+id, datetimepicker);
+        $("#"+id).removeAttr("readonly");
     }));
 });

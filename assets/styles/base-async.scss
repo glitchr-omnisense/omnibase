@@ -6,8 +6,6 @@
     max-height:400px;
 }
 
-.modal { position:absolute; }
-body > .modal-backdrop { display:none ; }
 .ql-editor .ql-align-justify img { float: left; }
 .ql-editor .ql-align-center img { float: initial; }
 .ql-editor .ql-align-center { clear: both; text-align:center; }
@@ -87,7 +85,7 @@ body > .modal-backdrop { display:none ; }
 .content:not(.loaded) .content-body {
     opacity: 0;
 }
-.modal { position:absolute !important; }
+
 .content.spinner:not(.loaded):before {
 
     animation: 0.5s linear infinite loader;
@@ -290,7 +288,7 @@ hr { margin: 0.5rem 0; }
 {
     text-decoration:none;
 }
-.modal { margin:0.5em;}
+
 .form-control:focus {
     box-shadow: none;
 }
