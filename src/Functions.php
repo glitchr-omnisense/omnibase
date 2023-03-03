@@ -603,6 +603,7 @@ namespace {
     define("SHORTEN_BACK",   1); // Lorem ipsum dolor [..]
     function str_shorten(?string $str, int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): ?string
     {
+        $str = trim(strip_tags($str));
         if(!$str) return $str;
         if($length == 0) return "";
 

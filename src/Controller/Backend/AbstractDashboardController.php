@@ -31,6 +31,7 @@ use Base\Backend\Config\MenuItem;
 
 use App\Enum\UserRole;
 use Base\Annotations\Annotation\Iconize;
+use Base\Annotations\Annotation\IsGranted;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\LayoutSettingListType;
@@ -213,6 +214,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * @Route({"fr": "/clef-api", "en": "/api-key"}, name="_apikey")
      * @Iconize({"fas fa-fw fa-fingerprint", "fas fa-fw fa-key"})
+     * @IsGranted("IS_AUTHENTICATED_FULLY")
      */
     public function ApiKey(Request $request, array $fields = []): Response
     {

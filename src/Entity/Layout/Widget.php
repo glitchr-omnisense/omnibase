@@ -38,12 +38,6 @@ class Widget implements TranslatableInterface, IconizeInterface
     public static function __iconizeStatic() : ?array { return ["fas fa-cube"]; }
 
     public function __toString() { return $this->getTitle() ?? $this->getTranslator()->transEntity(self::class)." #".$this->getId(); }
-    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
-    {
-        $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
-
-        return $this->getRouter()->generate("widget_app", $routeParameters, $referenceType);
-    }
 
     public function __construct(?string $title = null, ?string $excerpt = null, ?string $content = null)
     {

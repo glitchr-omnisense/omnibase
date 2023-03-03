@@ -7,6 +7,7 @@ use Base\Service\Model\Color\Intl\Colors;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\Model\ColorizeInterface;
+use Base\Service\Model\LinkableInterface;
 use Base\Service\TranslatorInterface;
 use DateInterval;
 use DateTime;
@@ -82,6 +83,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('title',                        [$this, 'title'  ], ['is_safe' => ['all']]),
             new TwigFunction('excerpt',                      [$this, 'excerpt'  ], ['is_safe' => ['all']]),
             new TwigFunction('get_class',                    [$this, 'get_class']),
+            new TwigFunction('is_linkable',                 [$this, 'is_linkable']),
             new TwigFunction('is_countable',                 [$this, 'is_countable']),
             new TwigFunction('is_callable',                  [$this, 'is_callable']),
             new TwigFunction('call_user_func_with_defaults', [$this, 'call_user_func_with_defaults']),
@@ -167,6 +169,7 @@ final class FunctionTwigExtension extends AbstractExtension
         return !array_key_exists("email", $context);
     }
 
+    public function is_linkable(mixed $value): bool { return $value instanceof LinkableInterface; }
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
     public function nargs(callable $fn): int { return (new ReflectionFunction($fn))->getNumberOfParameters(); }
     public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }

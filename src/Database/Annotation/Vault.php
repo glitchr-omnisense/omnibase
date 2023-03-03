@@ -144,6 +144,7 @@ class Vault extends AbstractAnnotation
                 $value = $propertyAccessor->getValue($entity, $field);
                 if($value === null) continue;
 
+                if(is_array($value) || is_object($value)) $value = serialize($value);
                 $propertyAccessor->setValue($entity, $field, base64_encode($this->seal($marshaller, $value)));
             }
         }
@@ -165,6 +166,7 @@ class Vault extends AbstractAnnotation
 
                 $value = $propertyAccessor->getValue($entity, $field);
                 $value = $value ? base64_decode($propertyAccessor->getValue($entity, $field)) : false;
+                if(is_serialized($value)) $value = unserialize($value);
                 if($value === false) $value = null;
 
                 if(is_string($value))
