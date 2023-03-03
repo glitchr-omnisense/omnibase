@@ -60,7 +60,6 @@ final class TradingMarketTwigExtension extends AbstractExtension
 
     public function formatCurrency($amount, string $currency, array $attrs = [], string $locale = null): string
     {
-        $amount = 4000;
         $rate = 1.00;
         $applyRate     = array_pop_key("use_rate", $attrs) ?? true;
         $scalingFactor = array_pop_key("scale", $attrs) ?? 100;
