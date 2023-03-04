@@ -13,7 +13,6 @@ $.fn.prependon = function(evtype, fnc) {
 $("[type=submit]").on("click", function(e) {
 
     var closestForm = $(this).closest("form");
-
     if (closestForm.length == 0) {
 
         var form = $("form");
@@ -27,8 +26,12 @@ $("[type=submit]").on("click", function(e) {
         if(form.length > 0) {
 
             var submitter = form.find("[type=submit]");
-            if(submitter.length == 1) submitter.on("click");
-            else form.trigger("submit");
+            if(submitter.length == 1) submitter.trigger("click");
+            else {
+
+                e.preventDefault();
+                form.trigger("submit");
+            }
         }
     }
 });
