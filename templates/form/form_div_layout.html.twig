@@ -642,7 +642,6 @@
 
 {%- block association_widget -%}
     {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control') %}
-    {% set attr = {"class": ""} | merge(attr) %}
     {{ form_widget(form, {attr:attr}) }}
 {%- endblock -%}
 {%- block association_row -%}
@@ -698,15 +697,15 @@
         {%- set attr = attr|merge({'class': (hiddenOnly ? "hidden" : "") ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
         {% if group %}
-            {% set label = form_label(form) %}
-            {% if label is empty %}
-                {{ form_widget(form, {attr: attr}) }}
-            {% else %}
+            {# {% set label = form_label(form) %} #}
+            {# {% if label is empty %} #}
+            {{ form_widget(form, {attr: attr}) }}
+            {# {% else %}
                 <fieldset>
                     <legend>{{ label|raw }}</legend>
                     {{ form_widget(form, {attr: attr}) }}
                 </fieldset>
-            {% endif %}
+            {% endif %} #}
         {% else %}
 
             <div class="form-association form-group">

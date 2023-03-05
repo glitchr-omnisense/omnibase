@@ -21,9 +21,12 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
+use ErrorException;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use TypeError;
 
 class EntityHydrator implements EntityHydratorInterface
 {
@@ -376,7 +379,8 @@ class EntityHydrator implements EntityHydratorInterface
             $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
             if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
 
-                $this->propertyAccessor->setValue($entity, $propertyName, $value);
+                try { $this->propertyAccessor->setValue($entity, $propertyName, $value); }
+                catch(AccessException $e) {}
                 $this->markAsHydrated($entity, $propertyName);
 
             } else if($aggregateModel & self::OBJECT_PROPERTIES || $aggregateFallback) {
@@ -446,17 +450,16 @@ class EntityHydrator implements EntityHydratorInterface
             if ($data === null && $aggregateModel & self::IGNORE_NULLS)
                 continue;
 
-            $mapping = $classMetadata->associationMappings[$classMetadata->getFieldName($propertyName)];
+            $mapping = $classMetadata->associationMappings[$this->classMetadataManipulator->getFieldName($entity, $propertyName)];
             try {
-
+                
                 if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
                     $this->hydrateAssociationToOne($entity, $propertyName, $mapping, $value, $aggregateModel);
 
-                if ($this->classMetadataManipulator->isToManySide($entity, $propertyName)) {
+                if ($this->classMetadataManipulator->isToManySide($entity, $propertyName))
                     $this->hydrateAssociationToMany($entity, $propertyName, $mapping, $value, $aggregateModel);
-                }
 
-            } catch (Exception $e) {
+            } catch (Exception|ErrorException $e) {
 
                 throw $e;
             }
@@ -544,9 +547,11 @@ class EntityHydrator implements EntityHydratorInterface
                 }
 
             } else {
-
-                foreach ($association as $entry)
+   
+                foreach ($association as $entry) {
+                    if(is_string($entry)) continue;
                     $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
+                }
             }
         }
 
@@ -614,11 +619,7 @@ class EntityHydrator implements EntityHydratorInterface
     {
         if(is_object($identifier)) return $identifier;
         if(!$identifier) return null;
-
-        $identifier = $this->propertyAccessor->isReadable($identifier, "id")
-                    ? $this->propertyAccessor->getValue($identifier, "id") : null;
-
-        if(!$identifier) return null;
+        
         if ($this->hydrateAssociationReferences && $identifier !== null)
             return $this->entityManager->getReference($entityName, $identifier);
 

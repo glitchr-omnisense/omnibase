@@ -527,6 +527,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     public function getTargetClass(null|string|object $entityOrClassOrMetadata, $fieldName)
     {
         // Associations can help to guess the expected returned values
+        $fieldName = $this->getFieldName($entityOrClassOrMetadata, $fieldName) ?? $fieldName;
         if($this->hasAssociation($entityOrClassOrMetadata, $fieldName)) {
 
             return $this->getAssociationTargetClass($entityOrClassOrMetadata, $fieldName);
