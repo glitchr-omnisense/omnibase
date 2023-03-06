@@ -4,7 +4,7 @@ namespace Base\EntityDispatcher\Event;
 
 use App\Entity\User;
 use Base\EntityDispatcher\AbstractEventDispatcher;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class UserEventDispatcher extends AbstractEventDispatcher
 {

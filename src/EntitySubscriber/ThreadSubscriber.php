@@ -49,7 +49,7 @@ class ThreadSubscriber implements EventSubscriberInterface
             $notification = new Notification('thread.published');
             $notification->setHtmlTemplate("@Base/client/thread/email/publish.html.twig", ["thread" => $thread]);
             $notification->setUser($author);
-            $notification->send("urgent");
+            $notification->send();
         }
     }
 }
