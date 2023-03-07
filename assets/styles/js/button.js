@@ -12,25 +12,33 @@ $.fn.prependon = function(evtype, fnc) {
 
 $("[type=submit]").on("click", function(e) {
 
+    const submitEvent = new SubmitEvent("submit", { submitter: this });
+
     var closestForm = $(this).closest("form");
     if (closestForm.length == 0) {
 
-        var form = $("form");
-        if(form.length != 1) {
-
-            var formName = $(this).attr("name").split("[")[0];
+        var formName = $(this).attr("name").split("[")[0];
             form = $("form[name="+formName+"]");
             form = (form.length ? form[0] : undefined);
-        }
 
-        if(form.length > 0) {
+        if(form.length == 1) {
 
-            var submitter = form.find("[type=submit]");
-            if(submitter.length == 1) submitter.trigger("click");
-            else {
+            $(form).trigger("submit");
+            return false;
 
-                e.preventDefault();
-                form.trigger("submit");
+        } else {
+
+            var form = $("form");
+            if(form.length != 1) {
+
+                console.error("Ambiguous submit button provided. Which form do you want to submit ? Use input with name=`form[field]`")
+                return false;
+
+            } else {
+
+                // form[0].dispatchEvent(submitEvent);
+                $(form).trigger("submit");
+                return false;
             }
         }
     }
