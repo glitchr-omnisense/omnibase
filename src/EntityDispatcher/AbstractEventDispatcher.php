@@ -5,8 +5,8 @@ namespace Base\EntityDispatcher;
 use Base\Database\Entity\EntityHydrator;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Exception;
 
 use Symfony\Component\HttpFoundation\RequestStack;

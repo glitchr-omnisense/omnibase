@@ -534,7 +534,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         catch(\RuntimeException $e) { throw new UnexpectedValueException("Template \"$this->htmlTemplate\" not found.", 500, $e); }
 
         if(preg_match('/<title>(.*)<\/title>/ims', $htmlTemplate, $matches))
-            $subject = trim($matches[1]);
+            $subject = html_entity_decode(trim($matches[1]));
 
         $subject ??= $this->getSubject();
         $subject = $fwd.$subject;

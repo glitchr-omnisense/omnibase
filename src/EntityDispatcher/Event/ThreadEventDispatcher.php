@@ -5,7 +5,7 @@ namespace Base\EntityDispatcher\Event;
 use Base\Entity\Thread;
 use Base\EntityDispatcher\AbstractEventDispatcher;
 use DateTime;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class ThreadEventDispatcher extends AbstractEventDispatcher
 {

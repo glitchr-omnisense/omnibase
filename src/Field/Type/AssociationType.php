@@ -2,6 +2,8 @@
 
 namespace Base\Field\Type;
 
+use App\Entity\Article\Comment;
+use App\Entity\Article\CommentReply;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Form\FormFactory;
@@ -223,8 +225,9 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"] ?? false;
                     unset($field['allow_entity']);
 
-                    if ($fieldType !== null && ($fieldEntity || $fieldType != AssociationType::class))
+                    if ($fieldType !== null && $fieldEntity && $fieldType != AssociationType::class)
                         $form->add($fieldName, $fieldType, $field);
+                        
                 }
 
                 if($options["keep_indexes"]) $form->add("_index", HiddenType::class, ["mapped" => false, "required" => false]);
@@ -272,6 +275,15 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if(is_instanceof($childFormType, IntegerType::class))
                     $value = intval($value);
 
+                if(is_instanceof($childFormType, CollectionType::class)) {
+
+                    $value ??= [];
+                    if($value instanceof Collection)
+                        $value = $value->toArray();
+
+                    if(!is_array($value)) $value = [$value];
+                }
+                
                 $childForm->setData($value);
             }
         }
@@ -298,7 +310,18 @@ class AssociationType extends AbstractType implements DataMapperInterface
             if(!$classMetadata)
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
 
-            $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], $entries);
+            if($options["class"] == Comment::class) {
+
+                foreach($entries as $fieldName => $entry) {
+
+                    $formType = $options["fields"][$fieldName]["form_type"] ?? null;
+                    if($formType == CollectionType::class)
+                        unset($entries[$fieldName]);
+                }
+
+            }
+
+            $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], $entries, [], EntityHydrator::CLASS_METHODS);
 
         } else if($viewData instanceof PersistentCollection) {
 
@@ -344,7 +367,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                     elseif(!$owningSide->contains($viewData->getOwner()))
-                            $owningSide->add($viewData->getOwner());
+                        $owningSide->add($viewData->getOwner());
                 }
             }
 
@@ -355,13 +378,11 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
                 foreach($childForm as $key => $value)
                     $viewData[$key] = $value->getViewData();
-
             }
 
         } else {
 
             $viewData = current(iterator_to_array($forms))->getViewData();
         }
-
     }
 }

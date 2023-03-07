@@ -362,9 +362,19 @@ form.was-validated select:invalid ~ .select2-selection, .form-control.is-invalid
     margin-top: unset;
 }
 
+.accordion-item:last-of-type .accordion-button.collapsed {
+    border-radius:0;
+}
+
+.accordion-item:first-of-type .accordion-button {
+    border-radius:0;
+}
+
 .form-switch .form-check-input { background-position: 0% !important; background-size: contain !important; padding-right: unset !important; }
 .form-switch .form-check-input:checked { background-position: 100% !important; background-size: contain !important; padding-right: unset !important; }
 
+.form-collection-items .accordion-button { border-bottom:1px solid lightgrey; }
+.form-collection-items .accordion-body { margin:1em; }
 .form-entity > .form-group:first-child { margin-top: 0em; padding-top: 0em; }
 .form-entity > .form-group:last-child  { margin-bottom: 0em; padding-bottom: 0em; }
 

@@ -55,7 +55,7 @@ trait FormGuessTrait
                             ?? null;
 
                         if($this->classMetadataManipulator->isEntity($parentDataClass))
-                            $class = $this->classMetadataManipulator->getTargetclass($parentDataClass, $form->getName());
+                            $class = $this->classMetadataManipulator->getTargetClass($parentDataClass, $form->getName());
 
                         if($class) break;
 
