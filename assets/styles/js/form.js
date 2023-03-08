@@ -9,7 +9,7 @@ window.addEventListener('load', function(event) {
 
 window.addEventListener('load', function(event) {
 
-    $("form :input").on("keydown", function(event){
+    $("form :input").keydown(function(event){
 
         if(event.keyCode == 13) {
 
@@ -28,7 +28,7 @@ window.addEventListener('load', function(event) {
 
                 if(target.length && target[0].tagName == "FORM") {
 
-                    target.trigger("submit");
+                    target.submit();
                     break;
                 }
             }
@@ -45,8 +45,7 @@ window.addEventListener('load', function(event) {
     });
 
     $("form").addClass("needs-validation").attr("novalidate", "");
-    $("form").off("submit.checker");
-    $("form").on("submit.checker", function(e) {
+    $("form").on("submit", function(e) {
 
         // Disable form
         if (this.getAttribute("disabled") != null) return e.preventDefault();
@@ -92,12 +91,6 @@ window.addEventListener('load', function(event) {
                     {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
                     function () { $(this).addClass('was-validated'); }.bind(this)
                 );
-
-                this.dispatchEvent(new Event("submit:invalid"));
-
-            } else {
-
-                this.dispatchEvent(new Event("submit:valid"));
             }
         }
     });
