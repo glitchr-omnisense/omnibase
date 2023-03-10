@@ -95,12 +95,26 @@ class ImageService extends FileService implements ImageServiceInterface
 
     public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
-        return $this->generate("ux_imageWebp", [], $path, array_merge($config, ["filters" => $filters]));
+        if($path === null) return null;
+
+        $output = [];
+        $pathList = is_array($path) ? $path : [$path];
+        foreach($pathList as $p) 
+            $output[] = $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters]));
+
+        return is_array($path) ? $output : first($output);
     }
 
     public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
-        return $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image"    , [], $path, array_merge($config, ["filters" => $filters]));
+        if($path === null) return null;
+
+        $output = [];
+        $pathList = is_array($path) ? $path : [$path];
+        foreach($pathList as $p) 
+            $output[] = $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image"    , [], $path, array_merge($config, ["filters" => $filters]));
+
+        return is_array($path) ? $output : first($output);
     }
 
     public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null

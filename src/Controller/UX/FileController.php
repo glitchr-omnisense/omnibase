@@ -310,15 +310,15 @@ class FileController extends AbstractController
         $path       = $config["path"] ?? null;
         $identifier = $config["identifier"] ?? null;
 
-        // If cropping identifier found
-        if ($extension == null)
-            return $this->redirectToRoute("ux_imageCrop", ["data" => $data, "identifier" => $identifier], Response::HTTP_MOVED_PERMANENTLY);
-
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
         if(!$extensions) throw $this->createNotFoundException();
         if ($extension == null || !in_array($extension, $extensions))
             return $this->redirectToRoute("ux_imageExtension", ["data" => $data, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+
+        // If cropping identifier found
+        if ($identifier != null) 
+            return $this->ImageCrop($data, $identifier, $extension);
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
