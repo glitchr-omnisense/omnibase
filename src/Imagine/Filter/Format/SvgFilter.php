@@ -16,13 +16,13 @@ class SvgFilter implements FormatFilterInterface
 
     public function __toString()
     {
-        $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
+        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
         return path_suffix("", $pathSuffixes);
     }
 
     public function __construct(?string $path = null, array $filters = [], array $options = [])
     {
-        if(!$path) {
+        if (!$path) {
             $path = stream_get_meta_data(tmpfile())['uri'];
             unlink_tmpfile($path);
         }
@@ -34,7 +34,10 @@ class SvgFilter implements FormatFilterInterface
         $this->mimeTypes = new MimeTypes();
     }
 
-    public function getFilters() { return $this->filters; }
+    public function getFilters()
+    {
+        return $this->filters;
+    }
     public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;
@@ -42,7 +45,10 @@ class SvgFilter implements FormatFilterInterface
     }
 
     protected ?string $path;
-    public function getPath():?string { return $this->path; }
+    public function getPath(): ?string
+    {
+        return $this->path;
+    }
     public function setPath(?string $path)
     {
         $this->path = $path;
@@ -51,7 +57,9 @@ class SvgFilter implements FormatFilterInterface
 
     public function getExtension()
     {
-        if($this->path === null) return null;
+        if ($this->path === null) {
+            return null;
+        }
 
         $mimeType = mime_content_type2($this->path);
         $extensions = $mimeType ? $this->mimeTypes->getExtensions($mimeType) : null;
@@ -66,13 +74,13 @@ class SvgFilter implements FormatFilterInterface
         $extension = $this->getExtension() ?? $this->mimeTypes->getExtensions($mimeType)[0] ?? null;
         pathinfo_extension($this->path, $extension);
 
-        foreach($this->filters as $filter){
-
+        foreach ($this->filters as $filter) {
             $oldImage = $image;
             $image = $filter->apply($oldImage);
 
-            if(spl_object_id($image) != spl_object_id($oldImage))
+            if (spl_object_id($image) != spl_object_id($oldImage)) {
                 $oldImage->__destruct();
+            }
         }
 
         return $this->path === null ? $image : $image->save($this->path, $this->options);

@@ -29,29 +29,27 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         parent::validate($entity, $constraint);
 
         $em = $constraint->em ?? $this->getEntityManager(\get_class($entity));
-        if (!$em)
+        if (!$em) {
             throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
+        }
 
         $classMetadata = $this->getClassMetadata($entity);
 
         $criteria = [];
         $hasNullValue = false;
 
-        $fields = array_map(fn($f) => $classMetadata->getFieldName($f), $constraint->fields);
+        $fields = array_map(fn ($f) => $classMetadata->getFieldName($f), $constraint->fields);
         foreach ($fields as $key => $fieldName) {
-
             //
             // Property path
             $fieldPath = explode(".", $fieldName);
-            if(count($fieldPath) > 1) {
-
+            if (count($fieldPath) > 1) {
                 $fieldName = head($fieldPath);
-                if(!$classMetadata->hasAssociation($fieldName)) {
+                if (!$classMetadata->hasAssociation($fieldName)) {
                     throw new ConstraintDefinitionException(sprintf('The field "%s" is expected to be an association.', $fieldName));
                 }
 
-                foreach($classMetadata->getFieldValue($entity, $fieldName) as $association) {
-
+                foreach ($classMetadata->getFieldValue($entity, $fieldName) as $association) {
                     $constraint->fields[$key] = implode(".", tail($fieldPath));
                     $constraint->message = implode(".", tail($fieldPath));
 
@@ -106,9 +104,9 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             $repository = $em->getRepository($constraint->entityClass);
             $supportedClass = $repository->getClassName();
 
-            if (!$entity instanceof $supportedClass)
+            if (!$entity instanceof $supportedClass) {
                 throw new ConstraintDefinitionException(sprintf('The "%s" entity repository does not support the "%s" entity. The entity should be an instance of or extend "%s".', $constraint->entityClass, $classMetadata->getName(), $supportedClass));
-
+            }
         } else {
             $repository = $em->getRepository(\get_class($entity));
         }
@@ -143,8 +141,9 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             return;
         }
 
-        if($constraint instanceof \Base\Validator\ConstraintEntity)
+        if ($constraint instanceof \Base\Validator\ConstraintEntity) {
             $constraint->entity  = $entity;
+        }
 
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];
         $invalidValue = $criteria[$errorPath] ?? $criteria[$fields[0]];

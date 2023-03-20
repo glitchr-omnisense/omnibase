@@ -89,15 +89,16 @@ final class EntityWidgetItem implements MenuItemInterface
 
     public function generateUrl()
     {
-        if (WidgetItem::$adminUrlGenerator == null)
+        if (WidgetItem::$adminUrlGenerator == null) {
             throw new Exception("AdminUrlGenerator is missing");
-        if (WidgetItem::$adminContextProvider == null)
+        }
+        if (WidgetItem::$adminContextProvider == null) {
             throw new Exception("AdminContextProvider is missing");
+        }
 
         $itemDto = $this->getAsDto();
         WidgetItem::$adminUrlGenerator->unsetAll();
         if ($itemDto->getType() === MenuItemDto::TYPE_CRUD) {
-
             $routeParameters = $itemDto->getRouteParameters();
             $entityFqcn = $routeParameters[EA::ENTITY_FQCN] ?? null;
             $crudControllerFqcn = $routeParameters[EA::CRUD_CONTROLLER_FQCN] ?? null;
@@ -108,9 +109,8 @@ final class EntityWidgetItem implements MenuItemInterface
             // 1. if CRUD controller is defined, use it...
             if (null !== $crudControllerFqcn) {
                 WidgetItem::$adminUrlGenerator->setController($crudControllerFqcn);
-                // 2. ...otherwise, find the CRUD controller from the entityFqcn
+            // 2. ...otherwise, find the CRUD controller from the entityFqcn
             } else {
-
                 $crudControllers = WidgetItem::$adminContextProvider->getContext()->getCrudControllers();
                 if (null === $controllerFqcn = AbstractCrudController::getCrudControllerFqcn($entityFqcn)) {
                     throw new \RuntimeException(sprintf('Unable to find the controller related to the "%s" Entity; did you forget to extend "%s"?', $entityFqcn, AbstractCrudController::class));

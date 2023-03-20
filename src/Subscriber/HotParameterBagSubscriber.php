@@ -20,7 +20,7 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
      * @var SettingBag
      */
     protected $settingBag;
-    
+
     public function __construct($parameterBag, SettingBagInterface $settingBag)
     {
         $this->parameterBag = $parameterBag;
@@ -37,16 +37,22 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
 
     public function onCommandRequest(ConsoleCommandEvent $event)
     {
-        if(!$this->parameterBag instanceof HotParameterBag) return;
-        if($this->parameterBag->isReady()) return;
+        if (!$this->parameterBag instanceof HotParameterBag) {
+            return;
+        }
+        if ($this->parameterBag->isReady()) {
+            return;
+        }
 
-        array_map_recursive(function($setting) {
-
-            if($setting === null) return;
-            if($setting->getBag() === null) return;
+        array_map_recursive(function ($setting) {
+            if ($setting === null) {
+                return;
+            }
+            if ($setting->getBag() === null) {
+                return;
+            }
 
             $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
-
         }, $this->settingBag->allRaw(true, true));
 
         $this->parameterBag->markAsReady();
@@ -54,17 +60,25 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;
-        if(!$this->parameterBag instanceof HotParameterBag) return;
-        if($this->parameterBag->isReady()) return;
+        if (!$event->isMainRequest()) {
+            return;
+        }
+        if (!$this->parameterBag instanceof HotParameterBag) {
+            return;
+        }
+        if ($this->parameterBag->isReady()) {
+            return;
+        }
 
-        array_map_recursive(function($setting) {
-
-            if($setting === null) return;
-            if($setting->getBag() === null) return;
+        array_map_recursive(function ($setting) {
+            if ($setting === null) {
+                return;
+            }
+            if ($setting->getBag() === null) {
+                return;
+            }
 
             $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
-
         }, $this->settingBag->allRaw(true, true));
 
         $this->parameterBag->markAsReady();

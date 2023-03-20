@@ -67,5 +67,4 @@ final class QuadrantField implements FieldInterface
         $this->setCustomOption(self::OPTION_SHOW, self::SHOW_NAME_ONLY);
         return $this;
     }
-
 }

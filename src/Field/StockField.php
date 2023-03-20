@@ -44,7 +44,10 @@ final class StockField implements FieldInterface
         return $this;
     }
 
-    public function step(float $step) { return $this->stepUp($step)->stepDown($step); }
+    public function step(float $step)
+    {
+        return $this->stepUp($step)->stepDown($step);
+    }
     public function stepUp(float $stepUp)
     {
         $this->setFormTypeOption("stepUp", $stepUp);

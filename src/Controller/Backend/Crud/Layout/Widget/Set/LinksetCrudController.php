@@ -8,13 +8,19 @@ use Base\Field\AttributeField;
 
 class LinksetCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, [
-            "id" => fn() => yield AttributeField::new('hyperlinks')->setFilter(HyperpatternAdapter::class)->hideOnIndex()],
-                    fn() => yield AttributeField::new('hyperlinks')->setFilter(HyperpatternAdapter::class)->onlyOnIndex()
-        , $args);
+        return parent::configureFields(
+            $pageName,
+            [
+            "id" => fn () => yield AttributeField::new('hyperlinks')->setFilter(HyperpatternAdapter::class)->hideOnIndex()],
+            fn () => yield AttributeField::new('hyperlinks')->setFilter(HyperpatternAdapter::class)->onlyOnIndex(),
+            $args
+        );
     }
 }

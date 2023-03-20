@@ -15,5 +15,4 @@ use Base\Database\Repository\ServiceEntityRepository;
 
 class AbstractScopeAdapterRepository extends AbstractAdapterRepository
 {
-
 }

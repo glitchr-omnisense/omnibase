@@ -43,7 +43,7 @@ class Slugify extends AbstractAnnotation
     protected string $separator;
     protected ?string $referenceColumn;
 
-    public function __construct( array $data )
+    public function __construct(array $data)
     {
         $this->referenceColumn = $data['reference'] ?? null;
 
@@ -60,34 +60,44 @@ class Slugify extends AbstractAnnotation
         );
     }
 
-    public function getReferenceColumn() { return $this->referenceColumn; }
+    public function getReferenceColumn()
+    {
+        return $this->referenceColumn;
+    }
     public function getInvalidSlugs($event, $entity, $property)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
 
         $candidateEntities = [];
-        foreach ($uow->getScheduledEntityInsertions() as $entity2)
+        foreach ($uow->getScheduledEntityInsertions() as $entity2) {
             $candidateEntities[] = $entity2;
-        foreach ($uow->getScheduledEntityUpdates() as $entity2)
+        }
+        foreach ($uow->getScheduledEntityUpdates() as $entity2) {
             $candidateEntities[] = $entity2;
+        }
 
         $invalidSlugs = [];
         foreach ($candidateEntities as $entity2) {
+            if ($entity === $entity2) {
+                break;
+            } // FIFO
+            if (!property_exists($entity2, $property)) {
+                continue;
+            }
 
-            if($entity === $entity2) break; // FIFO
-            if(!property_exists($entity2, $property)) continue;
-
-            $propertyDeclarer  = property_declarer($entity , $property);
+            $propertyDeclarer  = property_declarer($entity, $property);
             $propertyDeclarer2 = property_declarer($entity2, $property);
-            if($propertyDeclarer != $propertyDeclarer2 && !is_instanceof($propertyDeclarer, $propertyDeclarer2)) continue;
+            if ($propertyDeclarer != $propertyDeclarer2 && !is_instanceof($propertyDeclarer, $propertyDeclarer2)) {
+                continue;
+            }
 
             $invalidSlugs[] = $this->getFieldValue($entity2, $property);
         }
 
         $firstEntity = begin($candidateEntities);
-        if($firstEntity === $entity) {
+        if ($firstEntity === $entity) {
             $firstSlug = $this->getFieldValue($entity, $property);
-            $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
+            $invalidSlugs = array_filter($invalidSlugs, fn ($s) => $s !== $firstSlug);
         }
 
         return $invalidSlugs;
@@ -96,24 +106,31 @@ class Slugify extends AbstractAnnotation
     public function slug($entity, ?string $input = null, string $suffix = ""): ?string
     {
         // Check if field already set.. get field value or by default class name
-        if(!$input && $this->referenceColumn) $input = $this->getPropertyValue($entity, $this->referenceColumn) ?? $this->getFieldValue($entity, $this->referenceColumn);
-        if(!$input && $this->nullable) return null;
+        if (!$input && $this->referenceColumn) {
+            $input = $this->getPropertyValue($entity, $this->referenceColumn) ?? $this->getFieldValue($entity, $this->referenceColumn);
+        }
+        if (!$input && $this->nullable) {
+            return null;
+        }
 
-        if(!$input) $input = camel2snake(class_basename($entity), "-");
+        if (!$input) {
+            $input = camel2snake(class_basename($entity), "-");
+        }
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 
-        if(!$this->keep) $slug = $this->slugger->slug($input, $this->separator);
-        else {
-
+        if (!$this->keep) {
+            $slug = $this->slugger->slug($input, $this->separator);
+        } else {
             $pos = 0;
             $posList = [];
 
             $pos = -1;
-            while( ($pos = strmultipos($input, $this->keep, $pos+1)) )
+            while (($pos = strmultipos($input, $this->keep, $pos+1))) {
                 $posList[] = $input[$pos];
+            }
 
             $slug = explodeByArray($this->keep, $input);
-            $slug = array_map(fn($i) => $this->slugger->slug($i, $this->separator), $slug);
+            $slug = array_map(fn ($i) => $this->slugger->slug($i, $this->separator), $slug);
             $slug = implodeByArray($posList, $slug);
         }
 
@@ -128,11 +145,16 @@ class Slugify extends AbstractAnnotation
         $repository  = $this->getPropertyOwnerRepository($entity, $property);
         $defaultSlug = $this->slug($entity, $defaultInput);
         $slug = $defaultSlug;
-        if(!$slug) return null;
+        if (!$slug) {
+            return null;
+        }
 
-        if(!$this->unique) return $slug;
-        for($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
+        if (!$this->unique) {
+            return $slug;
+        }
+        for ($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++) {
             $slug = $defaultSlug.$this->separator.$i;
+        }
 
         return $slug;
     }
@@ -144,35 +166,33 @@ class Slugify extends AbstractAnnotation
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $propertyDeclarer  = property_declarer($entity , $property);
+        $propertyDeclarer  = property_declarer($entity, $property);
         $classMetadata = $this->getClassMetadata($propertyDeclarer);
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
 
-        if($this->sync) {
-
+        if ($this->sync) {
             $slug = $this->getFieldValue($entity, $property);
 
             $oldEntity = $this->getOldEntity($entity);
             $oldSlug   = $this->getFieldValue($oldEntity, $property);
 
             if ($slug == $oldSlug) {
-
                 $labelModified = !$this->referenceColumn ? null :
                     $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
 
-                if($labelModified)
+                if ($labelModified) {
                     $slug = $this->getSlug($entity, $property);
+                }
             }
-
         } else {
-
             $currentSlug = $this->getFieldValue($entity, $property);
             $slug = $this->getSlug($entity, $property, $currentSlug, $invalidSlugs);
         }
 
         $this->setFieldValue($entity, $property, $slug);
 
-        if ($this->getUnitOfWork()->getEntityChangeSet($entity))
+        if ($this->getUnitOfWork()->getEntityChangeSet($entity)) {
             $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+        }
     }
 }

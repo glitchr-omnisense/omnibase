@@ -32,8 +32,9 @@ class ReferrerSubscriber implements EventSubscriberInterface
     public function __construct(
         ReferrerInterface $referrer,
         RouterInterface $router,
-        ParameterBagInterface $parameterBag) {
-
+        ParameterBagInterface $parameterBag
+    )
+    {
         $this->router = $router;
         $this->parameterBag = $parameterBag;
         $this->referrer = $referrer;
@@ -44,30 +45,45 @@ class ReferrerSubscriber implements EventSubscriberInterface
         return [RequestEvent::class    => [['onKernelRequest', 4]]];
     }
 
-    public function getCurrentRouteName($event) { return $event->getRequest()->get('_route'); }
+    public function getCurrentRouteName($event)
+    {
+        return $event->getRequest()->get('_route');
+    }
 
     public function isException($route)
     {
         $exceptions = $this->parameterBag->get("base.access_restrictions.route_exceptions") ?? [];
-        foreach($exceptions as $pattern)
-            if (preg_match($pattern, $route)) return true;
+        foreach ($exceptions as $pattern) {
+            if (preg_match($pattern, $route)) {
+                return true;
+            }
+        }
 
         return false;
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;
-        if($this->router->isWdt()) return;
-        if($this->router->isUX()) return;
+        if (!$event->isMainRequest()) {
+            return;
+        }
+        if ($this->router->isWdt()) {
+            return;
+        }
+        if ($this->router->isUX()) {
+            return;
+        }
 
         $referrerPath = strval($this->referrer);
         $referrerRoute = $this->router->getRouteName($referrerPath);
-        if($this->isException($referrerRoute)) $this->referrer->clear();
+        if ($this->isException($referrerRoute)) {
+            $this->referrer->clear();
+        }
 
         $currentRoute = $this->getCurrentRouteName($event);
 
-        if(!$this->isException($currentRoute) && !$this->router->isSecured($event->getRequest()))
+        if (!$this->isException($currentRoute) && !$this->router->isSecured($event->getRequest())) {
             $this->referrer->setUrl($event->getRequest()->getUri());
+        }
     }
 }

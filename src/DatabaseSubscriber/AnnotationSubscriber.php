@@ -13,8 +13,8 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
-class AnnotationSubscriber implements EventSubscriberInterface {
-
+class AnnotationSubscriber implements EventSubscriberInterface
+{
     /**
      * @var AnnotationReader
      */
@@ -51,47 +51,54 @@ class AnnotationSubscriber implements EventSubscriberInterface {
     }
 
     protected array $subscriberHistory = [];
-    public function loadClassMetadata( LoadClassMetadataEventArgs $event )
+    public function loadClassMetadata(LoadClassMetadataEventArgs $event)
     {
         // needs to be booted to be aware of custom doctrine types.
-        if(!BaseBundle::getInstance()->hasBooted()) return;
+        if (!BaseBundle::getInstance()->hasBooted()) {
+            return;
+        }
 
         $className     = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
 
-        if (in_array($className, $this->subscriberHistory)) return;
+        if (in_array($className, $this->subscriberHistory)) {
+            return;
+        }
         $this->subscriberHistory[] =  $className."::".__FUNCTION__;
 
         $annotations = $this->annotationReader->getAnnotations($className);
 
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $annotation) {
-
-            if (!is_subclass_of($annotation, AbstractAnnotation::class))
-            continue;
-
-            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation)))
+            if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                 continue;
+            }
 
-            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $classMetadata))
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
                 continue;
+            }
+
+            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $classMetadata)) {
+                continue;
+            }
 
             $annotation->loadClassMetadata($classMetadata, AnnotationReader::TARGET_CLASS, $className);
         }
 
         $methodAnnotations = $annotations[AnnotationReader::TARGET_METHOD][$className] ?? [];
         foreach ($methodAnnotations as $method => $_) {
-
             foreach ($_ as $annotation) {
-
-                if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                     continue;
+                }
 
-                if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getAnnotationTargets($annotation)))
+                if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getAnnotationTargets($annotation))) {
                     continue;
+                }
 
-                if (!$annotation->supports(AnnotationReader::TARGET_METHOD, $method, $classMetadata))
+                if (!$annotation->supports(AnnotationReader::TARGET_METHOD, $method, $classMetadata)) {
                     continue;
+                }
 
                 $annotation->loadClassMetadata($classMetadata, AnnotationReader::TARGET_METHOD, $method);
             }
@@ -99,17 +106,18 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
         $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
         foreach ($propertyAnnotations as $property => $_) {
-
             foreach ($_ as $annotation) {
-
-                if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                     continue;
+                }
 
-                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation)))
+                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
                     continue;
+                }
 
-                if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $classMetadata))
+                if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $classMetadata)) {
                     continue;
+                }
 
                 $annotation->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
             }
@@ -121,19 +129,23 @@ class AnnotationSubscriber implements EventSubscriberInterface {
         $uow = $event->getEntityManager()->getUnitOfWork();
 
         $entities = [];
-        foreach ($uow->getScheduledEntityInsertions() as $entity)
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $entities[] = $entity;
-        foreach ($uow->getScheduledEntityUpdates() as $entity)
+        }
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
             $entities[] = $entity;
-        foreach ($uow->getScheduledEntityDeletions() as $entity)
+        }
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
             $entities[] = $entity;
+        }
 
-        foreach($entities as $entity) {
-
+        foreach ($entities as $entity) {
             $className = get_class($entity);
             $classMetadata  = $this->entityManager->getClassMetadata($className);
 
-            if (in_array($className, $this->subscriberHistory)) return;
+            if (in_array($className, $this->subscriberHistory)) {
+                return;
+            }
             $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
             $annotations = $this->annotationReader->getAnnotations($className);
@@ -141,20 +153,22 @@ class AnnotationSubscriber implements EventSubscriberInterface {
             $changeSet = $uow->getEntityChangeSet($entity);
             $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
             foreach ($propertyAnnotations as $property => $_) {
-
-                if(!array_key_exists($property, $changeSet))
+                if (!array_key_exists($property, $changeSet)) {
                     continue;
+                }
 
                 foreach ($_ as $annotation) {
-
-                    if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                    if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                         continue;
+                    }
 
-                    if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation)))
+                    if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
                         continue;
+                    }
 
-                    if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity))
+                    if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity)) {
                         continue;
+                    }
 
                     $annotation->onFlush($event, $classMetadata, $entity, $property);
                 }
@@ -162,15 +176,17 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
             $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
             foreach ($classAnnotations as $annotation) {
-
-                if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                     continue;
+                }
 
-                if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation)))
+                if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
                     continue;
+                }
 
-                if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
+                if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity)) {
                     continue;
+                }
 
                 $annotation->onFlush($event, $classMetadata, $entity);
             }
@@ -184,24 +200,27 @@ class AnnotationSubscriber implements EventSubscriberInterface {
         $className      = get_class($entity);
         $classMetadata  = $this->entityManager->getClassMetadata($className);
 
-        if (in_array($className, $this->subscriberHistory)) return;
+        if (in_array($className, $this->subscriberHistory)) {
+            return;
+        }
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
         $annotations    = $this->annotationReader->getAnnotations($className);
 
         $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
         foreach ($propertyAnnotations as $property => $_) {
-
             foreach ($_ as $annotation) {
-
-                if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                     continue;
+                }
 
-                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation)))
+                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
                     continue;
+                }
 
-                if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity))
+                if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity)) {
                     continue;
+                }
 
                 $annotation->{$eventName}($event, $classMetadata, $entity, $property);
             }
@@ -209,26 +228,49 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $annotation) {
-
-            if (!is_subclass_of($annotation, AbstractAnnotation::class))
+            if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                 continue;
+            }
 
-            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation)))
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
                 continue;
+            }
 
-            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
+            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity)) {
                 continue;
+            }
 
             $annotation->{$eventName}($event, $classMetadata, $entity);
         }
     }
 
-    public function prePersist(LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
-    public function preUpdate (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
-    public function preRemove (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
+    public function prePersist(LifecycleEventArgs $event)
+    {
+        $this->onLifecycle($event, __FUNCTION__);
+    }
+    public function preUpdate(LifecycleEventArgs $event)
+    {
+        $this->onLifecycle($event, __FUNCTION__);
+    }
+    public function preRemove(LifecycleEventArgs $event)
+    {
+        $this->onLifecycle($event, __FUNCTION__);
+    }
 
-    public function postLoad   (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
-    public function postPersist(LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
-    public function postUpdate (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
-    public function postRemove (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
+    public function postLoad(LifecycleEventArgs $event)
+    {
+        $this->onLifecycle($event, __FUNCTION__);
+    }
+    public function postPersist(LifecycleEventArgs $event)
+    {
+        $this->onLifecycle($event, __FUNCTION__);
+    }
+    public function postUpdate(LifecycleEventArgs $event)
+    {
+        $this->onLifecycle($event, __FUNCTION__);
+    }
+    public function postRemove(LifecycleEventArgs $event)
+    {
+        $this->onLifecycle($event, __FUNCTION__);
+    }
 }

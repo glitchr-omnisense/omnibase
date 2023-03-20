@@ -11,17 +11,18 @@ use Base\Field\SelectField;
 
 class PageCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, ["id" => function () {
-
             yield ImageField::new('thumbnail')->setColumns(6);
             yield SlugField::new('slug')->setColumns(6)->setTargetFieldName("translations.title");
 
             yield SelectField::new('connexes')->showFirst()->setColumns(6)->setFilter(Page::class);
-
         }], $args);
     }
 }

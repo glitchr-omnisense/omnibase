@@ -21,12 +21,12 @@ final class HtmlTwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('html_entry_link_tags',   [$this, 'renderLinkTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
-            new TwigFunction('html_entry_script_tags',   [$this, 'renderScriptTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_link_tags', [$this, 'renderLinkTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_script_tags', [$this, 'renderScriptTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
 
-            new TwigFunction('html_entry_head_tags',   [$this, 'renderHeadTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
-            new TwigFunction('html_entry_noscript_tags',  [$this, 'renderNoscriptTags' ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
-            new TwigFunction('html_entry_body_tags',  [$this, 'renderBodyTags' ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_head_tags', [$this, 'renderHeadTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_noscript_tags', [$this, 'renderNoscriptTags' ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_body_tags', [$this, 'renderBodyTags' ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
         ];
     }
 
@@ -49,7 +49,7 @@ final class HtmlTwigExtension extends AbstractExtension
         return $this->htmlTagRenderer->renderHtmlContent("stylesheet:before").
                $this->htmlTagRenderer->renderHtmlContent("stylesheet").
                $this->htmlTagRenderer->renderHtmlContent("stylesheet:after").
-               
+
                $this->htmlTagRenderer->renderHtmlContent("javascript:head").
                $this->htmlTagRenderer->renderHtmlContent("javascript");
     }

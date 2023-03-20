@@ -22,7 +22,10 @@ use Base\Database\Annotation\Cache;
  */
 abstract class AbstractRule extends AbstractAttribute implements RuleInterface
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-poll"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-poll"];
+    }
     public function compliesWith(mixed $subject): bool
     {
         return $this->adapter?->compliesWith($this->getValue(), $subject) ?? true;
@@ -33,7 +36,10 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
      * @Associate(metadata="class")
      */
     protected $value;
-    public function getValue()     { return $this->value; }
+    public function getValue()
+    {
+        return $this->value;
+    }
     public function setValue($value)
     {
         $this->value = $value;
@@ -45,7 +51,10 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
      */
     protected $class;
 
-    public function getClass(): ?string { return $this->class; }
+    public function getClass(): ?string
+    {
+        return $this->class;
+    }
     public function setClass(?string $class)
     {
         $this->class = $class;

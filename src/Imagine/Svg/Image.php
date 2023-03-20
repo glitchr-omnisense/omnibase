@@ -145,8 +145,8 @@ class Image extends AbstractImage
         throw new NotSupportedException('This method is not implemented');
     }
 
-    public function sanitize() {
-
+    public function sanitize()
+    {
         return $this->document;
     }
 

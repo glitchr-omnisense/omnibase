@@ -23,8 +23,12 @@ final class BrowserPlusChannel implements ChannelInterface
 
     public function notify(Notification $notification, RecipientInterface $recipient, string $transportName = null): void
     {
-        if (null === $request = $this->requestStack->getCurrentRequest()) return;
-        if (!$request->hasSession()) return;
+        if (null === $request = $this->requestStack->getCurrentRequest()) {
+            return;
+        }
+        if (!$request->hasSession()) {
+            return;
+        }
 
         // Prepare variables
         $type    = $notification->getImportance();
@@ -34,9 +38,11 @@ final class BrowserPlusChannel implements ChannelInterface
         // (when using subscriber or redirections for instance)
         $flashBag = $request->getSession()->getFlashBag()->peekAll();
         if (array_key_exists($type, $flashBag)) {
-
-            foreach ($flashBag[$type] as $content)
-                if ($message == $content) return;
+            foreach ($flashBag[$type] as $content) {
+                if ($message == $content) {
+                    return;
+                }
+            }
         }
 
         // Send notification to flashbag

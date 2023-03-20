@@ -15,7 +15,10 @@ class UserActionCrudController extends AbstractCrudController
      * */
     protected $entityManager;
 
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureActions(Actions $actions): Actions
     {

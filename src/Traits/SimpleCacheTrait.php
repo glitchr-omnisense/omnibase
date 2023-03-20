@@ -29,26 +29,29 @@ trait SimpleCacheTrait
 
     public function deleteCache(?string $key = null): bool
     {
-        if($key == null)
+        if ($key == null) {
             return $this->cache?->clear() ?? false;
+        }
 
         return $this->cache?->deleteItem($this->getCacheKey(static::class.$key)) ?? false;
     }
 
     public function getCache(?string $key = null, mixed $fallback = null, int|\DateInterval|null $ttl = null, $deferred = false): mixed
     {
-         if($key === null) return $this->cache;
+        if ($key === null) {
+            return $this->cache;
+        }
 
-         if(!$this->hasCache($key))
+        if (!$this->hasCache($key)) {
             $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $ttl, $deferred);
+        }
 
         return $this->cache?->getItem($this->getCacheKey(static::class.$key))->get();
     }
 
     public function setCache(CacheItemPoolInterface|string $cacheOrKey, mixed $value = null, int|\DateInterval|null $ttl = null, bool $deferred = false)
     {
-        if($cacheOrKey instanceof CacheItemPoolInterface) {
-
+        if ($cacheOrKey instanceof CacheItemPoolInterface) {
             $this->cache = $cacheOrKey;
             return $this;
         }
@@ -57,18 +60,22 @@ trait SimpleCacheTrait
         $item->set($value);
         $item->expiresAfter($ttl);
 
-        if($deferred) $this->cache->saveDeferred($item);
-        else $this->cache->save($item);
+        if ($deferred) {
+            $this->cache->saveDeferred($item);
+        } else {
+            $this->cache->save($item);
+        }
 
         $this->saveDeferred |= $deferred;
         return $this;
     }
-    
+
     public function commitCache()
     {
-        if ($this->cache && $this->saveDeferred)
+        if ($this->cache && $this->saveDeferred) {
             $this->cache->commit();
-        
+        }
+
         return $this;
     }
 

@@ -8,7 +8,6 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class DiscriminatorField extends SelectField implements FieldInterface
 {
-
     public const OPTION_DISCRIMINATOR_AUTOLOAD = 'discriminatorAutoload';
     public const OPTION_SHOW_COLUMN            = 'discriminatorColumn';
     public const OPTION_SHOW_INLINE            = 'discriminatorInline';

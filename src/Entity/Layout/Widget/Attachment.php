@@ -26,8 +26,14 @@ use Base\Database\Annotation\Cache;
 
 class Attachment extends Widget implements IconizeInterface, LinkableInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-paperclip"];
+    }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
@@ -36,7 +42,10 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
         return $this->getRouter()->generate("widget_attachment", $routeParameters, $referenceType);
     }
 
-    public function __toString() { return $this->getTitle(); }
+    public function __toString()
+    {
+        return $this->getTitle();
+    }
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
@@ -44,7 +53,10 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $slug;
-    public function getSlug(): ?string { return $this->slug; }
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
@@ -57,8 +69,14 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
      * @AssertBase\File(max_size="4096K", groups={"new", "edit"})
      */
     protected $download;
-    public function getDownload() { return Uploader::getPublic($this, "download"); }
-    public function getDownloadFile() { return Uploader::get($this, "download"); }
+    public function getDownload()
+    {
+        return Uploader::getPublic($this, "download");
+    }
+    public function getDownloadFile()
+    {
+        return Uploader::get($this, "download");
+    }
     public function setDownload($file)
     {
         $this->file = $file;

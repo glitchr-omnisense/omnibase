@@ -18,8 +18,9 @@ class BackgroundFilter implements FilterInterface
 
     /** @var array */
     protected $options;
-    
-    public function __toString() {
+
+    public function __toString()
+    {
         return "bkg:".$this->getRGBA(false).":".$this->getPosition().":".($this->getSize() ? implode("x", $this->getSize()) : "");
     }
 
@@ -29,18 +30,32 @@ class BackgroundFilter implements FilterInterface
         $this->options = $options;
     }
 
-    public function getRGB($hashtag = true):string { return ($hashtag ? "#" : "").ltrim($this->options['transparency'] ?? "FFF", "#"); }
-    public function getAlpha():float { return $this->options['transparency'] ?? null; }
-    public function getRGBA($hashtag = true):string { return $this->getRGB($hashtag).hex2rgba($this->options['transparency'] ?? 1, false); }
+    public function getRGB($hashtag = true): string
+    {
+        return ($hashtag ? "#" : "").ltrim($this->options['transparency'] ?? "FFF", "#");
+    }
+    public function getAlpha(): float
+    {
+        return $this->options['transparency'] ?? null;
+    }
+    public function getRGBA($hashtag = true): string
+    {
+        return $this->getRGB($hashtag).hex2rgba($this->options['transparency'] ?? 1, false);
+    }
 
-    public function getPosition():string { return $this->options["position"] ?? "center"; }
-    public function getSize():array { return $this->options["size"] ?? null; }
-    public function getXY(ImageInterface $image)  :array {
-
-        list($width,$height) = $this->getSize();
+    public function getPosition(): string
+    {
+        return $this->options["position"] ?? "center";
+    }
+    public function getSize(): array
+    {
+        return $this->options["size"] ?? null;
+    }
+    public function getXY(ImageInterface $image): array
+    {
+        list($width, $height) = $this->getSize();
         $position = $this->getPosition();
         switch ($position) {
-
             case 'topleft':
                 $x = 0;
                 $y = 0;
@@ -103,9 +118,8 @@ class BackgroundFilter implements FilterInterface
         $size = $image->getSize();
 
         if (isset($this->options['size'])) {
-
-            list($width,$height) = $this->getSize() ?? [null,null];
-            list($x,$y) = $this->getXY($image);
+            list($width, $height) = $this->getSize() ?? [null,null];
+            list($x, $y) = $this->getXY($image);
 
             $size = new Box($width ?? $size[0], $height ?? $size[1]);
             $topLeft = new Point($x, $y);

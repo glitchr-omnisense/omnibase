@@ -8,19 +8,27 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 trait FormProcessorTrait
 {
-    protected function getPost():array   { return $this->getSession()["POST"] ?? []; }
-    protected function getFiles():array  { return $this->getSession()["FILES"] ?? []; }
+    protected function getPost(): array
+    {
+        return $this->getSession()["POST"] ?? [];
+    }
+    protected function getFiles(): array
+    {
+        return $this->getSession()["FILES"] ?? [];
+    }
     protected function getUploadedFiles(): array
     {
         $uploadedFiles = [];
 
         if ($session = $this->getSession()) {
-
             $files = $session["FILES"];
-            foreach($files as $name => $file) {
-
+            foreach ($files as $name => $file) {
                 $uploadedFiles[$name] = new UploadedFile(
-                    $file["tmp_name"], $file["name"], $file["type"], $file["error"]);
+                    $file["tmp_name"],
+                    $file["name"],
+                    $file["type"],
+                    $file["error"]
+                );
             }
         }
 
@@ -41,7 +49,7 @@ trait FormProcessorTrait
         // return array_key_exists($flowFormId, $flowForm);
     }
 
-    protected function getSession(?Request $request = null):?array
+    protected function getSession(?Request $request = null): ?array
     {
         return null;
         // $session = $this->bindSession($request?->getSession());
@@ -56,7 +64,7 @@ trait FormProcessorTrait
     {
         return $this;
         // $session = $this->bindSession($session);
- 
+
         // $flowFormId            = $this->getOption("form_flow_id") ?? null;
         // $flowForm              = $session->get("_form_flow");
         // $flowForm[$flowFormId] = $entry;
@@ -69,7 +77,9 @@ trait FormProcessorTrait
         return $this;
         $formSession = $this->getSession($request);
 
-        if(!array_key_exists("POST", $formSession)) $formSession["POST"] = [];
+        if (!array_key_exists("POST", $formSession)) {
+            $formSession["POST"] = [];
+        }
         $formSession["POST"] = array_merge($formSession["POST"], $_POST);
 
         return $this->setSession($formSession);
@@ -80,9 +90,10 @@ trait FormProcessorTrait
         return $this;
         $formSession = $this->getSession($request);
 
-        if(!array_key_exists("FILES", $formSession)) $formSession["FILES"] = [];
-        foreach($_FILES as $key => $file) {
-
+        if (!array_key_exists("FILES", $formSession)) {
+            $formSession["FILES"] = [];
+        }
+        foreach ($_FILES as $key => $file) {
             $_FILES[$key]["tmp_name"] = stream_get_meta_data(tmpfile())['uri'];
             move_uploaded_file($file["tmp_name"], $_FILES[$key]["tmp_name"]);
         }

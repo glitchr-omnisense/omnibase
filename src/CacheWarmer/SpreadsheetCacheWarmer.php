@@ -11,13 +11,20 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
     /** @var int */
     protected int $shellVerbosity;
 
-    public function __construct() { $this->shellVerbosity = getenv("SHELL_VERBOSITY"); }
+    public function __construct()
+    {
+        $this->shellVerbosity = getenv("SHELL_VERBOSITY");
+    }
 
-    public function isOptional():bool { return true; }
+    public function isOptional(): bool
+    {
+        return true;
+    }
     public function warmUp($cacheDir): array
     {
-        if($this->shellVerbosity > 0 && php_sapi_name() == "cli")
+        if ($this->shellVerbosity > 0 && php_sapi_name() == "cli") {
             echo " // Warming up cache... PHP Spreadsheet".PHP_EOL.PHP_EOL;
+        }
 
         // Implement phpspreadsheet cache
         $psr6Cache = new FilesystemAdapter("phpspreadsheet");

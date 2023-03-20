@@ -24,8 +24,14 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
 {
     use BaseTrait;
 
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-external-link"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-external-link"];
+    }
 
     /**
      * @ORM\Id
@@ -33,7 +39,10 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @ORM\Column(type="integer")
      */
     protected $id;
-    public function getId() { return $this->id; }
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
@@ -41,7 +50,10 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $impersonator;
-    public function getImpersonator(): ?User { return $this->impersonator; }
+    public function getImpersonator(): ?User
+    {
+        return $this->impersonator;
+    }
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
@@ -49,17 +61,26 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @Blameable(on={"create", "update"})
      */
     protected $initiator;
-    public function getInitiator(): ?User { return $this->initiator; }
+    public function getInitiator(): ?User
+    {
+        return $this->initiator;
+    }
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $entityId;
-    public function getEntityId() { return $this->entityId; }
+    public function getEntityId()
+    {
+        return $this->entityId;
+    }
     public function setEntityId(mixed $entityOrId)
     {
-        if($this->getService()->isEntity($entityOrId)) $this->entityId = $entityOrId->getId();
-        else $this->entityId = $entityOrId;
+        if ($this->getService()->isEntity($entityOrId)) {
+            $this->entityId = $entityOrId->getId();
+        } else {
+            $this->entityId = $entityOrId;
+        }
 
         return $this;
     }
@@ -68,7 +89,10 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @ORM\Column(type="string", length=255)
      */
     protected $entityClass;
-    public function getEntityClass() { return $this->entityClass; }
+    public function getEntityClass()
+    {
+        return $this->entityClass;
+    }
     public function setEntityClass(object|string $entity)
     {
         $this->entityClass = is_object($entity) ? get_class($entity) : $entity;
@@ -79,7 +103,10 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @ORM\Column(type="entity_action")
      */
     protected $action;
-    public function getAction() { return $this->action; }
+    public function getAction()
+    {
+        return $this->action;
+    }
     public function setAction(string $action)
     {
         $this->action = $action;
@@ -90,8 +117,14 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @ORM\Column(type="array", nullable=true)
      */
     protected $entityData = [];
-    public function isEmpty() { return empty($this->getEntityData()); }
-    public function getEntityData(): array { return $this->entityData; }
+    public function isEmpty()
+    {
+        return empty($this->getEntityData());
+    }
+    public function getEntityData(): array
+    {
+        return $this->entityData;
+    }
     public function setEntityData(array $entityData)
     {
         $this->entityData = $entityData;
@@ -103,7 +136,10 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @Timestamp(on="create")
      */
     protected $createdAt;
-    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;

@@ -21,8 +21,14 @@ use Base\Database\Annotation\Cache;
  */
 class Mention implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-quote-right"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-quote-right"];
+    }
 
     /**
      * @ORM\Id
@@ -30,14 +36,20 @@ class Mention implements IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="mentions")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $target;
-    public function getTarget(): ?User { return $this->target; }
+    public function getTarget(): ?User
+    {
+        return $this->target;
+    }
     public function setTarget(?User $target): self
     {
         $this->target = $target;
@@ -49,7 +61,10 @@ class Mention implements IconizeInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $author;
-    public function getAuthor(): ?User { return $this->author; }
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
@@ -62,7 +77,10 @@ class Mention implements IconizeInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $thread;
-    public function getThread(): ?Thread { return $this->thread; }
+    public function getThread(): ?Thread
+    {
+        return $this->thread;
+    }
     public function setThread(?Thread $thread): self
     {
         $this->thread = $thread;

@@ -15,7 +15,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      */
 
     private $uniqueTableName = [];
-    public function classToTableName($classNameWithNamespace) : string
+    public function classToTableName($classNameWithNamespace): string
     {
         $x = $classNameWithNamespace;
         $classNameWithNamespace = !is_string($classNameWithNamespace) ? get_class($classNameWithNamespace) : $classNameWithNamespace;
@@ -27,16 +27,12 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
         //
         // Search for a table name in class annotation
-        if(class_exists($classNameWithNamespace)) {
-
-            if(!$tableName) {
-
+        if (class_exists($classNameWithNamespace)) {
+            if (!$tableName) {
                 $annotationReader = new AnnotationReader();
                 $annotations = $annotationReader->getClassAnnotations(new \ReflectionClass($classNameWithNamespace));
-                while  ($annotation = array_pop($annotations)) {
-
+                while ($annotation = array_pop($annotations)) {
                     if ($annotation instanceof Table && !empty($annotation->name)) {
-
                         $tableName = $annotation->name;
                         break;
                     }
@@ -46,14 +42,13 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
         //
         // Determination of table name based on class information
-        if(!$tableName) {
-
+        if (!$tableName) {
             $tableName = str_strip(strstr($classNameWithNamespace, "\\Entity\\"), "\\Entity\\");
-            if(empty($tableName)) {
-
+            if (empty($tableName)) {
                 $tableName = $classNameWithNamespace;
-                if(strrpos($tableName, '\\') !== false)
+                if (strrpos($tableName, '\\') !== false) {
                     $tableName = lcfirst(substr($classNameWithNamespace, strrpos($classNameWithNamespace, '\\') + 1));
+                }
             }
 
             $tableName = str_replace("\\", "", $tableName);
@@ -67,11 +62,13 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
         //
         // Make sure there is no ambiguity or issue related to SQL server
-        if(strlen($tableName) > self::TABLE_NAME_SIZE)
+        if (strlen($tableName) > self::TABLE_NAME_SIZE) {
             throw new \Exception("Table name will be truncated for \"".$classNameWithNamespace."\"");
+        }
 
-        if(str_contains($classNameWithNamespace, "\\Entity\\") && array_key_exists($tableName, $this->uniqueTableName) && $classNameWithNamespace != $this->uniqueTableName[$tableName])
+        if (str_contains($classNameWithNamespace, "\\Entity\\") && array_key_exists($tableName, $this->uniqueTableName) && $classNameWithNamespace != $this->uniqueTableName[$tableName]) {
             throw new \Exception("Ambiguous table name \"".$tableName."\" found between \"".$this->uniqueTableName[$tableName]."\" and \"".$classNameWithNamespace."\"");
+        }
 
         $this->uniqueTableName[$tableName] = $classNameWithNamespace;
 
@@ -81,7 +78,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function propertyToColumnName($propertyName, $classNameWithNamespace = null) :string
+    public function propertyToColumnName($propertyName, $classNameWithNamespace = null): string
     {
         return lcfirst($propertyName);
     }
@@ -89,7 +86,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function embeddedFieldToColumnName($propertyName, $embeddedColumnName, $classNameWithNamespace = null, $embeddedClassName = null) : string
+    public function embeddedFieldToColumnName($propertyName, $embeddedColumnName, $classNameWithNamespace = null, $embeddedClassName = null): string
     {
         return lcfirst($propertyName).'_'.lcfirst($embeddedColumnName);
     }
@@ -97,7 +94,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function referenceColumnName() : string
+    public function referenceColumnName(): string
     {
         return 'id';
     }
@@ -105,7 +102,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function joinColumnName($propertyName, $classNameWithNamespace = null) : string
+    public function joinColumnName($propertyName, $classNameWithNamespace = null): string
     {
         return lcfirst($propertyName) . '_' . lcfirst($this->referenceColumnName());
     }
@@ -113,7 +110,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function joinTableName($sourceEntity, $targetEntity, $propertyName = null) : string
+    public function joinTableName($sourceEntity, $targetEntity, $propertyName = null): string
     {
         return lcfirst($this->classToTableName($sourceEntity)) . '_' .
                lcfirst($this->classToTableName($propertyName ?? $targetEntity));
@@ -122,7 +119,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function joinKeyColumnName($entityName, $referencedColumnName = null) : string
+    public function joinKeyColumnName($entityName, $referencedColumnName = null): string
     {
         return lcfirst($this->classToTableName($entityName)) . '_' .
                lcfirst(($referencedColumnName ?: $this->referenceColumnName()));

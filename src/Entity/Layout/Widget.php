@@ -34,10 +34,19 @@ class Widget implements TranslatableInterface, IconizeInterface
     use BaseTrait;
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-cube"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-cube"];
+    }
 
-    public function __toString() { return $this->getTitle() ?? $this->getTranslator()->transEntity(self::class)." #".$this->getId(); }
+    public function __toString()
+    {
+        return $this->getTitle() ?? $this->getTranslator()->transEntity(self::class)." #".$this->getId();
+    }
 
     public function __construct(?string $title = null, ?string $excerpt = null, ?string $content = null)
     {
@@ -51,7 +60,9 @@ class Widget implements TranslatableInterface, IconizeInterface
     protected ?string $template = null;
     public function getTemplate()
     {
-        if($this->template) return $this->template;
+        if ($this->template) {
+            return $this->template;
+        }
 
         $defaultTemplate = camel2snake(class_basename(get_called_class()));
         $defaultTemplate = "widget/".$defaultTemplate.".html.twig";
@@ -71,7 +82,10 @@ class Widget implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      *
@@ -79,7 +93,10 @@ class Widget implements TranslatableInterface, IconizeInterface
      * @GenerateUuid(version=4)
      */
     protected $uuid;
-    public function getUuid() { return $this->uuid; }
+    public function getUuid()
+    {
+        return $this->uuid;
+    }
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -87,8 +104,14 @@ class Widget implements TranslatableInterface, IconizeInterface
      * @AssertBase\File(max_size="1024KB", mime_types={"image/*"}, groups={"new", "edit"})
      */
     protected $thumbnail;
-    public function getThumbnail()     { return Uploader::getPublic($this, "thumbnail"); }
-    public function getThumbnailFile() { return Uploader::get($this, "thumbnail"); }
+    public function getThumbnail()
+    {
+        return Uploader::getPublic($this, "thumbnail");
+    }
+    public function getThumbnailFile()
+    {
+        return Uploader::get($this, "thumbnail");
+    }
     public function setThumbnail($thumbnail)
     {
         $this->thumbnail = $thumbnail;
@@ -101,11 +124,15 @@ class Widget implements TranslatableInterface, IconizeInterface
      * @OrderColumn
      */
     protected $connexes;
-    public function getConnexes(): Collection { return $this->connexes; }
+    public function getConnexes(): Collection
+    {
+        return $this->connexes;
+    }
     public function addConnex(Widget $connex): self
     {
-        if(!$this->connexes->contains($connex))
+        if (!$this->connexes->contains($connex)) {
             $this->connexes[] = $connex;
+        }
 
         return $this;
     }

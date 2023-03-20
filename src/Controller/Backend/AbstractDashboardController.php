@@ -168,8 +168,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ImageService $imageService,
         Environment $twig,
         EntityManagerInterface $entityManager,
-        SettingBagInterface $settingBag) {
-
+        SettingBagInterface $settingBag
+    )
+    {
         $this->extension = $extension;
         $this->requestStack = $requestStack;
         $this->adminUrlGenerator = $adminUrlGenerator;
@@ -193,7 +194,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->slotRepository    = $entityManager->getRepository(Slot::class);
     }
 
-    public function getExtension() { return $this->extension; }
+    public function getExtension()
+    {
+        return $this->extension;
+    }
     public function setExtension(Extension $extension)
     {
         $this->extension = $extension;
@@ -226,12 +230,14 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "api.currency.abstract_api" => ["required" => false],
         ]), array_reverse($fields)));
 
-        if(empty($fields))
+        if (empty($fields)) {
             $fields = array_fill_keys($this->settingBag->getPaths("api"), []);
+        }
 
-        foreach($fields as $key => $field) {
-
-            if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
+        foreach ($fields as $key => $field) {
+            if (!array_key_exists("form_type", $field)) {
+                $fields[$key]["form_type"] = PasswordType::class;
+            }
             if ($fields[$key]["form_type"] == PasswordType::class) {
                 $fields[$key]["inline"]       = true;
                 $fields[$key]["revealer"]     = true;
@@ -248,30 +254,30 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form = $this->createForm(LayoutSettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()){
-
-            $data     = array_filter($form->getData(), function($v, $k) use ($fields) {
-
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data     = array_filter($form->getData(), function ($v, $k) use ($fields) {
                 // If field is required but empty, update skip.. (to make sure the value is not empty)
-                if($fields[$k]["required"] ?? true)
+                if ($fields[$k]["required"] ?? true) {
                     return !is_null($v) && $v->getValue() != null;
+                }
 
                 // If not required, then we update regardless of the value, but checking for secure flag
                 return !$fields[$k]["secure"];
-
             }, ARRAY_FILTER_USE_BOTH);
 
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
-                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s],
+                fn ($k, $s): ?array => $s === null ? null : [$s->getPath(), $s],
                 $this->settingBag->getRawScalar($fields, false)
             );
 
-            foreach($settings as $setting)
+            foreach ($settings as $setting) {
                 $setting->setSecure(true);
+            }
 
-            foreach(array_diff_key($data, $settings) as $name => $setting)
+            foreach (array_diff_key($data, $settings) as $name => $setting) {
                 $this->settingRepository->persist($setting);
+            }
 
             $this->settingRepository->flush();
 
@@ -316,27 +322,28 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.mail.name"                           => ["translatable" => true],
         ]), array_reverse($fields)));
 
-        foreach($fields as $name => &$options) {
-
+        foreach ($fields as $name => &$options) {
             $roles = array_pop_key("roles", $options);
-            if($roles && !$this->getUser()->isGranted($roles)) unset($fields[$name]);
+            if ($roles && !$this->getUser()->isGranted($roles)) {
+                unset($fields[$name]);
+            }
         }
 
         $form = $this->createForm(LayoutSettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()){
-
-            $data     = array_filter($form->getData(), fn($value) => !is_null($value));
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data     = array_filter($form->getData(), fn ($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
 
             $settings = array_transforms(
-                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
+                fn ($k, $s): ?array => $s === null ? null : [$s->getPath(), $s],
                 $this->settingBag->getRawScalar($fields, false)
             );
 
-            foreach(array_diff_key($data, $settings) as $name => $setting)
+            foreach (array_diff_key($data, $settings) as $name => $setting) {
                 $this->settingRepository->persist($setting);
+            }
 
             $notification = new Notification("@controllers.backoffice_settings.success");
             $notification->send("success");
@@ -365,21 +372,20 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form = $this->createForm(LayoutWidgetListType::class, $data, ["widgets" => $widgetSlots]);
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()){
-
+        if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-            foreach(array_keys($widgetSlots) as $path) {
-
+            foreach (array_keys($widgetSlots) as $path) {
                 $widgetSlot = $this->slotRepository->cacheOneByPath($path);
-                if(!$widgetSlot) {
-
+                if (!$widgetSlot) {
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);
                     $this->slotRepository->flush();
                 }
 
                 $widget = $data[$path] ?? null;
-                if(is_array($widget)) $widget = first($widget);
+                if (is_array($widget)) {
+                    $widget = first($widget);
+                }
                 $widgetSlot->setWidget($widget);
             }
 
@@ -394,7 +400,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return $this->render('backoffice/widgets.html.twig', ["form" => $form->createView()]);
     }
 
-    public function configureExtension(Extension $extension) : Extension
+    public function configureExtension(Extension $extension): Extension
     {
         return $extension;
     }
@@ -402,13 +408,18 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function configureDashboard(): Dashboard
     {
         $logo  = $this->settingBag->getScalar("base.settings.logo.backoffice");
-        if(!$logo) $logo = $this->settingBag->getScalar("base.settings.logo");
-        if(!$logo) $logo = $this->imageService->getPublicDir()."/bundles/base/logo.svg";
+        if (!$logo) {
+            $logo = $this->settingBag->getScalar("base.settings.logo");
+        }
+        if (!$logo) {
+            $logo = $this->imageService->getPublicDir()."/bundles/base/logo.svg";
+        }
 
         $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
         $subtitle = $this->settingBag->getScalar("base.settings.slogan") ?? $this->translator->trans("backoffice.subtitle", [], self::TRANSLATION_DASHBOARD);
 
-        $this->configureExtension($this->extension
+        $this->configureExtension(
+            $this->extension
             ->setIcon("fas fa-laptop-house")
             ->setTitle($title)
             ->setText($subtitle)
@@ -428,13 +439,18 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function addRoles(array &$menu, string $class)
     {
         foreach ($class::getPermittedValuesByGroup(false) as $values) {
+            if ($values == UserRole::USER) {
+                continue;
+            }
 
-            if ($values == UserRole::USER) continue;
-
-            if(!is_array($values)) $values = ["_self" => $values];
+            if (!is_array($values)) {
+                $values = ["_self" => $values];
+            }
             $role = array_pop_key("_self", $values);
             $crudController = UserRole::getCrudController($role);
-            if(!$crudController) continue;
+            if (!$crudController) {
+                continue;
+            }
 
             $label = $this->translator->transEnum($role, $class, Translator::NOUN_PLURAL);
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
@@ -446,19 +462,20 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 // ->set(EA::MENU_INDEX, count($menu))
                 ->generateUrl();
 
-            if(empty($values)) $item = MenuItem::linkToUrl($label, $icon, $url);
-            else {
-
+            if (empty($values)) {
+                $item = MenuItem::linkToUrl($label, $icon, $url);
+            } else {
                 $item = MenuItem::subMenu($label, $icon, $url);
 
                 $subItems = [];
-                foreach($values as $role)  {
-
+                foreach ($values as $role) {
                     $label = mb_ucfirst($this->translator->transEnum($role, $class, Translator::NOUN_PLURAL));
                     $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
                     $crudController = UserRole::getCrudController($role);
-                    if(!$crudController) continue;
+                    if (!$crudController) {
+                        continue;
+                    }
 
                     $url = $this->adminUrlGenerator
                         ->unsetAll()
@@ -489,11 +506,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $menu[] = MenuItem::linkToRoute("app_index", [], 'Back to website', 'fas fa-fw fa-door-open');
 
         $menu[] = MenuItem::section('BUSINESS CARD');
-        if(UserRole::class != \Base\Enum\UserRole::class)
+        if (UserRole::class != \Base\Enum\UserRole::class) {
             $menu   = $this->addRoles($menu, UserRole::class);
+        }
 
         if ($this->isGranted('ROLE_EDITOR')) {
-
             $menu[] = MenuItem::section('MEMBERSHIP');
 
             $menu   = $this->addRoles($menu, \Base\Enum\UserRole::class);
@@ -510,19 +527,19 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return Actions::new($this->adminUrlGenerator, $this->entityManager)
 
             ->add(Crud::PAGE_INDEX, Action::NEW, 'fas fa-fw fa-edit')
-            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fas fa-fw fa-pencil-alt', fn(EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_INDEX, Action::DETAIL, 'fas fa-fw fa-search', fn(EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fas fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fas fa-fw fa-pencil-alt', fn (EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DETAIL, 'fas fa-fw fa-search', fn (EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fas fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
 
             ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT, 'fas fa-fw fa-angle-right')
             ->add(Crud::PAGE_DETAIL, Action::INDEX, 'fas fa-fw fa-undo')
             ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV, 'fas fa-fw fa-angle-left')
             ->add(Crud::PAGE_DETAIL, Action::EDIT, 'fas fa-fw fa-pencil-alt')
-            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fas fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fas fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
 
             ->add(Crud::PAGE_EDIT, Action::INDEX, 'fas fa-fw fa-undo')
             ->add(Crud::PAGE_EDIT, Action::DETAIL, 'fas fa-fw fa-search')
-            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fas fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fas fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
             ->add(Crud::PAGE_EDIT, Action::SEPARATOR)
             ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fas fa-fw fa-angle-right')
             ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fas fa-fw fa-edit')
@@ -549,15 +566,16 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ])->setAvatarUrl($avatar);
     }
 
-    public function configureWidgetItems(array $widgets = []) : array
+    public function configureWidgetItems(array $widgets = []): array
     {
         WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
         WidgetItem::setAdminContextProvider($this->adminContextProvider);
         $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', null, 1));
         if ($this->isGranted('ROLE_EDITOR')) {
-
             $section = $this->getSectionWidgetItem($widgets, "LAYOUT");
-            if($section) $section->setWidth(2);
+            if ($section) {
+                $section->setWidth(2);
+            }
 
             $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
                 WidgetItem::linkToCrud(Setting::class),
@@ -585,7 +603,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ]);
 
         if ($this->isGranted('ROLE_EDITOR')) {
-
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', null, 1));
 
             $widgets = $this->addWidgetItem($widgets, "ATTRIBUTES", [
@@ -626,7 +643,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(UserPenalty::class),
                 WidgetItem::linkToCrud(UserToken::class),
             ]);
-
         }
 
         return $widgets;

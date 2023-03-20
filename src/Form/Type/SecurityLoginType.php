@@ -14,7 +14,10 @@ use Symfony\Component\Form\Util\StringUtil;
 
 class SecurityLoginType extends AbstractType
 {
-    public function getBlockPrefix():string { return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
+    public function getBlockPrefix(): string
+    {
+        return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {

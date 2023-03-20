@@ -13,20 +13,23 @@ final class ShareTwigExtension extends AbstractExtension
      * @var Sharer
      */
     protected $sharer;
-    
+
     public function __construct(Sharer $sharer)
     {
         $this->sharer = $sharer;
     }
 
-    public function getName() { return 'share_extension'; }
-    public function getFilters():array
+    public function getName()
+    {
+        return 'share_extension';
+    }
+    public function getFilters(): array
     {
         return [
             new TwigFilter('share', [$this, 'share'], ['is_safe' => ['all']]),
         ];
     }
-    public function getFunctions():array
+    public function getFunctions(): array
     {
         return [
             new TwigFilter('share', [Sharer::class, 'share'], ['is_safe' => ['all']]),

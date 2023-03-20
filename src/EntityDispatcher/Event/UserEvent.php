@@ -22,5 +22,8 @@ class UserEvent extends AbstractEvent
     public const GHOST    = 'user.ghost'   ;
     public const BANNED   = 'user.banned'  ;
 
-    public function getUser(): User { return $this->getObject(); }
+    public function getUser(): User
+    {
+        return $this->getObject();
+    }
 }

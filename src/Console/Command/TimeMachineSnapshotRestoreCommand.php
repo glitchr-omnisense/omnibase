@@ -35,14 +35,16 @@ class TimeMachineSnapshotRestoreCommand extends TimeMachineSnapshotCommand
         $cycle    = $input->getOption('cycle')      ?? -1;
         $id       = $input->getOption('id')         ?? -1;
 
-        if(!$storages) return Command::FAILED;
-        
+        if (!$storages) {
+            return Command::FAILED;
+        }
+
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion('You are about to restore an old version. Do you wish to continue ? [y/N] ', false);
         if (!$helper->ask($input, $output, $question)) {
             return Command::SUCCESS;
         }
-        
+
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion('Do you wish to restore application from tarball ? [y/N] ', false);
         $restoreApplication = $helper->ask($input, $output, $question);

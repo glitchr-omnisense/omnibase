@@ -21,8 +21,14 @@ class Semantic implements TranslatableInterface, IconizeInterface
     use BaseTrait;
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-award"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-award"];
+    }
 
     public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
@@ -42,13 +48,19 @@ class Semantic implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
     protected $routeName;
-    public function getRouteName(): ?string { return $this->routeName; }
+    public function getRouteName(): ?string
+    {
+        return $this->routeName;
+    }
     public function setRouteName(?string $routeName): self
     {
         $this->routeName = $routeName;
@@ -59,7 +71,10 @@ class Semantic implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="array", nullable=true)
      */
     protected $routeParameters;
-    public function getRouteParameters(): ?array { return $this->routeParameters; }
+    public function getRouteParameters(): ?array
+    {
+        return $this->routeParameters;
+    }
     public function setRouteParameters(?array $routeParameters): self
     {
         $this->routeParameters = $routeParameters;
@@ -72,30 +87,47 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return $route ? $route->getPath() : null;
     }
 
-    public function getRoute(): ?string { return $this->getRouter()->getRoute($this->getUrl()); }
-    public function getRouteIcons() { return $this->getIconProvider()->getRouteIcons($this->routeName); }
-    public function getUrl(): ?string { return $this->generate(); }
+    public function getRoute(): ?string
+    {
+        return $this->getRouter()->getRoute($this->getUrl());
+    }
+    public function getRouteIcons()
+    {
+        return $this->getIconProvider()->getRouteIcons($this->routeName);
+    }
+    public function getUrl(): ?string
+    {
+        return $this->generate();
+    }
 
-    public function match(string $keyword) { return in_array($keyword, $this->keywords); }
+    public function match(string $keyword)
+    {
+        return in_array($keyword, $this->keywords);
+    }
     public function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        try { return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType); }
-        catch (\Exception $e) { }
+        try {
+            return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType);
+        } catch (\Exception $e) {
+        }
 
         return null;
     }
 
     public function highlight(string $search, array $attributes = [])
     {
-        foreach($this->getKeywords() as $keyword)
+        foreach ($this->getKeywords() as $keyword) {
             $search = $this->highlightByWord($search, $keyword, $attributes);
+        }
 
         return $search;
     }
 
     public function highlightByWord(string $search, string $word, array $attributes)
     {
-        if(!$this->match($word)) return $word;
+        if (!$this->match($word)) {
+            return $word;
+        }
 
         return str_replace($word, "<a href='".$this->generate()."' ".html_attributes($attributes).">".$word."</a>", $search);
     }

@@ -13,13 +13,13 @@ class ThreadSubscriber implements EventSubscriberInterface
     protected array $events;
 
     protected $entityManager;
-    
-    public function __construct(EntityManagerInterface $entityManager) 
+
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
-    public static function getSubscribedEvents() : array
+    public static function getSubscribedEvents(): array
     {
         return
         [
@@ -44,8 +44,7 @@ class ThreadSubscriber implements EventSubscriberInterface
         $thread = $event->getThread();
         $thread->setState(ThreadState::PUBLISH);
 
-        foreach($thread->getAuthors() as $author) {
-
+        foreach ($thread->getAuthors() as $author) {
             $notification = new Notification('thread.published');
             $notification->setHtmlTemplate("@Base/client/thread/email/publish.html.twig", ["thread" => $thread]);
             $notification->setUser($author);

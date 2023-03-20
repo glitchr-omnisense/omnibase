@@ -30,7 +30,6 @@ abstract class ConstraintEntity extends Constraint
         }
 
         if (empty($this->message)) {
-
             $constraintName = explode("\\", get_called_class());
             $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
             $firstField = $fields['fields'][0] ?? "unknown";
@@ -41,11 +40,11 @@ abstract class ConstraintEntity extends Constraint
         parent::__construct($options, $groups, $payload);
     }
 
-    public function getRequiredOptions() : array
+    public function getRequiredOptions(): array
     {
         return ['fields'];
     }
-    public function getDefaultOption() : ?string
+    public function getDefaultOption(): ?string
     {
         return 'fields';
     }
@@ -53,7 +52,7 @@ abstract class ConstraintEntity extends Constraint
     /**
      * {@inheritdoc}
      */
-    public function getTargets() : string|array
+    public function getTargets(): string|array
     {
         return self::CLASS_CONSTRAINT;
     }

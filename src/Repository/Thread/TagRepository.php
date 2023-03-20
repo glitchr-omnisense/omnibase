@@ -11,4 +11,6 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method Tag[]    findAll()
  * @method Tag[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
  */
-class TagRepository extends ServiceEntityRepository { }
+class TagRepository extends ServiceEntityRepository
+{
+}

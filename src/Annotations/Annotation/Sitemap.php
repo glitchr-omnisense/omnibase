@@ -20,19 +20,34 @@ use Base\Annotations\AbstractAnnotation;
 class Sitemap extends AbstractAnnotation
 {
     protected static array $urls = [];
-    public static function getUrls() { return self::$urls; }
+    public static function getUrls()
+    {
+        return self::$urls;
+    }
 
     protected ?string $group = null;
-    public function getGroup() { return $this->group; }
+    public function getGroup()
+    {
+        return $this->group;
+    }
 
     protected string $lastMod;
-    public function getLastMod   () { return $this->lastMod;    }
+    public function getLastMod()
+    {
+        return $this->lastMod;
+    }
 
     protected string $changeFreq;
-    public function getChangeFreq() { return $this->changeFreq; }
+    public function getChangeFreq()
+    {
+        return $this->changeFreq;
+    }
 
     protected float  $priority;
-    public function getPriority  () { return $this->priority;   }
+    public function getPriority()
+    {
+        return $this->priority;
+    }
 
     public function __construct(array $data)
     {

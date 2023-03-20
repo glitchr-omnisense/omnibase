@@ -30,12 +30,12 @@ class FormTypeSpamExtension extends AbstractTypeExtension
      * @var SpamChecker
      */
     protected $spamChecker;
-    
+
     /**
      * @var Router
      */
     protected $router;
-    
+
     /** @var bool */
     private bool $defaultEnabled;
 
@@ -66,14 +66,19 @@ class FormTypeSpamExtension extends AbstractTypeExtension
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if (!$options["spam_protection"]) return;
-        if (!$builder->getForm()->isRoot()) return;
+        if (!$options["spam_protection"]) {
+            return;
+        }
+        if (!$builder->getForm()->isRoot()) {
+            return;
+        }
 
         $hasSpamInterface = class_implements_interface($options["data_class"] ?? null, SpamProtectionInterface::class);
-        if (!$hasSpamInterface ) return;
+        if (!$hasSpamInterface) {
+            return;
+        }
 
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
-
             $form = $event->getForm();
             $data = $event->getData();
 
@@ -81,7 +86,6 @@ class FormTypeSpamExtension extends AbstractTypeExtension
 
             $enum = SpamScore::__toInt();
             switch($score) {
-
                 default:
                 case $enum[SpamScore::NOT_SPAM]:
                 case $enum[SpamScore::MAYBE_SPAM]:

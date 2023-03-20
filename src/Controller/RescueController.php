@@ -24,39 +24,38 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-
 /**
  * @Route(priority="-1")
  */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
     /**
-     * @var RouterInterface 
+     * @var RouterInterface
      * */
     protected $router;
-    
+
     /**
-     * @var ImageServiceInterface 
+     * @var ImageServiceInterface
      * */
     protected $imageService;
 
     /**
-     * @var SettingBagInterface 
+     * @var SettingBagInterface
      * */
     protected $settingBag;
 
     /**
-     * @var Environment 
+     * @var Environment
      * */
     protected $twig;
 
     /**
-     * @var TranslatorInterface 
+     * @var TranslatorInterface
      * */
     protected $translator;
 
     /**
-     * @var FormProxyInterface 
+     * @var FormProxyInterface
      * */
     protected $formProxy;
 
@@ -74,8 +73,12 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
     public function configureDashboard(): Dashboard
     {
         $logo  = $this->settingBag->getScalar("base.settings.logo.backoffice");
-        if(!$logo) $logo = $this->settingBag->getScalar("base.settings.logo");
-        if(!$logo) $logo = "bundles/base/logo.svg";
+        if (!$logo) {
+            $logo = $this->settingBag->getScalar("base.settings.logo");
+        }
+        if (!$logo) {
+            $logo = "bundles/base/logo.svg";
+        }
 
         $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
         return Dashboard::new()
@@ -95,14 +98,14 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
         $lastUsername = $authenticationUtils->getLastUsername();
 
         // Redirect to the right page when access denied
-        if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirect($referrer->getUrl() ?? $this->router->generate("backoffice"));
+        }
 
         // Generate form
         $formProcessor = $this->formProxy
             ->createProcessor("form:login:rescue", SecurityLoginType::class, ["identifier" => $lastUsername])
-            ->onDefault(function(FormProcessorInterface $formProcessor) use ($authenticationUtils) { 
-
+            ->onDefault(function (FormProcessorInterface $formProcessor) use ($authenticationUtils) {
                 $lastUsername = $authenticationUtils->getLastUsername();
                 $logo = $this->settingBag->get("base.settings.logo.backoffice")["_self"] ?? null;
                 $logo = $logo ?? $this->settingBag->get("base.settings.logo")["_self"] ?? null;
@@ -118,7 +121,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
                     "form" => $formProcessor->getForm()->createView()
                 ]);
             })
-            
+
             ->handleRequest($request);
 
         return $formProcessor->getResponse();

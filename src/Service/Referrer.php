@@ -16,7 +16,10 @@ class Referrer implements ReferrerInterface
     /** @var RouterInterface */
     private $router;
 
-    public function __toString() : string { return $this->getUrl() ?? ""; }
+    public function __toString(): string
+    {
+        return $this->getUrl() ?? "";
+    }
     public function __construct(RequestStack $requestStack, RouterInterface $router)
     {
         $this->requestStack = $requestStack;
@@ -25,28 +28,37 @@ class Referrer implements ReferrerInterface
 
     public function redirect(array $headers = []): RedirectResponse
     {
-        return $this->router->redirect($this->getUrl() ?? $this->router->getBaseDir(), [], 302, $headers); 
+        return $this->router->redirect($this->getUrl() ?? $this->router->getBaseDir(), [], 302, $headers);
     }
 
     public function isVetoed(?string $routeName)
     {
-        if(!$routeName) return false;
+        if (!$routeName) {
+            return false;
+        }
 
-        if($this->router->isUX($routeName))
+        if ($this->router->isUX($routeName)) {
             return true;
+        }
 
-        if(RescueFormAuthenticator::isSecurityRoute($routeName))
+        if (RescueFormAuthenticator::isSecurityRoute($routeName)) {
             return true;
+        }
 
-        if(LoginFormAuthenticator::isSecurityRoute($routeName))
+        if (LoginFormAuthenticator::isSecurityRoute($routeName)) {
             return true;
+        }
     }
 
-    public function clear() { return $this->setUrl(null); }
+    public function clear()
+    {
+        return $this->setUrl(null);
+    }
     public function setUrl(?string $url)
     {
-        if($this->isVetoed($this->router->getRouteName($url)))
+        if ($this->isVetoed($this->router->getRouteName($url))) {
             return $this;
+        }
 
         $this->requestStack->getMainRequest()->getSession()->remove('_security.main.target_path');    // Internal definition by firewall
         $this->requestStack->getMainRequest()->getSession()->remove('_security.account.target_path'); // Internal definition by firewall
@@ -55,7 +67,7 @@ class Referrer implements ReferrerInterface
         return $this;
     }
 
-    public function sameSite() : bool
+    public function sameSite(): bool
     {
         $currentHost = parse_url2(get_url())["host"] ?? null;
         $targetHost  = parse_url2($this->getUrl())["host"] ?? $currentHost ?? null;
@@ -63,43 +75,45 @@ class Referrer implements ReferrerInterface
         return $currentHost == $targetHost;
     }
 
-    public function getUrl() : ?string
+    public function getUrl(): ?string
     {
         $request = $this->requestStack->getMainRequest();
-        if (null === $request) return null;
+        if (null === $request) {
+            return null;
+        }
 
         // Target path fallbacks
         $targetPath = $request->request->get('_target_path');
         $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
         $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
 
-        if(!$targetRoute) {
+        if (!$targetRoute) {
             $targetPath = $request->getSession()->get('_target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         // Security fallbacks
-        if(!$targetRoute) {
+        if (!$targetRoute) {
             $targetPath = $request->getSession()->get('_security.main.target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
-        if(!$targetRoute) {
+        if (!$targetRoute) {
             $targetPath = $request->getSession()->get('_security.account.target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         // Default referrer
-        if(!$targetRoute) {
+        if (!$targetRoute) {
             $targetPath = $request->headers->get("referer"); // Yes.. with the legendary misspelling.
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
-        if(!$targetRoute) {
+        if (!$targetRoute) {
             $targetPath = $request->request->get('referrer');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;

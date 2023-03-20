@@ -16,12 +16,14 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class ThreadCrudController extends ThreadActionCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, function() {
-
+        return parent::configureFields($pageName, function () {
             yield DiscriminatorField::new('class')->hideOnForm()->showColumnLabel();
             yield TextField::new('title')->setTextAlign(TextAlign::RIGHT)->hideOnDetail()->hideOnForm();
             yield SelectField::new('owners')->showFirst()->setTextAlign(TextAlign::LEFT);
@@ -37,7 +39,6 @@ class ThreadCrudController extends ThreadActionCrudController
 
             yield DateTimePickerField::new('updatedAt')->onlyOnDetail();
             yield DateTimePickerField::new('createdAt')->onlyOnDetail();
-
         }, $args);
     }
 }

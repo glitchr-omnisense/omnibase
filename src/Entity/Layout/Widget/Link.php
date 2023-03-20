@@ -21,8 +21,14 @@ use Base\Database\Annotation\Cache;
 
 class Link extends Widget implements IconizeInterface, LinkableInterface
 {
-    public        function __iconize()       : ?array { return $this->getHyperlink()->__iconize(); }
-    public static function __iconizeStatic() : ?array { return ["fas fa-share-square"]; }
+    public function __iconize(): ?array
+    {
+        return $this->getHyperlink()->__iconize();
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-share-square"];
+    }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH /* not used */): ?string
     {
@@ -39,8 +45,9 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
     {
         parent::__construct();
 
-        if($hyperlink)
+        if ($hyperlink) {
             $this->setHyperlink($hyperlink);
+        }
     }
 
     /**
@@ -48,7 +55,10 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $hyperlink;
-    public function getHyperlink(): ?Hyperlink { return $this->hyperlink; }
+    public function getHyperlink(): ?Hyperlink
+    {
+        return $this->hyperlink;
+    }
     public function setHyperlink(Hyperlink $hyperlink)
     {
         $this->hyperlink = $hyperlink;

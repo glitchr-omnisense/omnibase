@@ -34,12 +34,11 @@ class Countify extends AbstractAnnotation
     public const COUNT_WORDS     = "words";
     public const COUNT_SENTENCES = "sentences";
     public const COUNT_BLOCKS    = "blocks";
-    public function __construct( array $data )
+    public function __construct(array $data)
     {
         $this->referenceColumn = $data['reference'] ?? null;
 
-        switch($data["type"] ?? "")
-        {
+        switch($data["type"] ?? "") {
             default:
             case self::COUNT_CHARS:
                 $this->type = self::COUNT_CHARS;
@@ -75,14 +74,14 @@ class Countify extends AbstractAnnotation
 
     public function getCount($entity): string
     {
-        if (!$this->referenceColumn)
+        if (!$this->referenceColumn) {
             throw new Exception("Attribute \"reference\" missing for @Countify in " . get_class($entity));
+        }
 
         // Check if field already set.. (it needs to be checked)
         $value = $this->getFieldValue($entity, $this->referenceColumn) ?? "";
 
-        switch($this->type)
-        {
+        switch($this->type) {
             default:
             case self::COUNT_CHARS:
                 return strlen(strip_tags($value));
@@ -109,7 +108,9 @@ class Countify extends AbstractAnnotation
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $nWords = $this->getFieldValue($entity, $property);
-        if($nWords) return;
+        if ($nWords) {
+            return;
+        }
 
         $count = $this->getCount($entity) ?? 0;
         $this->setFieldValue($entity, $property, $count);

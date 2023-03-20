@@ -37,13 +37,13 @@ class EmailField implements FieldInterface
             ->setDefaultColumns('col-md-6 col-xxl-5');
     }
 
-    public function setCustomIcon(string $faIcon) 
+    public function setCustomIcon(string $faIcon)
     {
         $this->setCustomOption(self::OPTION_ICON_CUSTOM, $faIcon);
         return $this;
     }
 
-    public function renderIcon() 
+    public function renderIcon()
     {
         $this->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON);
         return $this;
@@ -55,7 +55,7 @@ class EmailField implements FieldInterface
         return $this;
     }
 
-    public function renderText() 
+    public function renderText()
     {
         $this->setCustomOption(self::OPTION_SHOW, self::SHOW_EMAIL);
         return $this;

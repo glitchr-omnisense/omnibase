@@ -20,8 +20,14 @@ class Token implements IconizeInterface
 {
     use BaseTrait;
 
-    public        function __iconize()       : ?array { return self::__iconizeStatic()[$this->isValid() ? 1 : 0]; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-drumstick-bite", "fas fa-drumstick"]; }
+    public function __iconize(): ?array
+    {
+        return self::__iconizeStatic()[$this->isValid() ? 1 : 0];
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-drumstick-bite", "fas fa-drumstick"];
+    }
 
     public const ALL     = "ALL_TOKENS";
     public const VALID   = "VALID_TOKENS";
@@ -40,7 +46,10 @@ class Token implements IconizeInterface
         $this->generate($expiry, $throttle);
     }
 
-    public function __sleep() { return array_keys(get_object_vars($this)); }
+    public function __sleep()
+    {
+        return array_keys(get_object_vars($this));
+    }
 
     public function encode()
     {
@@ -71,16 +80,20 @@ class Token implements IconizeInterface
         $this->setCreatedAt($createdAt);
 
         // Expiry date calculation
-        if($expiry < 0) $expiry = null;
-        if($expiry) {
+        if ($expiry < 0) {
+            $expiry = null;
+        }
+        if ($expiry) {
             $expireAt = clone $createdAt;
             $expireAt->modify(is_numeric($expiry) ? "+ ".floor($expiry)." seconds" : $expiry);
             $this->setExpiry($expireAt);
         }
 
         // Throttle date calculation (before next request)
-        if($throttle < 0) $throttle = null;
-        if($throttle) {
+        if ($throttle < 0) {
+            $throttle = null;
+        }
+        if ($throttle) {
             $allowAt = clone $createdAt;
             $allowAt->modify(is_numeric($throttle) ? "+ ".floor($throttle)." seconds" : $throttle);
             $this->setExpiry($allowAt);
@@ -97,7 +110,10 @@ class Token implements IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="tokens")
@@ -105,14 +121,19 @@ class Token implements IconizeInterface
      */
     protected $user;
 
-    public function getUser(): ?User { return $this->user; }
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
     public function setUser(?User $user): self
     {
-        if ($this->user && $this->user != $user)
+        if ($this->user && $this->user != $user) {
             $this->user->removeToken($this);
+        }
 
-        if ($user)
+        if ($user) {
             $user->addToken($this);
+        }
 
         $this->user = $user;
         return $this;
@@ -124,7 +145,10 @@ class Token implements IconizeInterface
      */
     protected $name;
 
-    public function getName(): ?string { return $this->name; }
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -136,8 +160,14 @@ class Token implements IconizeInterface
      */
     protected $value;
 
-    public function get(): ?string { return $this->getValue(); }
-    public function getValue(): ?string { return $this->value; }
+    public function get(): ?string
+    {
+        return $this->getValue();
+    }
+    public function getValue(): ?string
+    {
+        return $this->value;
+    }
     public function generate(?int $expiry = null, ?int $throttle = null): self
     {
         // Creation date
@@ -145,16 +175,14 @@ class Token implements IconizeInterface
         $this->setCreatedAt($now);
 
         // Expiry date calculation
-        if($expiry) {
-
+        if ($expiry) {
             $expireAt = clone $now;
             $expireAt->modify(is_numeric($expiry) ? "+ ".floor($expiry)." seconds" : $expiry);
             $this->setExpiry($expireAt);
         }
 
         // Rate date calculation
-        if($throttle) {
-
+        if ($throttle) {
             $allowAt = clone $now;
             $allowAt->modify(is_numeric($throttle) ? "+ ".floor($throttle)." seconds" : $throttle);
             $this->setThrottleTime($allowAt);
@@ -171,7 +199,10 @@ class Token implements IconizeInterface
      * @Timestamp(on="create")
      */
     protected $createdAt;
-    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
@@ -183,30 +214,62 @@ class Token implements IconizeInterface
      */
     protected $expireAt;
 
-    public function getExpireAt(): ?\DateTimeInterface { return $this->expireAt; }
+    public function getExpireAt(): ?\DateTimeInterface
+    {
+        return $this->expireAt;
+    }
     public function setExpireAt(\DateTimeInterface $expireAt): self
     {
-        if (!$this->getCreatedAt())
+        if (!$this->getCreatedAt()) {
             $this->setCreatedAt(new \DateTime("now"));
+        }
 
-        if ($expireAt < $this->getCreatedAt())
+        if ($expireAt < $this->getCreatedAt()) {
             $expireAt = $this->createdAt;
+        }
 
         $this->expireAt = $expireAt;
         return $this;
     }
 
-    public function getExpiry(): ?\DateTimeInterface { return $this->getExpireAt(); }
-    public function setExpiry(\DateTimeInterface $expireAt): self { return $this->setExpireAt($expireAt); }
-    protected function isExpired():bool { return $this->getExpiry() == null ? false : new \DateTime("now") >= $this->getExpiry(); }
-    protected function isHit():bool { return $this->isExpired(); }
+    public function getExpiry(): ?\DateTimeInterface
+    {
+        return $this->getExpireAt();
+    }
+    public function setExpiry(\DateTimeInterface $expireAt): self
+    {
+        return $this->setExpireAt($expireAt);
+    }
+    protected function isExpired(): bool
+    {
+        return $this->getExpiry() == null ? false : new \DateTime("now") >= $this->getExpiry();
+    }
+    protected function isHit(): bool
+    {
+        return $this->isExpired();
+    }
 
-    public function isValid():bool { return !$this->isHit() && !$this->isRevoked(); }
+    public function isValid(): bool
+    {
+        return !$this->isHit() && !$this->isRevoked();
+    }
 
-    public function getElapsedTime():int { return time() - $this->createdAt->getTimestamp(); }
-    public function getLifetime():int { return ($this->expireAt == null ? -1 : $this->expireAt->getTimestamp() - $this->createdAt->getTimestamp()); }
-    public function getRemainingTime():int { return $this->expireAt->getTimestamp() - time(); }
-    public function getRemainingTimeStr(): string { return $this->getTranslator()->transTime($this->getRemainingTime()); }
+    public function getElapsedTime(): int
+    {
+        return time() - $this->createdAt->getTimestamp();
+    }
+    public function getLifetime(): int
+    {
+        return ($this->expireAt == null ? -1 : $this->expireAt->getTimestamp() - $this->createdAt->getTimestamp());
+    }
+    public function getRemainingTime(): int
+    {
+        return $this->expireAt->getTimestamp() - time();
+    }
+    public function getRemainingTimeStr(): string
+    {
+        return $this->getTranslator()->transTime($this->getRemainingTime());
+    }
 
 
     /**
@@ -214,37 +277,64 @@ class Token implements IconizeInterface
      */
     protected $allowAt;
 
-    public function getAllowAt(): ?\DateTimeInterface { return $this->allowAt; }
+    public function getAllowAt(): ?\DateTimeInterface
+    {
+        return $this->allowAt;
+    }
     public function setAllowAt(\DateTimeInterface $allowAt): self
     {
-        if(!$this->getCreatedAt())
+        if (!$this->getCreatedAt()) {
             $this->setCreatedAt(new \DateTime("now"));
+        }
 
-        if ($allowAt < $this->getCreatedAt())
+        if ($allowAt < $this->getCreatedAt()) {
             $allowAt = $this->createdAt;
+        }
 
         $this->allowAt = $allowAt;
         return $this;
     }
 
-    public function hasVeto():bool { return $this->isValid() && ($this->getAllowAt() == null ? false : new \DateTime("now") < $this->getAllowAt()); }
-    public function getThrottleTime():int { return $this->allowAt->getTimestamp() - time(); }
-    public function getThrottleTimeStr(): string { return $this->getTranslator()->transTime($this->getThrottleTime()); }
-    public function setThrottleTime(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
-    public function isThrottled():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
+    public function hasVeto(): bool
+    {
+        return $this->isValid() && ($this->getAllowAt() == null ? false : new \DateTime("now") < $this->getAllowAt());
+    }
+    public function getThrottleTime(): int
+    {
+        return $this->allowAt->getTimestamp() - time();
+    }
+    public function getThrottleTimeStr(): string
+    {
+        return $this->getTranslator()->transTime($this->getThrottleTime());
+    }
+    public function setThrottleTime(\DateTimeInterface $allowAt): self
+    {
+        return $this->setAllowAt($allowAt);
+    }
+    public function isThrottled(): bool
+    {
+        return $this->getAllowAt() != $this->getCreatedAt();
+    }
 
     /**
      * @ORM\Column(type="boolean")
      */
     protected $isRevoked;
 
-    public function revoke(): self { return $this->markAsRevoked(); }
-    public function isRevoked(): bool { return $this->isRevoked; }
+    public function revoke(): self
+    {
+        return $this->markAsRevoked();
+    }
+    public function isRevoked(): bool
+    {
+        return $this->isRevoked;
+    }
     public function markAsRevoked(): self
     {
         $this->isRevoked = true;
-        if(($user = $this->getUser()))
+        if (($user = $this->getUser())) {
             $user->removeToken($this);
+        }
 
         return $this;
     }

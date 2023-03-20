@@ -15,7 +15,10 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class SemanticCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
     {
@@ -23,11 +26,13 @@ class SemanticCrudController extends AbstractCrudController
 
         return $extension;
     }
-    public function createEntity(string $entityFqcn) { return new Semantic(""); }
+    public function createEntity(string $entityFqcn)
+    {
+        return new Semantic("");
+    }
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-
             yield RouteField::new('routeName')->setColumns(6)->hideOnIndex();
             yield ArrayField::new('routeParameters')->setColumns(6)
                 ->setPatternFieldName("routeName")->useAssociativeKeys()
@@ -38,7 +43,6 @@ class SemanticCrudController extends AbstractCrudController
                     "label" => ["required" => true],
                     "keywords" => ["tags" => true, "tokenSeparators" => [",", ";"]],
                 ]);
-
-            }, $args);
+        }, $args);
     }
 }

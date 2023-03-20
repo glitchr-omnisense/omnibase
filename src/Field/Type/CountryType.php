@@ -23,14 +23,20 @@ class CountryType extends SelectType implements SelectInterface
     ];
 
     // A way to add countries to the list.. (Another way is shown below using options)
-    public static function addCountry($code, $country) { return self::addCountries([$code => $country]); }
-    public static function addCountries($array) {
-
+    public static function addCountry($code, $country)
+    {
+        return self::addCountries([$code => $country]);
+    }
+    public static function addCountries($array)
+    {
         $countryList = Countries::getNames();
-        foreach($array as $code => $country) {
-
-            if( array_key_exists($code, $countryList) ) throw new Exception("Country code \"$code\" ($country) already added in the true country list");
-            if( array_key_exists($code, self::$additionalList) ) throw new Exception("Country code \"$code\" ($country) already added in the fake country list");
+        foreach ($array as $code => $country) {
+            if (array_key_exists($code, $countryList)) {
+                throw new Exception("Country code \"$code\" ($country) already added in the true country list");
+            }
+            if (array_key_exists($code, self::$additionalList)) {
+                throw new Exception("Country code \"$code\" ($country) already added in the fake country list");
+            }
 
             self::$additionalList[$code] = $country;
         }
@@ -38,16 +44,22 @@ class CountryType extends SelectType implements SelectInterface
 
     public static function getName(string $code)
     {
-        if(array_key_exists($code, self::$additionalList)) return self::$additionalList[$code];
+        if (array_key_exists($code, self::$additionalList)) {
+            return self::$additionalList[$code];
+        }
         return Countries::getName($code);
     }
 
-    public static function getNamesWithoutAddons() { return self::getNames(true); }
+    public static function getNamesWithoutAddons()
+    {
+        return self::getNames(true);
+    }
     public static function getNames($addons = false)
     {
         $countryList = Countries::getNames() + ($addons ? self::$additionalList : []);
-        foreach(self::$rejectCountryList as $code)
+        foreach (self::$rejectCountryList as $code) {
             unset($countryList[$code]);
+        }
 
         return $countryList;
     }
@@ -62,13 +74,21 @@ class CountryType extends SelectType implements SelectInterface
         return null;
     }
 
-    public static function getText(string $id): ?string { return self::getName($id); }
-    public static function getHtml(string $id): ?string { return "<img class='country-flag' src='/bundles/base/images/flags/".$id.".svg' alt='".$id."'> ".self::getName($id)."</>"; }
-    public static function getData(string $id): ?array { return []; }
+    public static function getText(string $id): ?string
+    {
+        return self::getName($id);
+    }
+    public static function getHtml(string $id): ?string
+    {
+        return "<img class='country-flag' src='/bundles/base/images/flags/".$id.".svg' alt='".$id."'> ".self::getName($id)."</>";
+    }
+    public static function getData(string $id): ?array
+    {
+        return [];
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
-
         parent::configureOptions($resolver);
         $resolver->setDefaults([
             'choices' => $this->getChoices(),

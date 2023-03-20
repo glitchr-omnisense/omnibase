@@ -37,7 +37,10 @@ class IntlSubscriber implements EventSubscriberInterface
      * @var LocalizerInterface
      */
     protected $localizer;
-    public function getLocalizer() { return $this->localizer; }
+    public function getLocalizer()
+    {
+        return $this->localizer;
+    }
 
     public function __construct(EntityManagerInterface $entityManager, LocalizerInterface $localizer)
     {
@@ -53,27 +56,28 @@ class IntlSubscriber implements EventSubscriberInterface
         $this->upgradeIntl($object);
 
         if (is_subclass_of($object, TranslationInterface::class, true)) {
-
-            if ($object->isEmpty()) // Mark as removal for mispersistent translations..
+            if ($object->isEmpty()) { // Mark as removal for mispersistent translations..
                 $uow->scheduleOrphanRemoval($object);
+            }
         }
     }
 
     public function upgradeIntl($intl)
     {
         $translations = [];
-        if($intl instanceof TranslationInterface)
+        if ($intl instanceof TranslationInterface) {
             $translations[] = $intl;
-        if($intl instanceof TranslatableInterface)
+        }
+        if ($intl instanceof TranslatableInterface) {
             $translations = $intl->getTranslations()->toArray();
-
-        foreach($translations as $translation) {
-
-            $translatable = $translation->getTranslatable();
-            if(! $translation instanceof ($translatable::getTranslationEntityClass()) )
-                throw new Exception("Upgrade class type required.");
         }
 
+        foreach ($translations as $translation) {
+            $translatable = $translation->getTranslatable();
+            if (! $translation instanceof ($translatable::getTranslationEntityClass())) {
+                throw new Exception("Upgrade class type required.");
+            }
+        }
     }
 
     public function onFlush(OnFlushEventArgs $args)
@@ -81,50 +85,57 @@ class IntlSubscriber implements EventSubscriberInterface
         $uow = $this->entityManager->getUnitOfWork();
 
         $scheduledEntities = [];
-        foreach ($uow->getScheduledEntityInsertions() as $entity)
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $scheduledEntities[] = $entity;
-        foreach ($uow->getScheduledEntityUpdates() as $entity)
+        }
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
             $scheduledEntities[] = $entity;
-        foreach ($uow->getScheduledCollectionUpdates() as $entity)
+        }
+        foreach ($uow->getScheduledCollectionUpdates() as $entity) {
             $scheduledEntities[] = $entity->getOwner();
+        }
 
         // Retrieve translatable objects
         $scheduledEntities = array_filter(
             array_unique_object($scheduledEntities),
-            fn($e) => $e instanceof TranslationInterface || $e instanceof TranslatableInterface
+            fn ($e) => $e instanceof TranslationInterface || $e instanceof TranslatableInterface
         );
 
         // Normalize and turn into orphan intl entities if empty
-        foreach(array_unique_object($scheduledEntities) as $entity)
+        foreach (array_unique_object($scheduledEntities) as $entity) {
             $this->normalize($entity);
+        }
     }
 
     protected function normalize(TranslationInterface|TranslatableInterface $entity)
     {
         $uow = $this->entityManager->getUnitOfWork();
 
-        if($entity instanceof TranslatableInterface) {
-
-            foreach($entity->getTranslations() as $locale => $translation) {
-
-                if($translation->getLocale() === null) $translation->setLocale($locale);
-                if($translation->getLocale() !== null && $translation->getLocale() !== $translation->getLocale($locale))
+        if ($entity instanceof TranslatableInterface) {
+            foreach ($entity->getTranslations() as $locale => $translation) {
+                if ($translation->getLocale() === null) {
+                    $translation->setLocale($locale);
+                }
+                if ($translation->getLocale() !== null && $translation->getLocale() !== $translation->getLocale($locale)) {
                     throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
+                }
 
-                if(!$translation->getTranslatable())
+                if (!$translation->getTranslatable()) {
                     $translation->setTranslatable($entity);
+                }
             }
         }
 
-        if($entity instanceof TranslationInterface) {
-
-            if (!$entity->isEmpty()) $uow->cancelOrphanRemoval($entity);
-            else {
-
+        if ($entity instanceof TranslationInterface) {
+            if (!$entity->isEmpty()) {
+                $uow->cancelOrphanRemoval($entity);
+            } else {
                 $translatable = $entity->getTranslatable();
-                if($translatable) $translatable->removeTranslation($entity);
+                if ($translatable) {
+                    $translatable->removeTranslation($entity);
+                }
 
-                if($this->entityManager->contains($entity)) {
+                if ($this->entityManager->contains($entity)) {
                     $this->entityManager->remove($entity);
                 }
             }
@@ -140,15 +151,20 @@ class IntlSubscriber implements EventSubscriberInterface
     {
         $classMetadata = $loadClassMetadataEventArgs->getClassMetadata();
 
-        if ($classMetadata->reflClass === null)
-            return; // Class has not yet been fully built, ignore this event
+        if ($classMetadata->reflClass === null) {
+            return;
+        } // Class has not yet been fully built, ignore this event
 
-        if ($classMetadata->isMappedSuperclass) return;
+        if ($classMetadata->isMappedSuperclass) {
+            return;
+        }
 
-        if (is_subclass_of($classMetadata->reflClass->getName(), TranslatableInterface::class, true))
+        if (is_subclass_of($classMetadata->reflClass->getName(), TranslatableInterface::class, true)) {
             $this->mapTranslatable($classMetadata);
-        if (is_subclass_of($classMetadata->reflClass->getName(), TranslationInterface::class, true))
+        }
+        if (is_subclass_of($classMetadata->reflClass->getName(), TranslationInterface::class, true)) {
             $this->mapTranslation($classMetadata);
+        }
     }
 
     /**
@@ -156,8 +172,9 @@ class IntlSubscriber implements EventSubscriberInterface
      */
     private function convertFetchString($fetchMode): int
     {
-        if (is_int($fetchMode))
+        if (is_int($fetchMode)) {
             return $fetchMode;
+        }
 
         switch($fetchMode) {
             case 'EAGER':
@@ -175,11 +192,9 @@ class IntlSubscriber implements EventSubscriberInterface
     private function mapTranslatable(ClassMetadata $classMetadata): void
     {
         $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslationEntityClass')->invoke(null);
-        if($classMetadata->hasAssociation('translations')) {
-
+        if ($classMetadata->hasAssociation('translations')) {
             $mapping = $classMetadata->getAssociationMapping("translations");
-            if(is_subclass_of($targetEntity, $mapping["targetEntity"] ?? null)) {
-
+            if (is_subclass_of($targetEntity, $mapping["targetEntity"] ?? null)) {
                 $classMetadata->associationMappings["translations"]["targetEntity"] = $targetEntity;
                 $classMetadata->associationMappings["translations"]["sourceEntity"] = $classMetadata->getName();
 
@@ -195,9 +210,7 @@ class IntlSubscriber implements EventSubscriberInterface
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
             }
-
         } else {
-
             $classMetadata->cache = $classMetadata->cache ?? null;
             $classMetadata->cache = [
                 "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
@@ -225,11 +238,9 @@ class IntlSubscriber implements EventSubscriberInterface
         $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslatableEntityClass')->invoke(null);
         $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
 
-        if($classMetadata->hasAssociation('translatable')) {
-
+        if ($classMetadata->hasAssociation('translatable')) {
             $mapping = $classMetadata->getAssociationMapping("translatable");
-            if(is_subclass_of($targetEntity, $mapping["targetEntity"] ?? null)) {
-
+            if (is_subclass_of($targetEntity, $mapping["targetEntity"] ?? null)) {
                 $classMetadata->associationMappings["translatable"]["targetEntity"] = $targetEntity;
                 $classMetadata->associationMappings["translatable"]["sourceEntity"] = $classMetadata->getName();
                 $classMetadata->cache = $classMetadata->cache ?? null;
@@ -238,9 +249,7 @@ class IntlSubscriber implements EventSubscriberInterface
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
             }
-
         } else {
-
             $classMetadata->cache = $classMetadata->cache ?? null;
             $classMetadata->cache = [
                 "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
@@ -268,14 +277,14 @@ class IntlSubscriber implements EventSubscriberInterface
         }
 
         $classMetadata->cache = $targetClassMetadata->cache;
-        if(array_key_exists("region", $classMetadata->cache ?? []))
+        if (array_key_exists("region", $classMetadata->cache ?? [])) {
             $classMetadata->cache["region"] .= "_translation";
+        }
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
         $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_' .TranslatableWalker::SALT;
 
         if ($classMetadata->getName() == $classMetadata->rootEntityName) {
-
             $classMetadata->table['uniqueConstraints'][$name] ??= [];
             $classMetadata->table['uniqueConstraints'][$name]["columns"] = array_unique(array_merge(
                 $classMetadata->table['uniqueConstraints'][$name]["columns"] ?? [],
@@ -283,7 +292,8 @@ class IntlSubscriber implements EventSubscriberInterface
             ));
         }
 
-        if(!$classMetadata->hasField(TranslatableWalker::LOCALE) && !$classMetadata->hasAssociation(TranslatableWalker::LOCALE))
+        if (!$classMetadata->hasField(TranslatableWalker::LOCALE) && !$classMetadata->hasAssociation(TranslatableWalker::LOCALE)) {
             $classMetadata->mapField(['fieldName' => TranslatableWalker::LOCALE, 'type' => 'string', 'length' => 5]);
+        }
     }
 }

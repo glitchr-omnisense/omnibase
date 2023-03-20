@@ -42,7 +42,7 @@ final class TradingMarketTwigExtension extends AbstractExtension
         $this->intlExtension  = new IntlExtension();
     }
 
-    public function getFilters() : array
+    public function getFilters(): array
     {
         return
             [
@@ -50,7 +50,7 @@ final class TradingMarketTwigExtension extends AbstractExtension
                 new TwigFilter('apply_currency_rate', [$this, 'applyCurrencyRate']),
             ];
     }
-    public function getFunctions() : array
+    public function getFunctions(): array
     {
         return
             [
@@ -64,13 +64,15 @@ final class TradingMarketTwigExtension extends AbstractExtension
         $applyRate     = array_pop_key("use_rate", $attrs) ?? true;
         $scalingFactor = array_pop_key("scale", $attrs) ?? 100;
 
-        if($applyRate) {
-
+        if ($applyRate) {
             $targetCurrency = $this->tradingMarket->getRenderedCurrency() ?? $currency;
             $rate = $this->tradingMarket->getFallback($currency, $targetCurrency)?->getValue();
 
-            if($rate !== null) $currency = $targetCurrency;
-            else $rate = 1.0;
+            if ($rate !== null) {
+                $currency = $targetCurrency;
+            } else {
+                $rate = 1.0;
+            }
         }
 
         return $this->intlExtension->formatCurrency($amount*$rate / $scalingFactor, $currency, $attrs, $locale);
@@ -80,7 +82,9 @@ final class TradingMarketTwigExtension extends AbstractExtension
     {
         $targetCurrency = $this->tradingMarket->getRenderedCurrency() ?? $currency;
         $rate = $this->tradingMarket->getFallback($currency, $targetCurrency)?->getValue();
-        if($rate === null) return null;
+        if ($rate === null) {
+            return null;
+        }
 
         return $amount*$rate;
     }

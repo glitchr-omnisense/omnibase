@@ -15,5 +15,4 @@ use Base\Repository\Layout\WidgetRepository;
 
 class LinkRepository extends WidgetRepository
 {
-
 }

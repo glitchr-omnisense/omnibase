@@ -12,13 +12,18 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class ShortCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
-    public function createEntity(string $entityFqcn) { return new Short(""); }
+    public function createEntity(string $entityFqcn)
+    {
+        return new Short("");
+    }
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-
             yield SlugField::new('slug')->setColumns(6)->setRequired(false);
 
             $url = parse_url(get_url());
@@ -32,7 +37,6 @@ class ShortCrudController extends AbstractCrudController
                         "attr" => ["placeholder" => $this->getTranslator()->trans("@".AbstractDashboardController::TRANSLATION_DASHBOARD.".crud.short.url.placeholder", [$url["scheme"]."://".$url["host"]])]
                     ]
                 ]);
-
         }, $args);
     }
 }

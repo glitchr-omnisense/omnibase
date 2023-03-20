@@ -48,7 +48,10 @@ class CropperType extends AbstractType implements DataMapperInterface
      */
     protected $propertyAccessor;
 
-    public function getBlockPrefix(): string { return 'cropper'; }
+    public function getBlockPrefix(): string
+    {
+        return 'cropper';
+    }
 
     public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, Environment $twig)
     {
@@ -102,7 +105,6 @@ class CropperType extends AbstractType implements DataMapperInterface
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-
             $form = $event->getForm();
             $fields = array_reverse(array_merge(array_reverse([
 
@@ -130,8 +132,7 @@ class CropperType extends AbstractType implements DataMapperInterface
 
             ]), array_reverse($options["fields"] ?? [])));
 
-            foreach($fields as $fieldName => $fieldOptions) {
-
+            foreach ($fields as $fieldName => $fieldOptions) {
                 $fieldType = array_pop_key("form_type", $fieldOptions) ?? HiddenType::class;
                 $form->add($fieldName, $fieldType, $fieldOptions);
             }
@@ -148,31 +149,36 @@ class CropperType extends AbstractType implements DataMapperInterface
     {
         // Get oldest parent form available..
         $ancestor = $view;
-        while($ancestor->parent !== null)
+        while ($ancestor->parent !== null) {
             $ancestor = $ancestor->parent;
+        }
 
         $view->vars["ancestor"] = $ancestor;
 
         //
         // Check if target path is reacheable..
-        if(str_contains($options["target"], "/")) $targetPath = $options["target"];
-        else {
-
-            if(str_starts_with($options["target"], ".")) $target = substr($options["target"], 1);
-            else $target = $ancestor;
+        if (str_contains($options["target"], "/")) {
+            $targetPath = $options["target"];
+        } else {
+            if (str_starts_with($options["target"], ".")) {
+                $target = substr($options["target"], 1);
+            } else {
+                $target = $ancestor;
+            }
 
             $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
-            foreach($targetPath ?? [] as $path) {
-
-                if(!array_key_exists($path, $target->children))
+            foreach ($targetPath ?? [] as $path) {
+                if (!array_key_exists($path, $target->children)) {
                     throw new \Exception("Child form \"$path\" related to view data \"".$target->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
+                }
 
                 $target = $target->children[$path];
-                if($target->vars["name"] == "translations") {
-
+                if ($target->vars["name"] == "translations") {
                     $availableLocales = array_keys($target->children);
-                    $locale = count($availableLocales) > 1 ? $target->vars["default_locale"]: first($availableLocales) ?? null;
-                    if($locale) $target = $target->children[$locale];
+                    $locale = count($availableLocales) > 1 ? $target->vars["default_locale"] : first($availableLocales) ?? null;
+                    if ($locale) {
+                        $target = $target->children[$locale];
+                    }
                 }
             }
         }
@@ -181,22 +187,23 @@ class CropperType extends AbstractType implements DataMapperInterface
 
         //
         // Check if quadrant path is reacheable..
-        if(in_array($options["quadrant"], Quadrant8::getPermittedValues())) $quadrantPath = $options["quadrant"];
-        else {
-
+        if (in_array($options["quadrant"], Quadrant8::getPermittedValues())) {
+            $quadrantPath = $options["quadrant"];
+        } else {
             $quadrant = $ancestor;
             $quadrantPath = $options["quadrant"] ? explode(".", $options["quadrant"]) : null;
-            foreach($quadrantPath ?? [] as $path) {
-
-                if(!array_key_exists($path, $quadrant->children))
+            foreach ($quadrantPath ?? [] as $path) {
+                if (!array_key_exists($path, $quadrant->children)) {
                     throw new \Exception("Child form \"$path\" related to view data \"".$quadrant->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["quadrant"]."\")");
+                }
 
                 $quadrant = $quadrant->children[$path];
-                if($quadrant->vars["name"] == "translations") {
-
+                if ($quadrant->vars["name"] == "translations") {
                     $availableLocales = array_keys($quadrant->children);
-                    $locale = count($availableLocales) > 1 ? $quadrant->vars["default_locale"]: first($availableLocales) ?? null;
-                    if($locale) $quadrant = $quadrant->children[$locale];
+                    $locale = count($availableLocales) > 1 ? $quadrant->vars["default_locale"] : first($availableLocales) ?? null;
+                    if ($locale) {
+                        $quadrant = $quadrant->children[$locale];
+                    }
                 }
             }
         }
@@ -208,14 +215,17 @@ class CropperType extends AbstractType implements DataMapperInterface
 
     public function mapDataToForms($viewData, Traversable $forms)
     {
-        if($viewData === null) return;
+        if ($viewData === null) {
+            return;
+        }
 
         $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));
         $fieldNames = $classMetadata->getFieldNames($viewData);
         $fieldNames[] = "is_normalized"; // Include normalization information
-        foreach(iterator_to_array($forms) as $formName => $form) {
-
-            if(!in_array($formName, $fieldNames)) continue;
+        foreach (iterator_to_array($forms) as $formName => $form) {
+            if (!in_array($formName, $fieldNames)) {
+                continue;
+            }
             $form->setData($this->propertyAccessor->getValue($viewData, $formName));
         }
     }
@@ -225,9 +235,10 @@ class CropperType extends AbstractType implements DataMapperInterface
         $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));
         $fieldNames = $classMetadata->getFieldNames($viewData);
 
-        foreach(iterator_to_array($forms) as $formName => $form) {
-
-            if(!in_array($formName, $fieldNames)) continue;
+        foreach (iterator_to_array($forms) as $formName => $form) {
+            if (!in_array($formName, $fieldNames)) {
+                continue;
+            }
             $this->propertyAccessor->setValue($viewData, $formName, $form->getData());
         }
     }

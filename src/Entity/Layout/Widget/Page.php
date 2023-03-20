@@ -26,8 +26,14 @@ use Base\Database\Annotation\Cache;
 
 class Page extends Widget implements IconizeInterface, LinkableInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-file-alt"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-file-alt"];
+    }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
@@ -36,7 +42,10 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
         return $this->getRouter()->generate("widget_page", $routeParameters, $referenceType);
     }
 
-    public function __toString() { return $this->getTitle(); }
+    public function __toString()
+    {
+        return $this->getTitle();
+    }
 
     public function __construct(?string $title = null, ?string $slug = null)
     {
@@ -50,7 +59,10 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $slug;
-    public function getSlug(): ?string { return $this->slug; }
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
@@ -65,7 +77,6 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
     {
         $max = min($max, self::MAX_ANCHOR);
         return preg_replace_callback("/\<(h[1-".$max."])\>([^\<\>]*)\<\/h[1-".$max."]\>/", function ($match) use ($suffix, $options) {
-
             $tag = $match[1];
             $content = $match[2];
             $slug = strtolower($this->getSlugger()->slug($content));
@@ -74,7 +85,6 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
             $options["attr"]["class"] = trim($options["attr"]["class"] . " anchor");
 
             return "<".$tag." ".html_attributes($options["row_attr"] ?? [], ["id" => $slug])."><a ".html_attributes($options["attr"] ?? [])." href='#" . $slug . "'>".$content."</a><a href='#" . $slug . "'>".$suffix."</a></".$tag.">";
-
         }, $this->content);
     }
 
@@ -87,13 +97,11 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
         $max = min($max, 6);
 
         preg_replace_callback("/\<(h[1-".$max."])\>([^\<\>]*)\<\/h[1-".$max."]\>/", function ($match) use (&$headlines) {
-
             $headlines[] = [
                 "tag" => $match[1],
                 "slug"  => strtolower($this->getSlugger()->slug($match[2])),
                 "title" => $match[2]
             ];
-
         }, $this->content);
 
         return $headlines;

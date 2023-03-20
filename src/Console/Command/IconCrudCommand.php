@@ -18,7 +18,7 @@ class IconCrudCommand extends Command
 {
     protected function configure(): void
     {
-        $this->addOption('crud',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific CRUD controller ?');
+        $this->addOption('crud', null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific CRUD controller ?');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -29,13 +29,17 @@ class IconCrudCommand extends Command
             array_merge(
                 BaseBundle::getInstance()->getAllClasses($baseLocation."/Controller/Backend/Crud"),
                 BaseBundle::getInstance()->getAllClasses("./src/Controller/Backend/Crud"),
-            ), fn($c) => !($c instanceof EaCrudController)
+            ),
+            fn ($c) => !($c instanceof EaCrudController)
         );
 
-        if($cruds) $output->section()->writeln("CRUD controller list: ".$crudRestriction);
-        foreach($cruds as $crud) {
-
-            if(!str_starts_with($crud, $crudRestriction)) continue;
+        if ($cruds) {
+            $output->section()->writeln("CRUD controller list: ".$crudRestriction);
+        }
+        foreach ($cruds as $crud) {
+            if (!str_starts_with($crud, $crudRestriction)) {
+                continue;
+            }
 
             $icon = $crud instanceof AbstractCrudController ? $crud::getPreferredIcon() : null;
             $iconize = $icon ? "<warning>(implements ".Iconize::class.")</warning>: \"$icon\"" : "<red>(no icon found)</red>";

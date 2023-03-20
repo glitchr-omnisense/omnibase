@@ -7,12 +7,15 @@ use Base\Service\Model\IconizeInterface;
 
 class LogLevel extends EnumType implements IconizeInterface
 {
-    const INFO     = "INFO";
-    const DEBUG    = "DEBUG";
-    const WARNING  = "WARNING";
-    const CRITICAL = "CRITICAL";
+    public const INFO     = "INFO";
+    public const DEBUG    = "DEBUG";
+    public const WARNING  = "WARNING";
+    public const CRITICAL = "CRITICAL";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [

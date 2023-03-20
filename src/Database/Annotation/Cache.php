@@ -83,7 +83,7 @@ final class Cache extends AbstractAnnotation
         }
     }
 
-    public function supports(string $target, ?string $targetValue = null, $object = null):bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
     }
@@ -93,7 +93,6 @@ final class Cache extends AbstractAnnotation
         $region = $this->region ?? $this->getEntityManager()->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName);
 
         switch($this->usage) {
-
             case self::READ_ONLY:
                 $usage = ClassMetadata::CACHE_USAGE_READ_ONLY;
                 break;
@@ -106,7 +105,6 @@ final class Cache extends AbstractAnnotation
         }
 
         switch($target) {
-
             case AnnotationReader::TARGET_CLASS:
 
                 $classMetadata->cache = [
@@ -114,11 +112,11 @@ final class Cache extends AbstractAnnotation
                     "region" => $region,
                 ];
 
-                foreach($classMetadata->associationMappings as $property => $associationMapping) {
-
+                foreach ($classMetadata->associationMappings as $property => $associationMapping) {
                     $isTargetEntityCached = !empty($this->getAnnotationReader()->getClassAnnotations($associationMapping["targetEntity"], self::class));
-                    if(!$isTargetEntityCached)
+                    if (!$isTargetEntityCached) {
                         continue;
+                    }
 
                     $this->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
                 }
@@ -127,7 +125,9 @@ final class Cache extends AbstractAnnotation
 
             case AnnotationReader::TARGET_PROPERTY:
 
-                if(($classMetadata->associationMappings[$targetValue]["type"] & $this->associations) == 0) return;
+                if (($classMetadata->associationMappings[$targetValue]["type"] & $this->associations) == 0) {
+                    return;
+                }
 
                 $classMetadata->associationMappings[$targetValue]["cache"] = $classMetadata->associationMappings[$targetValue]["cache"] ?? [
                     "usage"  => $usage,

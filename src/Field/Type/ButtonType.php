@@ -1,4 +1,5 @@
 <?php
+
 namespace Base\Field\Type;
 
 use Symfony\Component\Form\ButtonTypeInterface;

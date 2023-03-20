@@ -116,8 +116,9 @@ class SecuritySubscriber implements EventSubscriberInterface
         ParameterBagInterface $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
         MaternityUnitInterface $maternityUnit,
-        ?Profiler $profiler = null) {
-
+        ?Profiler $profiler = null
+    )
+    {
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
         $this->translator  = $translator;
@@ -134,7 +135,6 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->settingBag = $settingBag;
         $this->referrer = $referrer;
         $this->profiler = $profiler;
-
     }
 
     public static function getSubscribedEvents(): array
@@ -152,10 +152,16 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRequest(?RequestEvent $event = null): bool
     {
-        if(!$this->router->getRouteFirewall()?->isSecurityEnabled()) return true;
+        if (!$this->router->getRouteFirewall()?->isSecurityEnabled()) {
+            return true;
+        }
 
-        if(!$event->isMainRequest()) return true;
-        if( $this->router->isWdt($event) ) return true; // Special case for _wdt
+        if (!$event->isMainRequest()) {
+            return true;
+        }
+        if ($this->router->isWdt($event)) {
+            return true;
+        } // Special case for _wdt
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
@@ -167,41 +173,53 @@ class SecuritySubscriber implements EventSubscriberInterface
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
 
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
-        if($accessRestricted) {
-
-                 if(!$adminAccess) $restrictionType = "admin_restriction";
-            else if(!$userAccess)  $restrictionType = "user_restriction";
-            else $restrictionType = "public_restriction";
+        if ($accessRestricted) {
+            if (!$adminAccess) {
+                $restrictionType = "admin_restriction";
+            } elseif (!$userAccess) {
+                $restrictionType = "user_restriction";
+            } else {
+                $restrictionType = "public_restriction";
+            }
 
             //
             // Check for user special grants (based on roles)
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
-            if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
-            if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
+            if ($user && !$specialGrant) {
+                $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
+            }
+            if ($user && !$specialGrant) {
+                $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
+            }
 
             // In case of restriction: profiler is disabled
-            if(!$specialGrant && $this->profiler && !$this->router->isDebug())
+            if (!$specialGrant && $this->profiler && !$this->router->isDebug()) {
                 $this->profiler->disable();
+            }
 
             // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
-            if($isSecurityRoute) return true;
+            if ($isSecurityRoute) {
+                return true;
+            }
 
             //
             // Prevent average guy to see the administration and debug tools
-            if($this->router->isProfiler() && !$this->authorizationChecker->isGranted("BACKEND"))
+            if ($this->router->isProfiler() && !$this->authorizationChecker->isGranted("BACKEND")) {
                 throw new NotFoundHttpException();
+            }
 
-            if($this->router->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND"))
-            if(!$isSecurityRoute) throw new NotFoundHttpException();
+            if ($this->router->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND")) {
+                if (!$isSecurityRoute) {
+                    throw new NotFoundHttpException();
+                }
+            }
 
             //
             // Nonetheless exception access is always possible
             // Let's notify connected user that there is a special access grant for this page
-            if(!$this->router->isProfiler() && !$this->router->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
-
-                if($specialGrant) {
-
+            if (!$this->router->isProfiler() && !$this->router->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
+                if ($specialGrant) {
                     $notification = new Notification("access_restricted.".$restrictionType.".exception");
                     $notification->send("info");
                 }
@@ -212,16 +230,14 @@ class SecuritySubscriber implements EventSubscriberInterface
             //
             // If not, then user is redirected to a specific route
             $routeRestriction = $this->settingBag->getScalar("base.settings.access_restriction.redirect_on_deny") ?? [];
-            foreach($routeRestriction as $i => $route)
+            foreach ($routeRestriction as $i => $route) {
                 $routeRestriction[$i] = str_rstrip($route, ".".$this->localizer->getDefaultLocaleLang());
+            }
 
             if (!in_array($this->router->getRouteName(), $routeRestriction)) {
-
-                if($specialGrant) {
-
+                if ($specialGrant) {
                     // If not let them know that this page is locked for others
-                    if($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isBackend()) {
-
+                    if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isBackend()) {
                         $notification = new Notification("access_restricted.".$restrictionType.".message");
                         $notification->send("warning");
                     }
@@ -232,13 +248,15 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction) ?? $this->router->getRoute(RescueFormAuthenticator::PENDING_ROUTE)) : null;
                 $response ??= $this->router->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
-                if($event) $event->setResponse($response);
-                if($event) $event->stopPropagation();
+                if ($event) {
+                    $event->setResponse($response);
+                }
+                if ($event) {
+                    $event->stopPropagation();
+                }
 
                 return false;
-
-            } else if($specialGrant) {
-
+            } elseif ($specialGrant) {
                 // If not let them know that this page is locked for others
                 $notification = new Notification("access_restricted.".$restrictionType.".on_deny");
                 $notification->send("info");
@@ -258,21 +276,21 @@ class SecuritySubscriber implements EventSubscriberInterface
          * @var User
          */
         $user = $token ? $token->getUser() : null;
-        if(!$user instanceof BaseUser) return;
+        if (!$user instanceof BaseUser) {
+            return;
+        }
 
         // Notify user about the authentication method
         $exceptions = $this->parameterBag->get("base.access_restrictions.route_exceptions") ?? [];
         $exceptions = array_merge($exceptions, ["/^(security|user|ux)_(?:.*)$/"]);
         if ($token instanceof SwitchUserToken) {
-
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
             $notification = new Notification("impersonator", [$user, $switchParameter]);
             $notification->send("warning");
         }
 
-        if($user->isKicked()) {
-
+        if ($user->isKicked()) {
             $notification = new Notification("kickout", [$user]);
             $notification->send("warning");
 
@@ -287,70 +305,64 @@ class SecuritySubscriber implements EventSubscriberInterface
         // Check if user is verified
         // (NB:exception in debut mode for user matching test_recipient emails)
         if (!$user->isVerified() && !$user->isTester() && !$this->router->isSecured()) {
+            $callbackFn = function () use ($user) {
+                $verifyEmailToken = $user->getToken("verify-email");
+                if ($verifyEmailToken && $verifyEmailToken->hasVeto()) {
+                    $notification = new Notification("verifyEmail.alreadySent", [$verifyEmailToken->getThrottleTimeStr()]);
+                    $notification->send("info");
+                } else {
+                    $notification = new Notification("verifyEmail.pending", [$this->router->generate("security_verifyEmail")]);
+                    $notification->send("warning");
+                }
+            };
 
-                $callbackFn = function () use ($user) {
+            $response    = $event->getResponse();
+            $alreadyRedirected = $response && $response->getStatusCode() == 302;
+            $isException =  $this->router->isEasyAdmin() || $this->router->isProfiler() || !$this->router->isSecured();
 
-                    $verifyEmailToken = $user->getToken("verify-email");
-                    if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
-
-                        $notification = new Notification("verifyEmail.alreadySent", [$verifyEmailToken->getThrottleTimeStr()]);
-                        $notification->send("info");
-
-                    } else {
-
-                        $notification = new Notification("verifyEmail.pending", [$this->router->generate("security_verifyEmail")]);
-                        $notification->send("warning");
-                    }
-                };
-
-                $response    = $event->getResponse();
-                $alreadyRedirected = $response && $response->getStatusCode() == 302;
-                $isException =  $this->router->isEasyAdmin() || $this->router->isProfiler() || !$this->router->isSecured();
-
-                if($alreadyRedirected || $isException) $callbackFn();
-                else $this->router->redirectEvent($event, "user_profile", [], 302, [
+            if ($alreadyRedirected || $isException) {
+                $callbackFn();
+            } else {
+                $this->router->redirectEvent($event, "user_profile", [], 302, [
                     "exceptions" => $exceptions,
                     "callback" => $callbackFn
                 ]);
-
+            }
         }
 
-        if(!$user->isApproved()) {
-
+        if (!$user->isApproved()) {
             if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
-
                 $user->approve();
                 $this->userRepository->flush($user);
-
-            } else if($this->parameterBag->get("base.user.autoapprove")) {
-
+            } elseif ($this->parameterBag->get("base.user.autoapprove")) {
                 $user->approve();
                 $this->userRepository->flush($user);
-
-            } else if ($this->router->isSecured()) {
-
-                $this->router->redirectEvent($event, "security_pendingForApproval", [], 302,  ["exceptions" => $exceptions]);
+            } elseif ($this->router->isSecured()) {
+                $this->router->redirectEvent($event, "security_pendingForApproval", [], 302, ["exceptions" => $exceptions]);
             }
-
-        } else if($this->router->getRouteName() == "security_pendingForApproval") {
-
-            $this->router->redirectEvent($event, $this->router->getRouteIndex(), [], 302,  ["exceptions" => $exceptions]);
+        } elseif ($this->router->getRouteName() == "security_pendingForApproval") {
+            $this->router->redirectEvent($event, $this->router->getRouteIndex(), [], 302, ["exceptions" => $exceptions]);
         }
     }
 
     public function onKernelResponse(ResponseEvent $event)
     {
         //Notify user about the authentication method
-        if(!($token = $this->tokenStorage->getToken()) ) return;
+        if (!($token = $this->tokenStorage->getToken())) {
+            return;
+        }
 
         /**
          * @var User
          */
-        if(!($user = $token->getUser())) return;
-        if(!$user instanceof BaseUser) return;
+        if (!($user = $token->getUser())) {
+            return;
+        }
+        if (!$user instanceof BaseUser) {
+            return;
+        }
 
-        if ( !($user->isActive()) ) {
-
+        if (!($user->isActive())) {
             $user->poke(new \DateTime("now"));
             $this->userRepository->flush($user);
         }
@@ -362,8 +374,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $importance = "danger";
         $data = [];
 
-        if( ($exception = $event->getException()) ) {
-
+        if (($exception = $event->getException())) {
             $importance = $exception->getMessageData()["importance"] ?? $importance;
             $data = $exception->getMessageData();
 
@@ -381,24 +392,25 @@ class SecuritySubscriber implements EventSubscriberInterface
          */
         $user = $event->getUser();
         if ($user instanceof BaseUser) {
-
             if (!$user->isPersistent()) {
-
                 $notification = new Notification("login.social", [$user]);
                 $notification->send("success");
-
-            } else if($user->isVerified()) {
-
+            } elseif ($user->isVerified()) {
                 $isAuthenticated = $this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') || $this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED');
-                if(!$isAuthenticated) $title = "@notifications.login.success.alien";
-                else {
-
+                if (!$isAuthenticated) {
+                    $title = "@notifications.login.success.alien";
+                } else {
                     $active = daydiff($user->getActiveAt()) < 0 ? "first" : "back";
 
-                         if(time_is_between($user->getActiveAt(), "05:00:00", "10:00:00")) $period = "morning";
-                    else if(time_is_between($user->getActiveAt(), "12:00:00", "15:00:00")) $period = "afternoon";
-                    else if(time_is_between($user->getActiveAt(), "19:00:00", "05:00:00")) $period = "evening";
-                    else $period = "day";
+                    if (time_is_between($user->getActiveAt(), "05:00:00", "10:00:00")) {
+                        $period = "morning";
+                    } elseif (time_is_between($user->getActiveAt(), "12:00:00", "15:00:00")) {
+                        $period = "afternoon";
+                    } elseif (time_is_between($user->getActiveAt(), "19:00:00", "05:00:00")) {
+                        $period = "evening";
+                    } else {
+                        $period = "day";
+                    }
 
                     $title = "@notifications.login.success.$period.$active";
                 }
@@ -414,28 +426,37 @@ class SecuritySubscriber implements EventSubscriberInterface
         $token = $event->getToken();
         $user = ($token) ? $token->getUser() : null;
 
-        if ($user instanceof User) // Just to remember username.. after logout & first redirection
+        if ($user instanceof User) { // Just to remember username.. after logout & first redirection
             $this->requestStack->getSession()?->set("_user", $user);
+        }
 
         $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_ROUTE, [], 302);
     }
 
     public function onMaintenanceRequest(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;
+        if (!$event->isMainRequest()) {
+            return;
+        }
 
-        if($this->maintenanceProvider->redirectOnDeny($event, $this->localizer->getLocale())) {
-            if($this->profiler) $this->profiler->disable();
+        if ($this->maintenanceProvider->redirectOnDeny($event, $this->localizer->getLocale())) {
+            if ($this->profiler) {
+                $this->profiler->disable();
+            }
             $event->stopPropagation();
         }
     }
 
     public function onBirthRequest(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;
+        if (!$event->isMainRequest()) {
+            return;
+        }
 
-        if($this->maternityUnit->redirectOnDeny($event, $this->localizer->getLocale())) {
-            if($this->profiler) $this->profiler->disable();
+        if ($this->maternityUnit->redirectOnDeny($event, $this->localizer->getLocale())) {
+            if ($this->profiler) {
+                $this->profiler->disable();
+            }
             $event->stopPropagation();
         }
     }

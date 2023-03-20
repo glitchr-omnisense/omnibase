@@ -18,7 +18,10 @@ use Base\Database\Annotation\Cache;
 
 class ArrayAdapter extends AbstractAdapter
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-clipboard-list"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-clipboard-list"];
+    }
 
     public function __construct(string $label, ?string $path = null, ?int $length = null)
     {
@@ -30,14 +33,26 @@ class ArrayAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $length;
-    public function getLength():?int     { return $this->length; }
+    public function getLength(): ?int
+    {
+        return $this->length;
+    }
     public function setLength(?int $length)
     {
         $this->length = $length;
         return $this;
     }
 
-    public static function getType(): string { return ArrayType::class; }
-    public function getOptions(): array { return ["length" => $this->getLength()]; }
-    public function resolve(mixed $value): mixed { return $value; }
+    public static function getType(): string
+    {
+        return ArrayType::class;
+    }
+    public function getOptions(): array
+    {
+        return ["length" => $this->getLength()];
+    }
+    public function resolve(mixed $value): mixed
+    {
+        return $value;
+    }
 }

@@ -30,24 +30,28 @@ class ColumnAlias extends AbstractAnnotation
         $this->column = $data["column"] ?? "";
     }
 
-    public function supports(string $target, ?string $targetValue = null, $object = null):bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
     {
-        if($target == "property") $alias = $targetValue;
-        else $alias = $this->alias;
+        if ($target == "property") {
+            $alias = $targetValue;
+        } else {
+            $alias = $this->alias;
+        }
 
-        if(!property_exists($classMetadata->getName(), $alias))
+        if (!property_exists($classMetadata->getName(), $alias)) {
             throw new Exception("Invalid alias property \"$alias\" provided in annotation of class ".$classMetadata->getName());
-        else if(!property_exists($classMetadata->getName(), $this->column))
+        } elseif (!property_exists($classMetadata->getName(), $this->column)) {
             throw new Exception("Invalid column property \"$this->column\" provided in annotation of class ".$classMetadata->getName());
-        else if($classMetadata->hasAssociation($alias))
+        } elseif ($classMetadata->hasAssociation($alias)) {
             throw new Exception("Alias variable \"$alias\" cannot be used, association mapping already found.");
-        else if($classMetadata->hasField($alias))
+        } elseif ($classMetadata->hasField($alias)) {
             throw new Exception("Alias variable \"$alias\" cannot be used, field mapping already found.");
+        }
 
         $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);
         $classMetadataCompletor->aliasNames ??= [];
@@ -56,19 +60,25 @@ class ColumnAlias extends AbstractAnnotation
 
     public function bind($entity, $column, $alias)
     {
-        if($alias == $column) return;
-        if(snake2camel($alias) == snake2camel($column)) return;
-        if(camel2snake($alias) == camel2snake($column)) return;
+        if ($alias == $column) {
+            return;
+        }
+        if (snake2camel($alias) == snake2camel($column)) {
+            return;
+        }
+        if (camel2snake($alias) == camel2snake($column)) {
+            return;
+        }
 
-        $fn = function() use ($alias, $column) {
-
+        $fn = function () use ($alias, $column) {
             $aliasValue  = $this->$alias;
 
             $columnValue = $this->$column;
-            if($aliasValue instanceof ArrayCollection && $columnValue instanceof ArrayCollection)
+            if ($aliasValue instanceof ArrayCollection && $columnValue instanceof ArrayCollection) {
                 $aliasValue = new ArrayCollection($columnValue->toArray() + $aliasValue->toArray());
-            else if($columnValue !== null)
+            } elseif ($columnValue !== null) {
                 $aliasValue = $columnValue;
+            }
 
             $this->$alias = &$this->$column; // Bind variable together..
             $this->$alias = $aliasValue;

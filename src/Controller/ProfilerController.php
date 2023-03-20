@@ -27,8 +27,8 @@ class ProfilerController extends AbstractController
      * */
     protected $notifier;
 
-    public function __construct(Notifier $notifier) {
-
+    public function __construct(Notifier $notifier)
+    {
         $this->notifier = $notifier;
     }
 

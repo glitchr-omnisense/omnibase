@@ -23,7 +23,10 @@ class AdminContextFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\Admin
         $this->extension = $extension;
     }
 
-    public function getExtension(): Extension { return $this->extension; }
+    public function getExtension(): Extension
+    {
+        return $this->extension;
+    }
 
     public function create(Request $request, DashboardControllerInterface $dashboardController, ?CrudControllerInterface $crudController): AdminContext
     {

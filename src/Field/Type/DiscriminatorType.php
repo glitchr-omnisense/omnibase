@@ -18,7 +18,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-
 class DiscriminatorType extends AbstractType
 {
     /**
@@ -40,26 +39,27 @@ class DiscriminatorType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-
             $form = $event->getForm();
 
             $class = $options["data_class"] ?? $this->formFactory->guessClass($form->getParent());
-            if(!$class) throw new \Exception("Entity cannot be determined for " . $form->getName());
+            if (!$class) {
+                throw new \Exception("Entity cannot be determined for " . $form->getName());
+            }
 
             $discriminatorMap   = $this->classMetadataManipulator->getDiscriminatorMap($class);
             $rootEntityName   = $this->classMetadataManipulator->getRootEntityName($class);
 
-            if($options["discriminator_autoload"]) {
-
+            if ($options["discriminator_autoload"]) {
                 $choices = [];
-                foreach($discriminatorMap as $key => $entity) {
-
+                foreach ($discriminatorMap as $key => $entity) {
                     $icon = null;
-                    if(class_implements_interface($entity, IconizeInterface::class))
+                    if (class_implements_interface($entity, IconizeInterface::class)) {
                         $icon = $entity::__iconizeStatic()[0];
+                    }
 
-                    if($options["exclude_root"] && $entity == $rootEntityName)
+                    if ($options["exclude_root"] && $entity == $rootEntityName) {
                         continue;
+                    }
 
                     $choices[mb_ucwords($key)] = [$icon, $key];
 
@@ -86,7 +86,6 @@ class DiscriminatorType extends AbstractType
 
         $text = $translator->trans($entry.".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
         switch($format) {
-
             case FORMAT_TITLECASE:
                 $text = mb_ucwords(mb_strtolower($text));
                 break;
@@ -113,7 +112,10 @@ class DiscriminatorType extends AbstractType
         //Optional: Implement SelectType + AssociationType with autoload option if option enabled
     }
 
-    public function getBlockPrefix(): string { return 'discriminator'; }
+    public function getBlockPrefix(): string
+    {
+        return 'discriminator';
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {

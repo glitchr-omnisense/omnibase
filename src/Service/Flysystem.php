@@ -32,10 +32,16 @@ class Flysystem extends LazyFactory implements FlysystemInterface
     protected FilesystemOperator $operator;
 
     protected static $projectDir;
-    public static function getProjectDir() { return self::$projectDir; }
+    public static function getProjectDir()
+    {
+        return self::$projectDir;
+    }
 
     protected static $publicDir;
-    public static function getPublicDir() { return self::$publicDir; }
+    public static function getPublicDir()
+    {
+        return self::$publicDir;
+    }
 
     public function __construct(...$args)
     {
@@ -44,15 +50,18 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         self::$projectDir = dirname(__FILE__, 6);
         self::$publicDir  = self::$projectDir."/public";
 
-        if(!$this->hasStorage("local.storage"))
+        if (!$this->hasStorage("local.storage")) {
             throw new InvalidArgumentException("\"local.storage\" storage not found in your Flysystem configuration.");
+        }
 
         $this->setDefaultStorage("local.storage");
     }
 
     public function createStorage(string $source, ?string $storageName = null)
     {
-        if($storageName === null) $storageName = $source;
+        if ($storageName === null) {
+            $storageName = $source;
+        }
 
         // NB: Nah.. I never experienced this..
         // if ($source === $storageName) {
@@ -66,16 +75,22 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return $this->storages->get($source);
     }
 
-    public function hasStorage(string $storageName):bool { return array_key_exists($storageName, $this->storages->getProvidedServices()); }
-    public function getStorageNames(bool $public = true):array 
-    { 
+    public function hasStorage(string $storageName): bool
+    {
+        return array_key_exists($storageName, $this->storages->getProvidedServices());
+    }
+    public function getStorageNames(bool $public = true): array
+    {
         return array_filter(
-                    array_keys($this->storages->getProvidedServices()), 
-                    fn($s) => $public || !str_ends_with($s, ".public"),
-                );
+            array_keys($this->storages->getProvidedServices()),
+            fn ($s) => $public || !str_ends_with($s, ".public"),
+        );
     }
 
-    public function getDefaultStorage():FilesystemOperator { return $this->operator; }
+    public function getDefaultStorage(): FilesystemOperator
+    {
+        return $this->operator;
+    }
     public function setDefaultStorage(FilesystemOperator|string $operator)
     {
         $this->operator = $this->getOperator($operator);
@@ -84,13 +99,14 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
     public function getOperator(FilesystemOperator|string|null $operator = null): FilesystemOperator
     {
-        if (class_implements_interface($operator, FilesystemOperator::class))
+        if (class_implements_interface($operator, FilesystemOperator::class)) {
             return $operator;
+        }
 
         if (is_string($operator)) {
-
-            if(!$this->hasStorage($operator))
+            if (!$this->hasStorage($operator)) {
                 throw new InvalidArgumentException("\"".$operator."\" storage not found in your Flysystem configuration.");
+            }
 
             return $this->createStorage($operator);
         }
@@ -102,8 +118,11 @@ class Flysystem extends LazyFactory implements FlysystemInterface
     {
         $operator = $this->getOperator($operator);
 
-        try { $reflProperty = new \ReflectionProperty(get_class($operator), 'adapter'); }
-        catch (ReflectionException $e) { return null; }
+        try {
+            $reflProperty = new \ReflectionProperty(get_class($operator), 'adapter');
+        } catch (ReflectionException $e) {
+            return null;
+        }
 
         $reflProperty->setAccessible(true);
         return $reflProperty->getValue($operator);
@@ -115,25 +134,32 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
         //
         // Prefixer
-        try { $reflProperty = new \ReflectionProperty(get_class($adapter), 'prefixer'); }
-        catch (ReflectionException $e) { return null; }
+        try {
+            $reflProperty = new \ReflectionProperty(get_class($adapter), 'prefixer');
+        } catch (ReflectionException $e) {
+            return null;
+        }
 
         $reflProperty->setAccessible(true);
-        return $reflProperty->isInitialized($adapter) ? $reflProperty->getValue($adapter) : new PathPrefixer($this->getConnectionOptions($operator)["root"] ?? "/");;
+        return $reflProperty->isInitialized($adapter) ? $reflProperty->getValue($adapter) : new PathPrefixer($this->getConnectionOptions($operator)["root"] ?? "/");
+        ;
     }
 
-    public function getConnectionOptions(FilesystemOperator|string|null $operator = null): ?array {
-
+    public function getConnectionOptions(FilesystemOperator|string|null $operator = null): ?array
+    {
         $adapter = $this->getAdapter($operator);
 
         //
         // Connection options
-        try { $reflProperty = new \ReflectionProperty(get_class($adapter), 'connectionOptions'); }
-        catch (ReflectionException $e) { 
-
+        try {
+            $reflProperty = new \ReflectionProperty(get_class($adapter), 'connectionOptions');
+        } catch (ReflectionException $e) {
             // Connection provider (SFTP)
-            try { $reflProperty = new \ReflectionProperty(get_class($adapter), 'connectionProvider'); }
-            catch (ReflectionException $e) { return null; }
+            try {
+                $reflProperty = new \ReflectionProperty(get_class($adapter), 'connectionProvider');
+            } catch (ReflectionException $e) {
+                return null;
+            }
         }
 
         $reflProperty->setAccessible(true);
@@ -157,21 +183,31 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
 
-        if(!$this->fileExists($path, $operator)) return null;
+        if (!$this->fileExists($path, $operator)) {
+            return null;
+        }
 
-        try { return $operator->read($path); }
-        catch (UnableToReadFile $e) { throw new NotReadableException("Unable to read file \"$path\".. ".$e->getMessage()); }
+        try {
+            return $operator->read($path);
+        } catch (UnableToReadFile $e) {
+            throw new NotReadableException("Unable to read file \"$path\".. ".$e->getMessage());
+        }
     }
 
-    public function write(string $path, string $contents, FilesystemOperator|string|null $operator = null, array $config = []):bool
+    public function write(string $path, string $contents, FilesystemOperator|string|null $operator = null, array $config = []): bool
     {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
 
-        if ($this->fileExists($path, $operator)) return false;
+        if ($this->fileExists($path, $operator)) {
+            return false;
+        }
 
-        try { $operator->write($path, $contents, $config); }
-        catch (UnableToWriteFile $e) { throw new NotWritableException("Unable to write file \"$path\".. ".$e->getMessage()); }
+        try {
+            $operator->write($path, $contents, $config);
+        } catch (UnableToWriteFile $e) {
+            throw new NotWritableException("Unable to write file \"$path\".. ".$e->getMessage());
+        }
         return true;
     }
 
@@ -180,10 +216,15 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
 
-        if(!$this->fileExists($path, $operator)) return false;
+        if (!$this->fileExists($path, $operator)) {
+            return false;
+        }
 
-        try { $operator->delete($path); }
-        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to delete file \"$path\".. ".$e->getMessage()); }
+        try {
+            $operator->delete($path);
+        } catch (UnableToDeleteFile|UnableToDeleteDirectory $e) {
+            throw new NotDeletableException("Unable to delete file \"$path\".. ".$e->getMessage());
+        }
         return true;
     }
 
@@ -192,31 +233,44 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
 
-        try { return $operator->fileExists($path); }
-        catch (CorruptedPathDetected $e ) { return false; }
+        try {
+            return $operator->fileExists($path);
+        } catch (CorruptedPathDetected $e) {
+            return false;
+        }
     }
 
-    public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = []):bool
+    public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = []): bool
     {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
 
-        if($this->fileExists($path, $operator)) return false;
+        if ($this->fileExists($path, $operator)) {
+            return false;
+        }
 
-        try { $operator->createDirectory($path, $config); }
-        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to create directory \"$path\".. ".$e->getMessage()); }
+        try {
+            $operator->createDirectory($path, $config);
+        } catch (UnableToDeleteFile|UnableToDeleteDirectory $e) {
+            throw new NotDeletableException("Unable to create directory \"$path\".. ".$e->getMessage());
+        }
         return true;
     }
 
-    public function mimeType(string $path, FilesystemOperator|string|null $operator = null) : ?string
+    public function mimeType(string $path, FilesystemOperator|string|null $operator = null): ?string
     {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
 
-        if(!$this->fileExists($path, $operator)) return null;
+        if (!$this->fileExists($path, $operator)) {
+            return null;
+        }
 
-        try { return $operator->mimeType($path); }
-        catch (UnableToRetrieveMetadata $e) { throw new NotDeletableException("Unable to read mimetype \"$path\".. ".$e->getMessage()); }
+        try {
+            return $operator->mimeType($path);
+        } catch (UnableToRetrieveMetadata $e) {
+            throw new NotDeletableException("Unable to read mimetype \"$path\".. ".$e->getMessage());
+        }
         return null;
     }
 
@@ -225,27 +279,32 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
 
-        if($this->fileExists($path, $operator))
+        if ($this->fileExists($path, $operator)) {
             return $this->getPathPrefixer($operator)?->prefixPath($path);
+        }
 
         return null;
     }
 
-    protected function getPublicRealpath(?string $path = null, int $depth = 1): array {
-
+    protected function getPublicRealpath(?string $path = null, int $depth = 1): array
+    {
         $publicPath = realpath($this->getPublicDir()."/".str_lstrip($path, [$this->getPublicDir(), "/"]));
 
         $endpoints = [$publicPath => realpath($publicPath)];
-        foreach(Finder::create()->followLinks()->directories()->in($publicPath)->depth("< ".$depth) as $path)
+        foreach (Finder::create()->followLinks()->directories()->in($publicPath)->depth("< ".$depth) as $path) {
             $endpoints[$path->getPathname()] = realpath($path->getPathname());
+        }
 
         return $endpoints;
     }
 
-    public function getPublicRoot( FilesystemOperator|string|null $operator = null) : ?string
+    public function getPublicRoot(FilesystemOperator|string|null $operator = null): ?string
     {
-        try { $publicPath = $this->getPathPrefixer($this->getOperator($operator))?->prefixPath("") ?? null; }
-        catch (UnableToCreateDirectory $e) { $publicPath = $e->location(); }
+        try {
+            $publicPath = $this->getPathPrefixer($this->getOperator($operator))?->prefixPath("") ?? null;
+        } catch (UnableToCreateDirectory $e) {
+            $publicPath = $e->location();
+        }
 
         return $publicPath;
     }
@@ -258,34 +317,36 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
     public function getPublic(mixed $path, FilesystemOperator|string|null $operator = null)
     {
-        if($path === null) return null;
-        if(in_array($path, ["", "/"]))
+        if ($path === null) {
+            return null;
+        }
+        if (in_array($path, ["", "/"])) {
             return $this->getPublicRoot($operator);
+        }
 
         $path = $this->stripPrefix($path, $operator);
         $path = $this->getPathPrefixer($operator)?->prefixPath($path) ?? null;
-        if($path === null) return null;
+        if ($path === null) {
+            return null;
+        }
 
         //
         // Check if file is reacheable from /public directory
         $operator = $this->getOperator($operator);
-        if($operator) {
-
+        if ($operator) {
             $endpoints = $this->getPublicRealpath();
-            foreach($endpoints as $alias => $realpath) {
-
-                if(str_starts_with($path, $realpath) && file_exists($alias.str_lstrip($path, $realpath)))
+            foreach ($endpoints as $alias => $realpath) {
+                if (str_starts_with($path, $realpath) && file_exists($alias.str_lstrip($path, $realpath))) {
                     return $alias.str_lstrip($path, $realpath);
+                }
             }
         }
 
         //
         // Check if the corresponding public operator is found
-        if(is_string($operator)) {
-
+        if (is_string($operator)) {
             $operator = $this->getOperator($operator.".public");
-            if($operator) {
-
+            if ($operator) {
                 $path = $this->stripPrefix($path, $operator);
                 return $this->fileExists($path, $operator) ? $this->getPathPrefixer($operator)?->prefixPath($path) : null;
             }
@@ -293,5 +354,4 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
         return null;
     }
-
 }

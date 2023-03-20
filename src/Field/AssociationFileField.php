@@ -123,20 +123,20 @@ final class AssociationFileField implements FieldInterface
         return $this;
     }
 
-    public function setMaxSize(int $filesize) {
-
+    public function setMaxSize(int $filesize)
+    {
         $this->setFormTypeOption("max_size", $filesize);
         return $this;
     }
 
-    public function setMaxFiles(int $nFiles) {
-
+    public function setMaxFiles(int $nFiles)
+    {
         $this->setFormTypeOption("max_files", $nFiles);
         return $this;
     }
 
-    public function setMimeTypes(array $mimeTypes) {
-
+    public function setMimeTypes(array $mimeTypes)
+    {
         $this->setFormTypeOption("mime_types", $mimeTypes);
         return $this;
     }
@@ -164,5 +164,4 @@ final class AssociationFileField implements FieldInterface
         $this->setCustomOption(self::OPTION_SHOW, $show);
         return $this;
     }
-
 }

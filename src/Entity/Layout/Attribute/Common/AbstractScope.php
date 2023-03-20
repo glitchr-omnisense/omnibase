@@ -21,18 +21,26 @@ use Base\Database\Annotation\Cache;
  */
 abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-crosshairs"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-crosshairs"];
+    }
     public function contains(mixed $subject): bool
     {
-        if(!$this->adapter) return true;
+        if (!$this->adapter) {
+            return true;
+        }
 
         $ret = false;
         $values = is_array($this->getValue()) ? $this->getValue() : [$this->getValue()];
-        foreach($values as $value) {
-
-            if(!$this->adapter->supports($value)) continue;
+        foreach ($values as $value) {
+            if (!$this->adapter->supports($value)) {
+                continue;
+            }
             $ret |= $this->adapter->contains($value, $subject);
-            if($ret) break;
+            if ($ret) {
+                break;
+            }
         }
 
         return $ret;
@@ -43,7 +51,10 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
      * @Associate(metadata="class")
      */
     protected $value;
-    public function getValue()     { return $this->value; }
+    public function getValue()
+    {
+        return $this->value;
+    }
     public function setValue($value)
     {
         $this->value = $value;
@@ -55,7 +66,10 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
      */
     protected $class;
 
-    public function getClass(): ?string { return $this->class; }
+    public function getClass(): ?string
+    {
+        return $this->class;
+    }
     public function setClass(?string $class)
     {
         $this->class = $class;

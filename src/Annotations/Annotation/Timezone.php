@@ -43,8 +43,9 @@ class Timezone extends AbstractAnnotation
     public function getValue(): string
     {
         $value = $this->value ?? date_default_timezone_get();
-        if (!in_array($value, timezone_identifiers_list()))
+        if (!in_array($value, timezone_identifiers_list())) {
             $value = self::DEFAULT_TIMEZONE;
+        }
 
         return $value;
     }
@@ -56,13 +57,17 @@ class Timezone extends AbstractAnnotation
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        if (!in_array("create", $this->context)) return;
+        if (!in_array("create", $this->context)) {
+            return;
+        }
         $this->setFieldValue($entity, $property, $this->getValue());
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        if (!in_array("update", $this->context)) return;
+        if (!in_array("update", $this->context)) {
+            return;
+        }
 
         $this->setFieldValue($entity, $property, $this->getValue());
     }

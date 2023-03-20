@@ -31,13 +31,19 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
         $this->setValue($value);
     }
 
-    public        function __iconize()       : ?array { return $this->adapter ? [$this->adapter->getIcon()] : null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-link"]; }
+    public function __iconize(): ?array
+    {
+        return $this->adapter ? [$this->adapter->getIcon()] : null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-link"];
+    }
 
     public function __toString()
     {
         $value = implode(", ", $this->getValue());
-        $value = $value ? ": ".$value: "";
+        $value = $value ? ": ".$value : "";
         return "<b>".($this->adapter ?? "Hyperlink")." #".$this->getId()."</b> ".$value;
     }
 
@@ -45,18 +51,33 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
       * @ColumnAlias(column = "adapter")
       */
     protected $hyperpattern;
-    public function getHyperpattern(): HyperpatternAdapter { return $this->hyperpattern; }
+    public function getHyperpattern(): HyperpatternAdapter
+    {
+        return $this->hyperpattern;
+    }
     public function setHyperpattern(HyperpatternAdapter $hyperpattern): self
     {
         $this->hyperpattern = $hyperpattern;
         return $this;
     }
 
-    public function generate(?string $locale = null) { return $this->adapter->generate(...$this->getValue($locale)); }
-    public function getLabel(): string { return $this->adapter->getLabel(); }
+    public function generate(?string $locale = null)
+    {
+        return $this->adapter->generate(...$this->getValue($locale));
+    }
+    public function getLabel(): string
+    {
+        return $this->adapter->getLabel();
+    }
 
-    public function get(?string $locale = null): mixed { return $this->getValue($locale); }
-    public function set(...$args): self { return array_key_exists("value", $args) ? $this->setValue($args["value"]) : $this; }
+    public function get(?string $locale = null): mixed
+    {
+        return $this->getValue($locale);
+    }
+    public function set(...$args): self
+    {
+        return array_key_exists("value", $args) ? $this->setValue($args["value"]) : $this;
+    }
     public function resolve(?string $locale = null): mixed
     {
         return $this->adapter ? $this->adapter->resolve($this->getValue($locale)) : null;

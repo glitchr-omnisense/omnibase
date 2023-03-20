@@ -27,20 +27,32 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
         parent::__construct($this->cacheFile);
     }
 
-    public function getCache(): ArrayAdapter { return $this->arrayAdapter; }
-    public function isOptional(): bool { return false; }
+    public function getCache(): ArrayAdapter
+    {
+        return $this->arrayAdapter;
+    }
+    public function isOptional(): bool
+    {
+        return false;
+    }
 
     protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter): bool
     {
-        if (!BaseBundle::USE_CACHE) return false;
-        if (!$this->cacheFile) return false;
-
-        if (is_file($this->cacheFile))
+        if (!BaseBundle::USE_CACHE) {
             return false;
+        }
+        if (!$this->cacheFile) {
+            return false;
+        }
 
-        if($this->shellVerbosity > 0 && php_sapi_name() == "cli")
+        if (is_file($this->cacheFile)) {
+            return false;
+        }
+
+        if ($this->shellVerbosity > 0 && php_sapi_name() == "cli") {
             echo " // Warming up cache... " . ucwords(camel2snake(str_replace("CacheWarmer", "", class_basename(static::class)), " ")) . PHP_EOL.PHP_EOL;
-        
+        }
+
         $this->simpleCache?->setCache($arrayAdapter);
         return $this->simpleCache?->warmUp($cacheDir) ?? false;
     }

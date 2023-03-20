@@ -8,15 +8,18 @@ use Base\Service\Model\IconizeInterface;
 
 class ThreadState extends EnumType implements IconizeInterface, ColorizeInterface
 {
-    const DRAFT    = "STATE_DRAFT";
-    const FUTURE   = "STATE_FUTURE";
-    const PUBLISH  = "STATE_PUBLISH";
-    const SECRET   = "STATE_PUBLISH_SECRET";
-    const ARCHIVE  = "STATE_PUBLISH_ARCHIVE";
-    const PASSWORD = "STATE_PUBLISH_PASSWORD";
-    const DELETE   = "STATE_DELETE";
+    public const DRAFT    = "STATE_DRAFT";
+    public const FUTURE   = "STATE_FUTURE";
+    public const PUBLISH  = "STATE_PUBLISH";
+    public const SECRET   = "STATE_PUBLISH_SECRET";
+    public const ARCHIVE  = "STATE_PUBLISH_ARCHIVE";
+    public const PASSWORD = "STATE_PUBLISH_PASSWORD";
+    public const DELETE   = "STATE_DELETE";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [
@@ -30,7 +33,10 @@ class ThreadState extends EnumType implements IconizeInterface, ColorizeInterfac
         ];
     }
 
-    public function __colorize(): ?array { return null; }
+    public function __colorize(): ?array
+    {
+        return null;
+    }
     public static function __colorizeStatic(): ?array
     {
         return [

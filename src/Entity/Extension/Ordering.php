@@ -16,11 +16,14 @@ use Base\Database\Annotation\Cache;
  */
 class Ordering extends AbstractExtension
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-sort-alpha-down"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-sort-alpha-down"];
+    }
 
     public function supports(): bool
     {
-        $needsOrdering = array_filter($this->getEntityData(), fn($v) => !is_identity($v));
+        $needsOrdering = array_filter($this->getEntityData(), fn ($v) => !is_identity($v));
         return $needsOrdering !== [];
     }
 }

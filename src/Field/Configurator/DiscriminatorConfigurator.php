@@ -50,13 +50,15 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
         $showLast   = $field->getCustomOption(DiscriminatorField::OPTION_SHOW_LEAF);
 
         $discriminatorAutoload = $field->getCustomOption(DiscriminatorField::OPTION_DISCRIMINATOR_AUTOLOAD);
-        if($discriminatorAutoload)
+        if ($discriminatorAutoload) {
             $field->setFormType(DiscriminatorType::class);
+        }
 
         $defaultClass = $field->getValue() && class_exists($field->getValue()) ? $field->getValue() : null;
         $defaultClass = $defaultClass ?? ($entityDto->getInstance() ? get_class($entityDto->getInstance()) : null);
-        if($showColumn)
+        if ($showColumn) {
             $field->setLabel(ucfirst($this->classMetadataManipulator->getDiscriminatorColumn($defaultClass)));
+        }
 
         $discriminatorMap    = $this->classMetadataManipulator->getDiscriminatorMap($entityDto->getInstance());
         $discriminatorValue  = $this->classMetadataManipulator->getDiscriminatorValue($entityDto->getInstance());
@@ -65,41 +67,39 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
         $field->setValue($discriminatorValue);
         $formattedValues = [];
         $array   = explode("_", $field->getValue());
-        foreach($array as $key => $value) {
-
+        foreach ($array as $key => $value) {
             $value = implode("_", array_slice($array, 0, $key+1));
             $text  = implode(".", array_slice($array, 0, $key+1));
 
             $class = $discriminatorMap[$value] ?? null;
-            if($key == array_key_last($array))
+            if ($key == array_key_last($array)) {
                 $class = $class ?? $defaultClass;
+            }
 
             if ($class) {
-
                 $class = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], $class);
                 $text  = implode(".", array_map("camel2snake", explode("\\", $class)));
             }
 
-            if($class)
+            if ($class) {
                 $formattedValues[] = DiscriminatorType::getFormattedValues($text, $discriminatorMap[$value] ?? $defaultClass, $this->translator);
+            }
         }
 
-        if($showLast) {
-
+        if ($showLast) {
             $formattedValues = [end($formattedValues)];
-
-        } else if($showInline) {
-
+        } elseif ($showInline) {
             $lastEntry = end($formattedValues);
-            $label = array_map(fn($v) => $v["text"], $formattedValues);
+            $label = array_map(fn ($v) => $v["text"], $formattedValues);
             $lastEntry["text"] = implode(" > ", $label);
             $formattedValues = [$lastEntry];
         }
 
-        if (!empty($formattedValues) && $classCrudController)
+        if (!empty($formattedValues) && $classCrudController) {
             $formattedValues[count($formattedValues)-1]["url"] = $this->adminUrlGenerator->unsetAll()->setController($classCrudController)->setAction(Action::INDEX)->set("filters[".$field->getProperty()."][value]", $discriminatorValue)->generateUrl();
+        }
 
-        $field->setValue(array_transforms(fn($k,$v):array => [$k, $v["id"] ?? null], $formattedValues));
+        $field->setValue(array_transforms(fn ($k, $v): array => [$k, $v["id"] ?? null], $formattedValues));
         $field->setFormattedValue($formattedValues);
     }
 }

@@ -17,12 +17,24 @@ use Base\Database\Annotation\Cache;
 
 class CountryAdapter extends AbstractAdapter
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-flag"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-flag"];
+    }
 
-    public static function getType(): string { return CountryType::class; }
-    public function getOptions(): array { return [
-        //"alt" => ["label" => "Nom"]
-    ]; }
+    public static function getType(): string
+    {
+        return CountryType::class;
+    }
+    public function getOptions(): array
+    {
+        return [
+            //"alt" => ["label" => "Nom"]
+        ];
+    }
 
-    public function resolve(mixed $value): mixed { return $value; }
+    public function resolve(mixed $value): mixed
+    {
+        return $value;
+    }
 }

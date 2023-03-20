@@ -11,8 +11,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class AvatarType extends ImageType
 {
-    public function getBlockPrefix(): string { return 'avatar'; }
-    public function getParent() : ?string { return ImageType::class; }
+    public function getBlockPrefix(): string
+    {
+        return 'avatar';
+    }
+    public function getParent(): ?string
+    {
+        return ImageType::class;
+    }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
@@ -25,15 +31,18 @@ class AvatarType extends ImageType
         ]);
 
         $resolver->setNormalizer('cropper', function (Options $options, $value) {
-            if(is_array($value) && !array_key_exists("aspectRatio", $value)) $value["aspectRatio"] = 1;
+            if (is_array($value) && !array_key_exists("aspectRatio", $value)) {
+                $value["aspectRatio"] = 1;
+            }
             return $value;
         });
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if($options["multiple"])
+        if ($options["multiple"]) {
             throw new InvalidArgumentException("There can be only one picture for avatar type, please disable 'multiple' option");
+        }
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)

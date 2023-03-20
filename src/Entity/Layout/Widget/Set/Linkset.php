@@ -23,8 +23,14 @@ use Base\Database\Annotation\Cache;
  */
 class Linkset extends Widget implements IconizeInterface, SetInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-layer-group"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-layer-group"];
+    }
 
     public function __construct(?string $title = null, array $hyperlinks = [])
     {
@@ -37,7 +43,10 @@ class Linkset extends Widget implements IconizeInterface, SetInterface
      * @OrderColumn
      */
     protected $hyperlinks;
-    public function getHyperlinks(): Collection { return $this->hyperlinks; }
+    public function getHyperlinks(): Collection
+    {
+        return $this->hyperlinks;
+    }
     public function addHyperlink(Hyperlink $hyperlink): self
     {
         if (!$this->hyperlinks->contains($hyperlink)) {

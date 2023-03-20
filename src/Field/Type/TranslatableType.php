@@ -36,21 +36,28 @@ class TranslatableType extends AbstractType
     {
         $translationOptions = [];
 
-        if($options["fields"])
+        if ($options["fields"]) {
             $translationOptions['fields'] = $options["fields"];
-        if($options["autoload"])
+        }
+        if ($options["autoload"]) {
             $translationOptions['autoload'] = $options["autoload"];
-        if($options["excluded_fields"])
+        }
+        if ($options["excluded_fields"]) {
             $translationOptions['excluded_fields'] = $options["excluded_fields"];
+        }
 
-        if($options["single_locale"])
+        if ($options["single_locale"]) {
             $translationOptions['single_locale'] = $options["fields"];
-        if($options["default_locale"])
+        }
+        if ($options["default_locale"]) {
             $translationOptions['default_locale'] = $options["default_locale"];
-        if($options["required_locales"])
+        }
+        if ($options["required_locales"]) {
             $translationOptions['required_locales'] = $options["required_locales"];
-        if($options["available_locales"])
+        }
+        if ($options["available_locales"]) {
             $translationOptions['available_locales'] = $options["available_locales"];
+        }
 
         $builder->add($options["translation_field_name"], TranslationType::class, $translationOptions);
     }

@@ -46,10 +46,10 @@ class GenerateUuid extends AbstractAnnotation
 
         // Determine namespace
         $this->namespace = $data['namespace'] ?? null;
-        if($this->version == self::V3_MD5 || $this->version == self::V5_SHA1) {
-
-            if(!$this->namespace)
+        if ($this->version == self::V3_MD5 || $this->version == self::V5_SHA1) {
+            if (!$this->namespace) {
                 throw new Exception("Namespace required for UUID v".$this->version);
+            }
         }
     }
 
@@ -87,10 +87,10 @@ class GenerateUuid extends AbstractAnnotation
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if ($this->getFieldValue($entity, $property) === null) {
-
             $this->setFieldValue($entity, $property, $this->getUuid($entity));
-            if ($this->getUnitOfWork()->getEntityChangeSet($entity))
+            if ($this->getUnitOfWork()->getEntityChangeSet($entity)) {
                 $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+            }
         }
     }
 }

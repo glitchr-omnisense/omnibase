@@ -26,7 +26,6 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         // Hydrate class
         $attributes = $this->em->getUnitOfWork()->getOriginalEntityData($entity);
         foreach ($attributes as $key => $value) {
-
             // One gets the setter's name matching the attribute.
             $method = 'set' . mb_ucfirst($key);
 
@@ -52,8 +51,11 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
 
     public function getClassMetadata($entityName): ClassMetadata
     {
-        if (is_object($entityName)) $class = get_class($entityName);
-        else $class = $entityName;
+        if (is_object($entityName)) {
+            $class = get_class($entityName);
+        } else {
+            $class = $entityName;
+        }
 
         return $this->em->getClassMetadata($class);
     }
@@ -63,7 +65,9 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $buildViolation = parent::buildViolation($constraint, $value);
 
         $entity = $constraint->entity;
-        if(!$entity) return $buildViolation;
+        if (!$entity) {
+            return $buildViolation;
+        }
 
         if ($constraint->em) {
             $em = $this->getDoctrine()->getManager($constraint->em);
@@ -94,11 +98,13 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
             return false;
         }
 
-        if (!is_instanceof($constraint, $this->constraintClass))
+        if (!is_instanceof($constraint, $this->constraintClass)) {
             throw new UnexpectedTypeException($constraint, $this->constraintClass);
+        }
 
-        if (!\is_array($constraint->fields) && !\is_string($constraint->fields))
+        if (!\is_array($constraint->fields) && !\is_string($constraint->fields)) {
             throw new UnexpectedTypeException($constraint->fields, 'array');
+        }
 
         // if (null !== $constraint->errorPath && !\is_string($constraint->errorPath))
         //     throw new UnexpectedTypeException($constraint->errorPath, 'string or null');
@@ -111,13 +117,12 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $class = get_class($constraint->entity);
 
         $message = $constraint->message;
-        while($class !== false) {
-
+        while ($class !== false) {
             $className = explode("\\", $class);
             array_shift($className);
             array_shift($className);
 
-            $id = trim("@entities." . implode(".", array_map(fn($c) => camel2snake($c), $className)) . "._validators.".$constraint->message,".");
+            $id = trim("@entities." . implode(".", array_map(fn ($c) => camel2snake($c), $className)) . "._validators.".$constraint->message, ".");
             if ($this->translator->transExists($id)) {
                 $message = $id;
                 break; // Intl found

@@ -75,12 +75,11 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
-
                     $prevEntity = null;
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
-                    if($entityRepository instanceof ServiceEntityRepository) {
-                        if(get_parent_class($entity) !== false) {
+                    if ($entityRepository instanceof ServiceEntityRepository) {
+                        if (get_parent_class($entity) !== false) {
                             $prevEntity = $entityRepository->cachePreviousOneByClassOf($entity->getId(), get_class($entity));
                         } else {
                             $prevEntity = $entityRepository->cachePreviousOne($entity->getId());
@@ -98,12 +97,11 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
-
                     $nextEntity = null;
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
-                    if($entityRepository instanceof ServiceEntityRepository) {
-                        if(get_parent_class($entity) !== false) {
+                    if ($entityRepository instanceof ServiceEntityRepository) {
+                        if (get_parent_class($entity) !== false) {
                             $nextEntity = $entityRepository->cacheNextOneByClassOf($entity->getId(), get_class($entity));
                         } else {
                             $nextEntity = $entityRepository->cacheNextOneBy($entity->getId());
@@ -121,10 +119,13 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
     {
         parent::add($pageName, $actionNameOrObject);
         $actionDto = $this->dto->getAction($pageName, $actionNameOrObject);
-        if($actionIcon) $actionDto->setIcon($actionIcon);
+        if ($actionIcon) {
+            $actionDto->setIcon($actionIcon);
+        }
 
-        if($callable != null)
+        if ($callable != null) {
             parent::update($pageName, $actionNameOrObject, $callable);
+        }
 
         return $this;
     }

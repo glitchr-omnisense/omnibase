@@ -42,14 +42,15 @@ class AnalyticsSubscriber implements EventSubscriberInterface
      * @var GaService
      */
     protected $gaService;
-    
+
     public function __construct(
         TokenStorageInterface $tokenStorage,
         RouterInterface $router,
         TranslatorInterface $translator,
         Environment $twig,
         UserRepository $userRepository,
-        ?GaService $googleAnalyticsService = null)
+        ?GaService $googleAnalyticsService = null
+    )
     {
         $this->tokenStorage = $tokenStorage;
         $this->router = $router;
@@ -69,11 +70,19 @@ class AnalyticsSubscriber implements EventSubscriberInterface
 
     public function onUserRequest(RequestEvent $event)
     {
-        if(!is_instanceof(User::class, BaseUser::class)) return;
-        if(!$event->isMainRequest()) return;
+        if (!is_instanceof(User::class, BaseUser::class)) {
+            return;
+        }
+        if (!$event->isMainRequest()) {
+            return;
+        }
 
-        if($this->router->isProfiler()) return;
-        if(!$this->router->isEasyAdmin()) return;
+        if ($this->router->isProfiler()) {
+            return;
+        }
+        if (!$this->router->isEasyAdmin()) {
+            return;
+        }
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
@@ -85,15 +94,14 @@ class AnalyticsSubscriber implements EventSubscriberInterface
             $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay());
 
         $onlineUsers = $onlineUsers->getResult();
-        $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
+        $activeUsers = array_filter($onlineUsers, fn ($u) => $u ? $u->isActive() : false);
 
         $this->twig->addGlobal("user_analytics", array_merge($this->twig->getGlobals()["user_analytics"] ?? [], [
             "label" => $this->translator->trans("@messages.user_analytics.label", [count($activeUsers)]),
         ]));
 
         $this->twig->addGlobal("user_manager", []);
-        if(count($onlineUsers)) {
-
+        if (count($onlineUsers)) {
             $this->twig->addGlobal("user_manager", [
                 "online" => $onlineUsers,
                 "active" => $activeUsers,
@@ -116,45 +124,56 @@ class AnalyticsSubscriber implements EventSubscriberInterface
     public function onGoogleAnalyticsRequest(RequestEvent $event)
     {
         if (isset($this->gaService) && $this->gaService->isEnabled()) {
-
             $googleAnalytics = $this->gaService->getBasics();
 
             $entries = [];
-            if($googleAnalytics["users"]) $entries = array_merge($entries, [
-                "users"        => [
-                    "label" => $this->translator->trans("@google_users", [$googleAnalytics["users"]]),
-                    "icon"  => 'fas fa-user'
-            ]]);
-            if($googleAnalytics["users_1day"]) $entries = array_merge($entries, [
-                "users_1day"   => [
-                    "label" => $this->translator->trans("@google_users_1day", [$googleAnalytics["users_1day"]]),
-                    "icon"  => 'fas fa-user-clock'
-                ]
-            ]);
-            if($googleAnalytics["views"]) $entries = array_merge($entries, [
-                "views"        => [
-                    "label" => $this->translator->trans("@google_analytics.views", [$googleAnalytics["views"]]),
-                    "icon"  => 'far fa-eye'
-                ]
-            ]);
-            if($googleAnalytics["views_1day"]) $entries = array_merge($entries, [
-                "views_1day"   => [
-                    "label" => $this->translator->trans("@google_analytics.views_1day", [$googleAnalytics["views_1day"]]) ,
-                    "icon"  => 'fas fa-eye'
-                ]
-            ]);
-            if($googleAnalytics["sessions"]) $entries = array_merge($entries, [
-                "sessions"     => [
-                    "label" => $this->translator->trans("@google_analytics.sessions", [$googleAnalytics["sessions"]]),
-                    "icon"  => 'fas fa-stopwatch'
-                ]
-            ]);
-            if($googleAnalytics["bounces_1day"]) $entries = array_merge($entries, [
-                "bounces_1day" => [
-                    "label" => $this->translator->trans("@google_analytics.bounces_1day", [$googleAnalytics["bounces_1day"]]),
-                    "icon"  => 'fas fa-meteor'
-                ]
-            ]);
+            if ($googleAnalytics["users"]) {
+                $entries = array_merge($entries, [
+                    "users"        => [
+                        "label" => $this->translator->trans("@google_users", [$googleAnalytics["users"]]),
+                        "icon"  => 'fas fa-user'
+                ]]);
+            }
+            if ($googleAnalytics["users_1day"]) {
+                $entries = array_merge($entries, [
+                    "users_1day"   => [
+                        "label" => $this->translator->trans("@google_users_1day", [$googleAnalytics["users_1day"]]),
+                        "icon"  => 'fas fa-user-clock'
+                    ]
+                ]);
+            }
+            if ($googleAnalytics["views"]) {
+                $entries = array_merge($entries, [
+                    "views"        => [
+                        "label" => $this->translator->trans("@google_analytics.views", [$googleAnalytics["views"]]),
+                        "icon"  => 'far fa-eye'
+                    ]
+                ]);
+            }
+            if ($googleAnalytics["views_1day"]) {
+                $entries = array_merge($entries, [
+                    "views_1day"   => [
+                        "label" => $this->translator->trans("@google_analytics.views_1day", [$googleAnalytics["views_1day"]]) ,
+                        "icon"  => 'fas fa-eye'
+                    ]
+                ]);
+            }
+            if ($googleAnalytics["sessions"]) {
+                $entries = array_merge($entries, [
+                    "sessions"     => [
+                        "label" => $this->translator->trans("@google_analytics.sessions", [$googleAnalytics["sessions"]]),
+                        "icon"  => 'fas fa-stopwatch'
+                    ]
+                ]);
+            }
+            if ($googleAnalytics["bounces_1day"]) {
+                $entries = array_merge($entries, [
+                    "bounces_1day" => [
+                        "label" => $this->translator->trans("@google_analytics.bounces_1day", [$googleAnalytics["bounces_1day"]]),
+                        "icon"  => 'fas fa-meteor'
+                    ]
+                ]);
+            }
 
             $this->twig->addGlobal("user_analytics", array_merge($this->twig->getGlobals()["user_analytics"] ?? [], [
                 "google" => $entries

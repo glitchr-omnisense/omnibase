@@ -31,28 +31,34 @@ class TranslationEnumsCommand extends Command
         );
 
         $maxLength = 0;
-        if(!$enumRestriction) {
-            foreach($enums as $enum)
+        if (!$enumRestriction) {
+            foreach ($enums as $enum) {
                 $maxLength = max(strlen($enum), $maxLength);
+            }
         }
 
         $locale = $input->getOption('locale');
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
-        if($locale && !in_array($locale, $availableLocales))
+        if ($locale && !in_array($locale, $availableLocales)) {
             throw new \Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
+        }
 
         $suffix = $input->getOption('suffix');
-        if($enums) $output->section()->writeln("Enum list: ".$enumRestriction);
-        foreach($enums as $enum) {
-
-            if(!str_starts_with($enum, $enumRestriction)) continue;
+        if ($enums) {
+            $output->section()->writeln("Enum list: ".$enumRestriction);
+        }
+        foreach ($enums as $enum) {
+            if (!str_starts_with($enum, $enumRestriction)) {
+                continue;
+            }
 
             $trans = "";
-            foreach($availableLocales as $currentLocale) {
-
-                if($locale !== null && $locale != $currentLocale) continue;
-                if($locale === null) {
+            foreach ($availableLocales as $currentLocale) {
+                if ($locale !== null && $locale != $currentLocale) {
+                    continue;
+                }
+                if ($locale === null) {
                     $prefix = "\n\t - ";
                     $space = "";
                 } else {
@@ -66,24 +72,28 @@ class TranslationEnumsCommand extends Command
                 $translationPathStr = $prefix."@enums[$currentLocale].<ln>".camel2snake($path, "_").".".$suffix."</ln>";
                 $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
-                if($translation == $translationPath) $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
-                else $trans .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
+                if ($translation == $translationPath) {
+                    $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
+                } else {
+                    $trans .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
+                }
             }
 
             $output->section()->writeln("\n * <magenta>".trim($enum)."</magenta> ".$space.": $trans");
 
             $maxValueLength = 0;
-            foreach($enum::getPermittedValues(false) as $value)
+            foreach ($enum::getPermittedValues(false) as $value) {
                 $maxValueLength = max(strlen($enum."::".$value), $maxValueLength);
+            }
 
-            foreach($enum::getPermittedValues(false) as $value) {
-
+            foreach ($enum::getPermittedValues(false) as $value) {
                 $value = strval($value);
                 $trans2 = "";
-                foreach($availableLocales as $currentLocale) {
-
-                    if($locale !== null && $locale != $currentLocale) continue;
-                    if($locale === null) {
+                foreach ($availableLocales as $currentLocale) {
+                    if ($locale !== null && $locale != $currentLocale) {
+                        continue;
+                    }
+                    if ($locale === null) {
                         $prefix = "\n\t\t - ";
                         $space = "";
                     } else {
@@ -92,11 +102,14 @@ class TranslationEnumsCommand extends Command
                     }
 
                     $translationPath = "@enums.".camel2snake($path, "_").".".strtolower($value).".".$suffix;
-                    $translationPathStr = $prefix."@enums[$currentLocale].<ln>".camel2snake($path,"_").".".strtolower($value).".".$suffix."</ln>";
+                    $translationPathStr = $prefix."@enums[$currentLocale].<ln>".camel2snake($path, "_").".".strtolower($value).".".$suffix."</ln>";
                     $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
-                    if($translation == $translationPath) $trans2 .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
-                    else $trans2 .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
+                    if ($translation == $translationPath) {
+                        $trans2 .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
+                    } else {
+                        $trans2 .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
+                    }
                 }
                 $output->section()->writeln("\t * <info>".trim($enum."::".$value)."</info> ".$space.": $trans2");
             }

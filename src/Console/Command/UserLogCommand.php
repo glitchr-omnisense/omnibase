@@ -16,15 +16,15 @@ class UserLogCommand extends Command
 {
     protected function configure(): void
     {
-        $this->addOption('user',         null, InputOption::VALUE_OPTIONAL, 'Should I consider them with a specific user ?');
+        $this->addOption('user', null, InputOption::VALUE_OPTIONAL, 'Should I consider them with a specific user ?');
         $this->addOption('impersonator', null, InputOption::VALUE_OPTIONAL, 'Should I consider them with a specific impersonator user ?');
-        $this->addOption('event',        null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific event ?');
-        $this->addOption('expiry',       null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific expiry value ?');
-        $this->addOption('pretty',       null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific pretty value ?');
-        $this->addOption('statutCode',   null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific status code ?');
+        $this->addOption('event', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific event ?');
+        $this->addOption('expiry', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific expiry value ?');
+        $this->addOption('pretty', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific pretty value ?');
+        $this->addOption('statutCode', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific status code ?');
 
-        $this->addOption('show',      null, InputOption::VALUE_NONE, 'Should I show them ?');
-        $this->addOption('clear',     null, InputOption::VALUE_NONE, 'Should I clear them ?');
+        $this->addOption('show', null, InputOption::VALUE_NONE, 'Should I show them ?');
+        $this->addOption('clear', null, InputOption::VALUE_NONE, 'Should I clear them ?');
         $this->addOption('clear-all', null, InputOption::VALUE_NONE, 'Should I clear them all?');
     }
 
@@ -42,9 +42,9 @@ class UserLogCommand extends Command
         $logRepository = $this->entityManager->getRepository(Log::class);
         $userRepository = $this->entityManager->getRepository(User::class);
 
-        if($actionClearAll) $filteredLogs = $logRepository->findAll();
-        else {
-
+        if ($actionClearAll) {
+            $filteredLogs = $logRepository->findAll();
+        } else {
             $expiry = $input->getOption('expiry');
             $defaultExpiry = $this->parameterBag->get("base.extension.logging_default_expiry");
 
@@ -53,8 +53,7 @@ class UserLogCommand extends Command
             $impersonator = ($impersonatorIdentifier ? $userRepository->loadUserByIdentifier($impersonatorIdentifier) : null);
 
             $filteredLogs = [];
-            if($event) {
-
+            if ($event) {
                 $filter = [];
                 $filter["event"]        = $event;
                 $filter["impersonator"] = $impersonator;
@@ -64,19 +63,20 @@ class UserLogCommand extends Command
                 $filter['expiry']       = $expiry ?? $defaultExpiry;
                 $filter['statusCode']   = trim($statusCode ?? ".*");
 
-                if($user) $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]])->getResult();
-                else      $logs = $logRepository->findByCreatedAtYoungerThan($filter["expiry"], ["event" => $event])->getResult();
+                if ($user) {
+                    $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]])->getResult();
+                } else {
+                    $logs = $logRepository->findByCreatedAtYoungerThan($filter["expiry"], ["event" => $event])->getResult();
+                }
 
                 $filteredLogs = $this->applyFilter($logs, $filter);
-
             } else {
-
                 // Monitored listeners
                 $monitoredEntries = $this->parameterBag->get("base.logging") ?? [];
                 foreach ($monitoredEntries as $key => $entry) {
-
-                    if (!array_key_exists("event", $entry))
+                    if (!array_key_exists("event", $entry)) {
                         throw new \Exception("Missing key \"event\" in monitored events #" . $key);
+                    }
 
                     $filter["event"]        = $entry["event"];
                     $filter["impersonator"] = $impersonator;
@@ -86,8 +86,11 @@ class UserLogCommand extends Command
                     $filter['expiry']       = $expiry ?? $entry["expiry"] ?? $defaultExpiry;
                     $filter["statusCode"]   = trim($entry["statusCode"] ?? ".*");
 
-                    if($user) $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]])->getResult();
-                    else      $logs = $logRepository->findByCreatedAtYoungerThan($filter["expiry"], ["event" => $filter["event"]])->getResult();
+                    if ($user) {
+                        $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]])->getResult();
+                    } else {
+                        $logs = $logRepository->findByCreatedAtYoungerThan($filter["expiry"], ["event" => $filter["event"]])->getResult();
+                    }
 
                     $filteredLogs = array_merge($filteredLogs, $this->applyFilter($logs, $filter));
                 }
@@ -96,20 +99,17 @@ class UserLogCommand extends Command
 
         // Show log list
         $nLogs = count($filteredLogs);
-        if($actionShow) {
-
+        if ($actionShow) {
             foreach ($logs as $key => $log) {
-
                 $message = "Entry ID #" .($key+1) . " / <info>Log #" . $log->getId()." \"".$log."\"</info>";
                 $output->section()->writeln($message);
             }
         }
 
         $output->section()->writeln($nLogs . ' log(s) found');
-        if($actionClear || $actionClearAll) {
-
+        if ($actionClear || $actionClearAll) {
             $output->section()->writeln('<warning>These logs are now erased..</warning>');
-            foreach($filteredLogs as $log) {
+            foreach ($filteredLogs as $log) {
                 $this->entityManager->remove($log);
                 $this->entityManager->flush();
             }
@@ -120,11 +120,16 @@ class UserLogCommand extends Command
 
     public function applyFilter($logs, $filter)
     {
-        $filteredLogs = array_filter($logs, function($log) use ($filter) {
-
-            if( !preg_match("/".$filter["statusCode"]."/", $log->getStatusCode())) return false;
-            if( !preg_match("/".$filter["pretty"]."/", $log->getPretty()) ) return false;
-            if($log->getImpersonator() != $filter["impersonator"]) return false;
+        $filteredLogs = array_filter($logs, function ($log) use ($filter) {
+            if (!preg_match("/".$filter["statusCode"]."/", $log->getStatusCode())) {
+                return false;
+            }
+            if (!preg_match("/".$filter["pretty"]."/", $log->getPretty())) {
+                return false;
+            }
+            if ($log->getImpersonator() != $filter["impersonator"]) {
+                return false;
+            }
 
             return true;
         });

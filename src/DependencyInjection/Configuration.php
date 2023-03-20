@@ -13,7 +13,10 @@ use Symfony\Component\Uid\Uuid;
 class Configuration implements ConfigurationInterface
 {
     private $treeBuilder;
-    public function getTreeBuilder() : TreeBuilder { return $this->treeBuilder; }
+    public function getTreeBuilder(): TreeBuilder
+    {
+        return $this->treeBuilder;
+    }
 
     /**
      * @inheritdoc
@@ -99,11 +102,11 @@ class Configuration implements ConfigurationInterface
                             ->children()
                                 ->booleanNode('autoapprove')
                                     ->info('Administrator check required')
-                                    ->defaultValue(False)
+                                    ->defaultValue(false)
                                     ->end()
                                 ->booleanNode('notify_admins')
                                     ->info('Administrator are notify when someone register')
-                                    ->defaultValue(False)
+                                    ->defaultValue(false)
                                     ->end()
                                 ->end()
                             ->end()
@@ -293,7 +296,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
 
                 ->arrayNode('parameter_bag')->addDefaultsIfNotSet()
-                
+
                     ->children()
                         ->booleanNode('use_setting_bag')
                             ->info('Use setting bag from database')
@@ -523,19 +526,19 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->booleanNode('use_form2')
                             ->info('Use custom base form style')
-                            ->defaultValue(True)
+                            ->defaultValue(true)
                             ->end()
                         ->booleanNode('use_ea')
                             ->info('Include EA form style')
-                            ->defaultValue(True)
+                            ->defaultValue(true)
                             ->end()
                         ->booleanNode('use_bootstrap')
                             ->info('Use bootstrap style in forms')
-                            ->defaultValue(True)
+                            ->defaultValue(true)
                             ->end()
                         ->booleanNode('autoappend')
                             ->info('Autoappend required dependencies in html content')
-                            ->defaultValue(True)
+                            ->defaultValue(true)
                             ->end()
                         ->scalarNode('default_path')
                             ->info('Default twig path')

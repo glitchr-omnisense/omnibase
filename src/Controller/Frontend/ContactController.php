@@ -51,15 +51,13 @@ class ContactController extends AbstractController
         return $this->formProxy
             ->createProcessor("contact", ContactType::class, ["use_model" => true])
             ->setData($user)
-            ->onDefault(function(FormProcessorInterface $formProcessor) use ($user) {
-
+            ->onDefault(function (FormProcessorInterface $formProcessor) use ($user) {
                 return $this->render('client/contact/index.html.twig', [
                     'user' => $user,
                     "form" => $formProcessor->getForm()->createView()
                 ]);
             })
-            ->onSubmit(function(FormProcessorInterface $formProcessor, Request $request) use ($user) {
-
+            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($user) {
                 /**
                  * @var ContactModel
                  */

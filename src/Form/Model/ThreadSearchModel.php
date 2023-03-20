@@ -11,7 +11,7 @@ use Base\Validator\Constraints as AssertBase;
 class ThreadSearchModel extends AbstractModel
 {
     public $parent_id;
-    
+
     /**
      * @var string
      */

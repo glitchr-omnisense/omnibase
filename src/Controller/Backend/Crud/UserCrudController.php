@@ -21,17 +21,21 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class UserCrudController extends UserActionCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
     {
-        if($entity = $this->getEntity()) {
-
+        if ($entity = $this->getEntity()) {
             $extension->setImage($entity->getAvatar());
 
             $userClass = "user.".mb_strtolower(camel2snake(class_basename($entity)));
             $entityLabel = $this->translator->transQuiet($userClass.".".Translator::NOUN_SINGULAR, [], Translator::DOMAIN_ENTITY);
-            if($entityLabel) $extension->setTitle(mb_ucwords($entityLabel));
+            if ($entityLabel) {
+                $extension->setTitle(mb_ucwords($entityLabel));
+            }
 
             $entityLabel ??= $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
             $entityLabel   = $entityLabel ? mb_ucwords($entityLabel) : "";
@@ -40,15 +44,16 @@ class UserCrudController extends UserActionCrudController
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
             $impersonate = null;
-            if($switchRole && $this->isGranted($switchRole) && !is_instanceof($this->getEntityFqcn(), LoginRestrictionInterface::class)  && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
-
+            if ($switchRole && $this->isGranted($switchRole) && !is_instanceof($this->getEntityFqcn(), LoginRestrictionInterface::class)  && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
                 $propertyAccessor =  PropertyAccess::createPropertyAccessor();
-                if($propertyAccessor->isReadable($entity, User::__DEFAULT_IDENTIFIER__))
+                if ($propertyAccessor->isReadable($entity, User::__DEFAULT_IDENTIFIER__)) {
                     $impersonate = '<a class="impersonate" href="?'.$switchParameter.'='.$propertyAccessor->getValue($entity, User::__DEFAULT_IDENTIFIER__).'"><i class="fa fa-fw fa-user-secret"></i></a>';
+                }
             }
 
-            if($this->getCrud()->getAsDto()->getCurrentAction() == "new") $extension->setTitle($entityLabel);
-            else {
+            if ($this->getCrud()->getAsDto()->getCurrentAction() == "new") {
+                $extension->setTitle($entityLabel);
+            } else {
                 $extension->setTitle($entity.$impersonate);
                 $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("crud.user.since", [$entity->getCreatedAt()->format("Y")], Translator::DOMAIN_BACKEND));
             }
@@ -57,12 +62,14 @@ class UserCrudController extends UserActionCrudController
         return $extension;
     }
 
-    public function configureFilters(Filters $filters): Filters { return $filters->add('roles'); }
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters->add('roles');
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, function() {
-
+        return parent::configureFields($pageName, function () {
             yield BooleanField::new("isApproved")->withConfirmation()->showInline();
             yield AvatarField::new('avatar')->setColumns(2)->hideOnDetail()->setCropper();
 
@@ -75,8 +82,6 @@ class UserCrudController extends UserActionCrudController
             yield DateTimeField::new('activeAt')->hideOnForm();
             yield DateTimeField::new('updatedAt')->onlyOnDetail();
             yield DateTimeField::new('createdAt')->onlyOnDetail();
-
         }, $args);
     }
-
 }

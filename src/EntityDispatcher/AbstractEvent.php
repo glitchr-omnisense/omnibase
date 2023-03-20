@@ -17,10 +17,25 @@ abstract class AbstractEvent extends Event implements EventInterface
         $this->request   = $request;
     }
 
-    public function getLifecycle(): LifecycleEventArgs { return $this->eventArgs; }
-    public function getRequest(): ?Request { return $this->request; }
+    public function getLifecycle(): LifecycleEventArgs
+    {
+        return $this->eventArgs;
+    }
+    public function getRequest(): ?Request
+    {
+        return $this->request;
+    }
 
-    public function getObjectManager()         { return $this->eventArgs->getObjectManager(); }
-    public function getObjectClass()  : string { return get_class($this->eventArgs->getObject()); }
-    public function getObject()       : object { return $this->eventArgs->getObject(); }
+    public function getObjectManager()
+    {
+        return $this->eventArgs->getObjectManager();
+    }
+    public function getObjectClass(): string
+    {
+        return get_class($this->eventArgs->getObject());
+    }
+    public function getObject(): object
+    {
+        return $this->eventArgs->getObject();
+    }
 }

@@ -26,5 +26,4 @@ class SitemapController extends AbstractController
             ->registerAnnotations()
             ->generate('sitemap.'.$extension.'.twig');
     }
-
 }

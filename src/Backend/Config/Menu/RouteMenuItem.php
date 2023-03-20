@@ -13,10 +13,12 @@ class RouteMenuItem extends EaRouteMenuItem
 {
     public function __construct(string $routeName, array $routeParameters, ?string $label = null, ?string $icon = null)
     {
-        if (MenuItem::$translator == null)
+        if (MenuItem::$translator == null) {
             throw new Exception("Translator is missing");
-        if (MenuItem::$router == null)
+        }
+        if (MenuItem::$router == null) {
             throw new Exception("Router is missing");
+        }
 
         $label = $label ? MenuItem::$translator->transQuiet($label, [], Translator::DOMAIN_BACKEND) : $label;
 
@@ -28,7 +30,9 @@ class RouteMenuItem extends EaRouteMenuItem
 
         if ($icon === null && MenuItem::$iconProvider != null) {
             $icons = MenuItem::$iconProvider->getRouteIcons($routeName);
-            if($icons) $this->dto->setIcon(closest($icons, 1) ?? null);
+            if ($icons) {
+                $this->dto->setIcon(closest($icons, 1) ?? null);
+            }
         }
     }
 }

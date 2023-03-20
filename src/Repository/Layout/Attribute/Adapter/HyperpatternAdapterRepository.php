@@ -16,5 +16,4 @@ use Base\Repository\Layout\AttributeRepository;
 
 class HyperpatternAdapterRepository extends AbstractAdapterRepository
 {
-
 }

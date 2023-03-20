@@ -21,7 +21,10 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     protected int $maxLength = 0;
     protected ?string $encoding;
 
-    public function warmUp(string $cacheDir): array { return []; }
+    public function warmUp(string $cacheDir): array
+    {
+        return [];
+    }
 
     public function __construct(ParameterBagInterface $parameterBag, string $cacheDir)
     {
@@ -47,26 +50,24 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return $this;
     }
 
-    public function getCompressions(): array { return $this->compressions; }
+    public function getCompressions(): array
+    {
+        return $this->compressions;
+    }
     public function getCompression(string $idOrClass): ?CompressionInterface
     {
         if (class_exists($idOrClass)) {
-
             $compression = $this->compressions[$idOrClass] ?? null;
-
         } else {
-
             foreach ($this->compressions as $availableCompression) {
-
                 if ($availableCompression->supports($idOrClass)) {
-
                     $compression = $availableCompression;
                     break;
                 }
             }
         }
 
-        if($compression == null) {
+        if ($compression == null) {
             $compressionIds = array_keys($this->getCompressions());
             throw new \LogicException("No compression class retrieved from \"" . $compressionId . "\" identifier (available: ".implode(", ", $compressionIds).")");
         }
@@ -78,7 +79,10 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return $compression;
     }
 
-    public function isShort() { return $this->uuid !== null; }
+    public function isShort()
+    {
+        return $this->uuid !== null;
+    }
     public function getUuid(string $name): ?UuidV5
     {
         return Uuid::v5(Uuid::fromString($this->uuid), $name);
@@ -89,8 +93,9 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         ksort($value); // Make sure keys are sorted before serializing..
 
         $data = serialize($value);
-        if($this->uuid == null)
+        if ($this->uuid == null) {
             return $this->getCompression($this->compression)->encode($data);
+        }
 
         $identifier = $this->getUuid($data);
         if (BaseBundle::USE_CACHE && $this->hasCache("/Identifiers/" . $identifier)) {
@@ -104,18 +109,24 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     public function decode(string $data): ?array
     {
         $uuid = $data;
-        if(Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
-
+        if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
             $_ = $this->getCache("/Identifiers/" . $uuid);
-            if($_) $data = $_;
+            if ($_) {
+                $data = $_;
+            }
         }
 
         $data = $this->getCompression($this->compression)->decode($data);
-        try { if($data) return unserialize($data); }
-        catch (\ErrorException $e) { }
+        try {
+            if ($data) {
+                return unserialize($data);
+            }
+        } catch (\ErrorException $e) {
+        }
 
-        if(Uuid::isValid($uuid) && BaseBundle::USE_CACHE)
+        if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
             $this->deleteCache("/Identifiers/".$uuid);
+        }
 
         return null;
     }

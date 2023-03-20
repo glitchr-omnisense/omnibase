@@ -11,5 +11,8 @@ class ThreadEvent extends AbstractEvent
     public const PUBLISHABLE = 'thread.publishable';
     public const PUBLISHED   = 'thread.published';
 
-    public function getThread(): Thread { return $this->getObject(); }
+    public function getThread(): Thread
+    {
+        return $this->getObject();
+    }
 }

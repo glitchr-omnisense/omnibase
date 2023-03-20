@@ -14,5 +14,4 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PenaltyRepository extends ServiceEntityRepository
 {
-
 }

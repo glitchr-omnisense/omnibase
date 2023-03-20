@@ -23,7 +23,10 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
      * @var TradingMarketInterface
      */
     protected $tradingMarket;
-    public function __construct(TradingMarketInterface $tradingMarket) { $this->tradingMarket = $tradingMarket; }
+    public function __construct(TradingMarketInterface $tradingMarket)
+    {
+        $this->tradingMarket = $tradingMarket;
+    }
 
     /**
      * {@inheritdoc}
@@ -47,18 +50,17 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
         $view->vars['currency_target'] = $targetPath;
 
         // Check if child exists.. this just trigger an exception..
-        if($options["currency_target"]) {
-
+        if ($options["currency_target"]) {
             $target = $form->getParent();
-            foreach($targetPath as $path) {
-
-                if(!$target->has($path))
+            foreach ($targetPath as $path) {
+                if (!$target->has($path)) {
                     throw new \Exception("Cannot determine currency.. Child path \"$path\" doesn't exists in \"".get_class($target->getViewData())."\".");
+                }
 
                 $target = $target->get($path);
                 $targetType = $target->getConfig()->getType()->getInnerType();
 
-                if($targetType instanceof TranslationType) {
+                if ($targetType instanceof TranslationType) {
                     $availableLocales = array_keys($target->all());
                     $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
                     $target = $target->get($locale);
@@ -72,29 +74,30 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
 
         $view->vars["currency"] = $options["currency"];
 
-        if ($options["currency_list"] === null)
+        if ($options["currency_list"] === null) {
             $options["currency_list"] = array_keys($this->tradingMarket->getFallback($options["currency"]));
+        }
 
         $view->vars["currency_list"] = array_values(array_unique(array_merge([$options["currency"]], $options["currency_list"] ?? [])));
-        foreach($view->vars["currency_list"] as $currency) {
-
-            if(!Currencies::exists($view->vars["currency"]))
+        foreach ($view->vars["currency_list"] as $currency) {
+            if (!Currencies::exists($view->vars["currency"])) {
                 throw new LogicException("Currency \"\" not referenced in \"". Currencies::class."\"");
+            }
         }
 
         $view->vars["currency_exchange"] = $options["currency_exchange"];
-        if($view->vars["currency_exchange"] === null) {
-
+        if ($view->vars["currency_exchange"] === null) {
             $view->vars["currency_exchange"] = [];
-            foreach($view->vars["currency_list"] as $currency) {
-
-                if($view->vars["currency"] == $currency) {
+            foreach ($view->vars["currency_list"] as $currency) {
+                if ($view->vars["currency"] == $currency) {
                     $view->vars["currency_exchange"][$currency] = 1.0;
                     continue;
                 }
 
                 $exchangeRate = $this->tradingMarket->get($view->vars["currency"], $currency, ["use_swap" => $options["use_swap"]]);
-                    if(!$exchangeRate) continue;
+                if (!$exchangeRate) {
+                    continue;
+                }
 
                 $view->vars["currency_exchange"][$currency] = $exchangeRate->getValue();
             }
@@ -103,7 +106,6 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
         $view->vars["currency_list"] = array_values(array_intersect($view->vars["currency_list"], array_keys($view->vars["currency_exchange"])));
 
         switch($options["currency_label"]) {
-
             case self::CODE_ONLY:
                 $view->vars["currency_label"] = array_combine($view->vars["currency_list"], $view->vars["currency_list"]);
                 break;
@@ -112,7 +114,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
             case self::LABEL_ONLY:
                 $view->vars["currency_label"] = array_combine(
                     $view->vars["currency_list"],
-                    array_map(fn($c) => Currencies::getSymbol($c), $view->vars["currency_list"])
+                    array_map(fn ($c) => Currencies::getSymbol($c), $view->vars["currency_list"])
                 );
 
                 break;
@@ -120,10 +122,9 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
             case self::LABELCODE_ONLY:
                 $view->vars["currency_label"] = array_combine(
                     $view->vars["currency_list"],
-                    array_map(fn($c) => Currencies::getSymbol($c) . " (".$c.")", $view->vars["currency_list"])
+                    array_map(fn ($c) => Currencies::getSymbol($c) . " (".$c.")", $view->vars["currency_list"])
                 );
                 break;
-
         }
     }
 
@@ -131,7 +132,6 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     {
         parent::buildForm($builder, $options); // TODO: Change the autogenerated stub
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
-
             $form = $event->getForm();
             $event->setData(str_replace([" ", ","], ["", "."], $event->getData()));
         });

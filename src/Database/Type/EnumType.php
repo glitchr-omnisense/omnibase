@@ -19,19 +19,20 @@ abstract class EnumType extends Type implements SelectInterface
     public static function getIcons(): array
     {
         $class = static::class;
-        if(array_key_exists($class, self::$icons))
+        if (array_key_exists($class, self::$icons)) {
             return self::$icons[$class] ?? [];
+        }
 
         $icons = [];
-        if(class_implements_interface(static::class, IconizeInterface::class))
+        if (class_implements_interface(static::class, IconizeInterface::class)) {
             $icons = static::class::__iconizeStatic();
+        }
 
-        while($class) {
-
-            if(class_implements_interface($class, IconizeInterface::class)) {
-
-                if( ($missingKeys = array_keys(array_key_removes($class::__iconizeStatic(), ...$class::getPermittedValues(false)))) )
+        while ($class) {
+            if (class_implements_interface($class, IconizeInterface::class)) {
+                if (($missingKeys = array_keys(array_key_removes($class::__iconizeStatic(), ...$class::getPermittedValues(false))))) {
                     throw new UnexpectedValueException("The following keys \"".implode(",", $missingKeys)."\" are missing in the list of the available icons on class \"".get_called_class()."\".");
+                }
 
                 $icons = array_union($icons, $class::__iconizeStatic());
                 self::$icons[$class] = $icons;
@@ -44,30 +45,55 @@ abstract class EnumType extends Type implements SelectInterface
         return $icons ?? [];
     }
 
-    public static function getIcon(string $id, int $index = -1): ?string { return array_map( fn($values) => ($index < 0 || !is_array($values)) ? $values : closest($values, $index), self::getIcons() )[$id] ?? null; }
-    public static function getText(string $id, ?TranslatorInterface $translator = null): ?string { return $translator ? $translator->transEnum($id, get_called_class(), Translator::NOUN_SINGULAR) : $id; }
-    public static function getHtml(string $id): ?string { return null; }
-    public static function getData(string $id): ?array { return null; }
+    public static function getIcon(string $id, int $index = -1): ?string
+    {
+        return array_map(fn ($values) => ($index < 0 || !is_array($values)) ? $values : closest($values, $index), self::getIcons())[$id] ?? null;
+    }
+    public static function getText(string $id, ?TranslatorInterface $translator = null): ?string
+    {
+        return $translator ? $translator->transEnum($id, get_called_class(), Translator::NOUN_SINGULAR) : $id;
+    }
+    public static function getHtml(string $id): ?string
+    {
+        return null;
+    }
+    public static function getData(string $id): ?array
+    {
+        return null;
+    }
 
-    public function getName() : string { return self::getStaticName(); }
-    public static function getStaticName() {
+    public function getName(): string
+    {
+        return self::getStaticName();
+    }
+    public static function getStaticName()
+    {
         $array = explode('\\', get_called_class());
         return camel2snake(end($array));
     }
 
-    public static function hasKey  (string $key,   bool $inheritance = true) { return array_key_exists($key, self::getPermittedValues($inheritance, true)); }
+    public static function hasKey(string $key, bool $inheritance = true)
+    {
+        return array_key_exists($key, self::getPermittedValues($inheritance, true));
+    }
 
-    public static function getValue(string $key,   bool $inheritance = true) { return self::getPermittedValues($inheritance, true)[$key] ?? null; }
-    public static function hasValue(string $value, bool $inheritance = true) { return array_search($value, self::getPermittedValues($inheritance, true)) !== false; }
+    public static function getValue(string $key, bool $inheritance = true)
+    {
+        return self::getPermittedValues($inheritance, true)[$key] ?? null;
+    }
+    public static function hasValue(string $value, bool $inheritance = true)
+    {
+        return array_search($value, self::getPermittedValues($inheritance, true)) !== false;
+    }
 
     public static function getOrderingKeys(array $array): array
     {
         $permittedValues = self::getPermittedValues();
 
         $ordering = array_filter(
-                array_map(fn($a) => ($pos = array_search($a, $permittedValues)) !== false ? $pos : null, $array),
-                fn($c) => $c !== null
-            );
+            array_map(fn ($a) => ($pos = array_search($a, $permittedValues)) !== false ? $pos : null, $array),
+            fn ($c) => $c !== null
+        );
 
         asort($ordering);
         return $ordering;
@@ -76,17 +102,22 @@ abstract class EnumType extends Type implements SelectInterface
     public static function getPermittedValues(bool $inheritance = true, bool $preserve_keys = false): array
     {
         $refl = new \ReflectionClass(get_called_class());
-        if($inheritance) $values = $refl->getConstants();
-        else $values = array_diff($refl->getConstants(),$refl->getParentClass()->getConstants());
+        if ($inheritance) {
+            $values = $refl->getConstants();
+        } else {
+            $values = array_diff($refl->getConstants(), $refl->getParentClass()->getConstants());
+        }
 
-        if($preserve_keys) asort($values);
-        else {
+        if ($preserve_keys) {
+            asort($values);
+        } else {
             $values = array_values($values);
             sort($values);
         }
 
-        if(!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values)
+        if (!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values) {
             throw new \Exception("\"".get_called_class()."\" is empty");
+        }
 
         return $values;
     }
@@ -96,20 +127,19 @@ abstract class EnumType extends Type implements SelectInterface
         $valuesByGroup = [];
         $values = self::getPermittedValues($inheritance, $preserve_keys);
 
-        $pathway = array_map(fn($a) => explode("_", $a), $values);
-        foreach($pathway as $i => $_) {
-
+        $pathway = array_map(fn ($a) => explode("_", $a), $values);
+        foreach ($pathway as $i => $_) {
             $value = $values[$i];
             $group = &$valuesByGroup;
 
             $kLast = count($_)-1;
-            foreach($_ as $k => $path) {
-
-                if($k == $kLast) $group[$path] = $value;
-                else {
-
-                    if(array_key_exists($path, $group))
+            foreach ($_ as $k => $path) {
+                if ($k == $kLast) {
+                    $group[$path] = $value;
+                } else {
+                    if (array_key_exists($path, $group)) {
                         $group[$path] = is_array($group[$path]) ? $group[$path] : ["_self" => $group[$path]];
+                    }
 
                     $group[$path] = $group[$path] ?? [];
                     $group = &$group[$path];
@@ -118,16 +148,12 @@ abstract class EnumType extends Type implements SelectInterface
         }
 
         $bubbleUp = count($valuesByGroup) == 1;
-        $valuesByGroup = array_transforms(function($k, $v, $callback) use ($bubbleUp): Generator {
-
-            if($bubbleUp && is_array($v)) {
-
+        $valuesByGroup = array_transforms(function ($k, $v, $callback) use ($bubbleUp): Generator {
+            if ($bubbleUp && is_array($v)) {
                 $bubbleUp = count($v) == 1;
-                foreach($v as $kk => $vv) {
-
+                foreach ($v as $kk => $vv) {
                     $vv = is_array($vv) ? array_transforms($callback, $vv) : $vv;
-                    if(is_array($vv) && count($vv) == 1) {
-
+                    if (is_array($vv) && count($vv) == 1) {
                         $key = array_keys($vv)[0] ?? null;
                         $kkp = explode("::", $key);
 
@@ -142,7 +168,6 @@ abstract class EnumType extends Type implements SelectInterface
             }
 
             return [$k, is_array($v) ? array_transforms($callback, $v) : $v];
-
         }, $valuesByGroup);
 
         return $valuesByGroup;
@@ -151,29 +176,40 @@ abstract class EnumType extends Type implements SelectInterface
     public static function getPermittedValuesByClass(bool $preserve_groups = true, bool $preserve_keys = false): array
     {
         $refl = new \ReflectionClass(get_called_class());
-        if(in_array($refl->getName(), [EnumType::class, SetType::class])) return [];
+        if (in_array($refl->getName(), [EnumType::class, SetType::class])) {
+            return [];
+        }
 
         $fnPermittedValues = $preserve_groups ? "getPermittedValuesByGroup" : "getPermittedValues";
 
         $values = [$refl->getName() => $refl->getName()::$fnPermittedValues(false, $preserve_keys)];
-        while(($refl = $refl->getParentClass()) && !in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class)
+        while (($refl = $refl->getParentClass()) && !in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class) {
             $values[$refl->getName()] = $refl->getName()::$fnPermittedValues(false, $preserve_keys);
+        }
 
         return $values;
     }
 
-    public function requiresSQLCommentHint(AbstractPlatform $platform) : bool { return true; }
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
     {
-        if($platform instanceof SqlitePlatform) return "TEXT";
-            
-        $values = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
+        return true;
+    }
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    {
+        if ($platform instanceof SqlitePlatform) {
+            return "TEXT";
+        }
+
+        $values = array_map(fn ($val) => "'".$val."'", $this->getPermittedValues());
 
         return "ENUM(".implode(", ", $values).")";
     }
 
-    public function convertToPHPValue($value, AbstractPlatform $platform) : mixed { return $value; }
-    public function convertToDatabaseValue($value, AbstractPlatform $platform) : mixed
+    public function convertToPHPValue($value, AbstractPlatform $platform): mixed
+    {
+        return $value;
+    }
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if (is_array($value)) {
             throw new \InvalidArgumentException("Enum type \"".get_class($this)."\" is not expecting an array \"['" . (is_array($value) ? implode("', '", $value) : $value) . "'] received.");
@@ -184,5 +220,4 @@ abstract class EnumType extends Type implements SelectInterface
 
         return $value;
     }
-
 }

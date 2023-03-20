@@ -13,12 +13,14 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class WidgetCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-
             yield DiscriminatorField::new("type")->setTextAlign(TextAlign::RIGHT);
             yield TranslationField::new('title')->setFields([
                 "title"   => TextType::class,
@@ -26,7 +28,6 @@ class WidgetCrudController extends AbstractCrudController
                 "excerpt" => TextareaType::class,
                 "content" => QuillType::class,
             ]);
-
         }, $args);
     }
 }

@@ -13,14 +13,23 @@ class BooleanType extends AbstractType
 {
     /** @var Environment */
     protected $twig;
-    
-    public function __construct(Environment $twig) { $this->twig = $twig; }
 
-    public function getBlockPrefix(): string { return 'boolean'; }
-    public function getParent() : ?string { return CheckboxType::class; }
+    public function __construct(Environment $twig)
+    {
+        $this->twig = $twig;
+    }
 
-    public function configureOptions(OptionsResolver $resolver) {
+    public function getBlockPrefix(): string
+    {
+        return 'boolean';
+    }
+    public function getParent(): ?string
+    {
+        return CheckboxType::class;
+    }
 
+    public function configureOptions(OptionsResolver $resolver)
+    {
         $resolver->setDefaults([
             "confirmation[onCheck]"   => true,
             "confirmation[onUncheck]" => true,
@@ -37,5 +46,6 @@ class BooleanType extends AbstractType
         $view->vars["confirmation_check"] = $options["confirmation[onCheck]"];
         $view->vars["confirmation_uncheck"] = $options["confirmation[onUncheck]"];
         $view->vars["toogle_url"] = $options["toogle_url"];
-        $view->vars["inline"] = $options["inline"];    }
+        $view->vars["inline"] = $options["inline"];
+    }
 }

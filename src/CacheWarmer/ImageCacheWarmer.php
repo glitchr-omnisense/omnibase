@@ -23,11 +23,15 @@ class ImageCacheWarmer implements CacheWarmerInterface
         $this->console = $console;
     }
 
-    public function isOptional() : bool { return true; }
+    public function isOptional(): bool
+    {
+        return true;
+    }
     public function warmUp($cacheDir): array
     {
-        if($this->shellVerbosity > 0 && php_sapi_name() == "cli")
+        if ($this->shellVerbosity > 0 && php_sapi_name() == "cli") {
             echo " // Warming up cache... Prepare database image".PHP_EOL.PHP_EOL;
+        }
 
         $this->console->verbosity($this->shellVerbosity);
         $this->console->exec("uploader:images", ["--warmup"]);

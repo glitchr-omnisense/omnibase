@@ -18,11 +18,23 @@ use Base\Database\Annotation\Cache;
 
 class PercentAdapter extends AbstractAdapter
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-percent"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-percent"];
+    }
 
-    public static function getType(): string { return PercentType::class; }
-    public function getOptions(): array { return []; }
-    public function resolve(mixed $value): mixed { return $value; }
+    public static function getType(): string
+    {
+        return PercentType::class;
+    }
+    public function getOptions(): array
+    {
+        return [];
+    }
+    public function resolve(mixed $value): mixed
+    {
+        return $value;
+    }
 
     public function __construct(string $label = "", ?string $code = null, int $epsilon = 4, int $scale = 2)
     {
@@ -36,7 +48,10 @@ class PercentAdapter extends AbstractAdapter
      */
     protected $epsilon;
 
-    public function getPrecision():int     { return $this->epsilon; }
+    public function getPrecision(): int
+    {
+        return $this->epsilon;
+    }
     public function setPrecision(int $epsilon)
     {
         $this->epsilon = $epsilon;
@@ -48,7 +63,10 @@ class PercentAdapter extends AbstractAdapter
      */
     protected $scale;
 
-    public function getScale():int     { return $this->scale; }
+    public function getScale(): int
+    {
+        return $this->scale;
+    }
     public function setScale(int $scale)
     {
         $this->scale = $scale;

@@ -7,12 +7,15 @@ use Base\Service\Model\IconizeInterface;
 
 class SpamScore extends EnumType implements IconizeInterface
 {
-    const NO_TEXT      = "NO_TEXT";
-    const NOT_SPAM     = "NOT_SPAM";
-    const MAYBE_SPAM   = "MAYBE_SPAM";
-    const BLATANT_SPAM = "BLATANT_SPAM";
+    public const NO_TEXT      = "NO_TEXT";
+    public const NOT_SPAM     = "NOT_SPAM";
+    public const MAYBE_SPAM   = "MAYBE_SPAM";
+    public const BLATANT_SPAM = "BLATANT_SPAM";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [

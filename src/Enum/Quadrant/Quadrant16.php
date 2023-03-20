@@ -6,16 +6,19 @@ use Base\Service\Model\IconizeInterface;
 
 class Quadrant16 extends Quadrant8
 {
-    const NNE  = "NORTH_NORTHEAST";
-    const ENE  = "EAST_NORTHEAST";
-    const ESE  = "EAST_SOUTHEAST";
-    const SSE  = "SOUTH_SOUTHEAST";
-    const SSW  = "SOUTH_SOUTHWEST";
-    const WSW  = "WEST_SOUTHWEST";
-    const WNW  = "WEST_NORTHWEST";
-    const NNW  = "NORTH_NORTHWEST";
+    public const NNE  = "NORTH_NORTHEAST";
+    public const ENE  = "EAST_NORTHEAST";
+    public const ESE  = "EAST_SOUTHEAST";
+    public const SSE  = "SOUTH_SOUTHEAST";
+    public const SSW  = "SOUTH_SOUTHWEST";
+    public const WSW  = "WEST_SOUTHWEST";
+    public const WNW  = "WEST_NORTHWEST";
+    public const NNW  = "NORTH_NORTHWEST";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [
@@ -30,9 +33,15 @@ class Quadrant16 extends Quadrant8
         ];
     }
 
-    public static function getTheta() { return parent::getTheta()/2; }
+    public static function getTheta()
+    {
+        return parent::getTheta()/2;
+    }
 
-    public static function getRotation(string $quadrant): ?float { return self::getRotations()[$quadrant] ?? self::getRotations()[self::O]; }
+    public static function getRotation(string $quadrant): ?float
+    {
+        return self::getRotations()[$quadrant] ?? self::getRotations()[self::O];
+    }
     public static function getRotations(): array
     {
         return array_merge(parent::getRotations(), [
@@ -47,7 +56,10 @@ class Quadrant16 extends Quadrant8
         ]);
     }
 
-    public static function getPosition(string $quadrant): string { return self::getPositions()[$quadrant] ?? self::getPositions()[self::O]; }
+    public static function getPosition(string $quadrant): string
+    {
+        return self::getPositions()[$quadrant] ?? self::getPositions()[self::O];
+    }
     public static function getPositions(): array
     {
         return array_merge(parent::getPositions(), [

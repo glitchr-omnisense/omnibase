@@ -19,11 +19,23 @@ use Base\Database\Annotation\Cache;
 
 class ColorAdapter extends AbstractAdapter
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-tint"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-tint"];
+    }
 
-    public static function getType(): string { return ColorType::class; }
-    public function getOptions(): array { return []; }
-    public function resolve(mixed $value): mixed { return $value; }
+    public static function getType(): string
+    {
+        return ColorType::class;
+    }
+    public function getOptions(): array
+    {
+        return [];
+    }
+    public function resolve(mixed $value): mixed
+    {
+        return $value;
+    }
 
     public function getName(string $locale = null): string
     {

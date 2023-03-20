@@ -10,7 +10,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 interface EventDispatcherInterface extends EventSubscriber
 {
     public function supports(mixed $subject): bool;
-    
+
     public function addEvent(string $event, mixed $subject);
     public function dispatchEvents(LifecycleEventArgs $event);
 

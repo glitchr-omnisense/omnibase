@@ -32,16 +32,12 @@ class BaseMappingCommand extends Command
 
         $output->section()->writeln('Complete mapping applied:');
         foreach ($baseList as $class) {
-
             $app  = "App\\$class";
             $base = "Base\\$class";
             if (!in_array($class, $appList)) {
-
                 $output->section()->writeln(" * <warning>No application file found:</> <ln>$base</> aliased to <red>$app</> ");
                 $nAlias++;
-
             } else {
-
                 $output->section()->writeln(" * <info>Application file found:</> <red>$app</> (no alias)");
                 $nException++;
             }
@@ -54,8 +50,9 @@ class BaseMappingCommand extends Command
         foreach ($appList as $class) {
             $app  = "App\\$class";
             $base = "Base\\$class";
-            if (in_array($class, $baseList))
+            if (in_array($class, $baseList)) {
                 $output->section()->writeln("  * <info>Application file found:</> <red>$app</> (no alias)");
+            }
         }
 
 

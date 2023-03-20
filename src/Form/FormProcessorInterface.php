@@ -12,15 +12,15 @@ interface FormProcessorInterface
     public function hydrate(mixed $data): mixed;
 
     public function getForm(): FormInterface;
-    public function getData()  : mixed;
+    public function getData(): mixed;
     public function setData(mixed $data): self;
-    public function getOption (string $name):mixed;
-    public function getOptions():array;
-    public function getFormType():string;
+    public function getOption(string $name): mixed;
+    public function getOptions(): array;
+    public function getFormType(): string;
 
     public function onDefault(callable    $callback): static;
     public function onInvalid(callable    $callback): static;
-    public function onSubmit (callable ...$callbacks): static;
+    public function onSubmit(callable ...$callbacks): static;
 
     public function getResponse(): Response;
 

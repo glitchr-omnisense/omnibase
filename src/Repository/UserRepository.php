@@ -20,16 +20,21 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class UserRepository extends ServiceEntityRepository implements UserLoaderInterface, UserProviderInterface, PasswordUpgraderInterface
 {
-    public function supportsClass(string $class): bool { return is_instanceof($class, User::class); }
-    public function loadUserByIdentifier(string $identifier) : UserInterface
+    public function supportsClass(string $class): bool
+    {
+        return is_instanceof($class, User::class);
+    }
+    public function loadUserByIdentifier(string $identifier): UserInterface
     {
         $user = $this->findOneByEmail($identifier);
-        if($user === null) throw new UserNotFoundException();
+        if ($user === null) {
+            throw new UserNotFoundException();
+        }
 
         return $user;
     }
 
-    public function refreshUser(UserInterface $user) : ?UserInterface
+    public function refreshUser(UserInterface $user): ?UserInterface
     {
         $user = $this->cacheOneByEmail($user->getEmail());
         return $user?->isKicked() ? null : $user;

@@ -7,7 +7,7 @@ use Base\Traits\SimpleCacheTrait;
 
 abstract class AbstractLocalCache implements AbstractLocalCacheInterface
 {
+    use SimpleCacheTrait;
     private bool $saveDeferred = false;
     private ?CacheItemPoolInterface $cache = null;
-    use SimpleCacheTrait;
 }

@@ -59,8 +59,14 @@ final class ColorPickerType extends AbstractType
         $this->parameterBag = $parameterBag;
     }
 
-    public function getParent() : ?string { return TextType::class; }
-    public function getBlockPrefix(): string { return 'colorpickr'; }
+    public function getParent(): ?string
+    {
+        return TextType::class;
+    }
+    public function getBlockPrefix(): string
+    {
+        return 'colorpickr';
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -208,9 +214,9 @@ final class ColorPickerType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
-
-            if ($event->getData() == "#00000000" && $options["is_nullable"])
+            if ($event->getData() == "#00000000" && $options["is_nullable"]) {
                 $event->setData(null);
+            }
         });
     }
 
@@ -225,7 +231,7 @@ final class ColorPickerType extends AbstractType
         $view->vars['attr']["class"] = "form-color";
 
         // Add alpha channel by default
-        switch( strlen($view->vars['value']) ) {
+        switch(strlen($view->vars['value'])) {
             case 4:
                 $view->vars['value'] .= "F";
                 break;

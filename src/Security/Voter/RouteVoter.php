@@ -13,20 +13,20 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class RouteVoter extends Voter
 {
-    const    VALIDATE_IP = "VALIDATE_IP";
-    const  VALIDATE_HOST = "VALIDATE_HOST";
-    const  VALIDATE_PATH = "VALIDATE_PATH";
+    public const    VALIDATE_IP = "VALIDATE_IP";
+    public const  VALIDATE_HOST = "VALIDATE_HOST";
+    public const  VALIDATE_PATH = "VALIDATE_PATH";
 
-    /** 
-     * @var Router 
+    /**
+     * @var Router
      * */
     protected $router;
-    /** 
-     * @var ParameterBag 
+    /**
+     * @var ParameterBag
      * */
     protected $parameterBag;
-    /** 
-     * @var Localizer 
+    /**
+     * @var Localizer
      * */
     protected $localizer;
 
@@ -42,11 +42,11 @@ class RouteVoter extends Voter
         $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localizer->getDefaultLocale());
         $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localizer->getDefaultLocaleLang());
         $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", null) ?? [];
-        $this->permittedHosts = array_transforms(fn($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $this->permittedHosts);
+        $this->permittedHosts = array_transforms(fn ($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $this->permittedHosts);
 
-        if(!$this->router->keepMachine() && !$this->router->keepSubdomain())
-            $this->permittedHosts[] = "^$"; // Special case if both subdomain and machine are unallowed
-
+        if (!$this->router->keepMachine() && !$this->router->keepSubdomain()) {
+            $this->permittedHosts[] = "^$";
+        } // Special case if both subdomain and machine are unallowed
     }
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -59,13 +59,13 @@ class RouteVoter extends Voter
     {
         $url = get_url();
         $pool[$attribute] ??= [];
-        if(array_key_exists($url, $pool[$attribute]))
+        if (array_key_exists($url, $pool[$attribute])) {
             return $pool[$attribute][$url];
+        }
 
         //
         // Select proper ballot
         switch ($attribute) {
-
             case self::VALIDATE_IP:
 
                 $parse = parse_url2($url);
@@ -105,15 +105,16 @@ class RouteVoter extends Voter
 
                 $parse = parse_url2($url);
                 $allowedHost = empty($this->permittedHosts);
-                foreach ($this->permittedHosts as $permittedHost)
+                foreach ($this->permittedHosts as $permittedHost) {
                     $allowedHost |= preg_match("/" . $permittedHost . "/", $parse["host"] ?? null);
+                }
 
                 if (!$allowedHost) {
                     $pool[$attribute][$url] = false;
                     break;
                 }
 
-                if (array_key_exists("machine", $parse) && !$this->router->keepMachine())  {
+                if (array_key_exists("machine", $parse) && !$this->router->keepMachine()) {
                     $pool[$attribute][$url] = false;
                     break;
                 }

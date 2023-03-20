@@ -12,7 +12,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 class SelectField implements FieldInterface
 {
     use FieldTrait; // __construct must be redefined because of insane EA exclusion scope &#$@!
-    public function __construct() { $this->dto = new FieldDto(); }
+    public function __construct()
+    {
+        $this->dto = new FieldDto();
+    }
 
     public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmationModalOnCheck';
     public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmationModalOnUncheck';
@@ -104,7 +107,10 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    public function turnHorizontal(bool $horizontal) { return $this->showVertical(!$horizontal); }
+    public function turnHorizontal(bool $horizontal)
+    {
+        return $this->showVertical(!$horizontal);
+    }
     public function showVertical(bool $vertical = true)
     {
         return $this->setFormTypeOption("vertical", $vertical);
@@ -113,15 +119,18 @@ class SelectField implements FieldInterface
     public function allowTags(bool|array $tokenSeparators = [])
     {
         $this->setFormTypeOption("tags", !empty($tokenSeparators) || $tokenSeparators === false);
-        if($tokenSeparators) $this->setFormTypeOption("tokenSeparators", $tokenSeparators);
+        if ($tokenSeparators) {
+            $this->setFormTypeOption("tokenSeparators", $tokenSeparators);
+        }
 
         return $this;
     }
 
     public function setChoices($choiceGenerator)
     {
-        if (!\is_array($choiceGenerator) && !\is_callable($choiceGenerator))
+        if (!\is_array($choiceGenerator) && !\is_callable($choiceGenerator)) {
             throw new \InvalidArgumentException(sprintf('The argument of the "%s" method must be an array or a closure ("%s" given).', __METHOD__, \gettype($choiceGenerator)));
+        }
 
         $this->setFormTypeOption(self::OPTION_CHOICES, $choiceGenerator);
         return $this;
@@ -196,8 +205,9 @@ class SelectField implements FieldInterface
 
     public function setDefault($defaultChoices)
     {
-        if(!is_array($defaultChoices) && !$defaultChoices instanceof Collection)
+        if (!is_array($defaultChoices) && !$defaultChoices instanceof Collection) {
             $defaultChoices = [$defaultChoices];
+        }
 
         $this->setFormTypeOption("empty_data", $defaultChoices);
         $this->setCustomOption(self::OPTION_DEFAULT_CHOICE, $defaultChoices);

@@ -82,8 +82,9 @@ class FileController extends AbstractController
     public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        if ($this->profiler !== null && $isUX)
+        if ($this->profiler !== null && $isUX) {
             $this->profiler->disable();
+        }
 
         $cacheless = $this->localCache == false ? "_cacheless" : "";
         return parent::redirectToRoute($route.$cacheless, $parameters, $status);
@@ -95,12 +96,16 @@ class FileController extends AbstractController
     public function Serve($data): Response
     {
         $config = $this->fileService->resolve($data);
-        if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
+        if (!array_key_exists("path", $config)) {
+            throw $this->createNotFoundException();
+        }
 
         $path     = $config["path"];
 
         $contents = $this->flysystem->read($path, $config["storage"] ?? null);
-        if($contents === null) throw $this->createNotFoundException();
+        if ($contents === null) {
+            throw $this->createNotFoundException();
+        }
 
         $options = $config["options"];
         $options["attachment"] = $config["attachment"] ?? null;
@@ -127,18 +132,25 @@ class FileController extends AbstractController
         //
         // Extract parameters
         $config = $this->imageService->resolve($data);
-        if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
+        if (!array_key_exists("path", $config)) {
+            throw $this->createNotFoundException();
+        }
 
         $filters    = $config["filters"] ?? [];
         $options    = $config["options"] ?? [];
         $path       = $config["path"] ?? null;
-        if(!$path) throw $this->createNotFoundException();
+        if (!$path) {
+            throw $this->createNotFoundException();
+        }
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
-        if(!$extensions) throw $this->createNotFoundException();
-        if ($extension == null || !in_array($extension, $extensions))
+        if (!$extensions) {
+            throw $this->createNotFoundException();
+        }
+        if ($extension == null || !in_array($extension, $extensions)) {
             return $this->redirectToRoute("ux_imageCropExtension", ["data" => $data, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         //
         // Get the most accurate cropping
@@ -147,16 +159,19 @@ class FileController extends AbstractController
         // Dimension information
         $imagesize = getimagesize($path);
         $naturalWidth = $imagesize[0] ?? 0;
-        if($naturalWidth == 0) throw $this->createNotFoundException();
+        if ($naturalWidth == 0) {
+            throw $this->createNotFoundException();
+        }
         $naturalHeight = $imagesize[1] ?? 0;
-        if($naturalHeight == 0) throw $this->createNotFoundException();
+        if ($naturalHeight == 0) {
+            throw $this->createNotFoundException();
+        }
 
         // Providing "label" information
         $imageCrop = $this->imageCropRepository->cacheOneBySlug($identifier, ["image.source" => $uuid]);
 
         // Providing just a "ratio" number
         if ($imageCrop === null && preg_match("/^(\d+|\d*\.\d+)$/", $identifier, $matches)) {
-
             $ratio = floatval($matches[1]);
             $ratio0 = $ratio/($naturalWidth/$naturalHeight);
 
@@ -166,8 +181,7 @@ class FileController extends AbstractController
         // Providing a "width:height" information
         $width  = null;
         $height = null;
-        if($imageCrop === null && preg_match("/([0-9]+)[:x]([0-9]+)/", $identifier, $matches)) {
-
+        if ($imageCrop === null && preg_match("/([0-9]+)[:x]([0-9]+)/", $identifier, $matches)) {
             $width   = $matches[1];
             $width0  = $width/$naturalWidth;
             $height  = $matches[2];
@@ -175,7 +189,9 @@ class FileController extends AbstractController
 
             $ratio   = $height ? $width/$height : 0;
             $ratio0  = $width0/$height0;
-            if($ratio0 == 0) throw $this->createNotFoundException();
+            if ($ratio0 == 0) {
+                throw $this->createNotFoundException();
+            }
 
             $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
             $identifier = $imageCrop->getWidth()."x".$imageCrop->getHeight();
@@ -185,11 +201,12 @@ class FileController extends AbstractController
         // Apply filter
         // NB: Only applying cropping if ImageCrop is found ..
         //     .. otherwise some naughty users might be generating infinite amount of image
-        if($imageCrop) {
-
+        if ($imageCrop) {
             array_prepend($filters, new CropFilter(
-                $imageCrop->getX0(), $imageCrop->getY0(),
-                $imageCrop->getWidth0(), $imageCrop->getHeight0()
+                $imageCrop->getX0(),
+                $imageCrop->getY0(),
+                $imageCrop->getWidth0(),
+                $imageCrop->getHeight0()
             ));
         }
 
@@ -203,7 +220,9 @@ class FileController extends AbstractController
         // NB: These lines below are commented to keep the same url and cache the image
         // $config["identifier"] = $identifier;
         // $data = $this->imageService->obfuscate($path, $config, $filters);
-        if($imageCrop === null) $identifier = "image";
+        if ($imageCrop === null) {
+            $identifier = "image";
+        }
 
         $output = pathinfo_extension($data."/".$identifier, $extension);
         $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
@@ -248,13 +267,19 @@ class FileController extends AbstractController
     public function ImageWebp($data): Response
     {
         $config = $this->imageService->resolve($data);
-        if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
+        if (!array_key_exists("path", $config)) {
+            throw $this->createNotFoundException();
+        }
 
         $webp = $config["webp"] ?? $this->imageService->isWebpEnabled();
-        if(!$webp) return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
+        if (!$webp) {
+            return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         $mimeType = $config["mimetype"] ?? $this->imageService->getMimeType($config["path"]);
-        if($mimeType == "image/svg+xml") return $this->redirectToRoute("ux_imageSvg", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
+        if ($mimeType == "image/svg+xml") {
+            return $this->redirectToRoute("ux_imageSvg", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         $options = $config["options"];
         $filters = $config["filters"];
@@ -275,14 +300,17 @@ class FileController extends AbstractController
     public function ImageSvg($data): Response
     {
         $config = $this->imageService->resolve($data);
-        if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
+        if (!array_key_exists("path", $config)) {
+            throw $this->createNotFoundException();
+        }
 
         $filters = $config["filters"];
         $options = $config["options"];
 
         $mimeType = $config["mimetype"] ?? $this->imageService->getMimeType($config["path"]);
-        if($mimeType != "image/svg+xml")
+        if ($mimeType != "image/svg+xml") {
             return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
@@ -303,7 +331,9 @@ class FileController extends AbstractController
         //
         // Extract parameters
         $config = $this->imageService->resolve($data);
-        if(!array_key_exists("path", $config)) throw $this->createNotFoundException();
+        if (!array_key_exists("path", $config)) {
+            throw $this->createNotFoundException();
+        }
 
         $filters    = $config["filters"] ?? [];
         $options    = $config["options"] ?? [];
@@ -312,21 +342,24 @@ class FileController extends AbstractController
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
-        if(!$extensions) throw $this->createNotFoundException();
-        if ($extension == null || !in_array($extension, $extensions))
+        if (!$extensions) {
+            throw $this->createNotFoundException();
+        }
+        if ($extension == null || !in_array($extension, $extensions)) {
             return $this->redirectToRoute("ux_imageExtension", ["data" => $data, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         // If cropping identifier found
-        if ($identifier != null) 
+        if ($identifier != null) {
             return $this->ImageCrop($data, $identifier, $extension);
+        }
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data."/image", $extension);
         $path = $this->imageService->filter($config["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
-        if($debug) {
-
+        if ($debug) {
             dump($data, $config, $path);
             exit(1);
         }
@@ -334,5 +367,4 @@ class FileController extends AbstractController
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
         return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
-
 }

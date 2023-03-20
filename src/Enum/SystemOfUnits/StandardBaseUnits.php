@@ -8,15 +8,18 @@ use Base\Service\Model\IconizeInterface;
 
 class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeInterface
 {
-    const SECOND   = "s";
-    const METER    = "m";
-    const KILOGRAM = "kg";
-    const AMPERE   = "A";
-    const KELVIN   = "K";
-    const MOLE     = "mol";
-    const CANDELA  = "cd";
+    public const SECOND   = "s";
+    public const METER    = "m";
+    public const KILOGRAM = "kg";
+    public const AMPERE   = "A";
+    public const KELVIN   = "K";
+    public const MOLE     = "mol";
+    public const CANDELA  = "cd";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [
@@ -30,9 +33,12 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
         ];
     }
 
-    public function __colorize(): ?array { return null; }
-    public static function __colorizeStatic(): ?array {
-
+    public function __colorize(): ?array
+    {
+        return null;
+    }
+    public static function __colorizeStatic(): ?array
+    {
         return [
             self::SECOND   => "#f5a801",
             self::METER    => "#ff671c",
@@ -44,10 +50,19 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
         ];
     }
 
-    public static function getBaseUnit(string $name): ?string { return self::getBaseUnits()[$name] ?? null; }
-    public static function getBaseUnits(): ?array { return parent::getPermittedValues(); }
+    public static function getBaseUnit(string $name): ?string
+    {
+        return self::getBaseUnits()[$name] ?? null;
+    }
+    public static function getBaseUnits(): ?array
+    {
+        return parent::getPermittedValues();
+    }
 
-    public static function getBaseUnitName(string $name): ?string { return self::getBaseUnitNames()[$name] ?? null; }
+    public static function getBaseUnitName(string $name): ?string
+    {
+        return self::getBaseUnitNames()[$name] ?? null;
+    }
     public static function getBaseUnitNames(): ?array
     {
         return [
@@ -61,7 +76,10 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
         ];
     }
 
-    public static function getConstant(string $name): ?string { return self::getConstants()[$name] ?? null; }
+    public static function getConstant(string $name): ?string
+    {
+        return self::getConstants()[$name] ?? null;
+    }
     public static function getConstants(): ?array
     {
         return [
@@ -75,7 +93,10 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
         ];
     }
 
-    public static function getConstantSymbol(string $name): ?string { return self::getConstantSymbols()[$name] ?? null; }
+    public static function getConstantSymbol(string $name): ?string
+    {
+        return self::getConstantSymbols()[$name] ?? null;
+    }
     public static function getConstantSymbols(): ?array
     {
         return [
@@ -89,7 +110,10 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
         ];
     }
 
-    public static function getConstantUnit(string $name): ?string { return self::getConstantUnits()[$name] ?? null; }
+    public static function getConstantUnit(string $name): ?string
+    {
+        return self::getConstantUnits()[$name] ?? null;
+    }
     public static function getConstantUnits(): ?array
     {
         return [
@@ -103,7 +127,10 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
         ];
     }
 
-    public static function getConstantName(string $name): ?string { return self::getConstantNames()[$name] ?? null; }
+    public static function getConstantName(string $name): ?string
+    {
+        return self::getConstantNames()[$name] ?? null;
+    }
     public static function getConstantNames(): ?array
     {
         return [

@@ -18,15 +18,27 @@ use Base\Database\Annotation\Cache;
  */
 class Revision extends AbstractExtension
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-sort-numeric-down"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-sort-numeric-down"];
+    }
 
     /**
      * @ORM\Column(type="integer")
      * @Hashify(random=true)
      */
     protected $hash;
-    public function getHash() { return $this->hash; }
-    public function getHashShort() { return substr($this->hash, 0, 7); }
+    public function getHash()
+    {
+        return $this->hash;
+    }
+    public function getHashShort()
+    {
+        return substr($this->hash, 0, 7);
+    }
 
-    public function supports(): bool { return true; }
+    public function supports(): bool
+    {
+        return true;
+    }
 }

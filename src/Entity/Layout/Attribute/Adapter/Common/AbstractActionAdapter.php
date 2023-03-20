@@ -29,9 +29,12 @@ use Base\Database\Annotation\Cache;
 
 abstract class AbstractActionAdapter extends AbstractAdapter implements ActionAdapterInterface
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-directions"]; }
-    public function apply(mixed $value, mixed $subject): mixed {
-
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-directions"];
+    }
+    public function apply(mixed $value, mixed $subject): mixed
+    {
         throw new \InvalidArgumentException("Unsupported value (".(is_object($subject) ? get_class($subject) : gettype($subject)).") provided in ".str_replace("Proxies\__CG__\\", "", static::class));
     }
 }

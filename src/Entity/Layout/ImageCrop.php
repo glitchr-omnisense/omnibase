@@ -21,7 +21,10 @@ class ImageCrop implements LinkableInterface, SaltInterface
 {
     use BaseTrait;
 
-    public function getSalt(): string { return $this->getImage()->getSalt()."_".md5(serialize($this->getData())); }
+    public function getSalt(): string
+    {
+        return $this->getImage()->getSalt()."_".md5(serialize($this->getData()));
+    }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
@@ -29,25 +32,36 @@ class ImageCrop implements LinkableInterface, SaltInterface
         $routeParameters = array_filter($routeParameters);
         $config = [
             "reference_type" => $referenceType,
-            "identifier" => $this->getSlug() ?? $this->getWidth().":".$this->getHeight(), 
+            "identifier" => $this->getSlug() ?? $this->getWidth().":".$this->getHeight(),
             "salt" => $this->getSalt()
         ];
 
-        return $this->getImageService()->generate($routeName, $routeParameters, $this->getImage()->getSource(),  $config);
+        return $this->getImageService()->generate($routeName, $routeParameters, $this->getImage()->getSource(), $config);
     }
 
-    public function __toString() {
-
+    public function __toString()
+    {
         return $this->getLabel() ?? $this->getTranslator()->transEntity($this).($this->getId() ? " #".$this->getId() : null);
     }
 
-    public function getRatio() { return $this->getWidth0()/$this->getHeight0(); }
+    public function getRatio()
+    {
+        return $this->getWidth0()/$this->getHeight0();
+    }
     public function isNormalized() // New coordinate system is using normalized values
     {
-        if($this->x0      > 1) return false;
-        if($this->y0      > 1) return false;
-        if($this->width0  > 1) return false;
-        if($this->height0 > 1) return false;
+        if ($this->x0      > 1) {
+            return false;
+        }
+        if ($this->y0      > 1) {
+            return false;
+        }
+        if ($this->width0  > 1) {
+            return false;
+        }
+        if ($this->height0 > 1) {
+            return false;
+        }
 
         return true;
     }
@@ -59,13 +73,19 @@ class ImageCrop implements LinkableInterface, SaltInterface
      */
     protected $id;
 
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * @ORM\ManyToOne(targetEntity=Image::class, inversedBy="crops")
      */
     protected $image;
-    public function getImage(): ?Image { return $this->image; }
+    public function getImage(): ?Image
+    {
+        return $this->image;
+    }
     public function setImage(?Image $image): self
     {
         $this->image = $image;
@@ -77,7 +97,10 @@ class ImageCrop implements LinkableInterface, SaltInterface
      */
     protected $label;
 
-    public function getLabel(): ?string { return $this->label; }
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
     public function setLabel(?string $label): self
     {
         $this->label = $label;
@@ -91,7 +114,10 @@ class ImageCrop implements LinkableInterface, SaltInterface
      */
     protected $slug;
 
-    public function getSlug(): ?string { return $this->slug; }
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
@@ -99,8 +125,8 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    public function __construct(?Image $image = null) {
-
+    public function __construct(?Image $image = null)
+    {
         $this->setImage($image);
 
         $this->x0      = 0;
@@ -135,8 +161,14 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="float")
      */
     protected $x0;
-    public function getX (?int $width = null): ?int { return $this->isNormalized() ? $this->x0 * ($width ?? $this->getNaturalWidth()) : $this->x0; }
-    public function getX0(): ?float { return $this->x0; }
+    public function getX(?int $width = null): ?int
+    {
+        return $this->isNormalized() ? $this->x0 * ($width ?? $this->getNaturalWidth()) : $this->x0;
+    }
+    public function getX0(): ?float
+    {
+        return $this->x0;
+    }
     public function setX0(float $x0): self
     {
         $this->x0 = min(1, max(0, $x0));
@@ -147,8 +179,14 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="float")
      */
     protected $y0;
-    public function getY (?int $height = null): ?int { return $this->isNormalized() ? $this->y0 * ($height ?? $this->getNaturalHeight()) : $this->y0; }
-    public function getY0(): ?float { return $this->y0; }
+    public function getY(?int $height = null): ?int
+    {
+        return $this->isNormalized() ? $this->y0 * ($height ?? $this->getNaturalHeight()) : $this->y0;
+    }
+    public function getY0(): ?float
+    {
+        return $this->y0;
+    }
     public function setY0(float $y0): self
     {
         $this->y0 = min(1, max(0, $y0));
@@ -159,8 +197,14 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="float")
      */
     protected $xP;
-    public function getPivotX (?int $width = null) { return $this->isNormalized() ? $this->xP * ($width ?? $this->getNaturalWidth()) : $this->xP; }
-    public function getXp():?float { return $this->xP; }
+    public function getPivotX(?int $width = null)
+    {
+        return $this->isNormalized() ? $this->xP * ($width ?? $this->getNaturalWidth()) : $this->xP;
+    }
+    public function getXp(): ?float
+    {
+        return $this->xP;
+    }
     public function setXp(float $xP): self
     {
         $this->xP = $xP;
@@ -171,8 +215,14 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="float")
      */
     protected $yP;
-    public function getPivotY (?int $height = null) { return $this->isNormalized() ? $this->yP * ($height ?? $this->getNaturalHeight()) : $this->xP; }
-    public function getYp():?float { return $this->yP; }
+    public function getPivotY(?int $height = null)
+    {
+        return $this->isNormalized() ? $this->yP * ($height ?? $this->getNaturalHeight()) : $this->xP;
+    }
+    public function getYp(): ?float
+    {
+        return $this->yP;
+    }
     public function setYp(float $yP): self
     {
         $this->yP = $yP;
@@ -183,9 +233,18 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="float")
      */
     protected $width0;
-    public function getNaturalWidth(): ?int { return $this->getImage() ? $this->getImage()->getNaturalWidth() : 0; }
-    public function getWidth (?int $width = null): ?int { return (int) ($this->isNormalized() ? $this->width0 * ($width ?? $this->getNaturalWidth()) : $this->width0); }
-    public function getWidth0(): ?float { return $this->width0; }
+    public function getNaturalWidth(): ?int
+    {
+        return $this->getImage() ? $this->getImage()->getNaturalWidth() : 0;
+    }
+    public function getWidth(?int $width = null): ?int
+    {
+        return (int) ($this->isNormalized() ? $this->width0 * ($width ?? $this->getNaturalWidth()) : $this->width0);
+    }
+    public function getWidth0(): ?float
+    {
+        return $this->width0;
+    }
     public function setWidth0(float $width0): self
     {
         $this->width0 = min(1, max(0, $width0));
@@ -196,9 +255,18 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="float")
      */
     protected $height0;
-    public function getNaturalHeight(): ?int { return $this->getImage() ? $this->getImage()->getNaturalHeight() : 0; }
-    public function getHeight (?int $height = null): ?int{ return (int) ($this->isNormalized() ? $this->height0 * ($height ?? $this->getNaturalHeight()) : $this->height0); }
-    public function getHeight0(): ?float { return $this->height0; }
+    public function getNaturalHeight(): ?int
+    {
+        return $this->getImage() ? $this->getImage()->getNaturalHeight() : 0;
+    }
+    public function getHeight(?int $height = null): ?int
+    {
+        return (int) ($this->isNormalized() ? $this->height0 * ($height ?? $this->getNaturalHeight()) : $this->height0);
+    }
+    public function getHeight0(): ?float
+    {
+        return $this->height0;
+    }
     public function setHeight0(float $height0): self
     {
         $this->height0 = min(1, max(0, $height0));
@@ -210,7 +278,10 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="float")
      */
     protected $scaleX;
-    public function getScaleX(): ?float { return $this->scaleX; }
+    public function getScaleX(): ?float
+    {
+        return $this->scaleX;
+    }
     public function setScaleX(float $scaleX): self
     {
         $this->scaleX = $scaleX;
@@ -221,7 +292,10 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="float")
      */
     protected $scaleY;
-    public function getScaleY(): ?float { return $this->scaleY; }
+    public function getScaleY(): ?float
+    {
+        return $this->scaleY;
+    }
     public function setScaleY(float $scaleY): self
     {
         $this->scaleY = $scaleY;
@@ -232,10 +306,13 @@ class ImageCrop implements LinkableInterface, SaltInterface
      * @ORM\Column(type="integer")
      */
     protected $rotate;
-    public function getRotate(): ?int { return $this->rotate; }
+    public function getRotate(): ?int
+    {
+        return $this->rotate;
+    }
     public function setRotate(int $rotate): self
     {
-        $this->rotate = mod($rotate,360);
+        $this->rotate = mod($rotate, 360);
         return $this;
     }
 }

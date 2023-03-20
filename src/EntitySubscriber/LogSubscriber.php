@@ -53,17 +53,19 @@ class LogSubscriber implements EventSubscriberInterface
         TokenStorageInterface $tokenStorage,
         UserRepository $userRepository,
         BaseService $baseService,
-        ParameterBagInterface $parameterBag) {
-
+        ParameterBagInterface $parameterBag
+    )
+    {
         $this->tokenStorage = $tokenStorage;
         $this->baseService = $baseService;
         $this->parameterBag = $parameterBag;
 
         $this->userRepository = $userRepository;
-        foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
-
+        foreach ($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
             $dispatcher = $dispatcherLocator->get($dispatcherId);
-            if (!$dispatcher instanceof TraceableEventDispatcher) continue;
+            if (!$dispatcher instanceof TraceableEventDispatcher) {
+                continue;
+            }
 
             $this->dispatchers[] = $dispatcherLocator->get($dispatcherId);
         }
@@ -89,84 +91,107 @@ class LogSubscriber implements EventSubscriberInterface
         $this->loggingOutUser = $user;
     }
 
-    protected function storeLog(KernelEvent $event, ?\Throwable $exception = null) {
-
-        if (self::$exceptionOnHold && self::$exceptionOnHold != $exception)
+    protected function storeLog(KernelEvent $event, ?\Throwable $exception = null)
+    {
+        if (self::$exceptionOnHold && self::$exceptionOnHold != $exception) {
             return;
+        }
 
-        if (!$event->isMainRequest()) return;
+        if (!$event->isMainRequest()) {
+            return;
+        }
         $request = $event->getRequest();
 
         // Handle security (not mandatory, $user is null if not defined)
         $token = $this->tokenStorage->getToken();
         $user = ($token ? $token->getUser() : $this->loggingOutUser);
-        if(!$user) return;
+        if (!$user) {
+            return;
+        }
 
         // Monitored listeners
         $monitoredEntries = $this->parameterBag->get("base.logging") ?? [];
-        if(!$monitoredEntries) return;
+        if (!$monitoredEntries) {
+            return;
+        }
 
         // Format monitored entries
         foreach ($monitoredEntries as $key => $entry) {
-
-            if (!array_key_exists("event", $monitoredEntries[$key]))
+            if (!array_key_exists("event", $monitoredEntries[$key])) {
                 throw new Exception("Missing key \"event\" in monitored events #" . $key);
-            if (!array_key_exists("pretty", $monitoredEntries[$key]))
+            }
+            if (!array_key_exists("pretty", $monitoredEntries[$key])) {
                 $monitoredEntries[$key]["pretty"] = "*";
-            if (!array_key_exists("statusCode", $monitoredEntries[$key]))
+            }
+            if (!array_key_exists("statusCode", $monitoredEntries[$key])) {
                 $monitoredEntries[$key]["statusCode"] = "*";
+            }
 
             $monitoredEntries[$key]["pretty"] = str_replace("\\", "\\\\", $monitoredEntries[$key]["pretty"]);
             $monitoredEntries[$key]["pretty"] = trim(ltrim($monitoredEntries[$key]["pretty"], '\\'));
             $monitoredEntries[$key]["pretty"] = "/" . $monitoredEntries[$key]["pretty"] . "/";
-            if ($monitoredEntries[$key]["pretty"] == "/*/")
+            if ($monitoredEntries[$key]["pretty"] == "/*/") {
                 $monitoredEntries[$key]["pretty"] = "/.*/";
+            }
 
             $monitoredEntries[$key]["statusCode"] = trim($monitoredEntries[$key]["statusCode"]);
             $monitoredEntries[$key]["statusCode"] = "/" . $monitoredEntries[$key]["statusCode"] . "/";
-            if ($monitoredEntries[$key]["statusCode"] == "/*/")
+            if ($monitoredEntries[$key]["statusCode"] == "/*/") {
                 $monitoredEntries[$key]["statusCode"] = "/.*/";
+            }
         }
 
         // Check called listeners
         $calledListeners = [];
-        foreach($this->dispatchers as $dispatcher)
+        foreach ($this->dispatchers as $dispatcher) {
             $calledListeners = array_merge($calledListeners, $dispatcher->getCalledListeners());
+        }
 
         foreach ($calledListeners as $listener) {
-
-            if (!array_key_exists("event", $listener))
+            if (!array_key_exists("event", $listener)) {
                 throw new Exception("Array key \"event\" missing in dispatcher listener");
-            if (!array_key_exists("pretty", $listener))
+            }
+            if (!array_key_exists("pretty", $listener)) {
                 throw new Exception("Array key \"pretty\" missing in dispatcher listener");
+            }
 
             $event  = $listener["event"];
             $pretty = $listener["pretty"];
 
             foreach ($monitoredEntries as $monitoredEntry) {
-
                 $monitoredStatusCode = $monitoredEntry["statusCode"];
                 $monitoredPretty   = $monitoredEntry["pretty"];
                 $monitoredEvent      = $monitoredEntry["event"];
-                if ($monitoredEvent != $event)                   continue;
+                if ($monitoredEvent != $event) {
+                    continue;
+                }
 
-                if($event == "kernel.exception") {
-
+                if ($event == "kernel.exception") {
                     // If kernel exception, listener regex is inhibited
-                    if ($pretty != __CLASS__ . "::onKernelException") continue;
+                    if ($pretty != __CLASS__ . "::onKernelException") {
+                        continue;
+                    }
 
                     // Handle exception
-                    if ($exception == null) continue;
+                    if ($exception == null) {
+                        continue;
+                    }
 
-                    if ($exception instanceof HttpException && !preg_match($monitoredStatusCode, $exception->getStatusCode())) continue;
-                    else if (!preg_match($monitoredStatusCode, $exception->getCode())) continue;
-
-                } else if (!preg_match($monitoredPretty, $pretty)) continue; // Else just check the provided regex
+                    if ($exception instanceof HttpException && !preg_match($monitoredStatusCode, $exception->getStatusCode())) {
+                        continue;
+                    } elseif (!preg_match($monitoredStatusCode, $exception->getCode())) {
+                        continue;
+                    }
+                } elseif (!preg_match($monitoredPretty, $pretty)) {
+                    continue;
+                } // Else just check the provided regex
 
                 // Entity Manager closed means most likely an exception
                 // due within doctrine execution happened
                 $entityManager = $this->baseService->getEntityManager(true);
-                if (!$entityManager || !$entityManager->isOpen()) return;
+                if (!$entityManager || !$entityManager->isOpen()) {
+                    return;
+                }
 
                 // In the opposite case, we are storing the exception
                 $log = new Log($listener, $request);
@@ -182,7 +207,9 @@ class LogSubscriber implements EventSubscriberInterface
 
     public function onKernelTerminate(TerminateEvent $event)
     {
-        if(!$this->baseService->isDebug()) return;
+        if (!$this->baseService->isDebug()) {
+            return;
+        }
 
         return $this->storeLog($event);
     }
@@ -190,15 +217,18 @@ class LogSubscriber implements EventSubscriberInterface
     private static $exceptionOnHold = null;
     public function onKernelException(ExceptionEvent $event)
     {
-        if(!$this->baseService->isDebug()) return;
+        if (!$this->baseService->isDebug()) {
+            return;
+        }
 
         $exception = $event->getThrowable();
 
         // Initial exception held here, this is in case of nested exceptions..
         // This guard must be set here, otherwise you are going to miss the first exception..
         // In case the initial exception is related to doctrine, entity manager will be closed.
-        if(self::$exceptionOnHold)
+        if (self::$exceptionOnHold) {
             throw self::$exceptionOnHold;
+        }
 
         self::$exceptionOnHold = $exception;
         $this->storeLog($event, $exception);

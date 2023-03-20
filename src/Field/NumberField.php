@@ -86,7 +86,10 @@ final class NumberField implements FieldInterface
         return $this;
     }
 
-    public function step(float $step) { return $this->stepUp($step)->stepDown($step); }
+    public function step(float $step)
+    {
+        return $this->stepUp($step)->stepDown($step);
+    }
     public function stepUp(float $stepUp)
     {
         $this->setFormTypeOption("stepUp", $stepUp);
@@ -98,7 +101,10 @@ final class NumberField implements FieldInterface
         return $this;
     }
 
-    public function throttle(float $throttle) { return $this->throttleUp($throttle)->throttleDown($throttle); }
+    public function throttle(float $throttle)
+    {
+        return $this->throttleUp($throttle)->throttleDown($throttle);
+    }
     public function throttleUp(float $throttleUp)
     {
         $this->setFormTypeOption("throttleUp", $throttleUp);

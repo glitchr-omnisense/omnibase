@@ -21,8 +21,9 @@ class IconConfigurator extends SelectConfigurator
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         $icon = null;
-        if( null !== $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME))
+        if (null !== $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME)) {
             $icon = $propertyAccessor->getValue($entityDto->getInstance(), $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME));
+        }
 
         $field->setCustomOption("iconColor", $icon);
     }

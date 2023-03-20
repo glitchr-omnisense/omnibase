@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Base\Validator\Constraints;
 
 use Base\Validator\ConstraintValidator;
@@ -26,7 +25,8 @@ class NotBlankValidator extends ConstraintValidator
             $object = ($constraint->normalizer)($object);
         }
 
-        if (false === $object || (empty($object) && '0' != $object) || ($object instanceof \Doctrine\ORM\PersistentCollection && empty($object->toArray())))
+        if (false === $object || (empty($object) && '0' != $object) || ($object instanceof \Doctrine\ORM\PersistentCollection && empty($object->toArray()))) {
             $this->buildViolation($constraint, $object)->addViolation();
+        }
     }
 }

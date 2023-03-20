@@ -18,17 +18,27 @@ use Base\Database\Annotation\Cache;
 
 class NumberAdapter extends AbstractAdapter
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-calculator"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-calculator"];
+    }
 
-    public static function getType(): string { return NumberType::class; }
-    public function getOptions(): array {
+    public static function getType(): string
+    {
+        return NumberType::class;
+    }
+    public function getOptions(): array
+    {
         return [
             "min" => $this->getMinimum(),
             "max" => $this->getMaximum()
         ];
     }
 
-    public function resolve(mixed $value): mixed { return $value; }
+    public function resolve(mixed $value): mixed
+    {
+        return $value;
+    }
 
     public function __construct(string $label = "", ?string $code = null, ?int $minimum = null, ?int $maximum = null)
     {
@@ -41,7 +51,10 @@ class NumberAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $minimum;
-    public function getMinimum():?int     { return $this->minimum; }
+    public function getMinimum(): ?int
+    {
+        return $this->minimum;
+    }
     public function setMinimum(?int $minimum)
     {
         $this->minimum = $minimum;
@@ -52,7 +65,10 @@ class NumberAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $maximum;
-    public function getMaximum():?int     { return $this->maximum; }
+    public function getMaximum(): ?int
+    {
+        return $this->maximum;
+    }
     public function setMaximum(?int $maximum)
     {
         $this->maximum = $maximum;

@@ -13,7 +13,7 @@ interface FormGuessInterface
     public const GUESS_FROM_DATA     = "GUESS_FROM_DATA";
     public const GUESS_FROM_VIEW     = "GUESS_FROM_VIEW";
 
-    public function guessClass(FormInterface|FormEvent $form, ?array $options = null) :?string;
+    public function guessClass(FormInterface|FormEvent $form, ?array $options = null): ?string;
     public function guessMultiple(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null);
     public function guessSortable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null);
     public function guessChoices(FormInterface|FormBuilderInterface $form, ?array $options = null);

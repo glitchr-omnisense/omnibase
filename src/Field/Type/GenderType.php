@@ -8,11 +8,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class GenderType extends AbstractType
 {
-    public function getParent() : ?string { return SelectType::class; }
-    public function getBlockPrefix(): string { return 'gender'; }
+    public function getParent(): ?string
+    {
+        return SelectType::class;
+    }
+    public function getBlockPrefix(): string
+    {
+        return 'gender';
+    }
 
-    public function configureOptions(OptionsResolver $resolver) {
-
+    public function configureOptions(OptionsResolver $resolver)
+    {
         $resolver->setDefaults([
             'class'      => Gender::class,
             'empty_data' => Gender::GENDERLESS

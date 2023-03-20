@@ -3,12 +3,14 @@
 namespace Base\Entity\Layout\Attribute\Common;
 
 use Base\Annotations\Annotation\Uploader;
-use Base\Database\Annotation\Associate;use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\Associate;
+use Base\Database\Annotation\DiscriminatorEntry;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractActionRepository;
 
 use Base\Database\Annotation\Cache;
+
 /**
  * @ORM\Entity(repositoryClass=AbstractActionRepository::class)
  * @ORM\InheritanceType( "JOINED" )
@@ -20,7 +22,10 @@ use Base\Database\Annotation\Cache;
  */
 abstract class AbstractAction extends AbstractAttribute implements ActionInterface
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-directions"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-directions"];
+    }
     public function apply(mixed $subject): mixed
     {
         return $this->adapter?->apply($this->getValue(), $subject) ?? $subject;
@@ -31,7 +36,10 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
      * @Associate(metadata="class")
      */
     protected $value;
-    public function getValue()     { return $this->value; }
+    public function getValue()
+    {
+        return $this->value;
+    }
     public function setValue($value)
     {
         $this->value = $value;
@@ -43,7 +51,10 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
      */
     protected $class;
 
-    public function getClass(): ?string { return $this->class; }
+    public function getClass(): ?string
+    {
+        return $this->class;
+    }
     public function setClass(?string $class)
     {
         $this->class = $class;

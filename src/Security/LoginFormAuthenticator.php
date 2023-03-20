@@ -94,31 +94,37 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
 
         $badges   = [];
-        if( array_key_exists("_remember_me", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) ) {
-
+        if (array_key_exists("_remember_me", $request->get('security_login') ?? $request->get('_base_security_login') ?? [])) {
             $badges[] = new RememberMeBadge();
-            if($request->get('security_login')["_remember_me"] ?? $request->get('_base_security_login')["_remember_me"])
+            if ($request->get('security_login')["_remember_me"] ?? $request->get('_base_security_login')["_remember_me"]) {
                 end($badges)->enable();
+            }
         }
 
-        if( array_key_exists("password", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) )
+        if (array_key_exists("password", $request->get('security_login') ?? $request->get('_base_security_login') ?? [])) {
             $badges[] = new PasswordUpgradeBadge($password, $this->userRepository);
-        if( array_key_exists("_captcha", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) && class_exists(CaptchaBadge::class) )
+        }
+        if (array_key_exists("_captcha", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) && class_exists(CaptchaBadge::class)) {
             $badges[] = new CaptchaBadge("_captcha", $request->get('security_login')["_captcha"] ?? $request->get('_base_security_login')["_captcha"]);
+        }
 
         return new Passport(
             new UserBadge($identifier),
-            new PasswordCredentials($password), $badges);
+            new PasswordCredentials($password),
+            $badges
+        );
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewall): ?Response
     {
         // Update client information
-        if( ($user = $token->getUser()) ) {
-
+        if (($user = $token->getUser())) {
             $permittedRoles = UserRole::getPermittedValues();
-            foreach($user->getRoles() as $role)
-                if(!in_array($role, $permittedRoles)) $user->removeRole($role);
+            foreach ($user->getRoles() as $role) {
+                if (!in_array($role, $permittedRoles)) {
+                    $user->removeRole($role);
+                }
+            }
 
             $user->setTimezone();
             $user->setLocale();
@@ -131,8 +137,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $targetPath = $this->referrer;
         $request->getSession()->remove("_target_path");
 
-        if ($targetPath->getUrl() && $targetPath->sameSite() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath))
-        {
+        if ($targetPath->getUrl() && $targetPath->sameSite() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath)) {
             return $this->router->redirect($targetPath->getUrl());
         }
         $defaultTargetPath = $request->getSession()->get('_security.'.$this->router->getRouteFirewall()->getName().'.target_path');

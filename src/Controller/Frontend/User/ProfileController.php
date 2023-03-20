@@ -20,17 +20,17 @@ class ProfileController extends AbstractController
      * @var FormProxyInterface
      */
     protected $formProxy;
-    
+
     /**
      * @var EntityManagerInterface
      */
     protected $entityManager;
-    
+
     /**
      * @var UserRepository
      */
     protected $userRepository;
-    
+
     public function __construct(EntityManagerInterface $entityManager, FormProxyInterface $formProxy)
     {
         $this->formProxy = $formProxy;
@@ -43,32 +43,30 @@ class ProfileController extends AbstractController
      */
     public function Edit(Request $request, int $id = -1)
     {
-        if($id > 0) {
-
-            if ( !($user = $this->userRepository->cacheOneById($id)) )
+        if ($id > 0) {
+            if (!($user = $this->userRepository->cacheOneById($id))) {
                 throw $this->createNotFoundException('User not found.');
-
+            }
         } else {
-
-            if (!($user = $this->getUser()) || !$user->isPersistent())
+            if (!($user = $this->getUser()) || !$user->isPersistent()) {
                 return $this->redirectToRoute('user_search');
+            }
         }
-        
-        if($user != $this->getUser() && !$this->isGranted(UserRole::ADMIN))
+
+        if ($user != $this->getUser() && !$this->isGranted(UserRole::ADMIN)) {
             throw new AccessDeniedException();
+        }
 
         return $this->formProxy
                 ->createProcessor("profile:user", UserProfileType::class, ["use_model" => true])
                 ->setData($user)
-                ->onDefault(function(FormProcessorInterface $formProcessor) use ($user) {
-
+                ->onDefault(function (FormProcessorInterface $formProcessor) use ($user) {
                     return $this->render('client/user/profile_edit.html.twig', [
-                        'user' => $user, 
+                        'user' => $user,
                         "form" => $formProcessor->getForm()->createView()
                     ]);
                 })
-                ->onSubmit(function(FormProcessorInterface $formProcessor, Request $request) use ($user) {
-                    
+                ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($user) {
                     $user = $formProcessor->hydrate($user);
                     $this->entityManager->flush();
 
@@ -84,15 +82,14 @@ class ProfileController extends AbstractController
      */
     public function Show(int $id = -1)
     {
-        if($id > 0) {
-
-            if ( !($user = $this->userRepository->cacheOneById($id)) )
+        if ($id > 0) {
+            if (!($user = $this->userRepository->cacheOneById($id))) {
                 throw $this->createNotFoundException('User not found.');
-
+            }
         } else {
-
-            if (!($user = $this->getUser()) || !$user->isPersistent())
+            if (!($user = $this->getUser()) || !$user->isPersistent()) {
                 return $this->redirectToRoute('user_search');
+            }
         }
 
         return $this->render('client/user/profile_show.html.twig', ['user' => $user]);

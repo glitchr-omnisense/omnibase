@@ -17,11 +17,10 @@ interface AnnotationInterface
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
-    public function preUpdate (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
-    public function preRemove (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
+    public function preRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
 
     public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
-    public function postUpdate (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
-    public function postRemove (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
-
+    public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
+    public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
 }

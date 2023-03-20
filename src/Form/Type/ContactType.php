@@ -19,7 +19,10 @@ use Symfony\Component\Form\Util\StringUtil;
 
 class ContactType extends AbstractType
 {
-    public function getBlockPrefix():string { return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
+    public function getBlockPrefix(): string
+    {
+        return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -30,8 +33,8 @@ class ContactType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name'   , TextType::class);
-        $builder->add('email'  , EmailType::class);
+        $builder->add('name', TextType::class);
+        $builder->add('email', EmailType::class);
         $builder->add('subject', TextType::class, ["required" => false]);
         $builder->add('message', TextareaType::class);
         $builder->add('attachments', FileType::class, ["required" => false, "multiple" => true, "dropzone" => null

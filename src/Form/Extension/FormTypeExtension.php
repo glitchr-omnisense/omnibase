@@ -82,11 +82,11 @@ class FormTypeExtension extends AbstractTypeExtension
             'submit_on_enter'   => true,
         ]);
 
-        $resolver->setNormalizer('form_flow_id', function(Options $options, $value) {
-
+        $resolver->setNormalizer('form_flow_id', function (Options $options, $value) {
             $formType = null;
-            if(class_implements_interface($options["data_class"], FormModelInterface::class))
-                $formType = camel2snake(str_rstrip(class_basename($options["data_class"]::getTypeClass()),"Type"));
+            if (class_implements_interface($options["data_class"], FormModelInterface::class)) {
+                $formType = camel2snake(str_rstrip(class_basename($options["data_class"]::getTypeClass()), "Type"));
+            }
 
             return $value == "_flow_token" ? $formType : $value;
         });
@@ -96,135 +96,148 @@ class FormTypeExtension extends AbstractTypeExtension
     {
         $this->submitOnEnter($view, $form, $options);
 
-        $this->browseView( $view, $form, $options);
+        $this->browseView($view, $form, $options);
     }
 
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
-        if($options["form2"]) $this->applyForm2($view);
-        if($options["easyadmin"]) $this->applyEA($view, $form);
-        if($options["use_advanced_form"] ?? false) 
+        if ($options["form2"]) {
+            $this->applyForm2($view);
+        }
+        if ($options["easyadmin"]) {
+            $this->applyEA($view, $form);
+        }
+        if ($options["use_advanced_form"] ?? false) {
             $this->formProxy->useAdvancedForm();
+        }
 
-        if($this->authorizationChecker->isGranted(UserRole::ADMIN) && $this->router->isEasyAdmin()) {
+        if ($this->authorizationChecker->isGranted(UserRole::ADMIN) && $this->router->isEasyAdmin()) {
             $this->markDbProperties($view, $form, $options);
             $this->markOptions($view, $form, $options);
         }
 
-        foreach($view->children as $field => $childView) {
-
-            if (!$form->has($field))
+        foreach ($view->children as $field => $childView) {
+            if (!$form->has($field)) {
                 continue;
+            }
 
             $childForm = $form->get($field);
             $childOptions = $childForm->getConfig()->getOptions();
             $childOptions["form2"] = $options["form2"];
             $childOptions["easyadmin"] = $options["easyadmin"];
-            if($childOptions["use_advanced_form"] ?? false) 
+            if ($childOptions["use_advanced_form"] ?? false) {
                 $this->formProxy->useAdvancedForm();
+            }
 
             $this->browseView($childView, $childForm, $childOptions);
         }
     }
 
-    public function applyForm2(FormView $view) {
-
+    public function applyForm2(FormView $view)
+    {
         // Add to all form custom base style..
         // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
-        if (array_search("form" , $view->vars['block_prefixes']) !== false &&
-            array_search("form2", $view->vars['block_prefixes']) === false)
-        {
+        if (array_search("form", $view->vars['block_prefixes']) !== false &&
+            array_search("form2", $view->vars['block_prefixes']) === false) {
             array_splice($view->vars['block_prefixes'], 1, 0, ["form2"]);
         }
     }
 
-    public function applyEA(FormView $view, FormInterface $form) {
-
-        if(!empty($view->vars["ea_crud_form"])) {
-
-            if(!$form->getParent()) {
-                if(!array_key_exists("class", $view->vars["attr"]))
+    public function applyEA(FormView $view, FormInterface $form)
+    {
+        if (!empty($view->vars["ea_crud_form"])) {
+            if (!$form->getParent()) {
+                if (!array_key_exists("class", $view->vars["attr"])) {
                     $view->vars["attr"]["class"] = "";
+                }
 
                 $view->vars["attr"]["class"] .= " row ";
             }
         }
 
         $fieldDto = $view->vars["ea_crud_form"]["ea_field"] ?? null;
-        if($fieldDto) {
-
+        if ($fieldDto) {
             $columns = $fieldDto->getColumns() ?? $fieldDto->getDefaultColumns() ?? "";
-            if(!array_key_exists("class", $view->vars["row_attr"]))
+            if (!array_key_exists("class", $view->vars["row_attr"])) {
                 $view->vars["row_attr"]["class"] = "";
+            }
 
             $view->vars["row_attr"]["class"] .= " ".$columns;
         }
     }
 
-    public function markAsDbColumns(FormView $view, FormInterface $form, array $options) {
-
+    public function markAsDbColumns(FormView $view, FormInterface $form, array $options)
+    {
         $dataClass = $options["class"] ?? $form->getConfig()->getDataClass();
-        if($this->classMetadataManipulator->isEntity($dataClass)) {
-
+        if ($this->classMetadataManipulator->isEntity($dataClass)) {
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
-            foreach($classMetadata->getFieldNames() as $fieldName) {
-
+            foreach ($classMetadata->getFieldNames() as $fieldName) {
                 $childView = $view->children[$fieldName] ?? null;
-                if($childView) $childView->vars["is_dbcolumn"] = true;
+                if ($childView) {
+                    $childView->vars["is_dbcolumn"] = true;
+                }
             }
 
-            foreach($classMetadata->getAssociationNames() as $fieldName) {
-
+            foreach ($classMetadata->getAssociationNames() as $fieldName) {
                 $childView = $view->children[$fieldName] ?? null;
-                if($childView) $childView->vars["is_dbcolumn"] = true;
+                if ($childView) {
+                    $childView->vars["is_dbcolumn"] = true;
+                }
             }
         }
     }
 
-    public function submitOnEnter(FormView $view, FormInterface $form, array $options) {
-
+    public function submitOnEnter(FormView $view, FormInterface $form, array $options)
+    {
         $submitOnEnter = $options["submit_on_enter"] ?? null;
-        if ($submitOnEnter || !$form->isRoot()) return;
+        if ($submitOnEnter || !$form->isRoot()) {
+            return;
+        }
 
         $view->vars["attr"] ??= [];
         $view->vars["attr"]["disabled"] = "";
     }
 
-    public function markDbProperties(FormView $view, FormInterface $form, array $options) {
-
+    public function markDbProperties(FormView $view, FormInterface $form, array $options)
+    {
         $dataClass = $options["class"] ?? $form->getConfig()->getDataClass();
-        if($this->classMetadataManipulator->isEntity($dataClass)) {
-
+        if ($this->classMetadataManipulator->isEntity($dataClass)) {
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
-            foreach($view->children as $childView) // Alias is marked by default and remove if field found..
+            foreach ($view->children as $childView) { // Alias is marked by default and remove if field found..
                 $childView->vars["is_alias"] = true;
+            }
 
-            foreach($classMetadata->getFieldNames() as $fieldName) {
-
+            foreach ($classMetadata->getFieldNames() as $fieldName) {
                 $childView = $view->children[$fieldName] ?? null;
-                if($childView) $childView->vars["is_dbcolumn"] = true;
+                if ($childView) {
+                    $childView->vars["is_dbcolumn"] = true;
+                }
 
                 unset($childView->vars["is_alias"]);
             }
 
-            foreach($classMetadata->getAssociationNames() as $fieldName) {
-
+            foreach ($classMetadata->getAssociationNames() as $fieldName) {
                 $childView = $view->children[$fieldName] ?? null;
-                if($childView) $childView->vars["is_dbcolumn"] = true;
+                if ($childView) {
+                    $childView->vars["is_dbcolumn"] = true;
+                }
 
                 unset($childView->vars["is_alias"]);
             }
         }
     }
 
-    public function markOptions(FormView $view, FormInterface $form, array $options) {
-
-        if($this->formFactory->guessSortable($form, $options))
+    public function markOptions(FormView $view, FormInterface $form, array $options)
+    {
+        if ($this->formFactory->guessSortable($form, $options)) {
             $view->vars["is_sortable"] = true;
-        if($this->formFactory->guessMultiple($form, $options))
+        }
+        if ($this->formFactory->guessMultiple($form, $options)) {
             $view->vars["is_multiple"] = true;
-        if($this->classMetadataManipulator->isCollectionOwner($form) === false)
+        }
+        if ($this->classMetadataManipulator->isCollectionOwner($form) === false) {
             $view->vars["is_inherited"] = true;
+        }
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)

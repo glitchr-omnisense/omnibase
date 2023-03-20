@@ -18,19 +18,32 @@ abstract class AbstractCurrencyApi implements CurrencyApiInterface
         $this->key = null;
     }
 
-    public static function getName(): string { return camel2snake(class_basename(static::class)); }
-    public function supports(string $key): bool { return $this->key === $key; }
+    public static function getName(): string
+    {
+        return camel2snake(class_basename(static::class));
+    }
+    public function supports(string $key): bool
+    {
+        return $this->key === $key;
+    }
 
     protected int $priority = 0;
-    public function getPriority(): int { return $this->priority; }
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
 
     protected array $options;
-    public function getOptions(): array { return $this->options; }
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
 
     public function getKey(): ?string
     {
-        if ($this->key === null)
+        if ($this->key === null) {
             $this->key = $this->settingBag->getScalar("api.currency.".self::getName());
+        }
 
         return $this->key;
     }

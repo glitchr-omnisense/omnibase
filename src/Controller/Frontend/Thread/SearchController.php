@@ -31,15 +31,13 @@ class SearchController extends AbstractController
         $formProcessor = $this->formProxy->createProcessor("thread:search", ThreadSearchType::class, []);
         $formProcessor
             ->setData($this->formProxy->get("thread:searchbar")?->getData())
-            ->onDefault(function(FormProcessorInterface $formProcessor) {
-
+            ->onDefault(function (FormProcessorInterface $formProcessor) {
                 return $this->render('client/thread/search.html.twig', [
                     "form" => $formProcessor->getForm()->createView(),
                     "form_data" => $formProcessor->getForm()->getData()
                 ]);
             })
-            ->onDefault(function(FormProcessorInterface $formProcessor) use ($request) {
-
+            ->onDefault(function (FormProcessorInterface $formProcessor) use ($request) {
                 $data = clone $formProcessor->getData();
                 $data->content = $data->content ?? $data->generic ?? "";
                 $data->title = $data->title   ?? $data->generic ?? "";
@@ -50,24 +48,25 @@ class SearchController extends AbstractController
                 $formattedData->title   = str_strip("%" . $data->title   . "%", "%%", "%%");
                 $formattedData->excerpt = str_strip("%" . $data->excerpt . "%", "%%", "%%");
                 $formattedData->generic = str_strip("%" . $data->generic . "%", "%%", "%%");
- 
-                $states = [ThreadState::PUBLISH];
-                if($this->isGranted("ROLE_ADMIN")) $states = [];
 
-                $threads = array_map(fn($t) => $t->getTranslatable(), $this->threadIntlRepository->cacheByInsensitivePartialModel([
+                $states = [ThreadState::PUBLISH];
+                if ($this->isGranted("ROLE_ADMIN")) {
+                    $states = [];
+                }
+
+                $threads = array_map(fn ($t) => $t->getTranslatable(), $this->threadIntlRepository->cacheByInsensitivePartialModel([
                     "content" => $formattedData->content,
                     "title"   => $formattedData->title,
                     "excerpt" => $formattedData->excerpt,
                 ], ["translatable.state" => $states, "translatable.parent" => $formattedData->parent_id])->getResult());
 
-                usort($threads, function ($a, $b)
-                {
+                usort($threads, function ($a, $b) {
                     $aRepository = $this->entityManager->getRepository(get_class($a));
                     $bRepository = $this->entityManager->getRepository(get_class($b));
-                    
+
                     return $aRepository->getHierarchy() < $bRepository->getHierarchy() ? -1 : 1;
                 });
-    
+
                 return $this->render('client/thread/search.html.twig', [
                     "form" => $formProcessor->getForm()->createView(),
                     "model" => $data,

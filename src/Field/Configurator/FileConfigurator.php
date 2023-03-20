@@ -31,14 +31,14 @@ class FileConfigurator implements FieldConfiguratorInterface
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $field->setFormTypeOption("max_size", Uploader::getMaxFilesize($entityDto->getInstance(), $field->getProperty()));
-        $field->setFormTypeOption("mime_types",   Uploader::getMimeTypes($entityDto->getInstance(), $field->getProperty()));
+        $field->setFormTypeOption("mime_types", Uploader::getMimeTypes($entityDto->getInstance(), $field->getProperty()));
 
         $preferredDownloadName = $field->getCustomOption(FileField::OPTION_PREFERRED_DOWNLOAD_NAME);
-        if($preferredDownloadName) {
-
+        if ($preferredDownloadName) {
             $entity = $entityDto->getInstance();
-            if($this->classMetadataManipulator->hasField($preferredDownloadName))
+            if ($this->classMetadataManipulator->hasField($preferredDownloadName)) {
                 $preferredDownloadName = $this->classMetadataManipulator->getFieldValue($entity, $preferredDownloadName);
+            }
 
             $field->setCustomOption(FileField::OPTION_PREFERRED_DOWNLOAD_NAME, $preferredDownloadName);
         }

@@ -12,4 +12,6 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method Address[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 
-class AddressRepository extends ServiceEntityRepository { }
+class AddressRepository extends ServiceEntityRepository
+{
+}

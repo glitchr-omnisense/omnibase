@@ -12,8 +12,17 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class TradingMarketPass extends AbstractPass
 {
-    public function taggedServiceIds(): string { return "currency.api"; }
+    public function taggedServiceIds(): string
+    {
+        return "currency.api";
+    }
 
-    public function classFqcn(): string { return TradingMarket::class; }
-    public function addMethod(): string { return "addProvider"; }
+    public function classFqcn(): string
+    {
+        return TradingMarket::class;
+    }
+    public function addMethod(): string
+    {
+        return "addProvider";
+    }
 }

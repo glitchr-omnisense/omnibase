@@ -32,10 +32,13 @@ use Base\Database\Annotation\Cache;
 
 abstract class AbstractScopeAdapter extends AbstractAdapter implements ScopeAdapterInterface
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-crosshairs"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-crosshairs"];
+    }
 
-    public function contains(mixed $value, mixed $subject): bool {
-
+    public function contains(mixed $value, mixed $subject): bool
+    {
         throw new \InvalidArgumentException("Unsupported value (".(is_object($subject) ? get_class($subject) : gettype($subject)).") provided in ".str_replace("Proxies\__CG__\\", "", static::class));
     }
 }

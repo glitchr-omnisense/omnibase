@@ -13,45 +13,45 @@ use EasyCorp\Bundle\EasyAdminBundle\Form\Filter\Type\TextFilterType;
 
 class AssociationFilter implements FilterInterface
 {
-   use FilterTrait;
+    use FilterTrait;
 
-   protected $alias;
-   protected $joinClass;
+    protected $alias;
+    protected $joinClass;
 
-   public static function new(string $propertyName, $label = null): self
-   {
-      $filter = (new self());
-      $parts = explode('.', $propertyName);
+    public static function new(string $propertyName, $label = null): self
+    {
+        $filter = (new self());
+        $parts = explode('.', $propertyName);
 
-      return $filter
-         ->setFilterFqcn(__CLASS__)
-         ->setAlias($parts[0])
-         ->setProperty(str_replace('.','_',$propertyName))
-         ->setLabel($label)
-         ->setFormType(TextFilterType::class)
-         ->setFormTypeOption('translation_domain', 'EasyAdminBundle');
-   }
+        return $filter
+           ->setFilterFqcn(__CLASS__)
+           ->setAlias($parts[0])
+           ->setProperty(str_replace('.', '_', $propertyName))
+           ->setLabel($label)
+           ->setFormType(TextFilterType::class)
+           ->setFormTypeOption('translation_domain', 'EasyAdminBundle');
+    }
 
-   public function setAlias($alias)
-   {
-      $this->alias = $alias;
-      return $this;
-   }
+    public function setAlias($alias)
+    {
+        $this->alias = $alias;
+        return $this;
+    }
 
-   public function apply(QueryBuilder $queryBuilder, FilterDataDto $filterDataDto, ?FieldDto $fieldDto, EntityDto $entityDto): void
-   {
-      $property = str_replace($this->alias.'_', '', $filterDataDto->getProperty());
-      $comparison = $filterDataDto->getComparison();
-      $parameterName = $filterDataDto->getParameterName();
-      $parameter = $filterDataDto->getValue();
+    public function apply(QueryBuilder $queryBuilder, FilterDataDto $filterDataDto, ?FieldDto $fieldDto, EntityDto $entityDto): void
+    {
+        $property = str_replace($this->alias.'_', '', $filterDataDto->getProperty());
+        $comparison = $filterDataDto->getComparison();
+        $parameterName = $filterDataDto->getParameterName();
+        $parameter = $filterDataDto->getValue();
 
-      $em = $queryBuilder->getEntityManager();
-      $meta = $em->getClassMetadata($entityDto->getFqcn());
-      $mappingInfo = $meta->getAssociationMapping($this->alias);
+        $em = $queryBuilder->getEntityManager();
+        $meta = $em->getClassMetadata($entityDto->getFqcn());
+        $mappingInfo = $meta->getAssociationMapping($this->alias);
 
-      $queryBuilder
-         ->innerJoin($mappingInfo['targetEntity'], $this->alias, Expr\Join::WITH, 'entity.'. $this->alias.' = '. $this->alias.'')
-         ->andWhere(sprintf('%s.%s %s :%s', $this->alias, $property, $comparison, $parameterName))
-         ->setParameter($parameterName, $parameter);
-   }
+        $queryBuilder
+           ->innerJoin($mappingInfo['targetEntity'], $this->alias, Expr\Join::WITH, 'entity.'. $this->alias.' = '. $this->alias.'')
+           ->andWhere(sprintf('%s.%s %s :%s', $this->alias, $property, $comparison, $parameterName))
+           ->setParameter($parameterName, $parameter);
+    }
 }

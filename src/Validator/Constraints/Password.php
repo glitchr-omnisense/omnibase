@@ -23,22 +23,46 @@ class Password extends Constraint
     public $messageSpecials  = 'password.requirements.specials' ;
 
     protected int $minLength;
-    public function getMinLength(): int { return $this->minLength; }
+    public function getMinLength(): int
+    {
+        return $this->minLength;
+    }
     protected int $minStrength;
-    public function getMinStrength(): int { return $this->minStrength; }
+    public function getMinStrength(): int
+    {
+        return $this->minStrength;
+    }
     protected int $maxStrength;
-    public function getMaxStrength(): int { return $this->maxStrength; }
+    public function getMaxStrength(): int
+    {
+        return $this->maxStrength;
+    }
 
     protected bool $uppercase;
-    public function requiresUppercase(): bool { return $this->uppercase; }
+    public function requiresUppercase(): bool
+    {
+        return $this->uppercase;
+    }
     protected bool $lowercase;
-    public function requiresLowercase(): bool { return $this->lowercase; }
+    public function requiresLowercase(): bool
+    {
+        return $this->lowercase;
+    }
     protected bool $numbers;
-    public function requiresNumbers(): bool { return $this->numbers; }
+    public function requiresNumbers(): bool
+    {
+        return $this->numbers;
+    }
     protected bool $specials;
-    public function requiresSpecials(): bool { return $this->specials; }
+    public function requiresSpecials(): bool
+    {
+        return $this->specials;
+    }
     protected bool $length12;
-    public function requiresLength12(): bool { return $this->length12; }
+    public function requiresLength12(): bool
+    {
+        return $this->length12;
+    }
 
     public function __construct(array $options = [], array $groups = null, mixed $payload = null)
     {
@@ -61,5 +85,5 @@ class Password extends Constraint
         unset($options["min_length"]);
 
         parent::__construct($options ?? [], $groups, $payload);
-   }
+    }
 }

@@ -10,7 +10,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SpamChecker implements SpamCheckerInterface
 {
-
     /**
      * @var RequestStack
      */
@@ -35,10 +34,10 @@ class SpamChecker implements SpamCheckerInterface
      * @var HttpClientInterface
      */
     protected $client;
-    
+
     /** * @var bool */
     protected bool $debug;
-    
+
     public function __construct(RequestStack $requestStack, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, TranslatorInterface $translator, HttpClientInterface $client, bool $debug)
     {
         $this->requestStack = $requestStack;
@@ -72,7 +71,6 @@ class SpamChecker implements SpamCheckerInterface
     public function getKey($api): ?string
     {
         switch($api) {
-
             case SpamApi::AKISMET:
                 return $this->settingBag->getScalar("api.spam.akismet");
 
@@ -84,9 +82,10 @@ class SpamChecker implements SpamCheckerInterface
     public function getEndpoint($api): ?string
     {
         $key = $this->getKey($api);
-        if(!$key) return null;
+        if (!$key) {
+            return null;
+        }
         switch($api) {
-
             case SpamApi::AKISMET:
                 return sprintf('https://%s.rest.akismet.com/1.1/comment-check', $key);
 
@@ -111,12 +110,12 @@ class SpamChecker implements SpamCheckerInterface
     public function score(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
     {
         $enum = SpamScore::__toInt();
-        if(empty($candidate->getSpamText()))
+        if (empty($candidate->getSpamText())) {
             return $enum[SpamScore::NO_TEXT];
+        }
 
         $request = $this->requestStack->getCurrentRequest();
         switch($api) {
-
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");
 
@@ -142,18 +141,20 @@ class SpamChecker implements SpamCheckerInterface
                 ];
 
                 $endpoint = $this->getEndpoint($api);
-                if(!$endpoint)
+                if (!$endpoint) {
                     return $enum[SpamScore::NOT_SPAM];
-                
+                }
+
                 $response = $this->client->request('POST', $endpoint, $options);
 
                 $headers = $response->getHeaders();
-                if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) $score = $enum[SpamScore::BLATANT_SPAM];
-                else {
-
+                if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) {
+                    $score = $enum[SpamScore::BLATANT_SPAM];
+                } else {
                     $content = $response->getContent();
-                    if (isset($headers['x-akismet-debug-help'][0]))
+                    if (isset($headers['x-akismet-debug-help'][0])) {
                         throw new \RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
+                    }
 
                     $score = ($content === "true" ? $enum[SpamScore::MAYBE_SPAM] : $enum[SpamScore::NOT_SPAM]);
                 }

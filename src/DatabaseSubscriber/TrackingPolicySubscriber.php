@@ -20,7 +20,7 @@ class TrackingPolicySubscriber implements EventSubscriberInterface
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
-    public function getSubscribedEvents():array
+    public function getSubscribedEvents(): array
     {
         return [ Events::loadClassMetadata];
     }
@@ -32,8 +32,9 @@ class TrackingPolicySubscriber implements EventSubscriberInterface
          */
         $classMetadata = $args->getClassMetadata();
 
-        if ( ($trackingPolicy = $this->classMetadataManipulator->getTrackingPolicy($classMetadata->getName())) )
+        if (($trackingPolicy = $this->classMetadataManipulator->getTrackingPolicy($classMetadata->getName()))) {
             $classMetadata->setChangeTrackingPolicy($trackingPolicy);
+        }
     }
 
     // protected function onLifecycle(LifecycleEventArgs $event, $eventName)

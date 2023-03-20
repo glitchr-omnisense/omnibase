@@ -14,7 +14,10 @@ class PasteFilter implements FilterInterface
      */
     protected $imagine;
 
-    public function __toString() { return "paste:".$this->x."x".$this->y; }
+    public function __toString()
+    {
+        return "paste:".$this->x."x".$this->y;
+    }
 
     public function __construct(ImageInterface $destination, int $x = 0, int $y = 0)
     {

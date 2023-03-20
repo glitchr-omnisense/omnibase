@@ -25,9 +25,15 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
      */
     protected $widgetProvider;
 
-    public function getBlockPrefix():string { return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
+    public function getBlockPrefix(): string
+    {
+        return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+    }
 
-    public function __construct(WidgetProviderInterface $widgetProvider) { $this->widgetProvider = $widgetProvider; }
+    public function __construct(WidgetProviderInterface $widgetProvider)
+    {
+        $this->widgetProvider = $widgetProvider;
+    }
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -44,18 +50,15 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
     public function getFormattedData($data, $from = ".", $to = "-")
     {
         $newData = [];
-        if(!$data) return [];
-        else if(is_associative($data)) {
-
-            foreach($data as $name => $value)
+        if (!$data) {
+            return [];
+        } elseif (is_associative($data)) {
+            foreach ($data as $name => $value) {
                 $newData[str_replace($from, $to, $name)] = $value;
-
-        } else if( is_subclass_of($data, Widget::class)) {
-
+            }
+        } elseif (is_subclass_of($data, Widget::class)) {
             $newData[str_replace($from, $to, $data->getName())] = $data->getName();
-
         } else {
-
             throw new \Exception("Unexpected data provided (expecting either associative array, Setting or BaseSetting)");
         }
 
@@ -65,25 +68,23 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->setDataMapper($this);
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($options) {
-
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $form = $event->getForm();
 
             $widgetSlots = [];
 
             $formattedWidgets = $this->getFormattedData($options["widgets"]);
-            foreach($formattedWidgets as $formattedWidget => $widgetOptions) {
-
+            foreach ($formattedWidgets as $formattedWidget => $widgetOptions) {
                 $widgetSlot = str_replace("-", ".", $formattedWidget);
                 $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widgetSlot, false) ?? new Slot($formattedWidget, "");
             }
 
-            foreach($widgetSlots as $formattedWidget => $slot) {
-
+            foreach ($widgetSlots as $formattedWidget => $slot) {
                 // Exclude requested widgets
                 $widget = str_replace("-", ".", $formattedWidget);
-                if(in_array($widget, $options["excluded_widgets"]))
+                if (in_array($widget, $options["excluded_widgets"])) {
                     continue;
+                }
 
                 // Set widget options
                 $widgetOptions = $options["widgets"][$widget];
@@ -98,43 +99,50 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
                 $widgetOptions["choice_filter"][] = "^".Slot::class;
 
                 // Set default label
-                if(!array_key_exists("label", $widgetOptions)) {
+                if (!array_key_exists("label", $widgetOptions)) {
                     $label = explode("-", $formattedWidget);
                     $widgetOptions["label"] = $slot->getLabel() ?? mb_ucwords(str_replace("_", " ", camel2snake(end($label))));
                 }
 
-                if(!array_key_exists("help", $widgetOptions))
+                if (!array_key_exists("help", $widgetOptions)) {
                     $widgetOptions["help"] = $slot->getHelp() ?? "";
+                }
 
                 $form->add($formattedWidget, SelectType::class, $widgetOptions);
                 $form->get($formattedWidget)->setData($slot->getWidget() ?? null);
             }
 
-            if(count($options["widgets"]) > 0)
+            if (count($options["widgets"]) > 0) {
                 $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "backoffice_widgets.valid"]);
+            }
         });
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void {}
+    public function mapDataToForms($viewData, \Traversable $forms): void
+    {
+    }
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);
 
         $newViewData = [];
-        foreach($children as $name => $child)
+        foreach ($children as $name => $child) {
             $newViewData[$name] = $child->getData();
+        }
 
         $newViewData = $this->getFormattedData($newViewData, "-", ".");
 
-        foreach($newViewData as $widget => $value) {
-
-            if($widget == "valid") continue;
+        foreach ($newViewData as $widget => $value) {
+            if ($widget == "valid") {
+                continue;
+            }
 
             $formattedWidget = str_replace(".", "-", $widget);
 
             $newViewData[$widget] = $children[$formattedWidget]->getData() ?? [];
-            if(!is_array($newViewData[$widget]))
+            if (!is_array($newViewData[$widget])) {
                 $newViewData[$widget] = [$newViewData[$widget]];
+            }
         }
 
         unset($newViewData["valid"]);

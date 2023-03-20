@@ -45,8 +45,8 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $this->twig->addGlobal("server", $_SERVER);
 
         $this->twig->addGlobal("random", $randomVariable);
-        $this->twig->addGlobal("base",   $baseService);
-        $this->twig->addGlobal("app" ,   $appVariable);
+        $this->twig->addGlobal("base", $baseService);
+        $this->twig->addGlobal("app", $appVariable);
 
         // Setup custom loader, to prevent the known issues of the default symfony TwigLoader
         // 1/ Cannot override <form_div_layout class="html twig">
@@ -58,21 +58,28 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         parent::__construct([], $bundlePath);
 
         $loaders = $this->twig->getLoader();
-        if($loaders instanceof ChainLoader) $loaders = $loaders->getLoaders();
-        else $loaders = [$loaders];
+        if ($loaders instanceof ChainLoader) {
+            $loaders = $loaders->getLoaders();
+        } else {
+            $loaders = [$loaders];
+        }
 
         $loaders[] = $this;
 
         // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
-        if(!$useCustomLoader) array_unshift($loaders, $defaultLoader);
-        else $loaders[] = $defaultLoader;
+        if (!$useCustomLoader) {
+            array_unshift($loaders, $defaultLoader);
+        } else {
+            $loaders[] = $defaultLoader;
+        }
 
         $chainLoader = new ChainLoader($loaders);
         $twig->setLoader($chainLoader);
 
         // Add @Twig, @Assets and @Layout variables
-        if(!$this->router->isProfiler())
+        if (!$this->router->isProfiler()) {
             $this->prependPath($bundlePath."/inspector", "WebProfiler");
+        }
 
         $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
         $this->prependPath($bundlePath);
@@ -85,13 +92,13 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
         // Add additional @Namespace variables
         $paths = $baseService->getParameterBag("base.twig.paths") ?? [];
-        foreach($paths as $entry) {
-
+        foreach ($paths as $entry) {
             $namespace = $entry["namespace"] ?? self::MAIN_NAMESPACE;
 
             $path = $entry["path"] ?? null;
-            if (empty($path))
+            if (empty($path)) {
                 throw new Exception("Missing path variable for @".$namespace." in \"base.twig.paths\"");
+            }
 
             $this->prependPath($path, $namespace);
         }

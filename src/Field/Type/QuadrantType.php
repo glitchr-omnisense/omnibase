@@ -17,14 +17,20 @@ use Traversable;
 
 class QuadrantType extends AbstractType implements DataMapperInterface
 {
-    public function getBlockPrefix(): string { return 'quadrant'; }
+    public function getBlockPrefix(): string
+    {
+        return 'quadrant';
+    }
 
     /**
      * @var Environment
      */
     protected $twig;
-    
-    public function __construct(Environment $twig) { $this->twig = $twig; }
+
+    public function __construct(Environment $twig)
+    {
+        $this->twig = $twig;
+    }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
@@ -50,11 +56,12 @@ class QuadrantType extends AbstractType implements DataMapperInterface
         $view->vars['default']    = $options["class"]::getDefault();
     }
 
-    public function mapDataToForms($viewData, Traversable $forms) { }
+    public function mapDataToForms($viewData, Traversable $forms)
+    {
+    }
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $windType = current(iterator_to_array($forms));
         $viewData = $windType->getData() ?? Quadrant::O;
-
     }
 }

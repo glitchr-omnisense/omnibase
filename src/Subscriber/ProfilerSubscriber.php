@@ -33,18 +33,22 @@ class ProfilerSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if($this->router->isProfiler($event) && !$this->router->isDebug())
+        if ($this->router->isProfiler($event) && !$this->router->isDebug()) {
             throw new NotFoundHttpException("Page not found.");
+        }
     }
 
     public function onKernelResponse(ResponseEvent $event)
     {
-        if(!$this->router->isDebug())
+        if (!$this->router->isDebug()) {
             return false;
-        if($this->router->isUX())
+        }
+        if ($this->router->isUX()) {
             return false;
-        if (!$event->getRequest()->isXmlHttpRequest())
+        }
+        if (!$event->getRequest()->isXmlHttpRequest()) {
             return false;
+        }
 
         $response = $event->getResponse();
         $response->headers->set('Symfony-Debug-Toolbar-Replace', true);

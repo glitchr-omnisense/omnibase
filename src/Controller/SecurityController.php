@@ -91,9 +91,15 @@ class SecurityController extends AbstractController
 
     public function __construct(
         NotifierInterface $notifier,
-        EntityManagerInterface $entityManager, TokenRepository $tokenRepository, UserRepository $userRepository,
-        RouterInterface $router, FormProxy $formProxy, TokenStorageInterface $tokenStorage,
-        TranslatorInterface $translator, ParameterBagInterface $parameterBag)
+        EntityManagerInterface $entityManager,
+        TokenRepository $tokenRepository,
+        UserRepository $userRepository,
+        RouterInterface $router,
+        FormProxy $formProxy,
+        TokenStorageInterface $tokenStorage,
+        TranslatorInterface $translator,
+        ParameterBagInterface $parameterBag
+    )
     {
         $this->router          = $router;
         $this->translator      = $translator;
@@ -114,20 +120,21 @@ class SecurityController extends AbstractController
     public function Login(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // In case of maintenance, still allow users to login
-        if($this->isGranted("EXCEPTION_ACCESS"))
+        if ($this->isGranted("EXCEPTION_ACCESS")) {
             return $this->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE);
+        }
 
         // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
         // Redirect to the right page when access denied
-        if ( ($user = $this->getUser()) ) {
-
+        if (($user = $this->getUser())) {
             // Remove expired tokens
             $user->removeExpiredTokens();
 
-            if($this->isGranted('IS_AUTHENTICATED_FULLY'))
+            if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
                 return $this->redirect($referrer->getUrl() ?? $this->router->getUrlIndex());
+            }
 
             $notification = new Notification("login.partial");
             $notification->send("info");
@@ -158,28 +165,23 @@ class SecurityController extends AbstractController
     public function Logout(Request $request, ReferrerInterface $referrer)
     {
         // If user is found.. go to the logout request page
-        if($this->getUser()) {
-
+        if ($this->getUser()) {
             $response = $this->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
             $response->headers->clearCookie('REMEMBERME', "/");
-            $response->headers->clearCookie('REMEMBERME', "/", ".".format_url(get_url(),FORMAT_URL_NOMACHINE|FORMAT_URL_NOSUBDOMAIN));
+            $response->headers->clearCookie('REMEMBERME', "/", ".".format_url(get_url(), FORMAT_URL_NOMACHINE|FORMAT_URL_NOSUBDOMAIN));
 
             return $response;
         }
 
         // Check if the session is found.. meaning, the user just logged out
-        if($request->getSession()?->has("_user")) {
-
+        if ($request->getSession()?->has("_user")) {
             $user = $request->getSession()?->remove("_user");
-            if( $user->isKicked()   ) {
-
+            if ($user->isKicked()) {
                 $notification = new Notification("kickout", [$user]);
                 $notification->setUser($user);
                 $notification->send("warning");
                 $user->kick(0);
-
             } else {
-
                 $notification = new Notification("logout.success", [$user]);
                 $notification->send("info");
             }
@@ -207,7 +209,6 @@ class SecurityController extends AbstractController
     {
         // If already connected..
         if (($user = $this->getUser()) && $user->isPersistent()) {
-
             $notification = new Notification("login.already");
             $notification->send("warning");
 
@@ -219,8 +220,7 @@ class SecurityController extends AbstractController
                 'validation_groups' => ['new'],
                 'validation_entity' => User::class
             ])
-            ->onSubmit(function(FormProcessorInterface $formProcessor, Request $request) use ($userAuthenticator, $authenticator){
-
+            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($userAuthenticator, $authenticator) {
                 $newUser = $formProcessor->hydrate((new User()));
 
                 // An account might require to be verified by an admin
@@ -229,11 +229,13 @@ class SecurityController extends AbstractController
                 $newUser->setPlainPassword($formProcessor->getData("plainPassword"));
 
                 // Social account connection
-                if (($user = $this->getUser()) && $user->isVerified())
+                if (($user = $this->getUser()) && $user->isVerified()) {
                     $newUser->verify($user->isVerified());
+                }
 
-                if ($newUser->isVerified() && $this->parameterBag->get("base.user.register.notify_admins"))
+                if ($newUser->isVerified() && $this->parameterBag->get("base.user.register.notify_admins")) {
                     $this->notifier->sendAdminsUserApprovalRequest($newUser);
+                }
 
                 $this->entityManager->persist($newUser);
                 $this->entityManager->flush();
@@ -245,8 +247,7 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('user_profile');
             })
 
-            ->onDefault(function(FormProcessorInterface $formProcessor) {
-
+            ->onDefault(function (FormProcessorInterface $formProcessor) {
                 return $this->render('security/register.html.twig', [
                     'form' => $formProcessor->getForm()->createView(),
                     'user' => $formProcessor->getData()
@@ -267,20 +268,14 @@ class SecurityController extends AbstractController
         // Check if accound is already verified..
         $user = $this->getUser();
         if ($user->isVerified()) {
-
             $notification = new Notification("verifyEmail.already");
             $notification->send("info");
-
         } else {
-
             $verifyEmailToken = $user->getToken("verify-email");
-            if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
-
+            if ($verifyEmailToken && $verifyEmailToken->hasVeto()) {
                 $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getThrottleTimeStr()]);
                 $notification->send("danger");
-
             } else {
-
                 $verifyEmailToken = new Token("verify-email", 24*3600, 3600);
                 $verifyEmailToken->setUser($user);
 
@@ -300,29 +295,25 @@ class SecurityController extends AbstractController
     public function VerifyEmailResponse(Request $request, UserAuthenticatorInterface $userAuthenticator, LoginFormAuthenticator $authenticator, string $token): Response
     {
         $token = $this->tokenRepository->findOneByValueAndName($token, "verify-email");
-        if($token) $userAuthenticator->authenticateUser($token->getUser(), $authenticator, $request);
+        if ($token) {
+            $userAuthenticator->authenticateUser($token->getUser(), $authenticator, $request);
+        }
 
         $user = $this->getUser();
         $user->removeExpiredTokens("verify-email");
 
         if ($user->isVerified()) {
-
             $notification = new Notification('verifyEmail.already');
             $notification->setUser($user);
             $notification->send('info');
-
         } else {
-
             $verifyEmailToken = $user->getValidToken("verify-email");
 
             if ($verifyEmailToken === null || $verifyEmailToken->get() != $token->get()) {
-
                 $notification = new Notification("verifyEmail.invalidToken");
                 $notification->setUser($user);
                 $notification->send("danger");
-
             } else {
-
                 $user->verify(true);
                 $verifyEmailToken->revoke();
 
@@ -330,8 +321,9 @@ class SecurityController extends AbstractController
                 $notification->setUser($user);
                 $notification->send('success');
 
-                if (!$user->isApproved()) // If the account needs further validation by admin..
+                if (!$user->isApproved()) { // If the account needs further validation by admin..
                     $this->AdminApprovalRequest($request);
+                }
             }
         }
 
@@ -347,20 +339,14 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         $user->removeExpiredTokens("admin-approval");
 
-        if(!$user->isVerified()) {
-
+        if (!$user->isVerified()) {
             $notification = new Notification("adminApproval.verifyFirst");
             $notification->send("warning");
-
-        } else if (!$user->isApproved()) {
-
-            if ( ($adminApprovalToken = $user->getValidToken("admin-approval")) ) {
-
+        } elseif (!$user->isApproved()) {
+            if (($adminApprovalToken = $user->getValidToken("admin-approval"))) {
                 $notification = new Notification("adminApproval.alreadySent");
                 $notification->send("warning");
-
             } else {
-
                 $adminApprovalToken = new Token("admin-approval");
                 $adminApprovalToken->setUser($user);
 
@@ -380,15 +366,12 @@ class SecurityController extends AbstractController
     {
         $user = $this->getUser();
 
-        if($user->isDisabled()) {
-
+        if ($user->isDisabled()) {
             $notification = new Notification("accountGoodbye.already");
             $notification->send("warning");
 
             return $this->redirectToRoute($this->router->getRouteIndex());
-
         } else {
-
             $user->disable();
             $user->logout();
 
@@ -405,25 +388,21 @@ class SecurityController extends AbstractController
         $welcomeBackToken = $this->tokenRepository->findOneByValueAndName($token, "welcome-back");
         $user = $welcomeBackToken ? $welcomeBackToken->getUser() : $this->getUser();
 
-        if($user && !$user->isDisabled()) {
-
+        if ($user && !$user->isDisabled()) {
             $welcomeBackToken->revoke();
 
             $notification = new Notification("accountWelcomeBack.already");
             $notification->send("warning");
-
-        } else if ($user && $user->getValidToken("welcome-back")){
-
+        } elseif ($user && $user->getValidToken("welcome-back")) {
             $user->enable();
             $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
 
             $this->entityManager->flush();
             return $authenticateUser;
-
         } else {
-
-            if ($welcomeBackToken)
+            if ($welcomeBackToken) {
                 $welcomeBackToken->revoke();
+            }
 
             $notification = new Notification("accountWelcomeBack.invalidToken");
             $notification->send("danger");
@@ -442,7 +421,6 @@ class SecurityController extends AbstractController
     public function ResetPasswordRequest(Request $request): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent()) {
-
             $notification = new Notification("login.already");
             $notification->send("warning");
 
@@ -453,15 +431,12 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $notification = new Notification("resetPassword.confirmation");
 
             $email = $username = $form->get('email')->getData();
-            if( ($user = $this->userRepository->findOneByUsernameOrEmail($email, $username)) ) {
-
+            if (($user = $this->userRepository->findOneByUsernameOrEmail($email, $username))) {
                 $user->removeExpiredTokens("reset-password");
                 if (!$user->getToken("reset-password")) {
-
                     $resetPasswordToken = new Token("reset-password", 3600);
                     $resetPasswordToken->setUser($user);
 
@@ -486,7 +461,6 @@ class SecurityController extends AbstractController
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent()) {
-
             $notification = new Notification("login.already");
             $notification->send("warning");
 
@@ -495,14 +469,11 @@ class SecurityController extends AbstractController
 
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
         if (!$resetPasswordToken) {
-
             $notification = new Notification("resetPassword.invalidToken");
             $notification->send("danger");
 
             return $this->redirectToRoute($this->router->getRouteIndex());
-
         } else {
-
             $user = $resetPasswordToken->getUser();
 
             // The token is valid; allow the user to change their password.
@@ -510,7 +481,6 @@ class SecurityController extends AbstractController
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
-
                 $resetPasswordToken->revoke();
                 $user->setPlainPassword($form->get('plainPassword')->getData());
 
@@ -574,7 +544,9 @@ class SecurityController extends AbstractController
      */
     public function PendingForApproval(): Response
     {
-        if($this->getUser()->isApproved()) return $this->redirectToRoute("app_index");
+        if ($this->getUser()->isApproved()) {
+            return $this->redirectToRoute("app_index");
+        }
         return $this->render('security/pendingForApproval.html.twig');
     }
 }

@@ -22,7 +22,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * */
 class DropzoneController extends AbstractController
 {
-    const CACHE_DURATION = 24*3600;
+    public const CACHE_DURATION = 24*3600;
 
     public const STATUS_OK      = "OK";
     public const STATUS_BAD     = "BAD";
@@ -75,15 +75,16 @@ class DropzoneController extends AbstractController
     {
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
-        if(!$token || !$this->isCsrfTokenValid("dropzone", $token))
+        if (!$token || !$this->isCsrfTokenValid("dropzone", $token)) {
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
+        }
 
         // Move.. with flysystem
-        if( !($file = $request->files->get("file")) )
+        if (!($file = $request->files->get("file"))) {
             return new Response($this->translator->trans("fileupload.error.no_file", [], "fields"), 500);
+        }
 
         switch($file->getError()) {
-
             case UPLOAD_ERR_OK: break;
             case UPLOAD_ERR_INI_SIZE:
             case UPLOAD_ERR_FORM_SIZE:
@@ -102,12 +103,14 @@ class DropzoneController extends AbstractController
                 return new Response("Unknown error during upload.", 500);
         }
 
-        if(array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6*$config["maxFilesize"])
+        if (array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6*$config["maxFilesize"]) {
             return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
+        }
 
         $cacheDir = $this->getCacheDir()."/dropzone";
-        if(!$this->filesystem->exists($cacheDir))
+        if (!$this->filesystem->exists($cacheDir)) {
             $this->filesystem->mkdir($cacheDir);
+        }
 
         $fileUuid = Uuid::v4();
         $filePath = $cacheDir."/".$fileUuid;
@@ -120,13 +123,16 @@ class DropzoneController extends AbstractController
         ];
 
         // dirname($newFileName))
-        if(!is_writable(dirname($file->getPathname())))
+        if (!is_writable(dirname($file->getPathname()))) {
             return new Response("Repository directory not writable.", 500);
-        if(!file_exists($file->getPathname()))
+        }
+        if (!file_exists($file->getPathname())) {
             return new Response("Uploaded file lost in the limbo.", 500);
+        }
 
-        if(!move_uploaded_file($file->getRealPath(), $filePath))
+        if (!move_uploaded_file($file->getRealPath(), $filePath)) {
             return new Response($this->translator->trans("fileupload.error.cant_write", [], "fields"), 500);
+        }
 
         // $fnExpiry = function($expiry, $uuid) use ($cacheDir) {
 
@@ -172,18 +178,21 @@ class DropzoneController extends AbstractController
     {
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
-        if(!$token) throw new InvalidCsrfTokenException();
+        if (!$token) {
+            throw new InvalidCsrfTokenException();
+        }
 
-        if(!$this->isCsrfTokenValid("dropzone", $token))
+        if (!$this->isCsrfTokenValid("dropzone", $token)) {
             return new Response("Invalid token.", 500);
+        }
 
-        if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
+        if (!preg_match('/^[a-f0-9\-]{36}$/i', $uuid)) {
             return new Response("Invalid uuid.", 500);
+        }
 
         $cacheDir = $this->getCacheDir()."/dropzone";
         $path = $cacheDir."/".$uuid;
-        if(file_exists($path)) {
-
+        if (file_exists($path)) {
             $content = file_get_contents2($path);
             $mimetype = mime_content_type2($path);
 
@@ -211,17 +220,23 @@ class DropzoneController extends AbstractController
     {
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
-        if(!$token) throw new InvalidCsrfTokenException();
+        if (!$token) {
+            throw new InvalidCsrfTokenException();
+        }
 
-        if(!$this->isCsrfTokenValid("dropzone", $token))
+        if (!$this->isCsrfTokenValid("dropzone", $token)) {
             return new Response("Invalid token.", 500);
+        }
 
-        if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
+        if (!preg_match('/^[a-f0-9\-]{36}$/i', $uuid)) {
             return new Response("Invalid uuid.", 500);
+        }
 
         $cacheDir = $this->getCacheDir()."/dropzone";
         $path = $cacheDir."/".$uuid;
-        if(file_exists($path)) !unlink($path);
+        if (file_exists($path)) {
+            !unlink($path);
+        }
 
         return JsonResponse::fromJsonString(json_encode(["status"    => self::STATUS_OK, 'uuid' => $uuid]));
     }

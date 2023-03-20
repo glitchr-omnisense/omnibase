@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Base\Validator\Constraints;
 
 use Base\Validator\Constraint;
@@ -19,7 +18,7 @@ class NotBlank extends Constraint
     public $allowNull = false;
     public $normalizer;
 
-    public function getTargets() : string|array
+    public function getTargets(): string|array
     {
         return [self::CLASS_CONSTRAINT, self::PROPERTY_CONSTRAINT];
     }

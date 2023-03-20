@@ -33,8 +33,9 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 
     public function setParameter(string $parameterName, ?string $parameterValue = null)
     {
-        if($this->buildViolation == null)
+        if ($this->buildViolation == null) {
             throw new UnexpectedValueException("Please build violation before calling ".self::class."::setParameter.");
+        }
 
         $this->buildViolation
             ->setParameter("{{ ".$parameterName." }}", $parameterValue ?? "")
@@ -61,7 +62,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
     public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface
     {
         $this->buildViolation = $this->context->buildViolation($this->formatIdentifier($constraint));
-        
+
         $this->setParameter('field', $this->getPropertyName());
         $this->setParameter('value', $value);
 

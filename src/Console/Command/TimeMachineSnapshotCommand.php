@@ -30,8 +30,13 @@ class TimeMachineSnapshotCommand extends Command
     protected $flysystem;
 
     public function __construct(
-        LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
-        TimeMachineInterface $timeMachine, FlysystemInterface $flysystem)
+        LocalizerInterface $localizer,
+        TranslatorInterface $translator,
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $parameterBag,
+        TimeMachineInterface $timeMachine,
+        FlysystemInterface $flysystem
+    )
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->timeMachine = $timeMachine;
@@ -41,29 +46,30 @@ class TimeMachineSnapshotCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('storages', InputArgument::IS_ARRAY, 'What storages do you want to backup?');
-        $this->addOption  ('cycle'   , null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
-        $this->addOption  ('prefix'  , null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', null);
+        $this->addOption('cycle', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
+        $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', null);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->timeMachine->setCommandOutput($output);
-       
+
         $storages       = $input->getArgument('storages') ?? [];
         $prefix         = $input->getOption('prefix')   ?? null;
         $cycle          = $input->getOption('cycle')      ?? -1;
-        
+
         $output->section()->writeln("<info>Available database connection(s)</info>:");
-        foreach($this->timeMachine->getDatabaseList() as $connectionName => $database)
+        foreach ($this->timeMachine->getDatabaseList() as $connectionName => $database) {
             $output->section()->writeln(" * <info>" . $connectionName . "</info> (". get_class($database).")");
-        
-        if($output) $output->section()->writeln("");
+        }
+
+        if ($output) {
+            $output->section()->writeln("");
+        }
 
         $output->section()->writeln("<info>Storage filesystem:</info> ");
-        foreach($this->timeMachine->getStorageList() as $storageName => $storage) {
-            
-            if($this->flysystem->hasStorage($storageName)) {
-
+        foreach ($this->timeMachine->getStorageList() as $storageName => $storage) {
+            if ($this->flysystem->hasStorage($storageName)) {
                 $public = $this->flysystem->getPublic("/", $storageName);
 
                 $selected = in_array($storageName, $storages);
@@ -73,19 +79,26 @@ class TimeMachineSnapshotCommand extends Command
                 $output->section()->writeln("* [<info>".$storageName."</info>] ".$remote.$public.$selected);
             }
         }
-        
-        if($output) $output->section()->writeln("");
+
+        if ($output) {
+            $output->section()->writeln("");
+        }
 
         $index = 0;
-        foreach($this->timeMachine->getSnapshots($storages, null, $cycle) as $storageName => $snapshot) {
+        foreach ($this->timeMachine->getSnapshots($storages, null, $cycle) as $storageName => $snapshot) {
             $output->section()->writeln("<info>Available snapshot(s) in</info>: ". $storageName, OutputInterface::VERBOSITY_VERBOSE);
-            
-            $public = $this->flysystem->getPublic("/", $storageName);
-            if(!$snapshot) $output->section()->writeln("* No snapshot found", OutputInterface::VERBOSITY_VERBOSE);
-            foreach($snapshot as $file)
-                $output->section()->writeln("* [<info>".$index++."</info>] ".$public.$file, OutputInterface::VERBOSITY_VERBOSE);
 
-            if($output) $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
+            $public = $this->flysystem->getPublic("/", $storageName);
+            if (!$snapshot) {
+                $output->section()->writeln("* No snapshot found", OutputInterface::VERBOSITY_VERBOSE);
+            }
+            foreach ($snapshot as $file) {
+                $output->section()->writeln("* [<info>".$index++."</info>] ".$public.$file, OutputInterface::VERBOSITY_VERBOSE);
+            }
+
+            if ($output) {
+                $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
+            }
         }
 
         return Command::SUCCESS;

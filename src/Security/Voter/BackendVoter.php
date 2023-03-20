@@ -8,14 +8,17 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class BackendVoter extends Voter
 {
-    const BACKEND = "BACKEND";
+    public const BACKEND = "BACKEND";
 
-    /** 
-     * @var Router 
+    /**
+     * @var Router
      * */
     protected $router;
-    
-    public function __construct(RouterInterface $router) { $this->router = $router; }
+
+    public function __construct(RouterInterface $router)
+    {
+        $this->router = $router;
+    }
 
     protected function supports(string $attribute, mixed $subject): bool
     {

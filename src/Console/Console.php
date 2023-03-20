@@ -27,16 +27,17 @@ class Console implements ConsoleInterface
         return $this;
     }
 
-    public function exec(string $command, array $parameters = []) :?string
+    public function exec(string $command, array $parameters = []): ?string
     {
         $input  = array_merge($parameters, ['command' => $command]);
-        $input  = array_transforms(fn($k,$v): array => str_starts_with($v, "-") ? [$v, true] : [$k,$v], $input);
+        $input  = array_transforms(fn ($k, $v): array => str_starts_with($v, "-") ? [$v, true] : [$k,$v], $input);
         $input  = new ArrayInput($input);
 
         $output = is_cli() ? new ConsoleOutput($this->verbosity) : new BufferedOutput($this->verbosity);
         $this->application->run($input, $output);
-        if($output instanceof BufferedOutput)
+        if ($output instanceof BufferedOutput) {
             return $output->fetch();
+        }
 
         return null;
     }

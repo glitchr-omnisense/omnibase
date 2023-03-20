@@ -11,8 +11,17 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class SharerPass extends AbstractPass
 {
-    public function taggedServiceIds(): string { return "base.service.sharer"; }
+    public function taggedServiceIds(): string
+    {
+        return "base.service.sharer";
+    }
 
-    public function classFqcn(): string { return Sharer::class; }
-    public function addMethod(): string { return "addAdapter"; }
+    public function classFqcn(): string
+    {
+        return Sharer::class;
+    }
+    public function addMethod(): string
+    {
+        return "addAdapter";
+    }
 }

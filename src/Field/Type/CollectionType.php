@@ -52,7 +52,10 @@ class CollectionType extends AbstractType
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
-    public function getBlockPrefix(): string { return 'collection2'; }
+    public function getBlockPrefix(): string
+    {
+        return 'collection2';
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -72,21 +75,26 @@ class CollectionType extends AbstractType
             'row_group' => true,
             'entry_collapsed' => true,
             'entry_type' => HiddenType::class,
-            'entry_label' => function($i, $label)
-            {
-                if($i === "__prototype__") return false;
+            'entry_label' => function ($i, $label) {
+                if ($i === "__prototype__") {
+                    return false;
+                }
 
-                if(!is_object($label)) return $this->translator->trans("@fields.collection.entry"). " #".(((int)$i)+1);
+                if (!is_object($label)) {
+                    return $this->translator->trans("@fields.collection.entry"). " #".(((int)$i)+1);
+                }
 
                 $_label = $this->translator->transEntity($label). " #".(((int)$label->getId())+1);
-                if(is_stringeable($label)) $_label .= " : ". ((string) $label);
+                if (is_stringeable($label)) {
+                    $_label .= " : ". ((string) $label);
+                }
                 return $_label;
             },
             'entry_options' => [],
             'entry_required' => null,
             'delete_empty' => false,
             'invalid_message' => function (Options $options, $previousValue) {
-               return 'The collection is invalid.';
+                return 'The collection is invalid.';
             },
         ]);
 
@@ -104,8 +112,8 @@ class CollectionType extends AbstractType
             return true;
         });
 
-        $resolver->setNormalizer('allow_add',     fn(Options $options, $value) => $options["length"] == 0 && $value);
-        $resolver->setNormalizer('allow_delete',  fn(Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('allow_add', fn (Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('allow_delete', fn (Options $options, $value) => $options["length"] == 0 && $value);
 
         $resolver->setAllowedTypes('delete_empty', ['bool', 'callable']);
     }
@@ -116,13 +124,14 @@ class CollectionType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         if ($options['allow_add'] && $options['prototype']) {
-
             $prototypeOptions = $options['entry_options'];
-            if (null !== $options['prototype_data'])
+            if (null !== $options['prototype_data']) {
                 $prototypeOptions['data'] = $options['prototype_data'];
+            }
 
-            if (null !== $options['entry_required'])
+            if (null !== $options['entry_required']) {
                 $prototypeOptions['required'] = $options['entry_required'];
+            }
 
             $prototypeOptions["label"] = "__prototype__";
             $prototypeOptions['attr']['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->translator->trans("@fields.array.value");
@@ -132,36 +141,36 @@ class CollectionType extends AbstractType
 
         // Prevent stringeable issue for entities...
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-
             $form = $event->getForm();
             $data = $event->getData();
-            if($form->getName() == "_collection") // Special case from association type
+            if ($form->getName() == "_collection") { // Special case from association type
                 $data ??= $form->getParent()->getData();
+            }
 
             $data ??= [];
 
-            foreach($data as $id => $entry) {
-
-                if (is_object($entry) && $options["allow_object"] == false)
+            foreach ($data as $id => $entry) {
+                if (is_object($entry) && $options["allow_object"] == false) {
                     throw new \Exception("Object data are not allowed in collection unless you mark it as so.. (use `allow_object` option)");
+                }
             }
 
             $event->setData($data);
         });
 
         // Resize collection according to length option
-        if(is_int($options["length"]) && $options["length"] > 0) {
-
+        if (is_int($options["length"]) && $options["length"] > 0) {
             $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-
                 $data = $event->getData() ?? [];
-                if($data instanceof Collection)
-                    while(count($data) < $options["length"]) $data->add(null);
-                else if(is_array($data))
+                if ($data instanceof Collection) {
+                    while (count($data) < $options["length"]) {
+                        $data->add(null);
+                    }
+                } elseif (is_array($data)) {
                     $data = array_pad($data, $options["length"], null);
+                }
 
                 $event->setData($data);
-
             });
         }
 
@@ -222,7 +231,6 @@ class CollectionType extends AbstractType
 
         /** @var FormInterface $prototype */
         if ($prototype = $form->getConfig()->getAttribute('prototype')) {
-
             $prototypeView = $view->vars['prototype'];
             if ($prototypeView->vars['multipart']) {
                 $view->vars['multipart'] = true;

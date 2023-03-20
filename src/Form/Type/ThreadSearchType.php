@@ -24,7 +24,7 @@ class ThreadSearchType extends AbstractType
     {
         $builder->add('generic', SearchType::class, ["required" => false]);
         $builder->add('content', SearchType::class, ["required" => false]);
-        $builder->add('title'  , SearchType::class, ["required" => false]);
+        $builder->add('title', SearchType::class, ["required" => false]);
         $builder->add('excerpt', SearchType::class, ["required" => false]);
         // $builder->add('content', SelectType::class, [ // Webpack required
         //     "required" => false,

@@ -20,11 +20,11 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getUrlIndex(): string;
 
     public function useAdvancedFeatures(): bool;
-    public function isProfiler(mixed $request = null) :bool;
-    public function isEasyAdmin(mixed $request = null) :bool;
-    public function isUX(mixed $request = null) :bool;
-    public function isWdt(mixed $request = null) :bool;
-    public function isSecured(mixed $request = null) :bool;
+    public function isProfiler(mixed $request = null): bool;
+    public function isEasyAdmin(mixed $request = null): bool;
+    public function isUX(mixed $request = null): bool;
+    public function isWdt(mixed $request = null): bool;
+    public function isSecured(mixed $request = null): bool;
     public function keepMachine(): bool;
     public function keepSubdomain(): bool;
 
@@ -41,7 +41,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function getRequest(): ?Request;
     public function getEnvironment(): string;
-    public function getLocale (?string $locale = null): string;
+    public function getLocale(?string $locale = null): string;
     public function getLocaleLang(?string $lang = null): string;
 
     public function getContext(): RequestContext;
@@ -52,7 +52,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function isCli(): bool;
     public function isDebug(): bool;
-    public function isBackend(mixed $request = null) :bool;
+    public function isBackend(mixed $request = null): bool;
     public function hasFirewall(?string $routeUrl = null): ?bool;
 
     public function getCache();

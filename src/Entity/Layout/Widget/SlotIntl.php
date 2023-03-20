@@ -17,7 +17,10 @@ class SlotIntl extends WidgetIntl
      * @ColumnAlias(column = "title")
      */
     protected $label;
-    public function getLabel(): ?string { return $this->label; }
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
     public function setLabel(?string $label): self
     {
         $this->label = $label;
@@ -28,7 +31,10 @@ class SlotIntl extends WidgetIntl
      * @ColumnAlias(column = "excerpt")
      */
     protected $help;
-    public function getHelp(): ?string { return $this->help; }
+    public function getHelp(): ?string
+    {
+        return $this->help;
+    }
     public function setHelp(?string $help): self
     {
         $this->help = $help;

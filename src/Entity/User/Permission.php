@@ -16,8 +16,14 @@ use App\Repository\User\PermissionRepository;
  */
 class Permission implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-lock"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-lock"];
+    }
 
     /**
      * @ORM\Id

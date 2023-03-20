@@ -6,9 +6,9 @@ interface LocalizerInterface
 {
     //
     // Locale, lang&country
-    public static function __toLocale (string $locale, ?string $separator = Localizer::LOCALE_SEPARATOR): string;
-    public static function __toLocaleLang (string $locale): string;
-    public static function __toLocaleCountry (string $locale): string;
+    public static function __toLocale(string $locale, ?string $separator = Localizer::LOCALE_SEPARATOR): string;
+    public static function __toLocaleLang(string $locale): string;
+    public static function __toLocaleCountry(string $locale): string;
     public static function normalizeLocale(string|array $locale, string $separator = Localizer::LOCALE_SEPARATOR): string|array;
 
     public static function getDefaultLocale(): ?string;
@@ -37,5 +37,4 @@ interface LocalizerInterface
     public static function getDefaultTimezone(): string;
     public static function getAvailableTimezones(): array;
     public function getTimezone(): string;
-
 }

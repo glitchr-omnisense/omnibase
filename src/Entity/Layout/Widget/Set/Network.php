@@ -24,8 +24,14 @@ use Base\Database\Annotation\Cache;
  */
 class Network extends Widget implements IconizeInterface, SetInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-network-wired"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-network-wired"];
+    }
 
     public function __construct(?string $title = null, array $routes = [])
     {
@@ -38,11 +44,15 @@ class Network extends Widget implements IconizeInterface, SetInterface
      * @OrderColumn
      */
     protected $routes;
-    public function getRoutes(): Collection { return $this->routes; }
+    public function getRoutes(): Collection
+    {
+        return $this->routes;
+    }
     public function addRoute(Route $route): self
     {
-        if(!$this->routes->contains($route))
+        if (!$this->routes->contains($route)) {
             $this->routes[] = $route;
+        }
 
         return $this;
     }

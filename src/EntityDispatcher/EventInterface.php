@@ -9,6 +9,6 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 interface EventInterface
 {
     public function getObjectManager();
-    public function getObjectClass()  : string;
-    public function getObject()       : object;
+    public function getObjectClass(): string;
+    public function getObject(): object;
 }

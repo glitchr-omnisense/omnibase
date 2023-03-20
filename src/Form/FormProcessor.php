@@ -22,38 +22,50 @@ class FormProcessor implements FormProcessorInterface
 {
     use BaseTrait;
     use FormProcessorTrait;
-    
+
     /** @var FormInterface */
     protected $form = [];
 
     public $flowSessions = [];
     public $flowCallbacks = [];
 
-    public function __construct(FormInterface $form) 
+    public function __construct(FormInterface $form)
     {
         $this->form = $form;
-        
+
         $this->onDefaultCallback = null;
         $this->onInvalidCallback = null;
         $this->onSubmitCallbacks = [];
     }
 
-    public function getForm    (): FormInterface { return $this->form; }
-    public function getFormType(): string        { return get_class($this->form); }
-    public function getOption (string $name):mixed { return $this->getOptions()[$name] ?? null; }
-    public function getOptions (): array { return $this->form->getConfig()->getType()->getOptionsResolver()->resolve(); }
+    public function getForm(): FormInterface
+    {
+        return $this->form;
+    }
+    public function getFormType(): string
+    {
+        return get_class($this->form);
+    }
+    public function getOption(string $name): mixed
+    {
+        return $this->getOptions()[$name] ?? null;
+    }
+    public function getOptions(): array
+    {
+        return $this->form->getConfig()->getType()->getOptionsResolver()->resolve();
+    }
 
-    public function getData    (?string $childName = null): mixed {
-
+    public function getData(?string $childName = null): mixed
+    {
         $form = $childName ? $this->form->get($childName) : $this->form;
         $data = $form?->getData();
 
         // Special case for buttons
-        if($form && $data instanceof FormModelInterface) {
-
+        if ($form && $data instanceof FormModelInterface) {
             foreach ($form->all() as $childName => $child) { // @TODO Use array_map_recursive()
-
-                if (!$child instanceof ClickableInterface) continue;
+                if (!$child instanceof ClickableInterface) {
+                    continue;
+                }
                 object_hydrate($data, [$childName => $child->isClicked()]);
             }
         }
@@ -61,19 +73,22 @@ class FormProcessor implements FormProcessorInterface
         return $data;
     }
 
-    public function setData    (mixed $data): self 
-    { 
+    public function setData(mixed $data): self
+    {
         $array = is_array($data) ? $data : $this->getEntityHydrator()->dehydrate($data) ?? [];
-        $array = array_map(fn($c) => $c instanceof PersistentCollection ? $this->getEntityHydrator()->dehydrate($c) : $c, $array);
+        $array = array_map(fn ($c) => $c instanceof PersistentCollection ? $this->getEntityHydrator()->dehydrate($c) : $c, $array);
 
         $formData = $this->form->getData();
-        if(is_object($this->form->getData())) $this->form->setData(object_hydrate($this->form->getData(), $array));
-        else if(!$this->form->isSubmitted()) $this->form->setData($formData ?? $data);
+        if (is_object($this->form->getData())) {
+            $this->form->setData(object_hydrate($this->form->getData(), $array));
+        } elseif (!$this->form->isSubmitted()) {
+            $this->form->setData($formData ?? $data);
+        }
 
-        if(!$this->form->isSubmitted()) {
-
-            foreach ($this->form->all() as $childName => $child) // @TODO Use array_map_recursive()
+        if (!$this->form->isSubmitted()) {
+            foreach ($this->form->all() as $childName => $child) { // @TODO Use array_map_recursive()
                 $child->setData($array[$childName] ?? null);
+            }
         }
 
         return $this;
@@ -81,14 +96,16 @@ class FormProcessor implements FormProcessorInterface
 
     public function hydrate(mixed $entity): mixed
     {
-        if($entity == null) return $entity;
+        if ($entity == null) {
+            return $entity;
+        }
 
         $ignoredFields = [];
         $data = $this->form->getData();
-        foreach($this->form as $childName => $child) {
-
-            if(!$child->getConfig()->getMapped())
+        foreach ($this->form as $childName => $child) {
+            if (!$child->getConfig()->getMapped()) {
                 $ignoredFields[] = $childName;
+            }
         }
 
         return $this->getEntityHydrator()->hydrate($entity, $data, $ignoredFields, EntityHydrator::CLASS_METHODS|EntityHydrator::FETCH_ASSOCIATIONS);
@@ -116,15 +133,16 @@ class FormProcessor implements FormProcessorInterface
     }
 
     protected $response;
-    public function hasResponse(): bool { return $this->response instanceof Response; }
+    public function hasResponse(): bool
+    {
+        return $this->response instanceof Response;
+    }
     public function getResponse(): Response
     {
         if (!$this->response instanceof Response) {
-            
-            if($this->form->isSubmitted()) {
-
-                if($this->form->isValid()) {
-                    throw new Exception("Unexpected returned value from " . get_class($this) . "::onSubmit(".$this->form->getName().")#" . ($this->getStep()-1) . ": instance of " . Response::class . " expected");                
+            if ($this->form->isSubmitted()) {
+                if ($this->form->isValid()) {
+                    throw new Exception("Unexpected returned value from " . get_class($this) . "::onSubmit(".$this->form->getName().")#" . ($this->getStep()-1) . ": instance of " . Response::class . " expected");
                 }
 
                 throw new Exception("Unexpected returned value from " . get_class($this) . "::onInvalid(".$this->form->getName().")#" . ($this->getStep()-1) . ": instance of " . Response::class . " expected");
@@ -136,19 +154,23 @@ class FormProcessor implements FormProcessorInterface
         return $this->response;
     }
 
-    public function getDto(): ?FormModelInterface {
-
+    public function getDto(): ?FormModelInterface
+    {
         $data = $this->getData();
         return $data instanceof FormModelInterface ? $data : null;
     }
 
 
     protected $entity;
-    public function getEntity() { return $this->entity; }
+    public function getEntity()
+    {
+        return $this->entity;
+    }
     public function handleRequest(Request $request): static
     {
-        if(!$this->form)
+        if (!$this->form) {
             throw new Exception("No form provided in FormProcessor");
+        }
 
         $this->form->handleRequest($request);
 
@@ -164,8 +186,9 @@ class FormProcessor implements FormProcessorInterface
         $nextStep = true; //false;
 
         $submitCount = count($this->onSubmitCallbacks);
-        if($stepMax > 0 && $submitCount > 1 && $stepMax != $submitCount)
+        if ($stepMax > 0 && $submitCount > 1 && $stepMax != $submitCount) {
             throw new Exception("Number of FormProcessor::onSubmit() calls is not matching the number of steps in ".$formType);
+        }
 
         // Bind session to form (retrieve previous step information)
         // $this->bindSession($request->getSession());
@@ -198,26 +221,28 @@ class FormProcessor implements FormProcessorInterface
         //     $this->appendPost($request);
         // }
 
-        if($this->form->isSubmitted()) {
-
+        if ($this->form->isSubmitted()) {
             // Prepare response either calling onDefault or onSubmit step
-            if($this->form->isValid()) {
-                $this->response = count($this->onSubmitCallbacks) > $step-1 ? call_user_func($this->onSubmitCallbacks[$step-1], $this, $request) : null;            
+            if ($this->form->isValid()) {
+                $this->response = count($this->onSubmitCallbacks) > $step-1 ? call_user_func($this->onSubmitCallbacks[$step-1], $this, $request) : null;
             } else {
                 $this->response = $this->onInvalidCallback ? call_user_func($this->onInvalidCallback, $this, $request) : null;
             }
 
-            if($step >= $stepMax)
+            if ($step >= $stepMax) {
                 $this->killSession($session);
+            }
         }
 
-        if(!$this->response)
+        if (!$this->response) {
             $this->response = $this->onDefaultCallback ? call_user_func($this->onDefaultCallback, $this, $request) : null;
+        }
 
-        if (is_string($this->response))
+        if (is_string($this->response)) {
             $this->response = new Response($this->response);
+        }
 
-        // Create one view.. make sure assets are loaded 
+        // Create one view.. make sure assets are loaded
         $this->getForm()->createView();
 
         return $this;
@@ -229,14 +254,16 @@ class FormProcessor implements FormProcessorInterface
         $this->flowCallbacks = [];
         $this->setStep(0);
     }
-    
+
     public function getToken()
     {
         $options = $this->getConfig()->getOptions();
         $name  = $options['flow_form_id'] ?? "";
         $token = $_POST[$name] ?? "";
 
-        if (!empty($token) && preg_match("/(.*)#([0-9]*)/", $token, $matches)) return $matches[1];
+        if (!empty($token) && preg_match("/(.*)#([0-9]*)/", $token, $matches)) {
+            return $matches[1];
+        }
 
         return rand_str();
     }
@@ -249,7 +276,8 @@ class FormProcessor implements FormProcessorInterface
     public function addConfirmStep()
     {
         $options = $this->getConfig()->getOptions();
-        return $this->addStep($options, function (FormBuilderInterface $builder, array $options) {});
+        return $this->addStep($options, function (FormBuilderInterface $builder, array $options) {
+        });
     }
 
     public function getPreviousStep()

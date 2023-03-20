@@ -8,8 +8,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class StateType extends AbstractType
 {
-    public function getParent() : ?string { return SelectType::class; }
-    public function getBlockPrefix(): string { return 'state'; }
+    public function getParent(): ?string
+    {
+        return SelectType::class;
+    }
+    public function getBlockPrefix(): string
+    {
+        return 'state';
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {

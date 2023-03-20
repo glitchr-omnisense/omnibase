@@ -20,7 +20,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      * {@inheritdoc}
      */
 
-    public function loadUserByIdentifier($response) : UserInterface
+    public function loadUserByIdentifier($response): UserInterface
     {
         $data = $response->getData();
 
@@ -32,16 +32,19 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
         $user->verify($data["verified_email"]);
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "username"))
+        if ($accessor->isWritable($this, "username")) {
             $accessor->setValue($this, "username", "Google");
+        }
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "username"))
+        if ($accessor->isWritable($this, "username")) {
             $accessor->setValue($this, "username", $data["family_name"]);
+        }
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "firstname"))
+        if ($accessor->isWritable($this, "firstname")) {
             $accessor->setValue($this, "firstname", $data["given_name"]);
+        }
 
         return $user;
     }
@@ -69,8 +72,9 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof User)
+        if (!$user instanceof User) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+        }
 
         return $user;
     }
@@ -78,7 +82,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
     /**
      * Tells Symfony to use this provider for this User class.
      */
-    public function supportsClass(string $class) : bool
+    public function supportsClass(string $class): bool
     {
         return User::class === $class || is_subclass_of($class, User::class);
     }

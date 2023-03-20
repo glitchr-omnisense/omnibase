@@ -15,5 +15,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 
 class AbstractActionAdapterCrudController extends AbstractAdapterCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 }

@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\Container;
 
 final class ClassTwigExtension extends AbstractExtension
 {
-    public function getFunctions() : array
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('get_short_class', [$this, 'getShortClass']),

@@ -44,7 +44,7 @@ class AppVariable
      * @var EasyAdminVariable
      */
     public $ea;
-    
+
     /**
      * @var SiteVariable
      */
@@ -69,11 +69,20 @@ class AppVariable
      * @var Localizer
      */
     public $localizer;
-    
+
     public function __construct(
-        \Symfony\Bridge\Twig\AppVariable $appVariable, EasyAdminVariable $ea, RandomVariable $random, SiteVariable $site, EmailVariable $email, BackofficeVariable $backoffice,
-        SettingBag $settingBag, ParameterBagInterface $parameterBag,
-        ReferrerInterface $referrer, Environment $twig, Localizer $localizer)
+        \Symfony\Bridge\Twig\AppVariable $appVariable,
+        EasyAdminVariable $ea,
+        RandomVariable $random,
+        SiteVariable $site,
+        EmailVariable $email,
+        BackofficeVariable $backoffice,
+        SettingBag $settingBag,
+        ParameterBagInterface $parameterBag,
+        ReferrerInterface $referrer,
+        Environment $twig,
+        Localizer $localizer
+    )
     {
         $this->settingBag     = $settingBag;
         $this->referrer       = $referrer;
@@ -90,19 +99,29 @@ class AppVariable
         $this->setProxy($appVariable);
     }
 
-    public function getGlobals() {
-
+    public function getGlobals()
+    {
         return array_transforms(
-            fn($k,$v):?array => $k != "app" && str_starts_with($k, "app") ? [str_strip($k, "app."), $v] : null,
+            fn ($k, $v): ?array => $k != "app" && str_starts_with($k, "app") ? [str_strip($k, "app."), $v] : null,
             $this->twig->getGlobals()
         );
     }
 
-    public function bag(?string $key = null, ?array $bag = null) { return $key ? $this->parameterBag->get($key, $bag) ?? null : $this->parameterBag; }
-    public function settings() { return $this->settingBag->get("app.settings") ?? []; }
-    public function referrer() { return $this->referrer; }
+    public function bag(?string $key = null, ?array $bag = null)
+    {
+        return $key ? $this->parameterBag->get($key, $bag) ?? null : $this->parameterBag;
+    }
+    public function settings()
+    {
+        return $this->settingBag->get("app.settings") ?? [];
+    }
+    public function referrer()
+    {
+        return $this->referrer;
+    }
 
-    public function locale()  {
+    public function locale()
+    {
         return [
             "_self"  => $this->localizer->getLocale(),
             "lang"    => $this->localizer->getLocaleLang(),

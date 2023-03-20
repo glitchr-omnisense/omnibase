@@ -53,30 +53,32 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         }
 
         if (null !== $patternFieldName = $field->getCustomOptions()->get(ArrayField::OPTION_PATTERN_FIELD_NAME)) {
-
             $entity = $entityDto->getInstance();
-            foreach(explode(".", $patternFieldName) as $propertyPath){
-
-                if(is_object($entity)) $entity = PropertyAccess::createPropertyAccessor()->getValue($entity, $propertyPath);
-                else throw new \Exception("Invalid property path for \"".get_class($entity)."\": ".$patternFieldName);
+            foreach (explode(".", $patternFieldName) as $propertyPath) {
+                if (is_object($entity)) {
+                    $entity = PropertyAccess::createPropertyAccessor()->getValue($entity, $propertyPath);
+                } else {
+                    throw new \Exception("Invalid property path for \"".get_class($entity)."\": ".$patternFieldName);
+                }
             }
 
             $formattedValue = $this->resolve($entity, ...PropertyAccess::createPropertyAccessor()->getValue($entityDto->getInstance(), $field->getProperty()));
             $field->setFormattedValue(is_url(sanitize_url($formattedValue)) ? "<a href='".sanitize_url($formattedValue)."'>".$formattedValue."</a>" : $formattedValue);
-
         } else {
-
             $field->setFormattedValue($this->formatCollection($field, $context));
         }
     }
 
     public function resolve(?string $pattern, ...$patternOpts): ?string
     {
-        if(!$pattern) return null;
+        if (!$pattern) {
+            return null;
+        }
 
         $search = [];
-        foreach($patternOpts as $index => $_)
+        foreach ($patternOpts as $index => $_) {
             $search[] = "{".$index."}";
+        }
 
         $url = str_replace($search, $patternOpts, $pattern);
         return rtrim(preg_match('/\{[0-9]*\}/', $url) ? null : $url, "/");

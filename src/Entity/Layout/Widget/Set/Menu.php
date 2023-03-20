@@ -24,8 +24,14 @@ use Base\Database\Annotation\Cache;
 
 class Menu extends Widget implements IconizeInterface, SetInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-compass"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-compass"];
+    }
 
     public function __construct(?string $title = null)
     {
@@ -38,11 +44,15 @@ class Menu extends Widget implements IconizeInterface, SetInterface
      * @OrderColumn
      */
     protected $items;
-    public function getItems(): Collection { return $this->items; }
+    public function getItems(): Collection
+    {
+        return $this->items;
+    }
     public function addItem(Widget $item): self
     {
-        if(!$this->items->contains($item) && class_implements_interface($item, LinkableInterface::class))
+        if (!$this->items->contains($item) && class_implements_interface($item, LinkableInterface::class)) {
             $this->items[] = $item;
+        }
 
         return $this;
     }

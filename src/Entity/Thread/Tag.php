@@ -32,10 +32,19 @@ class Tag implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return $this->getIcon() ? [$this->getIcon()] : null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-tags"]; }
+    public function __iconize(): ?array
+    {
+        return $this->getIcon() ? [$this->getIcon()] : null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-tags"];
+    }
 
-    public function __toString() { return $this->getLabel() ?? $this->getSlug() ?? get_class($this); }
+    public function __toString()
+    {
+        return $this->getLabel() ?? $this->getSlug() ?? get_class($this);
+    }
 
     public function __construct(?string $label = null, ?string $slug = null)
     {
@@ -51,14 +60,20 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * @ORM\Column(length=255, unique=true)
      * @Slugify(reference="translations.label")
      */
     protected $slug;
-    public function getSlug(): ?string { return $this->slug; }
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
@@ -69,7 +84,10 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="string", length=9, nullable=true)
      */
     protected $color;
-    public function getColor(): ?string { return $this->color; }
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
     public function setColor(?string $color): self
     {
         $this->color = $color;
@@ -82,8 +100,14 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @AssertBase\File(max_size="2MB", mime_types={"image/*"}, groups={"new", "edit"})
      */
     protected $icon;
-    public function getIcon() { return Uploader::getPublic($this, "icon"); }
-    public function getIconFile() { return Uploader::get($this, "icon"); }
+    public function getIcon()
+    {
+        return Uploader::getPublic($this, "icon");
+    }
+    public function getIconFile()
+    {
+        return Uploader::get($this, "icon");
+    }
     public function setIcon($icon)
     {
         $this->icon = $icon;
@@ -94,7 +118,10 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="tags")
      */
     protected $threads;
-    public function getThreads(): Collection { return $this->threads; }
+    public function getThreads(): Collection
+    {
+        return $this->threads;
+    }
     public function addThread(Thread $thread): self
     {
         if (!$this->threads->contains($thread)) {

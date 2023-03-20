@@ -56,18 +56,22 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     protected int $snapshotLimit;
 
     public function setCommandOutput(OutputInterface $output)
-    { 
+    {
         $this->output = $output;
         return $this;
     }
 
-    public function getCacheDir() { return $this->cacheDir."/timemachine"; }
+    public function getCacheDir()
+    {
+        return $this->cacheDir."/timemachine";
+    }
     public function preventAbort()
     {
         ignore_user_abort(true);
         pcntl_signal(SIGINT, "signal_handler");
 
-        function signal_handler($signal) {
+        function signal_handler($signal)
+        {
             switch($signal) {
                 case SIGINT:
                     echo "Time machine is preventing you to abort. Please kindly wait until the end of this script.\n";
@@ -88,14 +92,15 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $config = ["type" => "local", "root" => $this->getCacheDir()];
         $this->filesystemConfigs["local"] = $config;
 
-        foreach($flysystem->getStorageNames() as $storageName) {
-
-            if(str_ends_with($storageName, ".public")) continue;
+        foreach ($flysystem->getStorageNames() as $storageName) {
+            if (str_ends_with($storageName, ".public")) {
+                continue;
+            }
             $type = explode(".", $storageName)[0] ?? "local";
-                    
+
             switch($type) {
                 case "ftp":
-                case "sftp": 
+                case "sftp":
                     $config = ["type" => $type, 'root' => $flysystem->prefixPath("", $storageName), "connection" => $flysystem->getConnectionOptions($storageName)];
                     break;
                 default:
@@ -107,8 +112,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         //
         // Prepare database configuration
-        foreach($doctrine->getConnectionNames() as $connectionName => $_) {
-
+        foreach ($doctrine->getConnectionNames() as $connectionName => $_) {
             $params = $doctrine->getConnection($connectionName)->getParams();
             $this->databaseConfigs[$connectionName] = [
                 "type" => $params["driver"],
@@ -124,22 +128,22 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         //
         // Build providers
         $filesystems = new FilesystemProvider(new Config($this->filesystemConfigs));
-        $filesystems->add(new Awss3Filesystem);
-        $filesystems->add(new GcsFilesystem);
-        $filesystems->add(new DropboxFilesystem);
-        $filesystems->add(new FtpFilesystem);
-        $filesystems->add(new LocalFilesystem);
-        $filesystems->add(new RackspaceFilesystem);
-        $filesystems->add(new SftpFilesystem);
-        $filesystems->add(new WebdavFilesystem);
+        $filesystems->add(new Awss3Filesystem());
+        $filesystems->add(new GcsFilesystem());
+        $filesystems->add(new DropboxFilesystem());
+        $filesystems->add(new FtpFilesystem());
+        $filesystems->add(new LocalFilesystem());
+        $filesystems->add(new RackspaceFilesystem());
+        $filesystems->add(new SftpFilesystem());
+        $filesystems->add(new WebdavFilesystem());
 
         $databases = new DatabaseProvider(new Config($this->databaseConfigs));
-        $databases->add(new MysqlDatabase);
-        $databases->add(new PostgresqlDatabase);
+        $databases->add(new MysqlDatabase());
+        $databases->add(new PostgresqlDatabase());
 
-        $compressors = new CompressorProvider;
-        $compressors->add(new GzipCompressor);
-        $compressors->add(new NullCompressor);
+        $compressors = new CompressorProvider();
+        $compressors->add(new GzipCompressor());
+        $compressors->add(new NullCompressor());
 
         parent::__construct($filesystems, $databases, $compressors);
         $this->filesystems = $filesystems;
@@ -152,7 +156,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     }
 
     protected int $maxCycle;
-    public function getMaxCycle(): ?string { return $this->maxCycle; }
+    public function getMaxCycle(): ?string
+    {
+        return $this->maxCycle;
+    }
     public function setMaxCycle(?string $maxCycle)
     {
         $this->maxCycle = $maxCycle;
@@ -160,7 +167,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     }
 
     protected string $timeLimit;
-    public function getTimeLimit(): ?string { return $this->timeLimit; }
+    public function getTimeLimit(): ?string
+    {
+        return $this->timeLimit;
+    }
     public function setTimeLimit(?string $timeLimit)
     {
         $this->timeLimit = $timeLimit;
@@ -168,71 +178,92 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     }
 
     protected ?string $compression = "gzip";
-    public function getCompression(): ?string { return $this->compression; }
+    public function getCompression(): ?string
+    {
+        return $this->compression;
+    }
     public function setCompression(?string $compression)
     {
         $this->compression = $compression;
         return $this;
     }
 
-    public function getDatabase(string $name): Database { return $this->databases->get($name); }
-    public function getDatabaseConfiguration(string $name): Database { return $this->databases->get($name); }
-    public function getDatabaseList() : array {
-        
+    public function getDatabase(string $name): Database
+    {
+        return $this->databases->get($name);
+    }
+    public function getDatabaseConfiguration(string $name): Database
+    {
+        return $this->databases->get($name);
+    }
+    public function getDatabaseList(): array
+    {
         $list = [];
-        foreach($this->databases->getAvailableProviders() as $connectionName)
+        foreach ($this->databases->getAvailableProviders() as $connectionName) {
             $list[$connectionName] = $this->databases->get($connectionName);
+        }
 
         return $list;
     }
 
-    public function getStorage(string $name): Filesystem { return $this->filesystems->get($name); }
-    public function getStorageList() : array 
+    public function getStorage(string $name): Filesystem
+    {
+        return $this->filesystems->get($name);
+    }
+    public function getStorageList(): array
     {
         $list = [];
-        foreach($this->filesystems->getAvailableProviders() as $storageName)
+        foreach ($this->filesystems->getAvailableProviders() as $storageName) {
             $list[$storageName] = $this->filesystems->get($storageName);
+        }
 
         return $list;
     }
 
     public function getSnapshot(int $id, int|array $storageNames, $prefix = null, $cycle = -1)
-    { 
+    {
         $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
-        if($id >= count_leaves($snapshots))
+        if ($id >= count_leaves($snapshots)) {
             throw new \LogicException("Unknown ID #".$id." provided.");
+        }
 
         $prefix = $prefix ?? "backup";
 
         $i = 0;
 
-        if($id < 0) $id = count_leaves($snapshots)-1;
-        foreach($snapshots as $storageName => $files) {
-
-            foreach($files as $file) {
-
-                if($id != $i++) continue;
+        if ($id < 0) {
+            $id = count_leaves($snapshots)-1;
+        }
+        foreach ($snapshots as $storageName => $files) {
+            foreach ($files as $file) {
+                if ($id != $i++) {
+                    continue;
+                }
                 return [$storageName, $file];
             }
         }
 
         return null;
     }
-    
+
     public function getSnapshots(int|array $storageNames = [], $prefix = null, $cycle = -1): array
-    { 
+    {
         $snapshots = [];
         $prefix = $prefix ?? "backup";
 
         $storageNames = array_flip($storageNames);
-        foreach(array_intersect_key($this->getStorageList(), $storageNames) as $storageName => $filesystem) {
-
+        foreach (array_intersect_key($this->getStorageList(), $storageNames) as $storageName => $filesystem) {
             $snapshots[$storageName] = [];
-            foreach($filesystem->listContents("/") as $content) {
-
-                if($content->type() != "file") continue;
-                if(!str_starts_with($content->path(), $prefix)) continue;
-                if($cycle > 0 && !str_ends_with(basenameWithoutExtension($content->path()), "-".$cycle)) continue;
+            foreach ($filesystem->listContents("/") as $content) {
+                if ($content->type() != "file") {
+                    continue;
+                }
+                if (!str_starts_with($content->path(), $prefix)) {
+                    continue;
+                }
+                if ($cycle > 0 && !str_ends_with(basenameWithoutExtension($content->path()), "-".$cycle)) {
+                    continue;
+                }
 
                 $snapshots[$storageName][] = $content->path();
             }
@@ -240,10 +271,11 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             // Properly sort array
             $matches = [];
             sort($snapshots[$storageName]);
-            
+
             $mask = [];
-            foreach($snapshots[$storageName] as $snapshot)
+            foreach ($snapshots[$storageName] as $snapshot) {
                 $mask[] = preg_match('/'.preg_quote($prefix).'\-[0-9]+\-[0-9]+.\w/', basename($snapshot));
+            }
 
             $snapshots[$storageName] = array_reverseByMask($snapshots[$storageName], $mask);
             $snapshots[$storageName] = array_reverse($snapshots[$storageName]);
@@ -256,56 +288,61 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     {
         $matches = [];
         $lastCycle = 0;
-        if(preg_match('/'.preg_quote($prefix).'\-([0-9]*)\.\w/', basename(end($files)), $matches))
+        if (preg_match('/'.preg_quote($prefix).'\-([0-9]*)\.\w/', basename(end($files)), $matches)) {
             $lastCycle = intval($matches[1]);
-        else if(preg_match('/'.preg_quote($prefix).'\.\w/', basename(end($files)), $matches))
+        } elseif (preg_match('/'.preg_quote($prefix).'\.\w/', basename(end($files)), $matches)) {
             $lastCycle = 1;
+        }
 
         return $lastCycle;
     }
 
     public function backup(null|string|array $databases, int|array $storageNames = [], $prefix = null, $cycle = -1)
-    { 
+    {
         $prefix = $prefix ?? "backup";
-        if($this->output) $this->output->section()->writeln("<info>Backup procedure started:</info> " . $prefix);
+        if ($this->output) {
+            $this->output->section()->writeln("<info>Backup procedure started:</info> " . $prefix);
+        }
 
         // Remove too old backup
         $dateLimit = new \DateTime($this->timeLimit);
         $snapshots = $this->getSnapshots($storageNames, $prefix);
-        foreach($snapshots as $storageName => $files) {
-
+        foreach ($snapshots as $storageName => $files) {
             $filesystem = $this->filesystems->get($storageName);
-            foreach($files as $file) {
-
+            foreach ($files as $file) {
                 $matches = [];
                 $dateTime = null;
-                if(preg_match('/'.preg_quote($prefix).'-([0-9]*)/', $file, $matches))
+                if (preg_match('/'.preg_quote($prefix).'-([0-9]*)/', $file, $matches)) {
                     $dateTime = \DateTime::createFromFormat('Ymd', $matches[1]);
+                }
 
-                if($dateTime && $dateTime < $dateLimit) {
-
-                    if($this->output) $this->output->section()->writeln("- Too old version found (older than ".$this->timeLimit."), deleting <warning>".$file."</warning>");
+                if ($dateTime && $dateTime < $dateLimit) {
+                    if ($this->output) {
+                        $this->output->section()->writeln("- Too old version found (older than ".$this->timeLimit."), deleting <warning>".$file."</warning>");
+                    }
                     $filesystem->delete($file, $storageName);
                 }
             }
         }
-        
+
         // Find today versions
         $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
-        if(!$snapshots) throw new \LogicException("No valid storage selected.");
+        if (!$snapshots) {
+            throw new \LogicException("No valid storage selected.");
+        }
 
         // Prepare Backup filesystem
         $destinations = [];
 
         $prefix = $prefix."-".(new \DateTime())->format('Ymd');
-        foreach($snapshots as $storageName => $files) {
-            
+        foreach ($snapshots as $storageName => $files) {
             //
             // Remote older version
             $filesystem = $this->filesystems->get($storageName);
-            for($i = 0; $i < max(count($files)-$this->getMaxCycle(), 0); $i++) {
-
-                if($this->output) $this->output->section()->writeln("- Too many versions found, deleting <warning>".$files[$i]."</warning>");
+            for ($i = 0; $i < max(count($files)-$this->getMaxCycle(), 0); $i++) {
+                if ($this->output) {
+                    $this->output->section()->writeln("- Too many versions found, deleting <warning>".$files[$i]."</warning>");
+                }
                 $filesystem->delete($files[$i], $storageName);
             }
 
@@ -319,42 +356,49 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
 
         // Dump database to local repository
-        if($this->output) $this->output->section()->writeln("<info>- Temporary working directory:</info> " . $this->getCacheDir() . "/" . $prefix);
-        if($databases) {
+        if ($this->output) {
+            $this->output->section()->writeln("<info>- Temporary working directory:</info> " . $this->getCacheDir() . "/" . $prefix);
+        }
+        if ($databases) {
+            $databases = is_string($databases) ? [$databases] : $databases;
+            if ($this->output) {
+                $this->output->section()->writeln("<info>- Backing databases:</info> ". implode(", ", $databases));
+            }
 
-            $databases = is_string($databases) ? [$databases] : $databases; 
-            if($this->output) $this->output->section()->writeln("<info>- Backing databases:</info> ". implode(", ", $databases));
-            
-            foreach($databases as $database) 
+            foreach ($databases as $database) {
                 parent::makeBackup()->run($database, [new Destination("local", $prefix."/databases/".$database.".sql")], "null");
+            }
         }
 
         // Prepare backup directory
-        if(!is_dir($this->getCacheDir()."/".$prefix))
+        if (!is_dir($this->getCacheDir()."/".$prefix)) {
             mkdir($this->getCacheDir()."/".$prefix, 0755);
-            
+        }
+
         // Compress and transfer
         $output = $this->buildArchive($this->getCacheDir()."/".$prefix."/application.tar", getcwd(), [$this->cacheDir]);
         $output = $this->buildCompressedArchive($this->getCacheDir()."/".$prefix.".tar", $this->getCacheDir()."/".$prefix, []);
-        
-        foreach($destinations as $id => $destination) {
 
+        foreach ($destinations as $id => $destination) {
             $filesystem = $this->filesystems->get($destination->destinationFilesystem());
-            
+
             $compressor = $this->compressors->get($this->compression);
             $path       = $compressor->getCompressedPath($destination->destinationPath());
             $prefix     = $this->flysystem->prefixPath($path, $destination->destinationFilesystem());
-            
-            if ($stream = fopen($output, 'r')) {  
-              
+
+            if ($stream = fopen($output, 'r')) {
                 $filesystem->writeStream($path, $stream);
                 fclose($stream);
             }
 
-            if($this->output) $this->output->section()->writeln("<info>- Application backup #".($id+1)."</info> in \"".$destination->destinationFilesystem()."\": ".$prefix);
+            if ($this->output) {
+                $this->output->section()->writeln("<info>- Application backup #".($id+1)."</info> in \"".$destination->destinationFilesystem()."\": ".$prefix);
+            }
         }
 
-        if(file_exists($output)) unlink($output);
+        if (file_exists($output)) {
+            unlink($output);
+        }
 
         return true;
     }
@@ -364,32 +408,33 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $prefix = $prefix ?? "backup";
 
         list($storageName, $file) = $this->getSnapshot($id, $storageNames, $prefix, $cycle);
-        if(!$storageName) throw new \LogicException("No snapshot found among the list of storages provided: \"".implode(",",$storageNames)."\"");
-        
+        if (!$storageName) {
+            throw new \LogicException("No snapshot found among the list of storages provided: \"".implode(",", $storageNames)."\"");
+        }
+
         $location = getcwd()."-".str_lstrip(basename(basenameWithoutExtension($file), ".tar"), $prefix."-")."-at-".date("Ymd-his");
-        if(!dir_empty($location)) throw new \LogicException("Restoration directory is not empty: \"".$location."\"");
-        
+        if (!dir_empty($location)) {
+            throw new \LogicException("Restoration directory is not empty: \"".$location."\"");
+        }
+
         $filesystem = $this->filesystems->get($storageName);
 
         $localFile = $this->getCacheDir()."/".basename($file);
         $resource = $filesystem->readStream($file);
         if ($resource) {
-
             file_put_contents($localFile, $resource);
             fclose($resource);
         }
 
         $this->openArchive($localFile);
-    
+
         // Restore filesystem
-        $outputDir = dirname($localFile)."/".basename(basenameWithoutExtension($localFile), ".tar");    
-        if(!$restoreApplication) {
-
-            if ($this->output) 
+        $outputDir = dirname($localFile)."/".basename(basenameWithoutExtension($localFile), ".tar");
+        if (!$restoreApplication) {
+            if ($this->output) {
                 $this->output->section()->writeln("<info>- Application not restored !</info> ");
-
+            }
         } else {
-
             $this->openArchive($outputDir."/application.tar");
             rename($outputDir."/application", $location);
 
@@ -399,96 +444,116 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             }
         }
 
-        if(!$restoreDatabase) {
-
-            if ($this->output) 
+        if (!$restoreDatabase) {
+            if ($this->output) {
                 $this->output->section()->writeln("<info>- Database not restored !</info> ");
-        
+            }
         } else {
-
             $finder = new Finder();
             $databases = [];
-            foreach($finder->name('*.sql')->in($outputDir."/databases") as $sql)
+            foreach ($finder->name('*.sql')->in($outputDir."/databases") as $sql) {
                 $databases[] =  basename($sql, ".sql");
-        
-            if($databases) {
+            }
 
-                if($this->output) $this->output->section()->writeln("<info>- Restoring databases:</info> ". implode(", ", $databases));
-                foreach($databases as $database)
+            if ($databases) {
+                if ($this->output) {
+                    $this->output->section()->writeln("<info>- Restoring databases:</info> ". implode(", ", $databases));
+                }
+                foreach ($databases as $database) {
                     parent::makeRestore()->run("local", basename($outputDir)."/databases/".$database.".sql", $database, "null");
+                }
             }
         }
 
         return true;
     }
 
-    public function openCompressedArchive(string $output, ): ?string { return $this->openArchive($output, true); }
+    public function openCompressedArchive(string $output): ?string
+    {
+        return $this->openArchive($output, true);
+    }
     public function openArchive(string $output, bool $compression = false): ?string
     {
         // Compress tarball
-        if($compression) {
+        if ($compression) {
+            if ($ret) {
+                throw new \LogicException("Failed to decompress tarball: ". $output);
+            }
 
-            if($ret) throw new \LogicException("Failed to decompress tarball: ". $output);
- 
             $compressor = $this->compressors->get($this->compression);
             $decompressedOutput = $compressor->getDecompressedPath($output);
 
-            if($this->output) $this->output->section()->writeln("<info>- Decompressing.. </info> ./" . basename($decompressedOutput));
+            if ($this->output) {
+                $this->output->section()->writeln("<info>- Decompressing.. </info> ./" . basename($decompressedOutput));
+            }
             $command = $compressor->getDecompressCommandLine($output);
-            
+
             list($_, $ret) = [[], false];
-            if($command) exec($command, $_, $ret);
+            if ($command) {
+                exec($command, $_, $ret);
+            }
             $output = $decompressedOutput;
         }
 
         // Untar application
         list($_, $ret) = [[], false];
         $outputDir = dirname($output)."/".basename(basenameWithoutExtension($output), ".tar");
-       
+
         // Prepare backup directory
-        if(!is_dir($outputDir))
+        if (!is_dir($outputDir)) {
             mkdir($outputDir, 0755);
-    
+        }
+
         exec(sprintf('tar --directory=%s -xf %s', escapeshellarg($outputDir), escapeshellarg($output)), $_, $ret);
 
         return $outputDir;
     }
 
-    public function buildCompressedArchive(string $output, string $directory, array $excludes = []): ?string { return $this->buildArchive($output, $directory, $excludes, true); }
+    public function buildCompressedArchive(string $output, string $directory, array $excludes = []): ?string
+    {
+        return $this->buildArchive($output, $directory, $excludes, true);
+    }
     public function buildArchive(string $output, string $directory, array $excludes = [], bool $compression = false): ?string
     {
         // Prepare tarball archive
         $output    = str_replace(getcwd(), ".", $output)  ;
         $directory = str_replace(getcwd(), ".", $directory);
-        $excludes  = array_map(fn($o) => str_replace(getcwd(), ".", $o), $excludes);
-      
-        $exclusions = "";
-        foreach($excludes as $exclude)
-            $exclusions .= "--exclude='".$exclude."'";
+        $excludes  = array_map(fn ($o) => str_replace(getcwd(), ".", $o), $excludes);
 
-        if($this->output) $this->output->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output));
- 
+        $exclusions = "";
+        foreach ($excludes as $exclude) {
+            $exclusions .= "--exclude='".$exclude."'";
+        }
+
+        if ($this->output) {
+            $this->output->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output));
+        }
+
         list($_, $ret) = [[], false];
         exec(sprintf('tar %s --directory=%s -cf %s %s', $exclusions, escapeshellarg($directory), escapeshellarg($output), '.'), $_);
 
         // Compress tarball
-        if($compression) {
+        if ($compression) {
+            if ($ret) {
+                throw new \LogicException("Failed to create tarball: ". $output);
+            }
 
-            if($ret) throw new \LogicException("Failed to create tarball: ". $output);
- 
             $compressor = $this->compressors->get($this->compression);
             $compressedOutput = $compressor->getCompressedPath($output);
 
-            if($this->output) $this->output->section()->writeln("<info>- Compressing.. </info> ./" . basename($compressedOutput));
+            if ($this->output) {
+                $this->output->section()->writeln("<info>- Compressing.. </info> ./" . basename($compressedOutput));
+            }
             $command = $compressor->getCompressCommandLine($output);
-            
+
             list($_, $ret) = [[], false];
-            if($command) exec($command, $_, $ret);
+            if ($command) {
+                exec($command, $_, $ret);
+            }
 
             return $ret == 0 ? $compressedOutput : null;
         }
 
         return $ret == 0 ? $output : null;
     }
-
 }

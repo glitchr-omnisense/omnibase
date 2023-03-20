@@ -18,7 +18,10 @@ class AbstractAdapterIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $label;
-    public function getLabel(): ?string { return $this->label; }
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
     public function setLabel(?string $label)
     {
         $this->label = $label;
@@ -29,7 +32,10 @@ class AbstractAdapterIntl implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $help;
-    public function getHelp(): ?string { return $this->help; }
+    public function getHelp(): ?string
+    {
+        return $this->help;
+    }
     public function setHelp(?string $help)
     {
         $this->help = $help;

@@ -33,9 +33,11 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
         $storages = $input->getArgument('storages') ?? [];
         $database = $input->getOption('database')   ?? null;
         $prefix   = $input->getOption('prefix')     ?? null;
-        
-        if(!$storages) return Command::FAILED;
-        
+
+        if (!$storages) {
+            return Command::FAILED;
+        }
+
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion('You are about to backup this application and database. Do you wish to continue ?', false);
         if (!$helper->ask($input, $output, $question)) {

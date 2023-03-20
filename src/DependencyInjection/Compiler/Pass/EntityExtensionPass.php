@@ -11,8 +11,17 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class EntityExtensionPass extends AbstractPass
 {
-    public function taggedServiceIds(): string { return "base.entity_extension"; }
+    public function taggedServiceIds(): string
+    {
+        return "base.entity_extension";
+    }
 
-    public function classFqcn(): string { return EntityExtension::class; }
-    public function addMethod(): string { return "addExtension"; }
+    public function classFqcn(): string
+    {
+        return EntityExtension::class;
+    }
+    public function addMethod(): string
+    {
+        return "addExtension";
+    }
 }

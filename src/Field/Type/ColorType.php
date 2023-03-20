@@ -34,7 +34,10 @@ final class ColorType extends AbstractType
         $this->parameterBag = $parameterBag;
     }
 
-    public function getBlockPrefix(): string { return 'jscolor'; }
+    public function getBlockPrefix(): string
+    {
+        return 'jscolor';
+    }
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -43,7 +46,7 @@ final class ColorType extends AbstractType
         ]);
     }
 
-    public function getParent() : ?string
+    public function getParent(): ?string
     {
         return TextType::class;
     }
@@ -51,19 +54,19 @@ final class ColorType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-
             $event->setData(expandhex($event->getData(), true));
 
-            if ($event->getData() === null)
+            if ($event->getData() === null) {
                 $event->setData("#00000000");
+            }
         });
 
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
-
             $event->setData(expandhex($event->getData(), true));
 
-            if ($event->getData() == "#00000000" && $options["is_nullable"])
+            if ($event->getData() == "#00000000" && $options["is_nullable"]) {
                 $event->setData(null);
+            }
 
             $event->setData(shrinkhex($event->getData()));
         });

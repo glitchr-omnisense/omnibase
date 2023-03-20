@@ -63,7 +63,7 @@ final class DateTimePickerField implements FieldInterface
             ->setCustomOption(self::OPTION_WIDGET, self::WIDGET_TEXT);
     }
 
-    public function setDebug(bool $debug = true) : self
+    public function setDebug(bool $debug = true): self
     {
         $this->setFormTypeOptionIfNotSet("debug", $debug);
         return $this;

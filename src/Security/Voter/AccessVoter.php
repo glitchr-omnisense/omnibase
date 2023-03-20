@@ -17,44 +17,44 @@ use Symfony\Component\Security\Http\FirewallMapInterface;
 
 class AccessVoter extends Voter
 {
-    const       BIRTH_ACCESS = "BIRTH_ACCESS";
-    const MAINTENANCE_ACCESS = "MAINTENANCE_ACCESS";
-    const   EXCEPTION_ACCESS = "EXCEPTION_ACCESS";
+    public const       BIRTH_ACCESS = "BIRTH_ACCESS";
+    public const MAINTENANCE_ACCESS = "MAINTENANCE_ACCESS";
+    public const   EXCEPTION_ACCESS = "EXCEPTION_ACCESS";
 
-    const ANONYMOUS_ACCESS = "ANONYMOUS_ACCESS";
-    const      USER_ACCESS = "USER_ACCESS";
-    const     ADMIN_ACCESS = "ADMIN_ACCESS";
+    public const ANONYMOUS_ACCESS = "ANONYMOUS_ACCESS";
+    public const      USER_ACCESS = "USER_ACCESS";
+    public const     ADMIN_ACCESS = "ADMIN_ACCESS";
 
-    /** 
-     * @var RequestStack 
+    /**
+     * @var RequestStack
      * */
     protected $requestStack;
-    /** 
-     * @var Router 
+    /**
+     * @var Router
      * */
     protected $router;
-    /** 
-     * @var ParameterBag 
+    /**
+     * @var ParameterBag
      * */
     protected $parameterBag;
-    /** 
-     * @var Localizer 
+    /**
+     * @var Localizer
      * */
     protected $localizer;
-    /** 
-     * @var SettingBag 
+    /**
+     * @var SettingBag
      * */
     protected $settingBag;
-    /** 
-     * @var FirewallMapInterface 
+    /**
+     * @var FirewallMapInterface
      * */
     protected $firewallMap;
-    /** 
-     * @var MaintenanceProvider 
+    /**
+     * @var MaintenanceProvider
      * */
     protected $maintenanceProvider;
-    /** 
-     * @var MaternityUnit 
+    /**
+     * @var MaternityUnit
      * */
     protected $maternityUnit;
 
@@ -88,7 +88,6 @@ class AccessVoter extends Voter
         $url     = is_string($subject) || $subject instanceof Referrer ? $subject : get_url();
 
         switch($attribute) {
-
             case self::ADMIN_ACCESS:
                 $access  = filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= $user && $user->isGranted("ROLE_SUPERADMIN");
@@ -96,7 +95,7 @@ class AccessVoter extends Voter
 
             case self::USER_ACCESS:
                 $access  = filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
-                $access |= 
+                $access |=
                     filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN)
                     && $user && $user->isGranted("ROLE_ADMIN");
                 return $access;
@@ -123,57 +122,69 @@ class AccessVoter extends Voter
                 $isRestrictedFirewall = false;
 
                 $firewall = $this->router->getRouteFirewall($url);
-                foreach($firewallNames as $firewallName)
+                foreach ($firewallNames as $firewallName) {
                     $isRestrictedFirewall |= $firewall->getName() == $firewallName;
+                }
 
-                if(!$isRestrictedFirewall) return true;
+                if (!$isRestrictedFirewall) {
+                    return true;
+                }
 
                 $url = parse_url($url);
-                foreach($this->urlExceptions as $urlException) {
-
+                foreach ($this->urlExceptions as $urlException) {
                     $exception = true;
 
                     $environment = $urlException["env"] ?? null;
-                    if($environment !== null) {
+                    if ($environment !== null) {
                         $exception &= $environment == $this->router->getEnvironment();
                     }
 
                     $locale = $urlException["locale"] ?? null;
-                    if($locale !== null)
+                    if ($locale !== null) {
                         $exception &= $locale == $this->localizer->getLocale() ;
+                    }
 
                     $country = $urlException["country"] ?? null;
-                    if($country !== null)
+                    if ($country !== null) {
                         $exception &= $country == $this->localizer->getLocaleCountry() ;
+                    }
 
                     $lang = $urlException["lang"] ?? null;
-                    if($lang !== null)
+                    if ($lang !== null) {
                         $exception &= $lang == $this->localizer->getLocaleLang() ;
+                    }
 
                     $scheme = $urlException["scheme"] ?? null;
-                    if($scheme !== null)
+                    if ($scheme !== null) {
                         $exception &= array_key_exists("scheme", $url) && preg_match("/".$scheme."/", $url["scheme"]);
+                    }
 
                     $host = $urlException["host"] ?? null;
-                    if($host !== null)
+                    if ($host !== null) {
                         $exception &= array_key_exists("host", $url) && preg_match("/".$host."/", $url["host"]);
+                    }
 
                     $domain = $urlException["domain"] ?? null;
-                    if($domain !== null)
+                    if ($domain !== null) {
                         $exception &= array_key_exists("domain", $url) && preg_match("/".$domain."/", $url["domain"]);
+                    }
 
                     $subdomain = $urlException["subdomain"] ?? null;
-                    if($subdomain !== null)
+                    if ($subdomain !== null) {
                         $exception &= array_key_exists("subdomain", $url) && preg_match("/".$subdomain."/", $url["subdomain"]);
+                    }
 
                     $path = $urlException["path"] ?? null;
-                    if($path !== null)
+                    if ($path !== null) {
                         $exception &= array_key_exists("path", $url) && preg_match("/".$path."/", $url["path"]);
+                    }
 
-                    if($exception)
+                    if ($exception) {
                         return true;
+                    }
                 }
 
+                // no break
             default:
                 return false;
         }

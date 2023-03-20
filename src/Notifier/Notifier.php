@@ -17,8 +17,9 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification->setUser($user);
 
         $url = null;
-        if(!str_ends_with($this->router->getRouteName(), "_send"))
+        if (!str_ends_with($this->router->getRouteName(), "_send")) {
             $url = $this->router->generate($this->router->getRouteName()."_send");
+        }
 
         $notification->setContext([
             "importance" => "high",
@@ -59,11 +60,13 @@ class Notifier extends BaseNotifier implements NotifierInterface
     {
         $notification = new Notification("contact.adminNotification");
         $notification->setHtmlTemplate("email.html.twig");
-        foreach($this->getAdminRecipients() as $adminRecipient)
+        foreach ($this->getAdminRecipients() as $adminRecipient) {
             $notification->addRecipient($adminRecipient);
+        }
 
-        foreach($contactModel->attachments ?? [] as $file)
+        foreach ($contactModel->attachments ?? [] as $file) {
             $notification->addAttachment($file);
+        }
 
         $notification->setHtmlParameters([
 
@@ -92,14 +95,14 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
-    public function userAccountGoodbye(User $user) {
-
+    public function userAccountGoodbye(User $user)
+    {
         $notification = new Notification("accountGoodbye.success");
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
         $notification->setHtmlParameters([
-            "subject" => $this->translator->trans("@emails.accountGoodbye.subject" , [$user]),
+            "subject" => $this->translator->trans("@emails.accountGoodbye.subject", [$user]),
             "content" => $this->translator->trans("@emails.accountGoodbye.content"),
             "action_text" => $this->translator->trans("@emails.accountGoodbye.action_text"),
             "action_url" => $this->router->getUrl("security_login")
@@ -108,14 +111,14 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
-    public function userApprovalRequest(User $user) {
-
+    public function userApprovalRequest(User $user)
+    {
         $notification = new Notification("adminApproval.required");
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
         $notification->setHtmlParameters([
-            "subject" => $this->translator->trans("@emails.adminApproval.subject" , [$user]),
+            "subject" => $this->translator->trans("@emails.adminApproval.subject", [$user]),
             "content" => $this->translator->trans("@emails.adminApproval.content", [$user, $user->getId()]),
             "action_text" => $this->translator->trans("@emails.adminApproval.action_text"),
             "action_url" => $this->router->getUrl("backoffice")
@@ -124,8 +127,8 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
-    public function userApprovalConfirmation(User $user) {
-
+    public function userApprovalConfirmation(User $user)
+    {
         $notification = new Notification("adminApproval.approval");
         $notification->setUser($user);
 
@@ -140,8 +143,8 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
-    public function resetPasswordRequest(User $user, Token $token) {
-
+    public function resetPasswordRequest(User $user, Token $token)
+    {
         $notification = new Notification("resetPassword.success");
         $notification->setUser($user);
 
@@ -153,9 +156,9 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "action_url" => $this->router->getUrl("security_resetPasswordWithToken", ["token" => $token->get()])
         ]);
 
-        if($token->getLifetime() > 0 && $token->getLifetime() < 3600*24*7) {
-
-            $notification->addHtmlParameter("footer_text",
+        if ($token->getLifetime() > 0 && $token->getLifetime() < 3600*24*7) {
+            $notification->addHtmlParameter(
+                "footer_text",
                 $this->translator->trans("@emails.resetPassword.expiry", [
                     $this->translator->transTime($token->getRemainingTime())
                 ])
@@ -179,8 +182,8 @@ class Notifier extends BaseNotifier implements NotifierInterface
         ]);
 
         if ($token->getLifetime() > 0 && $token->getLifetime() < 3600 * 24 * 7) {
-
-            $notification->addHtmlParameter("footer_text",
+            $notification->addHtmlParameter(
+                "footer_text",
                 $this->translator->trans("@emails.verifyEmail.expiry", [
                     $this->translator->transTime($token->getRemainingTime())
                 ])
@@ -190,8 +193,8 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
-    public function userWelcomeBack(User $user, Token $token) {
-
+    public function userWelcomeBack(User $user, Token $token)
+    {
         $notification = new Notification("accountWelcomeBack.success");
         $notification->setUser($user);
 

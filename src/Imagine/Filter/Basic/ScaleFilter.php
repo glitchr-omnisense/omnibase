@@ -9,7 +9,6 @@ use Imagine\Image\ImageInterface;
 
 class ScaleFilter implements FilterInterface
 {
-
     /**
      * @var string
      */

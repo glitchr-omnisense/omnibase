@@ -9,9 +9,9 @@ interface TranslatorInterface extends \Symfony\Contracts\Translation\TranslatorI
     public function getFallbackLocales(): array;
     public function setLocale(string $locale);
 
-    public function trans      (TranslatableMessage|string $id, array $parameters = [], ?string $domain = null, ?string $locale = null, bool $recursive = true):string;
-    public function transQuiet (TranslatableMessage|string $id, array $parameters = [], ?string $domain = null, ?string $locale = null, bool $recursive = true):?string;
-    public function transExists(TranslatableMessage|string $id,                         ?string $domain = null, ?string $locale = null):bool;
+    public function trans(TranslatableMessage|string $id, array $parameters = [], ?string $domain = null, ?string $locale = null, bool $recursive = true): string;
+    public function transQuiet(TranslatableMessage|string $id, array $parameters = [], ?string $domain = null, ?string $locale = null, bool $recursive = true): ?string;
+    public function transExists(TranslatableMessage|string $id, ?string $domain = null, ?string $locale = null): bool;
 
     public function transTime(int $time): string;
 

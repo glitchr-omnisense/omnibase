@@ -17,19 +17,20 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class AddressCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, function() {
-
+        return parent::configureFields($pageName, function () {
             yield CountryField::new('country')->showFirst()->setTextAlign(TextAlign::LEFT);
             yield TextField::new('state')->setColumns(6);
 
             yield TextField::new('zipCode')->setColumns(6);
             yield TextField::new('city')->setColumns(6);
             yield TextField::new('streetAddress')->setColumns(6);
-
         }, $args);
     }
 }

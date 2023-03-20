@@ -21,15 +21,24 @@ use Base\Database\Annotation\Cache;
  */
 abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
 {
-    public        function __iconize()       : ?array { return $this->adapter ? $this->adapter->__iconizeStatic() : null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
+    public function __iconize(): ?array
+    {
+        return $this->adapter ? $this->adapter->__iconizeStatic() : null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-share-alt"];
+    }
 
     public function __toString()
     {
         return $this->getId() ? "<b>".($this->getAdapter() ?? "Attribute")." #".$this->getId()."</b>" : get_class($this);
     }
 
-    public function __construct(AbstractAdapter $adapter) { $this->setAdapter($adapter); }
+    public function __construct(AbstractAdapter $adapter)
+    {
+        $this->setAdapter($adapter);
+    }
 
     /**
      * @ORM\Id
@@ -37,21 +46,36 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * @ORM\ManyToOne(targetEntity=AbstractAdapter::class, inversedBy="attributes")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $adapter;
-    public function getAdapter(): ?AbstractAdapter { return $this->adapter; }
+    public function getAdapter(): ?AbstractAdapter
+    {
+        return $this->adapter;
+    }
     public function setAdapter(?AbstractAdapter $adapter): self
     {
         $this->adapter = $adapter;
         return $this;
     }
 
-    public function getCode(): ?string { return $this->getAdapter()->getCode(); }
-    public function getType(): ?string { return get_class($this->getAdapter()); }
-    public function getOptions(): array { return $this->getAdapter()->getOptions(); }
+    public function getCode(): ?string
+    {
+        return $this->getAdapter()->getCode();
+    }
+    public function getType(): ?string
+    {
+        return get_class($this->getAdapter());
+    }
+    public function getOptions(): array
+    {
+        return $this->getAdapter()->getOptions();
+    }
 }

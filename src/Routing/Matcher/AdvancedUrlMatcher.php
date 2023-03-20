@@ -20,7 +20,10 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     use BaseTrait;
 
     protected $compiledRoutes;
-    public function getCompiledRoutes():array { return $this->compiledRoutes; }
+    public function getCompiledRoutes(): array
+    {
+        return $this->compiledRoutes;
+    }
 
     public function __construct(array $compiledRoutes, RequestContext $context)
     {
@@ -46,8 +49,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     {
         $path = "";
         $parameters = array_reverse($array ?? []);
-        foreach($parameters as $parameter) {
-
+        foreach ($parameters as $parameter) {
             $path .= $parameter[1];
             $path .= $parameter[3] ?? false ? "{".$parameter[3]."}" : "";
         }
@@ -58,24 +60,25 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     public function groups(?string $routeName): array
     {
         $generator = $this->getRouter()->getGenerator();
-        if ($generator instanceof AdvancedUrlGenerator)
+        if ($generator instanceof AdvancedUrlGenerator) {
             $routeNames = array_keys($generator->getCompiledRoutes());
+        }
 
         // The next line should never be triggered as the generator is overloaded in __constructor
         $routeNames ??= array_keys($this->getRouter()->getRouteCollection()->all());
 
         $routeName = explode(".", $routeName ?? "")[0];
-        $routeGroups = array_transforms(function($k,$_routeName) use ($routeName) : ?Generator {
-
-            if($_routeName !== $routeName && !str_starts_with($_routeName, $routeName."."))
+        $routeGroups = array_transforms(function ($k, $_routeName) use ($routeName): ?Generator {
+            if ($_routeName !== $routeName && !str_starts_with($_routeName, $routeName.".")) {
                 return null;
+            }
 
             $_routeNameWithoutLocale = str_rstrip($_routeName, ".".Localizer::getDefaultLocaleLang());
-            if($_routeName != $_routeNameWithoutLocale)
+            if ($_routeName != $_routeNameWithoutLocale) {
                 yield null => $_routeNameWithoutLocale;
+            }
 
             yield null => $_routeName;
-
         }, $routeNames);
 
         return array_unique($routeGroups);
@@ -98,16 +101,22 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         //
         // Prevent to match custom route with Symfony internal route.
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
-        try { $match = parent::match($pathinfo); }
-        catch (Exception $e) { $match = []; }
+        try {
+            $match = parent::match($pathinfo);
+        } catch (Exception $e) {
+            $match = [];
+        }
 
-        if(str_starts_with($match["_route"] ?? "", "_") || !$this->getRouter()?->useAdvancedFeatures())
+        if (str_starts_with($match["_route"] ?? "", "_") || !$this->getRouter()?->useAdvancedFeatures()) {
             return $match;
+        }
 
         //
         // Custom match implementation
         $parsePathinfo = parse_url2($pathinfo, -1, $this->getRouter()->getBaseDir());
-        if($parsePathinfo === false) return $match;
+        if ($parsePathinfo === false) {
+            return $match;
+        }
 
         $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()) ?? [];
         $parse = array_merge($parse, $parsePathinfo);
@@ -115,11 +124,16 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         $this->getContext()->setBaseUrl($parse["base_dir"] ?? "");
 
         $pathinfo = str_lstrip($parse["path"] ?? $pathinfo, $this->getContext()->getBaseUrl());
-        try { $match = parent::match($pathinfo); } // Hand the case there is a "/$" in @Route
-        catch(ResourceNotFoundException $e) { $match = []; }
+        try {
+            $match = parent::match($pathinfo);
+        } // Hand the case there is a "/$" in @Route
+        catch(ResourceNotFoundException $e) {
+            $match = [];
+        }
 
-        if(empty($match) || (array_key_exists("_controller", $match) && $match["_controller"] == RedirectController::class."::urlRedirectAction")) 
+        if (empty($match) || (array_key_exists("_controller", $match) && $match["_controller"] == RedirectController::class."::urlRedirectAction")) {
             $match = parent::match($pathinfo."/");
+        }
 
         return $match;
     }

@@ -59,16 +59,20 @@ class IsGranted extends AbstractAnnotation
             $values = $data;
         }
 
-        if(!array_key_exists("value", $values))
+        if (!array_key_exists("value", $values)) {
             throw new MissingConstructorArgumentsException("Attribute parameter missing", 500);
+        }
 
-        $this->setSubject   ($values['subject'] ?? $subject);
-        $this->setMessage   ($values['message'] ?? $message);
-        $this->setMessage   ($values['statusCode'] ?? $statusCode);
+        $this->setSubject($values['subject'] ?? $subject);
+        $this->setMessage($values['message'] ?? $message);
+        $this->setMessage($values['statusCode'] ?? $statusCode);
         $this->setAttributes($values['value'] ?? null);
     }
 
-    public function supports(string $target, ?string $targetValue = null, $object = null): bool { return true; }
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
+    {
+        return true;
+    }
     public function setAttributes($attributes)
     {
         $this->attributes = $attributes;

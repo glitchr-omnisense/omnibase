@@ -39,5 +39,4 @@ class XmlResponse extends Response
         $dom->load($filename, $options);
         return new static($dom->saveXML(), $status, $headers, true);
     }
-
 }

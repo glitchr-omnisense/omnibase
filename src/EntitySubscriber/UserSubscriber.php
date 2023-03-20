@@ -39,15 +39,15 @@ class UserSubscriber implements EventSubscriberInterface
      */
     protected $notifier;
 
-    public function __construct(NotifierInterface $notifier, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage, RouterInterface $router){
-
+    public function __construct(NotifierInterface $notifier, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage, RouterInterface $router)
+    {
         $this->entityManager = $entityManager;
         $this->router        = $router;
         $this->tokenStorage  = $tokenStorage;
         $this->notifier      = $notifier;
     }
 
-    public static function getSubscribedEvents() : array
+    public static function getSubscribedEvents(): array
     {
         return
         [
@@ -63,44 +63,56 @@ class UserSubscriber implements EventSubscriberInterface
     public function onEnabling(UserEvent $event)
     {
         $user = $event->getUser();
-        if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
+        if ($this->tokenStorage->getToken()->getUser() != $user) {
+            return;
+        } // Only notify when user requests itself
 
-        if(!$user instanceof BaseUser) return;
+        if (!$user instanceof BaseUser) {
+            return;
+        }
 
         $notification = $this->notifier->sendUserWelcomeBack($user);
-        if($this->tokenStorage->getToken()->getUser() == $user)
+        if ($this->tokenStorage->getToken()->getUser() == $user) {
             $notification->send("success");
+        }
     }
 
     public function onDisabling(UserEvent $event)
     {
         $user = $event->getUser();
-        if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
+        if ($this->tokenStorage->getToken()->getUser() != $user) {
+            return;
+        } // Only notify when user requests itself
 
         $notification = $this->notifier->sendUserAccountGoodbye($user);
         $notification->send("success");
     }
 
-    public function onKickout(UserEvent $event) { }
+    public function onKickout(UserEvent $event)
+    {
+    }
 
-    public function onVerification(UserEvent $event) { }
+    public function onVerification(UserEvent $event)
+    {
+    }
 
     public function onRegistration(UserEvent $event)
     {
         $token = $this->tokenStorage->getToken();
 
         $user = $event->getUser();
-        if($token && $token->getUser() != $user) return; // Only notify when user requests itself
+        if ($token && $token->getUser() != $user) {
+            return;
+        } // Only notify when user requests itself
 
-        if(!$user instanceof BaseUser) return;
+        if (!$user instanceof BaseUser) {
+            return;
+        }
         if ($user->isVerified()) { // Social account connection
-
             $notification = new Notification("verifyEmail.success");
             $notification->setUser($user);
             $notification->send("success");
-
         } else {
-
             /**
              * @var \App\Entity\User\Token
              */
@@ -117,11 +129,12 @@ class UserSubscriber implements EventSubscriberInterface
     public function onApproval(UserEvent $event)
     {
         $user = $event->getUser();
-        if(!$user instanceof BaseUser) return;
+        if (!$user instanceof BaseUser) {
+            return;
+        }
 
         $adminApprovalToken = $user->getValidToken("admin-approval");
         if ($adminApprovalToken) {
-
             $adminApprovalToken->revoke();
             $notification = $this->notifier->sendUserApprovalConfirmation($user);
         }

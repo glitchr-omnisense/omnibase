@@ -11,8 +11,17 @@ use Symfony\Component\Workflow\Registry;
 
 class AnnotationPass extends AbstractPass
 {
-    public function taggedServiceIds(): string { return "base.annotation"; }
+    public function taggedServiceIds(): string
+    {
+        return "base.annotation";
+    }
 
-    public function classFqcn(): string { return AnnotationReader::class; }
-    public function addMethod(): string { return "addAnnotation"; }
+    public function classFqcn(): string
+    {
+        return AnnotationReader::class;
+    }
+    public function addMethod(): string
+    {
+        return "addAnnotation";
+    }
 }

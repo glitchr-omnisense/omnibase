@@ -10,7 +10,7 @@ interface FormProxyInterface
     public function all();
     public function add(string $name, ?FormInterface $form): self;
     public function remove(string $name): self;
-    public function has(string $name):bool;
+    public function has(string $name): bool;
     public function get(string $name): ?FormInterface ;
     public function getProcessor(string $name): ?FormProcessorInterface;
     public function setData(string $name, mixed $data): self;

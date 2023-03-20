@@ -8,31 +8,45 @@ trait ProxyTrait
 {
     private $_proxy = null;
 
-    public function hasProxy() { return $this->_proxy !== null; }
-    public function getProxy() { return $this->_proxy; }
-    public function setProxy(object $proxy) { $this->_proxy = $proxy; }
+    public function hasProxy()
+    {
+        return $this->_proxy !== null;
+    }
+    public function getProxy()
+    {
+        return $this->_proxy;
+    }
+    public function setProxy(object $proxy)
+    {
+        $this->_proxy = $proxy;
+    }
 
     public function __call(string $methodOrProperty, array $arguments)
     {
-        if(!$this->hasProxy())
+        if (!$this->hasProxy()) {
             throw new \Exception("Proxy not available.. did you forgot to call self::setProxy(Object) ?");
+        }
 
         // Getter from proxy
-        if(method_exists(get_class($this->_proxy), $methodOrProperty))
+        if (method_exists(get_class($this->_proxy), $methodOrProperty)) {
             return $this->_proxy->{$methodOrProperty}(...$arguments);
-        if(method_exists(get_class($this->_proxy), "get".mb_ucfirst($methodOrProperty)))
+        }
+        if (method_exists(get_class($this->_proxy), "get".mb_ucfirst($methodOrProperty))) {
             return $this->_proxy->{"get".mb_ucfirst($methodOrProperty)}(...$arguments);
+        }
 
         // Proxy variable
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        if ($propertyAccessor->isReadable($this->_proxy, $methodOrProperty))
+        if ($propertyAccessor->isReadable($this->_proxy, $methodOrProperty)) {
             return $propertyAccessor->getValue($this->_proxy, $methodOrProperty);
+        }
 
         // Fallback
-        if(method_exists(get_class($this), "getGlobals")) {
-
+        if (method_exists(get_class($this), "getGlobals")) {
             $global = $this->getGlobals()[$methodOrProperty] ?? null;
-            if($global !== null) return $global;
+            if ($global !== null) {
+                return $global;
+            }
         }
 
         return null;

@@ -21,6 +21,6 @@ class ThreadSearchbarType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('parent_id', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class);
-        $builder->add('generic'  , \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
+        $builder->add('generic', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
     }
 }

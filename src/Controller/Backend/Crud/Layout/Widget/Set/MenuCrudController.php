@@ -15,7 +15,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class MenuCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {
@@ -25,6 +28,5 @@ class MenuCrudController extends WidgetCrudController
             "title"   => ["form_type" => TextType::class],
             "excerpt" => ["form_type" => TextareaType::class]
         ]);
-
     }
 }

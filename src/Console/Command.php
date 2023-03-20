@@ -49,10 +49,22 @@ class Command extends SymfonyCommand
         parent::__construct();
     }
 
-    protected function getTranslator(): TranslatorInterface         { return $this->translator;    }
-    protected function getParameterBag(): ParameterBagInterface     { return $this->parameterBag;  }
-    protected function getEntityManager(): EntityManagerInterface   { return $this->entityManager; }
-    protected function getLocalizer(): LocalizerInterface { return $this->localizer; }
+    protected function getTranslator(): TranslatorInterface
+    {
+        return $this->translator;
+    }
+    protected function getParameterBag(): ParameterBagInterface
+    {
+        return $this->parameterBag;
+    }
+    protected function getEntityManager(): EntityManagerInterface
+    {
+        return $this->entityManager;
+    }
+    protected function getLocalizer(): LocalizerInterface
+    {
+        return $this->localizer;
+    }
 
     protected function configure(): void
     {
@@ -61,45 +73,46 @@ class Command extends SymfonyCommand
 
     public function run(InputInterface $input, OutputInterface $output): int
     {
-        if (!$output instanceof ConsoleOutputInterface)
+        if (!$output instanceof ConsoleOutputInterface) {
             throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');
+        }
 
-        $output->getFormatter()->setStyle('info'     , new OutputFormatterStyle('green', null, []));
+        $output->getFormatter()->setStyle('info', new OutputFormatterStyle('green', null, []));
         $output->getFormatter()->setStyle('bold,info', new OutputFormatterStyle('green', null, ['bold']));
         $output->getFormatter()->setStyle('info,bold', new OutputFormatterStyle('green', null, ['bold']));
         $output->getFormatter()->setStyle('info,bkg', new OutputFormatterStyle('black', 'green'));
         $output->getFormatter()->setStyle('bkg,info', new OutputFormatterStyle('black', 'green'));
 
-        $output->getFormatter()->setStyle('warning'     , new OutputFormatterStyle('yellow', null, []));
+        $output->getFormatter()->setStyle('warning', new OutputFormatterStyle('yellow', null, []));
         $output->getFormatter()->setStyle('warning,bold', new OutputFormatterStyle('yellow', null, ['bold']));
         $output->getFormatter()->setStyle('bold,warning', new OutputFormatterStyle('yellow', null, ['bold']));
         $output->getFormatter()->setStyle('warning,bkg', new OutputFormatterStyle('black', 'yellow'));
         $output->getFormatter()->setStyle('bkg,warning', new OutputFormatterStyle('black', 'yellow'));
 
-        $output->getFormatter()->setStyle('red'     , new OutputFormatterStyle('red', null, []));
+        $output->getFormatter()->setStyle('red', new OutputFormatterStyle('red', null, []));
         $output->getFormatter()->setStyle('red,bold', new OutputFormatterStyle('red', null, ['bold']));
         $output->getFormatter()->setStyle('bold,red', new OutputFormatterStyle('red', null, ['bold']));
         $output->getFormatter()->setStyle('red,bkg', new OutputFormatterStyle(null, 'red'));
         $output->getFormatter()->setStyle('bkg,red', new OutputFormatterStyle(null, 'red'));
 
-        $output->getFormatter()->setStyle('ln'     , new OutputFormatterStyle('cyan', null, []));
+        $output->getFormatter()->setStyle('ln', new OutputFormatterStyle('cyan', null, []));
         $output->getFormatter()->setStyle('ln,bold', new OutputFormatterStyle('cyan', null, ['bold']));
         $output->getFormatter()->setStyle('bold,ln', new OutputFormatterStyle('cyan', null, ['bold']));
         $output->getFormatter()->setStyle('ln,bkg', new OutputFormatterStyle(null, 'cyan'));
         $output->getFormatter()->setStyle('bkg,ln', new OutputFormatterStyle(null, 'cyan'));
 
-        $output->getFormatter()->setStyle('magenta'     , new OutputFormatterStyle('magenta', null, []));
+        $output->getFormatter()->setStyle('magenta', new OutputFormatterStyle('magenta', null, []));
         $output->getFormatter()->setStyle('magenta,bold', new OutputFormatterStyle('magenta', null, ['bold']));
         $output->getFormatter()->setStyle('bold,magenta', new OutputFormatterStyle('magenta', null, ['bold']));
         $output->getFormatter()->setStyle('magenta,bkg', new OutputFormatterStyle(null, 'magenta'));
         $output->getFormatter()->setStyle('bkg,magenta', new OutputFormatterStyle(null, 'magenta'));
 
         $defaultDescription = get_called_class()::$defaultDescription;
-        if($defaultDescription && $input->hasArgument("purpose")) {
-
+        if ($defaultDescription && $input->hasArgument("purpose")) {
             $output->section()->writeln("\n // Command purpose :");
-            foreach(explode("\n", $defaultDescription) as $line)
+            foreach (explode("\n", $defaultDescription) as $line) {
                 $output->section()->writeln(" // \t".trim($line));
+            }
 
             $output->section()->writeln(" // \n");
         }

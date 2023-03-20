@@ -9,12 +9,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
 
 final class SeparatorWidgetItem implements MenuItemInterface
 {
-    protected $width;
-    protected $column;
     use MenuItemTrait {
         setLinkRel as private;
         setLinkTarget as private;
     }
+    protected $width;
+    protected $column;
 
     public function __construct()
     {

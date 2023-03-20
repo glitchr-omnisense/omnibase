@@ -28,8 +28,14 @@ class QuillType extends AbstractType
         $this->twig = $twig;
     }
 
-    public function getParent(): ?string { return HiddenType::class; }
-    public function getBlockPrefix(): string { return 'quill'; }
+    public function getParent(): ?string
+    {
+        return HiddenType::class;
+    }
+    public function getBlockPrefix(): string
+    {
+        return 'quill';
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -70,8 +76,9 @@ class QuillType extends AbstractType
     public function getFormID($view): string
     {
         $parent = $view->parent;
-        while($parent->parent)
+        while ($parent->parent) {
             $parent = $parent->parent;
+        }
 
         return $parent->vars["attr"]["id"] ?? null;
     }

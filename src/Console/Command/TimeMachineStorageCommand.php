@@ -26,8 +26,13 @@ class TimeMachineStorageCommand extends Command
     protected $timeMachine;
 
     public function __construct(
-        LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
-        TimeMachineInterface $timeMachine, FlysystemInterface $flysystem)
+        LocalizerInterface $localizer,
+        TranslatorInterface $translator,
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $parameterBag,
+        TimeMachineInterface $timeMachine,
+        FlysystemInterface $flysystem
+    )
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->timeMachine = $timeMachine;
@@ -37,9 +42,10 @@ class TimeMachineStorageCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->section()->writeln("Available storage place(s):");
-        
-        foreach($this->timeMachine->getStorageList() as $storageName => $storage)
+
+        foreach ($this->timeMachine->getStorageList() as $storageName => $storage) {
             $output->section()->writeln(" * <info>" . $storageName . "</info> (". get_class($storage).")");
+        }
 
         return Command::SUCCESS;
     }

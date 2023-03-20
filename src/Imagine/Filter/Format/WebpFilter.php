@@ -14,11 +14,14 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 
     public function __toString()
     {
-        $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
+        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
         return path_suffix("", $pathSuffixes);
     }
 
-    public function getFilters() { return $this->filters; }
+    public function getFilters()
+    {
+        return $this->filters;
+    }
     public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;
@@ -27,7 +30,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 
     public function __construct(?string $path = null, array $filters = [], array $options = [])
     {
-        if(!$path) {
+        if (!$path) {
             $path = stream_get_meta_data(tmpfile())['uri'];
             unlink_tmpfile($path);
         }
@@ -35,17 +38,22 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
         $this->path    = $path.".webp";
         $this->filters = $filters;
 
-        if(array_key_exists("quality", $options))
+        if (array_key_exists("quality", $options)) {
             $options["quality"] *= $options["quality"] < 1 ? 100 : 1;
+        }
 
-        if($options["autorotate"] ?? true)
+        if ($options["autorotate"] ?? true) {
             array_prepend($this->filters, new Autorotate());
+        }
 
         parent::__construct($this->path, $options);
     }
 
     protected string $path;
-    public function getPath():?string { return $this->path; }
+    public function getPath(): ?string
+    {
+        return $this->path;
+    }
     public function setPath(?string $path)
     {
         $this->path = $path;
@@ -54,13 +62,13 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 
     public function apply(ImageInterface $image): ImageInterface
     {
-        foreach($this->filters as $filter){
-
+        foreach ($this->filters as $filter) {
             $oldImage = $image;
             $image = $filter->apply($oldImage);
 
-            if(spl_object_id($image) != spl_object_id($oldImage))
+            if (spl_object_id($image) != spl_object_id($oldImage)) {
                 $oldImage->__destruct();
+            }
         }
 
         $image = parent::apply($image);

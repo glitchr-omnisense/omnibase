@@ -14,7 +14,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 class FileField implements FieldInterface
 {
     use FieldTrait; // __construct must be redefined because of insane EA exclusion scope &#$@!
-    public function __construct() { $this->dto = new FieldDto(); }
+    public function __construct()
+    {
+        $this->dto = new FieldDto();
+    }
 
     public const OPTION_RENDER_FORMAT  = "renderFormat";
 
@@ -39,24 +42,24 @@ class FileField implements FieldInterface
             ->setFormTypeOptionIfNotSet("data_class", null);
     }
 
-    public function setMaxSize(int $filesize) {
-
+    public function setMaxSize(int $filesize)
+    {
         $this->setFormTypeOption("max_size", $filesize);
         return $this;
     }
 
-    public function setMaxFiles(int $nFiles) {
-
+    public function setMaxFiles(int $nFiles)
+    {
         $this->setFormTypeOption("max_files", $nFiles);
         return $this;
     }
 
-    public function setMimeTypes(array $mimeTypes) {
-
+    public function setMimeTypes(array $mimeTypes)
+    {
         $this->setFormTypeOption("mime_types", $mimeTypes);
         return $this;
     }
-    
+
     public function allowDelete(bool $allowDelete = true): self
     {
         $this->setFormTypeOption("allow_delete", $allowDelete);

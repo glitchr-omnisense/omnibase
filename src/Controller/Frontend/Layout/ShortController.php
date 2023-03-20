@@ -35,7 +35,9 @@ class ShortController extends AbstractController
          * @var Short
          */
         $short = $this->shortRepository->findOneBySlug($slug);
-        if($short === null) throw new NotFoundException("Page requested doesn't exist.");
+        if ($short === null) {
+            throw new NotFoundException("Page requested doesn't exist.");
+        }
 
         return $this->redirect($this->router->format($short->getUrl()));
     }

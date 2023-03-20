@@ -34,7 +34,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
      * @var AdminUrlGenerator
      */
     protected $adminUrlGenerator;
-    
+
     public function __construct(RouterInterface $router, AdminContextProvider $adminContextProvider, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->router = $router;
@@ -68,25 +68,34 @@ class EasyAdminSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $e)
     {
-        if($this->router->getMainRequest() != $e->getRequest()) return;
-        if($this->router->isProfiler()) return;
-        if(!$this->router->isEasyAdmin()) return;
+        if ($this->router->getMainRequest() != $e->getRequest()) {
+            return;
+        }
+        if ($this->router->isProfiler()) {
+            return;
+        }
+        if (!$this->router->isEasyAdmin()) {
+            return;
+        }
 
         $crud = $this->adminContextProvider->getContext()->getCrud();
-        if($crud == null) return;
+        if ($crud == null) {
+            return;
+        }
         try {
-
             $entity = $this->adminContextProvider->getContext()->getEntity();
             $entityCrudController = AbstractCrudController::getCrudControllerFqcn($entity->getInstance());
-
-        } catch (\TypeError $e) { return; }
+        } catch (\TypeError $e) {
+            return;
+        }
 
         // Redirect to proper CRUD controller
-        if($entityCrudController == null) return;
+        if ($entityCrudController == null) {
+            return;
+        }
 
         // Calling child CRUD controller
-        if($entityCrudController != $crud->getControllerFqcn() && !empty($crud->getCurrentPage())) {
-
+        if ($entityCrudController != $crud->getControllerFqcn() && !empty($crud->getCurrentPage())) {
             $instance = $entity->getInstance();
             $url = $this->adminUrlGenerator->unsetAll()
                 ->setController($entityCrudController)
@@ -100,31 +109,36 @@ class EasyAdminSubscriber implements EventSubscriberInterface
 
     public function onKernelException(ExceptionEvent $e)
     {
-        if(!$this->router->isEasyAdmin()) return;
-        if(!$this->router->isDebug()) {
-
+        if (!$this->router->isEasyAdmin()) {
+            return;
+        }
+        if (!$this->router->isDebug()) {
             $request   = $e->getRequest();
             $exception = $e->getThrowable();
 
             $eaCanonicException = true;
             switch(get_class($exception)) {
-
-                case InvalidArgumentException::class :
+                case InvalidArgumentException::class:
                     $request->query->remove("crudControllerFqcn");
-                case EntityNotFoundException::class :
+                    // no break
+                case EntityNotFoundException::class:
                     $request->query->remove("entityId");
-                case ForbiddenActionException::class :
-                    if($request->query->get("crudAction") !== null) $request->query->set("crudAction", "index");
-                    else $request->query->remove("crudAction");
+                    // no break
+                case ForbiddenActionException::class:
+                    if ($request->query->get("crudAction") !== null) {
+                        $request->query->set("crudAction", "index");
+                    } else {
+                        $request->query->remove("crudAction");
+                    }
 
-                $eaCanonicException = false;
+                    $eaCanonicException = false;
             }
 
-            if(!$eaCanonicException)
+            if (!$eaCanonicException) {
                 $e->setResponse($this->router->redirect($request));
+            }
 
             $e->stopPropagation();
         }
     }
-
 }

@@ -36,10 +36,14 @@ class TranslationEntitiesCommand extends Command
         );
 
         $maxLength = [];
-        if(!$entityRestriction) {
-            foreach($entities as $entity) {
-                if(in_array($entity, ["App\Entity","Base\Entity"])) continue;
-                if(str_ends_with($entity, NamingStrategy::TABLE_I18N_SUFFIX)) continue;
+        if (!$entityRestriction) {
+            foreach ($entities as $entity) {
+                if (in_array($entity, ["App\Entity","Base\Entity"])) {
+                    continue;
+                }
+                if (str_ends_with($entity, NamingStrategy::TABLE_I18N_SUFFIX)) {
+                    continue;
+                }
 
                 $maxLength[class_namespace($entity)] = max(strlen($entity), $maxLength[class_namespace($entity)] ?? 0);
             }
@@ -48,26 +52,37 @@ class TranslationEntitiesCommand extends Command
         $locale = $input->getOption('locale');
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
-        if($locale && !in_array($locale, $availableLocales))
+        if ($locale && !in_array($locale, $availableLocales)) {
             throw new \Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
+        }
 
         $suffix = $input->getOption('suffix');
-        if($entities) $output->section()->writeln("Entity list: ".$entityRestriction);
-        foreach($entities as $entity) {
-
-            if($entity == "App\Entity") continue;
-            if($entity == "Base\Entity") continue;
-            if(str_ends_with($entity, NamingStrategy::TABLE_I18N_SUFFIX)) continue;
-            if(!str_starts_with($entity, $entityRestriction)) continue;
+        if ($entities) {
+            $output->section()->writeln("Entity list: ".$entityRestriction);
+        }
+        foreach ($entities as $entity) {
+            if ($entity == "App\Entity") {
+                continue;
+            }
+            if ($entity == "Base\Entity") {
+                continue;
+            }
+            if (str_ends_with($entity, NamingStrategy::TABLE_I18N_SUFFIX)) {
+                continue;
+            }
+            if (!str_starts_with($entity, $entityRestriction)) {
+                continue;
+            }
 
             $isClass = class_exists($entity) ? " <info>& class</info>" : "";
             $entityStr = $entity . (in_array($entity, $namespaces) ? " (namespace".$isClass.")" : null);
             $color = in_array($entity, $namespaces) ? "magenta" : "info";
 
             $trans = "";
-            foreach($availableLocales as $currentLocale) {
-
-                if($locale !== null && $locale != $currentLocale) continue;
+            foreach ($availableLocales as $currentLocale) {
+                if ($locale !== null && $locale != $currentLocale) {
+                    continue;
+                }
                 $prefix = "\n\t - ";
                 $space = "";
 
@@ -78,8 +93,11 @@ class TranslationEntitiesCommand extends Command
                 $translationPathStr = $prefix."@entities[$currentLocale].<ln>".camel2snake($path, ".").".".$suffix."</ln>";
                 $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
-                if($translation == $translationPath) $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
-                else $trans .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
+                if ($translation == $translationPath) {
+                    $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
+                } else {
+                    $trans .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
+                }
             }
 
             $output->section()->writeln(" * <".$color.">".trim($entityStr)."</".$color."> ".$space.": $trans");

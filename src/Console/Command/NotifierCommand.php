@@ -19,9 +19,10 @@ class NotifierCommand extends Command
         $reflClass = new \ReflectionClass(Notifier::class);
 
         $output->section()->writeln("Available templated notifications:");
-        foreach($reflClass->getMethods() as $method) {
-
-            if($method->class == BaseNotifier::class) continue;
+        foreach ($reflClass->getMethods() as $method) {
+            if ($method->class == BaseNotifier::class) {
+                continue;
+            }
 
             $output->section()->writeln(" * <info>".$method->name."</info>");
         }

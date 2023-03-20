@@ -19,7 +19,10 @@ class TaxonIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $label;
-    public function getLabel(): ?string { return $this->label; }
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
     public function setLabel(?string $label): self
     {
         $this->label = $label;
@@ -31,7 +34,10 @@ class TaxonIntl implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $description;
-    public function getDescription(): ?string { return $this->description; }
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
     public function setDescription(?string $description): self
     {
         $this->description = $description;

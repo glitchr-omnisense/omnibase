@@ -22,7 +22,7 @@ class MaternityUnit implements MaternityUnitInterface
     protected $authorizationChecker;
     /** @var TokenStorage */
     protected $tokenStorage;
-    
+
     public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, TokenStorageInterface $tokenStorage)
     {
         $this->router = $router;
@@ -32,28 +32,34 @@ class MaternityUnit implements MaternityUnitInterface
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function getBirthdate(?string $locale = null) : ?DateTime
+    public function getBirthdate(?string $locale = null): ?DateTime
     {
         $birthdate = $this->settingBag->getScalar("base.settings.birthdate", $locale);
-        if(!$birthdate) return null;
+        if (!$birthdate) {
+            return null;
+        }
 
         return $birthdate instanceof DateTime ? $birthdate : new DateTime($birthdate);
     }
 
-    public function isBorn(?string $locale = null) : ?bool
+    public function isBorn(?string $locale = null): ?bool
     {
         $birthdate = $this->getBirthdate($locale);
-        if($birthdate === null) return false;
+        if ($birthdate === null) {
+            return false;
+        }
 
         $now = new \DateTime("now");
         return ($birthdate < $now);
     }
 
-    public function getAge(?string $locale = null) : string
+    public function getAge(?string $locale = null): string
     {
         $currentYear = date("Y");
         $birthdate = $this->getBirthdate($locale);
-        if(!$birthdate) return $currentYear;
+        if (!$birthdate) {
+            return $currentYear;
+        }
 
         $birthYear = $birthdate->format("Y");
         return $this->isBorn($locale) && $birthYear < $currentYear ? date("$birthYear-Y") : $birthYear;
@@ -61,40 +67,56 @@ class MaternityUnit implements MaternityUnitInterface
 
     public function redirectOnDeny(?RequestEvent $event = null, ?string $locale = null): bool
     {
-        if(!$this->settingBag->getScalar("base.settings.birthdate.redirect_on_deny")) return false;
-        if(!$this->getBirthdate()) return false;
+        if (!$this->settingBag->getScalar("base.settings.birthdate.redirect_on_deny")) {
+            return false;
+        }
+        if (!$this->getBirthdate()) {
+            return false;
+        }
 
         $redirectOnDeny = "security_birth";
-        if($this->router->isUX()) return false;
-        if($this->router->isProfiler() ) return false;
-        if($this->router->isEasyAdmin()) return false;
-        if($this->router->isSecured()) return false;
+        if ($this->router->isUX()) {
+            return false;
+        }
+        if ($this->router->isProfiler()) {
+            return false;
+        }
+        if ($this->router->isEasyAdmin()) {
+            return false;
+        }
+        if ($this->router->isSecured()) {
+            return false;
+        }
 
-        if($this->isBorn()) {
-
+        if ($this->isBorn()) {
             $homepageRoute = $this->parameterBag->get("base.site.homepage");
-            if ($event && $redirectOnDeny == $this->router->getRouteName())
+            if ($event && $redirectOnDeny == $this->router->getRouteName()) {
                 $event->setResponse($this->router->redirect($homepageRoute, [], 302));
+            }
 
             return false;
-
-        } else if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
-
+        } elseif ($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
             $birthdate = $this->getBirthdate();
             $notification = new Notification("maternityUnit.banner", [IntlDateTime::createFromDateTime($birthdate, $locale)->format("dd MMMM YYYY"), IntlDateTime::createFromDateTime($birthdate, $locale)->format("HH:mm")]);
             $notification->send("warning");
             return false;
         }
 
-        if ($this->router->getRouteName() == $redirectOnDeny)
+        if ($this->router->getRouteName() == $redirectOnDeny) {
             return false;
-        if ($this->authorizationChecker->isGranted("BIRTH_ACCESS"))
+        }
+        if ($this->authorizationChecker->isGranted("BIRTH_ACCESS")) {
             return false;
+        }
 
-        if($event) $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
+        if ($event) {
+            $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
+        }
 
         $token = $this->tokenStorage->getToken();
-        if($token && $token->getUser()) $token->getUser()->Logout();
+        if ($token && $token->getUser()) {
+            $token->getUser()->Logout();
+        }
 
         return true;
     }

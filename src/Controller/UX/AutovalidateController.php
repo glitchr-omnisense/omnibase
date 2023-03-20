@@ -27,7 +27,7 @@ class AutovalidateController extends AbstractController
         $this->translator = $translator;
     }
 
-    public function encode(array $array) : string
+    public function encode(array $array): string
     {
         $hex = bin2hex(serialize($array));
         return $this->hashIds->encodeHex($hex);
@@ -51,12 +51,10 @@ class AutovalidateController extends AbstractController
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("validation", $token) && $request->getMethod() == $expectedMethod) {
-
             $array = ["status" => "Fine"];
             return new JsonResponse($array);
         }
 
         return new JsonResponse("Invalid request", 500);
     }
-
 }

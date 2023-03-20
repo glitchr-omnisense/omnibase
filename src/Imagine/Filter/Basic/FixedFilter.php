@@ -12,7 +12,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FixedFilter implements FilterInterface
 {
-    public function __toString() { return ($this->options["width"] ?? "auto")."x".($this->options["height"] ?? "auto"); }
+    public function __toString()
+    {
+        return ($this->options["width"] ?? "auto")."x".($this->options["height"] ?? "auto");
+    }
     public function __construct(array $options = [])
     {
         $this->options = $options;

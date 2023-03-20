@@ -9,15 +9,18 @@ use Exception;
 
 class UserRole extends SetType implements IconizeInterface
 {
-    const EDITOR      = "ROLE_EDITOR";
+    public const EDITOR      = "ROLE_EDITOR";
 
-    const SUPERADMIN  = "ROLE_SUPERADMIN";
-    const ADMIN       = "ROLE_ADMIN";
-    const USER        = "ROLE_USER";
+    public const SUPERADMIN  = "ROLE_SUPERADMIN";
+    public const ADMIN       = "ROLE_ADMIN";
+    public const USER        = "ROLE_USER";
 
-    const SOCIAL      = "ROLE_SOCIAL";
+    public const SOCIAL      = "ROLE_SOCIAL";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [
@@ -34,12 +37,12 @@ class UserRole extends SetType implements IconizeInterface
     public static function getCrudController(string $role): ?string
     {
         switch($role) {
-            case self::EDITOR     :
-            case self::SUPERADMIN :
-            case self::ADMIN      :
-            case self::USER       :
+            case self::EDITOR:
+            case self::SUPERADMIN:
+            case self::ADMIN:
+            case self::USER:
                 return UserCrudController::class;
-            case self::SOCIAL     :
+            case self::SOCIAL:
                 return null;
         }
     }

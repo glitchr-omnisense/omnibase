@@ -17,7 +17,7 @@ class ColorExtractor
 
     public function extract(int $colorCount = 1): array
     {
-        if(!$this->isInitialized()) {
+        if (!$this->isInitialized()) {
             $this->initialize();
         }
 
@@ -67,7 +67,6 @@ class ColorExtractor
         $mergedColors = [];
 
         foreach ($colors as $color) {
-
             $hasColorBeenMerged = false;
             $colorLab = self::getColorLab($color);
 
@@ -207,7 +206,10 @@ class ColorExtractor
         ];
     }
 
-    protected static function xyz2lab_step(float $value): float { return $value > 216 / 24389 ? pow($value, 1 / 3) : 841 * $value / 108 + 4 / 29; }
+    protected static function xyz2lab_step(float $value): float
+    {
+        return $value > 216 / 24389 ? pow($value, 1 / 3) : 841 * $value / 108 + 4 / 29;
+    }
     protected static function xyz2lab(array $xyz): array
     {
         //http://en.wikipedia.org/wiki/Illuminant_D65#Definition

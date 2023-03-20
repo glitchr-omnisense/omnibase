@@ -20,8 +20,7 @@ class CountWalker extends TreeWalkerAdapter
         $parent = null;
         $parentName = null;
 
-        foreach ($this->getQueryComponents() AS $dqlAlias => $qComp) {
-
+        foreach ($this->getQueryComponents() as $dqlAlias => $qComp) {
             // skip mixed data in query
             if (isset($qComp['resultVariable'])) {
                 continue;
@@ -40,7 +39,8 @@ class CountWalker extends TreeWalkerAdapter
 
         $AST->selectClause->selectExpressions = array(
             new SelectExpression(
-                    new AggregateExpression('count', $pathExpression, true), null
+                new AggregateExpression('count', $pathExpression, true),
+                null
             )
         );
 

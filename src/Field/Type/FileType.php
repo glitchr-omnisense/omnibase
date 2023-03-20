@@ -86,9 +86,17 @@ class FileType extends AbstractType implements DataMapperInterface
     protected string $cacheDir;
 
     public function __construct(
-        ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig,
-        ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager,
-        FormFactory $formFactory, RouterInterface $router, ImageService $imageService, ObfuscatorInterface $obfuscator, string $cacheDir)
+        ParameterBagInterface $parameterBag,
+        TranslatorInterface $translator,
+        Environment $twig,
+        ClassMetadataManipulator $classMetadataManipulator,
+        CsrfTokenManagerInterface $csrfTokenManager,
+        FormFactory $formFactory,
+        RouterInterface $router,
+        ImageService $imageService,
+        ObfuscatorInterface $obfuscator,
+        string $cacheDir
+    )
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
@@ -157,8 +165,9 @@ class FileType extends AbstractType implements DataMapperInterface
         });
 
         $resolver->setNormalizer('clipboard', function (Options $options, $value) {
-
-            if($value) return !$options["multiple"] || $options["dropzone"] !== null;
+            if ($value) {
+                return !$options["multiple"] || $options["dropzone"] !== null;
+            }
             return false;
         });
 
@@ -169,7 +178,6 @@ class FileType extends AbstractType implements DataMapperInterface
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-
             $form = $event->getForm();
             $data = $event->getData();
 
@@ -179,17 +187,19 @@ class FileType extends AbstractType implements DataMapperInterface
 
             $mimeTypes   = $options["mime_types"] ?? Uploader::getMimeTypes($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName()) ;
             $maxFilesize = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
-            if(array_key_exists('max_size', $options) && $options["max_size"])
+            if (array_key_exists('max_size', $options) && $options["max_size"]) {
                 $maxFilesize = min($maxFilesize, $options["max_size"]);
+            }
 
-            if(!$options["dropzone"]) {
-
-                if($options["title"] !== null)
+            if (!$options["dropzone"]) {
+                if ($options["title"] !== null) {
                     $form->add("title", TextType::class, $options["title"]);
-                if($options["allow_url"])
+                }
+                if ($options["allow_url"]) {
                     $form->add("url", UrlType::class, [
                         "required"    => $options["required"] && ($data === null) && ($options["cropper"] ?? null) === null,
                     ]);
+                }
 
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
                         "required"    => $options["required"] && (!$options["allow_url"] && $data === null) && ($options["cropper"] ?? null) === null,
@@ -199,33 +209,40 @@ class FileType extends AbstractType implements DataMapperInterface
                 ]);
             }
 
-            if($options["allow_delete"])
+            if ($options["allow_delete"]) {
                 $form->add('delete', CheckboxType::class, ['required' => false]);
+            }
         });
 
         // Process the uploaded file on submission
         $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use ($options) {
-
             $data = $event->getData();
-            if(is_string($data)) {
-
+            if (is_string($data)) {
                 $cacheDir = $this->cacheDir."/dropzone";
                 $data = explode("|", $data);
 
-                foreach($data as $key => $uuid)
-                    if(!empty($uuid)) $data[$key] = $cacheDir."/".$uuid;
+                foreach ($data as $key => $uuid) {
+                    if (!empty($uuid)) {
+                        $data[$key] = $cacheDir."/".$uuid;
+                    }
+                }
 
-                $data = empty($data) ? [] : array_map(function($fname) {
-
-                    if(file_exists($fname)) return new UploadedFile($fname, $fname);
-                    else return $fname !== null ? basename($fname) : null;
-
+                $data = empty($data) ? [] : array_map(function ($fname) {
+                    if (file_exists($fname)) {
+                        return new UploadedFile($fname, $fname);
+                    } else {
+                        return $fname !== null ? basename($fname) : null;
+                    }
                 }, $data);
 
-                if(!$options["multiple"]) $data = $data[0] ?? null;
+                if (!$options["multiple"]) {
+                    $data = $data[0] ?? null;
+                }
             }
 
-            if(empty($data)) $data = null;
+            if (empty($data)) {
+                $data = null;
+            }
             $event->setData($data);
         });
     }
@@ -239,26 +256,29 @@ class FileType extends AbstractType implements DataMapperInterface
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
 
         $view->vars["lightbox"] = null;
-        if(is_array($options["lightbox"]))
+        if (is_array($options["lightbox"])) {
             $view->vars["lightbox"]  = json_encode($options["lightbox"]);
+        }
 
-        if($this->classMetadataManipulator->isEntity($entity)) {
-
+        if ($this->classMetadataManipulator->isEntity($entity)) {
             $files = Uploader::get($entity, $form->getName());
-            if(!is_array($files)) $files = [$files];
+            if (!is_array($files)) {
+                $files = [$files];
+            }
 
-            $files = array_map(fn($f) => $f ? $f->getPath() : null, $files);
+            $files = array_map(fn ($f) => $f ? $f->getPath() : null, $files);
 
             $propertyType = Uploader::getTypeOfField($entity, $form->getName());
-            if($options["multiple"] && $propertyType != "array")
+            if ($options["multiple"] && $propertyType != "array") {
                 $view->vars['max_files']     = 1;
-
+            }
         } else {
-
             $files = $form->getData();
         }
 
-        if(!is_array($files)) $files = $files ? [$files] : [];
+        if (!is_array($files)) {
+            $files = $files ? [$files] : [];
+        }
         $view->vars["files"] = array_filter($files);
 
         $view->vars["allow_reupload"] = $options["allow_reupload"];
@@ -268,45 +288,43 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['max_size'] = $options["max_size"] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
 
         $mimeTypes = $options["mime_types"];
-        if(!$mimeTypes && $entity)
+        if (!$mimeTypes && $entity) {
             $mimeTypes = Uploader::getMimeTypes($options["class"] ?? $entity, $options["data_mapping"] ?? $form->getName());
+        }
 
         $view->vars["mime_types"] = $mimeTypes;
         $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
-        
+
         $view->vars['clippable'] = $view->vars['path'] = $view->vars['download'] = json_encode([]);
-        if(!is_array($view->vars["value"]) && $options["multiple"])
+        if (!is_array($view->vars["value"]) && $options["multiple"]) {
             $view->vars["value"] = [$view->vars["value"]];
-        else if (is_array($view->vars["value"]) && !$options["multiple"])
+        } elseif (is_array($view->vars["value"]) && !$options["multiple"]) {
             $view->vars["value"] = first($view->vars["value"]);
-            
-        if(is_array($view->vars['value'])) {
+        }
 
+        if (is_array($view->vars['value'])) {
             if ($view->vars['value']) {
-
-                $view->vars['path'] = json_encode(array_transforms(function($k,$v):array {
+                $view->vars['path'] = json_encode(array_transforms(function ($k, $v): array {
                     return $v !== null ? [basename($v), $this->fileService->isImage($v) ? $this->imageService->imagine($v) : null] : null;
                 }, array_filter($view->vars['value'])));
 
-                $view->vars['download'] = json_encode(array_transforms(function($k,$v):array {
+                $view->vars['download'] = json_encode(array_transforms(function ($k, $v): array {
                     return $v !== null ? [basename($v), $this->fileService->downloadable($v)] : null;
                 }, array_filter($view->vars['value'])));
 
-                $view->vars['clippable'] = json_encode(array_transforms(function($k,$v):array {
+                $view->vars['clippable'] = json_encode(array_transforms(function ($k, $v): array {
                     return $v !== null ? [basename($v), $this->fileService->isImage($v)] : null;
                 }, array_filter($view->vars['value'])));
             }
 
-            $view->vars["value"] = implode("|", array_map(fn($v) => $v !== null ? basename($v) : null, $view->vars["value"]));
-
+            $view->vars["value"] = implode("|", array_map(fn ($v) => $v !== null ? basename($v) : null, $view->vars["value"]));
         } else {
-
             $view->vars['path']      = $this->fileService->isImage($view->vars["value"]) ? $this->imageService->imagine($view->vars["value"]) : null;
             $view->vars['download']  = $this->fileService->downloadable($view->vars["value"]);
             $view->vars['clippable'] = $this->fileService->isImage($view->vars["value"]);
         }
-        
+
         $view->vars["clipboard"]    = $options["clipboard"];
         $view->vars["sortable"]     = true;
         $view->vars['dropzone']     = null;
@@ -316,22 +334,33 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['href']         = $options["href"];
         $view->vars["confirm_action"] = $options["allow_cancel[confirmation]"] || $options["allow_delete[confirmation]"];
 
-        if(is_array($options["dropzone"]) && $options["multiple"]) {
-
+        if (is_array($options["dropzone"]) && $options["multiple"]) {
             $action = (!empty($options["action"]) ? $options["action"] : ".");
             $view->vars["attr"]["class"] = "dropzone";
 
             $options["dropzone"] = $options["dropzone"];
-            if(!array_key_exists("url", $options["dropzone"])) $options["dropzone"]["url"] = $action;
-            if($options['allow_delete'] !== null) $options["dropzone"]["addRemoveLinks"] = $options['allow_delete'];
-            if($options['max_size']     !== null) $options["dropzone"]["maxFilesize"]    = $options["max_size"]/1e6; // from B to MB
-            if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
-            if($mimeTypes) $options["dropzone"]["acceptedFiles"]  = implode(",", $mimeTypes);
+            if (!array_key_exists("url", $options["dropzone"])) {
+                $options["dropzone"]["url"] = $action;
+            }
+            if ($options['allow_delete'] !== null) {
+                $options["dropzone"]["addRemoveLinks"] = $options['allow_delete'];
+            }
+            if ($options['max_size']     !== null) {
+                $options["dropzone"]["maxFilesize"]    = $options["max_size"]/1e6;
+            } // from B to MB
+            if ($options['max_files']    !== null) {
+                $options["dropzone"]["maxFiles"]       = $options["max_files"];
+            }
+            if ($mimeTypes) {
+                $options["dropzone"]["acceptedFiles"]  = implode(",", $mimeTypes);
+            }
 
-            if(!array_key_exists("parallelUploads", $options["dropzone"])) 
+            if (!array_key_exists("parallelUploads", $options["dropzone"])) {
                 $options["dropzone"]["parallelUploads"]  = $options['parallel_uploads'];
-            if(!array_key_exists("uploadMultiple", $options["dropzone"])) 
+            }
+            if (!array_key_exists("uploadMultiple", $options["dropzone"])) {
                 $options["dropzone"]["uploadMultiple"]  = $options['upload_multiple'];
+            }
 
             $options["dropzone"]["thumbnailWidth"]  = $options['thumbnail_width'] ?? null;
             $options["dropzone"]["thumbnailHeight"] = $options['thumbnail_height'] ?? null;
@@ -345,11 +374,16 @@ class FileType extends AbstractType implements DataMapperInterface
             $options["dropzone"]["dictCancelUpload"]             = $options["dropzone"]["dictCancelUpload"]             ?? $this->translator->trans("@fields.fileupload.dropzone.cancel_upload");
             $options["dropzone"]["dictRemoveFile"]               = $options["dropzone"]["dictRemoveFile"]               ?? $this->translator->trans("@fields.fileupload.dropzone.remove_file");
 
-            if($options["allow_cancel[confirmation]"]) $options["dropzone"]["dictCancelUploadConfirmation"] = $options["dropzone"]["dictCancelUploadConfirmation"] ?? $this->translator->trans("@fields.fileupload.dropzone.cancel_upload_confirmation");
-            if($options["allow_delete[confirmation]"]) $options["dropzone"]["dictRemoveFileConfirmation"]   = $options["dropzone"]["dictRemoveFileConfirmation"]   ?? $this->translator->trans("@fields.fileupload.dropzone.remove_file_confirmation");
+            if ($options["allow_cancel[confirmation]"]) {
+                $options["dropzone"]["dictCancelUploadConfirmation"] = $options["dropzone"]["dictCancelUploadConfirmation"] ?? $this->translator->trans("@fields.fileupload.dropzone.cancel_upload_confirmation");
+            }
+            if ($options["allow_delete[confirmation]"]) {
+                $options["dropzone"]["dictRemoveFileConfirmation"]   = $options["dropzone"]["dictRemoveFileConfirmation"]   ?? $this->translator->trans("@fields.fileupload.dropzone.remove_file_confirmation");
+            }
 
-            if(array_key_exists("maxFiles", $options["dropzone"]) && !empty($view->vars["value"]))
+            if (array_key_exists("maxFiles", $options["dropzone"]) && !empty($view->vars["value"])) {
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));
+            }
 
             $token  = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $data = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
@@ -371,20 +405,23 @@ class FileType extends AbstractType implements DataMapperInterface
 
         $fileForm = current(iterator_to_array($forms));
         $isMultiple = $fileForm->getConfig()->getOption("multiple");
-        if($isMultiple) {
-
-            if(!is_array($viewData) && !$viewData instanceof Collection)
+        if ($isMultiple) {
+            if (!is_array($viewData) && !$viewData instanceof Collection) {
                 $viewData = [$viewData];
-
+            }
         } else {
-
-            if(is_array($viewData) || $viewData instanceof Collection)
+            if (is_array($viewData) || $viewData instanceof Collection) {
                 $viewData = first($viewData);
+            }
         }
 
-        if(is_array($viewData)) $viewData = array_map("basename", $viewData);
-        else if($viewData instanceof Collection) $viewData = $viewData->map(fn($f) => $f !== null ? basename($f) : null);
-        else $viewData = $viewData !== null ? basename($viewData) : $viewData;
+        if (is_array($viewData)) {
+            $viewData = array_map("basename", $viewData);
+        } elseif ($viewData instanceof Collection) {
+            $viewData = $viewData->map(fn ($f) => $f !== null ? basename($f) : null);
+        } else {
+            $viewData = $viewData !== null ? basename($viewData) : $viewData;
+        }
 
         $fileForm->setData($viewData);
     }
@@ -396,12 +433,12 @@ class FileType extends AbstractType implements DataMapperInterface
 
         $fileData = $childForms['file']->getData() ?? null;
         $rawData  = null;
-        if ($options["allow_reupload"])
+        if ($options["allow_reupload"]) {
             $rawData  = $childForms['raw']->getData() ?? null;
+        }
 
         $urlData  = null;
         if ($options["allow_url"]) {
-
             $urlData = $childForms['url']->getData() ?? null;
             $urlData = filter_var($urlData, FILTER_VALIDATE_URL) ? fetch_url($urlData) : null;
         }

@@ -18,11 +18,23 @@ use Base\Database\Annotation\Cache;
 
 class DateTimeAdapter extends AbstractAdapter
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-calendar"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-calendar"];
+    }
 
-    public static function getType(): string { return DateTimeType::class; }
-    public function getOptions(): array { return [
-    ]; }
+    public static function getType(): string
+    {
+        return DateTimeType::class;
+    }
+    public function getOptions(): array
+    {
+        return [
+        ];
+    }
 
-    public function resolve(mixed $value): mixed { return $value; }
+    public function resolve(mixed $value): mixed
+    {
+        return $value;
+    }
 }

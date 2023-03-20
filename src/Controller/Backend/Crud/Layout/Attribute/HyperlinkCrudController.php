@@ -13,19 +13,20 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
 
 class HyperlinkCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-
             yield TextField::new('label');
             yield SelectField::new('hyperpattern')->setTextAlign(TextAlign::RIGHT)
                                                   ->setFilter(HyperpatternAdapter::class);
 
             yield ArrayField::new('value')->setPatternFieldName("hyperpattern.pattern")->onlyOnForms();
             yield UrlField::new('generate');
-
-        },$args);
+        }, $args);
     }
 }

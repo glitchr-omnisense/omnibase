@@ -50,22 +50,22 @@ class TranslationConfigurator implements FieldConfiguratorInterface
         $field->setSortable(false);
 
         // Show formatted value
-        if( ($fieldName = $field->getCustomOption("show_field")) ) {
-
-            if($entityDto->getInstance() && !PropertyAccess::createPropertyAccessor()->isReadable($entityDto->getInstance(), $field->getProperty()))
+        if (($fieldName = $field->getCustomOption("show_field"))) {
+            if ($entityDto->getInstance() && !PropertyAccess::createPropertyAccessor()->isReadable($entityDto->getInstance(), $field->getProperty())) {
                 throw new \Exception("Failed to access \"$fieldName\" in \"".$entityDto->getName()."\".");
+            }
 
             $field->setLabel($field->getLabel() == mb_ucfirst($fieldName) ? $field->getLabel() : mb_ucfirst($fieldName));
             $field->setFormattedValue("-");
 
             $childField = $field->getValue();
-            if($childField instanceof PersistentCollection) {
-
+            if ($childField instanceof PersistentCollection) {
                 $typeClass = $childField->getTypeClass()->getName();
-                if($this->classMetadataManipulator->hasField($typeClass, $fieldName)) {
-
+                if ($this->classMetadataManipulator->hasField($typeClass, $fieldName)) {
                     $entity = $childField->get($this->localizer->getLocale());
-                    if (!$entity) $entity = $childField->get($this->localizer->getDefaultLocale());
+                    if (!$entity) {
+                        $entity = $childField->get($this->localizer->getDefaultLocale());
+                    }
 
                     $value = ($entity ? $this->propertyAccessor->getValue($entity, $fieldName) : null);
                     $renderAsHtml = $field->getCustomOption(TranslationField::OPTION_RENDER_AS_HTML);

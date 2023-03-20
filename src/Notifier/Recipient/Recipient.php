@@ -9,10 +9,10 @@ class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implemen
     use LocaleRecipientTrait;
     use TimezoneRecipientTrait;
 
-    public function __toString() {
-
+    public function __toString()
+    {
         $technicalRecipientStr  = "\"". $this->getEmail() . "\"";
-        $technicalRecipientStr .= $this->getPhone()  ? " / (" . $this->getPhone() .")" : "";
+        $technicalRecipientStr .= $this->getPhone() ? " / (" . $this->getPhone() .")" : "";
         $technicalRecipientStr .= $this->getLocale() ? " / " . $this->getLocale() : "";
 
         return $technicalRecipientStr;
@@ -22,10 +22,12 @@ class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implemen
     {
         parent::__construct($email ?? '', $phone ?? '');
 
-        if(!$locale)
+        if (!$locale) {
             $locale = Localizer::getDefaultLocale();
-        if(!$timezone)
+        }
+        if (!$timezone) {
             $timezone = "UTC";
+        }
 
         $this->locale = $locale;
         $this->timezone = $timezone;

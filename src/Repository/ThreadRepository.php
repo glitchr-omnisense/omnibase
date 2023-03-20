@@ -24,8 +24,9 @@ class ThreadRepository extends ServiceEntityRepository
         $nDiscussions = $this->countByParentAndWorkflow($thread, WorkflowState::APPROVED, [], "", null, ["children"]);
 
         $nComments = [];
-        foreach($nDiscussions as $entry)
+        foreach ($nDiscussions as $entry) {
             $nComments[$entry[$thread->getId()]] = ($nComments[$entry[$thread->getId()]] ?? 0) + $entry["count"];
+        }
 
         return $nComments;
     }

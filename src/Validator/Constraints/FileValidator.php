@@ -14,35 +14,36 @@ class FileValidator extends ConstraintValidator
 {
     public function validate($entry, Constraint $constraint)
     {
-        if (null === $entry || '' === $entry)
+        if (null === $entry || '' === $entry) {
             return;
+        }
 
-        if (!$entry instanceof File)
+        if (!$entry instanceof File) {
             return;
+        }
 
-        if (!$constraint instanceof ConstraintsFile)
+        if (!$constraint instanceof ConstraintsFile) {
             throw new UnexpectedTypeException($constraint, FileSize::class);
+        }
 
         $mimeTypes = $constraint->getAllowedMimeTypes();
-        $types = array_map(function($mimeType) {
+        $types = array_map(function ($mimeType) {
             $type = explode("/", $mimeType);
             return end($type);
         }, $mimeTypes);
 
         $compatibleMimeType = empty($mimeTypes);
-        foreach ($mimeTypes as $mimeType)
+        foreach ($mimeTypes as $mimeType) {
             $compatibleMimeType |= preg_match("/" . str_replace("/", "\/", $mimeType) . "/", $entry->getMimeType());
+        }
 
         if (!$compatibleMimeType) {
-
             $constraint->message = $constraint->messageMimeType;
             $this->buildViolation($constraint, $entry)
                 ->setParameter('{0}', count($mimeTypes))
                 ->setParameter('{1}', implode(", ", $types))
                 ->addViolation();
-
-        } else if ($entry->getSize() > $constraint->getMaxSize()) {
-
+        } elseif ($entry->getSize() > $constraint->getMaxSize()) {
             $constraint->message = $constraint->messageMaxSize;
             $this->buildViolation($constraint, $entry)
                 ->setParameter('{0}', byte2str($constraint->getMaxSize()))

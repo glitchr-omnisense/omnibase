@@ -98,8 +98,9 @@ final class AttributeField implements FieldInterface
 
     public function setChoices($choiceGenerator)
     {
-        if (!\is_array($choiceGenerator) && !\is_callable($choiceGenerator))
+        if (!\is_array($choiceGenerator) && !\is_callable($choiceGenerator)) {
             throw new \InvalidArgumentException(sprintf('The argument of the "%s" method must be an array or a closure ("%s" given).', __METHOD__, \gettype($choiceGenerator)));
+        }
 
         $this->setCustomOption(self::OPTION_CHOICES, $choiceGenerator);
         return $this;

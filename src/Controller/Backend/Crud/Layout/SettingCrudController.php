@@ -13,13 +13,18 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class SettingCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
-    public function createEntity(string $entityFqcn) { return new Setting(""); }
+    public function createEntity(string $entityFqcn)
+    {
+        return new Setting("");
+    }
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-
             yield SlugField::new('path')->showLeadingHash(false)->setColumns(6)->keep("_")->setSeparator(".")->setTargetFieldName("translations.label");
             yield SlugField::new('bag')->showLeadingHash(false)->setColumns(6)->keep("_")->setSeparator(".");
             yield BooleanField::new('locked')->setColumns(6)->withConfirmation();
@@ -28,7 +33,7 @@ class SettingCrudController extends AbstractCrudController
             yield BooleanField::new('secure')->setColumns(6)->hideOnIndex()->withConfirmation();
 
             yield TranslationField::new("label")->renderAsHtml();
-            yield TranslationField::new("help" )->renderAsHtml()->setRequired(false)
+            yield TranslationField::new("help")->renderAsHtml()->setRequired(false)
                     ->setFields([
                         "label" => [],
                         "class" => [],
@@ -36,7 +41,6 @@ class SettingCrudController extends AbstractCrudController
                         "help" => ["form_type" => QuillType::class]
                     ])
                     ->setExcludedFields("value");
-
         }, $args);
     }
 }

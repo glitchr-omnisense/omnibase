@@ -23,8 +23,14 @@ use Base\Database\Annotation\Cache;
  */
 class AttachmentBox extends Widget implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-boxes"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-boxes"];
+    }
 
     public function __construct(?string $title = null, array $attachments = [])
     {
@@ -37,7 +43,10 @@ class AttachmentBox extends Widget implements IconizeInterface
      * @OrderColumn
      */
     protected $attachments;
-    public function getAttachments(): Collection { return $this->attachments; }
+    public function getAttachments(): Collection
+    {
+        return $this->attachments;
+    }
     public function addAttachment(Attachment $attachment): self
     {
         if (!$this->attachments->contains($attachment)) {

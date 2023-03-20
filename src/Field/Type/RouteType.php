@@ -18,8 +18,14 @@ class RouteType extends AbstractType
     /** @var LocalizerInterface */
     protected $localizer;
 
-    public function getParent(): ?string { return SelectType::class; }
-    public function getBlockPrefix(): string { return 'route'; }
+    public function getParent(): ?string
+    {
+        return SelectType::class;
+    }
+    public function getBlockPrefix(): string
+    {
+        return 'route';
+    }
 
     public function __construct(RouterInterface $router, LocalizerInterface $localizer)
     {
@@ -32,31 +38,27 @@ class RouteType extends AbstractType
         $resolver->setDefaults([
             "capitalize" => null,
             'choice_loader' => function (Options $options) {
-
                 $routeList = [];
                 return ChoiceList::loader($this, new CallbackChoiceLoader(function () {
-
                     return array_flip(array_transforms(
-                        function($k, $r):?array {
-
+                        function ($k, $r): ?array {
                             $lang = explode(".", $k);
                             $lang = end($lang);
 
                             $localized = in_array($lang, $this->localizer->getAvailableLocaleLangs());
-                            if($localized) {
-
-                                if ($lang != $this->localizer->getDefaultLocaleLang())
+                            if ($localized) {
+                                if ($lang != $this->localizer->getDefaultLocaleLang()) {
                                     return null;
+                                }
 
                                 $k = str_rstrip($k, ".".$lang);
                                 return [$k, "<b>Name:</b> ".strtolower($k.".{_locale}")."<br/><b>Path:</b> ".$r->getPath()];
                             }
 
                             return [$k, "<b>Name:</b> ".strtolower($k)."<br/><b>Path:</b> ".$r->getPath()];
-
-                        }, $this->router->getRouteCollection()->all()
+                        },
+                        $this->router->getRouteCollection()->all()
                     ));
-
                 }), $routeList);
             },
             'choice_translation_domain' => false,

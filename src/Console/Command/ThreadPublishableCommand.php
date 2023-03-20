@@ -26,31 +26,38 @@ class ThreadPublishableCommand extends Command
         $threadRepository = $this->entityManager->getRepository(Thread::class);
         $threads = $threadRepository->findByState(ThreadState::FUTURE)->getResult();
 
-        $publishableThreads = array_filter($threads,
-        function($thread) use ($actionPublish) {
+        $publishableThreads = array_filter(
+            $threads,
+            function ($thread) use ($actionPublish) {
+                if (!$thread->isPublishable()) {
+                    return false;
+                }
 
-            if (!$thread->isPublishable()) return false;
+                if ($actionPublish) {
+                    $thread->poke();
+                }
 
-            if ($actionPublish) $thread->poke();
+                // Refresh database with publishable articles
+                $this->entityManager->flush();
 
-            // Refresh database with publishable articles
-            $this->entityManager->flush();
-
-            return true;
-        });
+                return true;
+            }
+        );
 
 
         // Show future article list
         $nThreads = count($threads);
         $nPublishableThreads = count($publishableThreads);
 
-        if($nThreads) $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
+        if ($nThreads) {
+            $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
+        }
         foreach ($threads as $key => $thread) {
-
             $publishableStr = $thread->isPublishable() ? "<info,bkg>[O]</info,bkg>" : "[X]";
             $message = $publishableStr." <info>Entry ID #" .($key+1) . "</info>: <ln>". $this->translator->transEntity($thread)." #" . $thread->getId()." \"".$thread->getTitle()."\"</ln>";
-            if ( ($parent = $thread->getParent()) )
+            if (($parent = $thread->getParent())) {
                 $message .= " in <ln>". $this->translator->transEntity($parent)." #" . $parent->getId()." ".$parent->getTitle()." </ln>";
+            }
 
             $message .= " -- Publishable in \"".$thread->getPublishTimeStr()."\"";
 
@@ -58,24 +65,20 @@ class ThreadPublishableCommand extends Command
         }
 
         if ($actionPublish && $nPublishableThreads) {
-        
             $msg = ' [OK] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable => These are now published. ';
             $output->writeln('');
             $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
             $output->writeln($msg);
             $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
             $output->writeln('');
-        
-        } else if($nPublishableThreads) {
-
-                $msg = ' [WARN] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable, please confirm using `--publish` option. ';
-                $output->writeln('');
-                $output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
-                $output->writeln($msg);
-                $output->writeln(str_blankspace(strlen($msg)).'</warning,bkg>');
-                $output->writeln('');
+        } elseif ($nPublishableThreads) {
+            $msg = ' [WARN] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable, please confirm using `--publish` option. ';
+            $output->writeln('');
+            $output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
+            $output->writeln($msg);
+            $output->writeln(str_blankspace(strlen($msg)).'</warning,bkg>');
+            $output->writeln('');
         } else {
-
             $msg = ' [OK] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable. ';
             $output->writeln('');
             $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));

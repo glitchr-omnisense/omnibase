@@ -14,10 +14,16 @@ class File extends Constraint
     public $messageMimeType = 'file.mime_type';
 
     protected array $mimeTypes;
-    public function getAllowedMimeTypes() { return $this->mimeTypes; }
+    public function getAllowedMimeTypes()
+    {
+        return $this->mimeTypes;
+    }
 
     protected $maxSize;
-    public function getMaxSize(): int { return $this->maxSize; }
+    public function getMaxSize(): int
+    {
+        return $this->maxSize;
+    }
 
     public function __construct(array $options = [], array $groups = null, mixed $payload = null)
     {
@@ -28,5 +34,5 @@ class File extends Constraint
         unset($options["max_size"]);
 
         parent::__construct($options ?? [], $groups, $payload);
-   }
+    }
 }

@@ -12,7 +12,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserChecker implements UserCheckerInterface
 {
-
     /**
      * @var EntityManagerInterface
      */
@@ -25,29 +24,32 @@ class UserChecker implements UserCheckerInterface
 
     public function checkPreAuth(UserInterface $user)
     {
-        if (class_implements_interface($user, LoginRestrictionInterface::class))
+        if (class_implements_interface($user, LoginRestrictionInterface::class)) {
             throw new CustomUserMessageAccountStatusException("@notifications.login.restricted", ["importance" => "danger"]);
+        }
 
         if ($user instanceof User) {
-
-            if ($user->isBanned())
+            if ($user->isBanned()) {
                 throw new CustomUserMessageAccountStatusException("@notifications.login.banned", ["importance" => "danger"]);
-            if ($user->isLocked())
+            }
+            if ($user->isLocked()) {
                 throw new CustomUserMessageAccountStatusException("@notifications.login.locked", ["importance" => "danger"]);
+            }
         }
     }
 
     public function checkPostAuth(UserInterface $user)
     {
-        if (!$user instanceof User) return;
-        if (class_implements_interface($user, LoginRestrictionInterface::class))
+        if (!$user instanceof User) {
+            return;
+        }
+        if (class_implements_interface($user, LoginRestrictionInterface::class)) {
             throw new CustomUserMessageAccountStatusException("@notifications.login.restricted", ["importance" => "danger"]);
+        }
 
         if ($user->isDisabled()) {
-
             $welcomeBackToken = $user->getValidToken("welcome-back");
-            if( $welcomeBackToken ) {
-
+            if ($welcomeBackToken) {
                 $user->enable();
                 return;
             }

@@ -5,10 +5,16 @@ namespace Base\Service\Model;
 class SitemapEntry
 {
     protected string $loc;
-    public function getLoc(): ?string { return $this->loc; }
+    public function getLoc(): ?string
+    {
+        return $this->loc;
+    }
 
     protected string $locale;
-    public function getLocale(): ?string { return $this->locale; }
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
     public function setLocale(string $locale): self
     {
         $this->locale = $locale;
@@ -16,7 +22,10 @@ class SitemapEntry
     }
 
     protected float $priority;
-    public function getPriority(): ?float { return $this->priority; }
+    public function getPriority(): ?float
+    {
+        return $this->priority;
+    }
     public function setPriority(float $priority): self
     {
         $this->priority = $priority;
@@ -24,7 +33,10 @@ class SitemapEntry
     }
 
     protected string $lastMod;
-    public function getLastMod(): ?string { return $this->lastMod; }
+    public function getLastMod(): ?string
+    {
+        return $this->lastMod;
+    }
     public function setLastMod(string $lastMod): self
     {
         $this->lastMod = $lastMod;
@@ -32,7 +44,10 @@ class SitemapEntry
     }
 
     protected string $changeFreq;
-    public function getChangeFreq(): ?string { return $this->changeFreq; }
+    public function getChangeFreq(): ?string
+    {
+        return $this->changeFreq;
+    }
     public function setChangeFreq(string $changeFreq): self
     {
         $this->changeFreq = $changeFreq;
@@ -40,12 +55,19 @@ class SitemapEntry
     }
 
     protected array $alternates = [];
-    public function hasAlternate(SitemapEntry $entry) { return in_array($entry, $this->alternates); }
-    public function getAlternates(): array { return $this->alternates; }
-    public function addAlternate(SitemapEntry $entry):self
+    public function hasAlternate(SitemapEntry $entry)
     {
-        if(in_array($entry, $this->alternates))
+        return in_array($entry, $this->alternates);
+    }
+    public function getAlternates(): array
+    {
+        return $this->alternates;
+    }
+    public function addAlternate(SitemapEntry $entry): self
+    {
+        if (in_array($entry, $this->alternates)) {
             return $this;
+        }
 
         $this->alternates[] = $entry;
         return $this;
@@ -53,14 +75,18 @@ class SitemapEntry
 
     public function removeAlternate(SitemapEntry $entry): self
     {
-        if( ($index = array_search($entry, $this->alternates)) === false )
+        if (($index = array_search($entry, $this->alternates)) === false) {
             return $this;
+        }
 
         unset($this->alternates[$index]);
         return $this;
     }
 
-    public function __construct($loc) { $this->loc = $loc; }
+    public function __construct($loc)
+    {
+        $this->loc = $loc;
+    }
 
     public function toArray(): array
     {
@@ -72,8 +98,7 @@ class SitemapEntry
             "alternates" => []
         ];
 
-        foreach($this->alternates as $alternate) {
-
+        foreach ($this->alternates as $alternate) {
             $entry["alternates"][] = [
                 "href" => $alternate->getLoc(),
                 "locale" => $alternate->getLocale()

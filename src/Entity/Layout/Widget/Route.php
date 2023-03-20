@@ -20,8 +20,14 @@ use Base\Database\Annotation\Cache;
 
 class Route extends Widget implements IconizeInterface, LinkableInterface
 {
-    public        function __iconize()       : ?array { return $this->getRouteIcons(); }
-    public static function __iconizeStatic() : ?array { return ["fas fa-road"]; }
+    public function __iconize(): ?array
+    {
+        return $this->getRouteIcons();
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-road"];
+    }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
@@ -29,7 +35,10 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $this->generate($referenceType);
     }
 
-    public function __toString() { return $this->getTitle() ?? ""; }
+    public function __toString()
+    {
+        return $this->getTitle() ?? "";
+    }
 
     public function __construct(?string $title = null, ?string $routeName = null, array $routeParameters = [])
     {
@@ -43,7 +52,10 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
      * @ORM\Column(type="text")
      */
     protected $routeName;
-    public function getRouteName(): ?string { return $this->routeName; }
+    public function getRouteName(): ?string
+    {
+        return $this->routeName;
+    }
     public function setRouteName(?string $routeName): self
     {
         $this->routeName = $routeName;
@@ -54,7 +66,10 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
      * @ORM\Column(type="array", nullable=true)
      */
     protected $routeParameters;
-    public function getRouteParameters(): ?array { return $this->routeParameters; }
+    public function getRouteParameters(): ?array
+    {
+        return $this->routeParameters;
+    }
     public function setRouteParameters(?array $routeParameters): self
     {
         $this->routeParameters = $routeParameters;
@@ -67,14 +82,25 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $route ? $route->getPath() : null;
     }
 
-    public function getRoute(): ?string { return $this->getRouter()->getRoute($this->getUrl()); }
-    public function getRouteIcons() { return $this->getIconProvider()->getRouteIcons($this->routeName); }
-    public function getUrl(): ?string { return $this->generate(); }
+    public function getRoute(): ?string
+    {
+        return $this->getRouter()->getRoute($this->getUrl());
+    }
+    public function getRouteIcons()
+    {
+        return $this->getIconProvider()->getRouteIcons($this->routeName);
+    }
+    public function getUrl(): ?string
+    {
+        return $this->generate();
+    }
 
     public function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        try { return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType); }
-        catch (\Exception $e) { }
+        try {
+            return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType);
+        } catch (\Exception $e) {
+        }
 
         return null;
     }

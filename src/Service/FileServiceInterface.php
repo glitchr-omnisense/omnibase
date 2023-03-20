@@ -6,8 +6,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 interface FileServiceInterface
 {
-    public function getExtensions(null|string|array $fileOrMimetypeOrArray):null|string|array;
-    public function getMimeType(null|string|array $fileOrArray):null|string|array;
+    public function getExtensions(null|string|array $fileOrMimetypeOrArray): null|string|array;
+    public function getMimeType(null|string|array $fileOrArray): null|string|array;
 
     public function generate(string $routeProxy, array $routeProxyParameters, ?string $path, array $config = []): ?string;
     public function resolve(string $data): ?array;

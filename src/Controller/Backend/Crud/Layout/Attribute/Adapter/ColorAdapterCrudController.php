@@ -6,5 +6,8 @@ use Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapter
 
 class ColorAdapterCrudController extends AbstractAdapterCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 }

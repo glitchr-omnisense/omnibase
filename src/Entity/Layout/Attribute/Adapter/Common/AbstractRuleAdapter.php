@@ -28,10 +28,13 @@ use Base\Database\Annotation\Cache;
 
 abstract class AbstractRuleAdapter extends AbstractAdapter implements RuleAdapterInterface
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-poll"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-poll"];
+    }
 
-    public function compliesWith(mixed $value, mixed $subject): bool {
-
+    public function compliesWith(mixed $value, mixed $subject): bool
+    {
         throw new \InvalidArgumentException("Unsupported value (".(is_object($subject) ? get_class($subject) : gettype($subject)).") provided in ".str_replace("Proxies\__CG__\\", "", static::class));
     }
 }

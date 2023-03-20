@@ -19,7 +19,10 @@ class WidgetIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $title;
-    public function getTitle(): ?string { return $this->title; }
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
     public function setTitle(?string $title): self
     {
         $this->title = $title;
@@ -30,7 +33,10 @@ class WidgetIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $headline;
-    public function getHeadline(): ?string { return $this->headline; }
+    public function getHeadline(): ?string
+    {
+        return $this->headline;
+    }
     public function setHeadline(?string $headline): self
     {
         $this->headline = $headline;
@@ -41,7 +47,10 @@ class WidgetIntl implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $excerpt;
-    public function getExcerpt(): ?string { return $this->excerpt; }
+    public function getExcerpt(): ?string
+    {
+        return $this->excerpt;
+    }
     public function setExcerpt(?string $excerpt): self
     {
         $this->excerpt = $excerpt;
@@ -52,7 +61,10 @@ class WidgetIntl implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $content;
-    public function getContent(): ?string { return $this->content; }
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
     public function setContent(?string $content): self
     {
         $this->content = $content;

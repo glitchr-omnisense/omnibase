@@ -11,8 +11,17 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class ObfuscatorCompressionPass extends AbstractPass
 {
-    public function taggedServiceIds(): string { return "obfuscator.compression"; }
+    public function taggedServiceIds(): string
+    {
+        return "obfuscator.compression";
+    }
 
-    public function classFqcn(): string { return Obfuscator::class; }
-    public function addMethod(): string { return "addCompression"; }
+    public function classFqcn(): string
+    {
+        return Obfuscator::class;
+    }
+    public function addMethod(): string
+    {
+        return "addCompression";
+    }
 }

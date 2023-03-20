@@ -107,11 +107,11 @@ final class FileTwigExtension extends AbstractExtension
                 new TwigFilter('obfuscate_image', [ImageService::class, 'obfuscate']),
                 new TwigFilter('lightbox', [ImageService::class, 'lightbox'], ["is_safe" => ['all']]),
 
-                new TwigFilter('imagine'           , [$this, 'imagine'], ['needs_context' => true]),
-                new TwigFilter('webp'              , [$this, 'imagine'], ['needs_context' => true]),
-                new TwigFilter('image'             , [$this, 'imagine'], ['needs_context' => true]),
-                new TwigFilter('crop'              , [$this, 'imagineCrop'], ['needs_context' => true]),
-                new TwigFilter('thumbnail'         , [$this, 'thumbnail'], ['needs_context' => true]),
+                new TwigFilter('imagine', [$this, 'imagine'], ['needs_context' => true]),
+                new TwigFilter('webp', [$this, 'imagine'], ['needs_context' => true]),
+                new TwigFilter('image', [$this, 'imagine'], ['needs_context' => true]),
+                new TwigFilter('crop', [$this, 'imagineCrop'], ['needs_context' => true]),
+                new TwigFilter('thumbnail', [$this, 'thumbnail'], ['needs_context' => true]),
                 new TwigFilter('thumbnail_inset   ', [$this, 'thumbnailInset   '], ['needs_context' => true]),
                 new TwigFilter('thumbnail_outbound', [$this, 'thumbnailOutbound'], ['needs_context' => true]),
                 new TwigFilter('thumbnail_noclone ', [$this, 'thumbnailNoclone '], ['needs_context' => true]),
@@ -127,11 +127,12 @@ final class FileTwigExtension extends AbstractExtension
     public function imagine(array $context, array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
         $config["local_cache"] ??= true;
-        if(array_key_exists("warmup", $context))
+        if (array_key_exists("warmup", $context)) {
             $config["warmup"] = $context["warmup"];
+        }
 
         $email = $context["email"] ?? null;
-        if($email instanceof WrappedTemplatedEmail) {
+        if ($email instanceof WrappedTemplatedEmail) {
             $config["warmup"] = true;
             $config["webp"]   = false;
         }
@@ -142,11 +143,12 @@ final class FileTwigExtension extends AbstractExtension
     public function imagineCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
     {
         $config["local_cache"] ??= true;
-        if(array_key_exists("warmup", $context))
+        if (array_key_exists("warmup", $context)) {
             $config["warmup"] = $context["warmup"];
+        }
 
         $email = $context["email"] ?? null;
-        if($email instanceof WrappedTemplatedEmail) {
+        if ($email instanceof WrappedTemplatedEmail) {
             $config["warmup"] = true;
             $config["webp"]   = false;
         }
@@ -154,18 +156,31 @@ final class FileTwigExtension extends AbstractExtension
         return $this->imageService->crop($path, $x, $y, $width, $height, $position, $filters, $config);
     }
 
-    public function thumbnailInset   (array $context, array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET])); }
-    public function thumbnailOutbound(array $context, array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND])); }
-    public function thumbnailNoclone (array $context, array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE])); }
-    public function thumbnailUpscale (array $context, array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE])); }
-    public function thumbnail(array $context, array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailInset(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]));
+    }
+    public function thumbnailOutbound(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]));
+    }
+    public function thumbnailNoclone(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]));
+    }
+    public function thumbnailUpscale(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]));
+    }
+    public function thumbnail(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
     {
         $config["local_cache"] ??= true;
-        if(array_key_exists("warmup", $context))
+        if (array_key_exists("warmup", $context)) {
             $config["warmup"] = $context["warmup"];
+        }
 
         $email = $context["email"] ?? null;
-        if($email instanceof WrappedTemplatedEmail) {
+        if ($email instanceof WrappedTemplatedEmail) {
             $config["warmup"] = true;
             $config["webp"]   = false;
         }
@@ -177,15 +192,18 @@ final class FileTwigExtension extends AbstractExtension
     {
         $url   = $urlOrPath;
         $label = $label ?? $urlOrPath;
-        if($urlOrPath instanceof LinkableInterface) {
+        if ($urlOrPath instanceof LinkableInterface) {
             $url   = $urlOrPath->__toLink();
             $label = $label ?? $urlOrPath->__toString();
         }
-        
-        if($this->router->getUrl() == $this->router->getAssetUrl($urlOrPath))
-        $attributes["class"] = trim(($attributes["class"] ?? "")." highlight");
 
-        if(!$url) return "";
+        if ($this->router->getUrl() == $this->router->getAssetUrl($urlOrPath)) {
+            $attributes["class"] = trim(($attributes["class"] ?? "")." highlight");
+        }
+
+        if (!$url) {
+            return "";
+        }
 
         return "<a href='".$url."' ".html_attributes($attributes).">".$label."</a>";
     }
@@ -193,15 +211,18 @@ final class FileTwigExtension extends AbstractExtension
     public function linkify(mixed $urlOrPath)
     {
         $url   = $urlOrPath;
-        if($urlOrPath instanceof LinkableInterface)
+        if ($urlOrPath instanceof LinkableInterface) {
             $url   = $urlOrPath->__toLink();
+        }
 
         return is_object($url) ? null : (is_string($url) ? $url : null);
     }
 
     public function url(array $context, ?string $name, array $parameters = [], int $referenceType = AdvancedRouter::ABSOLUTE_PATH)
     {
-        if($name == null) return $name;
+        if ($name == null) {
+            return $name;
+        }
 
         $email = $context["email"] ?? null;
         $referenceType = $email instanceof WrappedTemplatedEmail ? AdvancedRouter::ABSOLUTE_URL : $referenceType;
@@ -215,27 +236,28 @@ final class FileTwigExtension extends AbstractExtension
         if (null === $inliner) {
             $inliner = new CssToInlineStyles();
         }
-    
+
         $email = $context["email"] ?? null;
         return $email ? $inliner->convert($body, implode("\n", $css)) : $body;
     }
 
     public function embed(Environment $twig, array $context, string $src, array $options = [])
     {
-        if(!$src) return $src;
+        if (!$src) {
+            return $src;
+        }
 
-        if(!str_starts_with($src, "@")) $src = "@Public/".str_lstrip($src, [$this->projectDir."/public", "/"]);
+        if (!str_starts_with($src, "@")) {
+            $src = "@Public/".str_lstrip($src, [$this->projectDir."/public", "/"]);
+        }
 
         try {
-
             $path = $twig->getLoader()->getSourceContext($src)->getPath();
             $contentType = mime_content_type($twig->getLoader()->getSourceContext($src)->getPath());
 
             $url = explode("/", $twig->getLoader()->getSourceContext($src)->getName());
             $prefix = str_rstrip($path, [implode("/", tail($url)), "/"]);
-
-        } catch ( LoaderError $e) {
-
+        } catch (LoaderError $e) {
             throw $e;
         }
 

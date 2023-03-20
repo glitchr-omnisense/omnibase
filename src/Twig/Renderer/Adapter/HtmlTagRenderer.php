@@ -36,16 +36,19 @@ class HtmlTagRenderer extends AbstractTagRenderer
     {
         $url = trim($url);
         $parse = parse_url($url);
-        if($parse["scheme"] ?? false)
+        if ($parse["scheme"] ?? false) {
             return $url;
+        }
 
         $request = $this->requestStack->getCurrentRequest();
         $baseDir = $request ? $request->getBasePath() : $this->router->getBaseDir();
         $baseDir = $baseDir ."/";
         $path = trim($parse["path"]);
-        if($path == "/") return $baseDir ? $baseDir : "/";
-        else if(!str_starts_with($path, "/"))
+        if ($path == "/") {
+            return $baseDir ? $baseDir : "/";
+        } elseif (!str_starts_with($path, "/")) {
             $path = $baseDir.$path;
+        }
 
         return $path ? $path : null;
     }
@@ -54,37 +57,44 @@ class HtmlTagRenderer extends AbstractTagRenderer
     public function renderHtmlContent(string $location)
     {
         $htmlContent = $this->getHtmlContent($location);
-        if(!empty($htmlContent))
+        if (!empty($htmlContent)) {
             $this->removeHtmlContent($location);
+        }
 
         return $htmlContent;
     }
 
-    public function getHtmlContent(string $location) { return trim(implode(PHP_EOL,array_unique($this->htmlContent[$location] ?? []))); }
+    public function getHtmlContent(string $location)
+    {
+        return trim(implode(PHP_EOL, array_unique($this->htmlContent[$location] ?? [])));
+    }
     public function removeHtmlContent(string $location)
     {
-        if(array_key_exists($location, $this->htmlContent))
+        if (array_key_exists($location, $this->htmlContent)) {
             unset($this->htmlContent[$location]);
+        }
 
         return $this;
     }
 
     public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = [])
     {
-        if(empty($contentOrArrayOrFile)) return $this;
+        if (empty($contentOrArrayOrFile)) {
+            return $this;
+        }
 
-        if(is_array($contentOrArrayOrFile)) {
-
-            foreach($contentOrArrayOrFile as $content)
+        if (is_array($contentOrArrayOrFile)) {
+            foreach ($contentOrArrayOrFile as $content) {
                 $this->addHtmlContent($location, $content, $options);
+            }
 
             return $this;
         }
 
         $relationship = pathinfo_relationship($contentOrArrayOrFile);
-        if(!$relationship) $content = $contentOrArrayOrFile;
-        else {
-
+        if (!$relationship) {
+            $content = $contentOrArrayOrFile;
+        } else {
             // Compute options
             $relationship = $options["rel"] ?? $relationship;
             array_values_remove($options, "rel");
@@ -93,7 +103,6 @@ class HtmlTagRenderer extends AbstractTagRenderer
 
             // Convert into html tag
             switch($relationship) {
-
                 case "javascript":
                     $content = "<script src='".$this->getAsset($contentOrArrayOrFile)."' ".$attributes."></script>";
                     break;
@@ -107,8 +116,9 @@ class HtmlTagRenderer extends AbstractTagRenderer
             }
         }
 
-        if(!array_key_exists($location, $this->htmlContent))
+        if (!array_key_exists($location, $this->htmlContent)) {
             $this->htmlContent[$location] = [];
+        }
 
         $this->htmlContent[$location][] = $content;
         return $this;
@@ -123,14 +133,13 @@ class HtmlTagRenderer extends AbstractTagRenderer
             "breakpoints" => $breakpoints
         ]);
 
-        if($breakpointStylesheet) {
+        if ($breakpointStylesheet) {
             $this->addHtmlContent("stylesheets:before", "<style>" . $breakpointStylesheet . "</style>");
         }
 
         //
         // Make sure to load localized twig template, if available.
-        if(str_ends_with($name, ".twig")) {
-
+        if (str_ends_with($name, ".twig")) {
             $basename = explode(".", $name);
 
             $extension = [];
@@ -144,50 +153,61 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $locale         = str_replace("-", "_", $this->localizer->getLocale());
             $defaultLocale  = str_replace("-", "_", $this->localizer->getDefaultLocale());
 
-            if($this->twig->getLoader()->exists($basename.".".$locale.".".$extension))
+            if ($this->twig->getLoader()->exists($basename.".".$locale.".".$extension)) {
                 $name = $basename.".".$locale.".".$extension;
-            if($this->twig->getLoader()->exists($basename.".".$lang.".".$extension))
+            }
+            if ($this->twig->getLoader()->exists($basename.".".$lang.".".$extension)) {
                 $name = $basename.".".$lang.".".$extension;
-            if($this->twig->getLoader()->exists($basename.".".$defaultLocale.".".$extension))
+            }
+            if ($this->twig->getLoader()->exists($basename.".".$defaultLocale.".".$extension)) {
                 $name = $basename.".".$locale.".".$extension;
-            if($this->twig->getLoader()->exists($basename.".".$defaultLang.".".$extension))
+            }
+            if ($this->twig->getLoader()->exists($basename.".".$defaultLang.".".$extension)) {
                 $name = $basename.".".$lang.".".$extension;
+            }
         }
 
         //
         // Load resources: additional stylesheets & javascripts
-        if(str_ends_with($name, ".html.twig")) {
-
+        if (str_ends_with($name, ".html.twig")) {
             $stylesheet = str_rstrip($name, ".html.twig").".css.twig";
-            if($this->twig->getLoader()->exists($stylesheet)) {
+            if ($this->twig->getLoader()->exists($stylesheet)) {
                 $stylesheet = $this->twig->load($stylesheet)->render($context);
-                if($stylesheet) $this->addHtmlContent("stylesheets:after", "<style>".$stylesheet."</style>");
+                if ($stylesheet) {
+                    $this->addHtmlContent("stylesheets:after", "<style>".$stylesheet."</style>");
+                }
             }
 
             $formats = [];
             $breakpoints = $this->parameterBag->get("base.twig.breakpoints") ?? [];
-            foreach($breakpoints as $breakpoint)
+            foreach ($breakpoints as $breakpoint) {
                 $formats[$breakpoint["name"]] = $breakpoint["media"] ?? "all";
+            }
 
-            foreach($formats as $format => $media) {
-
+            foreach ($formats as $format => $media) {
                 $stylesheet = str_rstrip($name, ".html.twig").".".$format.".css.twig";
-                if($this->twig->getLoader()->exists($stylesheet)) {
+                if ($this->twig->getLoader()->exists($stylesheet)) {
                     $stylesheet = $this->twig->load($stylesheet)->render($context);
-                    if($stylesheet) $this->addHtmlContent("stylesheets:after", "<style media='".$media."'>".$stylesheet."</style>");
+                    if ($stylesheet) {
+                        $this->addHtmlContent("stylesheets:after", "<style media='".$media."'>".$stylesheet."</style>");
+                    }
                 }
             }
 
             $javascript = str_rstrip($name, ".html.twig").".js.twig";
-            if($this->twig->getLoader()->exists($javascript)) {
-
+            if ($this->twig->getLoader()->exists($javascript)) {
                 $javascript = $this->twig->load($javascript)->render($context);
-                if($javascript) $this->addHtmlContent("javascripts:body", "<script>".$javascript."</script>");
+                if ($javascript) {
+                    $this->addHtmlContent("javascripts:body", "<script>".$javascript."</script>");
+                }
             }
         }
 
-        try { return $this->twig->load($name)->render($context); }
-        catch (LoaderError $e) { throw new RuntimeException("Failed to render `".$name."`", $e->getCode(), $e); }
+        try {
+            return $this->twig->load($name)->render($context);
+        } catch (LoaderError $e) {
+            throw new RuntimeException("Failed to render `".$name."`", $e->getCode(), $e);
+        }
     }
 
     public function renderFallback(Response $response): Response

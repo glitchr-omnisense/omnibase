@@ -15,5 +15,4 @@ use Base\Repository\Layout\AttributeRepository;
 
 class HyperlinkRepository extends AttributeRepository
 {
-
 }

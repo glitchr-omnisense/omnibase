@@ -51,8 +51,9 @@ class WidgetItem
             $widgetItem     = CrudWidgetItem::class;
         }
 
-        if(!class_exists($crudController))
+        if (!class_exists($crudController)) {
             throw new \Exception("CRUD controller for \"".$entityFqcnOrCrudController."\" not found");
+        }
 
         $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
         $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
@@ -61,7 +62,7 @@ class WidgetItem
         $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::NOUN_PLURAL);
         $label ??= camel2snake(class_basename($entityFqcnOrCrudController), " ");
 
-        if(!$icon) {
+        if (!$icon) {
             $icon = class_implements_interface($entityFqcnOrCrudController, IconizeInterface::class) ? $entityFqcnOrCrudController::__iconizeStatic()[0] : null;
             $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
         }
@@ -91,11 +92,11 @@ class WidgetItem
 
     public static function linkToUrl(string $labelOrEntityFqcn, ?string $icon, string $url): UrlMenuItem
     {
-        if(class_exists($labelOrEntityFqcn)) {
-
+        if (class_exists($labelOrEntityFqcn)) {
             $crudController          = AbstractCrudController::getCrudControllerFqcn($labelOrEntityFqcn);
-            if(!class_exists($crudController))
+            if (!class_exists($crudController)) {
                 throw new \Exception("CRUD controller for \"".$labelOrEntityFqcn."\" not found");
+            }
 
             $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
             $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
@@ -104,12 +105,13 @@ class WidgetItem
             $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::NOUN_PLURAL);
             $label ??= camel2snake(class_basename($labelOrEntityFqcn), " ");
 
-            if(!$icon) {
+            if (!$icon) {
                 $icon = class_implements_interface($labelOrEntityFqcn, IconizeInterface::class) ? $labelOrEntityFqcn::__iconizeStatic()[0] : null;
                 $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
             }
-
-        } else $label = $labelOrEntityFqcn;
+        } else {
+            $label = $labelOrEntityFqcn;
+        }
 
         return new UrlMenuItem($label, $icon, $url);
     }

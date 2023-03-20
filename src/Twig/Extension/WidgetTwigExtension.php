@@ -20,26 +20,36 @@ final class WidgetTwigExtension extends AbstractExtension
      * @var WidgetProvider
      */
     protected $widgetProvider;
-    
-    public function __construct(WidgetProviderInterface $widgetProvider) { $this->widgetProvider = $widgetProvider; }
 
-    public function getName() { return 'widget_extension'; }
-    public function getFunctions() : array
+    public function __construct(WidgetProviderInterface $widgetProvider)
+    {
+        $this->widgetProvider = $widgetProvider;
+    }
+
+    public function getName()
+    {
+        return 'widget_extension';
+    }
+    public function getFunctions(): array
     {
         return [
             new TwigFunction("render_slot", [$this, 'render_slot'], ["needs_environment" => true, 'is_safe' => ['all']]),
-            new TwigFunction("all_slots",   [WidgetProvider::class, 'allSlots'], ['is_safe' => ['all']]),
+            new TwigFunction("all_slots", [WidgetProvider::class, 'allSlots'], ['is_safe' => ['all']]),
             new TwigFunction("all_widgets", [WidgetProvider::class, 'all'], ['is_safe' => ['all']])
         ];
     }
 
-    function render_slot(Environment $twig, string $slot, array $options = [], ?string $template = null): string
+    public function render_slot(Environment $twig, string $slot, array $options = [], ?string $template = null): string
     {
         $widgetSlot = $this->widgetProvider->getSlot($slot);
-        if(!$widgetSlot) return "";
+        if (!$widgetSlot) {
+            return "";
+        }
 
         $widget = $widgetSlot->getWidget();
-        if(!$widget) return "";
+        if (!$widget) {
+            return "";
+        }
 
         $options["widget"]   = $widget;
 

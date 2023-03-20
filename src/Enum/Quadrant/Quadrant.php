@@ -7,14 +7,17 @@ use Base\Service\Model\IconizeInterface;
 
 class Quadrant extends EnumType implements IconizeInterface
 {
-    const O    = "ORIGIN";
+    public const O    = "ORIGIN";
 
-    const N    = "NORTH";
-    const E    = "EAST";
-    const S    = "SOUTH";
-    const W    = "WEST";
+    public const N    = "NORTH";
+    public const E    = "EAST";
+    public const S    = "SOUTH";
+    public const W    = "WEST";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [
@@ -26,10 +29,19 @@ class Quadrant extends EnumType implements IconizeInterface
         ];
     }
 
-    public static function getDefault() { return self::O; }
-    public static function getTheta() { return 2*pi()/4; }
+    public static function getDefault()
+    {
+        return self::O;
+    }
+    public static function getTheta()
+    {
+        return 2*pi()/4;
+    }
 
-    public static function getRotation(string $quadrant): ?float { return self::getRotations()[$quadrant] ?? self::getRotations()[self::O]; }
+    public static function getRotation(string $quadrant): ?float
+    {
+        return self::getRotations()[$quadrant] ?? self::getRotations()[self::O];
+    }
     public static function getRotations(): array
     {
         return [
@@ -41,7 +53,10 @@ class Quadrant extends EnumType implements IconizeInterface
         ];
     }
 
-    public static function getPosition(string $quadrant): string { return self::getPositions()[$quadrant] ?? self::getPositions()[self::O]; }
+    public static function getPosition(string $quadrant): string
+    {
+        return self::getPositions()[$quadrant] ?? self::getPositions()[self::O];
+    }
     public static function getPositions(): array
     {
         return [

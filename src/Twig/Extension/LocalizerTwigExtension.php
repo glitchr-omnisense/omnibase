@@ -18,25 +18,31 @@ final class LocalizerTwigExtension extends AbstractExtension
      */
     protected $localizer;
 
-    public function __construct(LocalizerInterface $localizer) { $this->localizer = $localizer; }
+    public function __construct(LocalizerInterface $localizer)
+    {
+        $this->localizer = $localizer;
+    }
 
-    public function getName() { return 'locale_extension'; }
+    public function getName()
+    {
+        return 'locale_extension';
+    }
 
-    public function getFilters() : array
+    public function getFilters(): array
     {
         return [
-            new TwigFilter('lang',         [Localizer::class, 'getLocaleLang']),
-            new TwigFilter('lang_name',    [Localizer::class, 'getLocaleLangName']),
-            new TwigFilter('country',      [Localizer::class, 'getLocaleCountry']),
+            new TwigFilter('lang', [Localizer::class, 'getLocaleLang']),
+            new TwigFilter('lang_name', [Localizer::class, 'getLocaleLangName']),
+            new TwigFilter('country', [Localizer::class, 'getLocaleCountry']),
             new TwigFilter('country_name', [Localizer::class, 'getLocaleCountryName']),
         ];
     }
 
-    public function getFunctions() : array
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('compatible_locale', [Localizer::class, 'compatibleLocale'], ['is_safe' => ['all']]),
-            new TwigFunction('render_locale',   [$this, 'renderLocale'], ["needs_environment" => true, 'is_safe' => ['all']]),
+            new TwigFunction('render_locale', [$this, 'renderLocale'], ["needs_environment" => true, 'is_safe' => ['all']]),
             new TwigFunction('render_timezone', [$this, 'renderTimezone'], ["needs_environment" => true, 'is_safe' => ['all']]),
         ];
     }

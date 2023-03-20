@@ -17,6 +17,7 @@ use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Exception\RuntimeException;
 use Symfony\Component\Yaml\Exception\ParseException;
+
 use function is_file;
 
 class Excel
@@ -45,9 +46,9 @@ class Excel
     private static function flatten(iterable $data, array &$result, string $parentKey = ''): void
     {
         foreach ($data as $key => $value) {
-
-            if (is_object($value))
+            if (is_object($value)) {
                 $value = get_object_vars($value);
+            }
 
             if (is_iterable($value)) {
                 self::flatten($value, $result, $parentKey."[".$key."]");
@@ -66,23 +67,23 @@ class Excel
 
     public function dump(): string
     {
-        if (!is_iterable($this->data))
+        if (!is_iterable($this->data)) {
             throw new NotEncodableValueException(sprintf('Expected data of type iterable, %s given', gettype($this->data)));
+        }
 
         $spreadsheet = new Spreadsheet();
 
         switch ($this->format) {
-
             // Excel 2003
             case ExcelEncoder::XLS:
                 $writer = new Writers\Xls($spreadsheet);
-            break;
+                break;
 
-            // Excel 2007
+                // Excel 2007
             case ExcelEncoder::XLSM:
             case ExcelEncoder::XLSX:
                 $writer = new Writers\Xlsx($spreadsheet);
-            break;
+                break;
 
             default:
                 throw new InvalidArgumentException(sprintf('The format "%s" is not supported', $this->format));
@@ -91,12 +92,13 @@ class Excel
         $sheetIndex = 0;
 
         foreach ($this->data as $sheetName => $sheetData) {
-
-            if (!is_iterable($sheetData))
+            if (!is_iterable($sheetData)) {
                 throw new NotEncodableValueException(sprintf('Expected data of sheet #%d of type "iterable", "%s" given', $sheetName, gettype($sheetData)));
+            }
 
-            if ($sheetName === $sheetIndex)
+            if ($sheetName === $sheetIndex) {
                 $sheetName = sprintf('Sheet_%d', $sheetIndex);
+            }
 
             $spreadsheet->setActiveSheetIndex($sheetIndex);
             $worksheet = $spreadsheet->getActiveSheet();
@@ -104,9 +106,9 @@ class Excel
             $sheetData = (array) $sheetData;
 
             foreach ($sheetData as $rowIndex => $cells) {
-
-                if (!is_iterable($cells))
+                if (!is_iterable($cells)) {
                     throw new NotEncodableValueException(sprintf('Expected cells of type "iterable" for data sheet #%d at row #%d, "%s" given', $sheetIndex, $rowIndex, gettype($cells)));
+                }
 
                 $flattened = [];
                 self::flatten($cells, $flattened);
@@ -116,7 +118,6 @@ class Excel
             $headers = [];
 
             foreach ($sheetData as $cells) {
-
                 $headers = array_keys($cells);
                 break;
             }
@@ -129,16 +130,16 @@ class Excel
                 switch ($this->context[self::HEADERS_HORIZONTAL_ALIGNMENT_KEY]) {
                     case 'left':
                         $alignment = Alignment::HORIZONTAL_LEFT;
-                    break;
+                        break;
                     case 'center':
                         $alignment = Alignment::HORIZONTAL_CENTER;
-                    break;
+                        break;
                     case 'right':
                         $alignment = Alignment::HORIZONTAL_RIGHT;
-                    break;
+                        break;
                     case 'fill':
                         $alignment = Alignment::HORIZONTAL_FILL;
-                    break;
+                        break;
                     default:
                         throw new InvalidArgumentException(sprintf('The value of context key "%s" is not valid (possible values: "left", "center" or "right")', self::HEADERS_HORIZONTAL_ALIGNMENT_KEY));
                 }
@@ -149,54 +150,57 @@ class Excel
                 ;
             }
 
-            if (true === $this->context[self::HEADERS_IN_BOLD_KEY])
+            if (true === $this->context[self::HEADERS_IN_BOLD_KEY]) {
                 $headerLineStyle->getFont()->setBold(true);
+            }
 
-            for ($i = 1; $i <= Coordinate::columnIndexFromString($worksheet->getHighestDataColumn()); ++$i)
+            for ($i = 1; $i <= Coordinate::columnIndexFromString($worksheet->getHighestDataColumn()); ++$i) {
                 $worksheet->getColumnDimensionByColumn($i)->setAutoSize($this->context[self::COLUMNS_AUTOSIZE_KEY]);
+            }
 
             $worksheet->calculateColumnWidths();
 
             foreach ($worksheet->getColumnDimensions() as $columnDimension) {
-
                 $colWidth = $columnDimension->getWidth();
-                if ($colWidth > $this->context[self::COLUMNS_MAXSIZE_KEY])
+                if ($colWidth > $this->context[self::COLUMNS_MAXSIZE_KEY]) {
                     $columnDimension->setAutoSize(false)->setWidth($this->context[self::COLUMNS_MAXSIZE_KEY]);
+                }
             }
         }
 
         try {
-
             $tmpFile = self::$filesystem->tempnam(sys_get_temp_dir(), $this->format);
             $writer->save($tmpFile);
 
             $content = (string) file_get_contents($tmpFile);
             self::$filesystem->remove($tmpFile);
-
         } catch (Exception $e) {
-
             throw new RuntimeException(sprintf('Excel encoding failed - %s', $e->getMessage()), 0, $e);
         }
 
         return $content;
     }
 
-    public static function extension(string $path) {
-
-        try { $extension = exif_imagetype($path); }
-        catch (Exception $e) { $extension = false; }
+    public static function extension(string $path)
+    {
+        try {
+            $extension = exif_imagetype($path);
+        } catch (Exception $e) {
+            $extension = false;
+        }
         return $extension !== false ? substr(image_type_to_extension($extension), 1) : pathinfo($path, PATHINFO_EXTENSION) ?? null;
     }
 
     public static function parseFile(string $filename, array $context = []): mixed
     {
-        if(filter_var($filename, FILTER_VALIDATE_URL) === false) {
-
-            if (!is_file($filename))
+        if (filter_var($filename, FILTER_VALIDATE_URL) === false) {
+            if (!is_file($filename)) {
                 throw new ParseException(sprintf('File "%s" does not exist.', $filename));
+            }
 
-            if (!is_readable($filename))
+            if (!is_readable($filename)) {
                 throw new ParseException(sprintf('File "%s" cannot be read.', $filename));
+            }
         }
 
         return self::parse(file_get_contents($filename), self::extension($filename), $context);
@@ -204,8 +208,9 @@ class Excel
 
     public static function parse(string $data, string $format, array $context = []): mixed
     {
-        if (!is_scalar($data))
+        if (!is_scalar($data)) {
             throw new NotEncodableValueException(sprintf('Expected data of type scalar, %s given', gettype($data)));
+        }
 
         $tmpFile = (string) tempnam(sys_get_temp_dir(), $format);
 
@@ -213,17 +218,16 @@ class Excel
         $filesystem->dumpFile($tmpFile, $data);
 
         switch ($format) {
-
             // Excel 2003
             case ExcelEncoder::XLS:
                 $reader = new Readers\Xls();
-            break;
+                break;
 
-            // Excel 2007
+                // Excel 2007
             case ExcelEncoder::XLSM:
             case ExcelEncoder::XLSX:
                 $reader = new Readers\Xlsx();
-            break;
+                break;
 
             default:
                 throw new InvalidArgumentException(sprintf('The format "%s" is not supported', $format));
@@ -259,11 +263,11 @@ class Excel
                 $rowIndex = (int) $rowIndex;
 
                 if (null === $headers) {
-
                     $headers = [];
                     foreach ($cells as $key => $value) {
-
-                        if (null === $value || '' === $value) continue;
+                        if (null === $value || '' === $value) {
+                            continue;
+                        }
 
                         $headers[$key] = $value;
                         unset($sheetData[$rowIndex][$key]);
@@ -273,9 +277,11 @@ class Excel
                 }
 
                 foreach ($cells as $key => $value) {
-
-                    if (array_key_exists($key, $headers))  $labelledRows[$rowIndex - 1][(string) $headers[$key]] = $value;
-                    else $labelledRows[$rowIndex - 1][''][$key] = $value;
+                    if (array_key_exists($key, $headers)) {
+                        $labelledRows[$rowIndex - 1][(string) $headers[$key]] = $value;
+                    } else {
+                        $labelledRows[$rowIndex - 1][''][$key] = $value;
+                    }
 
                     unset($sheetData[$rowIndex][$key]);
                 }

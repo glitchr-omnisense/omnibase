@@ -12,7 +12,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 final class EmojiPickerType extends AbstractType
 {
-    public function getBlockPrefix(): string { return 'emojipickr'; }
+    public function getBlockPrefix(): string
+    {
+        return 'emojipickr';
+    }
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -22,7 +25,7 @@ final class EmojiPickerType extends AbstractType
         ]);
     }
 
-    public function getParent() : ?string
+    public function getParent(): ?string
     {
         return TextType::class;
     }

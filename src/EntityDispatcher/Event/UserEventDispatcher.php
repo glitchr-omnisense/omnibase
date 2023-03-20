@@ -24,28 +24,36 @@ class UserEventDispatcher extends AbstractEventDispatcher
         $user = $event->getObject();
         $oldUser = $this->entityHydrator->getOriginalEntity($event);
 
-        if($user->isApproved() && !$oldUser->isApproved())
+        if ($user->isApproved() && !$oldUser->isApproved()) {
             $this->addEvent(UserEvent::APPROVAL, $user);
+        }
 
-        if($user->isVerified() && !$oldUser->isVerified())
+        if ($user->isVerified() && !$oldUser->isVerified()) {
             $this->addEvent(UserEvent::VERIFIED, $user);
+        }
 
-        if($user->isEnabled() && !$oldUser->isEnabled())
+        if ($user->isEnabled() && !$oldUser->isEnabled()) {
             $this->addEvent(UserEvent::ENABLED, $user);
+        }
 
-        if($user->isDisabled() && !$oldUser->isDisabled())
+        if ($user->isDisabled() && !$oldUser->isDisabled()) {
             $this->addEvent(UserEvent::DISABLED, $user);
+        }
 
-        if($user->isKicked() && !$oldUser->isKicked())
+        if ($user->isKicked() && !$oldUser->isKicked()) {
             $this->addEvent(UserEvent::KICKED, $user);
+        }
 
-        if($user->isLocked() && !$oldUser->isLocked())
+        if ($user->isLocked() && !$oldUser->isLocked()) {
             $this->addEvent(UserEvent::LOCKED, $user);
+        }
 
-        if($user->isBanned() && !$oldUser->isBanned())
+        if ($user->isBanned() && !$oldUser->isBanned()) {
             $this->addEvent(UserEvent::BANNED, $user);
+        }
 
-        if(!$user->isGhost() && $oldUser->isGhost())
+        if (!$user->isGhost() && $oldUser->isGhost()) {
             $this->addEvent(UserEvent::GHOST, $user);
+        }
     }
 }

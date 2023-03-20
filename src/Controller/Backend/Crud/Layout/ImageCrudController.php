@@ -20,24 +20,30 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 
 class ImageCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
     public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
     {
-        if($entity = $this->getEntity()) {
-
+        if ($entity = $this->getEntity()) {
             $extension->setImage($entity->getSource(), ["style" => "object-position: ".$entity->getQuadrantPosition().";"]);
 
             $class = mb_strtolower(camel2snake($entity));
             $entityLabel = $this->translator->trans($class.".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
-            if($entityLabel == $class.".".Translator::NOUN_SINGULAR) $entityLabel = null;
-            else $extension->setTitle(mb_ucwords($entityLabel));
+            if ($entityLabel == $class.".".Translator::NOUN_SINGULAR) {
+                $entityLabel = null;
+            } else {
+                $extension->setTitle(mb_ucwords($entityLabel));
+            }
 
             $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
             $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
 
-            if($this->getCrud()->getAsDto()->getCurrentAction() != "new")
+            if ($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
                 $extension->setText($entityLabel." #".$entity->getId());
+            }
         }
 
         return $extension;
@@ -52,7 +58,6 @@ class ImageCrudController extends AbstractCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-
             yield QuadrantField::new('quadrant')->setColumns(2);
             yield ImageField::new('source')->setColumns(10)->setCropper();
 
@@ -60,10 +65,13 @@ class ImageCrudController extends AbstractCrudController
                     ->allowObject()
                     ->allowAdd()
                     ->showCollapsed(false)
-                    ->setEntryLabel(function($i, $e) {
-
-                        if($e === null) return false;
-                        if($i === "__prototype__") return false;
+                    ->setEntryLabel(function ($i, $e) {
+                        if ($e === null) {
+                            return false;
+                        }
+                        if ($i === "__prototype__") {
+                            return false;
+                        }
 
                         $id = " #".(((int) $i) + 1);
 

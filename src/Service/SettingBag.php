@@ -83,28 +83,43 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         $this->environment    = $environment;
     }
 
-    public function all   (?string $locale = null) : array   { return $this->get(null, $locale); }
-    public function allRaw($useCache = BaseBundle::USE_CACHE, $onlyLinkedBag = false) : array  { return $this->getRaw(null, $useCache, $onlyLinkedBag); }
-    public function __call($name, $_) { return $this->get("base.settings.".$name); }
+    public function all(?string $locale = null): array
+    {
+        return $this->get(null, $locale);
+    }
+    public function allRaw($useCache = BaseBundle::USE_CACHE, $onlyLinkedBag = false): array
+    {
+        return $this->getRaw(null, $useCache, $onlyLinkedBag);
+    }
+    public function __call($name, $_)
+    {
+        return $this->get("base.settings.".$name);
+    }
 
-    public function getEnvironment(): ?string { return $this->environment; }
+    public function getEnvironment(): ?string
+    {
+        return $this->environment;
+    }
     public function getPaths(null|string|array $path = null)
     {
-        return array_map(fn($s) => $s instanceof Setting ? $s->getPath() : null, array_filter_recursive($this->getRaw($path)) ?? []);
+        return array_map(fn ($s) => $s instanceof Setting ? $s->getPath() : null, array_filter_recursive($this->getRaw($path)) ?? []);
     }
 
     protected function read(?string $path, array $bag)
     {
-        if($path === null) return $bag;
+        if ($path === null) {
+            return $bag;
+        }
 
         $pathArray = explode(".", $path);
         foreach ($pathArray as $index => $key) {
-
-            if($key == "_self" && $index != count($pathArray)-1)
+            if ($key == "_self" && $index != count($pathArray)-1) {
                 throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
+            }
 
-            if(!array_key_exists($key, $bag))
+            if (!array_key_exists($key, $bag)) {
                 throw new \Exception("Failed to read \"$path\": key not found");
+            }
 
             $bag = &$bag[$key];
         }
@@ -112,33 +127,34 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $bag;
     }
 
-    public function normalize(?string $path, array $settings) {
-
+    public function normalize(?string $path, array $settings)
+    {
         $values = [];
 
         // Generate default structure
         $array = &$values;
 
-        if($path !== null) {
-
+        if ($path !== null) {
             $el = explode(".", $path);
             $last = count($el)-1;
             foreach ($el as $index => $key) {
-
-                if($key == "_self" && $index != $last)
+                if ($key == "_self" && $index != $last) {
                     throw new \Exception("Failed to normalize \"$path\": \"_self\" key can only be used as tail parameter");
+                }
 
-                if(!array_key_exists($key, $array)) $array[$key] = ["_self" => null];
+                if (!array_key_exists($key, $array)) {
+                    $array[$key] = ["_self" => null];
+                }
                 $array = &$array[$key];
             }
         }
 
         // Fill it with settings
-        foreach($settings as $setting) {
-
+        foreach ($settings as $setting) {
             $array = &$values;
-            foreach (explode(".", $setting->getPath()) as $key)
+            foreach (explode(".", $setting->getPath()) as $key) {
                 $array = &$array[$key];
+            }
 
             $array["_self"] = $setting;
         }
@@ -146,27 +162,26 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $values;
     }
 
-    public function denormalize(array $settings, ?string $path = null) {
-
-        if($path) {
-
-            foreach(explode(".", $path) as $value)
+    public function denormalize(array $settings, ?string $path = null)
+    {
+        if ($path) {
+            foreach (explode(".", $path) as $value) {
                 $settings = $settings[$value];
+            }
         }
 
         $settings = array_transforms(
-            fn($k, $v):?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v],
+            fn ($k, $v): ?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v],
             array_flatten(".", $settings, -1, ARRAY_FLATTEN_PRESERVE_KEYS)
         );
 
-        foreach($settings as $key => $setting) {
-
+        foreach ($settings as $key => $setting) {
             $matches = [];
-            if(preg_match("/(.*)[0-9]+$/", $key, $matches)) {
-
+            if (preg_match("/(.*)[0-9]+$/", $key, $matches)) {
                 $path = $matches[1];
-                if(!array_key_exists($path, $settings))
+                if (!array_key_exists($path, $settings)) {
                     $settings[$path] = [];
+                }
 
                 $settings[$path][] = $setting;
                 unset($settings[$key]);
@@ -179,24 +194,26 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::USE_CACHE, bool $onlyLinkedBag = false)
     {
         $useSettingBag = $this->parameterBag->get("base.parameter_bag.use_setting_bag") ?? false;
-        if(!$useSettingBag)
+        if (!$useSettingBag) {
             return [];
+        }
 
         $this->clear($path);
 
-        if(is_array($paths = $path)) {
-
+        if (is_array($paths = $path)) {
             $settings = [];
-            foreach($paths as $path)
+            foreach ($paths as $path) {
                 $settings[] = $this->getRaw($path, $useCache);
+            }
 
             return $settings;
         }
 
-        if(!$this->settingRepository) throw new InvalidArgumentException("Setting repository not found. No doctrine connection established ?");
+        if (!$this->settingRepository) {
+            throw new InvalidArgumentException("Setting repository not found. No doctrine connection established ?");
+        }
 
         try {
-
             $fn  = $useCache ? "cache" : "find";
             $fn .= $onlyLinkedBag ?
                     ($path ? "ByInsensitivePathStartingWithAndBagNotEmpty" : "ByBagNotEmpty") :
@@ -205,14 +222,13 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             $args = $path ? [$path] : [];
 
             $settings = $this->settingRepository->$fn(...$args);
-            if ($settings instanceof Query)
+            if ($settings instanceof Query) {
                 $settings = $settings->getResult();
-
-        } catch(TableNotFoundException  $e) { throw $e; }
-          catch(EntityNotFoundException $e) {
-
+            }
+        } catch(TableNotFoundException  $e) {
+            throw $e;
+        } catch(EntityNotFoundException $e) {
             return $useCache ? $this->getRaw($path, false) : [];
-
         } // Cache fallback
 
         $values = $this->normalize($path, $settings);
@@ -226,8 +242,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         $locale = $this->localizer->getLocale($locale);
         $setting = $this->getRawScalar($path, $useCache);
 
-        if(!$setting instanceof Setting) {
-
+        if (!$setting instanceof Setting) {
             $setting = new Setting($path, null, $locale);
             $this->entityManager->persist($setting);
         }
@@ -237,11 +252,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function getRawScalar(null|string|array $path = null, bool $useCache = BaseBundle::USE_CACHE)
     {
-        if(is_array($paths = $path)) {
-
+        if (is_array($paths = $path)) {
             $settings = [];
-            foreach($paths as $path)
+            foreach ($paths as $path) {
                 $settings[] = $this->getRawScalar($path, $useCache);
+            }
 
             return $settings;
         }
@@ -251,11 +266,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function getScalar(null|string|array $path, ?string $locale = null): mixed
     {
-        if(is_array($paths = $path)) {
-
+        if (is_array($paths = $path)) {
             $settings = [];
-            foreach($paths as $path)
+            foreach ($paths as $path) {
                 $settings[] = $this->getScalar($path, $locale);
+            }
 
             return $settings;
         }
@@ -266,51 +281,60 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     protected array $settingBag = [];
     public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = BaseBundle::USE_CACHE): array
     {
-        if(is_array($paths = $path)) {
-
+        if (is_array($paths = $path)) {
             $settings = [];
-            foreach($paths as $path)
+            foreach ($paths as $path) {
                 $settings[$path] = $this->get($path, $locale, $useCache);
+            }
 
             return $settings;
         }
 
         $this->settingBag ??= $useCache && $this->cacheSettingBag !== null ? $this->cacheSettingBag->get() ?? [] : [];
-        if(array_key_exists($path.":".($locale ?? Localizer::LOCALE_FORMAT), $this->settingBag))
+        if (array_key_exists($path.":".($locale ?? Localizer::LOCALE_FORMAT), $this->settingBag)) {
             return $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)];
+        }
 
-        try { $values = $this->getRaw($path, $useCache) ?? []; }
-        catch (Exception $e) { throw $e; return []; }
+        try {
+            $values = $this->getRaw($path, $useCache) ?? [];
+        } catch (Exception $e) {
+            throw $e;
+            return [];
+        }
 
-        $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)] ??= array_map_recursive(function($v) use ($locale) {
-
-            if(!$v instanceof Setting) return $v;
+        $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)] ??= array_map_recursive(function ($v) use ($locale) {
+            if (!$v instanceof Setting) {
+                return $v;
+            }
             return $v->translate($locale)?->getValue() ?? $v->translate($this->localizer->getDefaultLocale())?->getValue();
-
         }, $values);
 
-        if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        if ($useCache) {
+            $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        }
 
         return $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)];
     }
 
-    public function clearAll() { return $this->clear(null); }
+    public function clearAll()
+    {
+        return $this->clear(null);
+    }
     public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
-        if(is_array($paths = $path)) {
-
-            foreach($paths as $path)
+        if (is_array($paths = $path)) {
+            foreach ($paths as $path) {
                 $this->clear($path, $locale, $useCache);
+            }
 
             return;
         }
 
-        if(!$path) $this->settingBag = [];
-        else {
-
+        if (!$path) {
+            $this->settingBag = [];
+        } else {
             $pathByArray = explode(".", $path);
-            while( !empty($pathByArray) ) {
-
+            while (!empty($pathByArray)) {
                 $currentPath = implode(".", $pathByArray);
                 $this->settingBag = array_key_removes_startsWith($this->settingBag, true, $currentPath.":");
 
@@ -318,20 +342,24 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             }
         }
 
-        if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        if ($useCache) {
+            $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        }
     }
 
     public function set(string $path, $value, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
         $setting = $this->generateRaw($path, $locale);
-        if($setting->isLocked())
+        if ($setting->isLocked()) {
             throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
+        }
 
         $setting->translate($locale)->setValue($value);
         $this->clear($path, $locale);
 
-        if ($this->entityManager->getCache())
+        if ($this->entityManager->getCache()) {
             $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        }
 
         $this->entityManager->flush();
         return $this;
@@ -341,8 +369,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setLabel($label);
-        if ($this->entityManager->getCache())
+        if ($this->entityManager->getCache()) {
             $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        }
 
         $this->entityManager->flush();
         return $this;
@@ -352,8 +381,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setHelp($help);
-        if ($this->entityManager->getCache())
+        if ($this->entityManager->getCache()) {
             $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        }
 
         $this->entityManager->flush();
         return $this;
@@ -363,8 +393,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $setting = $this->generateRaw($path);
         $setting->setBag($parameterName);
-        if ($this->entityManager->getCache())
+        if ($this->entityManager->getCache()) {
             $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        }
 
         $this->entityManager->flush();
         return $this;
@@ -378,8 +409,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     public function remove(string $path)
     {
         $setting = $this->settingRepository->findOneByInsensitivePath($path);
-        if($setting instanceof Setting) {
-
+        if ($setting instanceof Setting) {
             unset($this->settingBag[$path]);
 
             $this->entityManager->remove($setting);
@@ -389,8 +419,14 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
-    public function lock(string $path  ) { return $this->setLock($path, true); }
-    public function unlock(string $path) { return $this->setLock($path, false); }
+    public function lock(string $path)
+    {
+        return $this->setLock($path, true);
+    }
+    public function unlock(string $path)
+    {
+        return $this->setLock($path, false);
+    }
     public function setLock(string $path, bool $flag = true)
     {
         $setting = $this->generateRaw($path);
@@ -400,14 +436,21 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
-    public function secure(string $path  ) { return $this->setSecure($path, true); }
-    public function unsecure(string $path) { return $this->setSecure($path, false); }
+    public function secure(string $path)
+    {
+        return $this->setSecure($path, true);
+    }
+    public function unsecure(string $path)
+    {
+        return $this->setSecure($path, false);
+    }
     public function setSecure(string $path, bool $flag = true)
     {
         $setting = $this->generateRaw($path);
         $setting->setVault($flag ? $this->getEnvironment() : null);
-        if ($this->entityManager->getCache())
+        if ($this->entityManager->getCache()) {
             $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        }
 
         $this->entityManager->flush();
         return $this;

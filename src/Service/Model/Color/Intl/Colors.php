@@ -10,7 +10,10 @@ final class Colors extends ResourceBundle
 {
     public const COLOR_DIR = "colors";
 
-    protected static function getPath(): string { return Intl::getDataDirectory().'/'.self::COLOR_DIR; }
+    protected static function getPath(): string
+    {
+        return Intl::getDataDirectory().'/'.self::COLOR_DIR;
+    }
     public static function getLocaleLanguageCodes(): array
     {
         return self::readEntry(['Colors'], 'meta');
@@ -19,10 +22,8 @@ final class Colors extends ResourceBundle
     public static function exists(string $color): bool
     {
         try {
-
             self::readEntry(['Names', $color]);
             return true;
-
         } catch (MissingResourceException $e) {
             return false;
         }
@@ -42,8 +43,20 @@ final class Colors extends ResourceBundle
         return self::asort(self::readEntry(['Names'], $displayLocale), $displayLocale);
     }
 
-    public static function getHSL(string $color): array { return hex2hsl(self::readEntry(['HexCode', $color], 'meta')); }
-    public static function getRGB(string $color): array { return hex2rgb(self::readEntry(['HexCode', $color], 'meta')); }
-    public static function getHexCode(string $color): string { return self::readEntry(['HexCode', $color], 'meta'); }
-    public static function getHexCodes(): array { return self::readEntry(['HexCodes'], 'meta'); }
+    public static function getHSL(string $color): array
+    {
+        return hex2hsl(self::readEntry(['HexCode', $color], 'meta'));
+    }
+    public static function getRGB(string $color): array
+    {
+        return hex2rgb(self::readEntry(['HexCode', $color], 'meta'));
+    }
+    public static function getHexCode(string $color): string
+    {
+        return self::readEntry(['HexCode', $color], 'meta');
+    }
+    public static function getHexCodes(): array
+    {
+        return self::readEntry(['HexCodes'], 'meta');
+    }
 }

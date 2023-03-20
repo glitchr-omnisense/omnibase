@@ -1,6 +1,7 @@
 <?php
 
 namespace Base\Field;
+
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 

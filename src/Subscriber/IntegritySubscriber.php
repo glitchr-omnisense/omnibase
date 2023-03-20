@@ -91,10 +91,14 @@ class IntegritySubscriber implements EventSubscriberInterface
     public function onLoginSuccess(LoginSuccessEvent $event)
     {
         $token = $this->tokenStorage->getToken();
-        if(!$token) return true;
+        if (!$token) {
+            return true;
+        }
 
         $user = $token->getUser();
-        if($user === null) return true;
+        if ($user === null) {
+            return true;
+        }
     }
 
     public function onException(ExceptionEvent $event)
@@ -104,47 +108,55 @@ class IntegritySubscriber implements EventSubscriberInterface
                        $throwable instanceof ErrorException || $throwable instanceof InvalidArgumentException ||
                        $throwable instanceof EntityNotFoundException);
 
-        if($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace()))
+        if ($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace())) {
             throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
+        }
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if(BaseBundle::getInstance()->isBroken() && $event->isMainRequest())
+        if (BaseBundle::getInstance()->isBroken() && $event->isMainRequest()) {
             throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?");
+        }
 
         $token = $this->tokenStorage->getToken();
 
         $session = $this->requestStack->getSession();
-        if(!$session->get("_integrity/doctrine"))
+        if (!$session->get("_integrity/doctrine")) {
             $session->set("_integrity/doctrine", $this->getDoctrineChecksum());
-        if(!$session->get("_integrity/secret"))
+        }
+        if (!$session->get("_integrity/secret")) {
             $session->set("_integrity/secret", $this->getSecret());
+        }
 
-        if(!$this->router->hasFirewall()) return;
-        if($this->router->getRouteName() == RescueFormAuthenticator::LOGIN_ROUTE) return;
+        if (!$this->router->hasFirewall()) {
+            return;
+        }
+        if ($this->router->getRouteName() == RescueFormAuthenticator::LOGIN_ROUTE) {
+            return;
+        }
 
         $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
 
-        if(!$integrity) {
-
-            if($token) {
+        if (!$integrity) {
+            if ($token) {
                 $user = $token->getUser();
                 $notification = new Notification("integrity", [$user]);
                 $notification->send("danger");
             }
 
-            $this->tokenStorage->setToken(NULL);
+            $this->tokenStorage->setToken(null);
             $session = $this->requestStack->getSession();
             $session->remove("_integrity/secret");
             $session->remove("_integrity/doctrine");
 
             $response = new Response();
             $response->headers->clearCookie('REMEMBERME', "/");
-            if(($host = parse_url(format_url(get_url(), FORMAT_URL_NOMACHINE|FORMAT_URL_NOSUBDOMAIN))["host"] ?? null))
+            if (($host = parse_url(format_url(get_url(), FORMAT_URL_NOMACHINE|FORMAT_URL_NOSUBDOMAIN))["host"] ?? null)) {
                 $response->headers->clearCookie('REMEMBERME', "/", ".".$host);
+            }
 
             $response->sendHeaders();
 
@@ -167,7 +179,9 @@ class IntegritySubscriber implements EventSubscriberInterface
         $params = $connection->getParams();
 
         $host = $params["host"] ?? "";
-        if(!$host) return "";
+        if (!$host) {
+            return "";
+        }
 
         $driver = $params["driver"] ?? null;
         $driver = $driver ? $driver."://" : "";
@@ -189,20 +203,28 @@ class IntegritySubscriber implements EventSubscriberInterface
 
 
 
-    public function checkUserIntegrity() {
-
+    public function checkUserIntegrity()
+    {
         $token = $this->tokenStorage->getToken();
-        if(!$token) return true;
+        if (!$token) {
+            return true;
+        }
 
         /**
          * @var User
          */
         $user = $token->getUser();
-        if($user === null) return true;
-        if(!$user instanceof BaseUser) return true;
+        if ($user === null) {
+            return true;
+        }
+        if (!$user instanceof BaseUser) {
+            return true;
+        }
 
         $persistentCollection = ($user->getLogs() instanceof PersistentCollection ? (array) $user->getLogs() : null);
-        if($persistentCollection === null) return false;
+        if ($persistentCollection === null) {
+            return false;
+        }
 
         $dirtyCollection = [
             "\x00*\x00initialized" => false,
@@ -221,26 +243,38 @@ class IntegritySubscriber implements EventSubscriberInterface
     public function checkDoctrineIntegrity()
     {
         $token = $this->tokenStorage->getToken();
-        if(!$token) return true;
+        if (!$token) {
+            return true;
+        }
 
         $user = $token->getUser();
-        if($user === null) return true;
+        if ($user === null) {
+            return true;
+        }
 
         $session = $this->requestStack->getSession();
-        if (!$session->get("_integrity/doctrine")) return false;
+        if (!$session->get("_integrity/doctrine")) {
+            return false;
+        }
 
         return $this->getDoctrineChecksum() == $session->get("_integrity/doctrine");
     }
 
     public function checkSecretIntegrity()
     {
-        if($this->secret == null) return true;
+        if ($this->secret == null) {
+            return true;
+        }
 
         $marshaller = $this->vault->getMarshaller();
-        if($marshaller == null) return true;
+        if ($marshaller == null) {
+            return true;
+        }
 
         $session = $this->requestStack->getSession();
-        if (!$session->get("_integrity/secret")) return false;
+        if (!$session->get("_integrity/secret")) {
+            return false;
+        }
 
         return $this->secret == $this->vault->reveal($marshaller, $session->get("_integrity/secret"));
     }

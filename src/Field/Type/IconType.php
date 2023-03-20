@@ -53,16 +53,22 @@ class IconType extends SelectType implements SelectInterface
     public static function getText(string $id): ?string
     {
         $adapter = self::$iconProvider->getAdapter($id);
-        if($adapter) {
-
+        if ($adapter) {
             $choices = $adapter->getChoices();
-            if( ($choicePath = array_search_recursive($id, $choices)) )
-                return $choicePath[count($choicePath)-1]; // Last but one is expected to contain "text" information
+            if (($choicePath = array_search_recursive($id, $choices))) {
+                return $choicePath[count($choicePath)-1];
+            } // Last but one is expected to contain "text" information
         }
 
         return null;
     }
 
-    public static function getHtml(string $id): ?string { return null; }
-    public static function getData(string $id): ?array { return []; }
+    public static function getHtml(string $id): ?string
+    {
+        return null;
+    }
+    public static function getData(string $id): ?array
+    {
+        return [];
+    }
 }

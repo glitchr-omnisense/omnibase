@@ -7,8 +7,8 @@ use Base\Cache\Abstract\AbstractLocalCacheWarmer;
 use Base\Service\IconProvider;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-class IconCacheWarmer extends AbstractLocalCacheWarmer {
-
+class IconCacheWarmer extends AbstractLocalCacheWarmer
+{
     /**
      * @var array[AbstractLocalCacheInterface]
      */
@@ -16,7 +16,7 @@ class IconCacheWarmer extends AbstractLocalCacheWarmer {
 
     public function __construct(IconProvider $iconProvider, string $cacheDir)
     {
-        $this->adapters = array_filter($iconProvider->getAdapters(), fn($a) => $a instanceof AbstractLocalCacheInterface);
+        $this->adapters = array_filter($iconProvider->getAdapters(), fn ($a) => $a instanceof AbstractLocalCacheInterface);
         parent::__construct($iconProvider, $cacheDir);
     }
 
@@ -24,8 +24,7 @@ class IconCacheWarmer extends AbstractLocalCacheWarmer {
     {
         $ret = parent::doWarmUp($cacheDir, $arrayAdapter);
 
-        foreach($this->adapters as $adapter) {
-
+        foreach ($this->adapters as $adapter) {
             $adapter->setCache($arrayAdapter);
             $ret &= $adapter->warmUp($cacheDir);
         }

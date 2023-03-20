@@ -15,7 +15,6 @@ use Symfony\Component\Form\FormView;
 
 class DateTimePickerType extends AbstractType
 {
-
     /** @var ParameterBagInterface */
     protected $parameterBag;
 
@@ -53,8 +52,14 @@ class DateTimePickerType extends AbstractType
         ]);
     }
 
-    public function getParent()     : ?string { return DateTimeType::class; }
-    public function getBlockPrefix():  string { return 'datetimepicker'; }
+    public function getParent(): ?string
+    {
+        return DateTimeType::class;
+    }
+    public function getBlockPrefix(): string
+    {
+        return 'datetimepicker';
+    }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {

@@ -8,14 +8,19 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-
 class RoleType extends AbstractType
 {
-    public function getParent() : ?string { return SelectType::class; }
-    public function getBlockPrefix(): string { return 'role'; }
+    public function getParent(): ?string
+    {
+        return SelectType::class;
+    }
+    public function getBlockPrefix(): string
+    {
+        return 'role';
+    }
 
-    public function configureOptions(OptionsResolver $resolver) {
-
+    public function configureOptions(OptionsResolver $resolver)
+    {
         $resolver->setDefaults([
             "capitalize" => true,
             'class'      => UserRole::class,

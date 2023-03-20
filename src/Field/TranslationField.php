@@ -27,8 +27,11 @@ class TranslationField implements FieldInterface
             ->setCustomOption(self::OPTION_MAX_LENGTH, 50)
             ->setFormType(TranslationType::class);
 
-        if($propertyName) $field->setFields([$propertyName => []])->showOnIndex($propertyName);
-        else $field->hideOnDetail();
+        if ($propertyName) {
+            $field->setFields([$propertyName => []])->showOnIndex($propertyName);
+        } else {
+            $field->hideOnDetail();
+        }
 
         return $field;
     }
@@ -72,8 +75,7 @@ class TranslationField implements FieldInterface
 
     public function showOnIndex(?string $field = null): self
     {
-        if($field) {
-
+        if ($field) {
             $this->setCustomOption("show_field", $field);
 
             $displayedOn = $this->dto->getDisplayedOn();
@@ -92,7 +94,9 @@ class TranslationField implements FieldInterface
 
     public function setExcludedFields($excludedFields): self
     {
-        if(!is_array($excludedFields)) $excludedFields = [$excludedFields];
+        if (!is_array($excludedFields)) {
+            $excludedFields = [$excludedFields];
+        }
         $this->setFormTypeOption("excluded_fields", $excludedFields);
         return $this;
     }

@@ -18,18 +18,21 @@ class IconControllersCommand extends Command
 {
     protected function configure(): void
     {
-        $this->addOption('controller',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific controller ?');
+        $this->addOption('controller', null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific controller ?');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $controllers = array_transforms(fn($k, $v):?array => str_starts_with($v->getDefault("_controller"), "App") ? [$k, $v->getDefault("_controller")] : null, $this->router->getRouteCollection()->all());
+        $controllers = array_transforms(fn ($k, $v): ?array => str_starts_with($v->getDefault("_controller"), "App") ? [$k, $v->getDefault("_controller")] : null, $this->router->getRouteCollection()->all());
         $controllerRestriction = $input->getOption('controller') ?? "";
 
-        if($controllers) $output->section()->writeln("Controller list: ".$controllerRestriction);
-        foreach($controllers as $controller) {
-
-            if(!str_starts_with($controller, $controllerRestriction)) continue;
+        if ($controllers) {
+            $output->section()->writeln("Controller list: ".$controllerRestriction);
+        }
+        foreach ($controllers as $controller) {
+            if (!str_starts_with($controller, $controllerRestriction)) {
+                continue;
+            }
 
             list($class, $method) = explode("::", $controller);
 
@@ -39,7 +42,7 @@ class IconControllersCommand extends Command
             $icon = $annotations[AnnotationReader::TARGET_METHOD][$class][$method] ?? null;
             $icon = $icon ? end($icon)->getIcon() : null;
 
-            if(!$icon) {
+            if (!$icon) {
                 $icon = $annotations[AnnotationReader::TARGET_CLASS][$class] ?? null;
                 $icon = $icon ? end($icon)->getIcon() : null;
             }

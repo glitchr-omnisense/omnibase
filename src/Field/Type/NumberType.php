@@ -20,7 +20,10 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
      */
     protected $twig;
 
-    public function getBlockPrefix(): string { return 'number2'; }
+    public function getBlockPrefix(): string
+    {
+        return 'number2';
+    }
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;
@@ -82,5 +85,4 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
             "keyDown" => true,
         ]);
     }
-
 }

@@ -54,7 +54,10 @@ final class AssociationField implements FieldInterface
             ->setCustomOption(self::OPTION_DOCTRINE_ASSOCIATION_TYPE, null);
     }
 
-    public function justDisplay(): self { return $this->allowDelete(false)->allowAdd(false)->autoload(false); }
+    public function justDisplay(): self
+    {
+        return $this->allowDelete(false)->allowAdd(false)->autoload(false);
+    }
 
     public function autoload($autoload = true): self
     {
@@ -99,7 +102,10 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    public function turnHorizontal(bool $horizontal) { return $this->showVertical(!$horizontal); }
+    public function turnHorizontal(bool $horizontal)
+    {
+        return $this->showVertical(!$horizontal);
+    }
     public function showVertical(bool $vertical = true)
     {
         return $this->setFormTypeOption("vertical", $vertical);

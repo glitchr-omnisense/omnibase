@@ -57,11 +57,11 @@ class SelectConfigurator implements FieldConfiguratorInterface
     {
         // Formatted value
         $class = $field->getCustomOption(SelectField::OPTION_CLASS);
-        if(!$class) {
-
+        if (!$class) {
             $values = $field->getValue();
-            if($values instanceof Collection)
+            if ($values instanceof Collection) {
                 $class = is_object($values->first()) ? get_class($values->first()) : null;
+            }
         }
 
         $values = $field->getValue();
@@ -69,33 +69,33 @@ class SelectConfigurator implements FieldConfiguratorInterface
         $formattedValues = [];
 
         $defaultClass = $this->classMetadataManipulator->getTargetClass($entityDto->getFqcn(), $field->getProperty());
-        if($this->classMetadataManipulator->isEntity($entityDto->getFqcn()) && $this->classMetadataManipulator->isToManySide($entityDto->getFqcn(), $field->getProperty()))
+        if ($this->classMetadataManipulator->isEntity($entityDto->getFqcn()) && $this->classMetadataManipulator->isToManySide($entityDto->getFqcn(), $field->getProperty())) {
             $field->setSortable(false);
+        }
 
         $showFirst = $field->getCustomOption(SelectField::OPTION_SHOW_FIRST);
         $displayLimit = $field->getCustomOption(SelectField::OPTION_DISPLAY_LIMIT);
-        if($showFirst) $displayLimit--;
+        if ($showFirst) {
+            $displayLimit--;
+        }
 
         if ($values instanceof Collection) {
-
             foreach ($values as $key => $value) {
-
                 $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
                 $dataClass = $dataClass ?? $defaultClass;
 
-                if($key > $displayLimit) $formattedValues[$key] = $value;
-                else {
-
+                if ($key > $displayLimit) {
+                    $formattedValues[$key] = $value;
+                } else {
                     $formattedValues[$key] = $this->autocomplete->resolve($value, $dataClass);
 
                     $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
-                    if ($formattedValues[$key] && $dataClassCrudController)
+                    if ($formattedValues[$key] && $dataClassCrudController) {
                         $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
+                    }
                 }
             }
-
         } else {
-
             $value = $field->getValue();
 
             $field->setCustomOption(SelectField::OPTION_RENDER_FORMAT, "text");
@@ -105,8 +105,9 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
             $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
             $formattedValues = $this->autocomplete->resolve($field->getValue(), $dataClass);
-            if ($formattedValues && $dataClassCrudController)
+            if ($formattedValues && $dataClassCrudController) {
                 $formattedValues["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
+            }
         }
 
         $field->setFormattedValue($formattedValues);

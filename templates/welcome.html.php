@@ -6,8 +6,12 @@
     <title>Welcome to Symfony!</title>
     <style>
         <?php $hue = random_int(0, 360); ?>
-        <?php $darkColor = static function (float $alpha = 1) use ($hue) { return "hsla($hue, 20%, 45%, $alpha)"; }; ?>
-        <?php $lightColor = static function (float $alpha = 1) use ($hue) { return "hsla($hue, 20%, 95%, $alpha)"; }; ?>
+        <?php $darkColor = static function (float $alpha = 1) use ($hue) {
+            return "hsla($hue, 20%, 45%, $alpha)";
+        }; ?>
+        <?php $lightColor = static function (float $alpha = 1) use ($hue) {
+            return "hsla($hue, 20%, 95%, $alpha)";
+        }; ?>
         body { background: <?= $lightColor(); ?>; color: <?= $darkColor(); ?>; display: flex; font: 16px/1.5 sans-serif; justify-content: center; margin: 0; }
         h1, h2 { line-height: 1.2; margin: 0 0 .5em; }
         h1 { font-size: 36px; }

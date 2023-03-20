@@ -6,12 +6,15 @@ use Base\Service\Model\IconizeInterface;
 
 class Quadrant8 extends Quadrant
 {
-    const NE   = "NORTHEAST";
-    const SE   = "SOUTHEAST";
-    const SW   = "SOUTHWEST";
-    const NW   = "NORTHWEST";
+    public const NE   = "NORTHEAST";
+    public const SE   = "SOUTHEAST";
+    public const SW   = "SOUTHWEST";
+    public const NW   = "NORTHWEST";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [
@@ -22,9 +25,15 @@ class Quadrant8 extends Quadrant
         ];
     }
 
-    public static function getTheta() { return parent::getTheta()/2; }
+    public static function getTheta()
+    {
+        return parent::getTheta()/2;
+    }
 
-    public static function getRotation(string $quadrant): ?float { return self::getRotations()[$quadrant] ?? self::getRotations()[self::O]; }
+    public static function getRotation(string $quadrant): ?float
+    {
+        return self::getRotations()[$quadrant] ?? self::getRotations()[self::O];
+    }
     public static function getRotations(): array
     {
         return array_merge(parent::getRotations(), [
@@ -36,7 +45,10 @@ class Quadrant8 extends Quadrant
         ]);
     }
 
-    public static function getPosition(string $quadrant): string { return self::getPositions()[$quadrant] ?? self::getPositions()[self::O]; }
+    public static function getPosition(string $quadrant): string
+    {
+        return self::getPositions()[$quadrant] ?? self::getPositions()[self::O];
+    }
     public static function getPositions(): array
     {
         return array_merge(parent::getPositions(), [

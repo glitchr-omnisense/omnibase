@@ -49,7 +49,10 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
-    public function getBlockPrefix():string { return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
+    public function getBlockPrefix(): string
+    {
+        return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -67,23 +70,19 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
     public function getFormattedData($data, $from = ".", $to = "-")
     {
         $newData = [];
-        if(!$data) return [];
-        else if(is_associative($data)) {
-
-            foreach($data as $name => $value)
+        if (!$data) {
+            return [];
+        } elseif (is_associative($data)) {
+            foreach ($data as $name => $value) {
                 $newData[str_replace($from, $to, $name)] = $value;
-
-        } else if( is_subclass_of($data, SettingBag::class)) {
-
-            foreach($data->all() as $setting)
+            }
+        } elseif (is_subclass_of($data, SettingBag::class)) {
+            foreach ($data->all() as $setting) {
                 $newData[str_replace($from, $to, $setting->getPath())] = $setting->getValue();
-
-        } else if( is_subclass_of($data, Setting::class)) {
-
+            }
+        } elseif (is_subclass_of($data, Setting::class)) {
             $newData[str_replace($from, $to, $data->getPath())] = $data->getValue();
-
         } else {
-
             throw new \Exception("Unexpected data provided (expecting either associative array, Setting or BaseSetting)");
         }
 
@@ -93,13 +92,11 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->setDataMapper($this);
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($options) {
-
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $settingBag = [];
 
             $formattedFields = $this->getFormattedData($options["fields"]);
-            foreach($formattedFields as $formattedField => $fieldOptions) {
-
+            foreach ($formattedFields as $formattedField => $fieldOptions) {
                 $field = str_replace("-", ".", $formattedField);
 
                 $settingBag[$formattedField] = $this->settingBag->getRawScalar($field, false) ?? new Setting($field);
@@ -110,12 +107,12 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
             $unvData = [];
             $intlData = [];
 
-            foreach($settingBag as $formattedField => $setting) {
-
+            foreach ($settingBag as $formattedField => $setting) {
                 // Exclude requested fields
                 $field = str_replace("-", ".", $formattedField);
-                if(in_array($field, $options["excluded_fields"]))
+                if (in_array($field, $options["excluded_fields"])) {
                     continue;
+                }
 
                 // Set field options
                 $fieldOptions = $options["fields"][$field];
@@ -123,7 +120,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 $fieldOptions["form_type"] = $fieldOptions["form_type"] ?? TextType::class;
 
                 // Set default label
-                if(!array_key_exists("label", $fieldOptions)) {
+                if (!array_key_exists("label", $fieldOptions)) {
                     $label = explode("-", trim(str_lstrip($formattedField, ["app-settings", "base-settings"]), " -"));
                     $fieldOptions["label"] = $setting->getLabel() ?? mb_ucwords(str_replace("_", " ", implode(" - ", $label)));
                 }
@@ -134,10 +131,12 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                     $fieldOptions["empty_data"]   = $settingValue ?? "";
                 }
 
-                if(!array_key_exists("help", $fieldOptions))
+                if (!array_key_exists("help", $fieldOptions)) {
                     $fieldOptions["help"] = $setting->getHelp() ?? "";
-                if(!array_key_exists("disabled", $fieldOptions))
+                }
+                if (!array_key_exists("disabled", $fieldOptions)) {
                     $fieldOptions["disabled"] = $setting->isLocked() ?? false;
+                }
 
                 //
                 // Check if expected to be translatable
@@ -147,14 +146,14 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 $fields["value"][$formattedField] = $fieldOptions;
 
                 $translations = $setting->getTranslations();
-                foreach($translations as $_ => $settingTranslation) {
-
+                foreach ($translations as $_ => $settingTranslation) {
                     $settingValue = $settingTranslation->getValue();
                     switch($fieldOptions["form_type"]) {
-
                         case DateTimePickerType::class:
                             $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
-                            if(!$datetime) $datetime = $settingValue ? new \DateTime($settingValue) : null;
+                            if (!$datetime) {
+                                $datetime = $settingValue ? new \DateTime($settingValue) : null;
+                            }
                             $settingTranslation->setValue($datetime);
                             break;
 
@@ -165,16 +164,15 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                     }
                 }
 
-                if ($isTranslatable) $intlData[$formattedField] = $translations;
-                else {
-
+                if ($isTranslatable) {
+                    $intlData[$formattedField] = $translations;
+                } else {
                     $unvData[$formattedField] = $translations;
                 }
             }
 
             $form = $event->getForm();
-            if($intlData) {
-
+            if ($intlData) {
                 $form->add("intl", TranslationType::class, [
                     "fields" => $fields,
                     "autoload" => false,
@@ -186,8 +184,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 $form->get("intl")->setData($intlData);
             }
 
-            if($unvData) {
-
+            if ($unvData) {
                 $form->add("unv", TranslationType::class, [
                     "fields" => $fields,
                     "autoload" => false,
@@ -200,43 +197,44 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 $form->get("unv")->setData($unvData);
             }
 
-            if(count($fields) > 0)
+            if (count($fields) > 0) {
                 $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "backoffice_settings.valid"]);
-            });
+            }
+        });
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void { }
+    public function mapDataToForms($viewData, \Traversable $forms): void
+    {
+    }
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        foreach(iterator_to_array($forms) as $formName => $form)
-        {
-            if($formName == "valid") continue;
-            else if($formName == "intl" || $formName == "unv") {
-
-                foreach($form->getData() as $formattedField => $translations) {
-
+        foreach (iterator_to_array($forms) as $formName => $form) {
+            if ($formName == "valid") {
+                continue;
+            } elseif ($formName == "intl" || $formName == "unv") {
+                foreach ($form->getData() as $formattedField => $translations) {
                     $field = str_replace("-", ".", $formattedField);
-                    foreach($translations as $locale => $translation) {
-
+                    foreach ($translations as $locale => $translation) {
                         $viewData[$field] = $viewData[$field] ?? new Setting($field);
-                        if($viewData[$field]->isLocked())
+                        if ($viewData[$field]->isLocked()) {
                             throw new \Exception("Setting \"".$viewData[$field]->getPath()."\" is locked, you cannot edit this variable.");
+                        }
 
                         $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null, $locale);
                     }
                 }
 
                 unset($viewData[$formName]);
-
             } else {
-
                 $field = str_replace("-", ".", $formName);
 
-                if(!$viewData[$formName] instanceof Setting)
+                if (!$viewData[$formName] instanceof Setting) {
                     $viewData[$formName] = $viewData[$formName] ?? new Setting($formName);
+                }
 
-                if($viewData[$formName]->isLocked())
+                if ($viewData[$formName]->isLocked()) {
                     throw new \Exception("Setting \"".$viewData[$formName]->getPath()."\" is currently locked.");
+                }
 
                 $translation = $form->getViewData();
                 $locale      = $translation->getLocale();

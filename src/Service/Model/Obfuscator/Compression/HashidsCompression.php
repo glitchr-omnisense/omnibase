@@ -13,12 +13,19 @@ class HashidsCompression extends AbstractCompression
     protected $hashids;
     public function __construct(string $secret)
     {
-        if(class_exists(Hashids::class))
+        if (class_exists(Hashids::class)) {
             $this->hashids = new Hashids($secret);
+        }
     }
 
-    public function getName(): string { return "hashids"; }
-    public function getEncoding(): ?string { return $this->encoding ?? ZLIB_ENCODING_GZIP; }
+    public function getName(): string
+    {
+        return "hashids";
+    }
+    public function getEncoding(): ?string
+    {
+        return $this->encoding ?? ZLIB_ENCODING_GZIP;
+    }
 
     public function isValid(string $hash): bool
     {
@@ -31,7 +38,9 @@ class HashidsCompression extends AbstractCompression
     }
     protected function decodeHex(string $data): string|false
     {
-        if (!$this->isValid($data)) return false;
+        if (!$this->isValid($data)) {
+            return false;
+        }
         return $this->hashids->decodeHex($data);
     }
 }

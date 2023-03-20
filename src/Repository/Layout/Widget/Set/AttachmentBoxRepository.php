@@ -15,5 +15,4 @@ use Base\Repository\Layout\WidgetRepository;
 
 class AttachmentBoxRepository extends WidgetRepository
 {
-
 }

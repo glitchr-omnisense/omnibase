@@ -75,21 +75,26 @@ class TwigSubscriber implements EventSubscriberInterface
 
     private function allowRender(ResponseEvent $event)
     {
-        if (!$this->autoAppend)
+        if (!$this->autoAppend) {
             return false;
+        }
 
         $contentType = $event->getResponse()->headers->get('content-type');
-        if ($contentType && !str_contains($contentType, "text/html"))
+        if ($contentType && !str_contains($contentType, "text/html")) {
             return false;
+        }
 
-        if ($this->router->isProfiler())
+        if ($this->router->isProfiler()) {
             return false;
+        }
 
-        if($this->exceptionTriggered)
+        if ($this->exceptionTriggered) {
             return false;
+        }
 
-        if (!$event->isMainRequest())
+        if (!$event->isMainRequest()) {
             return false;
+        }
 
         return true;
     }
@@ -104,19 +109,22 @@ class TwigSubscriber implements EventSubscriberInterface
     {
         //
         // Permission based entries
-        foreach(UserRole::getPermittedValues() as $role) {
-
+        foreach (UserRole::getPermittedValues() as $role) {
             $tag = "security-".strtolower(str_lstrip($role, "ROLE_"));
-            if(!$this->encoreTagRenderer->hasEntry($tag)) continue;
+            if (!$this->encoreTagRenderer->hasEntry($tag)) {
+                continue;
+            }
 
-            if ($this->authorizationChecker->isGranted($role))
+            if ($this->authorizationChecker->isGranted($role)) {
                 $this->encoreTagRenderer->addTag($tag);
+            }
         }
 
         //
         // Breakpoint based entries
-        foreach($this->parameterBag->get("base.twig.breakpoints") ?? [] as $breakpoint)
+        foreach ($this->parameterBag->get("base.twig.breakpoints") ?? [] as $breakpoint) {
             $this->encoreTagRenderer->addBreakpoint($breakpoint["name"], $breakpoint["media"] ?? "all");
+        }
 
         //
         // Alternative entries
@@ -127,12 +135,14 @@ class TwigSubscriber implements EventSubscriberInterface
     public function onKernelResponse(ResponseEvent $event)
     {
         $allowRender = $this->allowRender($event);
-        if(!$allowRender)
+        if (!$allowRender) {
             return false;
+        }
 
         $response = $event->getResponse();
-        if(is_instanceof($response, [StreamedResponse::class, BinaryFileResponse::class]))
+        if (is_instanceof($response, [StreamedResponse::class, BinaryFileResponse::class])) {
             return false;
+        }
 
         // Encore rest rendering
         $response = $this->encoreTagRenderer->renderFallback($response);

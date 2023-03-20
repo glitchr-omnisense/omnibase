@@ -55,18 +55,18 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         }
 
         $targetEntity = $this->classMetadataManipulator->getAssociationMapping($entityDto->getFqcn(), $propertyName)["targetEntity"] ?? null;
-        if ($field->getFormTypeOption("class") == null)
+        if ($field->getFormTypeOption("class") == null) {
             $field->setFormTypeOption("class", $targetEntity);
+        }
 
         $field->setFormattedValue($field->getValue());
 
         $href = [];
 
         $fieldValue = $field->getValue();
-        $classList = $fieldValue instanceof Collection ? array_unique($fieldValue->map(fn($e) => get_class($e))->toArray()) : array_filter([is_object($fieldValue) ? get_class($fieldValue) : null]);
+        $classList = $fieldValue instanceof Collection ? array_unique($fieldValue->map(fn ($e) => get_class($e))->toArray()) : array_filter([is_object($fieldValue) ? get_class($fieldValue) : null]);
         $classList[$field->getFormTypeOption("class")] = $field->getFormTypeOption("class");
-        foreach($classList as $classname) {
-
+        foreach ($classList as $classname) {
             $crudController = AbstractCrudController::getCrudControllerFqcn($classname);
 
             $href[$classname] = $crudController ?
@@ -177,16 +177,14 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         }
 
         $showFirst = $field->getCustomOption("showFirst");
-        if($field->getValue()) {
-
+        if ($field->getValue()) {
             $classFilter = $field->getFormTypeOption('class');
-            $others = $field->getValue()->filter(function($value) use ($classFilter) {
+            $others = $field->getValue()->filter(function ($value) use ($classFilter) {
                 return is_instanceof($value, $classFilter) || is_subclass_of($value, $classFilter);
             })->toArray();
 
             $first  = ($showFirst) ? array_shift($others) : $others[0] ?? null;
             if ($first) {
-
                 $targetEntityFqcn = $field->getDoctrineMetadata()->get('targetEntity');
                 $targetEntityDto = null === $first
                     ? $this->entityFactory->create($targetEntityFqcn)
@@ -199,10 +197,11 @@ class AssociationConfigurator implements FieldConfiguratorInterface
             }
 
             $count = $this->countNumElements($others);
-            if($first && $showFirst) $count++;
+            if ($first && $showFirst) {
+                $count++;
+            }
 
-            if($first != null || !empty($others))  {
-
+            if ($first != null || !empty($others)) {
                 $field->setFormattedValue([
                     "count" => $count,
                     "first" => $first,

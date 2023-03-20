@@ -38,31 +38,39 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 abstract class BaseNotifier implements BaseNotifierInterface
 {
-    public function __call   ($method, $arguments) : mixed
+    public function __call($method, $arguments): mixed
     {
         $action   = str_starts_with($method, "render") ? "render" : null;
         $action ??= str_starts_with($method, "sendAdmins") ? "sendAdmins" : null;
         $action ??= str_starts_with($method, "send") ? "send" : null;
-        if(!$action)
+        if (!$action) {
             throw new AccessException("Unexpected action received. Templated notification \"$method\" should starts with either  \"send\", \"sendAdmins\", or \"render\".");
+        }
 
         $method = lcfirst(substr($method, strlen($action)));
-        if(!method_exists($this::class, $method))
+        if (!method_exists($this::class, $method)) {
             throw new AccessException("Templated notification \"$method\" not found in class \"".get_class($this)."\".");
-        if(str_starts_with($method, "admin"))
+        }
+        if (str_starts_with($method, "admin")) {
             throw new AccessException("Templated notification \"".$this::class."::$method\" starts with \"admins\". This is a reserved word in \"".self::class."\"");
+        }
 
         $notification = $this->$method(...$arguments);
-        if($notification == null) return $this;
-        if(!$notification instanceof Notification)
+        if ($notification == null) {
+            return $this;
+        }
+        if (!$notification instanceof Notification) {
             throw new AccessException("Templated notification \"".$this::class."::$method\" must return a \"".Notification::class."\" object.");
+        }
 
 
         $arguments = [];
-        if ($action == "send")
+        if ($action == "send") {
             $arguments = [$notification->getImportance()];
-        if ($action == "sendAdmins")
+        }
+        if ($action == "sendAdmins") {
             $arguments = [$notification->getImportance()];
+        }
 
         return $notification->$action(...$arguments);
     }
@@ -125,7 +133,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
      * @var array
      */
     protected array $options;
-    public function getOptions(): array { return $this->options; }
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
 
     /**
      * @var array
@@ -137,9 +148,15 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     protected array $adminRecipients;
 
-    public function getTestRecipients(): array{ return $this->testRecipients; }
-    
-    public function getEnvironment() : Environment { return $this->twig; }
+    public function getTestRecipients(): array
+    {
+        return $this->testRecipients;
+    }
+
+    public function getEnvironment(): Environment
+    {
+        return $this->twig;
+    }
     public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
     {
         $this->twig          = $twig;
@@ -150,7 +167,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $this->adminRole          = $parameterBag->get("base.notifier.admin_role");
         $this->options            = $parameterBag->get("base.notifier.options") ?? [];
 
-        $this->testRecipients     = array_map(fn($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
+        $this->testRecipients     = array_map(fn ($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
 
         $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email");
         $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
@@ -167,20 +184,34 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $this->adminRecipients = [];
     }
 
-    public function getPolicy(): ChannelPolicyInterface { return $this->policy; }
+    public function getPolicy(): ChannelPolicyInterface
+    {
+        return $this->policy;
+    }
 
-    public function hasLoopback(): bool { return $this->technicalLoopback; }
+    public function hasLoopback(): bool
+    {
+        return $this->technicalLoopback;
+    }
     public function isTest(RecipientInterface $recipient): bool
     {
-        if($this->technicalLoopback) return true;
-        if($this->debug == false) return false;
-
-        if(!$recipient instanceof EmailRecipientInterface)
+        if ($this->technicalLoopback) {
+            return true;
+        }
+        if ($this->debug == false) {
             return false;
+        }
+
+        if (!$recipient instanceof EmailRecipientInterface) {
+            return false;
+        }
 
         $email = array_keys(mailparse($recipient->getEmail()));
-        foreach($this->testRecipients as $testRecipient)
-            if( preg_match('/'.$testRecipient->getEmail().'/', begin($email)) ) return true;
+        foreach ($this->testRecipients as $testRecipient) {
+            if (preg_match('/'.$testRecipient->getEmail().'/', begin($email))) {
+                return true;
+            }
+        }
 
         return false;
     }
@@ -190,39 +221,45 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     protected string $adminRole;
     public function getAdminRecipient($i = 0): ?RecipientInterface
-    { 
-        $this->initializeAdminRecipients();   
-        return $this->notifier->getAdminRecipients()[$i] ?? null; 
+    {
+        $this->initializeAdminRecipients();
+        return $this->notifier->getAdminRecipients()[$i] ?? null;
     }
 
     public function getAdminRecipients(): array
-    { 
-        $this->initializeAdminRecipients();    
-        return $this->notifier->getAdminRecipients(); 
+    {
+        $this->initializeAdminRecipients();
+        return $this->notifier->getAdminRecipients();
     }
 
     protected function initializeAdminRecipients()
     {
-        if(!$this->adminRole) return [];
-        if($this->adminRecipients) return $this;
-        
-        foreach ($this->getAdminUsers() as $adminUser)
-            $this->adminRecipients[] = $adminUser->getRecipient();
+        if (!$this->adminRole) {
+            return [];
+        }
+        if ($this->adminRecipients) {
+            return $this;
+        }
 
-        foreach (array_unique_map(fn($r) => $r->getEmail(), $this->adminRecipients) as $adminRecipient)
+        foreach ($this->getAdminUsers() as $adminUser) {
+            $this->adminRecipients[] = $adminUser->getRecipient();
+        }
+
+        foreach (array_unique_map(fn ($r) => $r->getEmail(), $this->adminRecipients) as $adminRecipient) {
             $this->notifier->addAdminRecipient($adminRecipient);
- 
+        }
+
         return $this;
     }
 
     protected function getAdminUsers()
     {
         try {
-            
             $userRepository = $this->entityManager->getRepository(User::class);
             $adminUsers = $userRepository->cacheByRoles($this->adminRole)->getResult();
-
-        } catch(MappingException|NonCacheableEntity|BadMethodCallException|DoctrineException|DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
+        } catch(MappingException|NonCacheableEntity|BadMethodCallException|DoctrineException|DriverException|InvalidFieldNameException|TableNotFoundException $e) {
+            $adminUsers = [];
+        }
 
         return $adminUsers;
     }
@@ -232,17 +269,31 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $defaultMail = mailparse($this->technicalRecipient->getEmail());
 
         $mail = $this->settingBag->getScalar("base.settings.mail");
-        if(!$mail) $mail = $this->getAdminRecipient()?->getEmail();
-        if(!$mail) $mail = array_keys($defaultMail)[0] ?? null;
-        if(!$mail) return new NoRecipient();
+        if (!$mail) {
+            $mail = $this->getAdminRecipient()?->getEmail();
+        }
+        if (!$mail) {
+            $mail = array_keys($defaultMail)[0] ?? null;
+        }
+        if (!$mail) {
+            return new NoRecipient();
+        }
 
         $mailName = $this->settingBag->getScalar("base.settings.mail.name");
-        if(!$mailName) $mailName = mb_ucwords(str_replace([".", "_"], [" ", " "], explode("@", $mail)[0]));
-        if(!$mailName) $mailName = first($defaultMail) ?? null;
+        if (!$mailName) {
+            $mailName = mb_ucwords(str_replace([".", "_"], [" ", " "], explode("@", $mail)[0]));
+        }
+        if (!$mailName) {
+            $mailName = first($defaultMail) ?? null;
+        }
 
         $phone = $this->settingBag->getScalar("base.settings.phone");
-        if(!$phone) $phone = $this->getAdminRecipient()?->getPhone();
-        if(!$phone) $phone = $this->technicalRecipient->getPhone();
+        if (!$phone) {
+            $phone = $this->getAdminRecipient()?->getPhone();
+        }
+        if (!$phone) {
+            $phone = $this->technicalRecipient->getPhone();
+        }
 
         return new Recipient($mailName." <".$mail.">", $phone);
     }
@@ -251,13 +302,17 @@ abstract class BaseNotifier implements BaseNotifierInterface
      * @var boolean
      */
     protected bool $markAsAdmin;
-    public function isMarkAsAdmin() { return $this->markAsAdmin; }
+    public function isMarkAsAdmin()
+    {
+        return $this->markAsAdmin;
+    }
     public function markAsAdmin(bool $markAsAdmin, Notification $notification = null)
     {
         $this->markAsAdmin = $markAsAdmin;
 
-        if ($notification)
+        if ($notification) {
             $notification->markAsAdmin();
+        }
 
         return $this;
     }
@@ -266,55 +321,75 @@ abstract class BaseNotifier implements BaseNotifierInterface
      * @var bool
      */
     protected bool $enable = true;
-    public function enable()  { $this->enable = true; return $this; }
-    public function disable() { $this->enable = false; return $this; }
+    public function enable()
+    {
+        $this->enable = true;
+        return $this;
+    }
+    public function disable()
+    {
+        $this->enable = false;
+        return $this;
+    }
 
-    public function getTranslator(): TranslatorInterface { return $this->translator; }
+    public function getTranslator(): TranslatorInterface
+    {
+        return $this->translator;
+    }
     public function setTranslator(TranslatorInterface $translator)
     {
         $this->translator = $translator;
         return $this;
     }
 
-    public function getRouter(): RouterInterface { return $this->router; }
+    public function getRouter(): RouterInterface
+    {
+        return $this->router;
+    }
     public function setRouter(RouterInterface $router)
     {
         $this->router = $router;
         return $this;
     }
 
-    public function getDefaultChannels(string $importance) { return BaseService::getNotifier()->getPolicy()->getChannels($importance); }
+    public function getDefaultChannels(string $importance)
+    {
+        return BaseService::getNotifier()->getPolicy()->getChannels($importance);
+    }
 
     protected function getUserChannels($importance, RecipientInterface $recipient): array
     {
         $channels = [];
-        foreach($this->getDefaultChannels($importance) as $channel) {
-
+        foreach ($this->getDefaultChannels($importance) as $channel) {
             // Replace email by email+ for user..
             // Users should not receive the default admin email sent by Symfony notifier
-            if (str_starts_with($channel, "email")) $channel = "email+";
+            if (str_starts_with($channel, "email")) {
+                $channel = "email+";
+            }
 
             // If no recipient, only browser notification is allowed to be sent.
-            if($recipient instanceof NoRecipient && !str_starts_with($channel, "browser"))
+            if ($recipient instanceof NoRecipient && !str_starts_with($channel, "browser")) {
                 continue;
+            }
 
             // If recipient implement SMS interface, check if sms is allowed and phone number available
-            else if(str_starts_with($channel, "sms")) {
-
-                if($recipient instanceof SmsRecipientInterface && empty($recipient->getPhone()))
+            elseif (str_starts_with($channel, "sms")) {
+                if ($recipient instanceof SmsRecipientInterface && empty($recipient->getPhone())) {
                     continue;
+                }
             }
 
             // If recipient implement Email interface, check if email is available
-            else if(str_starts_with($channel, "email")) {
-
-                if($recipient instanceof EmailRecipientInterface && empty($recipient->getEmail()))
+            elseif (str_starts_with($channel, "email")) {
+                if ($recipient instanceof EmailRecipientInterface && empty($recipient->getEmail())) {
                     continue;
+                }
             }
 
             // Only admin can receive chat message..
-            else if(str_starts_with($channel, "chat/"))
+            elseif (str_starts_with($channel, "chat/")) {
                 continue;
+            }
 
             $channels[] = $channel;
         }
@@ -326,35 +401,39 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         $channels = [];
         foreach ($this->getDefaultChannels($importance) as $channel) {
-
             // Replace email by email+ for user..
             // Users should not receive the default admin email sent by Symfony notifier
-            if (str_starts_with($channel, "email"  )) $channel = "email+";
+            if (str_starts_with($channel, "email")) {
+                $channel = "email+";
+            }
 
             // I suppose admin should receive notification by email when user is browser notified.
-            else if (str_starts_with($channel, "browser")) $channel = "email+";
+            elseif (str_starts_with($channel, "browser")) {
+                $channel = "email+";
+            }
 
             // If no recipient, only browser notification is allowed to be sent.
-            else if ($recipient instanceof NoRecipient) continue;
+            elseif ($recipient instanceof NoRecipient) {
+                continue;
+            }
 
             // If recipient implement SMS interface, check if sms is allowed and phone number available
-            else if (str_starts_with($channel, "sms")) {
-
-                if($recipient instanceof SmsRecipientInterface && empty($recipient->getPhone()) )
+            elseif (str_starts_with($channel, "sms")) {
+                if ($recipient instanceof SmsRecipientInterface && empty($recipient->getPhone())) {
                     continue;
+                }
             }
 
             // If recipient implement Email interface, check if email is available
-            else if (str_starts_with($channel, "email+")) {
-
-                if( $recipient instanceof EmailRecipientInterface && empty($recipient->getEmail()) )
+            elseif (str_starts_with($channel, "email+")) {
+                if ($recipient instanceof EmailRecipientInterface && empty($recipient->getEmail())) {
                     continue;
-            }
-
-            else if (str_starts_with($channel, "chat/")) {
-
+                }
+            } elseif (str_starts_with($channel, "chat/")) {
                 $firstAdminRecipient = $this->getAdminRecipients()[0] ?? null;
-                if($recipient != $firstAdminRecipient) continue;
+                if ($recipient != $firstAdminRecipient) {
+                    continue;
+                }
             }
 
             $channels[] = $channel;
@@ -365,13 +444,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
     public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void
     {
-        if (!$this->enable) return;
+        if (!$this->enable) {
+            return;
+        }
 
         $localeBak = $this->localizer->getLocale();
         $timezoneBak = date_default_timezone_get();
 
-        foreach($recipients as $recipient) {
-
+        foreach ($recipients as $recipient) {
             // Send notification with proper locale
             $locale = $this->localizer->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localizer->setLocale($locale);
@@ -398,21 +478,25 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
-        if(empty($recipients)) // Display browser+ notification !
+        if (empty($recipients)) { // Display browser+ notification !
             $recipients = [new NoRecipient()];
+        }
 
         // Determine recipient information
         $browserNotificationOnce = false;
         foreach (array_unique($recipients) as $i => $recipient) {
-
             // Set selected channels, if any
             $channels    = $this->getUserChannels($notification->getImportance(), $recipient);
-            if (empty($channels))
+            if (empty($channels)) {
                 throw new Exception("No valid channel for the notification \"".$notification->getBacktrace()."\" sent with \"".$notification->getImportance()."\"");
+            }
 
             // Only send browser notification once
-            if($browserNotificationOnce) $channels = array_filter($channels, fn($c) => !str_starts_with($c, "browser"));
-            else if(array_starts_with($channels, "browser")) $browserNotificationOnce = true;
+            if ($browserNotificationOnce) {
+                $channels = array_filter($channels, fn ($c) => !str_starts_with($c, "browser"));
+            } elseif (array_starts_with($channels, "browser")) {
+                $browserNotificationOnce = true;
+            }
 
             $prevChannels = array_merge($prevChannels, $channels);
             $notification->setChannels($channels);
@@ -437,12 +521,13 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $notification->setChannels([]);
 
         foreach (array_unique($recipients) as $recipient) {
-
             // Determine channels
             $channels   = array_intersect($channels, $this->getUserChannels($notification->getImportance(), $recipient));
             $prevChannels = array_merge($prevChannels, $channels);
 
-            if (empty($channels)) continue;
+            if (empty($channels)) {
+                continue;
+            }
             $notification->setChannels($channels);
 
             // Payload...
@@ -467,12 +552,13 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Back up channels and importance variables..
         // to be restored at the end of the method
         $recipients = $this->getAdminRecipients() ?? [new NoRecipient()];
-        foreach(array_unique($recipients) as $recipient) {
-
+        foreach (array_unique($recipients) as $recipient) {
             // Set selected channels, if any
             $channels    = $this->getAdminChannels($notification->getImportance(), $recipient);
 
-            if (empty($channels)) return $this;
+            if (empty($channels)) {
+                return $this;
+            }
             $notification->setChannels($channels);
 
             // Payload..

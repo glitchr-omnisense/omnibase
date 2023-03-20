@@ -40,8 +40,13 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
 
     protected $defaultFormats = [];
     public function __construct(
-        LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
-        ImageServiceInterface $imageService, FileController $fileController)
+        LocalizerInterface $localizer,
+        TranslatorInterface $translator,
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $parameterBag,
+        ImageServiceInterface $imageService,
+        FileController $fileController
+    )
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->fileController = $fileController;
@@ -55,9 +60,9 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
     protected function configure(): void
     {
         $this->addOption('warmup', false, InputOption::VALUE_NONE, 'Do you want to warm up image crops ?');
-        $this->addOption('batch' , false, InputOption::VALUE_OPTIONAL, 'Process data by batch of X entries', false);
-        $this->addOption('format' , false, InputOption::VALUE_OPTIONAL, 'Process data by batch of X entries');
-        $this->addOption('cache' , false, InputOption::VALUE_OPTIONAL, 'Cache data');
+        $this->addOption('batch', false, InputOption::VALUE_OPTIONAL, 'Process data by batch of X entries', false);
+        $this->addOption('format', false, InputOption::VALUE_OPTIONAL, 'Process data by batch of X entries');
+        $this->addOption('cache', false, InputOption::VALUE_OPTIONAL, 'Cache data');
         parent::configure();
     }
 
@@ -87,7 +92,9 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
     public function isCached($data)
     {
         $args = $this->imageService->resolve($data);
-        if(!$args) return false;
+        if (!$args) {
+            return false;
+        }
 
         $options = $args["options"] ?? [];
         $filters = $args["filters"] ?? [];
@@ -105,10 +112,8 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
     protected $ibatch = 0;
     public function postProcess(mixed $class, string $field, Uploader $annotation, array $fileList)
     {
-        if($this->warmup) {
-
-            if(!$annotation->isImage()) {
-
+        if ($this->warmup) {
+            if (!$annotation->isImage()) {
                 $this->output->section()->writeln("             <warning>* Only images (mimetype = \"".implode(",", $annotation->mimeTypes())."\") can be warmed up.. </warning>");
                 return;
             }
@@ -116,49 +121,53 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
             $formats = [];
 
             $annotationFormats = $annotation->getFormats();
-            foreach($annotationFormats as $format) {
-
-                if(!is_array($format)) $format = explode("x", $format);
-                if(count($format) != 2) {
+            foreach ($annotationFormats as $format) {
+                if (!is_array($format)) {
+                    $format = explode("x", $format);
+                }
+                if (count($format) != 2) {
                     $this->output->section()->writeln("             <warning>* Unexpected format provided ".implode("x", $format)."</warning>");
                     continue;
                 }
 
-                if($this->format !== null && $this->format != implode("x", $format))
+                if ($this->format !== null && $this->format != implode("x", $format)) {
                     continue;
+                }
 
                 $formats[] = [(int) $format[0], (int) $format[1]];
             }
 
-            foreach($this->defaultFormats as $format) {
-
-                if(!array_key_exists("width", $format)) {
+            foreach ($this->defaultFormats as $format) {
+                if (!array_key_exists("width", $format)) {
                     $this->output->section()->writeln("             <warning>* Width information missing in default configuration \"".serialize($format)."\"</warning>");
                     continue;
                 }
-                if(!array_key_exists("height", $format)) {
+                if (!array_key_exists("height", $format)) {
                     $this->output->section()->writeln("             <warning>* Height information missing in default configuration \"".serialize($format)."\"</warning>");
                     continue;
                 }
 
-                if(array_key_exists("class", $format) && !is_instanceof($class, $format["class"]))
+                if (array_key_exists("class", $format) && !is_instanceof($class, $format["class"])) {
                     continue;
-                if(array_key_exists("property", $format) && !preg_match("/^".$format["property"]."$/", $field))
+                }
+                if (array_key_exists("property", $format) && !preg_match("/^".$format["property"]."$/", $field)) {
                     continue;
+                }
 
                 $format = [$format["width"], $format["height"]];
-                if($this->format !== null && $this->format != implode("x", $format))
+                if ($this->format !== null && $this->format != implode("x", $format)) {
                     continue;
+                }
 
                 $formats[] = $format;
             }
 
             $N = count($fileList);
-            for($i = 0; $i < $N; $i++) {
-
-                if($this->ibatch >= $this->batch && $this->batch > 0) {
-
-                    if($i == 0) return;
+            for ($i = 0; $i < $N; $i++) {
+                if ($this->ibatch >= $this->batch && $this->batch > 0) {
+                    if ($i == 0) {
+                        return;
+                    }
                     $msg = ' [WARN] Batch limit reached out - Set the `--batch` limit higher, if you wish. ';
                     $this->output->writeln('');
                     $this->output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
@@ -172,27 +181,23 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 $file = $fileList[$i];
                 $publicDir = $annotation->getFlysystem()->getPublic("", $annotation->storage());
 
-                $formatStr = implode(", ", array_map(fn($f) => implode("x", $f), $formats));
+                $formatStr = implode(", ", array_map(fn ($f) => implode("x", $f), $formats));
                 $formatStr = $formatStr ? "Formats: ".$formatStr : "";
 
                 $extensions = $this->imageService->getExtensions($file);
                 $extension  = first($extensions);
 
                 $data = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
-                if($this->isCached($data)) {
-
-                    $this->output->section()->writeln("             <warning>* Already cached \".".str_lstrip(realpath($file),realpath($publicDir))."\".. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
-
+                if ($this->isCached($data)) {
+                    $this->output->section()->writeln("             <warning>* Already cached \".".str_lstrip(realpath($file), realpath($publicDir))."\".. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
                 } else {
-
-                    $this->output->section()->writeln("             <info>* Warming up \".".str_lstrip(realpath($file),realpath($publicDir))."\".. (".($i+1)."/".$N.")</info>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("             <info>* Warming up \".".str_lstrip(realpath($file), realpath($publicDir))."\".. (".($i+1)."/".$N.")</info>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->ibatch++;
 
                     $data = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
                     $data = $this->imageService->imagine($file, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
 
-                    foreach($formats as $format) {
-
+                    foreach ($formats as $format) {
                         list($width, $height) = $format;
                         $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
                         $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);

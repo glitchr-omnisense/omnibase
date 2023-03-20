@@ -16,5 +16,4 @@ use Base\Repository\Layout\AttributeRepository;
 
 class ImageAdapterRepository extends AbstractAdapterRepository
 {
-
 }

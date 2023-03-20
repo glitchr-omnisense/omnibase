@@ -50,39 +50,42 @@ class IdConfigurator implements FieldConfiguratorInterface
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $maxLength = $field->getCustomOption(IdField::OPTION_MAX_LENGTH);
-        if (null === $maxLength)
+        if (null === $maxLength) {
             $maxLength = Crud::PAGE_INDEX === $context->getCrud()->getCurrentPage() ? 7 : -1;
+        }
 
         // Check access rights and context to impersonate
         $switchRole      = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
         $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
         $field->setCustomOption(IdField::OPTION_IMPERSONATE, $switchParameter);
-        if(!$entityDto->getInstance() instanceof User || $entityDto->getInstance() instanceof LoginRestrictionInterface || !$switchRole || !$this->authorizationChecker->isGranted($switchRole))
+        if (!$entityDto->getInstance() instanceof User || $entityDto->getInstance() instanceof LoginRestrictionInterface || !$switchRole || !$this->authorizationChecker->isGranted($switchRole)) {
             $field->setCustomOption(IdField::OPTION_IMPERSONATE, false);
+        }
 
         // Formatted data
         $field->setValue($entityDto->getInstance());
         $accessor = PropertyAccess::createPropertyAccessor();
 
-        if($field->getValue() === null) return;
+        if ($field->getValue() === null) {
+            return;
+        }
 
         $value = $accessor->isReadable($field->getValue(), $field->getProperty())
-            ? $accessor->getValue  ($field->getValue(), $field->getProperty()) : null;
+            ? $accessor->getValue($field->getValue(), $field->getProperty()) : null;
 
-        $hashtag = gettype($value) == "integer" ?  "#" : "";
+        $hashtag = gettype($value) == "integer" ? "#" : "";
         $value   = $hashtag . ($maxLength !== -1 ? u($value)->truncate($maxLength, '…')->toString() : $value);
 
         $url = null;
-        if( Crud::PAGE_DETAIL !== $context->getCrud()->getCurrentPage() &&
+        if (Crud::PAGE_DETAIL !== $context->getCrud()->getCurrentPage() &&
             $field->getCustomOption(IdField::OPTION_ADD_LINK) && $entityDto->getInstance()) {
-
             $url = $this->adminUrlGenerator
                 ->setAction('detail')
                 ->setEntityId($entityDto->getInstance()->getId())
                 ->generateUrl();
         }
 
-        $field->setFormattedValue( ($url ? "<a href='".$url."'>".$value."</a>" : $value));
+        $field->setFormattedValue(($url ? "<a href='".$url."'>".$value."</a>" : $value));
     }
 }

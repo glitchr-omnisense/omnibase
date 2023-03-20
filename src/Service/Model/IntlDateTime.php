@@ -15,20 +15,23 @@ class IntlDateTime extends DateTime
      */
     protected $intlDateFormatter;
 
-    public function __construct(DateTime|string $datetime = "now", ?string $locale = null,
+    public function __construct(
+        DateTime|string $datetime = "now",
+        ?string $locale = null,
         int $dateType = IntlDateFormatter::FULL,
         int $timeType = IntlDateFormatter::FULL,
         IntlTimeZone|DateTimeZone|string|null $timezone = null,
-        IntlCalendar|int|null $calendar = null)
+        IntlCalendar|int|null $calendar = null
+    )
     {
-        if(is_string($datetime)) parent::__construct($datetime, $timezone);
-        else {
-
+        if (is_string($datetime)) {
+            parent::__construct($datetime, $timezone);
+        } else {
             parent::__construct();
             $this->setTimestamp($datetime->getTimestamp());
             $this->setTimezone($datetime->getTimezone());
         }
-            
+
         $this->intlDateFormatter = new IntlDateFormatter($locale, $dateType, $timeType, $timezone, $calendar);
     }
 
@@ -38,11 +41,14 @@ class IntlDateTime extends DateTime
         return $this->intlDateFormatter->format($this);
     }
 
-    public static function createFromDateTime(DateTime $datetime, ?string $locale = null,
-    int $dateType = IntlDateFormatter::FULL,
-    int $timeType = IntlDateFormatter::FULL,
-    IntlTimeZone|DateTimeZone|string|null $timezone = null,
-    IntlCalendar|int|null $calendar = null)
+    public static function createFromDateTime(
+        DateTime $datetime,
+        ?string $locale = null,
+        int $dateType = IntlDateFormatter::FULL,
+        int $timeType = IntlDateFormatter::FULL,
+        IntlTimeZone|DateTimeZone|string|null $timezone = null,
+        IntlCalendar|int|null $calendar = null
+    )
     {
         return new IntlDateTime($datetime, $locale, $dateType, $timeType, $timezone, $calendar);
     }

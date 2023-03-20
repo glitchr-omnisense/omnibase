@@ -31,8 +31,9 @@ class WidgetController extends AbstractController
     public function Page($slug): Response
     {
         $page = $this->pageRepository->findOneBySlug($slug);
-        if($page === null)
+        if ($page === null) {
             throw new NotFoundException("Page requested doesn't exist.");
+        }
 
         return $this->render("widget/page.html.twig", ["page" => $page]);
     }
@@ -43,16 +44,18 @@ class WidgetController extends AbstractController
     public function Attachment($slug): BinaryFileResponse
     {
         $attachment = $this->attachmentRepository->findOneBySlug($slug);
-        if($attachment === null)
+        if ($attachment === null) {
             throw new NotFoundException("Attachment requested doesn't exist.");
+        }
 
         $mimeTypeGuesser = new FileinfoMimeTypeGuesser();
 
         $response = new BinaryFileResponse($attachment->getPublic());
-        if($mimeTypeGuesser->isGuesserSupported())
+        if ($mimeTypeGuesser->isGuesserSupported()) {
             $response->headers->set('Content-Type', $mimeTypeGuesser->guessMimeType($attachment->getPublic()));
-        else
+        } else {
             $response->headers->set('Content-Type', 'text/plain');
+        }
 
         $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $attachment->getSlug());
 

@@ -66,8 +66,15 @@ class ImageService extends FileService implements ImageServiceInterface
     protected ?bool $enableWebp;
 
     public function __construct(
-        Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem,
-        ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg, ?Profiler $profiler)
+        Environment $twig,
+        RouterInterface $router,
+        ObfuscatorInterface $obfuscator,
+        FlysystemInterface $flysystem,
+        ParameterBagInterface $parameterBag,
+        ImagineInterface $imagineBitmap,
+        ImagineInterface $imagineSvg,
+        ?Profiler $profiler
+    )
     {
         parent::__construct($twig, $router, $obfuscator, $flysystem);
 
@@ -90,29 +97,41 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->localCache = "local.cache";
     }
 
-    public function getMaximumQuality() { return $this->maxQuality; }
-    public function isWebpEnabled() { return $this->enableWebp; }
-
-    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null
+    public function getMaximumQuality()
     {
-        if($path === null) return null;
+        return $this->maxQuality;
+    }
+    public function isWebpEnabled()
+    {
+        return $this->enableWebp;
+    }
+
+    public function webp(array|string|null $path, array $filters = [], array $config = []): array|string|null
+    {
+        if ($path === null) {
+            return null;
+        }
 
         $output = [];
         $pathList = is_array($path) ? $path : [$path];
-        foreach($pathList as $p) 
+        foreach ($pathList as $p) {
             $output[] = $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters]));
+        }
 
         return is_array($path) ? $output : first($output);
     }
 
-    public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null
+    public function image(array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
-        if($path === null) return null;
+        if ($path === null) {
+            return null;
+        }
 
         $output = [];
         $pathList = is_array($path) ? $path : [$path];
-        foreach($pathList as $p) 
-            $output[] = $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image"    , [], $path, array_merge($config, ["filters" => $filters]));
+        foreach ($pathList as $p) {
+            $output[] = $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image", [], $path, array_merge($config, ["filters" => $filters]));
+        }
 
         return is_array($path) ? $output : first($output);
     }
@@ -122,7 +141,9 @@ class ImageService extends FileService implements ImageServiceInterface
         $supports_webp   = array_pop_key("webp", $config) ?? browser_supports_webp();
 
         $extension = array_pop_key("extension", $config) ?? first($this->getExtensions($path));
-        if($extension) $supports_webp &= ($extension != "svg");
+        if ($extension) {
+            $supports_webp &= ($extension != "svg");
+        }
 
         return $supports_webp ? $this->webp($path, $filters, $config) : $this->image($path, $filters, array_merge($config, ["extension" => $extension]));
     }
@@ -130,8 +151,10 @@ class ImageService extends FileService implements ImageServiceInterface
     public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
     {
         $filters[] = new CropFilter(
-            $x, $y,
-            $width, $height,
+            $x,
+            $y,
+            $width,
+            $height,
             $position
         );
 
@@ -139,14 +162,27 @@ class ImageService extends FileService implements ImageServiceInterface
         return $this->imagine($path, $filters, $config);
     }
 
-    public function thumbnailInset   (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET])); }
-    public function thumbnailOutbound(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND])); }
-    public function thumbnailNoclone (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE])); }
-    public function thumbnailUpscale (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE])); }
-    public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailInset(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]));
+    }
+    public function thumbnailOutbound(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]));
+    }
+    public function thumbnailNoclone(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]));
+    }
+    public function thumbnailUpscale(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    {
+        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]));
+    }
+    public function thumbnail(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
     {
         $filters[] = new ThumbnailFilter(
-            $width, $height ?? null,
+            $width,
+            $height ?? null,
             $config["mode"]  ?? ImageInterface::THUMBNAIL_INSET,
             $config["resampling"] ?? ImageInterface::FILTER_UNDEFINED
         );
@@ -157,16 +193,19 @@ class ImageService extends FileService implements ImageServiceInterface
 
     public function obfuscate(string|null $path, array $config = [], array $filters = []): ?string
     {
-        if($path === null ) return null;
+        if ($path === null) {
+            return null;
+        }
         $path = "/".str_strip($path, $this->router->getAssetUrl(""));
 
         $config["path"] = $path;
         $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
         $config["local_cache"] = $config["local_cache"] ?? null;
-        if(!empty($filters)) $config["filters"] = $filters;
+        if (!empty($filters)) {
+            $config["filters"] = $filters;
+        }
 
-        while ( ($pathConfig = $this->obfuscator->decode(basename($path))) ) {
-
+        while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
             $path = $pathConfig["path"] ?? $path;
             $config["path"] = $path;
             $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -175,32 +214,43 @@ class ImageService extends FileService implements ImageServiceInterface
         }
 
         $data = $this->obfuscator->encode($config);
-        if($this->obfuscator->isShort()) $data = path_subdivide(str_replace("-", "", $data), 5, 2);
-        else $data = path_subdivide($data, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
+        if ($this->obfuscator->isShort()) {
+            $data = path_subdivide(str_replace("-", "", $data), 5, 2);
+        } else {
+            $data = path_subdivide($data, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
+        }
 
         return $data;
     }
 
     public function imageSet(null|array|string $path, ...$srcset): ?string
     {
-        if(!$path) return null;
-        if(is_array($path)) return array_map(fn($s) => $this->imageSet($s), $path);
+        if (!$path) {
+            return null;
+        }
+        if (is_array($path)) {
+            return array_map(fn ($s) => $this->imageSet($s), $path);
+        }
 
-        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
-        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
+        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
         return str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
     }
 
     public function imagify(null|array|string $path, array $attributes = [], ...$srcset): ?string
     {
-        if(!$path) return $path;
-        if(is_array($path)) return array_map(fn($s) => $this->imagify($s, $attributes), $path);
+        if (!$path) {
+            return $path;
+        }
+        if (is_array($path)) {
+            return array_map(fn ($s) => $this->imagify($s, $attributes), $path);
+        }
 
         $lazyload = array_pop_key("lazy", $attributes);
         $lazybox  = array_pop_key("lazy-box", $attributes);
 
-        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
-        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
+        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
         $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
 
         return $this->twig->render("@Base/image/default.html.twig", [
@@ -216,35 +266,45 @@ class ImageService extends FileService implements ImageServiceInterface
         array $attributes = [],
         array|string $lightboxId = null,
         array|string $lightboxTitle = null,
-        array $lightboxAttributes = [], ...$srcset): ?string
+        array $lightboxAttributes = [],
+        ...$srcset
+    ): ?string
     {
         $lightboxPathType = gettype($path);
         $lightboxIdType = gettype($lightboxId);
         $lightboxTitleType = gettype($lightboxTitle);
 
-        if($path != NULL && $lightboxPathType !== $lightboxIdType && $lightboxIdType !== gettype(NULL))
+        if ($path != null && $lightboxPathType !== $lightboxIdType && $lightboxIdType !== gettype(null)) {
             throw new Exception("Unexpected `lightboxId` type parameter received: ".$lightboxIdType." (expected:".$lightboxPathType.")");
-        if($path != NULL && $lightboxPathType !== $lightboxTitleType && $lightboxTitleType !== gettype(NULL))
+        }
+        if ($path != null && $lightboxPathType !== $lightboxTitleType && $lightboxTitleType !== gettype(null)) {
             throw new Exception("Unexpected `lightboxTitle` type parameter received: ".$lightboxIdType." (expected:".$lightboxPathType.")");
+        }
 
-        if(!$path) return $path;
-        if(is_array($path)) return array_map(fn($k) => $this->lightbox($path[$k], $attributes, $lightboxId[$k], $lightboxTitle[$k], $lightboxAttributes), array_keys($path));
+        if (!$path) {
+            return $path;
+        }
+        if (is_array($path)) {
+            return array_map(fn ($k) => $this->lightbox($path[$k], $attributes, $lightboxId[$k], $lightboxTitle[$k], $lightboxAttributes), array_keys($path));
+        }
 
         $routeName = $this->router->getRouteName($path);
-        if($routeName && !str_starts_with($routeName, "ux_"))
+        if ($routeName && !str_starts_with($routeName, "ux_")) {
             $path = $this->imagine($path);
+        }
 
         $lightboxAttributes["loading"] ??= "lazy";
         $lightboxAttributes["class"] = trim(($lightboxAttributes["class"] ?? "")." lightbox-wrapper");
         $lightboxAttributes["data-lightbox"] = $lightboxId ?? "lightbox";
-        if ($lightboxTitle !== null)
+        if ($lightboxTitle !== null) {
             $lightboxAttributes["data-title"] = $lightboxTitle;
+        }
 
         $lazyload = array_pop_key("lazy", $attributes);
         $lazybox = array_pop_key("lazy-box", $attributes);
 
-        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
-        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
+        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
         $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
 
         return $this->twig->render("@Base/image/lightbox.html.twig", [
@@ -258,7 +318,9 @@ class ImageService extends FileService implements ImageServiceInterface
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
     {
-        if(!$path) return null;
+        if (!$path) {
+            return null;
+        }
 
         $warmup = array_pop_key("warmup", $config);
 
@@ -266,13 +328,11 @@ class ImageService extends FileService implements ImageServiceInterface
         $routeUrl = parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
 
         // Call controller to warmup image
-        if($warmup && $this->fileController !== null) {
-
+        if ($warmup && $this->fileController !== null) {
             $routeMatch = $this->router->getRouteMatch($routeUrl);
 
             list($className, $controllerName) = array_pad(explode("::", $routeMatch["_controller"] ?? ""), 2, null);
-            if(is_instanceof($className, get_class($this->fileController)) && $controllerName) {
-
+            if (is_instanceof($className, get_class($this->fileController)) && $controllerName) {
                 $routeParameters = array_key_removes($routeMatch, "_route", "_controller");
                 $this->fileController->{$controllerName}(...$routeParameters);
             }
@@ -290,10 +350,8 @@ class ImageService extends FileService implements ImageServiceInterface
 
     public function serve(?string $file, int $status = 200, array $headers = []): ?Response
     {
-        if(!file_exists($file)) {
-
-            if(!$this->fallback) {
-
+        if (!file_exists($file)) {
+            if (!$this->fallback) {
                 throw is_length_safe($file) ?
                     new NotFoundHttpException($file ? "Image \"".str_shorten($file, 50, SHORTEN_MIDDLE)."\" not found." : "Empty path provided.") :
                     new \LogicException("Image \"".str_shorten($file, 50, SHORTEN_MIDDLE)."\" overflowed the PHP_MAXPATHLEN (= ".constant("PHP_MAXPATHLEN").") limit. Maybe use a compress option (\"gzcompress\",\"gzdeflate\",\"gzencode\") ?")
@@ -305,15 +363,18 @@ class ImageService extends FileService implements ImageServiceInterface
         }
 
         $useProfiler = $headers["profiler"] ?? true;
-        if ($this->profiler !== null && !$useProfiler)
+        if ($this->profiler !== null && !$useProfiler) {
             $this->profiler->disable();
+        }
 
         return parent::serve($file, $status, $headers);
     }
 
     public function isCached(?string $path, FilterInterface|array $filters = [], array $config = []): bool
     {
-        if(!is_array($filters)) $filters = [$filters];
+        if (!is_array($filters)) {
+            $filters = [$filters];
+        }
 
         //
         // Resolve nested paths
@@ -325,33 +386,36 @@ class ImageService extends FileService implements ImageServiceInterface
 
         //
         // Apply image resolution limitation
-        if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
+        if (!is_instanceof($this->maxResolution, ThumbnailFilter::class)) {
             throw new NotFoundHttpException("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
+        }
 
         //
         // Extract last filter
-        $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
+        $filters = array_filter($filters, fn ($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
-        if($formatter === null)
+        if ($formatter === null) {
             throw new NotFoundHttpException("Last filter is missing.");
+        }
 
         //
         // Apply size limitation to bitmap only
-        if(class_implements_interface($formatter, BitmapFilterInterface::class)) {
+        if (class_implements_interface($formatter, BitmapFilterInterface::class)) {
+            $definitionFilters = array_filter($formatter->getFilters(), fn ($f) => $f instanceof ThumbnailFilter);
+            if (empty($definitionFilters)) {
+                $formatter->addFilter(new $this->maxResolution());
+            }
 
-            $definitionFilters = array_filter($formatter->getFilters(), fn($f) => $f instanceof ThumbnailFilter);
-            if(empty($definitionFilters))
-                $formatter->addFilter(new $this->maxResolution);
-
-            if(!class_implements_interface($formatter, FormatFilterInterface::class))
+            if (!class_implements_interface($formatter, FormatFilterInterface::class)) {
                 throw new NotFoundHttpException("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
+            }
         }
 
         $filtersButLast = array_slice($filters, 0, count($filters)-1);
-        foreach($filtersButLast as $filter) {
-
-            if(class_implements_interface($filter, FormatFilterInterface::class))
+        foreach ($filtersButLast as $filter) {
+            if (class_implements_interface($filter, FormatFilterInterface::class)) {
                 throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
+            }
         }
 
         $pathRelative = $this->flysystem->stripPrefix($output, $storage);
@@ -365,11 +429,13 @@ class ImageService extends FileService implements ImageServiceInterface
         //
         // Compute a response.. (if cache not found)
         if ($config["local_cache"] ?? true) {
-
             $localCache = array_pop_key("local_cache", $config);
-            if(!is_string($localCache)) $localCache = $this->localCache;
-            if(!$this->flysystem->hasStorage($this->localCache))
+            if (!is_string($localCache)) {
+                $localCache = $this->localCache;
+            }
+            if (!$this->flysystem->hasStorage($this->localCache)) {
                 throw new InvalidArgumentException("\"".$this->localCache."\" storage not found in your Flysystem configuration.");
+            }
 
             return $this->flysystem->fileExists($pathCache, $localCache);
         }
@@ -379,8 +445,12 @@ class ImageService extends FileService implements ImageServiceInterface
 
     public function filter(?string $path, FilterInterface|array $filters = [], array $config = []): ?string
     {
-        if($this->debug) return $this->noImage;
-        if(!is_array($filters)) $filters = [$filters];
+        if ($this->debug) {
+            return $this->noImage;
+        }
+        if (!is_array($filters)) {
+            $filters = [$filters];
+        }
 
         //
         // Resolve nested paths
@@ -392,35 +462,39 @@ class ImageService extends FileService implements ImageServiceInterface
 
         //
         // Apply image resolution limitation
-        if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
+        if (!is_instanceof($this->maxResolution, ThumbnailFilter::class)) {
             throw new NotFoundHttpException("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
+        }
 
         //
         // Extract last filter
-        $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
+        $filters = array_filter($filters, fn ($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
-        if($formatter === false)
+        if ($formatter === false) {
             throw new NotFoundHttpException("No filter provided at least one must be provided (and must implement \"".FormatFilterInterface::class."\").");
-        if(!$formatter instanceof FormatFilterInterface)
+        }
+        if (!$formatter instanceof FormatFilterInterface) {
             throw new NotFoundHttpException("The last filter must implement \"".FormatFilterInterface::class."\"). A \"".get_class($formatter)."\" received.");
+        }
 
         //
         // Apply size limitation to bitmap only
-        if(class_implements_interface($formatter, BitmapFilterInterface::class)) {
+        if (class_implements_interface($formatter, BitmapFilterInterface::class)) {
+            $definitionFilters = array_filter($formatter->getFilters(), fn ($f) => $f instanceof ThumbnailFilter);
+            if (empty($definitionFilters)) {
+                $formatter->addFilter(new $this->maxResolution());
+            }
 
-            $definitionFilters = array_filter($formatter->getFilters(), fn($f) => $f instanceof ThumbnailFilter);
-            if(empty($definitionFilters))
-                $formatter->addFilter(new $this->maxResolution);
-
-            if(!class_implements_interface($formatter, FormatFilterInterface::class))
+            if (!class_implements_interface($formatter, FormatFilterInterface::class)) {
                 throw new NotFoundHttpException("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
+            }
         }
 
         $filtersButLast = array_slice($filters, 0, count($filters)-1);
-        foreach($filtersButLast as $filter) {
-
-            if(class_implements_interface($filter, FormatFilterInterface::class))
+        foreach ($filtersButLast as $filter) {
+            if (class_implements_interface($filter, FormatFilterInterface::class)) {
                 throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
+            }
         }
 
         $pathRelative = $this->flysystem->stripPrefix($output, $storage);
@@ -431,10 +505,10 @@ class ImageService extends FileService implements ImageServiceInterface
         // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
         // $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
-        if(!$pathRelative) {
-
-            if(!$this->fallback)
+        if (!$pathRelative) {
+            if (!$this->fallback) {
                 throw new NotFoundHttpException($path ? "Image not found behind system path \"$path\"." : "Empty path provided.");
+            }
 
             return $this->noImage;
         }
@@ -442,40 +516,40 @@ class ImageService extends FileService implements ImageServiceInterface
         //
         // Compute a response.. (if cache not found)
         if ($config["local_cache"] ?? false) {
-
             $localCache = array_pop_key("local_cache", $config);
-            if(!is_string($localCache)) $localCache = $this->localCache;
-            if(!$this->flysystem->hasStorage($this->localCache))
+            if (!is_string($localCache)) {
+                $localCache = $this->localCache;
+            }
+            if (!$this->flysystem->hasStorage($this->localCache)) {
                 throw new InvalidArgumentException("\"".$this->localCache."\" storage not found in your Flysystem configuration.");
+            }
 
-            if(!$this->flysystem->fileExists($pathCache, $localCache)) {
-
+            if (!$this->flysystem->fileExists($pathCache, $localCache)) {
                 $maxExecutionTime = ini_get('max_execution_time');
                 set_time_limit($this->timeout);
 
                 $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
-                if(!file_exists($filteredPath)) {
-
-                    if(!$this->fallback)
-                        throw new NotFoundHttpException($pathCache  ? "Image \"$pathCache\" not found." : "Empty path provided.");
+                if (!file_exists($filteredPath)) {
+                    if (!$this->fallback) {
+                        throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provided.");
+                    }
 
                     return $this->noImage;
                 }
 
                 try {
-
                     $this->flysystem->mkdir(dirname($pathCache), $localCache);
                     $this->flysystem->write($pathCache, file_get_contents($filteredPath), $localCache);
-
                 } catch(\League\Flysystem\UnableToCreateDirectory $e) {
-
                     $localDir = $this->flysystem->prefixPath("", $localCache);
                     mkdir_length_safe($localDir."/".dirname($pathCache), 0777, true);
                 }
 
                 set_time_limit($maxExecutionTime);
 
-                if($formatter->getPath() === null) unlink_tmpfile($filteredPath);
+                if ($formatter->getPath() === null) {
+                    unlink_tmpfile($filteredPath);
+                }
             }
 
             return $this->flysystem->prefixPath($pathCache, $localCache);
@@ -489,21 +563,24 @@ class ImageService extends FileService implements ImageServiceInterface
         // GD does not support other palette than RGB..
         //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
         //   cmyk2rgb($pathPublic); // Not working yet..
-        try { $image = $imagine->open($path); }
-        catch (Exception $e) { return null; }
+        try {
+            $image = $imagine->open($path);
+        } catch (Exception $e) {
+            return null;
+        }
 
-        if($formatter instanceof BitmapFilterInterface) {
+        if ($formatter instanceof BitmapFilterInterface) {
             $image->usePalette(new \Imagine\Image\Palette\RGB());
             $image->strip();
         }
 
         // Apply filters
         foreach ($filters as $filter) {
-
             $oldImage = $image;
             $image = $filter->apply($oldImage);
-            if(spl_object_id($image) != spl_object_id($oldImage))
+            if (spl_object_id($image) != spl_object_id($oldImage)) {
                 $oldImage->__destruct();
+            }
         }
 
         // Last filter is in charge of saving the final image

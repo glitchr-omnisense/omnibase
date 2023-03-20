@@ -13,7 +13,7 @@ class UserEditModel
      * @var string
      */
     public $avatar;
-    
+
     /**
      * @var string
      */

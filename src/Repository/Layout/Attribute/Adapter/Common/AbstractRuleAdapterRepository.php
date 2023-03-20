@@ -15,5 +15,4 @@ use Base\Database\Repository\ServiceEntityRepository;
 
 class AbstractRuleAdapterRepository extends AbstractAdapterRepository
 {
-
 }

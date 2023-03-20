@@ -13,11 +13,12 @@ class TrashFilter extends SQLFilter
     {
         $trasheableAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Trasheable::class);
 
-        if(count($trasheableAnnotation) < 1) return "";
+        if (count($trasheableAnnotation) < 1) {
+            return "";
+        }
 
         $fieldName = end($trasheableAnnotation)->deletedAt;
         if ($targetEntity->hasField($fieldName)) {
-
             $date = date("Y-m-d H:00:00", time()+3600);
             return $alias.".".$fieldName." < '".$date."' OR ".$alias.".".$fieldName." IS NULL";
         }

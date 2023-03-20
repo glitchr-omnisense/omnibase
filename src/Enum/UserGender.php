@@ -7,12 +7,15 @@ use Base\Service\Model\IconizeInterface;
 
 class UserGender extends EnumType implements IconizeInterface
 {
-    const MALE       = "MALE";
-    const FEMALE     = "FEMALE";
-    const HYBRID     = "HYBRID";
-    const GENDERLESS = "GENDERLESS";
+    public const MALE       = "MALE";
+    public const FEMALE     = "FEMALE";
+    public const HYBRID     = "HYBRID";
+    public const GENDERLESS = "GENDERLESS";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [

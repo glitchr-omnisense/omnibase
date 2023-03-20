@@ -18,7 +18,9 @@ final class CurrencyConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
-        if(!$field->getValue()) return;
+        if (!$field->getValue()) {
+            return;
+        }
 
         $field->setFormattedValue($field->getValue()." ".Currencies::getSymbol($field->getValue()));
     }

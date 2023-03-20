@@ -63,23 +63,32 @@ class FileService implements FileServiceInterface
         $this->mimeTypes = new MimeTypes();
     }
 
-    public function setController(FileController $fileController) {
+    public function setController(FileController $fileController)
+    {
         $this->fileController = $fileController;
         return $this;
     }
 
-    public function getProjectDir() { return $this->projectDir; }
-    public function getPublicDir() { return $this->publicDir; }
+    public function getProjectDir()
+    {
+        return $this->projectDir;
+    }
+    public function getPublicDir()
+    {
+        return $this->publicDir;
+    }
 
     public function getExtensions(null|string|array $fileOrMimetypeOrArray): array
     {
-        if(!$fileOrMimetypeOrArray) return [];
-        if(is_array($fileOrMimetypeOrArray)) {
-
+        if (!$fileOrMimetypeOrArray) {
+            return [];
+        }
+        if (is_array($fileOrMimetypeOrArray)) {
             $extensions = [];
-            $extensionList = array_map(fn($mimetype) => $this->getExtensions($mimetype), $fileOrMimetypeOrArray);
-            foreach ( $extensionList as $extension )
-                $extensions = array_merge($extensions,$extension);
+            $extensionList = array_map(fn ($mimetype) => $this->getExtensions($mimetype), $fileOrMimetypeOrArray);
+            foreach ($extensionList as $extension) {
+                $extensions = array_merge($extensions, $extension);
+            }
 
             return array_unique($extensions);
         }
@@ -88,45 +97,78 @@ class FileService implements FileServiceInterface
         return $this->mimeTypes->getExtensions($mimeType);
     }
 
-    public function getMimeType(null|string|array $fileOrContentsOrArray):null|string|array  {
-
-        if($fileOrContentsOrArray === null) return null;
-        if(is_array($fileOrContentsOrArray)) return array_map(fn($f) => $this->getMimeType($f), $fileOrContentsOrArray);
+    public function getMimeType(null|string|array $fileOrContentsOrArray): null|string|array
+    {
+        if ($fileOrContentsOrArray === null) {
+            return null;
+        }
+        if (is_array($fileOrContentsOrArray)) {
+            return array_map(fn ($f) => $this->getMimeType($f), $fileOrContentsOrArray);
+        }
 
         // Attempt to read from flysystem
         $mimeType = $this->flysystem->mimeType($fileOrContentsOrArray);
-        if($mimeType && $mimeType !== "application/x-empty") return $mimeType;
+        if ($mimeType && $mimeType !== "application/x-empty") {
+            return $mimeType;
+        }
 
         // Attempt to read based on custom mime_content_content method
         $mimeType = mime_content_type2($fileOrContentsOrArray);
-        if($mimeType && $mimeType !== "application/x-empty") return $mimeType;
+        if ($mimeType && $mimeType !== "application/x-empty") {
+            return $mimeType;
+        }
 
         // Attempt to read mimetype
         $extension = pathinfo($fileOrContentsOrArray, PATHINFO_EXTENSION);
         $extension = $extension ? $extension : $fileOrContentsOrArray; // Assume extension is provided without filename
         $mimeType = $this->mimeTypes->getMimeTypes($extension)[0] ?? null;
-        if($mimeType && $mimeType !== "application/x-empty") return $mimeType;
+        if ($mimeType && $mimeType !== "application/x-empty") {
+            return $mimeType;
+        }
 
         // Attempt to guess mimetype using MimeTypes class
-        try { return $this->mimeTypes->guessMimeType($fileOrContentsOrArray); }
-        catch (InvalidArgumentException $e) { return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */ }
+        try {
+            return $this->mimeTypes->guessMimeType($fileOrContentsOrArray);
+        } catch (InvalidArgumentException $e) {
+            return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */
+        }
     }
 
-    public function linkable(array|string|null $path, array $config = []): array|string|null { return $this->generate("ux_serve", [], $path); }
+    public function linkable(array|string|null $path, array $config = []): array|string|null
+    {
+        return $this->generate("ux_serve", [], $path);
+    }
     public function downloadable(array|string|null $path, array $config = []): array|string|null
     {
         $attachment = array_pop_key("attachment", $config);
-        if(!$attachment) $attachment = true;
+        if (!$attachment) {
+            $attachment = true;
+        }
 
         return $this->generate("ux_serve", [], $path, array_merge($config, ["attachment" => $attachment]));
     }
 
-    public function public(array|string|null $path, ?string $storage = null): array|string|null { return $this->flysystem->getPublic($path, $storage); }
-    public function asset(string $path, ?string $packageName = null): ?string { return $this->router->getAssetUrl($path, $packageName); }
+    public function public(array|string|null $path, ?string $storage = null): array|string|null
+    {
+        return $this->flysystem->getPublic($path, $storage);
+    }
+    public function asset(string $path, ?string $packageName = null): ?string
+    {
+        return $this->router->getAssetUrl($path, $packageName);
+    }
 
-    public function isEmpty(?string $file) { return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file)); }
-    public function isImage(?string $file) { return $file ? preg_match("/image\/.*/", $this->getMimeType($file)) : false; }
-    public function isSvg  (?string $file) { return $this->getMimeType($file) == "image/svg+xml"; }
+    public function isEmpty(?string $file)
+    {
+        return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file));
+    }
+    public function isImage(?string $file)
+    {
+        return $file ? preg_match("/image\/.*/", $this->getMimeType($file)) : false;
+    }
+    public function isSvg(?string $file)
+    {
+        return $this->getMimeType($file) == "image/svg+xml";
+    }
 
     public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string
     {
@@ -135,7 +177,9 @@ class FileService implements FileServiceInterface
 
     public function obfuscate(string|null $path, array $config = []): ?string
     {
-        if($path === null ) return null;
+        if ($path === null) {
+            return null;
+        }
 
         $path = realpath($path);
         $path = "/".str_strip($path, $this->router->getAssetUrl(""));
@@ -144,8 +188,7 @@ class FileService implements FileServiceInterface
         $config["options"] = $config["options"] ?? [];
         $config["local_cache"] = $config["local_cache"] ?? null;
 
-        while ( ($pathConfig = $this->obfuscator->decode(basename($path))) ) {
-
+        while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
@@ -157,14 +200,12 @@ class FileService implements FileServiceInterface
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
     {
         $routeMatch = $this->router->getRouteMatch($path) ?? [];
-        if(array_key_exists("_route", $routeMatch) && $routeMatch["_route"] == $proxyRoute) {
-
+        if (array_key_exists("_route", $routeMatch) && $routeMatch["_route"] == $proxyRoute) {
             $data = $routeMatch["data"];
             $config["options"] = $config["options"] ?? [];
             $config["local_cache"] = $config["local_cache"] ?? null;
 
-            if ( ($pathConfig = $this->obfuscator->decode($data)) ) {
-
+            if (($pathConfig = $this->obfuscator->decode($data))) {
                 $path = $pathConfig["path"] ?? $path;
                 $config["path"] = $path;
                 $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -176,19 +217,29 @@ class FileService implements FileServiceInterface
         }
 
         $extension = array_pop_key("extension", $config);
-        if ($extension !== null) $extension = first($this->getExtensions($path));
-        if ($extension !== null) $proxyRouteParameters["extension"] = $extension;
+        if ($extension !== null) {
+            $extension = first($this->getExtensions($path));
+        }
+        if ($extension !== null) {
+            $proxyRouteParameters["extension"] = $extension;
+        }
 
         $host = array_pop_key("_host", $config); // Use custom _host if found
         $referenceType = array_pop_key("reference_type", $config); // Get reference type
         $data = $this->obfuscate($path, $config);
-        if(!$data) return null;
+        if (!$data) {
+            return null;
+        }
 
-        if ($host !== null) $proxyRouteParameters["_host"] = $host;
+        if ($host !== null) {
+            $proxyRouteParameters["_host"] = $host;
+        }
         $proxyRouteParameters["data"] = $data;
 
         $variadic = [$proxyRoute, $proxyRouteParameters];
-        if($referenceType !== null) $variadic[] = $referenceType;
+        if ($referenceType !== null) {
+            $variadic[] = $referenceType;
+        }
         return $this->router->generate(...$variadic);
     }
 
@@ -199,37 +250,47 @@ class FileService implements FileServiceInterface
         $data = $match && array_key_exists("data", $match) ? $match["data"] : $data;
 
         $uuid = format_uuid(str_replace("/", "-", $data));
-        if(Uuid::isValid($uuid)) $data = $uuid;
-        else $data = str_replace("/", "", $data);
+        if (Uuid::isValid($uuid)) {
+            $data = $uuid;
+        } else {
+            $data = str_replace("/", "", $data);
+        }
 
         $data = $this->obfuscator->decode($data);
 
-        foreach($data ?? [] as $key => $el)
+        foreach ($data ?? [] as $key => $el) {
             $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;
-
-        if(array_key_exists("path", $config ?? [])) {
-
-            $resolvedPath = $this->resolve($config["path"]);
-            foreach($resolvedPath ?? [] as $key => $el)
-                $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;
         }
 
-        if(!$config) return null;
+        if (array_key_exists("path", $config ?? [])) {
+            $resolvedPath = $this->resolve($config["path"]);
+            foreach ($resolvedPath ?? [] as $key => $el) {
+                $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;
+            }
+        }
+
+        if (!$config) {
+            return null;
+        }
 
         return array_merge($config, ["options" => $config["options"] ?? []]);
     }
 
-    public function serve(?string $file, int $status = 200, array $headers = []): ?Response { return $this->serveContents(file_get_contents($file), $status, $headers); }
+    public function serve(?string $file, int $status = 200, array $headers = []): ?Response
+    {
+        return $this->serveContents(file_get_contents($file), $status, $headers);
+    }
     public function serveContents(?string $contents, int $status = 200, array $headers = []): ?Response
     {
         $httpCache  = array_pop_key("http_cache", $headers) ?? false;
         $attachment = array_pop_key("attachment", $headers) ?? false;
 
         $response = new Response($contents, $status, $headers);
-        if($this->isEmpty($contents)) return $response;
+        if ($this->isEmpty($contents)) {
+            return $response;
+        }
 
-        if($httpCache) {
-
+        if ($httpCache) {
             $response->setMaxAge(300);
             $response->setPublic();
             $response->setEtag(md5($response->getContent()));
@@ -240,19 +301,21 @@ class FileService implements FileServiceInterface
         $response->headers->set('Content-Type', $mimeType);
         $response->headers->set('Content-Length', strlen($contents));
 
-        if($attachment) {
-
+        if ($attachment) {
             $extension  = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
             $extensions = $this->getExtensions($mimeType);
 
-            if($attachment === true) {
-
-                if($mimeType && str_starts_with($mimeType, "image/")) $attachment = "image".$extension;
-                else $attachment = "unnamed";
+            if ($attachment === true) {
+                if ($mimeType && str_starts_with($mimeType, "image/")) {
+                    $attachment = "image".$extension;
+                } else {
+                    $attachment = "unnamed";
+                }
             }
 
-            if($extension && !in_array($extension, $extensions))
+            if ($extension && !in_array($extension, $extensions)) {
                 $extensions[] = $extension;
+            }
 
             $attachment = pathinfo_extension($attachment, first($extensions));
 

@@ -15,5 +15,4 @@ use Base\Repository\Layout\WidgetRepository;
 
 class BookRepository extends WidgetRepository
 {
-
 }

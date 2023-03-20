@@ -12,16 +12,20 @@ class AlphanumericPlusValidator extends ConstraintValidator
 {
     public function validate($entry, Constraint $constraint)
     {
-        if (!$constraint instanceof AlphanumericPlus)
+        if (!$constraint instanceof AlphanumericPlus) {
             throw new UnexpectedTypeException($constraint, AlphanumericPlus::class);
+        }
 
-        if (null === $entry || '' === $entry)
+        if (null === $entry || '' === $entry) {
             return;
+        }
 
-        if (!is_string($entry))
+        if (!is_string($entry)) {
             throw new UnexpectedValueException($entry, 'string');
+        }
 
-        if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $entry, $matches))
+        if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $entry, $matches)) {
             $this->buildViolation($constraint, $entry)->addViolation();
+        }
     }
 }

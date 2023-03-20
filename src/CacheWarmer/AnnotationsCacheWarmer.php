@@ -4,4 +4,6 @@ namespace Base\CacheWarmer;
 
 use Base\Cache\Abstract\AbstractLocalCacheWarmer;
 
-class AnnotationsCacheWarmer extends AbstractLocalCacheWarmer { }
+class AnnotationsCacheWarmer extends AbstractLocalCacheWarmer
+{
+}

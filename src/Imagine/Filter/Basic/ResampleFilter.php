@@ -19,7 +19,8 @@ class ResampleFilter implements FilterInterface
     private $imagine;
 
 
-    public function __toString() {
+    public function __toString()
+    {
         $md5sum = md5(serialize($this->options));
         return mod($this->angle, 360) ? "resample:".$md5sum : "";
     }

@@ -4,6 +4,6 @@ namespace Base\Service;
 
 interface ObfuscatorInterface
 {
-    function encode(array $value): string;
-    function decode(string $hash): ?array;
+    public function encode(array $value): string;
+    public function decode(string $hash): ?array;
 }

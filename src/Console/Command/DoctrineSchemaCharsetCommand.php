@@ -14,11 +14,11 @@ class DoctrineSchemaCharsetCommand extends Command
 {
     protected function configure(): void
     {
-        $this->addOption('update' , null, InputOption::VALUE_NONE, 'Update database charset,collate');
+        $this->addOption('update', null, InputOption::VALUE_NONE, 'Update database charset,collate');
         $this->addOption('charset', null, InputOption::VALUE_OPTIONAL, 'Database charset value');
         $this->addOption('collate', null, InputOption::VALUE_OPTIONAL, 'Database collate value');
 
-        $this->addOption('update-tables' , null, InputOption::VALUE_NONE, 'Update table collate');
+        $this->addOption('update-tables', null, InputOption::VALUE_NONE, 'Update table collate');
         $this->addOption('table', null, InputOption::VALUE_OPTIONAL, 'Table name');
         $this->addOption('table-collate', null, InputOption::VALUE_OPTIONAL, 'Table collate value');
 
@@ -37,9 +37,11 @@ class DoctrineSchemaCharsetCommand extends Command
     {
         $connection = $this->entityManager->getConnection();
         $params = $connection->getParams();
-        
+
         $databaseName   = $params["dbname"] ?? null;
-        if(!$databaseName) return 0;
+        if (!$databaseName) {
+            return 0;
+        }
 
         $statement = $connection->prepare("ALTER DATABASE ".$databaseName." CHARACTER SET ".$charset." COLLATE ".$collate);
         return $statement->executeStatement();
@@ -75,20 +77,17 @@ class DoctrineSchemaCharsetCommand extends Command
 
         $charsetDefault = $this->readDatabaseVariable("character_set_database");
         $charset = $input->getOption("charset") ?? $params["charset"] ?? $charsetDefault;
-        
+
         $collateDefault = $this->readDatabaseVariable("collation_database");
         $collate = $input->getOption("collate") ?? $params["defaultTableOptions"]["collate"] ?? $collateDefault;
 
         $output->writeln("");
         $updateDb = $update && (($charset != $charsetDefault) || ($collate != $collateDefault));
-        if(!$updateDb) {
-            
+        if (!$updateDb) {
             $output->writeln("<info>Database selected:</info> " . $databaseName);
             $output->section()->writeln("\t- Charset: <warning>".$charset."</warning>");
             $output->section()->writeln("\t- Collation: <warning>".$collate."</warning>");
-
         } else {
-
             $output->section()->writeln("\nUpdating database schema...");
             $this->writeDatabaseCharsetCollate($charset, $collate);
 
@@ -98,21 +97,20 @@ class DoctrineSchemaCharsetCommand extends Command
             $output->writeln($msg);
             $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
         }
-        
-        if(!$updateTables) {
-            
+
+        if (!$updateTables) {
             $output->writeln("<info>Table list:</info> ");
-            foreach($tableNames as $tableName)
+            foreach ($tableNames as $tableName) {
                 $output->section()->writeln("\t- ".$tableName . "; Collation = <warning>". $this->readTableVariable($tableName, "Collation")."</warning>");
-
+            }
         } else {
-
             $output->section()->writeln("\nUpdating table schema...");
 
             $count = 0;
             $tableCollate = $input->getOption("table-collate") ?? $tableCollateDefault ?? $params["defaultTableOptions"]["collate"];
-            foreach($tableNames as $tableName)
+            foreach ($tableNames as $tableName) {
                 $count += $this->writeTableCharsetCollate($tableName, $charset, $collate);
+            }
 
             $msg = ' [OK] '.$count.' table column(s) altered.. (charset, collate)=('.$charset.', '.$tableCollate.') ';
             $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));

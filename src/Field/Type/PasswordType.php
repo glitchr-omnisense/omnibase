@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Base\Field\Type;
 
 use Base\Service\Model\AutovalidateInterface;
@@ -24,19 +23,22 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
      * @var TranslatorInterface
      */
     protected $translator;
-    
+
     /**
      * @var Environment
      */
     protected $twig;
-    
+
     public function __construct(TranslatorInterface $translator, Environment $twig)
     {
         $this->translator = $translator;
         $this->twig = $twig;
     }
 
-    public function getBlockPrefix(): string { return 'password2'; }
+    public function getBlockPrefix(): string
+    {
+        return 'password2';
+    }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
@@ -87,12 +89,15 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
     {
         $builder->setDataMapper($this);
 
-        if (!isset($options['options']['error_bubbling']))
+        if (!isset($options['options']['error_bubbling'])) {
             $options['options']['error_bubbling'] = $options['error_bubbling'];
-        if (!isset($options['options']['help']))
+        }
+        if (!isset($options['options']['help'])) {
             $options["options"]["help"] = $options["help"];
-        if (!isset($options['options']['required']) && array_key_exists("required", $options))
+        }
+        if (!isset($options['options']['required']) && array_key_exists("required", $options)) {
             $options["options"]["required"] = $options["required"];
+        }
 
         $builder->add('plain', SymfonyPasswordType::class, array_merge([
             "label" => $options["label"] ?? $this->translator->trans("@fields.password.first"),
@@ -100,7 +105,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
             "constraints" => [new Password(["min_strength" => $options["min_strength"], "min_length" => $options["min_length"]])]
         ], $options["options"]));
 
-        if($options["repeater"]) {
+        if ($options["repeater"]) {
             $builder->add('plain_repeater', SymfonyPasswordType::class, array_merge([
                 "label" => $this->translator->trans("@fields.password.second"),
                 "mapped" => true
@@ -111,25 +116,32 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
     public function mapDataToForms($viewData, \Traversable $forms): void
     {
         $plainPasswordType = iterator_to_array($forms)["plain"];
-        if($plainPasswordType) $plainPasswordType->setData($viewData);
+        if ($plainPasswordType) {
+            $plainPasswordType->setData($viewData);
+        }
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $plainPasswordType = iterator_to_array($forms)["plain"] ?? null;
-        if($plainPasswordType == null) throw new TransformationFailedException("Missing password field.");
+        if ($plainPasswordType == null) {
+            throw new TransformationFailedException("Missing password field.");
+        }
 
         $plainPasswordRepeaterType = iterator_to_array($forms)["plain_repeater"] ?? null;
         $options = $plainPasswordType->getConfig()->getOptions();
 
-        if($viewData == []) $viewData = "";
-        if($plainPasswordType->getViewData() !== "" || !($options["required"] ?? false))
+        if ($viewData == []) {
+            $viewData = "";
+        }
+        if ($plainPasswordType->getViewData() !== "" || !($options["required"] ?? false)) {
             $viewData = $plainPasswordType->getViewData();
+        }
 
         if ($plainPasswordRepeaterType) {
-
-            if($plainPasswordType->getViewData() !== $plainPasswordRepeaterType->getViewData())
+            if ($plainPasswordType->getViewData() !== $plainPasswordRepeaterType->getViewData()) {
                 throw new TransformationFailedException('Password are differents');
+            }
         }
     }
 }

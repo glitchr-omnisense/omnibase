@@ -25,5 +25,4 @@ class SlotRepository extends WidgetRepository
     //         ->addSelect("w", "t")
     //         ->getQuery()->enableResultCache()->getOneOrNullResult();
     // }
-
 }

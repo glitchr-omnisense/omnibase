@@ -1,6 +1,7 @@
 <?php
 
 namespace Base\Controller\Frontend\User;
+
 use Base\Service\BaseService;
 
 use App\Entity\User;
@@ -84,14 +85,11 @@ class SettingsController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $submittedToken = $request->request->get('login2_fa_form')["_csrf_token"] ?? null;
             if (!$this->isCsrfTokenValid('2fa', $submittedToken)) {
                 $notification = new Notification("Invalid CSRF token detected. We cannot proceed with the 2FA authentification");
                 $notification->send("danger");
-
             } else {
-
                 $notification = new Notification("The 2FA authentification is not yet enabled. Try this later");
                 $notification->send("danger");
                 // $newUser->setTotpSecret($form->get('totpSecret')->getData());
@@ -124,7 +122,6 @@ class SettingsController extends AbstractController
            'form' => $form->createView(),
            'user' => $this->getUser()
         ]);
-
     }
 
      /**
@@ -134,9 +131,9 @@ class SettingsController extends AbstractController
     {
         $user = $this->getUser();
 
-        if(empty($user->getTotpSecret())) {
+        if (empty($user->getTotpSecret())) {
             $totpAuthenticator = $this->baseService->getContainer("scheb_two_factor.security.totp_authenticator");
-            $user->setTotpSecret( $totpAuthenticator->generateSecret() );
+            $user->setTotpSecret($totpAuthenticator->generateSecret());
         }
 
         $qrCode = $this->qrCodeGenerator->getTotpQrCode($user);

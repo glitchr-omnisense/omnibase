@@ -28,26 +28,33 @@ class OrphanRemoval extends AbstractAnnotation
         $this->value  = $data["value"]  ?? true;
     }
 
-    public function supports(string $target, ?string $targetValue = null, $entity = null):bool
+    public function supports(string $target, ?string $targetValue = null, $entity = null): bool
     {
         return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
-        if($target == "property") $column = $targetValue;
-        else $column = $this->column;
+        if ($target == "property") {
+            $column = $targetValue;
+        } else {
+            $column = $this->column;
+        }
 
         $columnAlias = $this->getAnnotation($classMetadata, $column, ColumnAlias::class);
-        if($columnAlias) $column = $columnAlias->column;
+        if ($columnAlias) {
+            $column = $columnAlias->column;
+        }
 
-        if(!property_exists($classMetadata->getName(), $column))
+        if (!property_exists($classMetadata->getName(), $column)) {
             throw new Exception("Invalid column property \"$column\" provided in annotation of class ".$classMetadata->getName());
+        }
 
         $associationMapping = $classMetadata->getAssociationMapping($classMetadata->getFieldName($column));
         $associationMapping["orphanRemoval"]    = boolval($this->value);
 
-        if(array_key_exists($column,  $classMetadata->associationMappings))
+        if (array_key_exists($column, $classMetadata->associationMappings)) {
             $classMetadata->associationMappings[$column] = $associationMapping;
+        }
     }
 }

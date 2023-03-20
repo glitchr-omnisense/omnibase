@@ -38,7 +38,10 @@ class ArrayType extends CollectionType implements DataMapperInterface
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
-    public function getBlockPrefix(): string { return 'array'; }
+    public function getBlockPrefix(): string
+    {
+        return 'array';
+    }
     public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
@@ -56,17 +59,17 @@ class ArrayType extends CollectionType implements DataMapperInterface
             "placeholder" => []
         ]);
 
-        $resolver->setNormalizer('target',       function(Options $options, $value) {
-
-            if($options["pattern"] !== null && $value !== null)
-            throw new \Exception("Option \"target\" cannot be set at the same time as \"pattern\"");
+        $resolver->setNormalizer('target', function (Options $options, $value) {
+            if ($options["pattern"] !== null && $value !== null) {
+                throw new \Exception("Option \"target\" cannot be set at the same time as \"pattern\"");
+            }
         });
 
-        $resolver->setNormalizer('length',        fn(Options $options, $value) => $options["pattern"] ? $this->getNumberOfArguments($options["pattern"]) : $value);
-        $resolver->setNormalizer('allow_add',     fn(Options $options, $value) => $options["length"] == 0 && $value);
-        $resolver->setNormalizer('allow_delete',  fn(Options $options, $value) => $options["length"] == 0 && $value);
-        $resolver->setNormalizer('prototype_key', fn(Options $options, $value) => $value ?? ($options["associative"] ? "__prototype_key__" : null));
-        $resolver->setNormalizer('prototype_id', fn(Options $options, $value) => $value ?? "__prototype_id__");
+        $resolver->setNormalizer('length', fn (Options $options, $value) => $options["pattern"] ? $this->getNumberOfArguments($options["pattern"]) : $value);
+        $resolver->setNormalizer('allow_add', fn (Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('allow_delete', fn (Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('prototype_key', fn (Options $options, $value) => $value ?? ($options["associative"] ? "__prototype_key__" : null));
+        $resolver->setNormalizer('prototype_id', fn (Options $options, $value) => $value ?? "__prototype_id__");
     }
 
     /**
@@ -74,14 +77,15 @@ class ArrayType extends CollectionType implements DataMapperInterface
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if($options['prototype_key'] && $options["prototype"]) {
-
+        if ($options['prototype_key'] && $options["prototype"]) {
             $prototypeOptions = $options['entry_options'];
-            if (null !== $options['prototype_data'])
+            if (null !== $options['prototype_data']) {
                 $prototypeOptions['data'] = $options['prototype_data'];
+            }
 
-            if (null !== $options['entry_required'])
+            if (null !== $options['entry_required']) {
                 $prototypeOptions['required'] = $options['entry_required'];
+            }
 
             $prototypeOptions["attr"]['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->translator->trans("@fields.array.value");
             $prototype = $builder->create($options['prototype_name'], FormType::class, ["label" => false])
@@ -98,9 +102,9 @@ class ArrayType extends CollectionType implements DataMapperInterface
 //                $form = $event->getForm();
 //
 //                dump($data, $form);
-////                exit(1);
-////
-//////                dump($data, $form);
+        ////                exit(1);
+        ////
+        //////                dump($data, $form);
 //                $entry = 0;
 //                foreach($data as $key => $value)
 //                {
@@ -111,7 +115,7 @@ class ArrayType extends CollectionType implements DataMapperInterface
 //                    dump([$options["prototype_key"] => $key, $options["prototype_id"] => $value]);
 //
 //                    $childForm->setData();
-////                    exit(1);
+        ////                    exit(1);
 //                }
 //
 //                if($data) {
@@ -128,17 +132,18 @@ class ArrayType extends CollectionType implements DataMapperInterface
 //
 //                    $form->setData($array);
 //                }
-//////
-////                dump($form->all(), $form->getParent());
+        //////
+        ////                dump($form->all(), $form->getParent());
 //            });
-
         } else {
-
             parent::buildForm($builder, $options);
         }
     }
 
-    public function getNumberOfArguments($pattern):int { return preg_match_all('/\{[0-9]*\}/i', $pattern); }
+    public function getNumberOfArguments($pattern): int
+    {
+        return preg_match_all('/\{[0-9]*\}/i', $pattern);
+    }
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         parent::finishView($view, $form, $options);

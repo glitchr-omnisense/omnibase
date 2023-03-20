@@ -7,11 +7,14 @@ use Base\Service\Model\IconizeInterface;
 
 class EntityAction extends EnumType implements IconizeInterface
 {
-    const INSERT = "ACTION_INSERT";
-    const UPDATE = "ACTION_UPDATE";
-    const DELETE = "ACTION_DELETE";
+    public const INSERT = "ACTION_INSERT";
+    public const UPDATE = "ACTION_UPDATE";
+    public const DELETE = "ACTION_DELETE";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [

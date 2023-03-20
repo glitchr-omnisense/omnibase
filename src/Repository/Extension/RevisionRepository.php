@@ -13,5 +13,4 @@ use Base\Database\Repository\ServiceEntityRepository;
  */
 class RevisionRepository extends ServiceEntityRepository
 {
-
 }

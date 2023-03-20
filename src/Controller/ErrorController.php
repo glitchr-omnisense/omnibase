@@ -1,6 +1,7 @@
 <?php
 
 namespace Base\Controller;
+
 use Base\Service\BaseService;
 
 use Base\Entity\User\Notification;
@@ -33,14 +34,14 @@ class ErrorController extends AbstractController
     public function Main(\Throwable $exception)
     {
         try {
-
             $isPreview = $this->router->getRouteName() === "_preview_error";
 
-            if ($this->baseService->isDevelopment() && !$isPreview) $response = $this->Rescue($exception);
-            else $response = $this->render("exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
-
+            if ($this->baseService->isDevelopment() && !$isPreview) {
+                $response = $this->Rescue($exception);
+            } else {
+                $response = $this->render("exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
+            }
         } catch(Error|Exception|ErrorException $fatalException) {
-
             throw new Exception("Twig rendering engine failed (".trim($fatalException->getMessage(), ".").") following a first exception. (see below)", 500, $exception);
             $response = $this->Rescue($exception);
         }
@@ -56,7 +57,9 @@ class ErrorController extends AbstractController
 
     public function Rescue(\Throwable $exception): Response
     {
-        if($this->profiler) $this->profiler->disable();
+        if ($this->profiler) {
+            $this->profiler->disable();
+        }
 
         $flattenException = $this->htmlErrorRenderer->render($exception);
 

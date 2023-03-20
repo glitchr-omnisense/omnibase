@@ -48,25 +48,40 @@ class DataCollector extends AbstractDataCollector
         $this->baseService = $baseService;
     }
 
-    public function getName(): string { return 'base'; }
+    public function getName(): string
+    {
+        return 'base';
+    }
 
-    public static function getTemplate(): ?string { return '@Base/inspector/data_collector.html.twig'; }
+    public static function getTemplate(): ?string
+    {
+        return '@Base/inspector/data_collector.html.twig';
+    }
 
-    public function getData(): array { return $this->data; }
+    public function getData(): array
+    {
+        return $this->data;
+    }
     public function getDataBundle(string $bundle): ?array
     {
-        if(!array_key_exists($bundle, $this->dataBundles))
+        if (!array_key_exists($bundle, $this->dataBundles)) {
             $this->collectDataBundle($bundle);
+        }
 
         return $this->dataBundles[$bundle] ?? null;
     }
 
-    public function getMethod() { return $this->data['method']; }
+    public function getMethod()
+    {
+        return $this->data['method'];
+    }
 
     public function collectDataBundle(string $bundle, ?string $bundleSuffix = null)
     {
         $bundleIdentifier = $this->getBundleIdentifier($bundle);
-        if(!$bundleIdentifier) return false;
+        if (!$bundleIdentifier) {
+            return false;
+        }
 
         $bundleLocation = \Composer\InstalledVersions::getRootPackage($bundleIdentifier)["install_path"];
         $bundleLocation = realpath($bundleLocation."vendor/".$bundleIdentifier);
@@ -98,28 +113,30 @@ class DataCollector extends AbstractDataCollector
         $this->collectDataBundle(DoctrineBundle::class, $dbname);
         $this->collectDataBundle(EasyAdminBundle::class);
 
-        $this->data = array_map_recursive(fn($v) => $this->cloneVar($v), $this->collectData($context));
+        $this->data = array_map_recursive(fn ($v) => $this->cloneVar($v), $this->collectData($context));
         $this->data["_bundles"] = $this->dataBundles;
     }
 
-    protected function getBundleIdentifier(string $bundle) {
-
-        if(!class_exists($bundle))
+    protected function getBundleIdentifier(string $bundle)
+    {
+        if (!class_exists($bundle)) {
             return null;
+        }
 
-        if(array_key_exists($bundle, $this->dataBundles))
+        if (array_key_exists($bundle, $this->dataBundles)) {
             return $this->dataBundles[$bundle]["identifier"];
+        }
 
         $reflector = new \ReflectionClass($bundle);
         $bundleRoot = dirname($reflector->getFileName());
 
-        foreach(\Composer\InstalledVersions::getInstalledPackages() as $bundleIdentifier) {
-
+        foreach (\Composer\InstalledVersions::getInstalledPackages() as $bundleIdentifier) {
             $bundleLocation = \Composer\InstalledVersions::getRootPackage($bundleIdentifier)["install_path"];
             $bundleLocation = realpath($bundleLocation."vendor/".$bundleIdentifier);
 
-            if($bundleLocation && str_starts_with($bundleRoot, $bundleLocation))
+            if ($bundleLocation && str_starts_with($bundleRoot, $bundleLocation)) {
                 return $bundleIdentifier;
+            }
         }
 
         return null;
@@ -130,7 +147,9 @@ class DataCollector extends AbstractDataCollector
         $params = $connection->getParams();
 
         $host = $params["host"] ?? "";
-        if(!$host) return "";
+        if (!$host) {
+            return "";
+        }
 
         $driver = $params["driver"] ?? null;
         $driver = $driver ? $driver."://" : "";
@@ -153,8 +172,7 @@ class DataCollector extends AbstractDataCollector
     private function getDoctrineConnections()
     {
         $defaultConnectionName = $this->doctrine->getDefaultConnectionName();
-        foreach($this->doctrine->getConnectionNames() as $connectionName => $_) {
-
+        foreach ($this->doctrine->getConnectionNames() as $connectionName => $_) {
             $connection = $this->doctrine->getConnection($connectionName);
 
             $isDefaultName  = $defaultConnectionName == $connectionName;
@@ -177,7 +195,7 @@ class DataCollector extends AbstractDataCollector
     private function collectData(?AdminContext $context): array
     {
         $data = [];
-        if(class_exists(BaseBundle::class))
+        if (class_exists(BaseBundle::class)) {
             $data[$this->getBundleFormattedName(BaseBundle::class)] = [
                 'Environment name' => $this->baseService->getEnvironment(),
                 'Environment name' => $this->baseService->getEnvironment(),
@@ -186,22 +204,26 @@ class DataCollector extends AbstractDataCollector
                 'Router Class' => get_class($this->router),
                 'Parameter Bag Class' => get_class($this->parameterBag),
             ];
+        }
 
-        if(class_exists(DoctrineBundle::class))
+        if (class_exists(DoctrineBundle::class)) {
             $data[$this->getBundleFormattedName(DoctrineBundle::class)] = $this->getDoctrineConnections();
+        }
 
-        if(class_exists(EasyAdminBundle::class))
+        if (class_exists(EasyAdminBundle::class)) {
             $data[$this->getBundleFormattedName(EasyAdminBundle::class)] = $context ? [
                 'CRUD Controller FQCN' => null === $context->getCrud() ? null : $context->getCrud()->getControllerFqcn(),
                 'CRUD Action' => $context->getRequest()->get(EA::CRUD_ACTION),
                 'Entity ID' => $context->getRequest()->get(EA::ENTITY_ID),
                 'Sort' => $context->getRequest()->get(EA::SORT),
             ] : [];
+        }
 
-        if(class_exists(ApiPlatformBundle::class))
+        if (class_exists(ApiPlatformBundle::class)) {
             $data[$this->getBundleFormattedName(ApiPlatformBundle::class)] = [];
+        }
 
-        if(class_exists(TwigBundle::class))
+        if (class_exists(TwigBundle::class)) {
             $data[$this->getBundleFormattedName(TwigBundle::class)] = [
                 'Custom Twig Loader' => $this->parameterBag->get("base.twig.use_custom"),
                 'Twig Autoappending' => $this->parameterBag->get("base.twig.autoappend"),
@@ -209,6 +231,7 @@ class DataCollector extends AbstractDataCollector
                 'Bootstrap Support' => $this->parameterBag->get("base.twig.use_bootstrap"),
                 'Font Awesome icons' => $this->parameterBag->get("base.vendor.fontawesome.metadata"),
             ];
+        }
 
         return $data;
     }

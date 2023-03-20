@@ -18,10 +18,22 @@ use Base\Database\Annotation\Cache;
 
 class ImageAdapter extends AbstractAdapter
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-image"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-image"];
+    }
 
-    public static function getType(): string { return ImageType::class; }
-    public function getOptions(): array { return [/*"alt" => ["label" => "Nom"]*/ ]; }
+    public static function getType(): string
+    {
+        return ImageType::class;
+    }
+    public function getOptions(): array
+    {
+        return [/*"alt" => ["label" => "Nom"]*/ ];
+    }
 
-    public function resolve(mixed $value): mixed { return $value; }
+    public function resolve(mixed $value): mixed
+    {
+        return $value;
+    }
 }

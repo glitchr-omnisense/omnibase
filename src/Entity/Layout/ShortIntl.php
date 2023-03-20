@@ -22,7 +22,10 @@ class ShortIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $label;
-    public function getLabel(): ?string { return $this->label; }
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
     public function setLabel(?string $label)
     {
         $this->label = $label;
@@ -34,7 +37,10 @@ class ShortIntl implements TranslationInterface
      * @Assert\Url
      */
     protected ?string $url = null;
-    public function getUrl(): ?string { return $this->url; }
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
     public function setUrl(string $url)
     {
         $this->url = $url;

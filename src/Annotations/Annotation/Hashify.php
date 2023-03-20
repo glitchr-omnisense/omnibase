@@ -46,7 +46,7 @@ class Hashify extends AbstractAnnotation
     public bool $random;
     public ?string $referenceColumn;
 
-    public function __construct( array $data )
+    public function __construct(array $data)
     {
         $this->data            = $data;
         $this->nullable        = $data["nullable"] ?? false;
@@ -84,8 +84,9 @@ class Hashify extends AbstractAnnotation
     private function getHashedMessage($entity, ?string $property = null): ?string
     {
         $plainMessage = $this->getPlainMessage($entity) ?? null;
-        if($plainMessage)
+        if ($plainMessage) {
             return $this->getMessageHasher($entity)->hash($plainMessage);
+        }
 
         return ($property ? $this->getFieldValue($entity, $property) : null);
     }
@@ -101,33 +102,38 @@ class Hashify extends AbstractAnnotation
         $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($className, Hashify::class);
         $that = $annotations[$property] ?? [];
 
-        if( !($that = array_pop($that)) )
+        if (!($that = array_pop($that))) {
             throw new Exception("@Hashify annotation not found in \"$property\" for $className");
+        }
 
-        if($that->needsRehash($entity, $hashedMessage))
+        if ($that->needsRehash($entity, $hashedMessage)) {
             throw new Exception("Password in @Hashify annotation in \"$property\" for $className needs to be rehashed");
+        }
 
         return $that->getMessageHasher($entity)->verify(
-                    $that->getHashedMessage($entity, $property),
-                    $that->getFieldValue($entity, $property)
-                );
+            $that->getHashedMessage($entity, $property),
+            $that->getFieldValue($entity, $property)
+        );
     }
 
     private function getPlainMessage($entity): ?string
     {
-        if ($this->random)
+        if ($this->random) {
             return random_bytes(10);
+        }
 
-        if (!$this->referenceColumn)
+        if (!$this->referenceColumn) {
             throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
+        }
 
         return $this->getPropertyValue($entity, $this->referenceColumn);
     }
 
     private function erasePlainMessage($entity)
     {
-        if (!$this->referenceColumn)
+        if (!$this->referenceColumn) {
             throw new Exception("Attribute \"plain\" missing for @Hashify in " . ClassUtils::getClass($entity));
+        }
 
         return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
     }
@@ -140,13 +146,17 @@ class Hashify extends AbstractAnnotation
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
-        if($value) $this->setFieldValue($entity, $property, $value);
+        if ($value) {
+            $this->setFieldValue($entity, $property, $value);
+        }
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
-        if($value) $this->setFieldValue($entity, $property, $value);
+        if ($value) {
+            $this->setFieldValue($entity, $property, $value);
+        }
     }
 
     public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)

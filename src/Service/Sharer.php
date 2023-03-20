@@ -9,16 +9,20 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class Sharer
 {
     protected $adapters = [];
-    public function getAdapters() { return $this->adapters; }
+    public function getAdapters()
+    {
+        return $this->adapters;
+    }
     public function getAdapter(string $idOrClass): ?SharerAdapterInterface
     {
-        if(class_exists($idOrClass))
+        if (class_exists($idOrClass)) {
             return $this->adapters[$idOrClass] ?? null;
+        }
 
-        foreach($this->adapters as $adapter) {
-
-            if ($adapter->getIdentifier() == $idOrClass)
+        foreach ($this->adapters as $adapter) {
+            if ($adapter->getIdentifier() == $idOrClass) {
                 return $adapter;
+            }
         }
 
         return null;
@@ -39,7 +43,9 @@ class Sharer
     public function share(string $adapterId, LinkableInterface|string $url, array $options = [], ?string $template = null)
     {
         $adapter = $this->getAdapter($adapterId);
-        if(!$adapter) return "";
+        if (!$adapter) {
+            return "";
+        }
 
         $options["url"] = $url instanceof LinkableInterface ? $url->__toLink([], UrlGeneratorInterface::ABSOLUTE_URL) : $url;
 

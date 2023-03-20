@@ -23,8 +23,14 @@ use Base\Database\Annotation\Cache;
  */
 class Book extends Widget implements IconizeInterface, SetInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-book"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-book"];
+    }
 
     public function __construct(?string $title = null, array $pages = [])
     {
@@ -37,7 +43,10 @@ class Book extends Widget implements IconizeInterface, SetInterface
      * @OrderColumn
      */
     protected $pages;
-    public function getPages(): Collection { return $this->pages; }
+    public function getPages(): Collection
+    {
+        return $this->pages;
+    }
     public function addPage(Page $page): self
     {
         if (!$this->pages->contains($page)) {

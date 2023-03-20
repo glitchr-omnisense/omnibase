@@ -12,7 +12,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FlipFilter implements FilterInterface
 {
-    public function __toString() { return "flip:". ($this->options['axis'] ?? "y"); }
+    public function __toString()
+    {
+        return "flip:". ($this->options['axis'] ?? "y");
+    }
 
     public function __construct(array $options = [])
     {

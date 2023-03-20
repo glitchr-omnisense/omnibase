@@ -18,12 +18,18 @@ trait TranslationTrait
      */
     protected $id;
 
-    public function getId(): ?int { return $this->id;}
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * Translatable related methods
      */
-    public static function getEntityFqcn(): string { return self::getTranslatableEntityClass()::getTranslationEntityClass(); }
+    public static function getEntityFqcn(): string
+    {
+        return self::getTranslatableEntityClass()::getTranslationEntityClass();
+    }
     public static function getTranslatableEntityClass(): string
     {
         // By default, the translatable class has the same name but without the suffix
@@ -37,7 +43,10 @@ trait TranslationTrait
      */
     protected $translatable;
 
-    public function getTranslatable(): ?TranslatableInterface { return $this->translatable; }
+    public function getTranslatable(): ?TranslatableInterface
+    {
+        return $this->translatable;
+    }
     public function setTranslatable(?TranslatableInterface $translatable)
     {
         $this->translatable = $translatable;
@@ -52,10 +61,13 @@ trait TranslationTrait
 
     public function getLocale(): ?string
     {
-        if($this->locale) return Localizer::normalizeLocale($this->locale);
+        if ($this->locale) {
+            return Localizer::normalizeLocale($this->locale);
+        }
 
-        if($this->getTranslatable() === null)
+        if ($this->getTranslatable() === null) {
             return null;
+        }
 
         return $this->getTranslatable()->getTranslations()->indexOf($this);
     }
@@ -72,22 +84,24 @@ trait TranslationTrait
         $ignoredVars = array_intersect(array_keys(get_object_vars($this)), $ignoredVars);
 
         foreach (get_object_vars($this) as $var => $value) {
-
-            if (in_array($var, $ignoredVars, true))
+            if (in_array($var, $ignoredVars, true)) {
                 continue;
-            if ($value === null)
+            }
+            if ($value === null) {
                 continue;
+            }
 
-            if($addConditions !== null && !call_user_func_array($addConditions, [$var, $value]))
+            if ($addConditions !== null && !call_user_func_array($addConditions, [$var, $value])) {
                 return false;
-            else if (is_string($value) && trim($value) !== "")
+            } elseif (is_string($value) && trim($value) !== "") {
                 return false;
-            else if (is_array($value) && $value !== [])
+            } elseif (is_array($value) && $value !== []) {
                 return false;
-            else if (is_bool($value) && $value === true)
+            } elseif (is_bool($value) && $value === true) {
                 return false;
-            else if (!empty($value))
+            } elseif (!empty($value)) {
                 return false;
+            }
         }
 
         return true;

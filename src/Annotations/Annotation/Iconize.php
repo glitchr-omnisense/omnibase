@@ -20,6 +20,12 @@ class Iconize extends AbstractAnnotation
         $this->icons = !is_array($icons) ? [$icons] : $icons;
     }
 
-    public function supports(string $target, ?string $targetValue = null, $object = null): bool { return true; }
-    public function getIcons() { return $this->icons; }
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
+    {
+        return true;
+    }
+    public function getIcons()
+    {
+        return $this->icons;
+    }
 }

@@ -23,12 +23,12 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
     /**
      * @var EntityHydratorInterface
-     */ 
+     */
     protected $entityHydrator;
-    
+
     /**
      * @var EntityManagerInterface
-     */ 
+     */
     protected $entityManager;
 
     /**
@@ -47,7 +47,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     }
 
     public const DISPATCHER_SUFFIX = "Dispatcher";
-    public function getSubscribedEvents() : array
+    public function getSubscribedEvents(): array
     {
         return
         [
@@ -66,8 +66,9 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     {
         $class = static::class;
 
-        if(!str_ends_with(static::class, self::DISPATCHER_SUFFIX))
+        if (!str_ends_with(static::class, self::DISPATCHER_SUFFIX)) {
             throw new Exception("Unexpected dispatcher name. \"".$class."\" must ends with \"". self::DISPATCHER_SUFFIX."\"");
+        }
 
         return substr($class, 0, -strlen(self::DISPATCHER_SUFFIX));
     }
@@ -75,44 +76,57 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function addEvent(string $event, mixed $subject)
     {
         $id = spl_object_id($subject);
-        if(!array_key_exists($id, $this->events))
+        if (!array_key_exists($id, $this->events)) {
             $this->events[$id] = [];
+        }
 
-        if(!array_key_exists($event, $this->events[$id]))
+        if (!array_key_exists($event, $this->events[$id])) {
             $this->events[$id][$event] = true;
+        }
     }
 
     public function dispatchEvents(LifecycleEventArgs $event)
     {
         $subject = $event->getObject();
-        if ($subject == null) return;
+        if ($subject == null) {
+            return;
+        }
 
         $id = spl_object_id($subject);
-        if (!array_key_exists($id, $this->events)) return;
+        if (!array_key_exists($id, $this->events)) {
+            return;
+        }
 
         $reflush = false;
         $eventClass = $this->getEventClass();
 
         $request = $this->requestStack->getCurrentRequest();
         foreach ($this->events[$id] as $eventName => $alreadyTriggered) {
-
-            if($alreadyTriggered === false) continue;
+            if ($alreadyTriggered === false) {
+                continue;
+            }
 
             $this->events[$id][$eventName] = false;
             $this->dispatcher->dispatch(new $eventClass($event, $request), $eventName);
             $reflush = true;
         }
 
-        if($reflush)
+        if ($reflush) {
             $event->getObjectManager()->flush();
+        }
     }
 
-    public function getEntityManager() { return $this->entityManager; }
+    public function getEntityManager()
+    {
+        return $this->entityManager;
+    }
 
     public function prePersist(LifecycleEventArgs $event)
     {
         $subject = $event->getObject();
-        if ($subject == null || !$this->supports($subject)) return;
+        if ($subject == null || !$this->supports($subject)) {
+            return;
+        }
 
         $this->onPersist($event);
     }
@@ -120,7 +134,9 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function preUpdate(LifecycleEventArgs $event)
     {
         $subject = $event->getObject();
-        if ($subject == null || !$this->supports($subject)) return;
+        if ($subject == null || !$this->supports($subject)) {
+            return;
+        }
 
         $this->onUpdate($event);
     }
@@ -128,16 +144,33 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function preRemove(LifecycleEventArgs $event)
     {
         $subject = $event->getObject();
-        if ($subject == null || !$this->supports($subject)) return;
+        if ($subject == null || !$this->supports($subject)) {
+            return;
+        }
 
         $this->onRemove($event);
     }
 
-    public function onPersist(LifecycleEventArgs $event) { }
-    public function onUpdate (LifecycleEventArgs $event) { }
-    public function onRemove (LifecycleEventArgs $event) { }
+    public function onPersist(LifecycleEventArgs $event)
+    {
+    }
+    public function onUpdate(LifecycleEventArgs $event)
+    {
+    }
+    public function onRemove(LifecycleEventArgs $event)
+    {
+    }
 
-    public function postPersist(LifecycleEventArgs $event): void { $this->dispatchEvents($event); }
-    public function postUpdate (LifecycleEventArgs $event): void { $this->dispatchEvents($event); }
-    public function postRemove (LifecycleEventArgs $event): void { $this->dispatchEvents($event); }
+    public function postPersist(LifecycleEventArgs $event): void
+    {
+        $this->dispatchEvents($event);
+    }
+    public function postUpdate(LifecycleEventArgs $event): void
+    {
+        $this->dispatchEvents($event);
+    }
+    public function postRemove(LifecycleEventArgs $event): void
+    {
+        $this->dispatchEvents($event);
+    }
 }

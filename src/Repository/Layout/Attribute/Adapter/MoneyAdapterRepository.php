@@ -16,5 +16,4 @@ use Base\Repository\Layout\AttributeRepository;
 
 class MoneyAdapterRepository extends AbstractAdapterRepository
 {
-
 }

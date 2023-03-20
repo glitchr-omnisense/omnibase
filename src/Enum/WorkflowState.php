@@ -7,14 +7,17 @@ use Base\Service\Model\IconizeInterface;
 
 class WorkflowState extends EnumType implements IconizeInterface
 {
-    const SUBMITTED = "WORKFLOW_SUBMITTED";
-    const SUSPENDED = "WORKFLOW_SUSPENDED";
-    const PENDING   = "WORKFLOW_PENDING";
-    const REVIEWING = "WORKFLOW_REVIEWING";
-    const REJECTED  = "WORKFLOW_REJECTED";
-    const APPROVED  = "WORKFLOW_APPROVED";
+    public const SUBMITTED = "WORKFLOW_SUBMITTED";
+    public const SUSPENDED = "WORKFLOW_SUSPENDED";
+    public const PENDING   = "WORKFLOW_PENDING";
+    public const REVIEWING = "WORKFLOW_REVIEWING";
+    public const REJECTED  = "WORKFLOW_REJECTED";
+    public const APPROVED  = "WORKFLOW_APPROVED";
 
-    public function __iconize(): ?array { return null; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
     public static function __iconizeStatic(): ?array
     {
         return [

@@ -15,10 +15,16 @@ final class BreadgrinderTwigExtension extends AbstractExtension
      */
     protected $breadgrinder;
 
-    public function __construct(Breadgrinder $breadgrinder) { $this->breadgrinder = $breadgrinder; }
+    public function __construct(Breadgrinder $breadgrinder)
+    {
+        $this->breadgrinder = $breadgrinder;
+    }
 
-    public function getName() { return 'breadcrumb_extension'; }
-    public function getFunctions() : array
+    public function getName()
+    {
+        return 'breadcrumb_extension';
+    }
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('render_breadcrumb', [$this, 'renderBreadcrumb'], ["needs_environment" => true, 'is_safe' => ['all']]),
@@ -30,8 +36,9 @@ final class BreadgrinderTwigExtension extends AbstractExtension
         $breadcrumb = $this->breadgrinder->grind($name, $options);
         $breadcrumb->compute($request);
 
-        if($breadcrumb === null)
+        if ($breadcrumb === null) {
             throw new \Exception("Breadcrumb \"$name\" not found in the grinder machine.");
+        }
 
         return $twig->render($breadcrumb->getTemplate(), ["breadcrumb" => $breadcrumb]);
     }

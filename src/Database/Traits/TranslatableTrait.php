@@ -17,24 +17,27 @@ use Symfony\Component\PropertyAccess\Exception\AccessException;
 trait TranslatableTrait
 {
     private static $translationClass;
-    public static function getEntityFqcn(): string { return self::getTranslationEntityClass()::getTranslatableEntityClass(); }
+    public static function getEntityFqcn(): string
+    {
+        return self::getTranslationEntityClass()::getTranslatableEntityClass();
+    }
     public static function getTranslationEntityClass(
         bool $withInheritance = true, // This is required in some cases, where you must access main class without inheritance
         bool $selfClass = false // Proxies\__CG__ error, if not true during discriminator map building (TranslationType)
-    ): ?string
-    {
+    ): ?string {
         $class = ($selfClass ? self::class : static::class);
 
         $prefix = "Proxies\__CG__\\";
-        if (strpos($class, $prefix) === 0)
+        if (strpos($class, $prefix) === 0) {
             $class = substr($class, strlen($prefix));
+        }
 
-        if($withInheritance) {
-
+        if ($withInheritance) {
             self::$translationClass = $class . NamingStrategy::TABLE_I18N_SUFFIX;
-            while(!class_exists(self::$translationClass) || !is_subclass_of(self::$translationClass, TranslationInterface::class)) {
-
-                if(!get_parent_class($class)) throw new Exception("No translation entity found for ".$class);
+            while (!class_exists(self::$translationClass) || !is_subclass_of(self::$translationClass, TranslationInterface::class)) {
+                if (!get_parent_class($class)) {
+                    throw new Exception("No translation entity found for ".$class);
+                }
 
                 $class = get_parent_class($class);
                 self::$translationClass = $class . NamingStrategy::TABLE_I18N_SUFFIX;
@@ -44,8 +47,9 @@ trait TranslatableTrait
         }
 
         $translationClass = $class . NamingStrategy::TABLE_I18N_SUFFIX;
-        if(!class_exists($translationClass) || !is_subclass_of($translationClass, TranslationInterface::class))
+        if (!class_exists($translationClass) || !is_subclass_of($translationClass, TranslationInterface::class)) {
             return null;
+        }
 
         return $translationClass;
     }
@@ -56,14 +60,15 @@ trait TranslatableTrait
     protected $translations;
     public function getTranslations()
     {
-        if ($this->translations === null)
+        if ($this->translations === null) {
             $this->translations = new ArrayCollection();
+        }
 
         return $this->translations;
     }
 
-    public function removeTranslation(TranslationInterface $translation) {
-
+    public function removeTranslation(TranslationInterface $translation)
+    {
         if ($this->getTranslations()->contains($translation)) {
             $this->getTranslations()->removeElement($translation);
         }
@@ -71,9 +76,9 @@ trait TranslatableTrait
         return $this;
     }
 
-    public function clearTranslations() {
-
-        foreach($this->translations as $translation) {
+    public function clearTranslations()
+    {
+        foreach ($this->translations as $translation) {
             $this->translations->removeElement($translation);
         }
 
@@ -83,8 +88,7 @@ trait TranslatableTrait
 
     public function addTranslation(TranslationInterface $translation)
     {
-        if($translation !== null) {
-
+        if ($translation !== null) {
             $this->getTranslations()->set(Localizer::normalizeLocale($translation->getLocale()), $translation);
             $translation->setTranslatable($this);
         }
@@ -95,7 +99,9 @@ trait TranslatableTrait
     public function translate(?string $locale = null)
     {
         $localizer = BaseService::getLocalizer();
-        if(!$localizer) return null;
+        if (!$localizer) {
+            return null;
+        }
 
         $defaultLocale = $localizer->getDefaultLocale();
         $availableLocales = $localizer->getAvailableLocales();
@@ -106,38 +112,38 @@ trait TranslatableTrait
         $translations = $this->getTranslations();
 
         $translation = $translations[$normLocale] ?? null;
-        if(!$translation && $locale === null) {
-
+        if (!$translation && $locale === null) {
             // First entry is default locale
-            $locales = array_filter($translations->getKeys(), fn($l) => in_array($l, $availableLocales));
-            foreach($locales as $locale) {
-
+            $locales = array_filter($translations->getKeys(), fn ($l) => in_array($l, $availableLocales));
+            foreach ($locales as $locale) {
                 $translation = $translations[$locale] ?? null;
-                if($translation) break;
+                if ($translation) {
+                    break;
+                }
             }
 
 
             // Search for compatible lang
-            if($translation == null) {
+            if ($translation == null) {
+                $locales = array_filter($translations->getKeys(), fn ($l) => !in_array($l, $availableLocales));
+                $fallbackLocales = array_map(fn ($l) => $localizer->getLocale($localizer->getLocaleLang($l)), $locales);
 
-                $locales = array_filter($translations->getKeys(), fn($l) => !in_array($l, $availableLocales));
-                $fallbackLocales = array_map(fn($l) => $localizer->getLocale($localizer->getLocaleLang($l)), $locales);
-
-                foreach(array_keys($fallbackLocales, $normLocale) as $normKey)
+                foreach (array_keys($fallbackLocales, $normLocale) as $normKey) {
                     $translation = $translations[$locales[$normKey]] ?? null;
+                }
 
-                foreach($locales as $locale) {
-
-                        $translation = $translations[$locale] ?? null;
-                        if($translation) break;
+                foreach ($locales as $locale) {
+                    $translation = $translations[$locale] ?? null;
+                    if ($translation) {
+                        break;
+                    }
                 }
             }
         }
 
         // Create a new locale if still not found..
-        if(!$translation) {
-
-            $translation = new $translationClass;
+        if (!$translation) {
+            $translation = new $translationClass();
             $translation->setLocale($normLocale);
             $this->addTranslation($translation);
         }
@@ -154,61 +160,63 @@ trait TranslatableTrait
         //
         // Call magic setter
         if (str_starts_with($method, "set")) {
-
             $property = lcfirst(substr($method, 3));
 
-            if (empty($arguments))
+            if (empty($arguments)) {
                 throw new AccessException("Missing argument for setter property \"$property\" in ". $className);
+            }
 
-            try { return $this->__set($property, ...$arguments); }
-            catch (AccessException $e) {
-
+            try {
+                return $this->__set($property, ...$arguments);
+            } catch (AccessException $e) {
                 // Parent fallback setter
-                if($parentClass && method_exists($parentClass, "__set"))
+                if ($parentClass && method_exists($parentClass, "__set")) {
                     return parent::__set($property, ...$arguments);
+                }
             }
         }
 
         //
         // Figure out is property exist
         $property = null;
-        if(property_exists($className, $method))
+        if (property_exists($className, $method)) {
             $property = $method;
-        else if(property_exists($translationClassName, $method))
+        } elseif (property_exists($translationClassName, $method)) {
             $property = $method;
-        else if(str_starts_with($method, "get") && property_exists($className, lcfirst(substr($method, 3))))
+        } elseif (str_starts_with($method, "get") && property_exists($className, lcfirst(substr($method, 3)))) {
             $property = lcfirst(substr($method, 3));
-        else if(str_starts_with($method, "get") && property_exists($translationClassName, lcfirst(substr($method, 3))))
+        } elseif (str_starts_with($method, "get") && property_exists($translationClassName, lcfirst(substr($method, 3)))) {
             $property = lcfirst(substr($method, 3));
-        else if(str_starts_with($method, "is" ) && property_exists($className, lcfirst(substr($method, 2))))
+        } elseif (str_starts_with($method, "is") && property_exists($className, lcfirst(substr($method, 2)))) {
             $property = lcfirst(substr($method, 2));
-        else if(str_starts_with($method, "is" ) && property_exists($translationClassName, lcfirst(substr($method, 2))))
+        } elseif (str_starts_with($method, "is") && property_exists($translationClassName, lcfirst(substr($method, 2)))) {
             $property = lcfirst(substr($method, 2));
+        }
 
         //
         // Call magic getter
-        if($property) {
-
-            try { return $this->__get($property); }
-            catch (AccessException $e)
-            {
+        if ($property) {
+            try {
+                return $this->__get($property);
+            } catch (AccessException $e) {
                 // Parent fallback getter
-                if($parentClass && method_exists($className, "__get"))
+                if ($parentClass && method_exists($className, "__get")) {
                     return parent::__get($property);
+                }
             }
-
-        } else if($translationClassName && method_exists($translationClassName, $method)) {
-
+        } elseif ($translationClassName && method_exists($translationClassName, $method)) {
             return $this->translate()->$method(...$arguments);
         }
 
         //
         // Parent fallback for magic __call
-        if($parentClass && method_exists($parentClass,"__call"))
+        if ($parentClass && method_exists($parentClass, "__call")) {
             return parent::__call($method, $arguments);
+        }
 
-        if(!method_exists($className,$method))
+        if (!method_exists($className, $method)) {
             throw new AccessException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+        }
 
         return null;
     }
@@ -223,10 +231,10 @@ trait TranslatableTrait
         // Setter method in called class
         if (method_exists($entity, "set".mb_ucfirst($property))) {
             return $entity->{"set".mb_ucfirst($property)}($value);
-        } else if(property_exists($this, $property)) {
-
-            if (!$accessor->isWritable($this, $property))
+        } elseif (property_exists($this, $property)) {
+            if (!$accessor->isWritable($this, $property)) {
                 throw new AccessException("Property \"$property\" not writable in ". get_class($this));
+            }
 
             $accessor->setValue($this, $property, $value);
             return $this;
@@ -237,18 +245,19 @@ trait TranslatableTrait
         $entityIntl = $this->translate();
         if (method_exists($entityIntl, "set".mb_ucfirst($property))) {
             return $entityIntl->{"set".mb_ucfirst($property)}($value);
-        } else if(property_exists($entityIntl, $property)) {
-
-            if (!$accessor->isWritable($entityIntl, $property))
+        } elseif (property_exists($entityIntl, $property)) {
+            if (!$accessor->isWritable($entityIntl, $property)) {
                 throw new AccessException("Property \"$property\" not writable in ". get_class($entityIntl));
+            }
 
             $accessor->setValue($entityIntl, $property, $value);
             return $this;
-
         }
 
         // Prevent "ea_" property exception conflict.. Damn'it.. ! >()
-        if(str_starts_with($property, "ea_")) return $this;
+        if (str_starts_with($property, "ea_")) {
+            return $this;
+        }
 
         throw new AccessException("Can't get a way to write property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }
@@ -261,12 +270,13 @@ trait TranslatableTrait
         //
         // Getter method in called class
         $entity = $this;
-        if(method_exists($entity, $property))
+        if (method_exists($entity, $property)) {
             return $entity->{$property}();
-        else if (method_exists($entity, "get".mb_ucfirst($property)))
+        } elseif (method_exists($entity, "get".mb_ucfirst($property))) {
             return $entity->{"get".mb_ucfirst($property)}();
-        else if (property_exists($entity, $property) && $accessor->isReadable($entity, $property))
+        } elseif (property_exists($entity, $property) && $accessor->isReadable($entity, $property)) {
             return $accessor->getValue($entity, $property);
+        }
 
         //
         // Proxy getter method for current locale
@@ -274,32 +284,39 @@ trait TranslatableTrait
         $entityIntl = $this->translate();
 
         $value = null;
-        if(method_exists($entityIntl, $property))
+        if (method_exists($entityIntl, $property)) {
             $value = $entityIntl->{$property}();
-        else if (method_exists($entityIntl, "get".mb_ucfirst($property)))
+        } elseif (method_exists($entityIntl, "get".mb_ucfirst($property))) {
             $value = $entityIntl->{"get".mb_ucfirst($property)}();
-        else if (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property))
+        } elseif (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
             $value = $accessor->getValue($entityIntl, $property);
+        }
 
         // If current locale is empty.. then try to access value from default locale
         // (unless is was already the default locale)
-        if ($value !== null) return $value;
+        if ($value !== null) {
+            return $value;
+        }
 
         //
         // Proxy getter method for default locale
-        if ($entityIntl->getLocale() == $defaultLocale)
+        if ($entityIntl->getLocale() == $defaultLocale) {
             return $value;
+        }
 
         $entityIntl = $this->translate($defaultLocale);
-        if(method_exists($entityIntl, $property))
+        if (method_exists($entityIntl, $property)) {
             return $entityIntl->{$property}();
-        else if(method_exists($entityIntl, "get".mb_ucfirst($property)))
+        } elseif (method_exists($entityIntl, "get".mb_ucfirst($property))) {
             return $entityIntl->{"get".mb_ucfirst($property)}();
-        else if (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property))
+        } elseif (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
             return $accessor->getValue($entityIntl, $property);
+        }
 
         // Exception for EA variables (cf. EA's FormField)
-        if(str_starts_with($property, "ea_")) return null;
+        if (str_starts_with($property, "ea_")) {
+            return null;
+        }
 
         throw new AccessException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }

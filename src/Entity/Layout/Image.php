@@ -36,27 +36,34 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 {
     use BaseTrait;
 
-    public function getSalt(): string { return md5(serialize($this->getQuadrant())); }
+    public function getSalt(): string
+    {
+        return md5(serialize($this->getQuadrant()));
+    }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         $filters = array_pop_key("filters", $routeParameters) ?? [];
-        if($this->getSource() === null) return null;
+        if ($this->getSource() === null) {
+            return null;
+        }
 
         $thumbnail  = array_pop_key("thumbnail", $routeParameters);
         $identifier = array_pop_key("crop", $routeParameters);
-        if(is_array($thumbnail)) {
-
+        if (is_array($thumbnail)) {
             $filters[] = new ThumbnailFilter($thumbnail[0] ?? null, $thumbnail[1] ?? null);
             $identifier ??= implode("x", array_slice($thumbnail, 0, 2)); // Set cropper using thumbnail information if not cropper not defined
         }
 
         if (array_key_exists("extension", $routeParameters)) {
-            if($routeParameters["extension"] === true) $routeParameters["extension"] = first($this->getImageService()->getExtensions($this->getSource()));
-            else if($routeParameters["extension"] === false) array_pop_key("extension", $routeParameters);
+            if ($routeParameters["extension"] === true) {
+                $routeParameters["extension"] = first($this->getImageService()->getExtensions($this->getSource()));
+            } elseif ($routeParameters["extension"] === false) {
+                array_pop_key("extension", $routeParameters);
+            }
         }
 
-        $routeName = (array_key_exists("extension", $routeParameters) ? "ux_imageExtension"     : "ux_image");
+        $routeName = (array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image");
         $routeParameters = array_merge($routeParameters, [
             "data" => $this->getImageService()->obfuscate($this->getSource(), [
                 "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
@@ -67,10 +74,19 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
     }
 
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-images"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-images"];
+    }
 
-    public function __toString() { return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.images.no_image") ?? ""; }
+    public function __toString()
+    {
+        return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.images.no_image") ?? "";
+    }
     public function __construct($src = null)
     {
         $this->crops = new ArrayCollection();
@@ -83,15 +99,24 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * @ORM\Column(type="text")
      * @Uploader(storage="local.storage", max_size="32MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
      */
     protected $source;
-    public function getSource()     { return Uploader::getPublic($this, "source"); }
-    public function getSourceFile() { return Uploader::get($this, "source"); }
+    public function getSource()
+    {
+        return Uploader::getPublic($this, "source");
+    }
+    public function getSourceFile()
+    {
+        return Uploader::get($this, "source");
+    }
     public function setSource($source): static
     {
         $this->source = $source;
@@ -100,15 +125,22 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     }
 
     protected $sourceMeta;
-    public function getNaturalWidth(): ?int { return $this->getSourceMeta()["width"] ?? 0; }
-    public function getNaturalHeight(): ?int { return $this->getSourceMeta()["height"] ?? 0; }
+    public function getNaturalWidth(): ?int
+    {
+        return $this->getSourceMeta()["width"] ?? 0;
+    }
+    public function getNaturalHeight(): ?int
+    {
+        return $this->getSourceMeta()["height"] ?? 0;
+    }
     public function getSourceMeta(): array|null|false
     {
         $sourceFile = $this->getSourceFile();
-        if($sourceFile === null) return null;
+        if ($sourceFile === null) {
+            return null;
+        }
 
-        if(empty($this->sourceMeta)) {
-
+        if (empty($this->sourceMeta)) {
             $imagesize = getimagesize($sourceFile->getPathname());
             $this->sourceMeta = [
                 "width" => $imagesize[0],
@@ -124,16 +156,31 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return $this->sourceMeta;
     }
 
-    public function get()     { return $this->getSource(); }
-    public function getFile() { return $this->getSourceFile(); }
-    public function set($source): self { return $this->setSource($source); }
+    public function get()
+    {
+        return $this->getSource();
+    }
+    public function getFile()
+    {
+        return $this->getSourceFile();
+    }
+    public function set($source): self
+    {
+        return $this->setSource($source);
+    }
 
     /**
      * @ORM\Column(type="quadrant8")
      */
     protected $quadrant = Quadrant::O;
-    public function getQuadrant(): string { return $this->quadrant; }
-    public function getQuadrantPosition(): string { return Quadrant8::getPosition($this->quadrant); }
+    public function getQuadrant(): string
+    {
+        return $this->quadrant;
+    }
+    public function getQuadrantPosition(): string
+    {
+        return Quadrant8::getPosition($this->quadrant);
+    }
     public function setQuadrant(string $quadrant): self
     {
         $this->quadrant = $quadrant;
@@ -144,7 +191,10 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
      * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $crops;
-    public function getCrops(): Collection { return $this->crops; }
+    public function getCrops(): Collection
+    {
+        return $this->crops;
+    }
     public function addCrop(ImageCrop $crop): self
     {
         if (!$this->crops->contains($crop)) {

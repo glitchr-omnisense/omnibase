@@ -15,9 +15,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SlotCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; }
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
 
-    public function createEntity(string $entityFqcn) { return new $entityFqcn(""); }
+    public function createEntity(string $entityFqcn)
+    {
+        return new $entityFqcn("");
+    }
     public function configureFields(string $pageName, ...$args): iterable
     {
         yield DiscriminatorField::new()->setTextAlign(TextAlign::RIGHT);

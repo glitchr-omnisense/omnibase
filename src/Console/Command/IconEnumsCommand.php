@@ -16,7 +16,7 @@ class IconEnumsCommand extends Command
 {
     protected function configure(): void
     {
-        $this->addOption('enum',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific enum ?');
+        $this->addOption('enum', null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific enum ?');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -28,10 +28,13 @@ class IconEnumsCommand extends Command
             BaseBundle::getInstance()->getAllClasses("./src/Enum"),
         );
 
-        if($enums) $output->section()->writeln("Enum list: ".$enumRestriction);
-        foreach($enums as $enum) {
-
-            if(!str_starts_with($enum, $enumRestriction)) continue;
+        if ($enums) {
+            $output->section()->writeln("Enum list: ".$enumRestriction);
+        }
+        foreach ($enums as $enum) {
+            if (!str_starts_with($enum, $enumRestriction)) {
+                continue;
+            }
 
             $output->section()->writeln(" * <info>".$enum."</info>");
 
@@ -39,11 +42,11 @@ class IconEnumsCommand extends Command
             $permittedValues = $enum::getPermittedValues(false);
 
             $maxLength = 0;
-            foreach($permittedValues as $value)
+            foreach ($permittedValues as $value) {
                 $maxLength = max($maxLength, strlen($value));
+            }
 
-            foreach($permittedValues as $value) {
-
+            foreach ($permittedValues as $value) {
                 $space = str_repeat(" ", max($maxLength-strlen($value), 0));
                 $icons = is_array($iconize[$value]) ? $iconize[$value] : [$iconize[$value]];
                 $output->section()->writeln("\t<warning>".$value."</warning> ".$space.": [".implode(",", $icons ?? [])."]");

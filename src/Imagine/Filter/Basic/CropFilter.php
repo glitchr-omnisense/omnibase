@@ -21,8 +21,11 @@ class CropFilter implements FilterInterface
     protected float $width;
     /** @var float */
     protected float $height;
-    
-    public function __toString() { return "crop:".$this->getPosition().":".implode("x",$this->getXY()).":".implode("x",$this->getSize()); }
+
+    public function __toString()
+    {
+        return "crop:".$this->getPosition().":".implode("x", $this->getXY()).":".implode("x", $this->getSize());
+    }
 
     public function __construct(float $x = 0, float $y = 0, ?float $width = null, ?float $height = null, string $position = "lefttop")
     {
@@ -35,30 +38,41 @@ class CropFilter implements FilterInterface
 
     public function isNormalized(): bool
     {
-        if($this->x      > 1) return false;
-        if($this->y      > 1) return false;
-        if($this->width  > 1) return false;
-        if($this->height > 1) return false;
+        if ($this->x      > 1) {
+            return false;
+        }
+        if ($this->y      > 1) {
+            return false;
+        }
+        if ($this->width  > 1) {
+            return false;
+        }
+        if ($this->height > 1) {
+            return false;
+        }
 
         return true;
     }
 
-    public function getPosition(): string { return $this->position ?? "topleft"; }
+    public function getPosition(): string
+    {
+        return $this->position ?? "topleft";
+    }
     public function getSize(?ImageInterface $image = null): array
     {
-        if($this->isNormalized() && $image !== null)
+        if ($this->isNormalized() && $image !== null) {
             return [$image->getSize()->getWidth()*$this->width, $image->getSize()->getHeight()*$this->height];
+        }
 
         return [$this->width, $this->height];
     }
 
-    public function getXY(?ImageInterface $image = null)  : array
+    public function getXY(?ImageInterface $image = null): array
     {
         list($width, $height) = $this->getSize($image);
 
         $position = $this->getPosition();
         switch ($position) {
-
             case 'topleft':
                 $x0 = 0;
                 $y0 = 0;
@@ -108,23 +122,27 @@ class CropFilter implements FilterInterface
                 break;
         }
 
-        if($this->isNormalized() && $image !== null)
+        if ($this->isNormalized() && $image !== null) {
             return [$image->getSize()->getWidth()*$this->x, $x0, $image->getSize()->getHeight()*$this->y, $y0];
+        }
 
         return [$this->x, $x0, $this->y, $y0];
     }
 
     public function apply(ImageInterface $image): ImageInterface
     {
-        list($x,$x0, $y,$y0) = $this->getXY($image);
-        list($w,$h)          = $this->getSize($image);
+        list($x, $x0, $y, $y0) = $this->getXY($image);
+        list($w, $h)          = $this->getSize($image);
 
         $filter = new Crop(
             new Point((int) $x - $x0, (int) $y - $y0),
-            new Box  ((int) $w - $x0, (int) $h - $y0)
+            new Box((int) $w - $x0, (int) $h - $y0)
         );
 
-        try { return $filter->apply($image); }
-        catch (Exception $e) { return $image; }
+        try {
+            return $filter->apply($image);
+        } catch (Exception $e) {
+            return $image;
+        }
     }
 }

@@ -13,4 +13,6 @@ namespace Base\Notifier\Channel;
 
 use Symfony\Component\Notifier\Channel\EmailChannel;
 
-final class EmailPlusChannel extends EmailChannel { }
+final class EmailPlusChannel extends EmailChannel
+{
+}

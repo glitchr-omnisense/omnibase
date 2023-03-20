@@ -36,32 +36,34 @@ class LocalizerController extends AbstractController
      */
     public function Locale(Request $request, ReferrerInterface $referrer, ?string $_locale = null)
     {
-        if($_locale === null)
+        if ($_locale === null) {
             setcookie(LocaleSubscriber::__LOCALE_IDENTIFIER__, null);
+        }
 
         $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
         $referrerName = $this->router->getRouteName(strval($referrer));
-        $referrerParameters = array_filter($this->router->match(strval($referrer)), fn($a) => !str_starts_with($a, "_"), ARRAY_FILTER_USE_KEY);
+        $referrerParameters = array_filter($this->router->match(strval($referrer)), fn ($a) => !str_starts_with($a, "_"), ARRAY_FILTER_USE_KEY);
         $referrer->setUrl(null);
 
         $availableLocales = array_merge($this->localizer->getAvailableLocaleLangs(), $this->localizer->getAvailableLocales());
-        if(in_array($_locale, $availableLocales)) {
-
+        if (in_array($_locale, $availableLocales)) {
             setcookie('_locale', $_locale);
-            if(!$this->isGranted("IS_IMPERSONATOR")){
+            if (!$this->isGranted("IS_IMPERSONATOR")) {
                 $this->getUser()?->setLocale($this->localizer->getLocale($_locale));
                 $this->entityManager->flush();
             }
 
             $this->addFlash("info", $this->translator->trans("@controllers.locale_changeto.action", [$this->localizer->getLocaleLangName($_locale)]));
 
-            if(!str_starts_with($referrerName, "_switch_locale")) {
-
+            if (!str_starts_with($referrerName, "_switch_locale")) {
                 $referrer->setUrl(null);
                 $lang = $_locale ? ".".$this->localizer->getLocaleLang($_locale) : "";
 
-                try { return $this->redirect($this->router->generate($referrerName.$lang, $referrerParameters)); }
-                catch (RouteNotFoundException $e) { return $this->redirect($this->router->generate($referrerName, $referrerParameters)); }
+                try {
+                    return $this->redirect($this->router->generate($referrerName.$lang, $referrerParameters));
+                } catch (RouteNotFoundException $e) {
+                    return $this->redirect($this->router->generate($referrerName, $referrerParameters));
+                }
             }
         }
 
@@ -73,32 +75,34 @@ class LocalizerController extends AbstractController
      */
     public function Timezone(Request $request, ReferrerInterface $referrer, ?string $_locale = null)
     {
-        if($_locale === null)
+        if ($_locale === null) {
             setcookie(LocaleSubscriber::__LOCALE_IDENTIFIER__, null);
+        }
 
         $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
         $referrerName = $this->router->getRouteName(strval($referrer));
-        $referrerParameters = array_filter($this->router->match(strval($referrer)), fn($a) => !str_starts_with($a, "_"), ARRAY_FILTER_USE_KEY);
+        $referrerParameters = array_filter($this->router->match(strval($referrer)), fn ($a) => !str_starts_with($a, "_"), ARRAY_FILTER_USE_KEY);
         $referrer->setUrl(null);
 
         $availableLocales = array_merge($this->localizer->getAvailableLocaleLangs(), $this->localizer->getAvailableLocales());
-        if(in_array($_locale, $availableLocales)) {
-
+        if (in_array($_locale, $availableLocales)) {
             setcookie('_locale', $_locale);
-            if(!$this->isGranted("IS_IMPERSONATOR")){
+            if (!$this->isGranted("IS_IMPERSONATOR")) {
                 $this->getUser()?->setLocale($this->localizer->getLocale($_locale));
                 $this->entityManager->flush();
             }
 
             $this->addFlash("info", $this->translator->trans("@controllers.locale_changeto.action", [$this->localizer->getLocaleLangName($_locale)]));
 
-            if(!str_starts_with($referrerName, "_switch_timezone")) {
-
+            if (!str_starts_with($referrerName, "_switch_timezone")) {
                 $referrer->setUrl(null);
                 $lang = $_locale ? ".".$this->localizer->getLocaleLang($_locale) : "";
 
-                try { return $this->redirect($this->router->generate($referrerName.$lang, $referrerParameters)); }
-                catch (RouteNotFoundException $e) { return $this->redirect($this->router->generate($referrerName, $referrerParameters)); }
+                try {
+                    return $this->redirect($this->router->generate($referrerName.$lang, $referrerParameters));
+                } catch (RouteNotFoundException $e) {
+                    return $this->redirect($this->router->generate($referrerName, $referrerParameters));
+                }
             }
         }
 

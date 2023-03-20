@@ -1,4 +1,5 @@
 <?php
+
 namespace Base\Subscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -25,10 +26,8 @@ class FlashBagSubscriber implements EventSubscriberInterface
          */
         $session = $event->getRequest()->getSession();
         if ($response instanceof JsonResponse) {
-
             $flashMessages = $session->getFlashBag()->all();
             if (!empty($flashMessages)) {
-
                 $data = json_decode($response->getContent(), true);
                 $data['flashbag'] = $flashMessages;
 

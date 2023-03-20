@@ -34,20 +34,21 @@ class SearchController extends AbstractController
 
         $formattedData = null;
         if ($formSearch->isSubmitted() && $formSearch->isValid()) {
-
             $formattedData = clone $formSearch->getData();
             $formattedData->username = $formattedData->username;
         }
 
         $users = [];
-        if($formattedData) {
-
-            $users = array_map(fn($t) => $t->getTranslatable(), $this->userRepository->findByInsensitivePartialModel(
+        if ($formattedData) {
+            $users = array_map(
+                fn ($t) => $t->getTranslatable(),
+                $this->userRepository->findByInsensitivePartialModel(
                 ["username" => "%" . ($formattedData->username) . "%",],
-                ["translatable.state" => UserState::VERIFIED])->getResult()
+                ["translatable.state" => UserState::VERIFIED]
+            )->getResult()
             );
         }
-        
+
         return $this->render('client/user/search.html.twig', [
             "form" => $formSearch->createView(),
             "form_data" => $formattedData ?? new UserSearchModel(),

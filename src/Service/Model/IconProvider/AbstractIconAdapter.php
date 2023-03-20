@@ -23,16 +23,20 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
 
     public function warmUp(string $cacheDir): bool
     {
-        $this->contents = $this->getCache("/Contents", function() {
+        $this->contents = $this->getCache("/Contents", function () {
+            if (!file_exists($this->metadata)) {
+                return [];
+            }
 
-            if (!file_exists($this->metadata)) return [];
-            
-            if(str_ends_with($this->metadata, "yml"))
+            if (str_ends_with($this->metadata, "yml")) {
                 return Yaml::parse(file_get_contents($this->metadata));
-            if(str_ends_with($this->metadata, "yaml"))
+            }
+            if (str_ends_with($this->metadata, "yaml")) {
                 return Yaml::parse(file_get_contents($this->metadata));
-            if(str_ends_with($this->metadata, "json"))
+            }
+            if (str_ends_with($this->metadata, "json")) {
                 return json_decode(file_get_contents($this->metadata), true);
+            }
 
             return [];
         });
@@ -41,14 +45,29 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
     }
 
     protected $version;
-    public function getVersion(): string { return $this->version ?? "unk"; }
+    public function getVersion(): string
+    {
+        return $this->version ?? "unk";
+    }
 
     protected $contents = [];
-    public function getContents() { return $this->contents; }
+    public function getContents()
+    {
+        return $this->contents;
+    }
 
-    public function getMetadata() { return $this->metadata; }
-    public function getEntries() { return $this->contents ?? []; }
-    public function getEntry(string $value = null): string { return $this->contents[$value] ?? ""; }
+    public function getMetadata()
+    {
+        return $this->metadata;
+    }
+    public function getEntries()
+    {
+        return $this->contents ?? [];
+    }
+    public function getEntry(string $value = null): string
+    {
+        return $this->contents[$value] ?? "";
+    }
 
     public function iconify(IconizeInterface|string $icon, array $attributes = []): string
     {

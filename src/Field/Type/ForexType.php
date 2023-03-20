@@ -52,6 +52,12 @@ class ForexType extends SelectType implements SelectInterface
         return $id;
     }
 
-    public static function getHtml(string $id): ?string { return null; }
-    public static function getData(string $id): ?array { return []; }
+    public static function getHtml(string $id): ?string
+    {
+        return null;
+    }
+    public static function getData(string $id): ?array
+    {
+        return [];
+    }
 }

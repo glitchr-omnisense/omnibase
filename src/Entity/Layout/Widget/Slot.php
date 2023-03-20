@@ -21,10 +21,19 @@ use Base\Database\Annotation\Cache;
  */
 class Slot extends Widget implements TranslatableInterface, IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-th"]; }
+    public function __iconize(): ?array
+    {
+        return null;
+    }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-th"];
+    }
 
-    public function __toString() { return $this->getLabel() ?? $this->getPath(); }
+    public function __toString()
+    {
+        return $this->getLabel() ?? $this->getPath();
+    }
     public function __construct(string $path, ?string $label = null, ?string $help = null)
     {
         parent::__construct();
@@ -40,7 +49,10 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
      * @Slugify(reference="translations.title", separator=".", keep={"_"})
      */
     protected $path;
-    public function getPath(): string { return $this->path; }
+    public function getPath(): string
+    {
+        return $this->path;
+    }
     public function setPath(string $path): self
     {
         $this->path = $path;
@@ -52,7 +64,10 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
      * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $widget;
-    public function getWidget(): ?Widget { return $this->widget; }
+    public function getWidget(): ?Widget
+    {
+        return $this->widget;
+    }
     public function setWidget(?Widget $widget): self
     {
         $this->widget = $widget;

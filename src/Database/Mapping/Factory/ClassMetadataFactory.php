@@ -71,12 +71,15 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * @return void
      */
-    public function setEntityManager(EntityManagerInterface $em) { $this->em = $em; }
+    public function setEntityManager(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
 
     /**
      * {@inheritDoc}
      */
-    protected function initialize() : void
+    protected function initialize(): void
     {
         $this->driver      = $this->em->getConfiguration()->getMetadataDriverImpl();
         $this->evm         = $this->em->getEventManager();
@@ -86,10 +89,11 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function onNotFoundMetadata($className) : ?ClassMetadata
+    protected function onNotFoundMetadata($className): ?ClassMetadata
     {
-        if (! $this->evm->hasListeners(Events::onClassMetadataNotFound))
+        if (! $this->evm->hasListeners(Events::onClassMetadataNotFound)) {
             return null;
+        }
 
         $eventArgs = new OnClassMetadataNotFoundEventArgs($className, $this->em);
 
@@ -111,7 +115,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function doLoadMetadata($class, $parent, $rootEntityFound, array $nonSuperclassParents) : void
+    protected function doLoadMetadata($class, $parent, $rootEntityFound, array $nonSuperclassParents): void
     {
         /** @var ClassMetadata $class */
         /** @var ClassMetadata $parent */
@@ -190,7 +194,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         }
 
         if ($parent) {
-
             if ($parent->isInheritanceTypeSingleTable()) {
                 $class->setPrimaryTable($parent->table);
             }
@@ -300,7 +303,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function newClassMetadataInstance($className) : ClassMetadata
+    protected function newClassMetadataInstance($className): ClassMetadata
     {
         return new ClassMetadata($className, $this->em->getConfiguration()->getNamingStrategy());
     }
@@ -326,10 +329,10 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         $duplicates = [];
         foreach ($allClasses as $subClass) {
             if (is_subclass_of($subClass, $fqcn)) {
-
                 $shortName = $this->getShortName($subClass);
-                if (isset($map[$shortName]))
+                if (isset($map[$shortName])) {
                     $duplicates[] = $shortName;
+                }
 
                 $map[$shortName] = $subClass;
             }
@@ -521,7 +524,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * Adds inherited sql result set mappings to the subclass mapping.
      */
-    private function addInheritedSqlResultSetMappings(ClassMetadata $subClass, ClassMetadata $parentClass) :void
+    private function addInheritedSqlResultSetMappings(ClassMetadata $subClass, ClassMetadata $parentClass): void
     {
         foreach ($parentClass->sqlResultSetMappings as $name => $mapping) {
             if (! isset($subClass->sqlResultSetMappings[$name])) {
@@ -713,7 +716,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function wakeupReflection(ClassMetadataInterface $classMetadata, ReflectionService $reflService) : void
+    protected function wakeupReflection(ClassMetadataInterface $classMetadata, ReflectionService $reflService): void
     {
         assert($classMetadata instanceof ClassMetadata);
         $classMetadata->wakeupReflection($reflService);
@@ -722,7 +725,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function initializeReflection(ClassMetadataInterface $classMetadata, ReflectionService $reflService) : void
+    protected function initializeReflection(ClassMetadataInterface $classMetadata, ReflectionService $reflService): void
     {
         assert($classMetadata instanceof ClassMetadata);
         $classMetadata->initializeReflection($reflService);
@@ -731,7 +734,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function getFqcnFromAlias($namespaceAlias, $simpleClassName) : string
+    protected function getFqcnFromAlias($namespaceAlias, $simpleClassName): string
     {
         /** @psalm-var class-string */
         return $this->em->getConfiguration()->getEntityNamespace($namespaceAlias) . '\\' . $simpleClassName;
@@ -740,7 +743,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function getDriver() : MappingDriver
+    protected function getDriver(): MappingDriver
     {
         return $this->driver;
     }
@@ -748,12 +751,13 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    public function isEntity($class) : bool
+    public function isEntity($class): bool
     {
-        if ($class instanceof ClassMetadataInterface)
+        if ($class instanceof ClassMetadataInterface) {
             return isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
-        else if (is_object($class))
+        } elseif (is_object($class)) {
             $class = ($class instanceof Proxy) ? get_parent_class($class) : get_class($class);
+        }
 
         return ! $this->em->getMetadataFactory()->isTransient($class);
     }
@@ -774,15 +778,17 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function loadMetadata($name) : array
+    protected function loadMetadata($name): array
     {
         $loadedMetadata = parent::loadMetadata($name);
 
-        foreach($loadedMetadata as $classMetadata)
+        foreach ($loadedMetadata as $classMetadata) {
             $classMetadataList[] = $this->getMetadataFor($classMetadata);
+        }
 
-        foreach($classMetadataList as $classMetadata)
+        foreach ($classMetadataList as $classMetadata) {
             $this->resolveDiscriminatorValue($classMetadata);
+        }
 
         return $loadedMetadata;
     }
@@ -800,49 +806,50 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     {
         //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
         if (is_subclass_of($classMetadata->getName(), TranslationInterface::class, true)) {
-
-            if(!str_ends_with($classMetadata->getName(), NamingStrategy::TABLE_I18N_SUFFIX))
+            if (!str_ends_with($classMetadata->getName(), NamingStrategy::TABLE_I18N_SUFFIX)) {
                 throw new \Exception("Invalid class name for \"".$classMetadata->getName()."\"");
+            }
 
             $translatableClass = $classMetadata->getName()::getTranslatableEntityClass();
             $translatableMetadata = $this->getMetadataFor($translatableClass);
 
             //
             // Handle translation discriminator map
-            if(!$classMetadata->discriminatorMap) {
-                $classMetadata->discriminatorMap = array_filter(array_map(function($className) {
-
+            if (!$classMetadata->discriminatorMap) {
+                $classMetadata->discriminatorMap = array_filter(array_map(function ($className) {
                     return (is_subclass_of($className, TranslatableInterface::class, true))
                         ? $className::getTranslationEntityClass(false, false)
                         : null;
-
-                }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
+                }, $translatableMetadata->discriminatorMap), fn ($c) => $c !== null);
             }
 
             //
             // Handle translation subclasses
             $subClasses = [];
-            foreach($translatableMetadata->subClasses as $translatableSubclass){
-
+            foreach ($translatableMetadata->subClasses as $translatableSubclass) {
                 $translationClass = $translatableSubclass::getTranslationEntityClass();
-                if($translationClass !== null && $translationClass != $classMetadata->getName()) $subClasses[] = $translationClass;
+                if ($translationClass !== null && $translationClass != $classMetadata->getName()) {
+                    $subClasses[] = $translationClass;
+                }
             }
 
             // Apply values..
             $classMetadata->subClasses = array_unique($subClasses);
             $classMetadata->inheritanceType     = $translatableMetadata->inheritanceType;
             $classMetadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
-            if($classMetadata->discriminatorMap) {
-
-                if(!in_array($classMetadata->getName(), $classMetadata->discriminatorMap))
+            if ($classMetadata->discriminatorMap) {
+                if (!in_array($classMetadata->getName(), $classMetadata->discriminatorMap)) {
                     throw new MissingDiscriminatorMapException(
                         "Discriminator map missing for \"".$classMetadata->getName().
                         "\". Did you forgot to implement \"".TranslatableInterface::class.
-                        "\" in \"".$classMetadata->getName()::getTranslatableEntityClass()."\".");
+                        "\" in \"".$classMetadata->getName()::getTranslatableEntityClass()."\"."
+                    );
+                }
 
                 $classMetadata->discriminatorValue  = array_flip($translatableMetadata->discriminatorMap)[$translatableMetadata->getName()] ?? null;
-                if(!$classMetadata->discriminatorValue)
+                if (!$classMetadata->discriminatorValue) {
                     throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$classMetadata->getName()."\".");
+                }
             }
         }
 

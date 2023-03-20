@@ -18,9 +18,21 @@ use Base\Database\Annotation\Cache;
 
 class TextareaAdapter extends AbstractAdapter
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-align-left"]; }
+    public static function __iconizeStatic(): ?array
+    {
+        return ["fas fa-align-left"];
+    }
 
-    public static function getType(): string { return TextareaType::class; }
-    public function getOptions(): array { return []; }
-    public function resolve(mixed $value): mixed { return $value; }
+    public static function getType(): string
+    {
+        return TextareaType::class;
+    }
+    public function getOptions(): array
+    {
+        return [];
+    }
+    public function resolve(mixed $value): mixed
+    {
+        return $value;
+    }
 }

@@ -32,8 +32,14 @@ class AssetPackage implements PackageInterface
         );
     }
 
-    public function getBasePath(): string { return $this->package->getBasePath(); }
-    public function stripPrefix(string $path): string { return str_lstrip($path, $this->package->getBasePath()); }
+    public function getBasePath(): string
+    {
+        return $this->package->getBasePath();
+    }
+    public function stripPrefix(string $path): string
+    {
+        return str_lstrip($path, $this->package->getBasePath());
+    }
 
     public function getUrl(string $assetPath): string
     {

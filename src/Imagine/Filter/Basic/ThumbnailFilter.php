@@ -26,22 +26,38 @@ class ThumbnailFilter implements FilterInterface
         $this->filter = $filter;
     }
 
-    public function __toString() { return ($this->width ?? "auto")."x".($this->height ?? "auto"); }
+    public function __toString()
+    {
+        return ($this->width ?? "auto")."x".($this->height ?? "auto");
+    }
     public function apply(ImageInterface $image): ImageInterface
     {
         $width  = $image->getSize()->getWidth();
         $height = $image->getSize()->getHeight();
 
         $ratio  = $width/$height;
-        if($this->height === null) $this->height = $ratio*($this->width  ?? $width );
-        if($this->width  === null) $this->width  = $ratio*($this->height ?? $height);
+        if ($this->height === null) {
+            $this->height = $ratio*($this->width  ?? $width);
+        }
+        if ($this->width  === null) {
+            $this->width  = $ratio*($this->height ?? $height);
+        }
 
         return $image->thumbnail(new Box($this->width, $this->height), $this->mode, $this->filter);
     }
 
-    public function getWidth() { return $this->width; }
-    public function getHeight() { return $this->height; }
-    public function getMode() { return $this->mode; }
+    public function getWidth()
+    {
+        return $this->width;
+    }
+    public function getHeight()
+    {
+        return $this->height;
+    }
+    public function getMode()
+    {
+        return $this->mode;
+    }
 
     public function resize(BoxInterface $imageSize)
     {
@@ -65,13 +81,12 @@ class ThumbnailFilter implements FilterInterface
         );
 
         switch ($mode) {
-
             case ImageInterface::THUMBNAIL_OUTBOUND:
                 // Crop the image so that it fits the wanted size
                 $ratio = max($ratios);
                 if ($imageSize->contains($size)) {
                     // Downscale the image
-                   return $size;
+                    return $size;
                 }
 
                 if ($allowUpscale) {

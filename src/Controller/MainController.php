@@ -23,8 +23,8 @@ class MainController extends AbstractController
 {
     protected $service;
     protected $settingBag;
-    public function __construct(BaseService $service, SettingBag $settingBag) {
-
+    public function __construct(BaseService $service, SettingBag $settingBag)
+    {
         $this->service = $service;
         $this->settingBag = $settingBag;
     }
@@ -45,5 +45,4 @@ class MainController extends AbstractController
         include \dirname(__DIR__).'/Resources/views/welcome.html.php';
         return new Response(ob_get_clean(), Response::HTTP_NOT_FOUND);
     }
-
 }

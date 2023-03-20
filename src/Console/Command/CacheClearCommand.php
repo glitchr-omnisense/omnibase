@@ -42,20 +42,29 @@ class CacheClearCommand extends Command
      * @var Flysystem
      */
     protected $flysystem;
-    
+
     /**
      * @var Notifier
      */
     protected $notifier;
-    
+
     /**
      * @var Router
      */
     protected $router;
-    
+
     public function __construct(
-        LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, 
-        SymfonyCacheClearCommand $cacheClearCommand, Flysystem $flysystem, Notifier $notifier, RouterInterface $router, string $projectDir, string $cacheDir)
+        LocalizerInterface $localizer,
+        TranslatorInterface $translator,
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $parameterBag,
+        SymfonyCacheClearCommand $cacheClearCommand,
+        Flysystem $flysystem,
+        Notifier $notifier,
+        RouterInterface $router,
+        string $projectDir,
+        string $cacheDir
+    )
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
@@ -77,7 +86,8 @@ class CacheClearCommand extends Command
                 new InputOption('no-warmup', '', InputOption::VALUE_NONE, 'Do not warm up the cache'),
                 new InputOption('no-optional-warmers', '', InputOption::VALUE_NONE, 'Skip optional cache warmers (faster)'),
             ])
-            ->setHelp(<<<'EOF'
+            ->setHelp(
+                <<<'EOF'
 The <info>%command.name%</info> command clears and warms up the application cache for a given environment
 and debug mode:
 
@@ -93,39 +103,43 @@ EOF
         $io = new SymfonyStyle($input, $output);
         $noExtension = $input->getOption('no-extension') ?? true;
 
-        if(!$noExtension) {
-
+        if (!$noExtension) {
             $this->phpConfigCheck($io);
             $this->diskAndMemoryCheck($io);
             $this->customFeatureWarnings($io);
             $this->checkCache($io);
-            
+
             $this->testFile = $this->cacheDir."/.test";
             $this->testFileExists = file_exists($this->testFile);
         }
 
         $noWarmup          = $input->getOption('no-warmup');
         $noOptionalWarmers = $input->getOption('no-optional-warmers') || $noWarmup;
-        if (!$noOptionalWarmers) $io->write("\n // <info>All</info> cache warmers requested.", true);
-        else $io->write("\n // Optional cache warmers disabled.", true);
+        if (!$noOptionalWarmers) {
+            $io->write("\n // <info>All</info> cache warmers requested.", true);
+        } else {
+            $io->write("\n // Optional cache warmers disabled.", true);
+        }
 
         $this->cacheClearCommand->setApplication($this->getApplication());
         $ret = $this->cacheClearCommand->execute($input, $output);
-     
-        if(!$noExtension) {
 
-            $this->webpackCheck($io);            
+        if (!$noExtension) {
+            $this->webpackCheck($io);
             $this->doubleCacheClearCheck($io);
             $this->generateSymlinks($io);
             $this->technicalSupportCheck($io);
         }
 
-        if($noWarmup) $io->warning("Warm up is disabled.", true);
-        else if ($noOptionalWarmers) {
-
+        if ($noWarmup) {
+            $io->warning("Warm up is disabled.", true);
+        } elseif ($noOptionalWarmers) {
             $environment = $this->parameterBag->get("kernel.environment");
-            if (str_starts_with($environment, "prod")) $io->warning("Optional warmers disabled !");
-            else $io->note("Optional warmers disabled !");
+            if (str_starts_with($environment, "prod")) {
+                $io->warning("Optional warmers disabled !");
+            } else {
+                $io->note("Optional warmers disabled !");
+            }
         }
 
         return $ret;

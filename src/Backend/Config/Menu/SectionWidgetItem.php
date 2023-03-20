@@ -9,21 +9,27 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
 
 final class SectionWidgetItem implements MenuItemInterface
 {
-    protected $width;
-    protected $column;
     use MenuItemTrait {
         setLinkRel as private;
         setLinkTarget as private;
     }
+    protected $width;
+    protected $column;
 
-    public function getWidth() { return $this->width; }
+    public function getWidth()
+    {
+        return $this->width;
+    }
     public function setWidth(int $width): self
     {
         $this->width = $width;
         return $this;
     }
 
-    public function getColumn() { return $this->column ?? $this->width; }
+    public function getColumn()
+    {
+        return $this->column ?? $this->width;
+    }
     public function setColumn(int $column): self
     {
         $this->column = $column;

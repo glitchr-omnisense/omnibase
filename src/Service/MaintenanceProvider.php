@@ -43,18 +43,19 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     protected bool $ready = false;
     protected function parseLockPath(): self
     {
-        if($this->lockPath) return $this;
+        if ($this->lockPath) {
+            return $this;
+        }
         $this->lockPath = $this->parameterBag->get("base.maintenance.lockpath");
 
-        if ( $this->lockPath && ($f = @fopen($this->lockPath, "r")) ) {
-
+        if ($this->lockPath && ($f = @fopen($this->lockPath, "r"))) {
             $downtime = trim(fgets($f, 4096));
-            if(!feof($f)) $uptime = trim(fgets($f, 4096));
+            if (!feof($f)) {
+                $uptime = trim(fgets($f, 4096));
+            }
 
             fclose($f);
-
         } else {
-
             $downtime = $this->settingBag->get("base.settings.maintenance.downtime")["_self"] ?? null;
             $uptime   = $this->settingBag->get("base.settings.maintenance.uptime")["_self"] ?? null;
         }
@@ -63,29 +64,50 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         $uptime = $uptime ? $uptime->getTimestamp() : 0;
 
         $this->remainingTime = $uptime ? $uptime - time() : 0;
-        if ($downtime-time() > 0 || $downtime < 1) $downtime = 0;
-        if (  $uptime-time() < 0 || $uptime < 1) $uptime = 0;
+        if ($downtime-time() > 0 || $downtime < 1) {
+            $downtime = 0;
+        }
+        if ($uptime-time() < 0 || $uptime < 1) {
+            $uptime = 0;
+        }
 
         $this->percentage = -1;
-        if( $downtime && ($uptime-$downtime > 0) && ($uptime-time() > 0) )
+        if ($downtime && ($uptime-$downtime > 0) && ($uptime-time() > 0)) {
             $this->percentage = round(100 * (time()-$downtime)/($uptime-$downtime));
+        }
 
         $this->uptime   = $uptime;
         $this->downtime = $downtime;
         return $this;
     }
 
-    public function getRemainingTime():int { return $this->parseLockPath()->remainingTime; }
-    public function getPercentage()   :int { return $this->parseLockPath()->percentage; }
-    public function getDowntime()     :int { return $this->parseLockPath()->downtime; }
-    public function getUptime()       :int { return $this->parseLockPath()->uptime; }
+    public function getRemainingTime(): int
+    {
+        return $this->parseLockPath()->remainingTime;
+    }
+    public function getPercentage(): int
+    {
+        return $this->parseLockPath()->percentage;
+    }
+    public function getDowntime(): int
+    {
+        return $this->parseLockPath()->downtime;
+    }
+    public function getUptime(): int
+    {
+        return $this->parseLockPath()->uptime;
+    }
 
-    public function isUnderMaintenance():bool
+    public function isUnderMaintenance(): bool
     {
         $this->parseLockPath();
 
-        if(filter_var($this->settingBag->getScalar("base.settings.maintenance", $this->localizer->getLocale()))) return true;
-        if($this->lockPath && file_exists($this->lockPath)) return true;
+        if (filter_var($this->settingBag->getScalar("base.settings.maintenance", $this->localizer->getLocale()))) {
+            return true;
+        }
+        if ($this->lockPath && file_exists($this->lockPath)) {
+            return true;
+        }
 
         return false;
     }
@@ -95,30 +117,34 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         $this->parseLockPath();
 
         $redirectOnDeny = $this->parameterBag->get("base.site.maintenance.redirect_on_deny") ?? "security_maintenance";
-        if(!$this->isUnderMaintenance()) {
-
+        if (!$this->isUnderMaintenance()) {
             $homepageRoute = $this->parameterBag->get("base.site.homepage");
-            if ($event && $redirectOnDeny == $this->router->getRouteName())
+            if ($event && $redirectOnDeny == $this->router->getRouteName()) {
                 $event->setResponse($this->router->redirect($homepageRoute, [], 302));
+            }
 
             return false;
-
-        } else if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
-
+        } elseif ($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
             $notification = new Notification("maintenance.banner");
             $notification->send("warning");
             return false;
         }
 
-        if ($this->router->getRouteName() == $redirectOnDeny)
+        if ($this->router->getRouteName() == $redirectOnDeny) {
             return true;
-        if ($this->authorizationChecker->isGranted("MAINTENANCE_ACCESS"))
+        }
+        if ($this->authorizationChecker->isGranted("MAINTENANCE_ACCESS")) {
             return false;
+        }
 
-        if($event) $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
+        if ($event) {
+            $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
+        }
 
         $token = $this->tokenStorage->getToken();
-        if($token && $token->getUser()) $token->getUser()->Logout();
+        if ($token && $token->getUser()) {
+            $token->getUser()->Logout();
+        }
 
         return true;
     }

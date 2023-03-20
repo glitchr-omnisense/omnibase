@@ -35,8 +35,9 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
         $label = $this->buildLabelOption($field, $translationDomain, $context->getCrud()->getCurrentPage(), $entityDto);
         $field->setLabel($label);
 
-        if($entityDto->getInstance() && $this->propertyAccessor->isReadable($entityDto->getInstance(), $field->getProperty()))
+        if ($entityDto->getInstance() && $this->propertyAccessor->isReadable($entityDto->getInstance(), $field->getProperty())) {
             parent::configure($field, $entityDto, $context);
+        }
     }
 
     /**
@@ -86,8 +87,12 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
 
     protected function robotizeString(EntityDto $entityDto, string $property): ?string
     {
-        if(!isset($entityDto)) return null;
-        if(!$this->translator->transEntityExists($entityDto->getFqcn(), $property)) return null;
+        if (!isset($entityDto)) {
+            return null;
+        }
+        if (!$this->translator->transEntityExists($entityDto->getFqcn(), $property)) {
+            return null;
+        }
 
         return $this->translator->transEntity($entityDto->getFqcn(), $property);
     }

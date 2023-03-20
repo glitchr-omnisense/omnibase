@@ -6,7 +6,10 @@ use Base\Cache\Abstract\AbstractLocalCache;
 
 final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterface
 {
-    public function warmUp(string $cacheDir): array { return []; }
+    public function warmUp(string $cacheDir): array
+    {
+        return [];
+    }
 
     //
     // MEM Simple cache
@@ -30,9 +33,18 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
     //
     // Adapter to PSR Simple Cache Interface
     //
-    public function get(string $key, mixed $default = null): mixed { return $this->getCache(); }
-    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool { return $this->setCache($key, $value, $ttl); }
-    public function delete(string $key): bool { return $this->deleteCache($key); }
+    public function get(string $key, mixed $default = null): mixed
+    {
+        return $this->getCache();
+    }
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
+    {
+        return $this->setCache($key, $value, $ttl);
+    }
+    public function delete(string $key): bool
+    {
+        return $this->deleteCache($key);
+    }
 
     public function clear(): bool
     {
@@ -42,8 +54,9 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         $multiple = [];
-        foreach($keys as $key)
+        foreach ($keys as $key) {
             $multiple[$key] = $this->getCache($key);
+        }
 
         return $multiple;
     }
@@ -51,8 +64,9 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
     public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
     {
         $ret = true;
-        foreach($keys as $key)
+        foreach ($keys as $key) {
             $ret &= $this->delete($key);
+        }
 
         return $ret;
     }
@@ -60,11 +74,15 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
     public function deleteMultiple(iterable $keys): bool
     {
         $ret = true;
-        foreach($keys as $key)
+        foreach ($keys as $key) {
             $ret &= $this->delete($key);
+        }
 
         return $ret;
     }
 
-    public function has(string $key): bool { return $this->hasCache($key); }
+    public function has(string $key): bool
+    {
+        return $this->hasCache($key);
+    }
 }

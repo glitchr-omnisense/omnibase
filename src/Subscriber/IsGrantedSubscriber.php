@@ -38,10 +38,12 @@ class IsGrantedSubscriber implements EventSubscriberInterface
         $class  = $array[0] ?? null;
         $method = $array[1] ?? null;
 
-        if(!class_exists($class)) return;
+        if (!class_exists($class)) {
+            return;
+        }
 
         $configurations = array_merge(
-            $this->annotationReader->getClassAnnotations ($class, IsGranted::class),
+            $this->annotationReader->getClassAnnotations($class, IsGranted::class),
             $this->annotationReader->getMethodAnnotations($class, IsGranted::class)[$method] ?? []
         );
 
@@ -51,7 +53,6 @@ class IsGrantedSubscriber implements EventSubscriberInterface
 
         $arguments = $request->attributes->get("_route_parameters");
         foreach ($configurations as $configuration) {
-
             $subjectRef = $configuration->getSubject();
             $subject = null;
 
