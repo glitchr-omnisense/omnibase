@@ -2,26 +2,26 @@
 
 namespace Base\Service;
 
-use BackupManager\Compressors\CompressorProvider;
-use BackupManager\Compressors\GzipCompressor;
-use BackupManager\Compressors\NullCompressor;
-use BackupManager\Config\Config;
-use BackupManager\Databases\Database;
-use BackupManager\Databases\DatabaseProvider;
-use BackupManager\Databases\MysqlDatabase;
-use BackupManager\Databases\PostgresqlDatabase;
+use Backup\Manager\Compressors\CompressorProvider;
+use Backup\Manager\Compressors\GzipCompressor;
+use Backup\Manager\Compressors\NullCompressor;
+use Backup\Manager\Config\Config;
+use Backup\Manager\Databases\Database;
+use Backup\Manager\Databases\DatabaseProvider;
+use Backup\Manager\Databases\MysqlDatabase;
+use Backup\Manager\Databases\PostgresqlDatabase;
 
-use BackupManager\Filesystems\Awss3Filesystem;
-use BackupManager\Filesystems\Destination;
-use BackupManager\Filesystems\DropboxFilesystem;
-use BackupManager\Filesystems\FilesystemProvider;
-use BackupManager\Filesystems\FtpFilesystem;
-use BackupManager\Filesystems\GcsFilesystem;
-use BackupManager\Filesystems\LocalFilesystem;
-use BackupManager\Filesystems\RackspaceFilesystem;
-use BackupManager\Filesystems\SftpFilesystem;
-use BackupManager\Filesystems\WebdavFilesystem;
-use BackupManager\Manager as BackupManager;
+use Backup\Manager\Filesystems\Awss3Filesystem;
+use Backup\Manager\Filesystems\Destination;
+use Backup\Manager\Filesystems\DropboxFilesystem;
+use Backup\Manager\Filesystems\FilesystemProvider;
+use Backup\Manager\Filesystems\FtpFilesystem;
+use Backup\Manager\Filesystems\GcsFilesystem;
+use Backup\Manager\Filesystems\LocalFilesystem;
+use Backup\Manager\Filesystems\RackspaceFilesystem;
+use Backup\Manager\Filesystems\SftpFilesystem;
+use Backup\Manager\Filesystems\WebdavFilesystem;
+use Backup\Manager\Manager as BackupManager;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
