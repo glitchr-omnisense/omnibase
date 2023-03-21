@@ -28,9 +28,11 @@ class FlashBagSubscriber implements EventSubscriberInterface
         if ($response instanceof JsonResponse) {
             $flashMessages = $session->getFlashBag()->all();
             if (!empty($flashMessages)) {
-                $data = json_decode($response->getContent(), true);
-                $data['flashbag'] = $flashMessages;
 
+                $data = json_decode($response->getContent(), true);
+                if(is_array($data)) $data = ["response" => $data];
+
+                $data['flashbag'] = $flashMessages;
                 $response->setData($data);
             }
         }
