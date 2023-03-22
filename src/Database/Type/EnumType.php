@@ -3,6 +3,7 @@
 namespace Base\Database\Type;
 
 use ArrayAccess;
+use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\SelectInterface;
 use Base\Service\Translator;
@@ -43,6 +44,17 @@ abstract class EnumType extends Type implements SelectInterface
 
         self::$icons[static::class] = $icons;
         return $icons ?? [];
+    }
+
+    public static function getColor(string $id): ?string
+    {
+        if(is_instanceof(static::class, ColorizeInterface::class)) {
+
+            $colors = static::__colorizeStatic()[$id] ?? [];
+            return $colors ? first($colors) : null;
+        }
+
+        return null;
     }
 
     public static function getIcon(string $id, int $index = -1): ?string

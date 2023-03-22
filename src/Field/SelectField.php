@@ -34,6 +34,7 @@ class SelectField implements FieldInterface
 
     public const OPTION_RENDER_FORMAT   = "renderFormat";
     public const OPTION_SHOW_FIRST      = 'showFirst';
+    public const OPTION_USE_COLOR      = 'useColor';
     public const OPTION_SHOW            = 'show';
 
     public const NO_SHOW        = 0;
@@ -56,6 +57,12 @@ class SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count")
             ->setTextAlign(TextAlign::CENTER)
             ->addCssClass('field-select');
+    }
+
+    public function useColor(bool $useColor = true)
+    {
+        $this->setCustomOption(self::OPTION_USE_COLOR, $useColor);
+        return $this;
     }
 
     public function useHtml(bool $useHtml = true)

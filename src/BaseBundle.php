@@ -5,6 +5,7 @@ namespace Base;
 $_SERVER["APP_TIMER"] = microtime(true);
 include_once("Functions.php");
 
+use DoctrineExtensions\Query\Mysql\Field;
 use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
 use App\Entity\User;
 use Base\Database\Filter\TrashFilter;
@@ -151,6 +152,7 @@ class BaseBundle extends Bundle
         $this->boot = true;
     }
 
+
     protected static array $dumpEnabled = [];
     public static function enableDump(string $scope)
     {
@@ -218,6 +220,11 @@ class BaseBundle extends Bundle
             ->addFilter("vault_filter", VaultFilter::class);
         $entityManagerConfig
             ->addCustomNumericFunction("rand", \Base\Database\Function\Rand::class);
+
+        if (class_exists(Field::class)) {
+            $entityManagerConfig
+                ->addCustomNumericFunction("FIELD", Field::class);
+        }
 
         if (class_exists(DqlFunctions\JsonExtract::class)) {
             $entityManagerConfig

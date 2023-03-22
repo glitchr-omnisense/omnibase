@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 interface FileServiceInterface
 {
+    public function getExtension(null|string|array $fileOrMimetypeOrArray): ?string;
     public function getExtensions(null|string|array $fileOrMimetypeOrArray): null|string|array;
     public function getMimeType(null|string|array $fileOrArray): null|string|array;
 

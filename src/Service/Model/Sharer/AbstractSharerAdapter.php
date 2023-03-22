@@ -29,13 +29,13 @@ abstract class AbstractSharerAdapter implements SharerAdapterInterface, IconizeI
     public function generate(array $options, ?string $template = null): string
     {
         $search  = array_map(fn ($e) => "{".$e."}", array_keys($options));
-        $replace = array_values($options);
+        $replace = array_map(fn ($o) => urlencode($o), array_values($options));
 
         return $this->twig->render(
             $template ?? $this->getTemplate(),
             array_merge($options, [
                 "adapter"    => $this,
-                "sharer"     => str_replace($search, $replace, $this->getUrl())
+                "sharer"     => preg_replace("/\{[^\{\}]+\}/", "", str_replace($search, $replace, $this->getUrl()))
             ])
         );
     }

@@ -48,7 +48,6 @@ class Sharer
         }
 
         $options["url"] = $url instanceof LinkableInterface ? $url->__toLink([], UrlGeneratorInterface::ABSOLUTE_URL) : $url;
-
         return $adapter->generate($options, $template);
     }
 }

@@ -62,6 +62,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                     $replace = array_values($parse);
 
                     foreach ($routeParameters as $key => &$routeParameter) {
+
                         $routeParameter = $routeParameter ? str_replace($search, $replace, $routeParameter) : $routeParameter;
                         if ($key == "host") {
                             $routeParameter = str_lstrip($routeParameter, "www.");
@@ -75,6 +76,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // Lookup for lang in current group
         $e = null;
         $routeParameters = array_filter($routeParameters, fn ($p) => $p !== null);
+
         if (!str_ends_with($routeName, ".".$this->getRouter()->getLocaleLang())) {
             try {
                 return sanitize_url(parent::generate($routeName.".".$this->getRouter()->getLocaleLang(), $routeParameters, $referenceType));
@@ -148,13 +150,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         if (str_starts_with($routeName, "_") || !$this->getRouter()->useAdvancedFeatures()) {
             $routeParameters = $this->resolveParameters($routeParameters);
-            try {
-                return parent::generate($routeName, $routeParameters, $referenceType);
-            } catch (Exception $e) {
-                throw $e;
-            }
+            try { return parent::generate($routeName, $routeParameters, $referenceType); }
+            catch (Exception $e) { throw $e; }
         }
-
 
         //
         // Extract locale from route name if found
@@ -166,17 +164,16 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         }
 
         // Priority to route parameter locale
-        if (array_key_exists("_locale", $routeParameters)) {
-            $locale = $this->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
-        }
-
         $routeParameters = $this->resolveParameters($routeParameters);
 
         // Check whether the route is already cached
         $hash = $this->getRouter()->getRouteHash($routeName, $routeParameters, $referenceType);
         if (array_key_exists($hash, $this->cachedRoutes)) {
+
             $cachedRoute = $this->cachedRoutes[$hash];
-            return $this->resolveUrl($cachedRoute["_name"], $routeParameters, $referenceType);
+            $locale = array_key_exists("_locale", $routeParameters) ? $this->getLocalizer()->getLocaleLang($routeParameters["_locale"]) : $this->getLocalizer()->getLocaleLang();
+            try { return $this->resolveUrl($cachedRoute["_name"].($locale ? ".".$locale : ""), $routeParameters, $referenceType); }
+            catch(\Exception $exception) { return $this->resolveUrl($cachedRoute["_name"], $routeParameters, $referenceType); }
         }
 
         $routeGroups  = $this->getRouter()->getRouteGroups($routeName);

@@ -78,6 +78,11 @@ class FileService implements FileServiceInterface
         return $this->publicDir;
     }
 
+    public function getExtension(null|string|array $fileOrMimetypeOrArray): ?string
+    {
+        return first($this->getExtensions($fileOrMimetypeOrArray));
+    }
+
     public function getExtensions(null|string|array $fileOrMimetypeOrArray): array
     {
         if (!$fileOrMimetypeOrArray) {

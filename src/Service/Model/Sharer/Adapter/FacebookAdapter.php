@@ -12,7 +12,7 @@ class FacebookAdapter extends AbstractSharerAdapter
     }
     public function getUrl(): string
     {
-        return "https://www.facebook.com/sharer/sharer.php?quote={text}&u={url}";
+        return "https://www.facebook.com/sharer/sharer.php?quote={quote}&u={url}";
     }
     public static function __iconizeStatic(): ?array
     {

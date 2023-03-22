@@ -722,35 +722,55 @@ namespace {
     define("SHORTEN_FRONT", -1); // [..] dolor sit amet
     define("SHORTEN_MIDDLE", 0); // Lorem ipsum [..] amet
     define("SHORTEN_BACK", 1); // Lorem ipsum dolor [..]
-    function str_shorten(?string $str, int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): ?string
+    define("SHORTEN_BACK_SHRINK", 2); // Lorem ipsum dolor [..]
+    define("SHORTEN_BACK_EXTEND", 3); // Lorem ipsum dolor [..]
+    function str_shorten(?string $haystack, int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): ?string
     {
-        $str = trim(strip_tags($str));
-        if (!$str) {
-            return $str;
+        $haystack = trim(strip_tags($haystack));
+        if (!$haystack) {
+            return $haystack;
         }
         if ($length == 0) {
             return "";
         }
 
-        $nChr = strlen($str);
+        $nChr = strlen($haystack);
 
         if ($nChr == 0) {
             return "";
         }
+
         if ($nChr > $length + strlen($separator)) {
             switch($position) {
                 case SHORTEN_FRONT:
-                    return ltrim($separator) . substr($str, $nChr, $length+1);
+                    return ltrim($separator) . substr($haystack, $nChr, $length + 1);
 
                 case SHORTEN_MIDDLE:
-                    return substr($str, 0, $length/2). $separator . substr($str, $nChr-$length/2, $length/2+1);
+                    return substr($haystack, 0, $length / 2) . $separator . substr($haystack, $nChr - $length / 2, $length / 2 + 1);
 
                 case SHORTEN_BACK:
-                    return substr($str, 0, $length) . rtrim($separator);
+                case SHORTEN_BACK_SHRINK:
+                case SHORTEN_BACK_EXTEND:
+
+                    if ($position == SHORTEN_BACK_SHRINK) {
+
+                        $pos = strrpos(substr($haystack,0, $length), ".");
+                        if($pos === false) return "";
+
+                        $length = $pos+1;
+                    }
+
+                    if ($position == SHORTEN_BACK_EXTEND){
+
+                        $pos = strpos(substr($haystack, $length), ".");
+                        if($pos !== false) $length += $pos+1;
+                    }
+
+                    return substr($haystack, 0, $length) . rtrim($separator);
             }
         }
 
-        return $str;
+        return $haystack;
     }
 
     function rand_int(int $digits)

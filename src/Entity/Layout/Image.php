@@ -195,6 +195,13 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     {
         return $this->crops;
     }
+    public function getCrop(string $identifier): ?ImageCrop
+    {
+        foreach($this->crops as $crop)
+            if($crop->getSlug() == $identifier) return $crop;
+
+        return null;
+    }
     public function addCrop(ImageCrop $crop): self
     {
         if (!$this->crops->contains($crop)) {

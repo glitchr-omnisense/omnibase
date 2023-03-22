@@ -12,7 +12,7 @@ class LinkedInAdapter extends AbstractSharerAdapter
     }
     public function getUrl(): string
     {
-        return "https://www.linkedin.com/shareArticle?mini=true&title={title}&summary={text}&url={url}";
+        return "https://www.linkedin.com/shareArticle?mini=true&title={title}&summary={summary}&url={url}";
     }
     public static function __iconizeStatic(): ?array
     {

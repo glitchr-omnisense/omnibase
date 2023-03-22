@@ -24,7 +24,9 @@ class Autocomplete
         if ($entry == null) {
             return null;
         }
+
         if (is_object($entry) && $class !== null) {
+
             $accessor = PropertyAccess::createPropertyAccessor();
             $id = $accessor->isReadable($entry, "id") ? strval($accessor->getValue($entry, "id")) : null;
 
@@ -57,24 +59,40 @@ class Autocomplete
             }
 
             $icon = begin($icons);
+
+
+            $color = [];
+            if (class_implements_interface($entry, ColorizeInterface::class)) {
+                $color = $entry->__colorize();
+            }
+            if (empty($color) && class_implements_interface($entry, ColorizeInterface::class)) {
+                $color = $entry::__colorizeStatic();
+            }
+            $color = null;
+
         } elseif (class_implements_interface($class, SelectInterface::class)) {
+
             $id   = $entry;
             $icon = $class::getIcon($entry, 0);
             $text = $class::getText($entry, $this->translator);
             $html = $class::getHtml($entry);
             $data = $class::getData($entry);
+            $color = $class::getColor($entry);
+
         } else {
             $icon  = is_array($entry) ? ($entry[2] ?? $entry[1] ?? $entry[0]) : null  ;
             $text  = is_array($entry) ? ($entry[1] ?? $entry[0]) : $entry;
             $id    = is_array($entry) ? ($entry[0]) : $entry;
             $html  = null;
             $data  = [];
+            $color = null;
         }
 
         return
         [
             "id"   => $id ?? null,
             "icon" => $icon,
+            "color" => $color,
             "search" => null,
             "text" => is_string($text) ? castcase($text, $entryOptions["format"]) : $text,
             "html" => $entryOptions["html"] ? $html : null,

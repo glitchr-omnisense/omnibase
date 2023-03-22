@@ -9,7 +9,7 @@ use Imagine\Image\Format;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
 
-class SvgFilter implements FormatFilterInterface
+class SvgFilter implements SvgFilterInterface
 {
     protected array $filters;
     protected array $options;
@@ -75,8 +75,10 @@ class SvgFilter implements FormatFilterInterface
         pathinfo_extension($this->path, $extension);
 
         foreach ($this->filters as $filter) {
+
             $oldImage = $image;
-            $image = $filter->apply($oldImage);
+            try { $image = $filter->apply($oldImage); }
+            catch (\Exception $e) { $image = $oldImage; }
 
             if (spl_object_id($image) != spl_object_id($oldImage)) {
                 $oldImage->__destruct();

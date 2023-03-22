@@ -92,7 +92,7 @@ class Sitemapper implements SitemapperInterface
             $route = $routeOrName;
         }
 
-        $routeMatch    = $this->router->getRouteMatch($route->getPath());
+        $routeMatch = $this->router->getRouteMatch($route->getPath());
         if (!$routeMatch) {
             return $this;
         }
@@ -109,12 +109,11 @@ class Sitemapper implements SitemapperInterface
 
         $this->computeFlag = false;
 
-        $routeRequirements = $route->getRequirements();
-        if (array_key_exists("_locale", $routeRequirements) && !str_ends_with(".".$routeRequirements["_locale"], $routeName)) {
-            $routeName .= ".".$routeRequirements["_locale"];
-        }
-
+        $routeDefaults = $route->getDefaults();
         $routeParameters = array_filter($routeParameters, fn ($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
+        if(array_key_exists("_locale", $routeDefaults))
+            $routeParameters["_locale"] = $routeDefaults["_locale"];
+
         $url = $this->router->generate($routeName, $routeParameters, Router::ABSOLUTE_URL);
 
         $sitemapEntry = new SitemapEntry($url);
@@ -122,10 +121,16 @@ class Sitemapper implements SitemapperInterface
         $sitemapEntry->setLastMod($sitemap->getLastMod());
         $sitemapEntry->setChangeFreq($sitemap->getChangeFreq());
 
-        $locale = $this->localizer->getLocale($routeParameters["_locale"] ?? $routeRequirements["_locale"] ?? null);
+        $locale = $this->localizer->getLocale($routeParameters["_locale"] ?? null);
         $sitemapEntry->setLocale($locale);
 
-        $this->urlset[$routeName.".".md5(serialize($routeParameters))] = $sitemapEntry;
+        $routeParameters = array_filter($routeParameters, fn ($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
+        if(!array_key_exists($routeName.".".md5(serialize($routeParameters)), $this->urlset))
+            $this->urlset[$routeName.".".md5(serialize($routeParameters))] = $sitemapEntry;
+
+        if(array_key_exists("_locale", $routeDefaults))
+            $this->urlset[$routeName.".".md5(serialize($routeParameters))]->addAlternate($sitemapEntry);
+
         return $this;
     }
 
@@ -143,21 +148,20 @@ class Sitemapper implements SitemapperInterface
     {
         $this->computeFlag = false;
         foreach ($this->router->getRouteCollection() as $routeName => $route) {
+
             $sitemap = $this->getSitemap($route);
             if (!$sitemap) {
                 continue;
             }
 
-            $routeParameters = $this->router->getRouteMatch($route->getPath());
+            $routeParameters = $this->router->getRouteMatch($route->getPath()) ?? [];
             $numberOfParameters = count(array_filter($routeParameters, fn ($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY));
             if ($numberOfParameters > 0) {
                 continue;
             }
 
-            try {
-                $this->register($route);
-            } catch(\Base\Exception\SitemapNotFoundException $e) {
-            }
+            try { $this->register($route); }
+            catch(\Base\Exception\SitemapNotFoundException $e) {}
         }
 
         return $this;
@@ -255,7 +259,7 @@ class Sitemapper implements SitemapperInterface
         return $this->urlset;
     }
 
-    public function generate(string $name, array $context = []): Response
+    public function serve(string $name, array $context = []): Response
     {
         $urlset = array_reverse(array_map(fn ($s) => $s->toArray($this->hostname), $this->doCompute()));
 
@@ -276,7 +280,6 @@ class Sitemapper implements SitemapperInterface
         if ($mimeTypes) {
             $response->headers->set('Content-Type', first($mimeTypes));
         }
-
         return $response;
     }
 }

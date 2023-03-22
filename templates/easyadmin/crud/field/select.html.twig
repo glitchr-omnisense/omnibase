@@ -6,6 +6,8 @@
 {% set showFirst    = field.customOptions.get('showFirst') %}
 {% set show         = field.customOptions.get('show') %}
 {% set iconAlign    = field.customOptions.get('iconAlign') %}
+{% set useColor    = field.customOptions.get('useColor') %}
+
 <span class="badges">
 {% if field.value is iterable %}
 
@@ -89,7 +91,7 @@
             {% endif %}
 
             {% set fieldLink = formattedValue['url'] ?? null %}
-            <span class="badge badge-secondary">
+            <span class="badge badge-secondary" >
                 {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if show == 1 %}
                     {{formattedValue.text|striptags|default("-")}}
@@ -135,7 +137,12 @@
             {% set icon = formattedValue.icon|iconify|first|raw|default(null) %}
         {% endif %}
 
-        <span class="badge badge-secondary">
+        {% set color = null %}
+        {% if formattedValue.color is defined %}
+            {% set color = formattedValue.color ?? null %}
+        {% endif %}
+
+        <span class="badge badge-secondary" {% if useColor and color is not empty %}style="background-color:{{ color }};"{% endif %}>
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if showFirst == 1 %}
            {{formattedValue.text|striptags|default("-")}}

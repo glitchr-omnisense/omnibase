@@ -12,7 +12,7 @@ class TumblrAdapter extends AbstractSharerAdapter
     }
     public function getUrl(): string
     {
-        return "https://www.tumblr.com/share/link?title={title}&description={text}&url={url}";
+        return "https://www.tumblr.com/share/link?title={title}&description={description}&url={url}";
     }
     public static function __iconizeStatic(): ?array
     {

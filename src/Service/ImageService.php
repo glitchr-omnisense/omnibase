@@ -8,6 +8,7 @@ use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
 
 use Base\Imagine\Filter\Format\SvgFilter;
+use Base\Imagine\Filter\Format\SvgFilterInterface;
 use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Routing\RouterInterface;
 use Imagine\Exception\NotSupportedException;
@@ -57,8 +58,8 @@ class ImageService extends FileService implements ImageServiceInterface
     protected string $maxResolution;
     /** @var string */
     protected string $maxQuality;
-    /** @var ?string */
-    protected ?string $noImage;
+    /** @var array */
+    protected array $noImage;
     /** @var ?bool */
     protected ?bool $debug;
 
@@ -140,7 +141,7 @@ class ImageService extends FileService implements ImageServiceInterface
     {
         $supports_webp   = array_pop_key("webp", $config) ?? browser_supports_webp();
 
-        $extension = array_pop_key("extension", $config) ?? first($this->getExtensions($path));
+        $extension = array_pop_key("extension", $config) ?? $this->getExtension($path);
         if ($extension) {
             $supports_webp &= ($extension != "svg");
         }
@@ -353,12 +354,11 @@ class ImageService extends FileService implements ImageServiceInterface
         if (!file_exists($file)) {
             if (!$this->fallback) {
                 throw is_length_safe($file) ?
-                    new NotFoundHttpException($file ? "Image \"".str_shorten($file, 50, SHORTEN_MIDDLE)."\" not found." : "Empty path provided.") :
-                    new \LogicException("Image \"".str_shorten($file, 50, SHORTEN_MIDDLE)."\" overflowed the PHP_MAXPATHLEN (= ".constant("PHP_MAXPATHLEN").") limit. Maybe use a compress option (\"gzcompress\",\"gzdeflate\",\"gzencode\") ?")
-                ;
+                    new NotFoundHttpException($file ? "Image \"" . str_shorten($file, 50, SHORTEN_MIDDLE) . "\" not found." : "Empty path provided.") :
+                    new \LogicException("Image \"" . str_shorten($file, 50, SHORTEN_MIDDLE) . "\" overflowed the PHP_MAXPATHLEN (= " . constant("PHP_MAXPATHLEN") . ") limit. Maybe use a compress option (\"gzcompress\",\"gzdeflate\",\"gzencode\") ?");
             }
 
-            $file = $this->noImage;
+            $file = $this->getNoImage($this->getExtension($file));
             array_pop_key("http_cache", $headers);
         }
 
@@ -446,7 +446,7 @@ class ImageService extends FileService implements ImageServiceInterface
     public function filter(?string $path, FilterInterface|array $filters = [], array $config = []): ?string
     {
         if ($this->debug) {
-            return $this->noImage;
+            return $this->getNoImage($this->getExtension($path));
         }
         if (!is_array($filters)) {
             $filters = [$filters];
@@ -510,7 +510,7 @@ class ImageService extends FileService implements ImageServiceInterface
                 throw new NotFoundHttpException($path ? "Image not found behind system path \"$path\"." : "Empty path provided.");
             }
 
-            return $this->noImage;
+            return $this->getNoImage($this->getExtension($path));
         }
 
         //
@@ -530,11 +530,12 @@ class ImageService extends FileService implements ImageServiceInterface
 
                 $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
                 if (!file_exists($filteredPath)) {
+
                     if (!$this->fallback) {
                         throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provided.");
                     }
 
-                    return $this->noImage;
+                    return $this->getNoImage($this->getExtension($path));
                 }
 
                 try {
@@ -563,21 +564,32 @@ class ImageService extends FileService implements ImageServiceInterface
         // GD does not support other palette than RGB..
         //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
         //   cmyk2rgb($pathPublic); // Not working yet..
-        try {
-            $image = $imagine->open($path);
-        } catch (Exception $e) {
-            return null;
-        }
+        try { $image = $imagine->open($path); }
+        catch (Exception $e) { return $this->fallback ? $this->getNoImage($this->getExtension($path)) : null; }
 
-        if ($formatter instanceof BitmapFilterInterface) {
-            $image->usePalette(new \Imagine\Image\Palette\RGB());
-            $image->strip();
+        try {
+
+            if ($formatter instanceof BitmapFilterInterface) {
+                $image->usePalette(new \Imagine\Image\Palette\RGB());
+                $image->strip();
+            }
+
+        } catch (Exception $e) {
+
+            if(!$this->fallback) throw $e;
         }
 
         // Apply filters
         foreach ($filters as $filter) {
+
             $oldImage = $image;
-            $image = $filter->apply($oldImage);
+            try { $image = $filter->apply($oldImage); }
+            catch (\Exception $e) {
+
+                if(!$this->fallback) throw $e;
+                $image = $oldImage;
+            }
+
             if (spl_object_id($image) != spl_object_id($oldImage)) {
                 $oldImage->__destruct();
             }
@@ -587,6 +599,31 @@ class ImageService extends FileService implements ImageServiceInterface
         // So we can safely destroy it
         $image->__destruct();
 
+        // Fallback
+        if(!file_exists($formatter->getPath()) && $this->fallback)
+            return $this->getNoImage($this->getExtension($path));
+
         return $formatter->getPath();
+    }
+
+    public function getNoImage(null|string|FormatFilterInterface $extensionOrFormatter = null)
+    {
+        if(is_string($extensionOrFormatter))
+            $extension = $extensionOrFormatter;
+
+        $extension ??= "png";
+        if($extensionOrFormatter instanceof SvgFilterInterface)
+            $extension = "svg";
+
+        $extensions = array_map(fn($a) => $a["extension"], $this->noImage);
+
+        $noImage = first(array_search_by($this->noImage, "extension", $extension));
+        if(!$noImage) {
+            throw new Exception("Replacement image not defined for \"" . strtoupper($extension) . "\"." . PHP_EOL .
+                "Please define `base.images.no_image." . $extension . "` or disable `base.images.fallback`"
+            );
+        }
+
+        return $noImage["path"];
     }
 }

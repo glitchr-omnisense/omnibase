@@ -12,7 +12,7 @@ class PinterestAdapter extends AbstractSharerAdapter
     }
     public function getUrl(): string
     {
-        return "https://pinterest.com/pin/create/button/?description={text}&url={url}&media={media}";
+        return "https://pinterest.com/pin/create/button/?description={description}&url={url}&media={media}";
     }
     public static function __iconizeStatic(): ?array
     {

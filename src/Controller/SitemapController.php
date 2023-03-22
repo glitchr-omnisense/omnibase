@@ -15,7 +15,7 @@ class SitemapController extends AbstractController
     use BaseTrait;
 
     /**
-     * @Route("/sitemap.{extension}", name="ux_sitemap", requirements={"extension"="xml|txt"})
+     * @Route("/sitemap.{extension}", name="app_sitemap", requirements={"extension"="xml|txt"})
      */
     public function Main(string $extension, Request $request, SitemapperInterface $sitemap): Response
     {
@@ -24,6 +24,6 @@ class SitemapController extends AbstractController
         return $sitemap
             ->setHostname($hostname)
             ->registerAnnotations()
-            ->generate('sitemap.'.$extension.'.twig');
+            ->serve('sitemap.'.$extension.'.twig');
     }
 }

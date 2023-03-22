@@ -78,6 +78,11 @@ class SiteVariable
         return $this->sitemapper->getAlternates();
     }
 
+    public function route()
+    {
+        return explode(".", $this->router->getRouteName())[0] ?? null;
+    }
+
     public function title()
     {
         return $this->baseService->getSite()["title"] ?? null;

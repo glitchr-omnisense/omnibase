@@ -21,6 +21,6 @@ class SanitizeFilter implements FilterInterface
 
     public function apply(ImageInterface $image): ImageInterface
     {
-        return $image; //$this->sanitizer->sanitize($image);
+        return $this->sanitizer->sanitize($image);
     }
 }

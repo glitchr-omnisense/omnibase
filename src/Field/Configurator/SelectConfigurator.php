@@ -111,7 +111,6 @@ class SelectConfigurator implements FieldConfiguratorInterface
         }
 
         $field->setFormattedValue($formattedValues);
-
         $fieldValue = $field->getValue();
 
         $isIndexOrDetail = \in_array($context->getCrud()->getCurrentPage(), [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true);
