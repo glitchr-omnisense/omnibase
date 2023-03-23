@@ -62,14 +62,6 @@ class DiscriminatorType extends AbstractType
                     }
 
                     $choices[mb_ucwords($key)] = [$icon, $key];
-
-                    // if(!class_implements_interface($entity, AttributeInterface::class))
-                    //     continue;
-
-                    // $fieldType    = $entity::getType();
-                    // $fieldOptions = $entity::getOptions();
-                    // $form->add($fieldName, $fieldType, $fieldOptions);
-                    // dump($fieldType);
                 }
 
                 $form->add("choice", SelectType::class, ["choices" => $choices]);

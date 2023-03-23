@@ -4,7 +4,6 @@ $.fn.flashNotification = function(method) {
     var methods = {
         init: function(options) {
 
-
             methods.settings = $.extend({}, $.fn.flashNotification.defaults, options);
             methods.settings["container"] = $(this).length ? $(this)[0] : undefined;
 

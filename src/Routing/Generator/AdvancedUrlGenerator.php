@@ -168,9 +168,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         // Check whether the route is already cached
         $hash = $this->getRouter()->getRouteHash($routeName, $routeParameters, $referenceType);
-        if (array_key_exists($hash, $this->cachedRoutes)) {
+        if (array_key_exists($hash, $this->cachedRoutes) && $this->cachedRoutes[$hash]["_name"] !== null) {
 
             $cachedRoute = $this->cachedRoutes[$hash];
+
             $locale = array_key_exists("_locale", $routeParameters) ? $this->getLocalizer()->getLocaleLang($routeParameters["_locale"]) : $this->getLocalizer()->getLocaleLang();
             try { return $this->resolveUrl($cachedRoute["_name"].($locale ? ".".$locale : ""), $routeParameters, $referenceType); }
             catch(\Exception $exception) { return $this->resolveUrl($cachedRoute["_name"], $routeParameters, $referenceType); }
@@ -204,7 +205,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
 
             $routeName = $routeDefaultName;
-            $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
+            if ($routeName !== null)
+                $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
         }
 
         $cache = $this->getRouter()->getCache();

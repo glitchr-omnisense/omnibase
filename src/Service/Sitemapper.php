@@ -242,17 +242,20 @@ class Sitemapper implements SitemapperInterface
 
         $entries = array_inflate(".", $this->urlset);
         foreach ($entries as $group => $entry) {
+
             if ($entry instanceof SitemapEntry) {
                 $this->urlset[$group] = $entry;
                 continue;
             }
 
             array_map_recursive(function ($sitemap) use ($group) {
+
                 if (!array_key_exists($group, $this->urlset)) {
                     $urlset[$group] = $sitemap;
                 }
 
                 $this->urlset[$group]->addAlternate($sitemap);
+
             }, $entry);
         }
 
@@ -268,8 +271,7 @@ class Sitemapper implements SitemapperInterface
         $mimeTypes = $this->mimeTypes->getMimeTypes($extension);
 
         $response = new Response(
-            $this->twig->render(
-            $name,
+            $this->twig->render($name,
             array_merge($context, [
                 'urlset' => $urlset,
                 'hostname' => $this->hostname
@@ -280,6 +282,7 @@ class Sitemapper implements SitemapperInterface
         if ($mimeTypes) {
             $response->headers->set('Content-Type', first($mimeTypes));
         }
+
         return $response;
     }
 }

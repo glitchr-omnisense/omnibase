@@ -22,8 +22,6 @@ class SemanticCrudController extends AbstractCrudController
 
     public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
     {
-//        dump($this->getEntity());
-
         return $extension;
     }
     public function createEntity(string $entityFqcn)

@@ -118,9 +118,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         try {
             $entityFqcn = BaseBundle::getInstance()->getAlias(preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
         } catch(\ErrorException $e) {
-//            dump($entityFqcn, preg_replace('/\\\Controller\\\Backend\\\Crud\\\/', "\\Entity\\", $entityFqcn));
-//            exit(1);
-
             throw new \LogicException("Failed to find Entity FQCN from \"".get_called_class()."\" CRUD controller..\nDid you remove the Entity but kept the CRUD controller ?", 500);
         }
         self::$crudController[$entityFqcn] = get_called_class();
