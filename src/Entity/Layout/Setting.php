@@ -39,9 +39,7 @@ class Setting implements TranslatableInterface, IconizeInterface
         $this->setBag(null);
 
         $this->setPath($path);
-        if ($value !== null) {
-            $this->translate($locale)->setValue($value);
-        }
+        $this->translate($locale)->setValue($value);
     }
 
     /**

@@ -73,6 +73,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      * @var TranslatorInterface
      * */
     protected $translator;
+    /**
+     * @var FileService
+     * */
+    protected $fileService;
 
     public function __construct(
         AdminContextProvider $adminContextProvider,

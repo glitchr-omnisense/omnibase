@@ -819,6 +819,7 @@ namespace {
     {
         return 8*$num;
     } // LMFAO :o)
+
     function bit2byte(int $num): int
     {
         return $num/8;
@@ -845,8 +846,8 @@ namespace {
         $factor   = (int) floor(log($num) / log($divider));
         $quotient = (int) ($num / ($divider ** $factor));
 
-        $rest     = $num - $divider*$quotient;
-        if ($rest < 0) {
+        $rest     = $num - $factor*($divider**$quotient);
+        if ($rest > 0) {
             $factor--;
         }
 

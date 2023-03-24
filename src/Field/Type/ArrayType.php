@@ -6,6 +6,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Entity\Layout\Attribute;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
+use Base\Form\Common\AbstractType;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -77,7 +78,9 @@ class ArrayType extends CollectionType implements DataMapperInterface
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        parent::buildForm($builder, $options);
         if ($options['prototype_key'] && $options["prototype"]) {
+
             $prototypeOptions = $options['entry_options'];
             if (null !== $options['prototype_data']) {
                 $prototypeOptions['data'] = $options['prototype_data'];
@@ -93,50 +96,31 @@ class ArrayType extends CollectionType implements DataMapperInterface
                 ->add($options['prototype_id'], $options['entry_type'], $prototypeOptions);
 
             $builder->setAttribute('prototype', $prototype->getForm());
+            $builder->add($prototype);
+            $builder->setDataMapper($this);
+            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
-//            parent::buildForm($builder,$options);
-//            $builder->setDataMapper($this);
-//            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-//
-//                $data = $event->getData();
-//                $form = $event->getForm();
-//
-//                dump($data, $form);
-        ////                exit(1);
-        ////
-        //////                dump($data, $form);
-//                $entry = 0;
-//                foreach($data as $key => $value)
-//                {
-//                    $form->add($entry, ChoiceType::class, [ "choices" => [] ]);
-//                    $childForm = $form->get($entry++);
-//                    dump($options["prototype_key"]);
-//                    dump($options["prototype_id"]);
-//                    dump([$options["prototype_key"] => $key, $options["prototype_id"] => $value]);
-//
-//                    $childForm->setData();
-        ////                    exit(1);
-//                }
-//
-//                if($data) {
-//
-//                    $array = [];
-//                    foreach($data as $id => $element) {
-//
-//                        $form->add($element["__prototype_key__"], ChoiceType::class);
-//                        $childForm = $form->get($element["__prototype_key__"], TextType::class);
-//                        $childForm->setData($element["__prototype_id__"]);
-//
-//                        $array[$element["__prototype_key__"]] = $element["__prototype_id__"];
-//                    }
-//
-//                    $form->setData($array);
-//                }
-        //////
-        ////                dump($form->all(), $form->getParent());
-//            });
-        } else {
-            parent::buildForm($builder, $options);
+                $data = $event->getData();
+                $form = $event->getForm();
+
+                dump($data, $form);
+
+                if($data) {
+
+                    dump($data);
+
+                    $array = [];
+                    foreach($data as $id => $element) {
+
+                        $childForm = $form->add($prototype);
+                        $childForm->setData($element["__prototype_id__"]);
+
+                        $array[$element["__prototype_key__"]] = $element["__prototype_id__"];
+                    }
+
+                    $form->setData($array);
+                }
+            });
         }
     }
 
@@ -155,13 +139,18 @@ class ArrayType extends CollectionType implements DataMapperInterface
 
     public function mapDataToForms($viewData, \Traversable $forms): void
     {
-        dump(iterator_to_array($forms));
+//        dump(iterator_to_array($forms));
         dump($viewData);
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        dump(iterator_to_array($forms));
+//        dump(iterator_to_array($forms));
+//        dump($viewData);
+        foreach(iterator_to_array($forms) as $form)
+        {
+            dump($form);
+        }
         dump($viewData);
     }
 }

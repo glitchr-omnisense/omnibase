@@ -60,14 +60,12 @@ class Notifier extends BaseNotifier implements NotifierInterface
     {
         $notification = new Notification("contact.adminNotification");
         $notification->setHtmlTemplate("email.html.twig");
-        foreach ($this->getAdminRecipients() as $adminRecipient) {
-            $notification->addRecipient($adminRecipient);
-        }
 
-        foreach ($contactModel->attachments ?? [] as $file) {
-            $notification->addAttachment($file);
-        }
+        $name = $this->parameterBag->get("base.settings.mail.name");
+        $email = $this->parameterBag->get("base.settings.mail.contact");
+        $adminRecipient = new Recipient(mailformat([], $name, $email));
 
+        $notification->addRecipient($adminRecipient);
         $notification->setHtmlParameters([
 
             "importance" => "high",

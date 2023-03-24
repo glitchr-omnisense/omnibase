@@ -235,14 +235,15 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         foreach ($fields as $key => $field) {
+
             if (!array_key_exists("form_type", $field)) {
                 $fields[$key]["form_type"] = PasswordType::class;
             }
+
             if ($fields[$key]["form_type"] == PasswordType::class) {
                 $fields[$key]["inline"]       = true;
                 $fields[$key]["revealer"]     = true;
                 $fields[$key]["repeater"]     = false;
-                $fields[$key]["allow_empty"]  = true;
                 $fields[$key]["min_length"]   = 0;
                 $fields[$key]["max_strength"] = 0;
                 $fields[$key]["secure"]       = false;
@@ -255,6 +256,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $data     = array_filter($form->getData(), function ($v, $k) use ($fields) {
                 // If field is required but empty, update skip.. (to make sure the value is not empty)
                 if ($fields[$k]["required"] ?? true) {
@@ -320,11 +322,14 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.maintenance.uptime"                  => ["form_type" => DateTimePickerType::class, "required" => false],
             "base.settings.mail"                                => ["form_type" => EmailType::class],
             "base.settings.mail.name"                           => ["translatable" => true],
+            "base.settings.mail.contact"                        => ["form_type" => EmailType::class],
         ]), array_reverse($fields)));
 
         foreach ($fields as $name => &$options) {
+
             $roles = array_pop_key("roles", $options);
             if ($roles && !$this->getUser()->isGranted($roles)) {
+
                 unset($fields[$name]);
             }
         }
@@ -332,14 +337,25 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form = $this->createForm(LayoutSettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data     = array_filter($form->getData(), fn ($value) => !is_null($value));
-            $fields   = array_keys($form->getConfig()->getOption("fields"));
+        $fields   = array_keys($form->getConfig()->getOption("fields"));
+        $settings = array_transforms(
+            fn ($k, $s): ?array => $s === null ? null : [$s->getPath(), $s],
+            $this->settingBag->getRawScalar($fields, false)
+        );
 
-            $settings = array_transforms(
-                fn ($k, $s): ?array => $s === null ? null : [$s->getPath(), $s],
-                $this->settingBag->getRawScalar($fields, false)
-            );
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $data     = $form->getData();
+
+            foreach($data as $setting)
+            {
+                $translations = $setting->getTranslations();
+                foreach($translations as $locale => $translation) {
+
+                    if($translation->isEmpty())
+                        $setting->removeTranslation($translation);
+                }
+            }
 
             foreach (array_diff_key($data, $settings) as $name => $setting) {
                 $this->settingRepository->persist($setting);

@@ -48,12 +48,11 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $view->vars["repeater"]     = $options["repeater"];
         $view->vars["revealer"]     = $options["revealer"];
         $view->vars["min_length"]   = $options["min_length"];
-        $view->vars["allow_empty"]  = $options["allow_empty"];
         $view->vars["min_strength"] = $options["min_strength"];
         $view->vars["max_strength"] = $options["max_strength"];
         $view->vars["autocomplete"] = $options["autocomplete"];
         $view->vars["suggestions"]  = $options["suggestions"];
-        $view->vars["required"]     = $options["required"] ?? true;
+        $view->vars["required"]     = $options["required"];
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -64,13 +63,12 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
             'hint'              => true,
             'revealer'          => false,
             'repeater'          => true,
-            'allow_empty'       => false,
             'autocomplete'      => false,
-            'suggestions'       => true,
             'suggestions'       => false,
             "min_length"        => Password::MIN_LENGTH_FALLBACK,
             "min_strength"      => Password::MIN_STRENGTH_FALLBACK,
             "max_strength"      => Password::MAX_STRENGTH_FALLBACK,
+            "required"          => false,
             'options'           => [],
             'options[repeater]' => [],
             'use_advanced_form' => true,
@@ -80,9 +78,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $resolver->setNormalizer('revealer', function (Options $options, $value) {
             return $value || !$options["repeater"];
         });
-        $resolver->setNormalizer('allow_empty', function (Options $options, $value) {
-            return $value || !$options["required"];
-        });
+
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -131,17 +127,14 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $plainPasswordRepeaterType = iterator_to_array($forms)["plain_repeater"] ?? null;
         $options = $plainPasswordType->getConfig()->getOptions();
 
-        if ($viewData == []) {
-            $viewData = "";
-        }
-        if ($plainPasswordType->getViewData() !== "" || !($options["required"] ?? false)) {
-            $viewData = $plainPasswordType->getViewData();
-        }
-
         if ($plainPasswordRepeaterType) {
             if ($plainPasswordType->getViewData() !== $plainPasswordRepeaterType->getViewData()) {
                 throw new TransformationFailedException('Password are differents');
             }
         }
+
+        $viewData = $plainPasswordType->getViewData();
+        if(!$viewData)
+            $viewData = null;
     }
 }

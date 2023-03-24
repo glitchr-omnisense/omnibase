@@ -24,7 +24,7 @@ class SettingIntl implements TranslationInterface
 
     public function isEmpty(): bool
     {
-        return $this->_isEmpty(["vault"]);
+        return $this->value == null;
     }
 
     /**
@@ -57,7 +57,7 @@ class SettingIntl implements TranslationInterface
 
     /**
      * @ORM\Column(type="array")
-     * @Uploader(storage="local.storage", max_size="2MB", missable=true)
+     * @Uploader(storage="local.storage", max_size="2MB", missable=true, nullable=true)
      * @Associate(metadata="class")
      */
     protected $value;

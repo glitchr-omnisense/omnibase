@@ -323,6 +323,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
         if (is_array($paths = $path)) {
+
             foreach ($paths as $path) {
                 $this->clear($path, $locale, $useCache);
             }

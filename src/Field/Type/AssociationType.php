@@ -334,6 +334,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
 
         if (!$options["multiple"] && $this->classMetadataManipulator->isEntity($options["class"])) {
+
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["class"]);
             if (!$classMetadata) {
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
@@ -348,8 +349,13 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 }
             }
 
-            $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], array_filter($entries instanceof Collection ? $entries->toArray() : $entries), [], EntityHydrator::CLASS_METHODS);
+            $viewData = $this->entityHydrator->hydrate(
+                is_object($viewData) ? $viewData : $options["class"],
+                $entries instanceof Collection ? $entries->toArray() : $entries, [], EntityHydrator::CLASS_METHODS
+            );
+
         } elseif ($viewData instanceof PersistentCollection) {
+
             $mappedBy =  $viewData->getMapping()["mappedBy"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
             $oldData = $viewData->toArray();
@@ -397,15 +403,19 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     }
                 }
             }
+
         } elseif ($options["multiple"]) {
+
             $viewData = new ArrayCollection();
             foreach (iterator_to_array($forms) as $fieldName => $childForm) {
                 foreach ($childForm as $key => $value) {
                     $viewData[$key] = $value->getViewData();
                 }
             }
+
         } else {
             $viewData = current(iterator_to_array($forms))->getViewData();
         }
+
     }
 }

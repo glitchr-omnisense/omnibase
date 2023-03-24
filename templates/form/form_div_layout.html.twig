@@ -1250,7 +1250,7 @@
         'data-password-strength-message[4]': '@fields.password.strength.strong.message'|trans|raw,
         'data-password-autocomplete': form.vars.autocomplete ? "on" : "new-password",
         'data-password-match': "@validators.password.not_matching"|trans(),
-        'data-password-allow-empty': form.vars.allow_empty ? "true" : "",
+        'data-password-allow-empty': not form.vars.required ? "true" : "",
         'data-password-minstrength': form.vars.min_strength,
         'data-password-minstrength[feedback]': "@validators.password.min_strength"|trans([form.vars.min_strength]),
         'data-password-minlength': form.vars.min_length,
@@ -1282,7 +1282,7 @@
             <footer>
                 <hr>
                 <div class="form-text text-muted">
-                {% if form.vars.allow_empty and form.vars.hint %}{{"@fields.password.unchanged"|trans}}{% endif %}
+                {% if not form.vars.required and form.vars.hint %}{{"@fields.password.unchanged"|trans}}{% endif %}
                 </div>
                 <div class="form-text text-muted">
                 {% if form.vars.min_length %}{{"@fields.password.requirements.min_length"|trans([form.vars.min_length])}}{% endif %}
@@ -1298,12 +1298,12 @@
             <div class="form-group">
 
                 {{ form_label(form.plain) }}
-
                 <div class="input-group">
                     <span class="input-group-text">{{ (form.vars.repeater ? 'fas fa-unlock' : 'fas fa-lock')|iconify|first|raw }}</span>
                     {% if form.vars.revealer %}{{ 'fas fa-eye'|iconify({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"})|first|raw }}{% endif%}
+
                     {{ form_widget(form.plain, {
-                        required:form.vars.required and not allow_empty,
+                        required:form.vars.required,
                         value:form.vars.revealer and not form.vars.secure ? form.vars.value : "",
                         attr: {'autocomplete': form.vars.autocomplete ? "autocomplete" : "new-password"}
                     }) }}
@@ -1322,7 +1322,7 @@
                 {% endif %}
 
                 {% if form.vars.inline %}
-                    {% if (form.vars.allow_empty and form.vars.hint) %}
+                    {% if (not form.vars.required and form.vars.hint) %}
                     <div class="form-text text-muted">{{"@fields.password.unchanged"|trans}}</div>
                     {% endif %}
                     {% if form.vars.min_length %}
@@ -1337,10 +1337,11 @@
             {% if form.vars.repeater %}
             <div class="form-group">
                 {{ form_label(form.plain_repeater) }}
+
                 <div class="input-group">
                     <span class="input-group-text">{{ 'fas fa-lock'|iconify|first|raw }}</span>
                     {{ form_widget(form.plain_repeater, {
-                        required:form.vars.required and not allow_empty,
+                        required:form.vars.required,
                         value:form.vars.revealer and not form.vars.secure ? form.vars.value : "",
                         attr:{'autocomplete': form.vars.autocomplete ? "autocomplete" : "new-password"}
                     }) }}

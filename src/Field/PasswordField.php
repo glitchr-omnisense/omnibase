@@ -26,11 +26,6 @@ final class PasswordField implements FieldInterface
         return $this;
     }
 
-    public function allowEmpty(bool $empty = true): self
-    {
-        $this->setFormTypeOption("allow_empty", $empty);
-        return $this;
-    }
 
     public function secure(bool $secure = true): self
     {

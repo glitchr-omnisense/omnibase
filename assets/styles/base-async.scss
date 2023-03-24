@@ -18,7 +18,7 @@
 
 .form-errors ul
 {
-padding:0.5em;
+    padding: 1em 0 !important;
 }
 
 .input-group-prepend:not(:first-of-type) .input-group-text
@@ -768,7 +768,7 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
 }
 
 .form-array-add-button:hover {
-    background-color: #eff1fa !important;
+    background-color: #eff1fa;
     color: #5768bc;
 }
 
@@ -786,6 +786,7 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
 }
 .form-array-items,
 .form-array-items > .form-group { border:0; padding: 0 !important; }
+.form-array-items:empty {border:0;}
 
 .form-array-items .form-array-item { border-bottom: 1px solid lightgrey;}
 .accordion-body { margin:0; padding:0; }
@@ -1267,7 +1268,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 }
 
 .form-errors:empty { margin: 0; }
-.form-errors { margin: 0.5em 0 0 0; }
+.form-errors { margin: 0;padding:0; }
 
 .form-translatable > .form-control { padding: 0; border:0; }
 .form-collection .form-collection-items .form-collection-item:not(.form-collection-item-last) { border-bottom: var(--border-width) solid lightgrey !important; }

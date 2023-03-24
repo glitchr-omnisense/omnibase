@@ -72,12 +72,15 @@ class Autocomplete
 
         } elseif (class_implements_interface($class, SelectInterface::class)) {
 
-            $id   = $entry;
-            $icon = $class::getIcon($entry, 0);
-            $text = $class::getText($entry, $this->translator);
-            $html = $class::getHtml($entry);
-            $data = $class::getData($entry);
-            $color = $class::getColor($entry);
+            $id    = $entry;
+            $icon  = $class::getIcon($entry, 0);
+            $text  = $class::getText($entry, $this->translator);
+            $html  = $class::getHtml($entry);
+            $data  = $class::getData($entry);
+
+            $color = null;
+            if (class_implements_interface($entry, ColorizeInterface::class))
+                $color = $class::getColor($entry);
 
         } else {
             $icon  = is_array($entry) ? ($entry[2] ?? $entry[1] ?? $entry[0]) : null  ;
@@ -85,6 +88,7 @@ class Autocomplete
             $id    = is_array($entry) ? ($entry[0]) : $entry;
             $html  = null;
             $data  = [];
+
             $color = null;
         }
 

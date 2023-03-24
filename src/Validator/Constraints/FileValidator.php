@@ -6,6 +6,7 @@ use Base\Validator\Constraints\File as ConstraintsFile;
 use Base\Validator\Constraints\FileSize;
 use Base\Validator\ConstraintValidator;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
@@ -38,16 +39,19 @@ class FileValidator extends ConstraintValidator
         }
 
         if (!$compatibleMimeType) {
+
             $constraint->message = $constraint->messageMimeType;
             $this->buildViolation($constraint, $entry)
                 ->setParameter('{0}', count($mimeTypes))
                 ->setParameter('{1}', implode(", ", $types))
                 ->addViolation();
+
         } elseif ($entry->getSize() > $constraint->getMaxSize()) {
+
             $constraint->message = $constraint->messageMaxSize;
             $this->buildViolation($constraint, $entry)
-                ->setParameter('{0}', byte2str($constraint->getMaxSize()))
                 ->setParameter('{1}', byte2str($entry->getSize()))
+                ->setParameter('{0}', byte2str(8*$constraint->getMaxSize()))
                 ->addViolation();
         }
     }

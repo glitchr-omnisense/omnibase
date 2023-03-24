@@ -77,7 +77,7 @@ class UserCrudController extends UserActionCrudController
             yield EmailField::new('email')->setColumns(5);
 
             yield FormField::addRow()->setColumns(2);
-            yield PasswordField::new('plainPassword')->onlyOnForms()->allowEmpty()->setColumns(10)->showInline(false)->setRepeater(true)->setRevealer(true);
+            yield PasswordField::new('plainPassword')->onlyOnForms()->setRequired(false)->setColumns(10)->showInline(false)->setRepeater(true)->setRevealer(true);
 
             yield DateTimeField::new('activeAt')->hideOnForm();
             yield DateTimeField::new('updatedAt')->onlyOnDetail();
