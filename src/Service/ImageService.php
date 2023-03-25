@@ -89,7 +89,7 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->maxResolution = $parameterBag->get("base.images.max_resolution");
         $this->maxQuality    = $parameterBag->get("base.images.max_quality");
         $this->enableWebp    = $parameterBag->get("base.images.enable_webp");
-        $this->noImage       = $parameterBag->get("base.images.no_image");
+        $this->noImage       = $parameterBag->get("base.images.no_image") ?? [];
         $this->debug         = $parameterBag->get("base.images.debug");
 
         $this->twig          = $twig;
