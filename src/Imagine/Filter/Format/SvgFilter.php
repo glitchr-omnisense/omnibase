@@ -20,6 +20,8 @@ class SvgFilter implements SvgFilterInterface
         return path_suffix("", $pathSuffixes);
     }
 
+    protected $mimeTypes;
+
     public function __construct(?string $path = null, array $filters = [], array $options = [])
     {
         if (!$path) {
