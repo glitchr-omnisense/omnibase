@@ -30,6 +30,7 @@ class SettingsCacheWarmer implements CacheWarmerInterface
             echo " // Warming up cache... Setting bag".PHP_EOL.PHP_EOL;
         }
 
-        return $this->settingBag->warmUp($cacheDir);
+        try { return $this->settingBag->warmUp($cacheDir); }
+        catch(\PDOException $e) { return []; }
     }
 }

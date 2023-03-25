@@ -12,13 +12,15 @@ trait CacheClearTrait
     protected function checkCache(SymfonyStyle $io): void
     {
         $Xdebug  = extension_loaded('xdebug') ? '<info>✓</info>' : '<error>✗</error>';
+        $Blackfire  = extension_loaded('blackfire') ? '<info>✓</info>' : '<error>✗</error>';
         $APCu    = extension_loaded('apc') && ini_get('apc.enabled') ? '<info>✓</info>' : '<error>✗</error>';
         $OPcache = extension_loaded('Zend OPcache') ? '<info>✓</info>' : '<error>✗</error>';
 
         $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver extensions might differ)".PHP_EOL);
-        $io->write("        [".$Xdebug."] Xdebug", true);
+        $io->write("        [".$Xdebug."] Xdebug; ");
         $io->write("        [".$APCu."] APCu", true);
-        $io->write("        [".$OPcache."] OPcache", true);
+        $io->write("        [".$Blackfire."] Blackfire; ");
+        $io->write("     [".$OPcache."] OPcache", true);
     }
 
     protected function customFeatureWarnings(SymfonyStyle $io): void

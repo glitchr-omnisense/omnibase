@@ -44,16 +44,21 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
             return;
         }
 
-        array_map_recursive(function ($setting) {
-            if ($setting === null) {
-                return;
-            }
-            if ($setting->getBag() === null) {
-                return;
-            }
+        try {
 
-            $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
-        }, $this->settingBag->allRaw(true, true));
+            array_map_recursive(function ($setting) {
+                if ($setting === null) {
+                    return;
+                }
+                if ($setting->getBag() === null) {
+                    return;
+                }
+
+                $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
+
+            }, $this->settingBag->allRaw(true, true));
+
+        } catch(\PDOException $e) { return; }
 
         $this->parameterBag->markAsReady();
     }
@@ -70,6 +75,10 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $allRaw = [];
+        try { $allRaw = $this->settingBag->allRaw(true, true); }
+        catch(\PDOException $e) { return; }
+
         array_map_recursive(function ($setting) {
             if ($setting === null) {
                 return;
@@ -79,7 +88,7 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
             }
 
             $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
-        }, $this->settingBag->allRaw(true, true));
+        }, $allRaw);
 
         $this->parameterBag->markAsReady();
     }

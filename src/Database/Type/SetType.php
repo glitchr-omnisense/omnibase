@@ -13,7 +13,7 @@ abstract class SetType extends EnumType
             return "TEXT";
         }
 
-        $values = array_map(fn ($val) => "`".$val."`", $this->getPermittedValues());
+        $values = array_map(fn ($val) => "'".$val."'", $this->getPermittedValues());
         return "SET(".implode(", ", $values).")";
     }
 
