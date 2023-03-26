@@ -128,14 +128,20 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         //
         // Build providers
         $filesystems = new FilesystemProvider(new Config($this->filesystemConfigs));
-        $filesystems->add(new Awss3Filesystem());
-        $filesystems->add(new GcsFilesystem());
-        $filesystems->add(new DropboxFilesystem());
-        $filesystems->add(new FtpFilesystem());
-        $filesystems->add(new LocalFilesystem());
-        $filesystems->add(new RackspaceFilesystem());
-        $filesystems->add(new SftpFilesystem());
-        $filesystems->add(new WebdavFilesystem());
+        if(class_exists(Awss3Filesystem::class))
+            $filesystems->add(new Awss3Filesystem());
+        if(class_exists(GcsFilesystem::class))
+            $filesystems->add(new GcsFilesystem());
+        if(class_exists(DropboxFilesystem::class))
+            $filesystems->add(new DropboxFilesystem());
+        if(class_exists(FtpFilesystem::class))
+            $filesystems->add(new FtpFilesystem());
+        if(class_exists(LocalFilesystem::class))
+            $filesystems->add(new LocalFilesystem());
+        if(class_exists(SftpFilesystem::class))
+            $filesystems->add(new SftpFilesystem());
+        if(class_exists(WebdavFilesystem::class))
+            $filesystems->add(new WebdavFilesystem());
 
         $databases = new DatabaseProvider(new Config($this->databaseConfigs));
         $databases->add(new MysqlDatabase());

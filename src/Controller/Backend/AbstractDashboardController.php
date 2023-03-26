@@ -178,8 +178,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         $this->translator = $translator;
         WidgetItem::$translator = $translator;
-        MenuItem::$translator = $translator;
+        WidgetItem::$adminUrlGenerator = $this->adminUrlGenerator;
+        WidgetItem::$adminContextProvider = $this->adminContextProvider;
 
+        MenuItem::$translator = $translator;
         MenuItem::$router = $router;
         MenuItem::$iconProvider = $iconProvider;
 
@@ -584,8 +586,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureWidgetItems(array $widgets = []): array
     {
-        WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
-        WidgetItem::setAdminContextProvider($this->adminContextProvider);
         $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', null, 1));
         if ($this->isGranted('ROLE_EDITOR')) {
             $section = $this->getSectionWidgetItem($widgets, "LAYOUT");
@@ -619,8 +619,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ]);
 
         if ($this->isGranted('ROLE_EDITOR')) {
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', null, 1));
 
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', null, 1));
             $widgets = $this->addWidgetItem($widgets, "ATTRIBUTES", [
                 WidgetItem::linkToUrl(AbstractAdapter::class, AbstractAdapter::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()
                     ->setController(AbstractAdapterCrudController::class)

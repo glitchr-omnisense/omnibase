@@ -1172,7 +1172,6 @@
         </service>
 
         <service id="Base\Controller\Backend\AbstractCrudController">
-            <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
