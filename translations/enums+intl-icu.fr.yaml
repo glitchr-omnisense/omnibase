@@ -88,6 +88,12 @@ workflow_state:
   workflow_suspended:
     _singular: "suspendu"
     _plural: "suspendus"
+  workflow_reviewing:
+    _singular: "révision"
+    _plural: "révisions"
+  workflow_submitted:
+    _singular: "envoyé"
+    _plural: "envoyés"
 
 spam_score:
   _singular: "score"
