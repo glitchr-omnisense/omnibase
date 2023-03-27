@@ -3,7 +3,7 @@
 <head>
 <title>
     {% block title %}
-        {{ email.subject|default('@messages.slogan')|trans }}
+        {{ subject|default('@messages.slogan')|trans }}
     {% endblock %}
 </title>
 <link rel="stylesheet" href="https://assets.glitchr.io/fonts/stylesheet.css">
@@ -26,7 +26,7 @@
                 {% block lead %}
                     {% if importance is not null %}<small><strong>{{ importance|upper }}</strong></small>{% endif %}
                     <p class="lead">
-                        {{ email.subject }}
+                        {{ subject }}
                     </p>
                 {% endblock %}
 

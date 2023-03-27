@@ -2,6 +2,9 @@
 
 namespace Base\DependencyInjection;
 
+use App\Notifier\Notifier as AppNotifier;
+use Base\Notifier\Abstract\BaseNotifier;
+use Base\Notifier\Notifier;
 use Base\Annotations\AnnotationInterface;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
@@ -13,6 +16,7 @@ use Base\Service\Model\Obfuscator\CompressionInterface;
 use Base\Twig\TagRendererInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 use Symfony\Component\Config\Definition\Processor;

@@ -27,7 +27,7 @@ class UserActionCrudController extends AbstractCrudController
     }
 
     public function configureActions(Actions $actions): Actions
-    {
+    { 
         $batchActionApprove = Action::new('batchActionApprove', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_approve', 'fa fa-user-check')
             ->linkToCrudAction('batchActionApprove')
             ->addCssClass('btn btn-primary text-success');

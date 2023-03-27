@@ -130,8 +130,9 @@
             <bind key="$environment">%kernel.environment%</bind>
         </service>
 
+        <service id="App\Notifier\Notifier"           alias="Base\Notifier\Notifier" />
         <service id="Base\Notifier\NotifierInterface"  alias="Base\Notifier\Notifier" />
-        <service id="Base\Notifier\Notifier"          parent="Base\Notifier\Abstract\BaseNotifier" public="true" />
+        <service id="Base\Notifier\Notifier"           parent="Base\Notifier\Abstract\BaseNotifier" public="true" />
 
         <service id="Base\Notifier\Abstract\BaseNotifierInterface" alias="Base\Notifier\Abstract\BaseNotifier"/>
         <service id="Base\Notifier\Abstract\BaseNotifier" abstract="true">
@@ -1171,7 +1172,6 @@
         </service>
 
         <service id="Base\Controller\Backend\AbstractCrudController">
-            <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>

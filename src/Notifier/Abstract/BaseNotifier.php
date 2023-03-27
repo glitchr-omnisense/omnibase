@@ -15,6 +15,7 @@ use Base\Service\SettingBag;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
 use Twig\Environment;
 
@@ -122,6 +123,8 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
     protected bool $debug;
 
+    protected ?string $mailer;
+
     /** * @var ?RecipientInterface */
     protected $technicalRecipient;
     /** * @var bool */
@@ -159,15 +162,16 @@ abstract class BaseNotifier implements BaseNotifierInterface
     }
     public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
     {
-        $this->twig          = $twig;
-        $this->notifier      = $notifier;
-        $this->policy        = $policy;
-        $this->router        = $router;
+        $this->twig           = $twig;
+        $this->notifier       = $notifier;
+        $this->policy         = $policy;
+        $this->router         = $router;
 
-        $this->adminRole          = $parameterBag->get("base.notifier.admin_role");
-        $this->options            = $parameterBag->get("base.notifier.options") ?? [];
+        $this->useMailer      = $parameterBag->get("base.notifier.mailer") && class_exists(Mailer::class);
+        $this->adminRole      = $parameterBag->get("base.notifier.admin_role");
+        $this->options        = $parameterBag->get("base.notifier.options") ?? [];
 
-        $this->testRecipients     = array_map(fn ($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
+        $this->testRecipients = array_map(fn ($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
 
         $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email");
         $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
@@ -361,6 +365,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         $channels = [];
         foreach ($this->getDefaultChannels($importance) as $channel) {
+
             // Replace email by email+ for user..
             // Users should not receive the default admin email sent by Symfony notifier
             if (str_starts_with($channel, "email")) {
@@ -381,6 +386,8 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
             // If recipient implement Email interface, check if email is available
             elseif (str_starts_with($channel, "email")) {
+
+                if (!$this->useMailer) continue;
                 if ($recipient instanceof EmailRecipientInterface && empty($recipient->getEmail())) {
                     continue;
                 }
@@ -426,9 +433,12 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
             // If recipient implement Email interface, check if email is available
             elseif (str_starts_with($channel, "email+")) {
+
+                if (!$this->useMailer) continue;
                 if ($recipient instanceof EmailRecipientInterface && empty($recipient->getEmail())) {
                     continue;
                 }
+                
             } elseif (str_starts_with($channel, "chat/")) {
                 $firstAdminRecipient = $this->getAdminRecipients()[0] ?? null;
                 if ($recipient != $firstAdminRecipient) {

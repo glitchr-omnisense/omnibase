@@ -31,6 +31,7 @@ use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 use Base\Traits\BaseTrait;
 use Throwable;
 use Exception;
+use Twig\Error\LoaderError;
 use UnexpectedValueException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Base\Database\Annotation\DiscriminatorEntry;
@@ -613,9 +614,9 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
         // Render html template to get back email title..
         // I was hoping to replace content with html(), but this gets overriden by Symfony notification
-        try {
-            $htmlTemplate = $this->getTwig()->render($this->htmlTemplate, $context);
-        } catch(\RuntimeException $e) {
+        try { $htmlTemplate = $this->getTwig()->render($this->htmlTemplate, $context); }
+        catch(\Twig\Error\LoaderError $e) { $htmlTemplate = $this->getTwig()->render("@Base/notifier/email.html.twig", $context); }
+        catch(\RuntimeException $e) {
             throw new UnexpectedValueException("Template \"$this->htmlTemplate\" not found.", 500, $e);
         }
 

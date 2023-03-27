@@ -26,6 +26,7 @@ trait CacheClearTrait
     protected function customFeatureWarnings(SymfonyStyle $io): void
     {
         $useCustomRouter     = $this->parameterBag->get("base.router.use_custom");
+        $useMailer           = $this->parameterBag->get("base.notifier.mailer");
         $useCustomLoader     = $this->parameterBag->get("base.twig.use_custom");
         $useCustomReader     = $this->parameterBag->get("base.annotations.use_custom");
         $useSettingBag       = $this->parameterBag->get("base.parameter_bag.use_setting_bag");
@@ -80,6 +81,14 @@ trait CacheClearTrait
             $io->write(" - Setting bag <info>'base.parameter_bag.use_setting_bag'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
         } else {
             $io->write(" - Setting bag <info>'base.parameter_bag.use_setting_bag'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+        }
+
+        if ($useMailer === null) {
+            $io->warning("Mailer is disabled in `base.yaml`".PHP_EOL."(configure 'base.notifier.mailer' boolean to remove this message).");
+        } elseif ($useMailer) {
+            $io->write(" - Mailer <info>'base.notifier.mailer'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
+        } else {
+            $io->write(" - Mailer <info>'base.notifier.mailer'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
         }
 
         //

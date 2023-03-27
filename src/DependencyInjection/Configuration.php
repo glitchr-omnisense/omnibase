@@ -313,6 +313,11 @@ class Configuration implements ConfigurationInterface
 
                     ->children()
 
+                        ->booleanNode('mailer')
+                            ->info('Enable mailer')
+                            ->defaultValue(true)
+                        ->end()
+
                         ->booleanNode('technical_loopback')
                             ->info('Do not allow sending email until loopback is removed')
                             ->defaultValue(true)
