@@ -80,6 +80,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
         }
 
         if ($values instanceof Collection) {
+
             foreach ($values as $key => $value) {
                 $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
                 $dataClass = $dataClass ?? $defaultClass;
@@ -90,12 +91,15 @@ class SelectConfigurator implements FieldConfiguratorInterface
                     $formattedValues[$key] = $this->autocomplete->resolve($value, $dataClass);
 
                     $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
+
                     if ($formattedValues[$key] && $dataClassCrudController) {
                         $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
                     }
                 }
             }
+
         } else {
+
             $value = $field->getValue();
 
             $field->setCustomOption(SelectField::OPTION_RENDER_FORMAT, "text");

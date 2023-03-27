@@ -351,7 +351,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $viewData = $this->entityHydrator->hydrate(
                 is_object($viewData) ? $viewData : $options["class"],
-                $entries instanceof Collection ? $entries->toArray() : $entries, [], EntityHydrator::CLASS_METHODS
+                $entries instanceof Collection ? $entries->toArray() : $entries, [], EntityHydrator::CLASS_METHODS|EntityHydrator::IGNORE_NULLS
             );
 
         } elseif ($viewData instanceof PersistentCollection) {

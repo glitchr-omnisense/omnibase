@@ -2791,7 +2791,10 @@ namespace {
 
     function is_serialized($str): bool
     {
-        return is_string($str) && ($str == 'b:0;' || @unserialize($str) !== false);
+        try { $ret = unserialize($object); }
+        catch (Exception $e) { return false; }
+
+        return is_string($str) && ($str == 'b:0;' || $ret !== false);
     }
     function is_serializable($object): bool
     {

@@ -2,6 +2,7 @@
 
 namespace Base\Entity\User;
 
+use Base\Entity\User;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Service\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -33,11 +34,13 @@ class Address implements IconizeInterface
         return ["fas fa-address-card"];
     }
 
-    public function __construct(?Address $address = null)
+    public function __construct(?string $name = null, ?Address $address = null)
     {
         if ($address) {
             object_hydrate($this, $address);
         }
+
+        $this->name = $name;
     }
 
     /**
@@ -90,7 +93,7 @@ class Address implements IconizeInterface
     {
         return $this->state;
     }
-    public function setState(string $state): self
+    public function setState(?string $state): self
     {
         $this->state = $state;
         return $this;
@@ -118,7 +121,7 @@ class Address implements IconizeInterface
     {
         return $this->zipCode;
     }
-    public function setZipCode(?string $zipCode): self
+    public function setZipCode(string $zipCode): self
     {
         $this->zipCode = $zipCode;
         return $this;
@@ -187,6 +190,11 @@ class Address implements IconizeInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $additional;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="addresses")
+     */
+    private $user;
     public function getAdditional(): ?string
     {
         return $this->additional;
@@ -194,6 +202,18 @@ class Address implements IconizeInterface
     public function setAdditional(?string $additional): self
     {
         $this->additional = $additional;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

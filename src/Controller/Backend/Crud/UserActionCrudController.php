@@ -6,6 +6,7 @@ use Base\Controller\Backend\AbstractCrudController;
 use Base\Controller\Backend\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 
 class UserActionCrudController extends AbstractCrudController
@@ -18,6 +19,11 @@ class UserActionCrudController extends AbstractCrudController
     public static function getPreferredIcon(): ?string
     {
         return null;
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters->add("roles");
     }
 
     public function configureActions(Actions $actions): Actions

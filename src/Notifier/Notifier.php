@@ -7,6 +7,7 @@ use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\Form\Model\ContactModel;
 use Base\Notifier\Abstract\BaseNotifier;
+use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Routing\Router;
 
 class Notifier extends BaseNotifier implements NotifierInterface
@@ -61,8 +62,9 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification = new Notification("contact.adminNotification");
         $notification->setHtmlTemplate("email.html.twig");
 
-        $name = $this->parameterBag->get("base.settings.mail.name");
-        $email = $this->parameterBag->get("base.settings.mail.contact");
+        $name = $this->settingBag->getScalar("base.settings.mail.name");
+        $email = $this->settingBag->getScalar("base.settings.mail.contact");
+
         $adminRecipient = new Recipient(mailformat([], $name, $email));
 
         $notification->addRecipient($adminRecipient);

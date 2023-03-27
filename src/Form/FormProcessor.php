@@ -76,7 +76,9 @@ class FormProcessor implements FormProcessorInterface
     public function setData(mixed $data): self
     {
         $array = is_array($data) ? $data : $this->getEntityHydrator()->dehydrate($data) ?? [];
+            dump($array);
         $array = array_map(fn ($c) => $c instanceof PersistentCollection ? $this->getEntityHydrator()->dehydrate($c) : $c, $array);
+            dump($array);
 
         $formData = $this->form->getData();
         if (is_object($this->form->getData())) {

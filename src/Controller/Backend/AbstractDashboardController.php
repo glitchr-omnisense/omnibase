@@ -472,11 +472,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
-                ->unsetAll()
-                ->setController($crudController)
-                ->setAction(Action::INDEX)
-                // ->set(EA::MENU_INDEX, count($menu))
-                ->generateUrl();
+                 ->unsetAll()
+                 ->setController($crudController)
+                 ->setAction(Action::INDEX)
+                 ->set("filters[roles][comparison]", "like")
+                 ->set("filters[roles][value]", $role)
+                 ->set(EA::MENU_INDEX, count($menu))
+                 ->generateUrl();
 
             if (empty($values)) {
                 $item = MenuItem::linkToUrl($label, $icon, $url);
@@ -494,10 +496,14 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                     }
 
                     $url = $this->adminUrlGenerator
-                        ->unsetAll()
-                        ->setController($crudController)
-                        ->setAction(Action::INDEX)
-                        ->generateUrl();
+                         ->unsetAll()
+                         ->setController($crudController)
+                         ->setAction(Action::INDEX)
+                         ->set("filters[roles][comparison]", "like")
+                         ->set("filters[roles][value]", $role)
+                         ->set(EA::MENU_INDEX, count($menu))
+                         ->set(EA::SUBMENU_INDEX, count($subItems))
+                         ->generateUrl();
 
                     $subItems[] = MenuItem::linkToUrl($label, $icon, $url);
                 }

@@ -3,6 +3,7 @@
 namespace Base\Field\Configurator;
 
 use App\Controller\Backend\Crud\UserCrudController;
+use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\RoleField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -29,9 +30,10 @@ class RoleConfigurator extends SelectConfigurator
                 continue;
             }
 
+            $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn(get_class($entityDto->getInstance()));
             $url = $this->adminUrlGenerator
                         ->unsetAll()
-                        ->setController(UserCrudController::class)
+                        ->setController($dataClassCrudController ?? UserCrudController::class)
                         ->setAction(Action::INDEX)
                         ->set("filters[roles][comparison]", "like")
                         ->set("filters[roles][value]", $role)

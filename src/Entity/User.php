@@ -2,6 +2,7 @@
 
 namespace Base\Entity;
 
+use Base\Entity\User\Address;
 use Base\Exception\MissingLocaleException;
 
 use App\Entity\Thread\Like;
@@ -132,6 +133,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->followedThreads = new ArrayCollection();
         $this->mentions = new ArrayCollection();
         $this->likes = new ArrayCollection();
+
+        $this->addresses = new ArrayCollection();
 
         $this->setTimezone();
         $this->setLocale();
@@ -996,5 +999,37 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isOnline(): bool
     {
         return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getOnlineDelay().' seconds ago');
+    }
+
+    /**
+     * @ORM\OneToMany(targetEntity=Address::class, mappedBy="user")
+     */
+    protected $addresses;
+    public function getAddresses(): Collection { return $this->addresses; }
+    public function getAddress(int $i = 0): ?Address
+    {
+        return $this->addresses[$i] ?? null;
+    }
+
+    public function addAddress(Address $address): self
+    {
+        if (!$this->addresses->contains($address)) {
+            $this->addresses[] = $address;
+            $address->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAddress(Address $address): self
+    {
+        if ($this->addresses->removeElement($address)) {
+            // set the owning side to null (unless already changed)
+            if ($address->getUser() === $this) {
+                $address->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }

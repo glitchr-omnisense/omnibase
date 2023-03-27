@@ -39,7 +39,8 @@
                         <ul class="submenu">
                             {% for menuSubItem in menuItem.subItems %}
                                 {% block menu_subitem %}
-                                    <li class="{{ menuSubItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ ea.mainMenu.isSelected(menuSubItem) or ea.isActive(menuSubItem.linkUrl) ? 'active' }}">
+
+                                    <li class="{{ menuSubItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuSubItem.isSelected(menuSubItem) or ea.isActive(menuSubItem.linkUrl) ? 'active' }}">
                                         {{ _self.render_menu_item(menuSubItem, ea.getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea.getTranslationDomain())|raw }}
                                     </li>
                                 {% endblock menu_subitem %}

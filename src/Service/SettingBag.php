@@ -225,6 +225,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             if ($settings instanceof Query) {
                 $settings = $settings->getResult();
             }
+
         } catch(TableNotFoundException  $e) {
             throw $e;
         } catch(EntityNotFoundException $e) {
@@ -295,9 +296,8 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)];
         }
 
-        try {
-            $values = $this->getRaw($path, $useCache) ?? [];
-        } catch (Exception $e) {
+        try { $values = $this->getRaw($path, $useCache) ?? []; }
+        catch (Exception $e) {
             throw $e;
             return [];
         }
