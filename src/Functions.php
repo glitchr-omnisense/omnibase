@@ -345,6 +345,7 @@ namespace {
     {
         // At least one class detection
         if (is_array($instanceOf)) {
+
             foreach ($instanceOf as $_instanceOf) {
                 if (is_instanceof($object_or_class, $_instanceOf)) {
                     return true;
