@@ -26,7 +26,7 @@ class WorkflowState extends EnumType implements IconizeInterface
             self::APPROVED  => ["fas fa-check-circle"],
             self::PENDING   => ["fas fa-pause-circle"],
             self::REJECTED  => ["fas fa-times-circle"],
-            self::REVIEWING => ["fas fa-times-circle"],
+            self::REVIEWING => ["fas fa-search"],
         ];
     }
 }
