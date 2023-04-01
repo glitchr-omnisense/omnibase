@@ -32,9 +32,13 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getHost(?string $locale = null, ?string $environment = null): string;
     public function getHostFallback(?string $locale = null, ?string $environment = null): string;
     public function getMachine(?string $locale = null, ?string $environment = null): ?string;
+    public function getMachineFallback(?string $locale = null, ?string $environment = null): ?string;
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string;
+    public function getSubdomainFallback(?string $locale = null, ?string $environment = null): ?string;
     public function getDomain(?string $locale = null, ?string $environment = null): string;
+    public function getDomainFallback(?string $locale = null, ?string $environment = null): string;
     public function getPort(?string $locale = null, ?string $environment = null): ?int;
+    public function getPortFallback(?string $locale = null, ?string $environment = null): ?int;
 
     public function getUrl(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string;
     public function getAssetUrl(string $name, ?string $packageName = null): string;

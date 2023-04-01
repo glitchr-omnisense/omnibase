@@ -84,6 +84,7 @@ class AdvancedRouter implements RouterInterface
     protected bool $useAdvancedFeatures;
     protected bool $keepMachine;
     protected bool $keepSubdomain;
+    protected bool $keepDomain;
 
     public function getLocaleLang(?string $lang   = null): string
     {
@@ -121,6 +122,7 @@ class AdvancedRouter implements RouterInterface
         $this->useAdvancedFeatures = $parameterBag->get("base.router.use_custom") ?? false;
         $this->keepMachine     = $parameterBag->get("base.router.keep_machine");
         $this->keepSubdomain   = $parameterBag->get("base.router.keep_subdomain");
+        $this->keepDomain   = $parameterBag->get("base.router.keep_domain");
     }
 
     public function useAdvancedFeatures(): bool
@@ -320,6 +322,10 @@ class AdvancedRouter implements RouterInterface
     {
         return $this->keepSubdomain;
     }
+    public function keepDomain(): bool
+    {
+        return $this->keepDomain;
+    }
 
     public function getContext(): RequestContext
     {
@@ -405,6 +411,7 @@ class AdvancedRouter implements RouterInterface
         $compiledRoutes = $generator->getCompiledRoutes();
         $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName.".".$lang] ?? null;
         if ($compiledRoute !== null) {
+
             $args = array_transforms(fn ($k, $v): array => [$k, in_array($k, [3,4]) ? $matcher->path($v) : $v], $compiledRoute);
             $locale = $args[1]["_locale"] ?? null;
             $locale = $locale ? ["_locale" => $locale] : [];
@@ -425,7 +432,7 @@ class AdvancedRouter implements RouterInterface
         return null;
     }
 
-    protected function getHostParameters(?string $locale = null, ?string $environment = null): ?array
+    protected function getFallbackParameters(?string $locale = null, ?string $environment = null): ?array
     {
         $fallbacks   = array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getLocale($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
@@ -442,7 +449,7 @@ class AdvancedRouter implements RouterInterface
 
     public function getScheme(?string $locale = null, ?string $environment = null): string
     {
-        $host = $this->getHostParameters($locale, $environment);
+        $host = $this->getFallbackParameters($locale, $environment);
 
         $use_https ??= $host["use_https"] ?? $_SERVER["REQUEST_SCHEME"] ?? true;
         return $use_https ? "https" : "http";
@@ -450,7 +457,7 @@ class AdvancedRouter implements RouterInterface
 
     public function getBaseDir(?string $locale = null, ?string $environment = null): string
     {
-        $host = $this->getHostParameters($locale, $environment);
+        $host = $this->getFallbackParameters($locale, $environment);
         if (array_key_exists("SYMFONY_PROJECT_DEFAULT_ROUTE_PATH", $_SERVER)) {
             return $_SERVER['SYMFONY_PROJECT_DEFAULT_ROUTE_PATH'];
         }
@@ -463,14 +470,9 @@ class AdvancedRouter implements RouterInterface
         return $baseDir;
     }
 
-    public function getHost(?string $locale = null, ?string $environment = null): string
-    {
-        return $_SERVER['HTTP_HOST'] ?? $this->getHostFallback();
-    }
-
     public function getHostFallback(?string $locale = null, ?string $environment = null): string
     {
-        $host = $this->getHostParameters($locale, $environment);
+        $host = array_merge($this->getFallbackParameters($locale, $environment), parse_url(get_url()));
 
         $machine = $host["machine"] ?? null;
         if ($machine) {
@@ -484,34 +486,62 @@ class AdvancedRouter implements RouterInterface
 
         $domain = $host["domain"] ?? null;
 
-        $port   = $host["port"] ?? null;
-        if ($port == 80 || $port == 443) {
-            $port = null;
-        }
-        if ($port) {
-            $port = ":" . $port;
-        }
-
-        return $machine.$subdomain.$domain.$port;
+        return $machine.$subdomain.$domain;
     }
 
-    public function getMachine(?string $locale = null, ?string $environment = null): ?string
+    public function getHost(?string $locale = null, ?string $environment = null): string
     {
-        return $this->getHostParameters($locale, $environment)["machine"] ?? null;
+        $host = parse_url2(get_url());
+        $machine = $host["machine"] ?? null;
+        if ($machine) {
+            $machine = $machine . ".";
+        }
+
+        $subdomain = $host["subdomain"] ?? null;
+        if ($subdomain) {
+            $subdomain = $subdomain . ".";
+        }
+
+        $domain = $host["domain"] ?? null;
+
+        $host = $machine.$subdomain.$domain;
+        return $host ? $host : $this->getHostFallback();
     }
-    public function getSubdomain(?string $locale = null, ?string $environment = null): ?string
+
+    public function getPortFallback(?string $locale = null, ?string $environment = null): ?int
     {
-        return $this->getHostParameters($locale, $environment)["subdomain"] ?? null;
+        $port = parse_url2(get_url())["port"] ?? $this->getFallbackParameters($locale, $environment)["port"] ?? null;
+        return in_array($port, [80, 443]) ? null : $port;
     }
-    public function getDomain(?string $locale = null, ?string $environment = null): string
-    {
-        return $this->getHostParameters($locale, $environment)["domain"] ?? null;
-    }
+
     public function getPort(?string $locale = null, ?string $environment = null): ?int
     {
-        $host = $this->getHostParameters($locale, $environment);
-        $port = $host["port"] ?? null;
+        $port = $this->getPortFallback($locale, $environment);
         return in_array($port, [80, 443]) ? null : $port;
+    }
+
+
+    public function getMachineFallback(?string $locale = null, ?string $environment = null): ?string { return $this->getFallbackParameters($locale, $environment)["machine"] ?? null; }
+    public function getMachine(?string $locale = null, ?string $environment = null): ?string
+    {
+        return parse_url2(get_url())["machine"] ?? $this->getMachineFallback($locale, $environment)["machine"] ?? null;
+    }
+
+    public function getSubdomainFallback(?string $locale = null, ?string $environment = null): ?string
+    {
+        $subdomain = $this->getFallbackParameters($locale, $environment)["subdomain"];
+        return $subdomain ? $subdomain : null;
+    }
+
+    public function getSubdomain(?string $locale = null, ?string $environment = null): ?string
+    {
+        return parse_url2(get_url())["subdomain"] ?? $this->getSubdomainFallback($locale, $environment)["subdomain"] ?? null;
+    }
+
+    public function getDomainFallback(?string $locale = null, ?string $environment = null): string { return $this->getFallbackParameters($locale, $environment)["domain"] ?? null; }
+    public function getDomain(?string $locale = null, ?string $environment = null): string
+    {
+        return parse_url2(get_url())["domain"] ?? $this->getDomainFallback($locale, $environment)["domain"] ?? null;
     }
 
     public function getRouteIndex(): string

@@ -63,10 +63,16 @@ class RouterSubscriber implements EventSubscriberInterface
         //
         // If no host specified in Route, then check the list of permitted subdomain
         if ($route && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route)) {
+
             $url = get_url(); // Redirect to proper host fallback if required.
             if (!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback()) {
-                $url = parse_url($url);
-                $url["host"] = $this->router->getHostFallback();
+
+                $url = parse_url2($url);
+                if(!$this->router->keepDomain()) {
+
+                    $url["host"] = $this->router->getHostFallback();
+                    $url["port"] = $this->router->getPortFallback();
+                }
 
                 $url = compose_url(
                     $url["scheme"]  ?? null,
@@ -75,14 +81,17 @@ class RouterSubscriber implements EventSubscriberInterface
                     null,
                     null,
                     $url["host"] ?? null,
-                    null,
+                    $url["port"] ?? null,
                     $url["path"]    ?? null,
                     $url["query"]     ?? null
                 );
             }
 
             // Redirect to sanitized url
-            $event->setResponse(new RedirectResponse($this->router->format($url)));
+            $formattedUrl = $this->router->format($url);
+            if($formattedUrl != get_url()) {
+                $event->setResponse(new RedirectResponse($formattedUrl));
+            }
             return $event->stopPropagation();
         }
 

@@ -228,6 +228,11 @@ class Configuration implements ConfigurationInterface
                             ->defaultValue(true)
                             ->end()
 
+                        ->booleanNode('keep_domain')
+                            ->info('Keep domain name if required by route')
+                            ->defaultValue(false)
+                            ->end()
+
                         ->booleanNode('ip_access')
                             ->info('Allow accessing by')
                             ->defaultValue(false)

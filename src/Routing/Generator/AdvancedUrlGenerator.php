@@ -234,14 +234,15 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocalizer()->getDefaultLocale());
         $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", $this->getLocalizer()->getDefaultLocaleLang());
         $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", null) ?? [];
+
         $permittedHosts = array_transforms(fn ($k, $a): ?array => $a["env"] == $this->getRouter()->getEnvironment() ? [$k, $a["regex"]] : null, $permittedHosts);
-        if (!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain()) {
-            $permittedHosts = "^$";
+        if (!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain() && !$this->getRouter()->keepDomain()) {
+            $permittedHosts[] = "^$";
         } // Special case if both subdomain and machine are unallowed
 
         $parse = parse_url2($url);
 
-        $allowedHost = empty($permittedHosts);
+        $allowedHost = empty($permittedHosts) || !$this->getRouter()->keepDomain();
         foreach ($permittedHosts as $permittedHost) {
             $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);
         }
@@ -249,24 +250,33 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // Special case for login form.. to be redirected to rescue authenticator if no access right
         $routeName = $this->getRouter()->getRouteName();
         if (!LoginFormAuthenticator::isSecurityRoute($routeName) && !RescueFormAuthenticator::isSecurityRoute($routeName)) {
-            // Special case for WWW subdomain
-            if (!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse) && !$allowedHost) {
-                $parse["subdomain"] = "www";
-            } elseif (array_key_exists("subdomain", $parse) && !$allowedHost) {
-                if ($parse["subdomain"] === "www") {
-                    $parse = array_key_removes($parse, "subdomain");
-                } else {
-                    $parse["subdomain"] = "www";
-                }
-            }
 
             if (array_key_exists("machine", $parse) && !$this->getRouter()->keepMachine()) {
                 $parse = array_key_removes($parse, "machine");
             }
 
-            if (array_key_exists("subdomain", $parse) && !$this->getRouter()->keepSubdomain()) {
-                if (array_key_exists("machine", $parse) || !$this->getRouter()->keepMachine()) {
-                    $parse = array_key_removes($parse, "subdomain");
+            // Special case for WWW subdomain
+            if($this->getRouter()->keepSubdomain()) {
+
+                if (!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse) && !$allowedHost) {
+
+                    $parse["subdomain"] = $this->getRouter()->getSubdomainFallback();
+
+                } elseif (array_key_exists("subdomain", $parse) && !$allowedHost) {
+
+                    if ($parse["subdomain"] === $this->getRouter()->getSubdomainFallback()) {
+                        $parse = array_key_removes($parse, "subdomain");
+                    } else {
+                        $parse["subdomain"] = $this->getRouter()->getSubdomainFallback();
+                    }
+                }
+
+            } else {
+
+                if (array_key_exists("subdomain", $parse)) {
+                    if (array_key_exists("machine", $parse) || !$this->getRouter()->keepMachine()) {
+                        $parse = array_key_removes($parse, "subdomain");
+                    }
                 }
             }
         }
