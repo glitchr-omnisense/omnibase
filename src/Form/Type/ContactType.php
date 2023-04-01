@@ -8,6 +8,7 @@ use Base\Field\Type\PasswordType;
 use Base\Field\Type\SubmitType;
 use Base\Form\Model\ContactModel;
 use Base\Form\Model\UserProfileModel;
+use Google\Service\GrService;
 use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -26,9 +27,16 @@ class ContactType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults([
-            'data_class' => ContactModel::class
-        ]);
+        $defaults = ['data_class' => ContactModel::class];
+
+        if(class_exists(GrService::class)) {
+
+            $defaults["captcha_protection"] = true;
+            $defaults["captcha_min_attempts"] = 0;
+            $defaults["captcha_api"] = GrService::APIV2;
+        }
+
+        $resolver->setDefaults($defaults);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -37,8 +45,7 @@ class ContactType extends AbstractType
         $builder->add('email', EmailType::class);
         $builder->add('subject', TextType::class, ["required" => false]);
         $builder->add('message', TextareaType::class);
-        $builder->add('attachments', FileType::class, ["required" => false, "multiple" => true, "dropzone" => null
-        ]);
+        $builder->add('attachments', FileType::class, ["required" => false, "multiple" => true, "dropzone" => null]);
         $builder->add('submit', SubmitType::class, ["confirmation" => true]);
         $builder->add('reset', ResetType::class);
     }

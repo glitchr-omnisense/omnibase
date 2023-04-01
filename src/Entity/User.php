@@ -116,7 +116,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->getUserIdentifier();
     }
-    public function __construct($email)
+    public function __construct(?string $email = null)
     {
         $this->email = $email;
 
