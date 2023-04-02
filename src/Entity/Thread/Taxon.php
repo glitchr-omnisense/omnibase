@@ -38,7 +38,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-sitemap"];
+        return ["fa-solid fa-sitemap"];
     }
 
     public function __toString()

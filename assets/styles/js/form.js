@@ -54,7 +54,6 @@ window.addEventListener('load', function(event) {
         var submitter = e.originalEvent ? e.originalEvent.submitter : undefined;
         if (submitter) {
 
-            $(submitter).addClass('disabled');
             $(".tooltip").remove();
             $(".popover").remove();
         }
@@ -78,8 +77,6 @@ window.addEventListener('load', function(event) {
                     location.hash = navButton.data("bs-target");
                 }
 
-                if (submitter != undefined)
-                    $(submitter).removeClass("disabled").removeAttr("disabled");
             }
 
             var el = $(this).find(":invalid, .has-error");

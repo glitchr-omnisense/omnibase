@@ -20,7 +20,7 @@ class ImageAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-image"];
+        return ["fa-solid fa-image"];
     }
 
     public static function getType(): string

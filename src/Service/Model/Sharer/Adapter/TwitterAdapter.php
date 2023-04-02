@@ -16,6 +16,6 @@ class TwitterAdapter extends AbstractSharerAdapter
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fab fa-twitter", "fab fa-twitter-p", "fab fa-twitter-square"];
+        return ["fa-brands fa-twitter", "fa-brands fa-twitter-p", "fa-brands fa-twitter-square"];
     }
 }

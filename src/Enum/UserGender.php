@@ -19,10 +19,10 @@ class UserGender extends EnumType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::MALE       => ["fas fa-fw fa-mars"],
-            self::FEMALE     => ["fas fa-fw fa-venus"],
-            self::HYBRID     => ["fas fa-fw fa-mercury"],
-            self::GENDERLESS => ["fas fa-fw fa-genderless"]
+            self::MALE       => ["fa-solid fa-fw fa-mars"],
+            self::FEMALE     => ["fa-solid fa-fw fa-venus"],
+            self::HYBRID     => ["fa-solid fa-fw fa-mercury"],
+            self::GENDERLESS => ["fa-solid fa-fw fa-genderless"]
         ];
     }
 }

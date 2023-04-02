@@ -196,8 +196,9 @@ class Translator implements TranslatorInterface
         return trim($trans ?? "");
     }
 
-    protected function parseClass($class, string $parseBy = self::PARSE_NAMESPACE): string
+    public function parseClass($class, string $parseBy = self::PARSE_NAMESPACE): string
     {
+        $class = is_object($class) ? get_class($class) : $class;
         switch($parseBy) {
             case self::PARSE_EXTENDS:
 

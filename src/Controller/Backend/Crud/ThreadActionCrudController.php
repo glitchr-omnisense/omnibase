@@ -37,7 +37,7 @@ class ThreadActionCrudController extends AbstractCrudController
     }
     public function configureActions(Actions $actions): Actions
     {
-        $batchActionPublish = Action::new('batchActionPublish', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_publish', 'fa fa-check')
+        $batchActionPublish = Action::new('batchActionPublish', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_publish', 'fa-solid fa-check')
             ->linkToCrudAction('batchActionPublish')
             ->addCssClass('btn btn-primary text-success');
 

@@ -20,7 +20,7 @@ class HyperpatternAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-share-alt"];
+        return ["fa-solid fa-share-alt"];
     }
 
     public static function getType(): string
@@ -39,7 +39,7 @@ class HyperpatternAdapter extends AbstractAdapter
         ];
     }
 
-    public function __construct(string $label = "", ?string $code = null, ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
+    public function __construct(string $label = "", ?string $code = null, ?string $icon = "fa-solid fa-laptop", string $pattern = "https://{0}")
     {
         parent::__construct($label, $code);
         $this->setIcon($icon);

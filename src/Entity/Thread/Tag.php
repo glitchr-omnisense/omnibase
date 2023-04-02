@@ -38,7 +38,7 @@ class Tag implements TranslatableInterface, IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-tags"];
+        return ["fa-solid fa-tags"];
     }
 
     public function __toString()

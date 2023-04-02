@@ -18,7 +18,7 @@ class TrashBall extends AbstractExtension
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-trash-alt"];
+        return ["fa-solid fa-trash-alt"];
     }
 
     /**

@@ -26,7 +26,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-tools"];
+        return ["fa-solid fa-tools"];
     }
 
     public function __toString()

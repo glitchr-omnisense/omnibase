@@ -33,7 +33,7 @@ class EmailField implements FieldInterface
             ->setFormType(EmailType::class)
             ->setTextAlign(TextAlign::CENTER)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON)
-            ->setCustomOption(self::OPTION_ICON_CUSTOM, "fas fa-at")
+            ->setCustomOption(self::OPTION_ICON_CUSTOM, "fa-solid fa-at")
             ->setDefaultColumns('col-md-6 col-xxl-5');
     }
 

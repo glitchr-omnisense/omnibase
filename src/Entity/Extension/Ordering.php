@@ -18,7 +18,7 @@ class Ordering extends AbstractExtension
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-sort-alpha-down"];
+        return ["fa-solid fa-sort-alpha-down"];
     }
 
     public function supports(): bool

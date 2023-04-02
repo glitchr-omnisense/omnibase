@@ -54,7 +54,7 @@ abstract class AbstractCompression implements CompressionInterface
     abstract protected function encodeHex(string $hex): string|false;
     public function encode(string $data): ?string
     {
-        $hex = bin2hex($this->encodeHex(bin2hex($data)));
+        $hex = $this->encodeHex(bin2hex($data));
         return $hex ? $hex : null;
     }
 
@@ -62,7 +62,7 @@ abstract class AbstractCompression implements CompressionInterface
     public function decode(string $hex): ?string
     {
         try {
-            $hex = hex2bin($this->decodeHex(hex2bin($hex)));
+            $hex = hex2bin($this->decodeHex($hex));
             if ($hex === false) {
                 return null;
             }

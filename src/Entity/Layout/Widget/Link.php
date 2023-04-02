@@ -27,7 +27,7 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-share-square"];
+        return ["fa-solid fa-share-square"];
     }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH /* not used */): ?string

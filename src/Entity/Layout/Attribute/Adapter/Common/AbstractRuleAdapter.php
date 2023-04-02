@@ -30,7 +30,7 @@ abstract class AbstractRuleAdapter extends AbstractAdapter implements RuleAdapte
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-poll"];
+        return ["fa-solid fa-poll"];
     }
 
     public function compliesWith(mixed $value, mixed $subject): bool

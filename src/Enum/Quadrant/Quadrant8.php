@@ -18,10 +18,10 @@ class Quadrant8 extends Quadrant
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::NE => ["fas fa-chevron-up    fa-rotate-45"],
-            self::SE => ["fas fa-chevron-right fa-rotate-45"],
-            self::SW => ["fas fa-chevron-down  fa-rotate-45"],
-            self::NW => ["fas fa-chevron-left  fa-rotate-45"],
+            self::NE => ["fa-solid fa-chevron-up    fa-rotate-45"],
+            self::SE => ["fa-solid fa-chevron-right fa-rotate-45"],
+            self::SW => ["fa-solid fa-chevron-down  fa-rotate-45"],
+            self::NW => ["fa-solid fa-chevron-left  fa-rotate-45"],
         ];
     }
 

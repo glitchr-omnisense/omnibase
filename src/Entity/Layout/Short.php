@@ -31,7 +31,7 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-compress-alt fa-rotate-45"];
+        return ["fa-solid fa-compress-alt fa-rotate-45"];
     }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string

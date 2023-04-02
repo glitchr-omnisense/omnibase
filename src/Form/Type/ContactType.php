@@ -32,8 +32,7 @@ class ContactType extends AbstractType
         if(class_exists(GrService::class)) {
 
             $defaults["captcha_protection"] = true;
-            $defaults["captcha_min_attempts"] = 0;
-            $defaults["captcha_api"] = GrService::APIV2;
+            $defaults["captcha_api"] = GrService::APIV3;
         }
 
         $resolver->setDefaults($defaults);

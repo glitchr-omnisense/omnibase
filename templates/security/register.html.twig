@@ -16,7 +16,7 @@
     content: "\f1e2"; /* FontAwesome Unicode */
     font-size: 15pt;
     font-weight: 900;
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 6 Free";
 
     display: inline-block;
     width: 1.2em;
@@ -47,7 +47,7 @@
             <div class="input-group form-group mb-2">
                 <div class="input-group-prepend">
                     <span class="input-group-text">
-                        <i class="fa-fw fas fa-at {{ form.email.vars.required ? "required" : "" }}"></i>
+                        <i class="fa-fw fa-solid fa-at {{ form.email.vars.required ? "required" : "" }}"></i>
                     </span>
                 </div>
                 {{ form_widget(form.email, {'attr': {'placeholder': '@forms.register.email'|trans}}) }}
@@ -60,11 +60,11 @@
 
             <div class="input-group form-group mb-2">
                 <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fa-fw fas fa-lock-open  {{ form.plainPassword.first.vars.required ? "required" : "" }}"></i></span>
+                    <span class="input-group-text"><i class="fa-fw fa-solid fa-lock-open  {{ form.plainPassword.first.vars.required ? "required" : "" }}"></i></span>
                 </div>
                 {{ form_widget(form.plainPassword.first, {'attr': {'placeholder': '@forms.register.password'|trans}}) }}
                 <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fa-fw fas fa-lock {{ form.plainPassword.second.vars.required ? "required" : "" }}"></i></span>
+                    <span class="input-group-text"><i class="fa-fw fa-solid fa-lock {{ form.plainPassword.second.vars.required ? "required" : "" }}"></i></span>
                 </div>
                 {{ form_widget(form.plainPassword.second, {'attr': {'placeholder': '@forms.register.passwordConfirm'|trans}}) }}
             </div>

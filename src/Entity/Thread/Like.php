@@ -29,13 +29,13 @@ class Like implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-thumbs-up"];
+        return ["fa-solid fa-thumbs-up"];
     }
 
     public function __construct(?User $user = null)
     {
         $this->user = $user;
-        $this->icon = "fas fa-thumbs-up";
+        $this->icon = "fa-solid fa-thumbs-up";
     }
 
     /**

@@ -104,8 +104,8 @@ namespace {
     // Value (4) => 180 degrees, mirrored: image has been flipped back-to-front and is upside down.
     // Value (5) => 90 degrees: image has been flipped back-to-front and is on its side.
     // Value (6) => 90 degrees, mirrored: image is on its side.
-    // Value (7) => 270 degrees: image has been flipped back-to-front and is on its far side.
-    // Value (8) => 270 degrees, mirrored: image is on its far side.
+    // Value (7) => 270 degrees: image has been flipped back-to-front and is on its fa-regular side.
+    // Value (8) => 270 degrees, mirrored: image is on its fa-regular side.
     function getimageorientation(string $fname): int
     {
         try {

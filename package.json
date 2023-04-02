@@ -17,7 +17,7 @@
 
     "@glitchr/ajaxer": "^1.0",
     "@glitchr/breakpoints": "^1.0",
-    "@fortawesome/fontawesome-free": "^5.15.4",
+    "@fortawesome/fontawesome-free": "^6.4",
     "@glitchr/clipboardjs": "^1.0",
     "@glitchr/cookie": "^1.0",
     "@glitchr/dockjs": "^1.0",

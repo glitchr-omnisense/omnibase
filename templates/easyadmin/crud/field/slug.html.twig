@@ -11,7 +11,7 @@
             {{ clipboard("copy", field.formattedValue['url']) }}
             <a href="{{ field.formattedValue['url'] }}">{{leadingHash ~ field.formattedValue['slug']|raw|nl2br }}</a>
         {% else %}
-            {{ "fa fa-question-circle"|iconify|first|raw }}
+            {{ "fa-solid fa-question-circle"|iconify|first|raw }}
             #{{ field.formattedValue['slug']|raw|nl2br }}
         {% endif %}
     </span>

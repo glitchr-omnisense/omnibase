@@ -19,10 +19,10 @@ class SpamScore extends EnumType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::NO_TEXT      => ["fas fa-file"],
-            self::NOT_SPAM     => ["fas fa-file-alt"],
-            self::MAYBE_SPAM   => ["fas fa-question-circle"],
-            self::BLATANT_SPAM => ["fas fa-exclamation-circle"],
+            self::NO_TEXT      => ["fa-solid fa-file"],
+            self::NOT_SPAM     => ["fa-solid fa-file-alt"],
+            self::MAYBE_SPAM   => ["fa-solid fa-question-circle"],
+            self::BLATANT_SPAM => ["fa-solid fa-exclamation-circle"],
         ];
     }
 

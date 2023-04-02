@@ -64,7 +64,7 @@ class WidgetItem
 
         if (!$icon) {
             $icon = class_implements_interface($entityFqcnOrCrudController, IconizeInterface::class) ? $entityFqcnOrCrudController::__iconizeStatic()[0] : null;
-            $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
+            $icon = $crudController::getPreferredIcon() ?? $icon ?? "fa-solid fa-question-circle";
         }
 
         return new $widgetItem($label, $icon, $crudController);
@@ -109,7 +109,7 @@ class WidgetItem
 
             if (!$icon) {
                 $icon = class_implements_interface($labelOrEntityFqcn, IconizeInterface::class) ? $labelOrEntityFqcn::__iconizeStatic()[0] : null;
-                $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
+                $icon = $crudController::getPreferredIcon() ?? $icon ?? "fa-solid fa-question-circle";
             }
         } else {
             $label = $labelOrEntityFqcn;

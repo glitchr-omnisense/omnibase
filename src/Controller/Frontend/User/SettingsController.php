@@ -67,7 +67,7 @@ class SettingsController extends AbstractController
 
     /**
      * @Route("/settings", name="user_settings")
-     * @Iconize("fas fa-fw fa-user-cog")
+     * @Iconize("fa-solid fa-fw fa-user-cog")
      */
     public function Settings()
     {

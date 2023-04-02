@@ -42,7 +42,7 @@ class AttachmentCrudController extends WidgetCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        $downloadAction = Action::new('download', "Download", 'fas fa-fw fa-download')
+        $downloadAction = Action::new('download', "Download", 'fa-solid fa-fw fa-download')
             ->linkToCrudAction("downloadAttachment");
 
         return parent::configureActions($actions)->add(Crud::PAGE_INDEX, $downloadAction);

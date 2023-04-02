@@ -15,9 +15,9 @@
 {% if  renderFormat == 'image' or renderFormat == 'avatar' %}
 
     {% if renderFormat == 'avatar' %}
-        {% set icon = '<i class="fas fa-fw fa-user-circle fa-3x"></i>' %}
+        {% set icon = '<i class="fa-solid fa-fw fa-user-circle fa-3x"></i>' %}
     {% else %}
-        {% set icon = '<i class="fas fa-fw fa-image fa-2x"></i>' %}
+        {% set icon = '<i class="fa-solid fa-fw fa-image fa-2x"></i>' %}
     {% endif %}
 
     {% if field.formattedValue is iterable %}
@@ -71,7 +71,7 @@
 
         {% if field.value is not empty %}
         <div data-toggle="tooltip" data-placement="top" title="File is missing">
-            <i class="fas fa-fw fa-exclamation-triangle"></i>
+            <i class="fa-solid fa-fw fa-exclamation-triangle"></i>
         </div>
         {% else %}
         <div data-toggle="tooltip" data-placement="top" title="No file">-</div>
@@ -81,11 +81,11 @@
 
         {% if allowDownload %}
         <a href="{{ field.formattedValue }}" download="{{ preferredDownloadName }}">
-            <i class="fas fa-fw fa-paperclip"></i>
+            <i class="fa-solid fa-fw fa-paperclip"></i>
         </a>
         {% elseif field.value is not empty %}
         <div data-toggle="tooltip" data-placement="top" title="{{ preferredDownloadName }}">
-            <i class="fas fa-fw fa-check"></i>
+            <i class="fa-solid fa-fw fa-check"></i>
         </div>
         {% else %}
         <div data-toggle="tooltip" data-placement="top" title="No file">-</div>

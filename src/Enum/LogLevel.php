@@ -19,10 +19,10 @@ class LogLevel extends EnumType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::INFO     => ["fas fa-info-circle"       , "fas fa-info-triangle", "fas fa-info"              ],
-            self::DEBUG    => ["fas fa-question-circle"   , "fas fa-question-triangle", "fas fa-question"      ],
-            self::WARNING  => ["fas fa-exclamation-circle", "fas fa-exclamation-triangle", "fas fa-exclamation"],
-            self::CRITICAL => ["fas fa-skull-crossbones"],
+            self::INFO     => ["fa-solid fa-info-circle"       , "fa-solid fa-info-triangle", "fa-solid fa-info"              ],
+            self::DEBUG    => ["fa-solid fa-question-circle"   , "fa-solid fa-question-triangle", "fa-solid fa-question"      ],
+            self::WARNING  => ["fa-solid fa-exclamation-circle", "fa-solid fa-exclamation-triangle", "fa-solid fa-exclamation"],
+            self::CRITICAL => ["fa-solid fa-skull-crossbones"],
         ];
     }
 }

@@ -30,7 +30,7 @@ class Network extends Widget implements IconizeInterface, SetInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-network-wired"];
+        return ["fa-solid fa-network-wired"];
     }
 
     public function __construct(?string $title = null, array $routes = [])

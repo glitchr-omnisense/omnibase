@@ -16,6 +16,6 @@ class FacebookAdapter extends AbstractSharerAdapter
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fab fa-facebook", "fab fa-facebook-square", "fab fa-facebook-f", "fab fa-facebook-messenger"];
+        return ["fa-brands fa-facebook", "fa-brands fa-facebook-square", "fa-brands fa-facebook-f", "fa-brands fa-facebook-messenger"];
     }
 }

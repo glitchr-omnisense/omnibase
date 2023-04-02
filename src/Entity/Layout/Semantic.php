@@ -27,7 +27,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-award"];
+        return ["fa-solid fa-award"];
     }
 
     public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string

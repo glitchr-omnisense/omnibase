@@ -24,7 +24,7 @@ abstract class AbstractCurrencyApi implements CurrencyApiInterface
     }
     public function supports(string $key): bool
     {
-        return $this->key === $key;
+        return $this->key === $key && $key !== null;
     }
 
     protected int $priority = 0;

@@ -59,7 +59,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
         }
 
         if (Action::SAVE_AND_CONTINUE === $actionName) {
-            return Action::new(Action::SAVE_AND_CONTINUE, t(Crud::PAGE_EDIT === $pageName ? 'action.save_and_continue' : 'action.create_and_continue', domain: 'EasyAdminBundle'), 'far fa-edit')
+            return Action::new(Action::SAVE_AND_CONTINUE, t(Crud::PAGE_EDIT === $pageName ? 'action.save_and_continue' : 'action.create_and_continue', domain: 'EasyAdminBundle'), 'fa-regular fa-edit')
                 ->setCssClass('action-'.Action::SAVE_AND_CONTINUE)
                 ->addCssClass('btn btn-secondary action-save text-success')
                 ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])

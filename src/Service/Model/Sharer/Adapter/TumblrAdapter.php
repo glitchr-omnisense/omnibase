@@ -16,6 +16,6 @@ class TumblrAdapter extends AbstractSharerAdapter
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fab fa-tumblr", "fab fa-tumblr-square"];
+        return ["fa-brands fa-tumblr", "fa-brands fa-tumblr-square"];
     }
 }

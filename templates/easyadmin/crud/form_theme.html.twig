@@ -11,7 +11,7 @@
                         <li class="nav-item">
                             <a class="nav-link {% if tab_config.active %}active{% endif %}" href="#{{ tab_config['id'] }}" id="{{ tab_config['id'] }}-tab" data-bs-toggle="tab">
                                 {%- if tab_config.icon|default(false) -%}
-                                    <i class="fa fa-fw fa-{{ tab_config.icon }}"></i>
+                                    <i class="fa-solid fa-fw fa-{{ tab_config.icon }}"></i>
                                 {%- endif -%}
                                 {{ tab_config['label']|trans(domain = ea.i18n.translationDomain) }}
                                 {%- if tab_config.errors > 0 -%}
@@ -71,7 +71,7 @@
                                {% endif %}
                             >
                                 {% if collapsible %}
-                                    <i class="fas fw fa-chevron-right form-panel-collapse-marker"></i>
+                                    <i class="fa-solid fw fa-chevron-right form-panel-collapse-marker"></i>
                                 {% endif %}
 
                                 {% if panel_config.icon|default(false) %}

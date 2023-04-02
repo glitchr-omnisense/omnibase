@@ -18,9 +18,9 @@ class EntityAction extends EnumType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::INSERT => ["fas fa-calendar-plus"],
-            self::UPDATE => ["fas fa-calendar"],
-            self::DELETE => ["fas fa-calendar-times"]
+            self::INSERT => ["fa-solid fa-calendar-plus"],
+            self::UPDATE => ["fa-solid fa-calendar"],
+            self::DELETE => ["fa-solid fa-calendar-times"]
         ];
     }
 }

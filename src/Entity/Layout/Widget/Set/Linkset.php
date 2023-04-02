@@ -29,7 +29,7 @@ class Linkset extends Widget implements IconizeInterface, SetInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-layer-group"];
+        return ["fa-solid fa-layer-group"];
     }
 
     public function __construct(?string $title = null, array $hyperlinks = [])

@@ -31,7 +31,7 @@ abstract class AbstractActionAdapter extends AbstractAdapter implements ActionAd
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-directions"];
+        return ["fa-solid fa-directions"];
     }
     public function apply(mixed $value, mixed $subject): mixed
     {

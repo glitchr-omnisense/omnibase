@@ -31,22 +31,22 @@ class Quadrant32 extends Quadrant16
     {
         return [
 
-            self::NbW  => ["fas fa-location-arrow"],
-            self::NbE  => ["fas fa-location-arrow"],
-            self::NEbN => ["fas fa-location-arrow"],
-            self::NEbE => ["fas fa-location-arrow"],
-            self::EbN  => ["fas fa-location-arrow"],
-            self::EbS  => ["fas fa-location-arrow"],
-            self::SEbE => ["fas fa-location-arrow"],
-            self::SEbS => ["fas fa-location-arrow"],
-            self::SbE  => ["fas fa-location-arrow"],
-            self::SbW  => ["fas fa-location-arrow"],
-            self::SWbS => ["fas fa-location-arrow"],
-            self::SWbW => ["fas fa-location-arrow"],
-            self::WbS  => ["fas fa-location-arrow"],
-            self::WbN  => ["fas fa-location-arrow"],
-            self::NWbW => ["fas fa-location-arrow"],
-            self::NWbN => ["fas fa-location-arrow"],
+            self::NbW  => ["fa-solid fa-location-arrow"],
+            self::NbE  => ["fa-solid fa-location-arrow"],
+            self::NEbN => ["fa-solid fa-location-arrow"],
+            self::NEbE => ["fa-solid fa-location-arrow"],
+            self::EbN  => ["fa-solid fa-location-arrow"],
+            self::EbS  => ["fa-solid fa-location-arrow"],
+            self::SEbE => ["fa-solid fa-location-arrow"],
+            self::SEbS => ["fa-solid fa-location-arrow"],
+            self::SbE  => ["fa-solid fa-location-arrow"],
+            self::SbW  => ["fa-solid fa-location-arrow"],
+            self::SWbS => ["fa-solid fa-location-arrow"],
+            self::SWbW => ["fa-solid fa-location-arrow"],
+            self::WbS  => ["fa-solid fa-location-arrow"],
+            self::WbN  => ["fa-solid fa-location-arrow"],
+            self::NWbW => ["fa-solid fa-location-arrow"],
+            self::NWbN => ["fa-solid fa-location-arrow"],
         ];
     }
 

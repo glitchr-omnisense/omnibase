@@ -21,7 +21,7 @@
                 {{ item.label|trans_quiet(nullable = false, domain = ea.getTranslationDomain())|default(item.label)|raw }}
             </span>
             <span class="submenu-toggler">
-            {% if item.hasSubItems %}<i class="fa fa-fw fa-angle-right  {{ item.hasSubItems ? 'submenu-toggle' }} submenu-toggle-icon"></i>{% endif %}
+            {% if item.hasSubItems %}<i class="fa-solid fa-fw fa-angle-right  {{ item.hasSubItems ? 'submenu-toggle' }} submenu-toggle-icon"></i>{% endif %}
             </span>
         </a>
     {% endif %}

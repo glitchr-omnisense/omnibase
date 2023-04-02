@@ -29,7 +29,7 @@ class Book extends Widget implements IconizeInterface, SetInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-book"];
+        return ["fa-solid fa-book"];
     }
 
     public function __construct(?string $title = null, array $pages = [])

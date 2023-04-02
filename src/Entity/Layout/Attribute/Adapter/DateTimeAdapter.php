@@ -20,7 +20,7 @@ class DateTimeAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-calendar"];
+        return ["fa-solid fa-calendar"];
     }
 
     public static function getType(): string

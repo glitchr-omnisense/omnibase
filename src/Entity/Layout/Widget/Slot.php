@@ -27,7 +27,7 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-th"];
+        return ["fa-solid fa-th"];
     }
 
     public function __toString()

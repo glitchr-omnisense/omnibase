@@ -71,7 +71,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-bell"];
+        return ["fa-solid fa-bell"];
     }
 
     // Default notification

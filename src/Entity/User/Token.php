@@ -26,7 +26,7 @@ class Token implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-drumstick-bite", "fas fa-drumstick"];
+        return ["fa-solid fa-drumstick-bite", "fa-solid fa-drumstick"];
     }
 
     public const ALL     = "ALL_TOKENS";

@@ -62,17 +62,18 @@ class Uploader extends AbstractAnnotation
         $this->maxSize   = str2dec($data["max_size"] ?? 8*UploadedFile::getMaxFilesize())/8;
     }
 
-    protected $ancestorEntity = null;
+    protected array $ancestorEntity = [];
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         if (!$this->getEntityManager()->contains($entity)) {
             return;
         }
+
         if (array_key_exists(spl_object_id($entity), $this->getUnitOfWork()->getScheduledEntityInsertions())) {
             return;
         }
 
-        $this->ancestorEntity = $this->getOldEntity($entity);
+        $this->ancestorEntity[spl_object_id($entity)] = $this->getOldEntity($entity);
     }
 
     protected function getConfig(): array
@@ -326,15 +327,9 @@ class Uploader extends AbstractAnnotation
         }
 
         // File instances are filtered below, in case of UOW manipulation..
-        $old = self::getFieldValue($this->ancestorEntity, $fieldName) ?? self::getFieldValue($oldEntity, $fieldName);
+        $old = array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName) : self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
-
-        // This list contains non is_stringeable element. (e.g. in case of a generic use)
-        // This means that these elements are not meant to be uploaded
-        if (count($oldList) != count($oldListStringable)) {
-            return false;
-        }
 
         // No change in the list.. (NB: Not good approach in case of UOW manipulation)
         $potentialMemoryLeak = array_filter($oldList, fn ($f) => $f instanceof File);
@@ -369,6 +364,7 @@ class Uploader extends AbstractAnnotation
         $fileList = []; // Field value can be an array or just a single path
         $uploadList = array_values(array_intersect($newList, $oldList));
         foreach (array_union($uploadList, array_diff($newList, $oldList)) as $index => $entry) {
+
             //
             // In case of string casting, and UploadedFile might be returned as a string..
             $file = is_string($entry) && !str_contains($entry, "://") && is_file($entry) ? new File($entry) : $entry;
@@ -430,7 +426,7 @@ class Uploader extends AbstractAnnotation
             return false;
         }
 
-        $old = self::getFieldValue($this->ancestorEntity, $fieldName) ?? self::getFieldValue($oldEntity, $fieldName);
+        $old = array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName) : self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
 

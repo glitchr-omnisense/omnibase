@@ -24,11 +24,11 @@
 {%- block form2_label  -%}
 
     {% set badges = "" %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_dbcolumn  ?? false) ? "fas fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_multiple  ?? false) ? "fas fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_alias     ?? false) ? "fas fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_sortable  ?? false) ? "fas fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_inherited ?? false) ? "fas fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_dbcolumn  ?? false) ? "fa-solid fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_multiple  ?? false) ? "fa-solid fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_alias     ?? false) ? "fa-solid fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_sortable  ?? false) ? "fa-solid fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_inherited ?? false) ? "fa-solid fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
 
     {% set label     = form_label(form, null, {'label_html': true}) %}
     {% set labelTrim = (label|trim(" ")|trim("&nbsp;")) %}
@@ -40,7 +40,7 @@
             {{- label|raw -}}
             {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value.id is defined %}
             <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id })}}" target='_blank'>
-                <i class="fas fa-external-link-square-alt"></i>
+                <i class="fa-solid fa-external-link-square-alt"></i>
             </a>{% endif %}
 
             {{- form_help(form) -}}
@@ -71,7 +71,7 @@
 {%- block form2_help -%}
     {% if help is not empty %}
     <span class="data-help">
-        <i class="far fa-question-circle" data-toggle="tooltip" data-bs-placement="right" title="{{help}}"></i>
+        <i class="fa-regular fa-question-circle" data-toggle="tooltip" data-bs-placement="right" title="{{help}}"></i>
     </span>
     {% endif %}
 {%- endblock -%}
@@ -185,7 +185,7 @@
     <div class="input-group form-stock">
         <div class="input-group-text">
             <button class="btn btn-outline-secondary" type="button" id="{{form.vars.id}}-btn">
-                <i class="fas fa-calendar-day"></i>
+                <i class="fa-solid fa-calendar-day"></i>
             </button>
         </div>
 
@@ -277,7 +277,7 @@
     {{ form_widget(form, {attr:attr}) }}
     <div class="input-group-append">
         <button class="input-group-text" type="button">
-            <i class="fas {{ target is not empty ? "fa-lock" : "fa-unlock" }} fa-fw"></i>
+            <i class="fa-solid {{ target is not empty ? "fa-lock" : "fa-unlock" }} fa-fw"></i>
         </button>
     </div>
 </div>
@@ -289,23 +289,25 @@
         {{ block('form_widget') }}
         <div class="input-group-append">
             <button class="input-group-text" type="button">
-                <i class="fas fa-percent fa-fw"></i>
+                <i class="fa-solid fa-percent fa-fw"></i>
             </button>
         </div>
     </div>
 {%- endblock -%}
 
 {%- block button2_attributes -%}
-    id="{{ id ~ (form.vars.confirmation ? "-request" : "") }}" name="{{ full_name }}"{% if disabled %} disabled="disabled"{% endif -%}
+    id="{{ id }}" name="{{ full_name }}"{% if disabled %} disabled="disabled"{% endif -%}
     {{ block('attributes') }}
 {%- endblock button2_attributes -%}
 
 {%- block button2_widget -%}
 
+    {% set attr_request = attr %}
     {% set attr = attr|merge({
         'data-button-field'          : form.vars.id,
         'data-button-confirmation'   : form.vars.confirmation,
-        'data-button-confirmation-bubbleup'   : form.vars.confirmation_bubbleup
+        'data-button-confirmation-bubbleup'   : form.vars.confirmation_bubbleup,
+        "class": (attr.class ?? "")~" hidden btn-action"
     }) %}
 
     {%- if label is empty -%}
@@ -319,7 +321,23 @@
         {%- endif -%}
     {%- endif -%}
 
-    <button type="{{ type|default('button') }}" {{ form.vars.confirmation ? block('button2_attributes') : block('button_attributes') }}>
+    <button type="{{ type|default('button') }}" {{ block("button2_attributes") }}>
+        {%- if translation_domain is same as(false) -%}
+            {%- if label_html is same as(false) -%}
+                {{- label -}}
+            {%- else -%}
+                {{- label|raw -}}
+            {%- endif -%}
+        {%- else -%}
+            {%- if label_html is same as(false) -%}
+                {{- label|trans(label_translation_parameters, translation_domain) -}}
+            {%- else -%}
+                {{- label|trans(label_translation_parameters, translation_domain)|raw -}}
+            {%- endif -%}
+        {%- endif -%}
+    </button>
+
+    <button type="button" {{ html_attributes(attr_request) }} id="{{ form.vars.id }}-request" >
         {%- if translation_domain is same as(false) -%}
             {%- if label_html is same as(false) -%}
                 {{- label -}}
@@ -336,6 +354,7 @@
     </button>
 
     {% if form.vars.confirmation %}
+
     <div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -344,7 +363,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" id="{{ form.vars.id }}-cancel" data-dismiss="modal">{{ "@fields.boolean.button.cancel"|trans }}</button>
-                <button type="{{ form.vars.type ?? "button" }}" class="btn btn-primary" {{ form.vars.confirmation ? block('button_attributes') : block('button2_attributes') }}>{{ "@fields.boolean.button.confirm"|trans }}</button>
+                <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
             </div>
         </div>
     </div>
@@ -417,7 +436,7 @@
 
     {% if allow_delete %}
     <div id="{{id}}_deleteBtn2" class="deleteBtn" style="{% if avatar is empty %}display:none;{% endif %}">
-        <i class="fas fa-plus-circle fa-2x"></i>
+        <i class="fa-solid fa-plus-circle fa-2x"></i>
     </div>
     {% endif %}
 </div>
@@ -445,12 +464,12 @@
             <figcaption id="{{id}}_figcaption">
                 <div class="figwrapper">
                 {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-                    <span><i class="fas fa-search-plus" id="{{id}}_preview"></i></span>
+                    <span><i class="fa-solid fa-search-plus" id="{{id}}_preview"></i></span>
                     <span>{{ clipboard("copy", form.vars.value|imagine) }}</span>
-                    <span><a                 href='{{ form.vars.download }}'>{{ "fas fa-fw fa-download"|iconify({"style":"font-size:0.95em;bottom:3px;position:relative"})|first|raw }}</a></span>
-                    <span><a target='_blank' href='{{ form.vars.value|imagine }}'>{{ "fas fa-fw fa-image"|iconify|first|raw }}</a></span>
+                    <span><a                 href='{{ form.vars.download }}'>{{ "fa-solid fa-fw fa-download"|iconify({"style":"font-size:0.95em;bottom:3px;position:relative"})|first|raw }}</a></span>
+                    <span><a target='_blank' href='{{ form.vars.value|imagine }}'>{{ "fa-solid fa-fw fa-image"|iconify|first|raw }}</a></span>
                 {% else %}
-                    <span><i class="fas fa-plus-circle"></i></span>
+                    <span><i class="fa-solid fa-plus-circle"></i></span>
                 {% endif %}
                 </div>
             </figcaption>
@@ -508,12 +527,12 @@
 {% set download = form.vars.download ?? [] %}
 {% set clippable = form.vars.clippable ?? [] %}
 
-{% set lightboxIcon = path|length > 1 ? "fas fa-2x fa-fw fa-search-plus" : "fas fa-2x fa-fw fa-image" %}
+{% set lightboxIcon = path|length > 1 ? "fa-solid fa-2x fa-fw fa-search-plus" : "fa-solid fa-2x fa-fw fa-image" %}
 {% set lightboxPattern = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~(lightboxIcon|iconify|first|raw)~"</a>" %}
-{% set downloadPattern = "<a href='{0}' >"~("fas fa-2x fa-fw fa-download"|iconify({"style":"font-size: 1.8em;"})|first|raw)~"</a>" %}
+{% set downloadPattern = "<a href='{0}' >"~("fa-solid fa-2x fa-fw fa-download"|iconify({"style":"font-size: 1.8em;"})|first|raw)~"</a>" %}
 {% set clipboardPattern = clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) %}
-{% set gotoPattern = "<a target='_blank' href='{0}'>"~("fas fa-fw fa-2x fa-external-link-square-alt"|iconify|first|raw)~"</a>" %}
-{% set deletePattern = allow_delete ? "<a class='warning' data-dz-remove='true'>"~("far fa-fw fa-2x fa-trash-alt"|iconify|first|raw)~"</a>" : null %}
+{% set gotoPattern = "<a target='_blank' href='{0}'>"~("fa-solid fa-fw fa-2x fa-external-link-square-alt"|iconify|first|raw)~"</a>" %}
+{% set deletePattern = allow_delete ? "<a class='warning' data-dz-remove='true'>"~("fa-regular fa-fw fa-2x fa-trash-alt"|iconify|first|raw)~"</a>" : null %}
 
 {% set attr = attr|merge({
     'data-file-sortable'              : form.vars.sortable,
@@ -565,7 +584,7 @@
                 </span>
             </div>
 
-            {% if allow_url %} <div class="input-group-text">{{ "fas fa-paperclip"|iconify|first|raw }}</div>{% endif %}
+            {% if allow_url %} <div class="input-group-text">{{ "fa-solid fa-paperclip"|iconify|first|raw }}</div>{% endif %}
             {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({'class': (files is empty ? 'last' : "") ~ (form.raw.vars.attr.class is defined ? ' ' ~ form.raw.vars.attr.class : ''), accept: mime_types|join(',') }) }) }}
             {% if allow_delete and not form.vars.disabled %}
             <div id="{{id}}_deleteBtn" class="input-group-text deleteBtn {% if files is empty %}hidden{% endif %}">
@@ -577,7 +596,7 @@
 
         {% if (allow_url) %}
         <div class="input-group field-url">
-            <div class="input-group-text">{{ "fas fa-link"|iconify|first|raw }}</div>
+            <div class="input-group-text">{{ "fa-solid fa-link"|iconify|first|raw }}</div>
             {{ form_widget(form.url, { attr: form.url.vars.attr|merge({'placeholder': ("@fields.fileupload.download_placeholder"|trans)}) }) }}
         </div>
         {% endif %}
@@ -774,7 +793,7 @@
 
     {% if group and allow_add %}
         <button type="button" class="btn btn-link form-collection-add-button">
-            <i class="fa fa-plus pr-1"></i>
+            <i class="fa-solid fa-plus pr-1"></i>
             {{ '@EasyAdminBundle.action.add_new_item'|trans }}
         </button>
     {% endif %}
@@ -805,7 +824,7 @@
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
-                <i class="far fa-fw fa-trash-alt"></i>
+                <i class="fa-regular fa-fw fa-trash-alt"></i>
             </button>
         {% endset %}
 
@@ -827,7 +846,7 @@
                     {%- endif -%}
                         &nbsp;
                     {%- if linkable and not html -%}
-                    <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
+                    <i class="fa-solid fw fa-chevron-right form-collection-item-collapse-marker"></i>
                     {% endif %}
                     {% if html %}
                         {{form.vars.value.__autocomplete|raw }}
@@ -845,11 +864,11 @@
                             {% set url = method_exists(form.vars.value, "__toLink") ? form.vars.value.__toLink() : null %}
                             {% if url is not empty %}
                                 {{ url ? clipboard("copy", url)|raw : "" }}
-                                <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify|first|raw}}</a>
+                                <a href="{{ url }}" target="_blank" >{{ "fa-solid fa-fw fa-eye" | iconify|first|raw}}</a>
                             {% endif %}
 
                             {% if _href is not null %}
-                            <a target="_blank" href="{{ _href|url_decode|replace({'{0}': form.vars.value.id}) }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
+                            <a target="_blank" href="{{ _href|url_decode|replace({'{0}': form.vars.value.id}) }}">{{ "fa-solid fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
                             {% endif %}
 
                         {% endif %}
@@ -881,11 +900,11 @@
                         {% set url = method_exists(form.vars.value, "__toLink") ? form.vars.value.__toLink() : null %}
                         {% if url is not empty %}
                             {{ url ? clipboard("copy", url)|raw : "" }}
-                            <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify|first|raw}}</a>
+                            <a href="{{ url }}" target="_blank" >{{ "fa-solid fa-fw fa-eye" | iconify|first|raw}}</a>
                         {% endif %}
 
                         {% if _href is not null %}
-                        <a target='_blank' href="{{ _href|url_decode|replace({'{0}': form.vars.value.id}) }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
+                        <a target='_blank' href="{{ _href|url_decode|replace({'{0}': form.vars.value.id}) }}">{{ "fa-solid fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
                         {% endif %}
 
                     {% endif %}
@@ -973,7 +992,7 @@
 
     {% if allow_add %}
         <button type="button" class="btn btn-link form-array-add-button">
-            <i class="fa fa-plus pr-1"></i>
+            <i class="fa-solid fa-plus pr-1"></i>
             {{ '@EasyAdminBundle.action.add_new_item'|trans }}
         </button>
     {% endif %}
@@ -1005,7 +1024,7 @@
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
-                <i class="far fa-fw fa-trash-alt"></i>
+                <i class="fa-regular fa-fw fa-trash-alt"></i>
             </button>
         {% endset %}
 
@@ -1013,7 +1032,7 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse">
-                        <i class="fas fa-fw fa-chevron-right form-array-item-collapse-marker"></i>
+                        <i class="fa-solid fa-fw fa-chevron-right form-array-item-collapse-marker"></i>
                         {{ form_widget(form, {attr:attr}) }}
                     </button>
 
@@ -1031,7 +1050,7 @@
     <div class="empty array-empty">
         {% if not form.vars.allow_add %}
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse">
-            <i class="fas fw fa-chevron-right form-array-item-collapse-marker"></i>
+            <i class="fa-solid fw fa-chevron-right form-array-item-collapse-marker"></i>
             {{"@fields.array.empty"|trans}}
         </button>
         {% endif %}
@@ -1072,7 +1091,7 @@
 <div class="input-group form-stock">
     <div class="input-group-text">
         <button class="btn btn-outline-secondary" id="{{form.vars.id}}-btn" type="button">
-            <i class="fas fa-box-open"></i>
+            <i class="fa-solid fa-box-open"></i>
         </button>
     </div>
     {% if form.vars.target is not null %}
@@ -1082,10 +1101,10 @@
     {{ form_widget(form, {attr:attr}) }} {# NumberType is returning and input type text... #}
     {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}
     <div class="input-group-text">
-        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-down" type="button"><i class="fas fa-minus"></i></button>
+        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-down" type="button"><i class="fa-solid fa-minus"></i></button>
     </div>
      <div class="input-group-text">
-        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-up" type="button"><i class="fas fa-plus"></i></button>
+        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-up" type="button"><i class="fa-solid fa-plus"></i></button>
     </div>
 </div>
 
@@ -1120,10 +1139,10 @@
     {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}
 
     <div class="input-group-text">
-        <button class="btn btn-outline-secondary" {{form.vars.disabled ? "disabled=disabled" : ""}} id="{{form.vars.id}}-down" type="button"><i class="fas fa-minus"></i></button>
+        <button class="btn btn-outline-secondary" {{form.vars.disabled ? "disabled=disabled" : ""}} id="{{form.vars.id}}-down" type="button"><i class="fa-solid fa-minus"></i></button>
     </div>
      <div class="input-group-text">
-        <button class="btn btn-outline-secondary" {{form.vars.disabled ? "disabled=disabled" : ""}} id="{{form.vars.id}}-up" type="button"><i class="fas fa-plus"></i></button>
+        <button class="btn btn-outline-secondary" {{form.vars.disabled ? "disabled=disabled" : ""}} id="{{form.vars.id}}-up" type="button"><i class="fa-solid fa-plus"></i></button>
     </div>
 </div>
 
@@ -1173,7 +1192,7 @@
 {% endif %}
 
 {# todo: handle xhr errors #}
-{# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fas fa-fw fa-exclamation-circle'|iconify|first|raw)~" "~('@fields.cropper.error')~"</div>", #}
+{# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fa-solid fa-fw fa-exclamation-circle'|iconify|first|raw)~" "~('@fields.cropper.error')~"</div>", #}
 <div class="form-group form-cropper {{ cropper_info ? "form-cropper-info" : "" }}">
     <div class="cropper">
         <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine}}">
@@ -1187,7 +1206,7 @@
 
         {% if cropper_actions %}
         <div class="hidden cropper-actions" id="{{ id }}_actions">
-            <button class="btn btn-warning" type="button" data-cropper-reset="true">{{"fas fa-undo"|iconify|first|raw}}</button>
+            <button class="btn btn-warning" type="button" data-cropper-reset="true">{{"fa-solid fa-undo"|iconify|first|raw}}</button>
             {% for label,aspectRatio in form.vars.aspectRatios %}
                 <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}" data-labelledby="{{form.vars.id ~ "_label"}}" data-labelledby-value="{{ label|trans }}">{{ label|trans }}</button>
             {% endfor %}
@@ -1272,11 +1291,11 @@
                 <hr>
                 <div>{{ '@fields.password.requirements.label'|trans }}</div>
                 <ul>
-                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.uppercase'|trans }}</li>
-                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.lowercase'|trans }}</li>
-                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.numbers'  |trans }}</li>
-                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.specials' |trans }}</li>
-                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.length12' |trans }}</li>
+                    <li>{{ 'fa-solid fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.uppercase'|trans }}</li>
+                    <li>{{ 'fa-solid fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.lowercase'|trans }}</li>
+                    <li>{{ 'fa-solid fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.numbers'  |trans }}</li>
+                    <li>{{ 'fa-solid fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.specials' |trans }}</li>
+                    <li>{{ 'fa-solid fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.length12' |trans }}</li>
                 </ul>
             </div>
             <footer>
@@ -1299,8 +1318,8 @@
 
                 {{ form_label(form.plain) }}
                 <div class="input-group">
-                    <span class="input-group-text">{{ (form.vars.repeater ? 'fas fa-unlock' : 'fas fa-lock')|iconify|first|raw }}</span>
-                    {% if form.vars.revealer %}{{ 'fas fa-eye'|iconify({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"})|first|raw }}{% endif%}
+                    <span class="input-group-text">{{ (form.vars.repeater ? 'fa-solid fa-unlock' : 'fa-solid fa-lock')|iconify|first|raw }}</span>
+                    {% if form.vars.revealer %}{{ 'fa-solid fa-eye'|iconify({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"})|first|raw }}{% endif%}
 
                     {{ form_widget(form.plain, {
                         required:form.vars.required,
@@ -1339,7 +1358,7 @@
                 {{ form_label(form.plain_repeater) }}
 
                 <div class="input-group">
-                    <span class="input-group-text">{{ 'fas fa-lock'|iconify|first|raw }}</span>
+                    <span class="input-group-text">{{ 'fa-solid fa-lock'|iconify|first|raw }}</span>
                     {{ form_widget(form.plain_repeater, {
                         required:form.vars.required,
                         value:form.vars.revealer and not form.vars.secure ? form.vars.value : "",
