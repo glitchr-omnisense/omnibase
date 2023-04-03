@@ -71,7 +71,7 @@
         "doctrine/doctrine-bundle": "^2.0",
         "beberlei/doctrineextensions": "^1.0",
         "doctrine/annotations": "^1.0",
-        "glitchr/base-plugin": "1.0.*-dev",
+        "glitchr/base-plugin": "2.0.*-dev",
 
     	"glitchr/backup-manager": "4.0.*-dev"
     },

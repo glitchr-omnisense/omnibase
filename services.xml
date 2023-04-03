@@ -669,6 +669,8 @@
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
             <argument type="service" id="twig.extension.assets" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <bind key="$projectDir">%kernel.project_dir%</bind>
        </service>
 
