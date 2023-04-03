@@ -172,6 +172,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     $entityOptions["multiple"] = true;
                     $entityOptions["group"] = false;
                     $entityOptions["row_group"] = false;
+                    $entityOptions["allow_null"] = true;
                     $entityOptions["allow_add"] = false;
                     $entityOptions["allow_delete"] = false;
                     $entityOptions["recursive"] = true;

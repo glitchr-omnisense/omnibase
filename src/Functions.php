@@ -2790,10 +2790,14 @@ namespace {
         return $newObject;
     }
 
-    function is_serialized($str): bool
+    function is_serialized(?string $str): bool
     {
+	if($str === null) return false;
+	if(!str_starts_with($str, "{")) return false;
+	if(!str_ends_with($str, "}")) return false;
+
         try { $ret = unserialize($str); }
-        catch (Exception $e) { return false; }
+        catch (\Exception $e) { return false; }
 
         return is_string($str) && ($str == 'b:0;' || $ret !== false);
     }

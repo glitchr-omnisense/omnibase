@@ -24,7 +24,7 @@ trait VaultTrait
     }
 
     protected array $vaultBag = [];
-    public function getPlainVaultBag(string $key): mixed
+    public function getPlainVaultBag(mixed $key): mixed
     {
         return $this->vaultBag[$key][1] ?? null;
     }
@@ -32,7 +32,7 @@ trait VaultTrait
     {
         return $this->vaultBag[$key][0] ?? null;
     }
-    public function setVaultBag(?string $key, string $sealedValue, ?string $plainValue): self
+    public function setVaultBag(?string $key, string $sealedValue, mixed $plainValue): self
     {
         $this->vaultBag[$key] = [$sealedValue, $plainValue];
 

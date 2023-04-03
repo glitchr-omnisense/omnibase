@@ -230,8 +230,6 @@ class Vault extends AbstractAnnotation
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
 
-//        dump($entity);
-
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
 
@@ -256,8 +254,6 @@ class Vault extends AbstractAnnotation
 
                     $propertyAccessor->setValue($entity, $field, $plainValue);
                     $entity->setVaultBag($field, $sealedValue, $plainValue);
-
-//                    dump($entity);
                 }
             }
         }
