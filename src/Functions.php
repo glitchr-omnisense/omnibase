@@ -2792,7 +2792,7 @@ namespace {
 
     function is_serialized($str): bool
     {
-        try { $ret = unserialize($object); }
+        try { $ret = unserialize($str); }
         catch (Exception $e) { return false; }
 
         return is_string($str) && ($str == 'b:0;' || $ret !== false);
