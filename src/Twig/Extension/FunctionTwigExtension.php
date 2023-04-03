@@ -20,6 +20,9 @@ use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Base\Controller\Backend\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -63,13 +66,26 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     protected string $projectDir;
 
-    public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, string $projectDir)
+    /**
+     * @var AdminUrlGenerator
+     */
+    protected $adminUrlGenerator;
+    
+    /**
+     * @var Environment
+     */
+    protected $twig;
+    
+    public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGenerator $adminUrlGenerator, string $projectDir)
     {
         $this->translator     = $translator;
         $this->assetExtension = $assetExtension;
         $this->projectDir     = $projectDir;
         $this->mimeTypes      = new MimeTypes();
         $this->intlExtension  = new IntlExtension();
+
+        $this->twig = $twig;
+        $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
     public function getFunctions(): array
@@ -106,7 +122,6 @@ final class FunctionTwigExtension extends AbstractExtension
 
             new TwigFunction('addslashes', 'addslashes'),
             new TwigFunction('enum', [$this, 'enum']),
-            new TwigFunction('colorify', [$this, 'colorify']),
             new TwigFunction('email_preview', [$this, 'email'], ['needs_context' => true])
         ];
     }
@@ -161,7 +176,21 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('empty', "empty"),
 
             new TwigFilter('colorify', [$this, 'colorify']),
+            new TwigFilter('crudify', [$this, 'crudify'], ["is_safe" => ['all']])
         ];
+    }
+
+    // Used in twig environment
+    public function crudify($entity): string
+    {
+        return $this->twig->render("@Base/easyadmin/crudify.html.twig", [
+            "path"     => $this->adminUrlGenerator->unsetAll()
+                                ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
+                                ->setEntityId($entity->getId())
+                                ->setAction(Crud::PAGE_EDIT)
+                                ->includeReferrer()
+                                ->generateUrl()
+        ]);
     }
 
     public function email(array $context)
