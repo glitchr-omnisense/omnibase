@@ -28,6 +28,7 @@ abstract class AbstractSharerAdapter implements SharerAdapterInterface, IconizeI
     }
     public function generate(array $options, ?string $template = null): string
     {
+        $options = array_filter($options);
         $search  = array_map(fn ($e) => "{".$e."}", array_keys($options));
         $replace = array_map(fn ($o) => urlencode($o), array_values($options));
 
