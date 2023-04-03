@@ -5,7 +5,7 @@ namespace Base\Twig\Extension;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\Color\Intl\Colors;
 use Base\Service\IconProvider;
-use Base\Service\ImageService;
+use Base\Service\MediaService;
 use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Base\Service\TranslatorInterface;
@@ -34,9 +34,9 @@ final class FunctionTwigExtension extends AbstractExtension
     protected $translator;
 
     /**
-     * @var ImageService
+     * @var MediaService
      */
-    protected $imageService;
+    protected $mediaService;
 
     /**
      * @var IconProvider
@@ -106,7 +106,6 @@ final class FunctionTwigExtension extends AbstractExtension
 
             new TwigFunction('addslashes', 'addslashes'),
             new TwigFunction('enum', [$this, 'enum']),
-            new TwigFunction('colorify', [$this, 'colorify']),
             new TwigFunction('email_preview', [$this, 'email'], ['needs_context' => true])
         ];
     }

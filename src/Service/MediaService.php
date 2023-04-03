@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Controller\UX\FileController;
+use Base\Controller\UX\MediaController;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
@@ -26,7 +26,7 @@ use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class ImageService extends FileService implements ImageServiceInterface
+class MediaService extends FileService implements MediaServiceInterface
 {
     /**
      * @var ImagineInterface
@@ -107,37 +107,71 @@ class ImageService extends FileService implements ImageServiceInterface
         return $this->enableWebp;
     }
 
-    public function webp(array|string|null $path, array $filters = [], array $config = []): array|string|null
+    public function audio(array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
         if ($path === null) {
             return null;
         }
 
         $output = [];
+
         $pathList = is_array($path) ? $path : [$path];
         foreach ($pathList as $p) {
-            $output[] = $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters]));
+
+            $output[] = $this->generate("ux_serve", [], $path, array_merge($config, ["filters" => $filters]));
         }
 
         return is_array($path) ? $output : first($output);
+    }
+
+    public function video(array|string|null $path, array $filters = [], array $config = []): array|string|null
+    {
+        if ($path === null) {
+            return null;
+        }
+
+        $output = [];
+
+        $pathList = is_array($path) ? $path : [$path];
+        foreach ($pathList as $p) {
+
+            $output[] = $this->generate("ux_serve", [], $path, array_merge($config, ["filters" => $filters]));
+        }
+
+        return is_array($path) ? $output : first($output);
+    }
+
+    public function soundify(null|array|string $path, array $attributes = [], ...$srcset): ?string
+    {
+        if (!$path) {
+            return $path;
+        }
+        if (is_array($path)) {
+            return array_map(fn ($s) => $this->soundify($s, $attributes), $path);
+        }
+
+        return $this->twig->render("@Base/media/audio.html.twig", [
+            "path"     => $this->media($path),
+            "attr"     => $attributes,
+        ]);
+    }
+
+    public function vidify(null|array|string $path, array $attributes = [], ...$srcset): ?string
+    {
+        if (!$path) {
+            return $path;
+        }
+        if (is_array($path)) {
+            return array_map(fn ($s) => $this->vidify($s, $attributes), $path);
+        }
+
+        return $this->twig->render("@Base/media/video.html.twig", [
+            "path"     => $this->video($path),
+            "attr"     => $attributes,
+        ]);
     }
 
     public function image(array|string|null $path, array $filters = [], array $config = []): array|string|null
-    {
-        if ($path === null) {
-            return null;
-        }
-
-        $output = [];
-        $pathList = is_array($path) ? $path : [$path];
-        foreach ($pathList as $p) {
-            $output[] = $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image", [], $path, array_merge($config, ["filters" => $filters]));
-        }
-
-        return is_array($path) ? $output : first($output);
-    }
-
-    public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
         $supports_webp   = array_pop_key("webp", $config) ?? browser_supports_webp();
 
@@ -146,9 +180,62 @@ class ImageService extends FileService implements ImageServiceInterface
             $supports_webp &= ($extension != "svg");
         }
 
-        return $supports_webp ? $this->webp($path, $filters, $config) : $this->image($path, $filters, array_merge($config, ["extension" => $extension]));
+        if ($path === null) {
+            return null;
+        }
+
+        $output = [];
+
+        $pathList = is_array($path) ? $path : [$path];
+        foreach ($pathList as $p) {
+
+            if($supports_webp)
+                $output[] = $supports_webp ? 
+                    $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters])) :
+                    $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image", [], $path, array_merge($config, ["extension" => $extension, "filters" => $filters]));
+        }
+
+        return is_array($path) ? $output : first($output);
     }
 
+    public function imageSet(null|array|string $path, ...$srcset): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+        if (is_array($path)) {
+            return array_map(fn ($s) => $this->imageSet($s), $path);
+        }
+
+        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
+        return str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
+    }
+
+    public function imagify(null|array|string $path, array $attributes = [], ...$srcset): ?string
+    {
+        if (!$path) {
+            return $path;
+        }
+        if (is_array($path)) {
+            return array_map(fn ($s) => $this->imagify($s, $attributes), $path);
+        }
+
+        $lazyload = array_pop_key("lazy", $attributes);
+        $lazybox  = array_pop_key("lazy-box", $attributes);
+
+        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
+        $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
+
+        return $this->twig->render("@Base/media/image.html.twig", [
+            "path"     => $this->image($path),
+            "attr"     => $attributes,
+            "lazyload" => $lazyload,
+            "lazybox"  => $lazybox
+        ]);
+    }
+    
     public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
     {
         $filters[] = new CropFilter(
@@ -160,7 +247,7 @@ class ImageService extends FileService implements ImageServiceInterface
         );
 
         $config = array_key_removes($config, "width", "height", "x", "y", "position");
-        return $this->imagine($path, $filters, $config);
+        return $this->image($path, $filters, $config);
     }
 
     public function thumbnailInset(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
@@ -189,7 +276,7 @@ class ImageService extends FileService implements ImageServiceInterface
         );
 
         $config = array_key_removes($config, "width", "height", "mode", "resampling");
-        return $this->imagine($path, $filters, $config);
+        return $this->image($path, $filters, $config);
     }
 
     public function obfuscate(string|null $path, array $config = [], array $filters = []): ?string
@@ -224,44 +311,6 @@ class ImageService extends FileService implements ImageServiceInterface
         return $data;
     }
 
-    public function imageSet(null|array|string $path, ...$srcset): ?string
-    {
-        if (!$path) {
-            return null;
-        }
-        if (is_array($path)) {
-            return array_map(fn ($s) => $this->imageSet($s), $path);
-        }
-
-        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
-        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
-        return str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
-    }
-
-    public function imagify(null|array|string $path, array $attributes = [], ...$srcset): ?string
-    {
-        if (!$path) {
-            return $path;
-        }
-        if (is_array($path)) {
-            return array_map(fn ($s) => $this->imagify($s, $attributes), $path);
-        }
-
-        $lazyload = array_pop_key("lazy", $attributes);
-        $lazybox  = array_pop_key("lazy-box", $attributes);
-
-        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
-        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
-        $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
-
-        return $this->twig->render("@Base/image/default.html.twig", [
-            "path"     => $this->imagine($path),
-            "attr"     => $attributes,
-            "lazyload" => $lazyload,
-            "lazybox"  => $lazybox
-        ]);
-    }
-
     public function lightbox(
         null|array|string $path,
         array $attributes = [],
@@ -291,7 +340,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
         $routeName = $this->router->getRouteName($path);
         if ($routeName && !str_starts_with($routeName, "ux_")) {
-            $path = $this->imagine($path);
+            $path = $this->image($path);
         }
 
         $lightboxAttributes["loading"] ??= "lazy";
@@ -308,7 +357,7 @@ class ImageService extends FileService implements ImageServiceInterface
         $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
         $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
 
-        return $this->twig->render("@Base/image/lightbox.html.twig", [
+        return $this->twig->render("@Base/image-lightbox.html.twig", [
             "path" => $path,
             "attr" => $attributes,
             "attr_lightbox" => $lightboxAttributes,
@@ -329,13 +378,13 @@ class ImageService extends FileService implements ImageServiceInterface
         $routeUrl = parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
 
         // Call controller to warmup image
-        if ($warmup && $this->fileController !== null) {
+        if ($warmup && $this->mediaController !== null) {
             $routeMatch = $this->router->getRouteMatch($routeUrl);
 
             list($className, $controllerName) = array_pad(explode("::", $routeMatch["_controller"] ?? ""), 2, null);
-            if (is_instanceof($className, get_class($this->fileController)) && $controllerName) {
+            if (is_instanceof($className, get_class($this->mediaController)) && $controllerName) {
                 $routeParameters = array_key_removes($routeMatch, "_route", "_controller");
-                $this->fileController->{$controllerName}(...$routeParameters);
+                $this->mediaController->{$controllerName}(...$routeParameters);
             }
         }
 

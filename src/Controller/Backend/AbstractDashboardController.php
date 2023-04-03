@@ -71,7 +71,7 @@ use Base\Entity\Layout\Semantic;
 use Base\Field\Type\BooleanType;
 use Base\Routing\RouterInterface;
 use Base\Service\IconProvider;
-use Base\Service\ImageService;
+use Base\Service\MediaService;
 use Base\Service\SettingBagInterface;
 use Base\Twig\Environment;
 use Doctrine\ORM\EntityManagerInterface;
@@ -119,9 +119,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     protected $twig;
 
     /**
-     * @var ImageService
+     * @var MediaService
      */
-    protected $imageService;
+    protected $mediaService;
 
     /**
      * @var SettingBag
@@ -165,7 +165,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         AdminUrlGenerator $adminUrlGenerator,
         RouterInterface $router,
         IconProvider $iconProvider,
-        ImageService $imageService,
+        MediaService $mediaService,
         Environment $twig,
         EntityManagerInterface $entityManager,
         SettingBagInterface $settingBag
@@ -186,7 +186,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         MenuItem::$iconProvider = $iconProvider;
 
         $this->twig              = $twig;
-        $this->imageService      = $imageService;
+        $this->mediaService      = $mediaService;
         $this->settingBag        = $settingBag;
         $this->entityManager     = $entityManager;
         $this->router = $router;
@@ -430,7 +430,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $logo = $this->settingBag->getScalar("base.settings.logo");
         }
         if (!$logo) {
-            $logo = $this->imageService->getPublicDir()."/bundles/base/logo.svg";
+            $logo = $this->mediaService->getPublicDir()."/bundles/base/logo.svg";
         }
 
         $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
@@ -446,7 +446,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         );
 
         $logo = $this->twig->getAsset($logo);
-        $logo = $this->imageService->thumbnail($logo, 500, 500);
+        $logo = $this->mediaService->thumbnail($logo, 500, 500);
 
         return parent::configureDashboard()
             ->setFaviconPath("favicon.ico")
@@ -580,7 +580,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
         // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
         $avatar = ($user->getAvatarFile() ? $user->getAvatar() : null);
-        $avatar = $this->imageService->thumbnail($avatar, 250, 250);
+        $avatar = $this->mediaService->thumbnail($avatar, 250, 250);
 
         return parent::configureUserMenu($user)
             ->setAvatarUrl($avatar)

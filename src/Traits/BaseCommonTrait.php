@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
-use Base\Service\ImageServiceInterface;
+use Base\Service\MediaServiceInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
@@ -171,12 +171,12 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var ImageServiceInterface
+     * @var MediaServiceInterface
      */
-    protected static $imageService = null;
-    public static function setImageService(?ImageServiceInterface $imageService)
+    protected static $mediaService = null;
+    public static function setMediaService(?MediaServiceInterface $mediaService)
     {
-        self::$imageService = $imageService;
+        self::$mediaService = $mediaService;
     }
 
     /**

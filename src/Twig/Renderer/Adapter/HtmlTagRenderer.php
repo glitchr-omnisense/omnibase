@@ -204,10 +204,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
         }
 
         try { return $this->twig->load($name)->render($context); }
-        catch(\Twig\Error\LoaderError $e) {return $this->twig->load("@Base/notifier/email.html.twig")->render($context); }
-        catch (LoaderError $e) {
-            throw new RuntimeException("Failed to render `".$name."`", $e->getCode(), $e);
-        }
+        catch (LoaderError $e) { throw new RuntimeException("Failed to render `".$name."`", $e->getCode(), $e); }
     }
 
     public function renderFallback(Response $response): Response

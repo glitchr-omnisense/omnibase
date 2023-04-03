@@ -13,7 +13,7 @@ use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
-use Base\Service\ImageService;
+use Base\Service\MediaService;
 use Base\Service\LocalizerInterface;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
@@ -136,9 +136,9 @@ trait BaseTrait
     {
         return (self::class === BaseService::class) ? BaseService::$entityHydrator : BaseService::getEntityHydrator();
     }
-    public static function getImageService(): ?ImageService
+    public static function getMediaService(): ?MediaService
     {
-        return (self::class === BaseService::class) ? BaseService::$imageService : BaseService::getImageService();
+        return (self::class === BaseService::class) ? BaseService::$mediaService : BaseService::getMediaService();
     }
     public static function getObfuscator(): ?Obfuscator
     {

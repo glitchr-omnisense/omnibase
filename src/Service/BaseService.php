@@ -121,7 +121,7 @@ class BaseService implements RuntimeExtensionInterface
         TradingMarketInterface $tradingMarket,
         Obfuscator $obfuscator,
         SettingBag $settingBag,
-        ImageService $imageService,
+        MediaService $mediaService,
         IconProvider $iconProvider,
         TranslatorInterface $translator,
         RouterInterface $router,
@@ -145,7 +145,7 @@ class BaseService implements RuntimeExtensionInterface
 
         // Additional common containers
         $this->setClassMetadataManipulator($classMetadataManipulator);
-        $this->setImageService($imageService);
+        $this->setMediaService($mediaService);
         $this->setIconProvider($iconProvider);
         $this->setSettingBag($settingBag);
         $this->setLocalizer($localizer);
@@ -224,7 +224,9 @@ class BaseService implements RuntimeExtensionInterface
     public function settings()
     {
         return $this->getSettingBag();
-    } // Used in twig environment
+    } 
+    
+    // Used in twig environment
     public function crudify($entity): string
     {
         return $this->adminUrlGenerator->unsetAll()

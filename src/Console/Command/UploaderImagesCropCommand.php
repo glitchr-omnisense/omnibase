@@ -177,11 +177,11 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                     continue;
                 }
 
-                $extensions = $this->imageService->getExtensions($file);
+                $extensions = $this->mediaService->getExtensions($file);
                 $extension  = first($extensions);
 
-                $dataWebp = $this->imageService->imagine($file, [], ["webp" => true, "local_cache" => true]);
-                $data     = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
+                $dataWebp = $this->mediaService->imagine($file, [], ["webp" => true, "local_cache" => true]);
+                $data     = $this->mediaService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
                 if ($this->isCached($data)) {
                     $this->output->section()->writeln("             <warning>* Already cached main image \".".str_lstrip(realpath($file), realpath($publicDir))."\" .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
                 } else {
@@ -189,10 +189,10 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                     $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
 
                     if ($this->cache) {
-                        $this->fileController->ImageWebp($dataWebp);
+                        $this->mediaController->ImageWebp($dataWebp);
                     }
                     if ($this->cache) {
-                        $this->fileController->Image($data, $extension);
+                        $this->mediaController->Image($data, $extension);
                     }
 
                     $this->ibatch++;
@@ -207,10 +207,10 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                         $this->ibatch++;
 
                         if ($this->cache) {
-                            $this->fileController->ImageCrop($dataWebp, $identifier, $extension);
+                            $this->mediaController->ImageCrop($dataWebp, $identifier, $extension);
                         }
                         if ($this->cache) {
-                            $this->fileController->ImageCrop($data, $identifier, $extension);
+                            $this->mediaController->ImageCrop($data, $identifier, $extension);
                         }
                     }
 
@@ -230,7 +230,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
         //
         // Extract parameters
-        $args = $this->imageService->resolve($data);
+        $args = $this->mediaService->resolve($data);
         if (!$args) {
             return false;
         }
@@ -269,7 +269,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
 
-        return $this->imageService->isCached($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache]);
+        return $this->mediaService->isCached($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache]);
     }
 
     protected function getUploaderAnnotations(?string $namespace)

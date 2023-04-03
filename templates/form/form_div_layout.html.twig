@@ -465,9 +465,9 @@
                 <div class="figwrapper">
                 {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
                     <span><i class="fa-solid fa-search-plus" id="{{id}}_preview"></i></span>
-                    <span>{{ clipboard("copy", form.vars.value|imagine) }}</span>
+                    <span>{{ clipboard("copy", image(form.vars.value)) }}</span>
                     <span><a                 href='{{ form.vars.download }}'>{{ "fa-solid fa-fw fa-download"|iconify({"style":"font-size:0.95em;bottom:3px;position:relative"})|first|raw }}</a></span>
-                    <span><a target='_blank' href='{{ form.vars.value|imagine }}'>{{ "fa-solid fa-fw fa-image"|iconify|first|raw }}</a></span>
+                    <span><a target='_blank' href='{{ image(form.vars.value) }}'>{{ "fa-solid fa-fw fa-image"|iconify|first|raw }}</a></span>
                 {% else %}
                     <span><i class="fa-solid fa-plus-circle"></i></span>
                 {% endif %}
@@ -1197,7 +1197,7 @@
 {# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fa-solid fa-fw fa-exclamation-circle'|iconify|first|raw)~" "~('@fields.cropper.error')~"</div>", #}
 <div class="form-group form-cropper {{ cropper_info ? "form-cropper-info" : "" }}">
     <div class="cropper">
-        <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine}}">
+        <img id="{{ id }}_image" class="hidden" src="{{image(targetForm.vars.value)}}">
         <div id="{{ id }}_loader" class="loader">
             {% if targetForm.vars.value is not empty%}
                 <div class="loader-spinner"></div> {{ '@fields.cropper.loading.wait'|trans }}

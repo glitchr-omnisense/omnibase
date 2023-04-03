@@ -9,7 +9,7 @@ use Base\Database\Entity\EntityHydrator;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Service\FileService;
-use Base\Service\ImageService;
+use Base\Service\MediaService;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -55,9 +55,9 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     protected $entityHydrator = null;
 
     /**
-     * @var ImageService
+     * @var MediaService
      */
-    protected $imageService = null;
+    protected $mediaService = null;
 
     /**
      * @var PropertyAccessor
@@ -74,14 +74,14 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         return 'associationfile';
     }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, ImageService $imageService)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, MediaService $mediaService)
     {
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityHydrator = $entityHydrator;
 
-        $this->imageService     = $imageService;
-        $this->fileService      = cast($imageService, FileService::class);
+        $this->mediaService     = $mediaService;
+        $this->fileService      = cast($mediaService, FileService::class);
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }

@@ -50,7 +50,7 @@
             <argument type="service" id="translator" />
         </service>
 
-        <service id="Base\Controller\UX\FileController">
+        <service id="Base\Controller\UX\MediaController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
@@ -304,7 +304,7 @@
         <service id="Base\Console\Command\UploaderImagesCommand" parent="Base\Console\Command\UploaderEntitiesCommand">
             <tag name="console.command" />
             <argument type="service" id="base.service.image" />
-            <argument type="service" id="Base\Controller\UX\FileController" />
+            <argument type="service" id="Base\Controller\UX\MediaController" />
         </service>
 
         <service id="Base\Console\Command\TranslationControllersCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
@@ -472,7 +472,7 @@
             <argument type="service" id="flysystem" />
         </service>
 
-        <service id="Base\Service\ImageService" public="true" parent="Base\Service\FileService">
+        <service id="Base\Service\MediaService" public="true" parent="Base\Service\FileService">
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="imagine.bitmap" />
@@ -626,11 +626,11 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Twig\Extension\FileTwigExtension" public="true">
+        <service id="Base\Twig\Extension\MediaTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="router" />
             <argument type="service" id="base.service.image" />
-            <argument type="service" id="Base\Controller\UX\FileController" />
+            <argument type="service" id="Base\Controller\UX\MediaController" />
             <bind key="$projectDir">%kernel.project_dir%</bind>
         </service>
 

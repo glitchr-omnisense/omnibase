@@ -82,6 +82,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         }
 
         $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
+        $this->prependPath($bundlePath."/notifier");
         $this->prependPath($bundlePath);
 
         $this->prependPath($projectDir . "/src", "App");

@@ -20,7 +20,7 @@ class IconProvider extends AbstractLocalCache
     /**
      * @var ImagineService
      */
-    protected $imageService;
+    protected $mediaService;
     /**
      * @var Localizer
      */
@@ -30,10 +30,10 @@ class IconProvider extends AbstractLocalCache
      */
     protected $router;
 
-    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir)
+    public function __construct(AnnotationReader $annotationReader, MediaService $mediaService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir)
     {
         $this->annotationReader = $annotationReader;
-        $this->imageService = $imageService;
+        $this->mediaService = $mediaService;
         $this->localizer = $localizer;
         $this->router = $router;
 

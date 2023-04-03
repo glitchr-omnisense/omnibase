@@ -22,8 +22,8 @@
         <service id="twig.html_renderer" alias="Base\Twig\Renderer\Adapter\HtmlTagRenderer" />
         <service id="twig.encore_renderer" alias="Base\Twig\Renderer\Adapter\EncoreTagRenderer" />
         
-        <service id="base.service.image" alias="Base\Service\ImageService" />
-        <service id="Base\Service\ImageServiceInterface" alias="base.service.image"/>
+        <service id="base.service.image" alias="Base\Service\MediaService" />
+        <service id="Base\Service\MediaServiceInterface" alias="base.service.image"/>
 
         <service id="time_machine" alias="Base\Service\TimeMachine" />
         <service id="Base\Service\TimeMachineInterface" alias="time_machine"/>
@@ -93,8 +93,8 @@
         <service id="twig.backoffice_variable" alias="Base\Twig\Variable\BackofficeVariable" />
         <service id="twig.ea_variable"         alias="Base\Twig\Variable\EasyAdminVariable" />
 
-        <service id="base.service.image" alias="Base\Service\ImageService" />
-        <service id="Base\Service\ImageServiceInterface" alias="base.service.image"/>
+        <service id="base.service.image" alias="Base\Service\MediaService" />
+        <service id="Base\Service\MediaServiceInterface" alias="base.service.image"/>
 
         <service id="form.proxy"     alias="Base\Form\FormProxy" />
         <service id="Base\Form\FormProxyInterface" alias="form.proxy"/>

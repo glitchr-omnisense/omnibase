@@ -140,6 +140,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         return $this->options;
     }
+    /**
+     * @var bool
+     */
+    protected bool $useMailer;
 
     /**
      * @var array

@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Controller\UX\FileController;
+use Base\Controller\UX\MediaController;
 use Base\Routing\RouterInterface;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
@@ -47,9 +47,9 @@ class FileService implements FileServiceInterface
     protected string $publicDir;
 
     /**
-     * @var FileController
+     * @var MediaController
      */
-    protected $fileController;
+    protected $mediaController;
 
     public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
@@ -63,9 +63,9 @@ class FileService implements FileServiceInterface
         $this->mimeTypes = new MimeTypes();
     }
 
-    public function setController(FileController $fileController)
+    public function setController(MediaController $mediaController)
     {
-        $this->fileController = $fileController;
+        $this->mediaController = $mediaController;
         return $this;
     }
 

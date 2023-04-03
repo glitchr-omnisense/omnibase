@@ -36,7 +36,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
             "salt" => $this->getSalt()
         ];
 
-        return $this->getImageService()->generate($routeName, $routeParameters, $this->getImage()->getSource(), $config);
+        return $this->getMediaService()->generate($routeName, $routeParameters, $this->getImage()->getSource(), $config);
     }
 
     public function __toString()

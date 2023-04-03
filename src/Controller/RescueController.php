@@ -11,7 +11,7 @@ use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
 use Base\Form\Type\SecurityLoginType;
 use Base\Service\ReferrerInterface;
-use Base\Service\ImageServiceInterface;
+use Base\Service\MediaServiceInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,9 +35,9 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
     protected $router;
 
     /**
-     * @var ImageServiceInterface
+     * @var MediaServiceInterface
      * */
-    protected $imageService;
+    protected $mediaService;
 
     /**
      * @var SettingBagInterface
@@ -59,13 +59,13 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
      * */
     protected $formProxy;
 
-    public function __construct(RouterInterface $router, ImageServiceInterface $imageService, SettingBagInterface $settingBag, Environment $twig, TranslatorInterface $translator, FormProxyInterface $formProxy)
+    public function __construct(RouterInterface $router, MediaServiceInterface $mediaService, SettingBagInterface $settingBag, Environment $twig, TranslatorInterface $translator, FormProxyInterface $formProxy)
     {
         $this->twig = $twig;
         $this->router = $router;
         $this->settingBag = $settingBag;
 
-        $this->imageService = $imageService;
+        $this->mediaService = $mediaService;
         $this->translator = $translator;
         $this->formProxy  = $formProxy;
     }

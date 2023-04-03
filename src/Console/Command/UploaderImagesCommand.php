@@ -3,9 +3,9 @@
 namespace Base\Console\Command;
 
 use Base\Annotations\Annotation\Uploader;
-use Base\Controller\UX\FileController;
+use Base\Controller\UX\MediaController;
 use Base\Imagine\Filter\Format\WebpFilter;
-use Base\Service\ImageServiceInterface;
+use Base\Service\MediaServiceInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
@@ -19,14 +19,14 @@ use Symfony\Component\Console\Attribute\AsCommand;
 class UploaderImagesCommand extends UploaderEntitiesCommand
 {
     /**
-     * @var ImageServiceInterface
+     * @var MediaServiceInterface
      */
-    protected $imageService;
+    protected $mediaService;
 
     /**
-     * @var FileController
+     * @var MediaController
      */
-    protected $fileController;
+    protected $mediaController;
 
     /**
      * @var bool
@@ -44,15 +44,15 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
         TranslatorInterface $translator,
         EntityManagerInterface $entityManager,
         ParameterBagInterface $parameterBag,
-        ImageServiceInterface $imageService,
-        FileController $fileController
+        MediaServiceInterface $mediaService,
+        MediaController $mediaController
     )
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
-        $this->fileController = $fileController;
+        $this->mediaController = $mediaController;
 
-        $this->imageService   = $imageService;
-        $this->imageService->setController($fileController);
+        $this->mediaService   = $mediaService;
+        $this->mediaService->setController($mediaController);
 
         $this->defaultFormats = $parameterBag->get("base.uploader.formats");
     }
@@ -91,7 +91,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
 
     public function isCached($data)
     {
-        $args = $this->imageService->resolve($data);
+        $args = $this->mediaService->resolve($data);
         if (!$args) {
             return false;
         }
@@ -102,11 +102,11 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
 
-        $extensions = $this->imageService->getExtensions($args["path"] ?? $data);
+        $extensions = $this->mediaService->getExtensions($args["path"] ?? $data);
         $extension  = first($extensions);
 
         $output = pathinfo_extension($data."/image", $extension);
-        return $this->imageService->isCached($args["path"] ?? $data, new WebpFilter(null, $filters, $options), ["webp" => true, "local_cache" => $localCache, "output" => $output]);
+        return $this->mediaService->isCached($args["path"] ?? $data, new WebpFilter(null, $filters, $options), ["webp" => true, "local_cache" => $localCache, "output" => $output]);
     }
 
     protected $ibatch = 0;
@@ -184,23 +184,23 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 $formatStr = implode(", ", array_map(fn ($f) => implode("x", $f), $formats));
                 $formatStr = $formatStr ? "Formats: ".$formatStr : "";
 
-                $extensions = $this->imageService->getExtensions($file);
+                $extensions = $this->mediaService->getExtensions($file);
                 $extension  = first($extensions);
 
-                $data = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
+                $data = $this->mediaService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
                 if ($this->isCached($data)) {
                     $this->output->section()->writeln("             <warning>* Already cached \".".str_lstrip(realpath($file), realpath($publicDir))."\".. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
                 } else {
                     $this->output->section()->writeln("             <info>* Warming up \".".str_lstrip(realpath($file), realpath($publicDir))."\".. (".($i+1)."/".$N.")</info>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->ibatch++;
 
-                    $data = $this->imageService->imagine($file, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
-                    $data = $this->imageService->imagine($file, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
+                    $data = $this->mediaService->imagine($file, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
+                    $data = $this->mediaService->imagine($file, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
 
                     foreach ($formats as $format) {
                         list($width, $height) = $format;
-                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
-                        $data = $this->imageService->thumbnail($file, $width, $height, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
+                        $data = $this->mediaService->thumbnail($file, $width, $height, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
+                        $data = $this->mediaService->thumbnail($file, $width, $height, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
                     }
                 }
 

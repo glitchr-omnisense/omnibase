@@ -5,7 +5,7 @@ namespace Base\Twig\Extension;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\Color\Intl\Colors;
 use Base\Service\IconProvider;
-use Base\Service\ImageService;
+use Base\Service\MediaService;
 use Base\Service\Model\ColorizeInterface;
 use Base\Service\TradingMarketInterface;
 use Base\Service\TranslatorInterface;

@@ -16,21 +16,21 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-use Base\Service\ImageService;
+use Base\Service\MediaService;
 use Base\Traits\BaseTrait;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 /** @Route("", name="ux_", priority=-1) */
-class FileController extends AbstractController
+class MediaController extends AbstractController
 {
     use BaseTrait;
 
     /**
-     * @var ImageService
+     * @var MediaService
      */
-    protected $imageService;
+    protected $mediaService;
 
     /**
      * @var FileService
@@ -62,14 +62,14 @@ class FileController extends AbstractController
      */
     protected $localCache;
 
-    public function __construct(RequestStack $requestStack, Flysystem $flysystem, ImageService $imageService, ImageCropRepository $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
+    public function __construct(RequestStack $requestStack, Flysystem $flysystem, MediaService $mediaService, ImageCropRepository $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
     {
         $this->imageCropRepository = $imageCropRepository;
 
-        $this->imageService = $imageService;
+        $this->mediaService = $mediaService;
         $this->profiler = $profiler;
 
-        $this->fileService = cast($imageService, FileService::class);
+        $this->fileService = cast($mediaService, FileService::class);
         $this->flysystem   = $flysystem;
 
         $this->localCache    = $localCache ?? true;
@@ -131,7 +131,7 @@ class FileController extends AbstractController
     {
         //
         // Extract parameters
-        $config = $this->imageService->resolve($data);
+        $config = $this->mediaService->resolve($data);
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();
         }
@@ -144,7 +144,7 @@ class FileController extends AbstractController
         }
 
         // Redirect to proper path
-        $extensions = $this->imageService->getExtensions($path);
+        $extensions = $this->mediaService->getExtensions($path);
         if (!$extensions) {
             throw $this->createNotFoundException();
         }
@@ -219,16 +219,16 @@ class FileController extends AbstractController
         // File should be access from default "image" route to spare some computing time
         // NB: These lines below are commented to keep the same url and cache the image
         // $config["identifier"] = $identifier;
-        // $data = $this->imageService->obfuscate($path, $config, $filters);
+        // $data = $this->mediaService->obfuscate($path, $config, $filters);
         if ($imageCrop === null) {
             $identifier = "image";
         }
 
         $output = pathinfo_extension($data."/".$identifier, $extension);
-        $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+        $path = $this->mediaService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
+        return  $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
@@ -266,17 +266,17 @@ class FileController extends AbstractController
      */
     public function ImageWebp($data): Response
     {
-        $config = $this->imageService->resolve($data);
+        $config = $this->mediaService->resolve($data);
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();
         }
 
-        $webp = $config["webp"] ?? $this->imageService->isWebpEnabled();
+        $webp = $config["webp"] ?? $this->mediaService->isWebpEnabled();
         if (!$webp) {
             return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
         }
 
-        $mimeType = $config["mimetype"] ?? $this->imageService->getMimeType($config["path"]);
+        $mimeType = $config["mimetype"] ?? $this->mediaService->getMimeType($config["path"]);
         if ($mimeType == "image/svg+xml") {
             return $this->redirectToRoute("ux_imageSvg", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
         }
@@ -288,10 +288,10 @@ class FileController extends AbstractController
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data."/image", "webp");
-        $path = $this->imageService->filter($config["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+        $path = $this->mediaService->filter($config["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
+        return  $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
@@ -299,7 +299,7 @@ class FileController extends AbstractController
      */
     public function ImageSvg($data): Response
     {
-        $config = $this->imageService->resolve($data);
+        $config = $this->mediaService->resolve($data);
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();
         }
@@ -307,7 +307,7 @@ class FileController extends AbstractController
         $filters = $config["filters"];
         $options = $config["options"];
 
-        $mimeType = $config["mimetype"] ?? $this->imageService->getMimeType($config["path"]);
+        $mimeType = $config["mimetype"] ?? $this->mediaService->getMimeType($config["path"]);
         if ($mimeType != "image/svg+xml") {
             return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
         }
@@ -316,10 +316,10 @@ class FileController extends AbstractController
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data."/image", "svg");
-        $path = $this->imageService->filter($config["path"], new SvgFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+        $path = $this->mediaService->filter($config["path"], new SvgFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
+        return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
@@ -330,7 +330,7 @@ class FileController extends AbstractController
     {
         //
         // Extract parameters
-        $config = $this->imageService->resolve($data);
+        $config = $this->mediaService->resolve($data);
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();
         }
@@ -341,7 +341,7 @@ class FileController extends AbstractController
         $identifier = $config["identifier"] ?? null;
 
         // Redirect to proper path
-        $extensions = $this->imageService->getExtensions($path);
+        $extensions = $this->mediaService->getExtensions($path);
         if (!$extensions) {
             throw $this->createNotFoundException();
         }
@@ -358,13 +358,13 @@ class FileController extends AbstractController
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data."/image", $extension);
-        $path = $this->imageService->filter($config["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+        $path = $this->mediaService->filter($config["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
         if ($debug) {
             dump($data, $config, $path);
             exit(1);
         }
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
+        return  $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 }

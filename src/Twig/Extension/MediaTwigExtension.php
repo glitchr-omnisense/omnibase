@@ -2,14 +2,14 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Controller\UX\FileController;
+use Base\Controller\UX\MediaController;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Routing\AdvancedRouter;
 use Base\Service\Model\LinkableInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\FileService;
 use Base\Service\IconProvider;
-use Base\Service\ImageService;
+use Base\Service\MediaService;
 use Base\Service\Obfuscator;
 use Base\Twig\Environment;
 use Imagine\Image\ImageInterface;
@@ -21,7 +21,7 @@ use Twig\TwigFilter;
 use Twig\TwigFunction;
 use Twig\TwigTest;
 
-final class FileTwigExtension extends AbstractExtension
+final class MediaTwigExtension extends AbstractExtension
 {
     /**
      * @var Router
@@ -29,47 +29,39 @@ final class FileTwigExtension extends AbstractExtension
     protected $router;
 
     /**
-     * @var FileController
+     * @var MediaController
      */
-    protected $fileController;
+    protected $mediaController;
 
     /**
-     * @var ImageService
+     * @var MediaService
      */
-    protected $imageService;
+    protected $mediaService;
 
     /** @var string */
     protected $projectDir;
 
-    public function __construct(RouterInterface $router, ImageService $imageService, FileController $fileController, string $projectDir)
+    public function __construct(RouterInterface $router, MediaService $mediaService, MediaController $mediaController, string $projectDir)
     {
         $this->projectDir = $projectDir;
 
         $this->router = $router;
-        $this->fileController = $fileController;
+        $this->mediaController = $mediaController;
 
-        $this->imageService = $imageService;
-        $this->imageService->setController($fileController);
+        $this->mediaService = $mediaService;
+        $this->mediaService->setController($mediaController);
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('urlify', [$this, 'urlify'], ["is_safe" => ['all']]),
-            new TwigFunction('linkify', [$this, 'linkify'], ["is_safe" => ['all']]),
             new TwigFunction('embed', [$this, 'embed'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('url', [$this, 'url'], ['needs_context' => true]),
-
-            new TwigFunction('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
-            new TwigFunction('imagify', [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
-            new TwigFunction('imageset', [ImageService::class, 'imageSet'], ["is_safe" => ['all']]),
-            new TwigFunction('urlify', [$this, 'urlify'], ["is_safe" => ['all']]),
-            new TwigFunction('linkify', [$this, 'linkify'], ["is_safe" => ['all']]),
-            new TwigFunction('lightbox', [ImageService::class, 'lightbox'], ["is_safe" => ['all']]),
-            new TwigFunction('image', [$this, 'image']),
-
-            new TwigFunction('file_exists', 'file_exists'),
-
+            new TwigFunction('imageset', [MediaService::class, 'imageSet'], ["is_safe" => ['all']]),
+            new TwigFunction('image', [$this, 'image'], ['needs_context' => true]),
+            new TwigFunction('video', [MediaService::class, 'video'], ["is_safe" => ['all']]),
+            new TwigFunction('audio', [MediaService::class, 'audio'], ["is_safe" => ['all']]),
+          
             new TwigFunction('asset', [AdvancedRouter::class, 'getAssetUrl']),
         ];
     }
@@ -85,9 +77,10 @@ final class FileTwigExtension extends AbstractExtension
     {
         return
             [
+                new TwigFilter('soundify', [MediaService::class, 'soundify'], ["is_safe" => ['all']]),
+                new TwigFilter('vidify'  , [MediaService::class, 'vidify'], ["is_safe" => ['all']]),
                 new TwigFilter('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
-                new TwigFilter('imagify', [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
-                new TwigFilter('imageset', [ImageService::class, 'imageSet'], ["is_safe" => ['all']]),
+                new TwigFilter('imagify', [MediaService::class, 'imagify'], ["is_safe" => ['all']]),
                 new TwigFilter('urlify', [$this, 'urlify'], ["is_safe" => ['all']]),
                 new TwigFilter('linkify', [$this, 'linkify'], ["is_safe" => ['all']]),
 
@@ -104,13 +97,10 @@ final class FileTwigExtension extends AbstractExtension
                 new TwigFilter('filesize', [FileService::class, 'filesize']),
                 new TwigFilter('obfuscate', [Obfuscator::class, 'encode']),
                 new TwigFilter('obfuscate_file', [FileService::class, 'obfuscate']),
-                new TwigFilter('obfuscate_image', [ImageService::class, 'obfuscate']),
-                new TwigFilter('lightbox', [ImageService::class, 'lightbox'], ["is_safe" => ['all']]),
+                new TwigFilter('obfuscate_image', [MediaService::class, 'obfuscate']),
+                new TwigFilter('lightbox', [MediaService::class, 'lightbox'], ["is_safe" => ['all']]),
 
-                new TwigFilter('imagine', [$this, 'imagine'], ['needs_context' => true]),
-                new TwigFilter('webp', [$this, 'imagine'], ['needs_context' => true]),
-                new TwigFilter('image', [$this, 'imagine'], ['needs_context' => true]),
-                new TwigFilter('crop', [$this, 'imagineCrop'], ['needs_context' => true]),
+                               new TwigFilter('crop', [$this, 'imageCrop'], ['needs_context' => true]),
                 new TwigFilter('thumbnail', [$this, 'thumbnail'], ['needs_context' => true]),
                 new TwigFilter('thumbnail_inset   ', [$this, 'thumbnailInset   '], ['needs_context' => true]),
                 new TwigFilter('thumbnail_outbound', [$this, 'thumbnailOutbound'], ['needs_context' => true]),
@@ -124,7 +114,7 @@ final class FileTwigExtension extends AbstractExtension
         return file_exists(sanitize_url($this->projectDir . "/public/" . $file));
     }
 
-    public function imagine(array $context, array|string|null $path, array $filters = [], array $config = []): array|string|null
+    public function image(array $context, array|string|null $path, array $filters = [], array $config = []): array|string|null
     {
         $config["local_cache"] ??= true;
         if (array_key_exists("warmup", $context)) {
@@ -137,10 +127,10 @@ final class FileTwigExtension extends AbstractExtension
             $config["webp"]   = false;
         }
 
-        return $this->imageService->imagine($path, $filters, $config);
+        return $this->mediaService->image($path, $filters, $config);
     }
 
-    public function imagineCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
+    public function imageCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
     {
         $config["local_cache"] ??= true;
         if (array_key_exists("warmup", $context)) {
@@ -153,7 +143,7 @@ final class FileTwigExtension extends AbstractExtension
             $config["webp"]   = false;
         }
 
-        return $this->imageService->crop($path, $x, $y, $width, $height, $position, $filters, $config);
+        return $this->mediaService->crop($path, $x, $y, $width, $height, $position, $filters, $config);
     }
 
     public function thumbnailInset(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
@@ -185,7 +175,7 @@ final class FileTwigExtension extends AbstractExtension
             $config["webp"]   = false;
         }
 
-        return $this->imageService->thumbnail($path, $width, $height, $filters, $config);
+        return $this->mediaService->thumbnail($path, $width, $height, $filters, $config);
     }
 
     public function urlify(LinkableInterface|string|null $urlOrPath, ?string $label = null, array $attributes = [])
