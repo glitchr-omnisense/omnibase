@@ -154,6 +154,7 @@ class Vault extends AbstractAnnotation
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
 
+//        dump($entity);
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
 
@@ -171,9 +172,11 @@ class Vault extends AbstractAnnotation
                 if ($entity->getSealedVaultBag($field) == $value) continue;
                 if ($entity->getPlainVaultBag($field) == $value) {
                     $propertyAccessor->setValue($entity, $field, $entity->getSealedVaultBag($field));
+//                    dump($entity);
                     continue;
                 }
 
+//                dump("SCHEDULE FOR UPDATE");
                 $this->getEntityManager()->getUnitOfWork()->scheduleForUpdate($entity);
             }
         }
@@ -199,15 +202,19 @@ class Vault extends AbstractAnnotation
                 continue;
             }
             if ($propertyAccessor->isReadable($entity, $field)) {
-                $value = $propertyAccessor->getValue($entity, $field);
-                if ($value === null) {
+
+                $plainValue = $propertyAccessor->getValue($entity, $field);
+                if ($plainValue === null) {
                     continue;
                 }
 
-                if (is_array($value) || is_object($value)) {
-                    $value = serialize($value);
+                if (is_array($plainValue) || is_object($plainValue)) {
+                    $plainValue = serialize($plainValue);
                 }
-                $propertyAccessor->setValue($entity, $field, base64_encode($this->seal($marshaller, $value)));
+
+                $sealedValue = base64_encode($this->seal($marshaller, $plainValue));
+                $propertyAccessor->setValue($entity, $field, $sealedValue);
+                $entity->setVaultBag($field, $sealedValue, $plainValue);
             }
         }
     }
@@ -222,6 +229,8 @@ class Vault extends AbstractAnnotation
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
+
+//        dump($entity);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
@@ -247,6 +256,8 @@ class Vault extends AbstractAnnotation
 
                     $propertyAccessor->setValue($entity, $field, $plainValue);
                     $entity->setVaultBag($field, $sealedValue, $plainValue);
+
+//                    dump($entity);
                 }
             }
         }

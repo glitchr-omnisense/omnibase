@@ -122,6 +122,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'allow_add' => true,
             'allow_delete' => true,
             'allow_entity' => true,
+            'allow_null' => null
         ]);
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
@@ -327,6 +328,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $options     = $formParent->getConfig()->getOptions();
         $options["class"]    = $options["class"] ?? $this->formFactory->guessClass($formParent, $options);
         $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($formParent, $options);
+        $options["allow_null"] = $options["allow_null"]   ?? $this->formFactory->guessNullable($formParent, $options);
 
         $entries = new ArrayCollection();
         foreach (iterator_to_array($forms) as $fieldName => $childForm) {
@@ -349,9 +351,11 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 }
             }
 
+            $aggregateModel = EntityHydrator::CLASS_METHODS;
+            if(!$options["allow_null"]) $aggregateModel |= EntityHydrator::IGNORE_NULLS;
             $viewData = $this->entityHydrator->hydrate(
                 is_object($viewData) ? $viewData : $options["class"],
-                $entries instanceof Collection ? $entries->toArray() : $entries, [], EntityHydrator::CLASS_METHODS|EntityHydrator::IGNORE_NULLS
+                $entries instanceof Collection ? $entries->toArray() : $entries, [], $aggregateModel
             );
 
         } elseif ($viewData instanceof PersistentCollection) {
@@ -392,13 +396,18 @@ class AssociationType extends AbstractType implements DataMapperInterface
             }
 
             $viewData->clear();
+
             foreach ($entries as $entry) {
+
                 $viewData->add($entry);
                 if (!$isOwningSide && $mappedBy) {
+
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
+
                         $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                     } elseif (!$owningSide->contains($viewData->getOwner())) {
+
                         $owningSide->add($viewData->getOwner());
                     }
                 }

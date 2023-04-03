@@ -127,17 +127,23 @@ class IntlSubscriber implements EventSubscriberInterface
         }
 
         if ($entity instanceof TranslationInterface) {
+
             if (!$entity->isEmpty()) {
+
                 $uow->cancelOrphanRemoval($entity);
+
             } else {
+
                 $translatable = $entity->getTranslatable();
                 if ($translatable) {
                     $translatable->removeTranslation($entity);
                 }
 
+                $this->entityManager->detach($entity);
                 if ($this->entityManager->contains($entity)) {
                     $this->entityManager->remove($entity);
                 }
+
             }
         }
 

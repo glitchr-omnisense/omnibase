@@ -173,6 +173,39 @@ trait FormGuessTrait
         return $options["multiple"] ?? false;
     }
 
+    public function guessNullable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
+    {
+        if ($form instanceof FormEvent) {
+            $form = $form->getForm();
+        }
+
+        if (!array_key_exists("nullable", $options)) {
+            $options["allow_null"] = false;
+        }
+
+        if ($options["allow_null"] === null) {
+
+            $parentForm = $form->getParent();
+            if ($parentForm) {
+                $options = $parentForm->getConfig()->getOptions();
+                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+            }
+
+            if ($target == null) {
+                $options = $options ?? $form->getConfig()->getOptions();
+                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+            }
+
+            if ($this->classMetadataManipulator->isEntity($target)) {
+
+                $targetField = $form->getName();
+                $this->classMetadataManipulator->getMapping($target, $targetField)["allow_null"] ?? false;
+            }
+        }
+
+        return $options["allow_null"] ?? false;
+    }
+
     public function guessSortable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
     {
         if ($form instanceof FormEvent) {

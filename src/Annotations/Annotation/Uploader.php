@@ -426,7 +426,7 @@ class Uploader extends AbstractAnnotation
             return false;
         }
 
-        $old = array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName) : self::getFieldValue($oldEntity, $fieldName);
+        $old = $entity !== null && array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName) : self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
 

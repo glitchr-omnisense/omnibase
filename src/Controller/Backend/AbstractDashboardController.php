@@ -225,11 +225,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function ApiKey(Request $request, array $fields = []): Response
     {
         $fields = array_reverse(array_merge(array_reverse([
-            "api.spam.akismet" => [],
-            "api.currency.fixer" => [],
-            "api.currency.exchange_rates_api" => ["required" => false],
-            "api.currency.currency_layer" => ["required" => false],
-            "api.currency.abstract_api" => ["required" => false],
+//            "api.spam.akismet" => [],
+//            "api.currency.fixer" => [],
+//            "api.currency.exchange_rates_api" => ["required" => false],
+//            "api.currency.currency_layer" => ["required" => false],
+//            "api.currency.abstract_api" => ["required" => false],
         ]), array_reverse($fields)));
 
         if (empty($fields)) {

@@ -203,6 +203,7 @@ class AnnotationSubscriber implements EventSubscriberInterface
         }
 
         foreach ($entities as $entity) {
+
             $className = get_class($entity);
             $classMetadata  = $this->entityManager->getClassMetadata($className);
 

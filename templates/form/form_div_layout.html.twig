@@ -578,11 +578,13 @@
         {% if (allow_reupload or value is null) %}
         <div class="input-group field-raw">
 
+            {% if form.vars.inline  %}
             <div class="input-group-prepend">
                 <span class="input-group-text">
                     {{ form_label(form)}}
                 </span>
             </div>
+            {% endif %}
 
             {% if allow_url %} <div class="input-group-text">{{ "fa-solid fa-paperclip"|iconify|first|raw }}</div>{% endif %}
             {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({'class': (files is empty ? 'last' : "") ~ (form.raw.vars.attr.class is defined ? ' ' ~ form.raw.vars.attr.class : ''), accept: mime_types|join(',') }) }) }}

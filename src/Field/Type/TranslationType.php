@@ -406,6 +406,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
                     if ($translation) {
                         $viewData[$key][$locale] = $translation;
+
                     }
                 }
             }
