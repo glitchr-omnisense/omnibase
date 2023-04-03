@@ -7,6 +7,8 @@ use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
+use Doctrine\ORM\Event\PostFlushEventArgs;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -44,7 +46,7 @@ class AnnotationSubscriber implements EventSubscriberInterface
             Events::loadClassMetadata,
             Events::postLoad,
 
-            Events::onFlush,
+            Events::preFlush, Events::onFlush, Events::postFlush,
             Events::prePersist,  Events::preUpdate,  Events::preRemove,
             Events::postPersist, Events::postUpdate, Events::postRemove,
         ];
@@ -124,6 +126,67 @@ class AnnotationSubscriber implements EventSubscriberInterface
         }
     }
 
+    public function preFlush(PreFlushEventArgs $event)
+    {
+        $uow = $event->getEntityManager()->getUnitOfWork();
+
+        foreach ($uow->getIdentityMap() as $class => $entities) {
+
+            foreach ($entities as $entity) {
+                $className = get_class($entity);
+                $classMetadata = $this->entityManager->getClassMetadata($className);
+
+                if (in_array($className, $this->subscriberHistory)) {
+                    return;
+                }
+                $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
+
+                $annotations = $this->annotationReader->getAnnotations($className);
+
+                $changeSet = $uow->getEntityChangeSet($entity);
+                $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+                foreach ($propertyAnnotations as $property => $_) {
+                    if (!array_key_exists($property, $changeSet)) {
+                        continue;
+                    }
+
+                    foreach ($_ as $annotation) {
+                        if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                            continue;
+                        }
+
+                        if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
+                            continue;
+                        }
+
+                        if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity)) {
+                            continue;
+                        }
+
+                        $annotation->preFlush($event, $classMetadata, $entity, $property);
+                    }
+                }
+
+                $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+                foreach ($classAnnotations as $annotation) {
+                    if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                        continue;
+                    }
+
+                    if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
+                        continue;
+                    }
+
+                    if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity)) {
+                        continue;
+                    }
+
+                    $annotation->preFlush($event, $classMetadata, $entity);
+                }
+            }
+        }
+    }
+
     public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
@@ -140,6 +203,7 @@ class AnnotationSubscriber implements EventSubscriberInterface
         }
 
         foreach ($entities as $entity) {
+
             $className = get_class($entity);
             $classMetadata  = $this->entityManager->getClassMetadata($className);
 
@@ -189,6 +253,75 @@ class AnnotationSubscriber implements EventSubscriberInterface
                 }
 
                 $annotation->onFlush($event, $classMetadata, $entity);
+            }
+        }
+    }
+
+    public function postFlush(PostFlushEventArgs $event)
+    {
+        $uow = $event->getEntityManager()->getUnitOfWork();
+
+        $entities = [];
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+            $entities[] = $entity;
+        }
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+            $entities[] = $entity;
+        }
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+            $entities[] = $entity;
+        }
+
+        foreach ($entities as $entity) {
+            $className = get_class($entity);
+            $classMetadata  = $this->entityManager->getClassMetadata($className);
+
+            if (in_array($className, $this->subscriberHistory)) {
+                return;
+            }
+            $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
+
+            $annotations = $this->annotationReader->getAnnotations($className);
+
+            $changeSet = $uow->getEntityChangeSet($entity);
+            $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+            foreach ($propertyAnnotations as $property => $_) {
+                if (!array_key_exists($property, $changeSet)) {
+                    continue;
+                }
+
+                foreach ($_ as $annotation) {
+                    if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                        continue;
+                    }
+
+                    if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
+                        continue;
+                    }
+
+                    if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity)) {
+                        continue;
+                    }
+
+                    $annotation->postFlush($event, $classMetadata, $entity, $property);
+                }
+            }
+
+            $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+            foreach ($classAnnotations as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+
+                if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+
+                if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity)) {
+                    continue;
+                }
+
+                $annotation->postFlush($event, $classMetadata, $entity);
             }
         }
     }

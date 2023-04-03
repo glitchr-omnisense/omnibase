@@ -20,7 +20,7 @@ class NumberAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-calculator"];
+        return ["fa-solid fa-calculator"];
     }
 
     public static function getType(): string

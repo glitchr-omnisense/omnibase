@@ -78,7 +78,7 @@ class ProfileController extends AbstractController
 
     /**
      * @Route("/profile/{id}", name="user_profile")
-     * @Iconize("fas fa-fw fa-id-card")
+     * @Iconize("fa-solid fa-fw fa-id-card")
      */
     public function Show(int $id = -1)
     {

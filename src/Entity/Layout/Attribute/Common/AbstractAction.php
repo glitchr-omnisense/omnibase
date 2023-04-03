@@ -24,7 +24,7 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-directions"];
+        return ["fa-solid fa-directions"];
     }
     public function apply(mixed $subject): mixed
     {

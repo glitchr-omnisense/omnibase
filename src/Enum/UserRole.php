@@ -24,13 +24,13 @@ class UserRole extends SetType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::EDITOR   => ["fas fa-hard-hat", "fas fa-hard-hat"],
+            self::EDITOR   => ["fa-solid fa-hard-hat", "fa-solid fa-hard-hat"],
 
-            self::SUPERADMIN => ["fas fa-cog", "fas fa-user-cog"],
-            self::ADMIN      => ["fas fa-crown", "fas fa-star"],
-            self::USER       => ["fas fa-user", "fas fa-user-tag"],
+            self::SUPERADMIN => ["fa-solid fa-cog", "fa-solid fa-user-cog"],
+            self::ADMIN      => ["fa-solid fa-crown", "fa-solid fa-star"],
+            self::USER       => ["fa-solid fa-user", "fa-solid fa-user-tag"],
 
-            self::SOCIAL     => ["fas fa-user-friends"],
+            self::SOCIAL     => ["fa-solid fa-user-friends"],
         ];
     }
 

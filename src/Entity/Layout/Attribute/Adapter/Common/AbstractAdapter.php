@@ -41,7 +41,7 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-share-alt"];
+        return ["fa-solid fa-share-alt"];
     }
 
     public function __toString()

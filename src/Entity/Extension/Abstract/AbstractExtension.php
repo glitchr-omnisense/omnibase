@@ -30,7 +30,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-external-link"];
+        return ["fa-solid fa-external-link"];
     }
 
     /**

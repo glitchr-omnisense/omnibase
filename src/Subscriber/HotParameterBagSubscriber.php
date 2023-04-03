@@ -60,6 +60,7 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
             }
 
             $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
+
         }, $allRaw);
 
         $this->parameterBag->markAsReady();

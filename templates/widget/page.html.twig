@@ -8,7 +8,7 @@
     <div>
         {% if is_granted("ROLE_ADMIN") %}
         <a class="btn btn-outline-primary" href="{{app.ea.crudify(page)}}" target="_blank">
-            <i class="fas fa-pencil-alt"></i> {{ '@EasyAdminBundle.action.edit'|trans|raw }}
+            <i class="fa-solid fa-pencil-alt"></i> {{ '@EasyAdminBundle.action.edit'|trans|raw }}
         </a>
         {% endif %}
     </div>

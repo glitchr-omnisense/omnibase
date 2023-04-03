@@ -265,12 +265,12 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureActions(Actions $actions): Actions
     {
-        $batchActionDelete = Action::new('batchActionDelete', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_delete', 'fa fa-user-times')
+        $batchActionDelete = Action::new('batchActionDelete', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_delete', 'fa-solid fa-user-times')
             ->linkToCrudAction('batchActionDelete')
             ->addCssClass('btn btn-primary text-danger');
 
         if (is_instanceof($this->getEntityFqcn(), LinkableInterface::class)) {
-            $linkToEntity = \Base\Backend\Config\Action::new(\Base\Backend\Config\Action::GOTO, self::getEntityLabelInSingular(), "fas fa-fw fa-plug")
+            $linkToEntity = \Base\Backend\Config\Action::new(\Base\Backend\Config\Action::GOTO, self::getEntityLabelInSingular(), "fa-solid fa-fw fa-plug")
                 ->renderAsTooltip()
                 ->linkToUrl(fn ($e) => $e->__toLink() ?? "");
 
@@ -375,7 +375,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $text ??= $this->translator->transQuiet($crudTranslationPrefix.".text");
         $text ??= "";
 
-        $this->extension->setIcon($this->getEntityIcon() ?? "fas fa-question-circle");
+        $this->extension->setIcon($this->getEntityIcon() ?? "fa-solid fa-question-circle");
         $this->extension->setTitle(mb_ucfirst($title));
         $this->extension->setHelp($help);
         $this->extension->setText($text);

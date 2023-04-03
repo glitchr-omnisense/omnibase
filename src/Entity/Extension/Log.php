@@ -23,7 +23,7 @@ class Log extends AbstractExtension
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-info-circle"];
+        return ["fa-solid fa-info-circle"];
     }
 
     public function __construct(array $listener, Request $request = null)

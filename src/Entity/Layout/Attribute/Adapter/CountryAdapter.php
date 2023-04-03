@@ -19,7 +19,7 @@ class CountryAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-flag"];
+        return ["fa-solid fa-flag"];
     }
 
     public static function getType(): string

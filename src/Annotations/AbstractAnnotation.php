@@ -9,6 +9,8 @@ use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\ORM\EntityNotFoundException;
+use Doctrine\ORM\Event\PostFlushEventArgs;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\Persistence\Event\LifecycleEventArgs as BaseLifecycleEventArgs;
 
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -281,14 +283,18 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
 
     abstract public function supports(string $target, ?string $targetValue = null, mixed $object = null): bool;
-    public function postParser(mixed $object = null)
-    {
-    }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
     {
     }
+
+    public function preFlush(PreFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+    }
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+    }
+    public function postFlush(PostFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
 

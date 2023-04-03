@@ -23,13 +23,13 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::SECOND   => ["fas fa-question-circle"],
-            self::METER    => ["fas fa-question-circle"],
-            self::KILOGRAM => ["fas fa-question-circle"],
-            self::AMPERE   => ["fas fa-question-circle"],
-            self::KELVIN   => ["fas fa-question-circle"],
-            self::MOLE     => ["fas fa-question-circle"],
-            self::CANDELA  => ["fas fa-question-circle"],
+            self::SECOND   => ["fa-solid fa-question-circle"],
+            self::METER    => ["fa-solid fa-question-circle"],
+            self::KILOGRAM => ["fa-solid fa-question-circle"],
+            self::AMPERE   => ["fa-solid fa-question-circle"],
+            self::KELVIN   => ["fa-solid fa-question-circle"],
+            self::MOLE     => ["fa-solid fa-question-circle"],
+            self::CANDELA  => ["fa-solid fa-question-circle"],
         ];
     }
 

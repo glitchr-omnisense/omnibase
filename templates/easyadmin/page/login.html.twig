@@ -140,14 +140,14 @@
         .btn-matrix5 > .btn:nth-last-child(5) { border-bottom-left-radius: 4px !important; }
         .btn-matrix6 > .btn:nth-child(6) { border-top-right-radius: 4px !important; }
         .btn-matrix6 > .btn:nth-last-child(6) { border-bottom-left-radius: 4px !important; }
-        .fa, .fab, .fad, .fal, .far, .fas { -webkit-font-smoothing: antialiased; display: inline-block; font-style: normal; font-variant: normal; line-height: 1; text-rendering: auto; }
+        .fa, .fab, .fad, .fal, .far, .fa-solid { -webkit-font-smoothing: antialiased; display: inline-block; font-style: normal; font-variant: normal; line-height: 1; text-rendering: auto; }
         .fa-3x { font-size: 3em; }
         .fa-fw { text-align: center; width: 1.25em; }
         .fa-lock::before { content: ""; }
         .fa-unlock::before { content: ""; }
         .fa-user::before { content: ""; }
-        .fa, .far, .fas { font-family: "Font Awesome 5 Free"; }
-        .fa, .fas { font-weight: 900; }
+        .fa, .far, .fa-solid { font-family: "Font Awesome 6 Free"; }
+        .fa, .fa-solid { font-weight: 900; }
         .input-group.date .input-group-addon, .input-group.date .input-group-text { cursor: pointer; }
         img, svg { vertical-align: unset; }
         .input-group .select2-container--bootstrap4 { -webkit-box-flex: 1; flex-grow: 1; }
@@ -281,12 +281,12 @@
                     <input type="hidden" name="_target_path" value="{{ app.referrer }}"/>
 
                     <div class="input-group mt-4 mb-2">
-                        <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-user"></i></span>
+                        <span class="input-group-text h-auto" id="identifier-addons"><i class="fa-solid fa-fw fa-user"></i></span>
                         {{ form_widget(form.identifier, {attr:{placeholder:'@forms.login.identifier'|trans}}) }}
                     </div>
 
                     <div class="input-group field-password mb">
-                        <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-lock"></i></span>
+                        <span class="input-group-text h-auto" id="identifier-addons"><i class="fa-solid fa-fw fa-lock"></i></span>
                         {{ form_widget(form.password, {attr:{ placeholder:'@forms.login.password'|trans}}) }}
                     </div>
 

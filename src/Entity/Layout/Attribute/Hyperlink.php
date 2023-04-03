@@ -37,7 +37,7 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-link"];
+        return ["fa-solid fa-link"];
     }
 
     public function __toString()

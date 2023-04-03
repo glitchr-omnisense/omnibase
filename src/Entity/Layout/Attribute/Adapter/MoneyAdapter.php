@@ -20,7 +20,7 @@ class MoneyAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-money-bill-wave"];
+        return ["fa-solid fa-money-bill-wave"];
     }
 
     public static function getType(): string

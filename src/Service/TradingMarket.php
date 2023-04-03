@@ -9,6 +9,7 @@ use Base\Service\Model\Currency\CurrencyApiInterface;
 use Exchanger\Contract\CurrencyPair as CurrencyPairContract;
 use Exchanger\Contract\ExchangeRate;
 use Exchanger\CurrencyPair;
+use Exchanger\Exception\UnsupportedCurrencyPairException;
 use Psr\SimpleCache\CacheInterface;
 use Swap\Builder;
 use Swap\Swap;
@@ -47,7 +48,7 @@ class TradingMarket implements TradingMarketInterface
     protected $providers = [];
     public function getProviders()
     {
-        return $this->providers;
+        return array_filter($this->providers, fn($p) => $p->getKey() !== null);
     }
     public function getProvider(string $idOrClass): ?CurrencyApiInterface
     {
@@ -211,8 +212,12 @@ class TradingMarket implements TradingMarketInterface
             $cash = (string) $cash;
         }
 
-        $rate = $this->get($source, $target, $options, $timeAgo)->getValue();
-        return $rate === null ? null : $cash * $rate;
+        if($source == $target) return $cash;
+
+        $rate = $this->get($source, $target, $options, $timeAgo)?->getValue();
+        if($rate == null) throw new \Exception("No source available for currency exchange.");
+
+        return $cash * $rate;
     }
 
     public function convertLatest(string|float $cash, string $source, string $target, array $options = []): ?float

@@ -16,6 +16,6 @@ class LinkedInAdapter extends AbstractSharerAdapter
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fab fa-linkedin", "fab fa-linkedin-in"];
+        return ["fa-brands fa-linkedin", "fa-brands fa-linkedin-in"];
     }
 }

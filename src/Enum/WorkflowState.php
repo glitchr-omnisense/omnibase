@@ -21,12 +21,12 @@ class WorkflowState extends EnumType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::SUBMITTED => ["fas fa-paper-plane"],
-            self::SUSPENDED => ["fas fa-exclamation-circle"],
-            self::APPROVED  => ["fas fa-check-circle"],
-            self::PENDING   => ["fas fa-pause-circle"],
-            self::REJECTED  => ["fas fa-times-circle"],
-            self::REVIEWING => ["fas fa-search"],
+            self::SUBMITTED => ["fa-solid fa-paper-plane"],
+            self::SUSPENDED => ["fa-solid fa-exclamation-circle"],
+            self::APPROVED  => ["fa-solid fa-check-circle"],
+            self::PENDING   => ["fa-solid fa-pause-circle"],
+            self::REJECTED  => ["fa-solid fa-times-circle"],
+            self::REVIEWING => ["fa-solid fa-search"],
         ];
     }
 }

@@ -6,6 +6,7 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
+use Doctrine\ORM\UnitOfWork;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -14,6 +15,7 @@ use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 use Symfony\Component\Cache\Marshaller\SodiumMarshaller;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+use function GuzzleHttp\Promise\queue;
 use function is_file;
 
 /**
@@ -25,6 +27,7 @@ use function is_file;
  *   @Attribute("unique", type = "array")
  * })
  */
+
 class Vault extends AbstractAnnotation
 {
     public string $vault;
@@ -146,6 +149,40 @@ class Vault extends AbstractAnnotation
         }
     }
 
+    public function preFlush(\Doctrine\ORM\Event\PreFlushEventArgs $args, \Doctrine\ORM\Mapping\ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+        $vault = $entity->getVault();
+        $marshaller = $this->getMarshaller($vault);
+
+//        dump($entity);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        foreach ($this->fields as $field) {
+
+            if (!$entity->isSecured()) {
+                continue;
+            }
+
+            if ($propertyAccessor->isReadable($entity, $field)) {
+
+                $value = $propertyAccessor->getValue($entity, $field);
+                if ($value === null) {
+                    continue;
+                }
+
+                if ($entity->getSealedVaultBag($field) == $value) continue;
+                if ($entity->getPlainVaultBag($field) == $value) {
+                    $propertyAccessor->setValue($entity, $field, $entity->getSealedVaultBag($field));
+//                    dump($entity);
+                    continue;
+                }
+
+//                dump("SCHEDULE FOR UPDATE");
+                $this->getEntityManager()->getUnitOfWork()->scheduleForUpdate($entity);
+            }
+        }
+    }
+
+
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
@@ -165,27 +202,25 @@ class Vault extends AbstractAnnotation
                 continue;
             }
             if ($propertyAccessor->isReadable($entity, $field)) {
-                $value = $propertyAccessor->getValue($entity, $field);
-                if ($value === null) {
+
+                $plainValue = $propertyAccessor->getValue($entity, $field);
+                if ($plainValue === null) {
                     continue;
                 }
 
-                if (is_array($value) || is_object($value)) {
-                    $value = serialize($value);
+                if (is_array($plainValue) || is_object($plainValue)) {
+                    $plainValue = serialize($plainValue);
                 }
-                $propertyAccessor->setValue($entity, $field, base64_encode($this->seal($marshaller, $value)));
+
+                $sealedValue = base64_encode($this->seal($marshaller, $plainValue));
+                $propertyAccessor->setValue($entity, $field, $sealedValue);
+                $entity->setVaultBag($field, $sealedValue, $plainValue);
             }
         }
     }
 
-    public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
-    {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
-    }
-    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
-    {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
-    }
+
+
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
@@ -195,25 +230,34 @@ class Vault extends AbstractAnnotation
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
 
+//        dump($entity);
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
+
             if (!$entity->isSecured()) {
                 continue;
             }
+
             if ($propertyAccessor->isReadable($entity, $field)) {
-                $value = $propertyAccessor->getValue($entity, $field);
-                $value = $value ? base64_decode($propertyAccessor->getValue($entity, $field)) : false;
-                if ($value === false) {
-                    $value = null;
+
+                $sealedValue = $propertyAccessor->getValue($entity, $field);
+                $plainValue = $sealedValue ? base64_decode($propertyAccessor->getValue($entity, $field)) : false;
+
+                if ($plainValue === false) {
+                    $plainValue = null;
                 }
 
-                if (is_string($value)) {
+                if (is_string($plainValue)) {
 
-                    $value = $this->reveal($marshaller, $value);
-                    if (is_serialized($value))
-                        $value = unserialize($value);
+                    $plainValue = $this->reveal($marshaller, $plainValue);
+                    if (is_serialized($plainValue))
+                        $plainValue = unserialize($plainValue);
 
-                    $propertyAccessor->setValue($entity, $field, $value);
+                    $propertyAccessor->setValue($entity, $field, $plainValue);
+                    $entity->setVaultBag($field, $sealedValue, $plainValue);
+
+//                    dump($entity);
                 }
             }
         }

@@ -43,7 +43,9 @@ window.addEventListener("load.form_type", function () {
                 val = parseFloat(max);
 
             var scale = Math.log(scale) / Math.log(10);
-            $(input).val(Math.round(val, scale));
+
+            val = divisor ? Math.round(val/divisor)*divisor : val;
+            $(input).val(val);
 
             input[0].dispatchEvent(new Event("input"));
         }
@@ -139,6 +141,25 @@ window.addEventListener("load.form_type", function () {
 
             $(input).val(prefix+number+suffix);
         });
+
+        // $(input).closest("form").off("submit");
+        // $(input).closest("form").on("submit", function(e) {
+        //
+        //     var val = $(input).val();
+        //
+        //     if(prefix.length) {
+        //
+        //         var prefixFound = val.indexOf(prefix) == 0;
+        //         console.log(prefixFound);
+        //         if(prefixFound)
+        //             val = val.substring(0, prefix.length);
+        //     }
+        //
+        //     if(suffix.length)
+        //         val = val.substring( 0, val.indexOf( suffix ) );
+        //
+        //     $(input).val(val);
+        // });
 
         var number = $(input).val();
             number = number.replaceAll(/[^\d.,\-]+/ig, "").replaceAll(/^0/ig, "");

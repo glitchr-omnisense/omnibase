@@ -20,7 +20,7 @@ class TextareaAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-align-left"];
+        return ["fa-solid fa-align-left"];
     }
 
     public static function getType(): string

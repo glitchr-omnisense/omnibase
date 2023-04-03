@@ -20,7 +20,7 @@ class ScalarAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-ruler-combined"];
+        return ["fa-solid fa-ruler-combined"];
     }
 
     public static function getType(): string

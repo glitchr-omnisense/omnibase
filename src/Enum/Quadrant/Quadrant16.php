@@ -22,14 +22,14 @@ class Quadrant16 extends Quadrant8
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::ENE => ["fas fa-location-arrow fa-22p5 "],
-            self::ESE => ["fas fa-location-arrow fa-67p5 "],
-            self::SSE => ["fas fa-location-arrow fa-22p5 fa-flip-horizontal"],
-            self::SSW => ["fas fa-location-arrow fa-67p5 fa-flip-horizontal"],
-            self::WSW => ["fas fa-location-arrow fa-67p5 fa-flip-horizontal fa-flip-vertical"],
-            self::WNW => ["fas fa-location-arrow fa-45   fa-flip-horizontal fa-flip-vertical"],
-            self::NNW => ["fas fa-location-arrow fa-22p5 fa-flip-vertical"],
-            self::NNE => ["fas fa-location-arrow fa-67p5 fa-flip-vertical"],
+            self::ENE => ["fa-solid fa-location-arrow fa-22p5 "],
+            self::ESE => ["fa-solid fa-location-arrow fa-67p5 "],
+            self::SSE => ["fa-solid fa-location-arrow fa-22p5 fa-flip-horizontal"],
+            self::SSW => ["fa-solid fa-location-arrow fa-67p5 fa-flip-horizontal"],
+            self::WSW => ["fa-solid fa-location-arrow fa-67p5 fa-flip-horizontal fa-flip-vertical"],
+            self::WNW => ["fa-solid fa-location-arrow fa-45   fa-flip-horizontal fa-flip-vertical"],
+            self::NNW => ["fa-solid fa-location-arrow fa-22p5 fa-flip-vertical"],
+            self::NNE => ["fa-solid fa-location-arrow fa-67p5 fa-flip-vertical"],
         ];
     }
 

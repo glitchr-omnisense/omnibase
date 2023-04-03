@@ -22,7 +22,7 @@ class Permission implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-lock"];
+        return ["fa-solid fa-lock"];
     }
 
     /**

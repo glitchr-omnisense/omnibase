@@ -32,7 +32,7 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-file-alt"];
+        return ["fa-solid fa-file-alt"];
     }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string

@@ -23,13 +23,13 @@ class ThreadState extends EnumType implements IconizeInterface, ColorizeInterfac
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::PUBLISH  => ["fas fa-book", "fas fa-check"],
-            self::DRAFT    => ["fas fa-drafting-compass", "fas fa-exclamation"],
-            self::FUTURE   => ["fas fa-stopwatch", "fas fa-hourglass-half"],
-            self::SECRET   => ["fas fa-eye-slash", "fas fa-check"],
-            self::ARCHIVE  => ["fas fa-archive", "fas fa-check"],
-            self::PASSWORD => ["fas fa-key", "fas fa-check"],
-            self::DELETE   => ["fas fa-trash-alt", "fas fa-exclamation"],
+            self::PUBLISH  => ["fa-solid fa-book", "fa-solid fa-check"],
+            self::DRAFT    => ["fa-solid fa-drafting-compass", "fa-solid fa-exclamation"],
+            self::FUTURE   => ["fa-solid fa-stopwatch", "fa-solid fa-hourglass-half"],
+            self::SECRET   => ["fa-solid fa-eye-slash", "fa-solid fa-check"],
+            self::ARCHIVE  => ["fa-solid fa-archive", "fa-solid fa-check"],
+            self::PASSWORD => ["fa-solid fa-key", "fa-solid fa-check"],
+            self::DELETE   => ["fa-solid fa-trash-alt", "fa-solid fa-exclamation"],
         ];
     }
 

@@ -80,7 +80,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-images"];
+        return ["fa-solid fa-images"];
     }
 
     public function __toString()

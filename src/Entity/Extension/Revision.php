@@ -20,7 +20,7 @@ class Revision extends AbstractExtension
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-sort-numeric-down"];
+        return ["fa-solid fa-sort-numeric-down"];
     }
 
     /**

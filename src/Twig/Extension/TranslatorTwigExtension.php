@@ -39,6 +39,8 @@ final class TranslatorTwigExtension extends AbstractExtension
             new TwigFilter('trans_enumExists', [Translator::class, 'transEnumExists']),
             new TwigFilter('trans_entity', [Translator::class, 'transEntity']),
             new TwigFilter('trans_entityExists', [Translator::class, 'transEntityExists']),
+
+            new TwigFilter('parse_class', [Translator::class, 'parseClass']),
         ];
     }
 }

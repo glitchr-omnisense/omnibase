@@ -23,14 +23,14 @@ class UserState extends SetType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::NEWCOMER => ["fas fa-user-plus"],
-            self::GHOST    => ["fas fa-user-ghost"],
-            self::BANNED   => ["fas fa-user-slash"],
-            self::LOCKED   => ["fas fa-user-lock"],
-            self::KICKED   => ["fas fa-user-times"],
-            self::VERIFIED => ["fas fa-user-check"],
-            self::APPROVED => ["fas fa-user-shield"],
-            self::ENABLED  => ["fas fa-user"],
+            self::NEWCOMER => ["fa-solid fa-user-plus"],
+            self::GHOST    => ["fa-solid fa-user-ghost"],
+            self::BANNED   => ["fa-solid fa-user-slash"],
+            self::LOCKED   => ["fa-solid fa-user-lock"],
+            self::KICKED   => ["fa-solid fa-user-times"],
+            self::VERIFIED => ["fa-solid fa-user-check"],
+            self::APPROVED => ["fa-solid fa-user-shield"],
+            self::ENABLED  => ["fa-solid fa-user"],
         ];
     }
 }

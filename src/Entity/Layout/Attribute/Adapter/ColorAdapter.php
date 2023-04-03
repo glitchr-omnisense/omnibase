@@ -21,7 +21,7 @@ class ColorAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-tint"];
+        return ["fa-solid fa-tint"];
     }
 
     public static function getType(): string

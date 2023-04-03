@@ -20,7 +20,7 @@ class PercentAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-percent"];
+        return ["fa-solid fa-percent"];
     }
 
     public static function getType(): string

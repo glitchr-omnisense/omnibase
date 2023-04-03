@@ -18,10 +18,10 @@ class UploadState extends SetType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::UPLOAD_ERROR => ["fas fa-exclamation-triangle"],
+            self::UPLOAD_ERROR => ["fa-solid fa-exclamation-triangle"],
 
-            self::UPLOAD_FILESIZE => ["fab fa-mixer"],
-            self::UPLOAD_MIMETYPE => ["fas fa-filter"]
+            self::UPLOAD_FILESIZE => ["fa-brands fa-mixer"],
+            self::UPLOAD_MIMETYPE => ["fa-solid fa-filter"]
         ];
     }
 }

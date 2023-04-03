@@ -90,7 +90,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
      * Link to this controller to start the "connect" process
      *
      * @Route("/rescue", name="security_rescue")
-     * @Iconize({"fas fa-lock","fas fa-unlock"})
+     * @Iconize({"fa-solid fa-lock","fa-solid fa-unlock"})
      */
     public function LoginRescue(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {

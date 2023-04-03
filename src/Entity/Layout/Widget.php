@@ -40,7 +40,7 @@ class Widget implements TranslatableInterface, IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-cube"];
+        return ["fa-solid fa-cube"];
     }
 
     public function __toString()

@@ -22,7 +22,7 @@ class Penalty implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-exclamation-triangle"];
+        return ["fa-solid fa-exclamation-triangle"];
     }
 
     /**

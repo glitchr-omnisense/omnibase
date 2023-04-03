@@ -16,6 +16,6 @@ class PinterestAdapter extends AbstractSharerAdapter
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fab fa-pinterest", "fab fa-pinterest-square", "fab fa-pinterest-p"];
+        return ["fa-brands fa-pinterest", "fa-brands fa-pinterest-square", "fa-brands fa-pinterest-p"];
     }
 }

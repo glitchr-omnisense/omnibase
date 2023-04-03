@@ -29,7 +29,7 @@ class AttachmentBox extends Widget implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-boxes"];
+        return ["fa-solid fa-boxes"];
     }
 
     public function __construct(?string $title = null, array $attachments = [])

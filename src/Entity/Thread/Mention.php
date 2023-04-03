@@ -27,7 +27,7 @@ class Mention implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-quote-right"];
+        return ["fa-solid fa-quote-right"];
     }
 
     /**

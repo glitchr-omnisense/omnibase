@@ -115,7 +115,7 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/login", name="security_login")
-     * @Iconize("fas fa-fw fa-sign-in-alt")
+     * @Iconize("fa-solid fa-fw fa-arrow-right-to-bracket")
      */
     public function Login(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
@@ -160,7 +160,7 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/logout", name="security_logout")
-     * @Iconize("fas fa-fw fa-sign-out-alt")
+     * @Iconize("fa-solid fa-fw fa-right-from-bracket")
      */
     public function Logout(Request $request, ReferrerInterface $referrer)
     {

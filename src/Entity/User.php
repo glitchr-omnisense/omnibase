@@ -71,7 +71,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-user"];
+        return ["fa-solid fa-user"];
     }
 
     public const __COOKIE_IDENTIFIER__ = "USER/INFO";

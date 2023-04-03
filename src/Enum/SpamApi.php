@@ -16,7 +16,7 @@ class SpamApi extends EnumType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::AKISMET => ["fas fa-backspace"]
+            self::AKISMET => ["fa-solid fa-backspace"]
         ];
     }
 }

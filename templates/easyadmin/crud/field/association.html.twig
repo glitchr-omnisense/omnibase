@@ -8,9 +8,9 @@
 {% if renderFormat == "image" or renderFormat == "avatar" %}
 
     {% if renderFormat == 'avatar' %}
-        {% set icon = '<i class="fas fa-fw fa-user-circle fa-3x"></i>' %}
+        {% set icon = '<i class="fa-solid fa-fw fa-user-circle fa-3x"></i>' %}
     {% else %}
-        {% set icon = '<i class="fas fa-fw fa-image fa-2x"></i>' %}
+        {% set icon = '<i class="fa-solid fa-fw fa-image fa-2x"></i>' %}
     {% endif %}
 
     {% if field.value is iterable %}

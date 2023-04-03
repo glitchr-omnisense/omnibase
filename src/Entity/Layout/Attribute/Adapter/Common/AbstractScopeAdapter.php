@@ -34,7 +34,7 @@ abstract class AbstractScopeAdapter extends AbstractAdapter implements ScopeAdap
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-crosshairs"];
+        return ["fa-solid fa-crosshairs"];
     }
 
     public function contains(mixed $value, mixed $subject): bool

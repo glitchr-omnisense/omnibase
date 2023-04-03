@@ -16,6 +16,6 @@ class GooglePlusAdapter extends AbstractSharerAdapter
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fab fa-google-plus", "fab fa-google-plus-square", "fab fa-google-plus-g"];
+        return ["fa-brands fa-google-plus", "fa-brands fa-google-plus-square", "fa-brands fa-google-plus-g"];
     }
 }

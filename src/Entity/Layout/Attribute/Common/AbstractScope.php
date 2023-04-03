@@ -23,7 +23,7 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-crosshairs"];
+        return ["fa-solid fa-crosshairs"];
     }
     public function contains(mixed $subject): bool
     {

@@ -31,7 +31,7 @@ class Address implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-address-card"];
+        return ["fa-solid fa-address-card"];
     }
 
     public function __construct(?string $name = null, ?Address $address = null)

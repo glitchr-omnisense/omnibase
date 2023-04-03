@@ -157,7 +157,9 @@ class FileType extends AbstractType implements DataMapperInterface
             'mime_types'      => [],
             "data_mapping"    => null,
             "parallel_uploads" => 5,
-            "upload_multiple"  => false
+            "upload_multiple"  => false,
+
+            "inline" => true
         ]);
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
@@ -254,6 +256,8 @@ class FileType extends AbstractType implements DataMapperInterface
 
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
+
+        $view->vars["inline"] = $options["inline"];
 
         $view->vars["lightbox"] = null;
         if (is_array($options["lightbox"])) {

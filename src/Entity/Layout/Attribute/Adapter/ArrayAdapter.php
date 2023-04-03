@@ -20,7 +20,7 @@ class ArrayAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-clipboard-list"];
+        return ["fa-solid fa-clipboard-list"];
     }
 
     public function __construct(string $label, ?string $path = null, ?int $length = null)

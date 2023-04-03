@@ -58,7 +58,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-box"];
+        return ["fa-solid fa-box"];
     }
 
     public function __toString()

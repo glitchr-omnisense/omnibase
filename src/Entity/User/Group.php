@@ -25,7 +25,7 @@ class Group implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-users"];
+        return ["fa-solid fa-users"];
     }
 
     /**

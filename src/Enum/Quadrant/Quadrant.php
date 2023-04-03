@@ -21,11 +21,11 @@ class Quadrant extends EnumType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::O   => ["fas fa-crosshairs"],
-            self::E   => ["fas fa-chevron-right"],
-            self::S   => ["fas fa-chevron-down"],
-            self::W   => ["fas fa-chevron-left"],
-            self::N   => ["fas fa-chevron-up"],
+            self::O   => ["fa-solid fa-crosshairs"],
+            self::E   => ["fa-solid fa-chevron-right"],
+            self::S   => ["fa-solid fa-chevron-down"],
+            self::W   => ["fa-solid fa-chevron-left"],
+            self::N   => ["fa-solid fa-chevron-up"],
         ];
     }
 

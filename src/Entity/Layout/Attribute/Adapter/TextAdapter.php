@@ -20,7 +20,7 @@ class TextAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
     {
-        return ["fas fa-paragraph"];
+        return ["fa-solid fa-paragraph"];
     }
 
     public static function getType(): string
