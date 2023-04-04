@@ -85,7 +85,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
     public function __toString()
     {
-        return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.images.no_image") ?? "";
+        return $this->__toLink();
     }
     public function __construct($src = null)
     {

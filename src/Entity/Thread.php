@@ -28,12 +28,15 @@ use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\Traits\TrasheableTrait;
 use Base\Entity\Thread\Taxon;
+use Base\Service\Model\CacheableInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\GraphInterface;
 use Base\Enum\WorkflowState;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
 use DateTime;
+
+use Base\Traits\CacheableTrait;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
@@ -46,11 +49,12 @@ use DateTime;
  * @Hierarchify(null, separator = "/" )
  * @Trasheable
  */
-class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
+class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {
     use BaseTrait;
     use TrasheableTrait;
     use TranslatableTrait;
+    use CacheableTrait;
 
     public function __iconize(): ?array
     {

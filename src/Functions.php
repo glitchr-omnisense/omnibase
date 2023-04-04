@@ -2790,11 +2790,11 @@ namespace {
         return $newObject;
     }
 
-    function is_serialized(?string $str): bool
+    function is_serialized($str): bool
     {
-	if($str === null) return false;
-	if(!str_starts_with($str, "{")) return false;
-	if(!str_ends_with($str, "}")) return false;
+        if(!is_string($str)) return false;
+        if(!str_starts_with($str, "{")) return false;
+        if(!str_ends_with($str, "}")) return false;
 
         try { $ret = unserialize($str); }
         catch (\Exception $e) { return false; }

@@ -108,8 +108,8 @@ final class FileTwigExtension extends AbstractExtension
                 new TwigFilter('lightbox', [ImageService::class, 'lightbox'], ["is_safe" => ['all']]),
 
                 new TwigFilter('imagine', [$this, 'imagine'], ['needs_context' => true]),
-                new TwigFilter('webp', [$this, 'imagine'], ['needs_context' => true]),
-                new TwigFilter('image', [$this, 'imagine'], ['needs_context' => true]),
+                new TwigFilter('webp', [$this, 'webp'], ['needs_context' => true]),
+                new TwigFilter('image', [$this, 'image'], ['needs_context' => true]),
                 new TwigFilter('crop', [$this, 'imagineCrop'], ['needs_context' => true]),
                 new TwigFilter('thumbnail', [$this, 'thumbnail'], ['needs_context' => true]),
                 new TwigFilter('thumbnail_inset   ', [$this, 'thumbnailInset   '], ['needs_context' => true]),
@@ -122,6 +122,38 @@ final class FileTwigExtension extends AbstractExtension
     public function onDisk(string $file): bool
     {
         return file_exists(sanitize_url($this->projectDir . "/public/" . $file));
+    }
+
+    public function webp(array $context, array|string|null $path, array $filters = [], array $config = []): array|string|null
+    {
+        $config["local_cache"] ??= true;
+        if (array_key_exists("warmup", $context)) {
+            $config["warmup"] = $context["warmup"];
+        }
+
+        $email = $context["email"] ?? null;
+        if ($email instanceof WrappedTemplatedEmail) {
+            $config["warmup"] = true;
+            $config["webp"]   = false;
+        }
+
+        return $this->imageService->webp($path, $filters, $config);
+    }
+
+    public function image(array $context, array|string|null $path, array $filters = [], array $config = []): array|string|null
+    {
+        $config["local_cache"] ??= true;
+        if (array_key_exists("warmup", $context)) {
+            $config["warmup"] = $context["warmup"];
+        }
+
+        $email = $context["email"] ?? null;
+        if ($email instanceof WrappedTemplatedEmail) {
+            $config["warmup"] = true;
+            $config["webp"]   = false;
+        }
+
+        return $this->imageService->image($path, $filters, $config);
     }
 
     public function imagine(array $context, array|string|null $path, array $filters = [], array $config = []): array|string|null

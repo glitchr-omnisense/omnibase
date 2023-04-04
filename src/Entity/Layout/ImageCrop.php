@@ -41,7 +41,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
 
     public function __toString()
     {
-        return $this->getLabel() ?? $this->getTranslator()->transEntity($this).($this->getId() ? " #".$this->getId() : null);
+        return $this->__toLink();
     }
 
     public function getRatio()
