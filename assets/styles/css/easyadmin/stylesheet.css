@@ -20,11 +20,17 @@ html, body { scroll-padding-top: 11em; }
 .form-entity > div { margin-bottom: 1.5em; }
 .form-entity > div:last-child { margin-bottom: 0em !important; }
 
+.input-group-text, form .label-wrapper { padding:0; }
+.input-group-text {
+
+    font-size:11pt;
+}
+
 .form-errors ul
 {
     padding: 1em 0 !important;
-}z
-.form-collection-items .accordion-button, .form-collection-items .accordion-button:hover
+}
+.form-collection-items .accordion-button:hover
 {
     background:var(--sidebar-bg);
     color:var(--form-label-color);

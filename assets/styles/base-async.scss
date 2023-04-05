@@ -21,6 +21,12 @@
     padding: 1em 0 !important;
 }
 
+.input-group-text, form .label-wrapper { padding:0; }
+.input-group-text {
+
+    font-size:11pt;
+}
+
 .input-group-prepend:not(:first-of-type) .input-group-text
 {
     border-radius:0;
@@ -1459,6 +1465,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .input-group-text .btn:not(:disabled):not(.disabled):not(.btn-link):hover,
 .input-group-text .btn:not(:disabled):not(.disabled):not(.btn-link):focus { background-color:transparent; border:0; box-shadow:none; height:100%; padding:1px; margin:0; }
 
+.form-number .label-wrapper { padding:0; }
 .select2-selection__entry span:last-of-child { margin-left:1em; }
 .select2-selection__entry i { text-align: center; width: 1.25em; }
 

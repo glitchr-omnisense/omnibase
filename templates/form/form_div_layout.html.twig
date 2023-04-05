@@ -1144,6 +1144,12 @@
 
 <div class="input-group form-number">
 
+    <div class="input-group-prepend">
+        <span class="input-group-text">
+            {{ form_label(form)}}
+        </span>
+    </div>
+
     {{ form_widget(form, {attr:attr}) }} {# NumberType is returning and input type text... #}
     {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}
 
@@ -1204,7 +1210,7 @@
 {# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fa-solid fa-fw fa-exclamation-circle'|iconify|first|raw)~" "~('@fields.cropper.error')~"</div>", #}
 <div class="form-group form-cropper {{ cropper_info ? "form-cropper-info" : "" }}">
     <div class="cropper">
-        <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine}}">
+        <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|thumbnail(1000,1000)}}">
         <div id="{{ id }}_loader" class="loader">
             {% if targetForm.vars.value is not empty%}
                 <div class="loader-spinner"></div> {{ '@fields.cropper.loading.wait'|trans }}
