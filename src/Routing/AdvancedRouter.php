@@ -491,18 +491,18 @@ class AdvancedRouter implements RouterInterface
 
     public function getHost(?string $locale = null, ?string $environment = null): string
     {
-        $host = parse_url2(get_url());
-        $machine = $host["machine"] ?? null;
+        $parsedUrl = parse_url2(get_url());
+        $machine = $parsedUrl["machine"] ?? null;
         if ($machine) {
             $machine = $machine . ".";
         }
 
-        $subdomain = $host["subdomain"] ?? null;
+        $subdomain = $parsedUrl["subdomain"] ?? null;
         if ($subdomain) {
             $subdomain = $subdomain . ".";
         }
 
-        $domain = $host["domain"] ?? null;
+        $domain = $parsedUrl["host"] ?? null;
 
         $host = $machine.$subdomain.$domain;
         return $host ? $host : $this->getHostFallback();

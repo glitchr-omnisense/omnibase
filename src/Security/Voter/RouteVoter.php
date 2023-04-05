@@ -44,7 +44,7 @@ class RouteVoter extends Voter
         $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", null) ?? [];
 
         $this->permittedHosts = array_transforms(fn ($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $this->permittedHosts) ?? [];
-        if (!$this->router->keepMachine() && !$this->router->keepSubdomain() && !$this->getRouter()->keepDomain()) {
+        if (!$this->router->keepMachine() && !$this->router->keepSubdomain() && $this->router->keepDomain()) {
             $this->permittedHosts[] = "^$";
         } // Special case if both subdomain and machine are unallowed
     }
@@ -66,10 +66,45 @@ class RouteVoter extends Voter
         //
         // Select proper ballot
         switch ($attribute) {
+
             case self::VALIDATE_IP:
 
                 $parse = parse_url2($url);
-                $pool[$attribute][$url] = !array_key_exists("ip", $parse) || $this->parameterBag->get("base.access_restriction.ip_access");
+
+                $pool[$attribute][$url] = array_key_exists("ip", $parse);
+                break;
+
+            case self::VALIDATE_HOST:
+
+                $hostFallback = $this->router->getHostFallback();
+                $parse = parse_url2($url);
+                $ipAddress = $parse["ip"] ?? null;
+                if($ipAddress) {
+
+                    if (!$this->parameterBag->get("base.router.ip_access")) {
+                        $pool[$attribute][$url] = false;
+                        break;
+                    }
+
+                } else {
+
+                    if (array_key_exists("machine", $parse) && !$this->router->keepMachine()) {
+                        $pool[$attribute][$url] = false;
+                        break;
+                    }
+
+                    if (array_key_exists("subdomain", $parse) && !$this->router->keepSubdomain()) {
+                        $pool[$attribute][$url] = !array_key_exists("machine", $parse) && $this->router->keepMachine();
+                        break;
+                    }
+                }
+
+                $allowedHost = empty($this->permittedHosts);
+                foreach ($this->permittedHosts as $permittedHost) {
+                    $allowedHost |= preg_match("/" . $permittedHost . "/", $parse["host"] ?? null);
+                }
+
+                $pool[$attribute][$url] = $allowedHost;
                 break;
 
             case self::VALIDATE_PATH:
@@ -78,53 +113,6 @@ class RouteVoter extends Voter
                 $format = str_ends_with($urlButQuery, "/") ? SANITIZE_URL_KEEPSLASH : SANITIZE_URL_STANDARD;
 
                 $pool[$attribute][$url] = $url == sanitize_url($url, $format) || $url == sanitize_url($url);
-                break;
-
-            case self::VALIDATE_HOST:
-
-                $hostFallback = $this->router->getHostFallback();
-                if (!$hostFallback) {
-                    $pool[$attribute][$url] = true;
-                    break;
-                }
-
-                if (!$route->getHost() && $this->router->getHost() != $hostFallback) {
-                    $pool[$attribute][$url] = false;
-                    break;
-                }
-
-                $routeName = $this->router->getRouteName();
-                if (LoginFormAuthenticator::isSecurityRoute($routeName)) {
-                    $pool[$attribute][$url] = true;
-                    break;
-                }
-                if (RescueFormAuthenticator::isSecurityRoute($routeName)) {
-                    $pool[$attribute][$url] = true;
-                    break;
-                }
-
-                $parse = parse_url2($url);
-                $allowedHost = empty($this->permittedHosts) || !$this->router->keepDomain();
-                foreach ($this->permittedHosts as $permittedHost) {
-                    $allowedHost |= preg_match("/" . $permittedHost . "/", $parse["host"] ?? null);
-                }
-
-                if (!$allowedHost) {
-                    $pool[$attribute][$url] = false;
-                    break;
-                }
-
-                if (array_key_exists("machine", $parse) && !$this->router->keepMachine()) {
-                    $pool[$attribute][$url] = false;
-                    break;
-                }
-
-                if (array_key_exists("subdomain", $parse) && !$this->router->keepSubdomain()) {
-                    $pool[$attribute][$url] = !array_key_exists("machine", $parse) && $this->router->keepMachine();
-                    break;
-                }
-
-                $pool[$attribute][$url] = $allowedHost;
                 break;
 
             default:

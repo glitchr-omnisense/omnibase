@@ -233,6 +233,11 @@ class Configuration implements ConfigurationInterface
                             ->defaultValue(false)
                             ->end()
 
+                        ->booleanNode('host_restriction')
+                            ->info('Restrict to permitted hosts only')
+                            ->defaultValue(false)
+                        ->end()
+
                         ->booleanNode('ip_access')
                             ->info('Allow accessing by')
                             ->defaultValue(false)

@@ -236,13 +236,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $permittedHosts ??= array_search_by($this->getParameterBag()->get("base.router.permitted_hosts"), "locale", null) ?? [];
 
         $permittedHosts = array_transforms(fn ($k, $a): ?array => $a["env"] == $this->getRouter()->getEnvironment() ? [$k, $a["regex"]] : null, $permittedHosts);
-        if (!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain() && !$this->getRouter()->keepDomain()) {
+        if (!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain() && $this->getRouter()->keepDomain()) {
             $permittedHosts[] = "^$";
         } // Special case if both subdomain and machine are unallowed
 
         $parse = parse_url2($url);
 
-        $allowedHost = empty($permittedHosts) || !$this->getRouter()->keepDomain();
+        $allowedHost = empty($permittedHosts);
         foreach ($permittedHosts as $permittedHost) {
             $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);
         }
@@ -287,7 +287,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $parse["password"] ?? null,
             $parse["machine"] ?? null,
             $parse["subdomain"] ?? null,
-            $parse["domain"] ?? null,
+            $parse["host"] ?? null,
             $parse["port"] ?? null,
             $parse["path"] ?? null,
         );

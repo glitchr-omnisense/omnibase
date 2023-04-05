@@ -240,23 +240,23 @@ namespace {
         ?string $password = null,
         ?string $machine = null,
         ?string $subdomain = null,
-        ?string $domain = null,
+        ?string $host = null,
         string|int|null $port = null,
         ?string $path = null,
         ?string $query = null
     ): array|string|int|false|null
     {
-        $scheme    = ($domain && $scheme) ? $scheme."://" : null;
-        $user      = ($domain && $user) ? $user."@" : null;
-        $password  = ($domain && $user && $password) ? ":".$password : null;
+        $scheme    = ($host && $scheme) ? $scheme."://" : null;
+        $user      = ($host && $user) ? $user."@" : null;
+        $password  = ($host && $user && $password) ? ":".$password : null;
 
-        $subdomain = ($domain && $subdomain) ? $subdomain . "." : null;
-        $machine   = ($domain && $machine) ? $machine . "." : null;
-        $port      = ($domain && $port && $port != 80 && $port != 443) ? ":".$port : null;
+        $subdomain = ($host && $subdomain) ? $subdomain . "." : null;
+        $machine   = ($host && $machine) ? $machine . "." : null;
+        $port      = ($host && $port && $port != 80 && $port != 443) ? ":".$port : null;
 
         $query     =  $query ? "?".$query : null;
 
-        $url = $scheme.$machine.$subdomain.$domain.$port.$user.$password.$path.$query;
+        $url = $scheme.$machine.$subdomain.$host.$port.$user.$password.$path.$query;
         return $url ? $url : "/";
     }
 
