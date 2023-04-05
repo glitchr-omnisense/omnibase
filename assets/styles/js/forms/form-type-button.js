@@ -4,15 +4,21 @@ window.addEventListener("load.form_type", function () {
 
         var id = el.getAttribute("data-button-field");
 
+        if( $('#'+id).closest("form").length ) {
+            $('#' + id + '-modal').appendTo($('#' + id).closest("form"));
+            $('#' + id).appendTo($('#' + id).closest("form"));
+        }
+
         var onConfirmation        = el.getAttribute("data-button-confirmation") ?? false;
         if(onConfirmation) {
 
             var bubbleUp       = el.getAttribute("data-button-confirmation-bubbleup") ?? true;
+            if(bubbleUp) $('#'+id+'-modal').appendTo("body");
+
             $("#"+id+"-request").off("click");
             $("#"+id+"-request").on("click", function (e) {
 
-                if(bubbleUp) $('#'+id+'-modal').appendTo("body").modal('show');
-                else $('#'+id+'-modal').modal('show');
+                $('#'+id+'-modal').modal('show');
 
                 e.preventDefault();
 

@@ -1144,11 +1144,13 @@
 
 <div class="input-group form-number">
 
+    {% if form.vars.inline  %}
     <div class="input-group-prepend">
         <span class="input-group-text">
             {{ form_label(form)}}
         </span>
     </div>
+    {% endif %}
 
     {{ form_widget(form, {attr:attr}) }} {# NumberType is returning and input type text... #}
     {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}

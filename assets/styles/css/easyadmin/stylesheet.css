@@ -20,7 +20,6 @@ html, body { scroll-padding-top: 11em; }
 .form-entity > div { margin-bottom: 1.5em; }
 .form-entity > div:last-child { margin-bottom: 0em !important; }
 
-.input-group-text, form .label-wrapper { padding:0; }
 .input-group-text {
 
     font-size:11pt;

@@ -21,7 +21,12 @@
     padding: 1em 0 !important;
 }
 
-.input-group-text, form .label-wrapper { padding:0; }
+.form-inline button:first-of-type:not(last-of-type)
+{
+    border-bottom-right-radius:0;
+    border-top-right-radius:0;
+}
+
 .input-group-text {
 
     font-size:11pt;
@@ -206,6 +211,7 @@ pre {
 .label-wrapper .badge:not(.label) > i:first-child,
 .label-wrapper .badge:not(.label) > a:first-child i { font-size:13pt; }
 
+form .label-wrapper { padding:8px 0; }
 .badge:empty { display:none; }
 .badge+.badge { margin-left:0; }
 .field-boolean .badge { min-width:auto; }
@@ -215,10 +221,6 @@ form .label-wrapper .badge
     margin-left:0.25em; padding-right:0.5em;
     margin-top: auto;
     margin-bottom: auto;
-}
-
-form .label-wrapper {
-    padding: 8px 0;
 }
 
 .select2-container--bootstrap4 .select2-results__group { color: inherit; }
