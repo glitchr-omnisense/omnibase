@@ -1024,7 +1024,7 @@
 
         {% set allows_deleting_items = form_parent(form).vars.allow_delete %}
         {% set delete_item_button %}
-            <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"
+            <button type="button" tabindex="-1" class="btn btn-link btn-link-danger form-array-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
                 <i class="fa-regular fa-fw fa-trash-alt"></i>
             </button>
@@ -1033,8 +1033,16 @@
         <div class="accordion form-array-item">
             <div class="accordion-item">
                 <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse">
+                    <button class="accordion-button collapsed" tabindex="-1" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse">
                         <i class="fa-solid fa-fw fa-chevron-right form-array-item-collapse-marker"></i>
+
+                        {% if  form_parent(form).vars.associative %}
+                            {%- set attr = attr | filter((v, k) => k != 'class' and v != 'form-control') -%}
+                            {%- set attr = attr|merge({'class': 'form-inline' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+                        {% else %}
+                            {%- set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+                        {% endif %}
+
                         {{ form_widget(form, {attr:attr}) }}
                     </button>
 
@@ -1051,7 +1059,7 @@
 {%- block array_empty -%}
     <div class="empty array-empty">
         {% if not form.vars.allow_add %}
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse">
+        <button tabindex="-1" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse">
             <i class="fa-solid fw fa-chevron-right form-array-item-collapse-marker"></i>
             {{"@fields.array.empty"|trans}}
         </button>
@@ -1060,7 +1068,6 @@
 {%- endblock array_empty -%}
 
 {%- block stock_widget -%}
-
 
 {# Search for target inside form based on parent including translation #}
 {% set targetForm = form.vars.ancestor %}

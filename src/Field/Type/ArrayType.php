@@ -12,7 +12,6 @@ use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -26,7 +25,7 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
-class ArrayType extends CollectionType implements DataMapperInterface
+class ArrayType extends CollectionType
 {
     /**
      * @var ClassMetadataManipulator
@@ -50,8 +49,6 @@ class ArrayType extends CollectionType implements DataMapperInterface
         $resolver->setDefaults([
             "target" => null,
             "associative" => null,
-            "prototype_key" => null,
-            "prototype_id" => null,
             "allow_add" => true,
             "allow_delete" => true,
             'entry_type' => TextType::class,
@@ -69,8 +66,93 @@ class ArrayType extends CollectionType implements DataMapperInterface
         $resolver->setNormalizer('length', fn (Options $options, $value) => $options["pattern"] ? $this->getNumberOfArguments($options["pattern"]) : $value);
         $resolver->setNormalizer('allow_add', fn (Options $options, $value) => $options["length"] == 0 && $value);
         $resolver->setNormalizer('allow_delete', fn (Options $options, $value) => $options["length"] == 0 && $value);
-        $resolver->setNormalizer('prototype_key', fn (Options $options, $value) => $value ?? ($options["associative"] ? "__prototype_key__" : null));
-        $resolver->setNormalizer('prototype_id', fn (Options $options, $value) => $value ?? "__prototype_id__");
+    }
+
+    public function buildFormArray(FormBuilderInterface $builder, array $options)
+    {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
+
+            $data = $event->getData() ?? [];
+            $event->setData(array_values($data));
+        });
+
+        parent::buildForm($builder, $options);
+    }
+
+    public function buildFormAssociativeArray(FormBuilderInterface $builder, array $options)
+    {
+        $data = [];
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$data) {
+            $data = $event->getData();
+            $event->setData([]);
+        });
+        parent::buildForm($builder, $options);
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$data) {
+            $event->setData($data);
+        });
+
+        $prototypeOptions = $options['entry_options'];
+        if (null !== $options['prototype_data']) {
+            $prototypeOptions['data'] = $options['prototype_data'];
+        }
+
+        if (null !== $options['entry_required']) {
+            $prototypeOptions['required'] = $options['entry_required'];
+        }
+
+        $prototypeOptions["attr"]['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->translator->trans("@fields.array.value");
+        $prototype = $builder->create($options['prototype_name'], FormType::class, ["label" => false])
+            ->add("key", TextType::class, ["label" => false, "attr" => ["placeholder" => $this->translator->trans("@fields.array.key")]])
+            ->add("value", $options['entry_type'], $prototypeOptions);
+
+        $builder->setAttribute('prototype', $prototype->getForm());
+        $builder->add($prototype);
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options, $builder, $prototypeOptions) {
+
+            $form = $event->getForm();
+            $data = $event->getData();
+
+            $data = array_transforms(fn($key, $entry):array => [null, [
+                    "key" => is_array($entry) ? ($entry["key"] ?? null) : $key,
+                    "value" => is_array($entry) ? ($entry["value"] ?? first($entry) ?? null) : $entry,
+            ]], $data);
+
+            $event->setData($data);
+
+            foreach($data ?? [] as $id => $element) {
+
+                $form->add(
+                    $builder->create($id, FormType::class, ["label" => false, 'auto_initialize' => false])
+                        ->add("key", TextType::class, ["label" => false, "attr" => ["placeholder" => $this->translator->trans("@fields.array.key")]])
+                        ->add("value", $options['entry_type'], $prototypeOptions)->getForm()
+                );
+            }
+        });
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options, $builder, $prototypeOptions) {
+
+            $form = $event->getForm();
+            $data = $event->getData();
+
+            foreach($data ?? [] as $id => $element) {
+
+                $form->add(
+                    $builder->create($id, FormType::class, ["label" => false, 'auto_initialize' => false])
+                        ->add("key", TextType::class, ["label" => false, "attr" => ["placeholder" => $this->translator->trans("@fields.array.key")]])
+                        ->add("value", $options['entry_type'], $prototypeOptions)->getForm()
+                );
+            }
+        });
+
+        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use (&$options, $builder, $prototypeOptions) {
+
+            $event->setData(array_transforms(fn($k, $v):array => [
+                    first($v) ?? null,
+                    second($v) ?? null
+                ], $event->getData())
+            );
+        });
     }
 
     /**
@@ -78,56 +160,15 @@ class ArrayType extends CollectionType implements DataMapperInterface
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        parent::buildForm($builder, $options);
-        if ($options['prototype_key'] && $options["prototype"]) {
-
-            $prototypeOptions = $options['entry_options'];
-            if (null !== $options['prototype_data']) {
-                $prototypeOptions['data'] = $options['prototype_data'];
-            }
-
-            if (null !== $options['entry_required']) {
-                $prototypeOptions['required'] = $options['entry_required'];
-            }
-
-            $prototypeOptions["attr"]['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->translator->trans("@fields.array.value");
-            $prototype = $builder->create($options['prototype_name'], FormType::class, ["label" => false])
-                ->add($options["prototype_key"], TextType::class, ["label" => false, "attr" => ["placeholder" => $this->translator->trans("@fields.array.key")]])
-                ->add($options['prototype_id'], $options['entry_type'], $prototypeOptions);
-
-            $builder->setAttribute('prototype', $prototype->getForm());
-            $builder->add($prototype);
-            $builder->setDataMapper($this);
-            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-
-                $data = $event->getData();
-                $form = $event->getForm();
-
-                dump($data, $form);
-
-                if($data) {
-
-                    dump($data);
-
-                    $array = [];
-                    foreach($data as $id => $element) {
-
-                        $childForm = $form->add($prototype);
-                        $childForm->setData($element["__prototype_id__"]);
-
-                        $array[$element["__prototype_key__"]] = $element["__prototype_id__"];
-                    }
-
-                    $form->setData($array);
-                }
-            });
-        }
+        if ($options['associative']) $this->buildFormAssociativeArray($builder, $options);
+        else $this->buildFormArray($builder, $options);
     }
 
     public function getNumberOfArguments($pattern): int
     {
         return preg_match_all('/\{[0-9]*\}/i', $pattern);
     }
+
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         parent::finishView($view, $form, $options);
@@ -135,22 +176,7 @@ class ArrayType extends CollectionType implements DataMapperInterface
         $view->vars['length'] = is_string($options["length"]) ? explode(".", $options["length"]) : $options["length"];
         $view->vars["pattern"] = $options["pattern"];
         $view->vars["placeholder"] = $options["placeholder"];
-    }
+        $view->vars["associative"] = $options['associative'];
 
-    public function mapDataToForms($viewData, \Traversable $forms): void
-    {
-//        dump(iterator_to_array($forms));
-        dump($viewData);
-    }
-
-    public function mapFormsToData(\Traversable $forms, &$viewData): void
-    {
-//        dump(iterator_to_array($forms));
-//        dump($viewData);
-        foreach(iterator_to_array($forms) as $form)
-        {
-            dump($form);
-        }
-        dump($viewData);
     }
 }
