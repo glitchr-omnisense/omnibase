@@ -88,6 +88,7 @@ class FileService implements FileServiceInterface
         if (!$fileOrMimetypeOrArray) {
             return [];
         }
+
         if (is_array($fileOrMimetypeOrArray)) {
 
             $extensions = [];
@@ -99,7 +100,10 @@ class FileService implements FileServiceInterface
             return array_unique($extensions);
         }
 
-        return $this->mimeTypes->getExtensions($this->getMimeType($fileOrMimetypeOrArray));
+        if (!filter_var($fileOrMimetypeOrArray, FILTER_VALIDATE_URL))
+            $fileOrMimetypeOrArray = mime_content_type2($fileOrMimetypeOrArray) ?? $fileOrMimetypeOrArray;
+
+        return $this->mimeTypes->getExtensions($fileOrMimetypeOrArray);
     }
 
     public function getMimeType(null|string|array $fileOrContentsOrArray): null|string|array

@@ -182,26 +182,30 @@ class AnnotationSubscriber implements EventSubscriberInterface
                     }
 
                     $annotation->preFlush($event, $classMetadata, $entity);
+                    $this->entityCandidateBuffer[] = $entity;
                 }
             }
         }
     }
 
+    protected array $entityCandidateBuffer = [];
+    protected array $entityInsertionBuffer = [];
+    protected array $entityUpdateBuffer = [];
+    protected array $entityDeletionBuffer = [];
     public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
-
-        $entities = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
-            $entities[] = $entity;
+            $this->entityInsertionBuffer[] = $entity;
         }
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            $entities[] = $entity;
+            $this->entityUpdateBuffer[] = $entity;
         }
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
-            $entities[] = $entity;
+            $this->entityDeletionBuffer[] = $entity;
         }
 
+        $entities = array_merge($this->entityInsertionBuffer, $this->entityUpdateBuffer, $this->entityDeletionBuffer);
         foreach ($entities as $entity) {
 
             $className = get_class($entity);
@@ -261,18 +265,9 @@ class AnnotationSubscriber implements EventSubscriberInterface
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
 
-        $entities = [];
-        foreach ($uow->getScheduledEntityInsertions() as $entity) {
-            $entities[] = $entity;
-        }
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            $entities[] = $entity;
-        }
-        foreach ($uow->getScheduledEntityDeletions() as $entity) {
-            $entities[] = $entity;
-        }
-
+        $entities = array_merge($this->entityCandidateBuffer, $this->entityInsertionBuffer, $this->entityUpdateBuffer, $this->entityDeletionBuffer);
         foreach ($entities as $entity) {
+
             $className = get_class($entity);
             $classMetadata  = $this->entityManager->getClassMetadata($className);
 
@@ -324,6 +319,11 @@ class AnnotationSubscriber implements EventSubscriberInterface
                 $annotation->postFlush($event, $classMetadata, $entity);
             }
         }
+
+        $this->entityInsertionBuffer = [];
+        $this->entityUpdateBuffer = [];
+        $this->entityDeletionBuffer = [];
+        $this->entityCandidateBuffer = [];
     }
 
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)

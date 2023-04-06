@@ -36,6 +36,7 @@ use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\LayoutSettingListType;
 use Base\Form\Type\LayoutWidgetListType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -225,11 +226,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function ApiKey(Request $request, array $fields = []): Response
     {
         $fields = array_reverse(array_merge(array_reverse([
-//            "api.spam.akismet" => [],
-//            "api.currency.fixer" => [],
-//            "api.currency.exchange_rates_api" => ["required" => false],
-//            "api.currency.currency_layer" => ["required" => false],
-//            "api.currency.abstract_api" => ["required" => false],
+            "api.spam.akismet" => [],
+            "api.currency.fixer" => [],
+            "api.currency.exchange_rates_api" => ["required" => false],
+            "api.currency.currency_layer" => ["required" => false],
+            "api.currency.abstract_api" => ["required" => false],
         ]), array_reverse($fields)));
 
         if (empty($fields)) {
@@ -266,7 +267,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 }
 
                 // If not required, then we update regardless of the value, but checking for secure flag
-                return !$fields[$k]["secure"];
+                return !($fields[$k]["secure"] ?? true);
             }, ARRAY_FILTER_USE_BOTH);
 
             $fields   = array_keys($form->getConfig()->getOption("fields"));
