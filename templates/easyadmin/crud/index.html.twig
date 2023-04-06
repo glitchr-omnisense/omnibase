@@ -145,7 +145,7 @@
                         {% endif %}
 
                         {% for field in entity.fields %}
-                            <td data-label="{{ field.label|trans|e('html_attr') }}" class="{{ field.property == sort_field_name ? 'sorted' }} text-{{ field.textAlign }} {{ field.cssClass }}" dir="{{ ea.i18n.textDirection }}">
+                            <td data-label="{{ field.label|trans|e('html_attr') }}" class="{{ field.property == sort_field_name ? 'sorted' }} text-{{ field.textAlign ?? "left" }} {{ field.cssClass }}" dir="{{ ea.i18n.textDirection }}">
                                 {{ include(field.templatePath, { field: field, entity: entity }, with_context = false) }}
                             </td>
                         {% endfor %}

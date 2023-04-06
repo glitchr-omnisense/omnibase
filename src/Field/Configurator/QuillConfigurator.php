@@ -3,6 +3,7 @@
 namespace Base\Field\Configurator;
 
 use Base\Field\QuillField;
+use Base\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -26,6 +27,13 @@ class QuillConfigurator implements FieldConfiguratorInterface
             $field->setValue(!empty($field->getValue()));
         }
 
-        $field->setFormattedValue(str_shorten($field->getFormattedValue(), $length, $position, $separator));
+        $stripTags = $field->getCustomOption(TextField::OPTION_STRIP_TAGS);
+        if ($stripTags) {
+            $formattedValue = strip_tags((string) $field->getValue());
+        } else {
+            $formattedValue = htmlspecialchars((string) $field->getValue(), \ENT_NOQUOTES, null, false);
+        }
+
+        $field->setFormattedValue(str_shorten($formattedValue, $length, $position, $separator));
     }
 }
