@@ -206,7 +206,6 @@ final class FileTwigExtension extends AbstractExtension
     }
     public function thumbnail(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
     {
-        $config["local_cache"] ??= true;
         if (array_key_exists("warmup", $context)) {
             $config["warmup"] = $context["warmup"];
         }

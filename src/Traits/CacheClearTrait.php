@@ -9,14 +9,19 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
 trait CacheClearTrait
 {
-    protected function checkCache(SymfonyStyle $io): void
+    protected function checkCache(SymfonyStyle $io): void 
+    {
+        $io->write("<info> [INFO] Cache directory:</info> ".$this->cacheDir.PHP_EOL, true);
+    }
+
+    protected function checkExtensions(SymfonyStyle $io): void
     {
         $Xdebug  = extension_loaded('xdebug') ? '<info>✓</info>' : '<error>✗</error>';
         $Blackfire  = extension_loaded('blackfire') ? '<info>✓</info>' : '<error>✗</error>';
         $APCu    = extension_loaded('apc') && ini_get('apc.enabled') ? '<info>✓</info>' : '<error>✗</error>';
         $OPcache = extension_loaded('Zend OPcache') ? '<info>✓</info>' : '<error>✗</error>';
 
-        $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver extensions might differ)".PHP_EOL);
+        $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver extensions might differ)", true);
         $io->write("        [".$Xdebug."] Xdebug; ");
         $io->write("        [".$APCu."] APCu", true);
         $io->write("        [".$Blackfire."] Blackfire; ");
@@ -144,7 +149,7 @@ trait CacheClearTrait
         $diskSpace = disk_total_space(".");
         $remainingSpace = $diskSpace - $freeSpace;
         $percentSpace = round(100*$remainingSpace/$diskSpace, 2);
-        $diskSpaceStr = 'Disk space information: '. byte2str($freeSpace) . ' / ' . byte2str($diskSpace) . " available (".$percentSpace." % used)";
+        $diskSpaceStr = byte2str($freeSpace) . ' / ' . byte2str($diskSpace) . " available (".$percentSpace." % used)";
 
         $memoryLimit = str2dec(ini_get("memory_limit"));
         $memoryLimitStr = $memoryLimit > 1 ? 'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(DECIMAL_PREFIX, 0, 3)) : "";
@@ -157,11 +162,14 @@ trait CacheClearTrait
             $fn = "info";
         }
 
-        if ($memoryLimit > 1 && $memoryLimit < str2dec("512M")) {
-            $io->{$fn}($diskSpaceStr);
-            $io->warning('Memory limit is very low.. Please consider increasing it'.PHP_EOL.$memoryLimitStr);
-        } else {
-            $io->{$fn}($diskSpaceStr.PHP_EOL.$memoryLimitStr);
+        $io->write("<$fn> [".strtoupper($fn)."] Disk space information: </$fn>".$diskSpaceStr.PHP_EOL, true);
+        if ($memoryLimit > 1) {
+            
+            if($memoryLimit < str2dec("512M")) {
+                $io->write("<warning> [WARNING] </warning> Memory limit is very low.. Please consider increasing it", true);
+            }
+
+            $io->write($memoryLimitStr);
         }
     }
 

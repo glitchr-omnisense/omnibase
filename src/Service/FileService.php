@@ -202,6 +202,7 @@ class FileService implements FileServiceInterface
         $config["local_cache"] = $config["local_cache"] ?? null;
 
         while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
+            
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
@@ -214,11 +215,13 @@ class FileService implements FileServiceInterface
     {
         $routeMatch = $this->router->getRouteMatch($path) ?? [];
         if (array_key_exists("_route", $routeMatch) && $routeMatch["_route"] == $proxyRoute) {
+            
             $data = $routeMatch["data"];
             $config["options"] = $config["options"] ?? [];
             $config["local_cache"] = $config["local_cache"] ?? null;
 
             if (($pathConfig = $this->obfuscator->decode($data))) {
+
                 $path = $pathConfig["path"] ?? $path;
                 $config["path"] = $path;
                 $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -239,6 +242,8 @@ class FileService implements FileServiceInterface
 
         $host = array_pop_key("_host", $config); // Use custom _host if found
         $referenceType = array_pop_key("reference_type", $config); // Get reference type
+       
+       
         $data = $this->obfuscate($path, $config);
         if (!$data) {
             return null;

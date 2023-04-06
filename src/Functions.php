@@ -58,10 +58,14 @@ namespace {
     {
         return preg_replace("/[^a-zA-Z]/", "", $str);
     }
+    function str_strip_specials(string $str)
+    {
+        return preg_replace("/[^a-zA-Z0-9]/", "", $str);
+    }
 
     function format_uuid(string $uuid): string|false
     {
-        $uuid = str_replace("-", "", $uuid);
+        $uuid = str_strip_specials($uuid);
         if (!preg_match("/[a-f0-9]{32}/i", $uuid)) {
             return false;
         }
