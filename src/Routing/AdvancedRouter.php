@@ -502,7 +502,7 @@ class AdvancedRouter implements RouterInterface
             $subdomain = $subdomain . ".";
         }
 
-        $domain = $parsedUrl["host"] ?? null;
+        $domain = $parsedUrl["domain"] ?? null;
 
         $host = $machine.$subdomain.$domain;
         return $host ? $host : $this->getHostFallback();

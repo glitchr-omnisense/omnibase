@@ -89,6 +89,7 @@ class FileService implements FileServiceInterface
             return [];
         }
         if (is_array($fileOrMimetypeOrArray)) {
+
             $extensions = [];
             $extensionList = array_map(fn ($mimetype) => $this->getExtensions($mimetype), $fileOrMimetypeOrArray);
             foreach ($extensionList as $extension) {
@@ -98,8 +99,7 @@ class FileService implements FileServiceInterface
             return array_unique($extensions);
         }
 
-        $mimeType = mime_content_type2($fileOrMimetypeOrArray) ?? $fileOrMimetypeOrArray;
-        return $this->mimeTypes->getExtensions($mimeType);
+        return $this->mimeTypes->getExtensions($this->getMimeType($fileOrMimetypeOrArray));
     }
 
     public function getMimeType(null|string|array $fileOrContentsOrArray): null|string|array
@@ -116,13 +116,7 @@ class FileService implements FileServiceInterface
         if ($mimeType && $mimeType !== "application/x-empty") {
             return $mimeType;
         }
-
-        // Attempt to read based on custom mime_content_content method
-        $mimeType = mime_content_type2($fileOrContentsOrArray);
-        if ($mimeType && $mimeType !== "application/x-empty") {
-            return $mimeType;
-        }
-
+        
         // Attempt to read mimetype
         $extension = pathinfo($fileOrContentsOrArray, PATHINFO_EXTENSION);
         $extension = $extension ? $extension : $fileOrContentsOrArray; // Assume extension is provided without filename
@@ -131,10 +125,20 @@ class FileService implements FileServiceInterface
             return $mimeType;
         }
 
+        
         // Attempt to guess mimetype using MimeTypes class
         try {
+        
             return $this->mimeTypes->guessMimeType($fileOrContentsOrArray);
+        
         } catch (InvalidArgumentException $e) {
+
+            // Attempt to read based on custom mime_content_content method
+            $mimeType = mime_content_type2($fileOrContentsOrArray);
+            if ($mimeType && $mimeType !== "application/x-empty") {
+                return $mimeType;
+            }
+
             return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */
         }
     }
@@ -245,6 +249,7 @@ class FileService implements FileServiceInterface
         if ($referenceType !== null) {
             $variadic[] = $referenceType;
         }
+
         return $this->router->generate(...$variadic);
     }
 
