@@ -1,11 +1,15 @@
 <div {{ html_attributes(row_attr) }}>
     {% if label != false %}<span class="label">{{ label }}</span>{% endif %}
     <ul {{ html_attributes(attr) }}>
+
+        {% cache widget.__toKey("linkset", app.request.locale) %}
         {% for item in widget.hyperlinks %}
             {% set url = item.generate() %}
             {% if url is not empty %}
                 <li class="{{ item.getHyperpattern().getCode() }}"><a href="{{ url }}" class="{{ class|default(null) }}">{{ item|iconify|first|raw }}</a></li>
             {% endif %}
         {% endfor %}
+
+        {% endcache %}
     </ul>
 </div>

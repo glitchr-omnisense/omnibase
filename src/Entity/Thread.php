@@ -54,7 +54,16 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     use BaseTrait;
     use TrasheableTrait;
     use TranslatableTrait;
-    use CacheableTrait;
+    use CacheableTrait {
+        CacheableTrait::__toKey as __toDefaultKey;
+    }
+
+    public function __toKey(?string ...$variadic):string
+    {
+//        $variadic[] = $this->getId();
+//        $variadic[] = $this->getUpdatedAt();
+        return $this->__toDefaultKey(...$variadic);
+    }
 
     public function __iconize(): ?array
     {

@@ -10,10 +10,11 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 trait CacheableTrait
 {
     public function __toKey(?string ...$variadic):string {
-        
+
+        if(empty($variadic)) $variadic[] = spl_object_id($this);
+
         return implode(";", array_filter([
             snake2camel(str_replace("\\", "_", static::class)),
-            spl_object_id($this),
             ...$variadic
         ]));
     }
