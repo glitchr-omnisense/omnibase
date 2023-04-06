@@ -227,7 +227,7 @@ namespace {
             $parse["password"] ?? null,
             $parse["machine"] ?? null,
             $parse["subdomain"] ?? null,
-            $parse["domain"] ?? $parse["host"] ?? null,
+            $parse["domain"] ?? null,
             $parse["port"] ?? null,
             str_replace("//", "/", $parse["path"] ?? "").(($format & FORMAT_URL_KEEPSLASH) && $pathEndsWithSlash ? "/" : ""),
             $parse["query"] ?? null
@@ -240,23 +240,23 @@ namespace {
         ?string $password = null,
         ?string $machine = null,
         ?string $subdomain = null,
-        ?string $host = null,
+        ?string $domain = null,
         string|int|null $port = null,
         ?string $path = null,
         ?string $query = null
     ): array|string|int|false|null
     {
-        $scheme    = ($host && $scheme) ? $scheme."://" : null;
-        $user      = ($host && $user) ? $user."@" : null;
-        $password  = ($host && $user && $password) ? ":".$password : null;
+        $scheme    = ($domain && $scheme) ? $scheme."://" : null;
+        $user      = ($domain && $user) ? $user."@" : null;
+        $password  = ($domain && $user && $password) ? ":".$password : null;
 
-        $subdomain = ($host && $subdomain) ? $subdomain . "." : null;
-        $machine   = ($host && $machine) ? $machine . "." : null;
-        $port      = ($host && $port && $port != 80 && $port != 443) ? ":".$port : null;
+        $subdomain = ($domain && $subdomain) ? $subdomain . "." : null;
+        $machine   = ($domain && $machine) ? $machine . "." : null;
+        $port      = ($domain && $port && $port != 80 && $port != 443) ? ":".$port : null;
 
         $query     =  $query ? "?".$query : null;
 
-        $url = $scheme.$machine.$subdomain.$host.$port.$user.$password.$path.$query;
+        $url = $scheme.$machine.$subdomain.$domain.$port.$user.$password.$path.$query;
         return $url ? $url : "/";
     }
 
@@ -291,10 +291,14 @@ namespace {
         }
 
         if (array_key_exists("host", $parse)) {
+
+            $parse["host"] = trim($parse["host"], ":");
+
             //
             // Check if IP address provided
             if (filter_var($parse["host"], FILTER_VALIDATE_IP)) {
                 $parse["ip"] = $parse["host"];
+                $parse["domain"] = $parse["host"];
             }
             if (filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                 $parse["ipv4"] = $parse["host"];
@@ -336,6 +340,9 @@ namespace {
         }
         if (!array_key_exists("base_dir", $parse)) {
             $parse["base_dir"] = $base;
+        }
+        if(array_key_exists("ip", $parse)) {
+            array_key_removes($parse, "subdomain", "machine");
         }
 
         return $parse;
@@ -1275,17 +1282,19 @@ namespace {
     function get_headers2(string $url, &$redirect = null, int $mode = HEADER_FOLLOW_REDIRECT)
     {
         if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            return null;
+            return [500, "application/octet-stream"];
         }
         if ($mode != HEADER_FOLLOW_REDIRECT) {
             return get_headers($url, false);
         }
 
         do {
+
             $http_response_header = []; // Special PHP variable
             $context = stream_context_create(["http" => ["follow_location" => false]]);
+            
             get_headers($url, false, $context);
-
+            
             $pattern = "/^Location:\s*(.*)$/i";
             $location_headers = preg_grep($pattern, $http_response_header);
 
@@ -1293,6 +1302,7 @@ namespace {
             if ($repeat) {
                 $url = $matches[1];
             }
+
         } while ($repeat);
 
         $redirect = $url;
@@ -1309,6 +1319,7 @@ namespace {
     {
         // Search by looking at the header if url format
         if (filter_var($filename, FILTER_VALIDATE_URL)) {
+            
             $headers = get_headers2($filename, $filename, $mode);
             if (strpos($headers[0], '200')) {
                 return explode("Content-Type: ", $headers[1])[1] ?? null;

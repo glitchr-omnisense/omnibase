@@ -43,14 +43,16 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             return null;
         }
         if (($route = $this->getRouter()->getRoute($routeName))) {
+
             if ($route->getHost()) {
                 $referenceType = self::ABSOLUTE_URL;
             }
 
             if (str_contains($route->getHost().$route->getPath(), "{") && str_contains($route->getHost().$route->getPath(), "}")) {
+                
                 if (preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
+                    
                     $parse = parse_url2(get_url());
-
                     $parameterNames = array_flip($matches[1]);
                     $routeParameters = array_merge(
                         array_intersect_key($parse, $parameterNames),
@@ -60,13 +62,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
                     $search  = array_map(fn ($k) => "{".$k."}", array_keys($parse));
                     $replace = array_values($parse);
-
-                    foreach ($routeParameters as $key => &$routeParameter) {
-
-                        $routeParameter = $routeParameter ? str_replace($search, $replace, $routeParameter) : $routeParameter;
-                        if ($key == "host") {
-                            $routeParameter = str_lstrip($routeParameter, "www.");
-                        }
+                    foreach ($routeParameters as $key => $routeParameter) {
+                        $routeParameters[$key] = str_replace($search, $replace, $routeParameter ?? "");
                     }
                 }
             }
@@ -85,8 +82,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
         }
 
-        try {
-            return sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType));
+        try { return sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType));
         } catch (InvalidParameterException|RouteNotFoundException $_) {
             $e = $_;
         }
@@ -117,13 +113,16 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     {
         if ($routeParameters === null) {
             $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()); // Make sure also it gets the basic context
+        
         } else {
+        
             // Use either parameters or $_SERVER variables to determine the host to provide
             $scheme    = array_pop_key("_scheme", $routeParameters) ?? $this->getRouter()->getScheme();
             $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getRouter()->getBaseDir();
             $host      = array_pop_key("_host", $routeParameters) ?? $this->getRouter()->getHost();
             $port      = array_pop_key("_port", $routeParameters) ?? explode(":", $host)[1] ?? $this->getRouter()->getPort();
             $host      = explode(":", $host)[0].":".$port;
+
 
             $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
             $parse["base_dir"] = $baseDir;
@@ -187,7 +186,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         }
 
         $routes = array_filter(array_transforms(fn ($k, $routeName): array => [$routeName, $this->getRouter()->getRoute($routeName)], $routeGroups));
-
+    
         //
         // Try to compute subgroup (if not found compute base)
         try {
