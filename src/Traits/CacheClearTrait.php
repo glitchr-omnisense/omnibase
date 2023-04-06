@@ -152,7 +152,7 @@ trait CacheClearTrait
         $diskSpaceStr = byte2str($freeSpace) . ' / ' . byte2str($diskSpace) . " available (".$percentSpace." % used)";
 
         $memoryLimit = str2dec(ini_get("memory_limit"));
-        $memoryLimitStr = $memoryLimit > 1 ? 'PHP Memory limit: ' . byte2str($memoryLimit, array_slice(DECIMAL_PREFIX, 0, 3)) : "";
+        $memoryLimitStr = $memoryLimit > 1 ? byte2str($memoryLimit, array_slice(DECIMAL_PREFIX, 0, 3)) : "";
 
         if ($percentSpace > 95) {
             $fn = "warning";
@@ -167,9 +167,12 @@ trait CacheClearTrait
             
             if($memoryLimit < str2dec("512M")) {
                 $io->write("<warning> [WARNING] </warning> Memory limit is very low.. Please consider increasing it", true);
-            }
+                $io->write('PHP Memory limit: ' . $memoryLimitStr);
 
-            $io->write($memoryLimitStr);
+            } else {
+
+                $io->write("<$fn> [".strtoupper($fn)."] PHP Memory limit: </$fn>".$memoryLimitStr.PHP_EOL, true);
+            }
         }
     }
 
