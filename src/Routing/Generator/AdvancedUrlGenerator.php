@@ -267,16 +267,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $_host = $route->getRequirements()["_host"] ?? null;
             if(!array_key_exists("host", $parse) || !$_host || !preg_match("/".$_host."/", $parse["host"])) {
                
-                $_machine = $route->getRequirements()["_machine"] ?? null;            
-                if (array_key_exists("machine", $parse) && !$this->getRouter()->keepMachine() && !$_machine && !$allowedHost) {
-                    $parse = array_key_removes($parse, "machine");
-                }
-
                 // Special case for WWW subdomain
                 $_subdomain = $route->getRequirements()["_subdomain"] ?? null;
-                if($this->getRouter()->keepSubdomain() && !$_subdomain && !$allowedHost) {
+                
+                if(!$this->getRouter()->keepSubdomain() && !$_subdomain) {
 
-                    if (!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse)) {
+                    if (!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse) && !$allowedHost) {
 
                         $parse["subdomain"] = $this->getRouter()->getSubdomainFallback();
 
@@ -293,7 +289,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
                     if (array_key_exists("subdomain", $parse)) {
 
-                        if (array_key_exists("machine", $parse) || !$this->getRouter()->keepMachine()) {
+                        $_machine = $route->getRequirements()["_machine"] ?? null;
+                        if (array_key_exists("machine", $parse) || !$this->getRouter()->keepMachine() && !$_machine && !$allowedHost) {
                             $parse = array_key_removes($parse, "subdomain");
                         }
                     }
