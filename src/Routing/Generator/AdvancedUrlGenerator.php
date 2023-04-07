@@ -76,13 +76,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         if (!str_ends_with($routeName, ".".$this->getRouter()->getLocaleLang())) {
             try {
-                return sanitize_url(parent::generate($routeName.".".$this->getRouter()->getLocaleLang(), $routeParameters, $referenceType));
+                return sanitize_url($this->format(parent::generate($routeName.".".$this->getRouter()->getLocaleLang(), $routeParameters, $referenceType)));
             } catch (InvalidParameterException|RouteNotFoundException $_) {
                 $e = $_;
             }
         }
 
-        try { return sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType));
+        try { return sanitize_url($this->format(parent::generate($routeName, array_filter($routeParameters), $referenceType)));
         } catch (InvalidParameterException|RouteNotFoundException $_) {
             $e = $_;
         }
@@ -243,7 +243,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         $allowedHost = empty($permittedHosts);
         foreach ($permittedHosts as $permittedHost) {
-            $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);
+
+            if(!array_key_exists("host", $parse)) continue;
+            $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"]);
         }
 
         // Special case for login form.. to be redirected to rescue authenticator if no access right
@@ -286,7 +288,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $parse["password"] ?? null,
             $parse["machine"] ?? null,
             $parse["subdomain"] ?? null,
-            $parse["host"] ?? null,
+            $parse["domain"] ?? null,
             $parse["port"] ?? null,
             $parse["path"] ?? null,
         );
