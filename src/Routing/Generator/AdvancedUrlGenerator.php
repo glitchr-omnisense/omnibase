@@ -52,13 +52,14 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 
                 if (preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
                     
-                    $parse = parse_url2(get_url());
+                    $parse = array_transforms(fn($k,$v): array => ["_".$k, $v], parse_url2(get_url()));
                     $parameterNames = array_flip($matches[1]);
+                 
                     $routeParameters = array_merge(
                         array_intersect_key($parse, $parameterNames),
                         $route->getDefaults(),
                         $routeParameters,
-                    );
+                    );        
 
                     $search  = array_map(fn ($k) => "{".$k."}", array_keys($parse));
                     $replace = array_values($parse);
@@ -66,6 +67,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                         $routeParameters[$key] = str_replace($search, $replace, $routeParameter ?? "");
                     }
                 }
+
+                $this->resolveParameters($routeParameters);
+                array_pop_key("_domain", $routeParameters);
+                array_pop_key("_subdomain", $routeParameters);
+                array_pop_key("_machine", $routeParameters);
             }
         }
 
@@ -122,7 +128,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $host      = array_pop_key("_host", $routeParameters) ?? $this->getRouter()->getHost();
             $port      = array_pop_key("_port", $routeParameters) ?? explode(":", $host)[1] ?? $this->getRouter()->getPort();
             $host      = explode(":", $host)[0].":".$port;
-
 
             $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
             $parse["base_dir"] = $baseDir;
@@ -189,16 +194,18 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     
         //
         // Try to compute subgroup (if not found compute base)
-        try {
-            $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
-        } catch(Exception $e) {
+        try { $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType); } 
+        catch(Exception $e) {
+
             if (str_starts_with($routeName, "app_")) {
+
                 $routeName = "base_".substr($routeName, 4);
                 try {
                     $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
                 } catch(Exception $_) {
                     throw $e;
                 }
+
             } elseif ($routeName == $routeDefaultName || $routeDefaultName === null) {
                 throw $e;
             }
@@ -223,6 +230,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $cache->save($this->getRouter()->getCacheRoutes()->set($this->cachedRoutes));
         }
 
+
         return $routeUrl;
     }
 
@@ -240,7 +248,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         } // Special case if both subdomain and machine are unallowed
 
         $parse = parse_url2($url);
-
+     
         $allowedHost = empty($permittedHosts);
         foreach ($permittedHosts as $permittedHost) {
 
@@ -249,34 +257,45 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         }
 
         // Special case for login form.. to be redirected to rescue authenticator if no access right
-        $routeName = $this->getRouter()->getRouteName();
+        $routeName = $this->getRouter()->getRouteName($url);
+        if(!$routeName) return $url;
+
         if (!LoginFormAuthenticator::isSecurityRoute($routeName) && !RescueFormAuthenticator::isSecurityRoute($routeName)) {
 
-            if (array_key_exists("machine", $parse) && !$this->getRouter()->keepMachine()) {
-                $parse = array_key_removes($parse, "machine");
-            }
+            $route = $this->getRouter()->getRoute($routeName);
 
-            // Special case for WWW subdomain
-            if($this->getRouter()->keepSubdomain()) {
-
-                if (!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse) && !$allowedHost) {
-
-                    $parse["subdomain"] = $this->getRouter()->getSubdomainFallback();
-
-                } elseif (array_key_exists("subdomain", $parse) && !$allowedHost) {
-
-                    if ($parse["subdomain"] === $this->getRouter()->getSubdomainFallback()) {
-                        $parse = array_key_removes($parse, "subdomain");
-                    } else {
-                        $parse["subdomain"] = $this->getRouter()->getSubdomainFallback();
-                    }
+            $_host = $route->getRequirements()["_host"] ?? null;
+            if(!array_key_exists("host", $parse) || !$_host || !preg_match("/".$_host."/", $parse["host"])) {
+               
+                $_machine = $route->getRequirements()["_machine"] ?? null;            
+                if (array_key_exists("machine", $parse) && !$this->getRouter()->keepMachine() && !$_machine && !$allowedHost) {
+                    $parse = array_key_removes($parse, "machine");
                 }
 
-            } else {
+                // Special case for WWW subdomain
+                $_subdomain = $route->getRequirements()["_subdomain"] ?? null;
+                if($this->getRouter()->keepSubdomain() && !$_subdomain && !$allowedHost) {
 
-                if (array_key_exists("subdomain", $parse)) {
-                    if (array_key_exists("machine", $parse) || !$this->getRouter()->keepMachine()) {
-                        $parse = array_key_removes($parse, "subdomain");
+                    if (!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse)) {
+
+                        $parse["subdomain"] = $this->getRouter()->getSubdomainFallback();
+
+                    } elseif (array_key_exists("subdomain", $parse)) {
+
+                        if ($parse["subdomain"] === $this->getRouter()->getSubdomainFallback()) {
+                            $parse = array_key_removes($parse, "subdomain");
+                        } else {
+                            $parse["subdomain"] = $this->getRouter()->getSubdomainFallback();
+                        }
+                    }
+
+                } else {
+
+                    if (array_key_exists("subdomain", $parse)) {
+
+                        if (array_key_exists("machine", $parse) || !$this->getRouter()->keepMachine()) {
+                            $parse = array_key_removes($parse, "subdomain");
+                        }
                     }
                 }
             }
@@ -291,6 +310,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $parse["domain"] ?? null,
             $parse["port"] ?? null,
             $parse["path"] ?? null,
+            $parse["query"] ?? null
         );
     }
 }

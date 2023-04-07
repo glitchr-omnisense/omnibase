@@ -225,6 +225,8 @@ namespace {
 
         $urlButQuery   = explode("?", $url)[0] ?? "";
         $pathEndsWithSlash = str_ends_with($urlButQuery, "/");
+        $parse["path"] = $parse["path"] ?? "";
+        
         return compose_url(
             $parse["scheme"] ?? null,
             $parse["user"] ?? null,
@@ -233,7 +235,7 @@ namespace {
             $parse["subdomain"] ?? null,
             $parse["domain"] ?? null,
             $parse["port"] ?? null,
-            str_replace("//", "/", $parse["path"] ?? "").(($format & FORMAT_URL_KEEPSLASH) && $pathEndsWithSlash ? "/" : ""),
+            ($format & FORMAT_URL_KEEPSLASH) ? $parse["path"] : str_replace("//", "/", $parse["path"]) . ($pathEndsWithSlash ? "/" : ""),
             $parse["query"] ?? null
         );
     }
@@ -273,7 +275,7 @@ namespace {
         }
 
         $parse = parse_url($url, $component);
-
+        
         if ($parse === false) {
             return false;
         }
@@ -286,8 +288,6 @@ namespace {
         }
 
         $path = str_rstrip($parse['path'] ?? "", "/");
-        $parse["path"] = str_replace("//", "/", $path);
-
         $tail = str_strip($url, ["file://", $base], "/");
         $root = str_strip($url, ["file://", $base], $tail);
         if (!empty($root)) {

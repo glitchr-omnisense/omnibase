@@ -416,6 +416,10 @@ class AdvancedRouter implements RouterInterface
             $locale = $args[1]["_locale"] ?? null;
             $locale = $locale ? ["_locale" => $locale] : [];
 
+            $search  = array_map(fn ($k) => "{".$k."}", array_keys($args[1]));
+            $replace = array_values($args[1]);
+            $args[4] = str_replace($search, $replace, $args[4]);
+            
             $this->routes[$routeName] = new Route(
                 $args[3],
                 $args[1],

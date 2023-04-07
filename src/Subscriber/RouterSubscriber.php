@@ -59,6 +59,7 @@ class RouterSubscriber implements EventSubscriberInterface
         $ipRestriction = !$this->parameterBag->get("base.router.ip_access")        &&  $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
         $redirectToFallback  = $this->parameterBag->get("base.router.host_restriction") && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route);
         $redirectToFallback |= $ipRestriction;
+        
         if ($redirectToFallback) {
 
             $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
@@ -68,25 +69,31 @@ class RouterSubscriber implements EventSubscriberInterface
             //
             // If host specified in rozute, then check the list of permitted subdomain
             $url = get_url(); // Redirect to proper host fallback if required.
-            if ($ipRestriction && $this->router->getHost() && $this->router->getHost() != $this->router->getHostFallback()) {
 
-                $url = parse_url2($url);
-                if($ipRestriction || !$this->router->keepDomain()) {
+            if ($ipRestriction || ($this->router->getHost() && $this->router->getHost() != $this->router->getHostFallback())) {
 
-                    $url["host"] = $this->router->getHostFallback();
-                    $url["port"] = $this->router->getPortFallback();
+                $route = $this->router->getRoute($url);
+                $_host = $route ? $route->getRequirements()["_host"] ?? null : null;
+
+                $parsedUrl = parse_url2($url);
+                
+                $hostFound = $_host && preg_match("/".$_host."/", $parsedUrl["host"]);
+                if($ipRestriction || (!$this->router->keepDomain() && !$hostFound)) {
+
+                    $parsedUrl["host"] = $this->router->getHostFallback();
+                    $parsedUrl["port"] = $this->router->getPortFallback();
                 }
 
                 $url = compose_url(
-                    $url["scheme"]  ?? null,
+                    $parsedUrl["scheme"]  ?? null,
                     null,
                     null,
                     null,
                     null,
-                    $url["domain"] ?? null,
-                    $url["port"] ?? null,
-                    $url["path"]    ?? null,
-                    $url["query"]     ?? null
+                    $parsedUrl["host"] ?? null,
+                    $parsedUrl["port"] ?? null,
+                    $parsedUrl["path"]    ?? null,
+                    $parsedUrl["query"]     ?? null
                 );
             }
 
@@ -101,6 +108,7 @@ class RouterSubscriber implements EventSubscriberInterface
         //
         // If no host specified in Route, then check the list of permitted subdomain
         if (!$this->authorizationChecker->isGranted("VALIDATE_PATH", $route)) {
+        
             $event->setResponse(new RedirectResponse(sanitize_url(get_url())));
             return $event->stopPropagation();
         }
