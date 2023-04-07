@@ -28,12 +28,15 @@ class ImageCrop implements LinkableInterface, SaltInterface
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        if(($routeParameters["extension"] ?? true) === true) {
-            $routeParameters["extension"] ??= $this->getImageService()->getExtension($this->getImage()->getSource());
-        } elseif ($routeParameters["extension"] === false) {
-            array_pop_key("extension", $routeParameters);
+        if(array_key_exists("extension", $routeParameters)) {
+            
+            if ($routeParameters["extension"] === true) {
+                $routeParameters["extension"] = $this->getImageService()->getExtension($this->getImage()->getSource());
+            } elseif ($routeParameters["extension"] === false) {
+                array_pop_key("extension", $routeParameters);
+            }
         }
-        
+
         $routeName = (array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image");
         $routeParameters = array_filter($routeParameters);
         $config = [
