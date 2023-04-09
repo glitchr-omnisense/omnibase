@@ -43,7 +43,7 @@ class Route extends \Symfony\Component\Routing\Annotation\Route
         $parsedUrl["machine"]   ??= $machine   ?? "\{_machine\}"  ;
         $parsedUrl["port"]      ??= $port       ?? "\{_port\}"     ;
 
-        $host = compose_url(null, null, null, $parsedUrl["machine"], $parsedUrl["subdomain"], $parsedUrl["domain"]);
+        $host = compose_url(null, null, null, $parsedUrl["machine"], $parsedUrl["subdomain"], $parsedUrl["domain"], $parsedUrl["port"]);
         $this->setHost($host);
 
         parent::__construct($path, $name, $requirements, $options, $defaults, $host, $methods, $schemes, $condition, $priority, $locale, $format, $utf8, $stateless, $env);
