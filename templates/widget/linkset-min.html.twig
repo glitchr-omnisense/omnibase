@@ -2,7 +2,7 @@
     {% if label != false %}<span class="label">{{ label }}</span>{% endif %}
     <ul {{ html_attributes(attr) }}>
 
-        {% cache widget.__toKey("linkset", app.request.locale) %}
+        {% cache widget.__toKey("linkset-min", app.request.locale) %}
         {% for item in widget.hyperlinks %}
             {% set url = item.generate() %}
             {% if url is not empty %}
