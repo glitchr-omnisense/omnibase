@@ -225,8 +225,8 @@ namespace {
 
         $urlButQuery   = explode("?", $url)[0] ?? "";
         $pathEndsWithSlash = str_ends_with($urlButQuery, "/");
-        $parse["path"] = $parse["path"] ?? "";
-        
+        $parse["path"] = str_rstrip($parse["path"] ?? "","/");
+
         return compose_url(
             $parse["scheme"] ?? null,
             $parse["user"] ?? null,
@@ -275,7 +275,6 @@ namespace {
         }
 
         $parse = parse_url($url, $component);
-        
         if ($parse === false) {
             return false;
         }
@@ -289,7 +288,7 @@ namespace {
 
         $path = str_rstrip($parse['path'] ?? "", "/");
         $tail = str_strip($url, ["file://", $base], "/");
-        $root = str_strip($url, ["file://", $base], $tail);
+        $root = str_strip($url, ["file://", $base], [$tail, "/"]);
         if (!empty($root)) {
             $parse["root"] = $root;
         }
@@ -334,11 +333,14 @@ namespace {
                 $domain = explode(".", $match[0]);
                 $parse["sld"] = first($domain);
                 $parse["tld"] = implode(".", tail($domain));
+
             } elseif (preg_match('/^[a-z0-9][a-z0-9\-]{0,63}$/i', strtolower($parse["host"] ?? ""), $match)) {
+
                 $parse["domain"] = $match[0];
             }
         }
 
+        $parse["path"] = $root.$path;
         if (array_key_exists("root", $parse)) {
             $parse["url"] = $root.$path;
         }

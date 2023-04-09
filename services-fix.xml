@@ -7,11 +7,6 @@
 
         <defaults />
 
-        <!-- PROFILER FIX -->
-        <service id="Symfony\Component\HttpKernel\Profiler\Profiler" public="true">
-            <argument type="service" id="profiler.storage" />
-        </service>
-
         <!-- NOTIFIER FIX -->
         <service id="Symfony\Component\Notifier\Channel\ChannelPolicyInterface"  alias="notifier.channel_policy"/>
 

@@ -26,7 +26,7 @@ class ProfilerSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => ['onKernelRequest', 256],
+            KernelEvents::REQUEST  => ['onKernelRequest', 512],
             KernelEvents::RESPONSE => ['onKernelResponse'],
         ];
     }
@@ -41,6 +41,9 @@ class ProfilerSubscriber implements EventSubscriberInterface
     public function onKernelResponse(ResponseEvent $event)
     {
         if (!$this->router->isDebug()) {
+            return false;
+        }
+        if ($this->router->isProfiler($event)) {
             return false;
         }
         if ($this->router->isUX()) {

@@ -39,6 +39,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id=".inner" />
             <argument type="service" id="request_stack" />
+            <argument type="service" id="security.firewall.map" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="localizer" />
             <argument type="service" id="twig.extension.assets" />

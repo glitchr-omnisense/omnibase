@@ -124,6 +124,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="Base\Repository\Layout\SettingRepository" />
             <argument type="service" id="localizer" />
             <argument type="service" id="assets.packages" />
             <argument type="service" id="cache.adapter" />
@@ -581,13 +582,6 @@
             <argument type="service" id="localizer" />
             <argument type="service" id="base.service.maintenance" />
             <argument type="service" id="base.service.maternity_unit" />
-        </service>
-
-         <service id="Base\Security\Voter\RouteVoter">
-            <tag name="security.voter" />
-            <argument type="service" id="router" />
-            <argument type="service" id="parameter_bag" />
-            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Database\Entity\EntityExtension" public="true" />

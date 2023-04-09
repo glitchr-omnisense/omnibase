@@ -49,6 +49,8 @@ class RouterSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        return;
+
         if (!$event->isMainRequest()) {
             return ;
         }
@@ -57,59 +59,33 @@ class RouterSubscriber implements EventSubscriberInterface
         if(!$route) return;
 
         $ipRestriction = !$this->parameterBag->get("base.router.ip_access")        &&  $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
-        $redirectToFallback  = $this->parameterBag->get("base.router.host_restriction") && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route);
-        $redirectToFallback |= $ipRestriction;
-        
-        if ($redirectToFallback) {
+        if ($ipRestriction) {
 
             $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
             if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback)
                 throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
 
-            //
-            // If host specified in rozute, then check the list of permitted subdomain
-            $url = get_url(); // Redirect to proper host fallback if required.
+            $parsedUrl["host"] = $this->router->getHostFallback();
+            $parsedUrl["port"] = $this->router->getPortFallback();
 
-            if ($ipRestriction || ($this->router->getHost() && $this->router->getHost() != $this->router->getHostFallback())) {
-
-                $route = $this->router->getRoute($url);
-                $_host = $route ? $route->getRequirements()["_host"] ?? null : null;
-
-                $parsedUrl = parse_url2($url);
-                
-                $hostFound = $_host && preg_match("/".$_host."/", $parsedUrl["host"]);
-                if($ipRestriction || (!$this->router->keepDomain() && !$hostFound)) {
-
-                    $parsedUrl["host"] = $this->router->getHostFallback();
-                    $parsedUrl["port"] = $this->router->getPortFallback();
-                }
-
-                $url = compose_url(
-                    $parsedUrl["scheme"]  ?? null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    $parsedUrl["host"] ?? null,
-                    $parsedUrl["port"] ?? null,
-                    $parsedUrl["path"]    ?? null,
-                    $parsedUrl["query"]     ?? null
-                );
-            }
+            $url = compose_url(
+                $parsedUrl["scheme"]  ?? null,
+                null,
+                null,
+                null,
+                null,
+                $parsedUrl["host"] ?? null,
+                $parsedUrl["port"] ?? null,
+                $parsedUrl["path"]    ?? null,
+                $parsedUrl["query"]     ?? null
+            );
 
             // Redirect to sanitized url
             $formattedUrl = $this->router->format($url);
             if($formattedUrl != get_url()) {
+                exit(1);
                 $event->setResponse(new RedirectResponse($formattedUrl));
             }
-            return $event->stopPropagation();
-        }
-
-        //
-        // If no host specified in Route, then check the list of permitted subdomain
-        if (!$this->authorizationChecker->isGranted("VALIDATE_PATH", $route)) {
-        
-            $event->setResponse(new RedirectResponse(sanitize_url(get_url())));
             return $event->stopPropagation();
         }
     }
