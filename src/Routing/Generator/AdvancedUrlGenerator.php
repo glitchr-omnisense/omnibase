@@ -45,7 +45,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $port      ??= self::$router->getPort()      ?? self::$router->getPortFallback();
 
                 $search = ["\\{_machine\\}.", "\\{_subdomain\\}.", "\\{_domain\\}", ":\\{_port\\}"];
-                $replace = [$machine ? $machine."\." : "", $subdomain ? $subdomain."\." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : ":".$port];
+                $replace = [$machine ? $machine."." : "", $subdomain ? $subdomain."." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : ":".$port];
 
                 foreach($compiledRoute[4] as &$variable) {
                     $variable[1] = str_replace($search, $replace, $variable[1]);
