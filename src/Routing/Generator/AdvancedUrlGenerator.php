@@ -39,10 +39,21 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             foreach ($compiledRoutes as &$compiledRoute) {
 
-                $machine   ??= self::$router->getMachine()   ?? self::$router->getMachineFallback();
-                $subdomain ??= self::$router->getSubdomain() ?? self::$router->getSubdomainFallback();
-                $domain    ??= self::$router->getDomain()    ?? self::$router->getDomainFallback();
-                $port      ??= self::$router->getPort()      ?? self::$router->getPortFallback();
+                $machine = self::$router->getMachineFallback();
+                if(in_array(self::$router->getMachine(), self::$router->getMachineFallbacks()))
+                    $machine = self::$router->getMachine();
+
+                $subdomain = self::$router->getSubdomainFallback();
+                if(in_array(self::$router->getSubdomain(), self::$router->getSubdomainFallbacks()))
+                    $subdomain = self::$router->getSubdomain();
+
+                $domain = self::$router->getDomainFallback();
+                if(in_array(self::$router->getDomain(), self::$router->getDomainFallbacks()))
+                    $domain = self::$router->getDomain();
+
+                $port = self::$router->getPortFallback();
+                if(in_array(self::$router->getPort(), self::$router->getPortFallbacks()))
+                    $port = self::$router->getPort();
 
                 $search = ["\\{_machine\\}.", "\\{_subdomain\\}.", "\\{_domain\\}", ":\\{_port\\}"];
                 $replace = [$machine ? $machine."." : "", $subdomain ? $subdomain."." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : ":".$port];

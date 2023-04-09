@@ -522,8 +522,8 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getPortFallback(?string $locale = null, ?string $environment = null): mixed { return first($this->getPortFallbacks($locale, $environment)); }
     public function getPort(?string $locale = null, ?string $environment = null): ?int
     {
-        $port = $this->getPortFallback($locale, $environment);
-        return in_array($port, [80, 443]) ? null : $port;
+        $parsedUrl = parse_url2(get_url());
+        return in_array($parsedUrl["port"], [80, 443]) ? null : $parsedUrl["port"];
     }
 
     public function getMachineFallbacks(?string $locale = null, ?string $environment = null): array { return $this->getFallbackParameters($locale, $environment)["machine"] ?? []; }
