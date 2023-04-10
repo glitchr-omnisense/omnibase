@@ -34,7 +34,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         //
         // NB: Static routes using multiple host, or domains might be screened.. imo
 
-        $cacheKey = self::$router->getCacheName().".compiled_routes[".self::$router->getLocale()."][".self::$router->getHost()."]";
+        $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];
+        $replacementChars = array_pad([], count($reservedChars), "_");
+        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName().".compiled_routes[".self::$router->getLocale()."][".self::$router->getHost()."]");
         $compiledRoutes = self::$router->getCache()->get($cacheKey, function() use ($compiledRoutes) {
 
             foreach ($compiledRoutes as &$compiledRoute) {

@@ -29,7 +29,9 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
         //
         // NB: Static routes using multiple host, or domains might be screened.. imo
-        $cacheKey = self::$router->getCacheName().".static_routes[".self::$router->getLocale()."][".self::$router->getHost()."]";
+        $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];
+        $replacementChars = array_pad([], count($reservedChars), "_");
+        $cacheKey = str_replace($reservedChars, $replacementChars,self::$router->getCacheName().".static_routes[".self::$router->getLocale()."][".self::$router->getHost()."]");
         $staticRoutes = self::$router->getCache()->get($cacheKey, function() use (&$staticRoutes) {
 
             foreach ($staticRoutes as &$staticRoute) {
@@ -68,7 +70,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
             return $staticRoutes;
         });
 
-        $cacheKey = self::$router->getCacheName().".dynamic_routes[".self::$router->getLocale()."][".self::$router->getHost()."]";
+        $cacheKey = str_replace($reservedChars, $replacementChars,self::$router->getCacheName().".dynamic_routes[".self::$router->getLocale()."][".self::$router->getHost()."]");
         [$regexpList, $dynamicRoutes] = self::$router->getCache()->get($cacheKey, function() use (&$regexpList, &$dynamicRoutes) {
 
             foreach ($regexpList as $offset => &$regexp) {
