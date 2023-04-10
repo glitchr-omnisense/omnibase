@@ -3211,7 +3211,7 @@ namespace {
         return strlen($directory) <= $maxPathLength;
     }
 
-    function mkdir_length_safe(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool
+    function mkdir_length_safe(string $directory, int $permissions = 0777, bool $recursive = true, $context = null): bool
     {
         if (is_length_safe($directory)) {
             return mkdir($directory, $permissions, $recursive, $context);
@@ -3234,7 +3234,7 @@ namespace {
             }
 
             if (!file_exists($directory)) {
-                shell_exec("mkdir -p ".$directory);
+                mkdir($directory, $permissions, $recursive, $context);
             }
             if (!is_dir($directory)) {
                 throw new LogicException("\"".getcwd()."/".$directory."\" is a file.");
