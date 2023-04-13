@@ -107,7 +107,7 @@ class MediaService extends FileService implements MediaServiceInterface
         return $this->enableWebp;
     }
 
-    public function audio(array|string|null $path, array $filters = [], array $config = []): array|string|null
+    public function audio(array|string|null $path, array $config = [], array $filters = []): array|string|null
     {
         if ($path === null) {
             return null;
@@ -118,13 +118,13 @@ class MediaService extends FileService implements MediaServiceInterface
         $pathList = is_array($path) ? $path : [$path];
         foreach ($pathList as $p) {
 
-            $output[] = $this->generate("ux_serve", [], $path, array_merge($config, ["filters" => $filters]));
+            $output[] = $this->generate("ux_serve", [], $path, $config);
         }
 
         return is_array($path) ? $output : first($output);
     }
 
-    public function video(array|string|null $path, array $filters = [], array $config = []): array|string|null
+    public function video(array|string|null $path, array $config = [], array $filters = []): array|string|null
     {
         if ($path === null) {
             return null;
@@ -135,13 +135,13 @@ class MediaService extends FileService implements MediaServiceInterface
         $pathList = is_array($path) ? $path : [$path];
         foreach ($pathList as $p) {
 
-            $output[] = $this->generate("ux_serve", [], $path, array_merge($config, ["filters" => $filters]));
+            $output[] = $this->generate("ux_serve", [], $path, $config);
         }
 
         return is_array($path) ? $output : first($output);
     }
 
-    public function soundify(null|array|string $path, array $attributes = [], ...$srcset): ?string
+    public function soundify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
             return $path;
@@ -150,13 +150,16 @@ class MediaService extends FileService implements MediaServiceInterface
             return array_map(fn ($s) => $this->soundify($s, $attributes), $path);
         }
 
+        $sources = $this->audio($path);
+        $sources = is_array($sources) ? $sources : [$sources];
+
         return $this->twig->render("@Base/media/audio.html.twig", [
-            "path"     => $this->media($path),
+            "sources"  => $sources,
             "attr"     => $attributes,
         ]);
     }
 
-    public function vidify(null|array|string $path, array $attributes = [], ...$srcset): ?string
+    public function vidify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
             return $path;
@@ -165,13 +168,16 @@ class MediaService extends FileService implements MediaServiceInterface
             return array_map(fn ($s) => $this->vidify($s, $attributes), $path);
         }
 
+        $sources = $this->video($path);
+        $sources = is_array($sources) ? $sources : [$sources];
+
         return $this->twig->render("@Base/media/video.html.twig", [
-            "path"     => $this->video($path),
+            "sources"  => $sources,
             "attr"     => $attributes,
         ]);
     }
 
-    public function image(array|string|null $path, array $filters = [], array $config = []): array|string|null
+    public function image(array|string|null $path, array $config = [], array $filters = []): array|string|null
     {
         $supports_webp   = array_pop_key("webp", $config) ?? browser_supports_webp();
 
@@ -236,7 +242,7 @@ class MediaService extends FileService implements MediaServiceInterface
         ]);
     }
     
-    public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
+    public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $config = [], array $filters = []): array|string|null
     {
         $filters[] = new CropFilter(
             $x,
@@ -247,26 +253,26 @@ class MediaService extends FileService implements MediaServiceInterface
         );
 
         $config = array_key_removes($config, "width", "height", "x", "y", "position");
-        return $this->image($path, $filters, $config);
+        return $this->image($path, $config, $filters);
     }
 
-    public function thumbnailInset(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailInset(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]));
     }
-    public function thumbnailOutbound(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailOutbound(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]));
     }
-    public function thumbnailNoclone(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailNoclone(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]));
     }
-    public function thumbnailUpscale(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailUpscale(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]));
     }
-    public function thumbnail(array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnail(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         $filters[] = new ThumbnailFilter(
             $width,
@@ -276,7 +282,7 @@ class MediaService extends FileService implements MediaServiceInterface
         );
 
         $config = array_key_removes($config, "width", "height", "mode", "resampling");
-        return $this->image($path, $filters, $config);
+        return $this->image($path, $config, $filters);
     }
 
     public function obfuscate(string|null $path, array $config = [], array $filters = []): ?string
@@ -419,7 +425,7 @@ class MediaService extends FileService implements MediaServiceInterface
         return parent::serve($file, $status, $headers);
     }
 
-    public function isCached(?string $path, FilterInterface|array $filters = [], array $config = []): bool
+    public function isCached(?string $path, FilterInterface|array $config = [], array $filters = []): bool
     {
         if (!is_array($filters)) {
             $filters = [$filters];
@@ -492,7 +498,7 @@ class MediaService extends FileService implements MediaServiceInterface
         return false;
     }
 
-    public function filter(?string $path, FilterInterface|array $filters = [], array $config = []): ?string
+    public function filter(?string $path, array $config = [], FilterInterface|array $filters = []): ?string
     {
         if ($this->debug) {
             return $this->getNoImage($this->getExtension($path));
@@ -577,7 +583,7 @@ class MediaService extends FileService implements MediaServiceInterface
                 $maxExecutionTime = ini_get('max_execution_time');
                 set_time_limit($this->timeout);
 
-                $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
+                $filteredPath = $this->filter($path, array_merge($config, ["local_cache" => false]), $filters) ?? $path;
                 if (!file_exists($filteredPath)) {
 
                     if (!$this->fallback) {

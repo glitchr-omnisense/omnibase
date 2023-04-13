@@ -141,8 +141,9 @@ class FileService implements FileServiceInterface
 
     public function linkable(array|string|null $path, array $config = []): array|string|null
     {
-        return $this->generate("ux_serve", [], $path);
+        return $this->generate("ux_serve", [], $path, $config);
     }
+    
     public function downloadable(array|string|null $path, array $config = []): array|string|null
     {
         $attachment = array_pop_key("attachment", $config);

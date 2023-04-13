@@ -15,7 +15,13 @@ boolean:
 stock:
   unlimited: Illimité
 
-quill:
+audio:
+  unsupported_element:  "Votre navigateur ne supporte pas les audios"
+  
+video:
+  unsupported_tag:  "Votre navigateur ne supporte pas les vidéos"
+  
+editor:
   soft_linebreak: "Utilise Maj+Entrer pour faire un retour à la ligne sans changer de paragraphe"
 
 password:

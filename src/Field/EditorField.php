@@ -2,12 +2,12 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\QuillType;
+use Base\Field\Type\EditorType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-final class QuillField implements FieldInterface
+final class EditorField implements FieldInterface
 {
     use FieldTrait;
 
@@ -22,9 +22,9 @@ final class QuillField implements FieldInterface
         return (new self())
             ->setProperty($propertyName)
             ->setLabel($label)
-            ->setTemplateName('crud/field/textarea')
+            ->setTemplateName('crud/field/hidden')
             ->shorten()
-            ->setFormType(QuillType::class);
+            ->setFormType(EditorType::class);
     }
 
     public function renderAsBoolean(bool $asBool = true)

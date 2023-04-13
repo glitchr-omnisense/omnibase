@@ -27,6 +27,7 @@
     "@glitchr/quill": "^1.0",
     "@glitchr/select2": "^1.0",
     "@picmo/popup-picker": "5.7.2",
+    "@editorjs/editorjs": "^2.26",
     "@popperjs/core": "^2.11.6",
     "@simonwep/pickr": "^1.8.2",
     "bootstrap": "^5.2.3",

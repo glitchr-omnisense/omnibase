@@ -18,6 +18,7 @@ import './styles/js/forms/form-type-number.js';
 import './styles/js/forms/form-type-password.js';
 import './styles/js/forms/form-type-quadrant.js';
 import './styles/js/forms/form-type-quill.js';
+import './styles/js/forms/form-type-editor.js';
 import './styles/js/forms/form-type-select2.js';
 import './styles/js/forms/form-type-slug.js';
 import './styles/js/forms/form-type-stock.js';

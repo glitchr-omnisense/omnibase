@@ -27,6 +27,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function isSecured(mixed $request = null): bool;
     public function keepMachine(): bool;
     public function keepSubdomain(): bool;
+    public function keepDomain(): bool;
 
     public function getBaseDir(?string $locale = null, ?string $environment = null): string;
     public function getHost(?string $locale = null, ?string $environment = null): string;

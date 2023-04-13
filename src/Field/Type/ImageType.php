@@ -24,7 +24,6 @@ class ImageType extends FileType
     {
         $resolver->setDefaults([
             'thumbnail'    => "bundles/base/images/image.svg",
-            'alt'          => null,
             'clipboard'    => true,
 
             'modal'        => [
@@ -44,9 +43,6 @@ class ImageType extends FileType
     {
         parent::buildForm($builder, $options);
 
-        if ($options["alt"]   !== null) {
-            $builder->add("alt", TextType::class, $options["alt"]);
-        }
         if ($options["multiple"] && is_array($options["cropper"])) {
             throw new InvalidArgumentException("There can be only one picture if you want to crop, please disable 'multiple' option");
         }

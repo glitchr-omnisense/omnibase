@@ -1,3 +1,6 @@
-{{ lazyload and lazybox ? "<div class='lazybox'>" : "" }}
-<img {{ lazyload ? "data-src" : "src" }}='{{ path }}' {{ html_attributes(attr) }} />
-{{ lazyload and lazybox ? "</div>" : "" }}
+<audio {{ html_attributes(attr) }}>
+    {% for source in sources %}
+    <source src="{{source}}" type="{{ source|mimetype }}">
+    {% endfor %}
+    {{ "@fields.audio.unsupported_element"|trans }}
+</audio>

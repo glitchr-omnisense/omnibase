@@ -9,7 +9,7 @@ use Base\Field\SelectField;
 use Base\Field\SlugField;
 use Base\Field\StateField;
 use Base\Field\TranslationField;
-use Base\Field\Type\QuillType;
+use Base\Field\Type\EditorType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -34,7 +34,7 @@ class ThreadCrudController extends ThreadActionCrudController
             yield SlugField::new('slug')->setTargetFieldName("translations.title");
             yield TranslationField::new()->setFields([
                 "excerpt" => ["form_type" => TextareaType::class],
-                "content" => ["form_type" => QuillType::class]
+                "content" => ["form_type" => EditorType::class]
             ]);
 
             yield DateTimePickerField::new('updatedAt')->onlyOnDetail();

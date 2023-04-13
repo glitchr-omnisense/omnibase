@@ -8,7 +8,7 @@ use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
 use Base\Entity\Layout\Attribute\Adapter\HyperpatternAdapter;
 use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Field\AttributeField;
-use Base\Field\Type\QuillType;
+use Base\Field\Type\EditorType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class LinkCrudController extends WidgetCrudController
@@ -25,7 +25,7 @@ class LinkCrudController extends WidgetCrudController
             yield TranslationField::new('title')->setFields([
                 "title" => [],
                 "excerpt" => ["form_type" => TextareaType::class],
-                "content" => ["form_type" => QuillType::class],
+                "content" => ["form_type" => EditorType::class],
             ]);
         }], $args);
     }

@@ -951,7 +951,7 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Field\Type\QuillType"><tag name="form.type" />
+        <service id="Base\Field\Type\EditorType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
         </service>
@@ -1028,6 +1028,8 @@
 
         <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\ImageType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
+        <service id="Base\Field\Type\AudioType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
+        <service id="Base\Field\Type\VideoType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
             <argument type="service" id="parameter_bag" />
@@ -1064,7 +1066,7 @@
 
         <service id="Base\Field\Configurator\LocaleConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\TextConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\QuillConfigurator">
+        <service id="Base\Field\Configurator\EditorConfigurator">
             <tag name="ea.field_configurator" />
         </service>
 
@@ -1093,8 +1095,6 @@
         </service>
 
         <service id="Base\Field\Configurator\CropperConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\ImageConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\FileConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.database.metadata_manipulator" />

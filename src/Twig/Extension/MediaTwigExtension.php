@@ -114,7 +114,7 @@ final class MediaTwigExtension extends AbstractExtension
         return file_exists(sanitize_url($this->projectDir . "/public/" . $file));
     }
 
-    public function image(array $context, array|string|null $path, array $filters = [], array $config = []): array|string|null
+    public function image(array $context, array|string|null $path, array $config = [], array $filters = []): array|string|null
     {
         $config["local_cache"] ??= true;
         if (array_key_exists("warmup", $context)) {
@@ -127,10 +127,10 @@ final class MediaTwigExtension extends AbstractExtension
             $config["webp"]   = false;
         }
 
-        return $this->mediaService->image($path, $filters, $config);
+        return $this->mediaService->image($path, $config, $filters);
     }
 
-    public function imageCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
+    public function imageCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $config = [], array $filters = []): array|string|null
     {
         $config["local_cache"] ??= true;
         if (array_key_exists("warmup", $context)) {
@@ -143,26 +143,26 @@ final class MediaTwigExtension extends AbstractExtension
             $config["webp"]   = false;
         }
 
-        return $this->mediaService->crop($path, $x, $y, $width, $height, $position, $filters, $config);
+        return $this->mediaService->crop($path, $x, $y, $width, $height, $position, $config, $filters);
     }
 
-    public function thumbnailInset(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailInset(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]));
+        return $this->thumbnail($context, $path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]), $filters);
     }
-    public function thumbnailOutbound(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailOutbound(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]));
+        return $this->thumbnail($context, $path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]), $filters);
     }
-    public function thumbnailNoclone(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailNoclone(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]));
+        return $this->thumbnail($context, $path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]), $filters);
     }
-    public function thumbnailUpscale(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnailUpscale(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($context, $path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]));
+        return $this->thumbnail($context, $path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]), $filters);
     }
-    public function thumbnail(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
+    public function thumbnail(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         $config["local_cache"] ??= true;
         if (array_key_exists("warmup", $context)) {
@@ -175,7 +175,7 @@ final class MediaTwigExtension extends AbstractExtension
             $config["webp"]   = false;
         }
 
-        return $this->mediaService->thumbnail($path, $width, $height, $filters, $config);
+        return $this->mediaService->thumbnail($path, $width, $height, $config, $filters);
     }
 
     public function urlify(LinkableInterface|string|null $urlOrPath, ?string $label = null, array $attributes = [])

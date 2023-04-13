@@ -15,6 +15,12 @@ boolean:
 stock:
   unlimited: Unlimited
 
+audio:
+  unsupported_element:  "Your browser does not support the audio element."
+  
+video:
+  unsupported_tag:  "Your browser does not support the video tag."
+  
 password:
   invalid_message: "Password must be identicals."
   first: "Password"
@@ -81,7 +87,7 @@ clipboard:
     copy: Copied!
     paste: Paste!
 
-quill:
+editor:
   soft_linebreak: "Use Maj+Enter to make a soft breakline"
 
 cropper:

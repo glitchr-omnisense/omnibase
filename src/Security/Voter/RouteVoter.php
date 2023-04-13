@@ -44,9 +44,9 @@ class RouteVoter extends Voter
         $this->permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", null) ?? [];
 
         $this->permittedHosts = array_transforms(fn ($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $this->permittedHosts) ?? [];
-        if (!$this->router->keepMachine() && !$this->router->keepSubdomain() && !$this->getRouter()->keepDomain()) {
+        if (!$this->router->keepMachine() && !$this->router->keepSubdomain() && !$this->router->keepDomain()) {
             $this->permittedHosts[] = "^$";
-        } // Special case if both subdomain and machine are unallowed
+        }
     }
 
     protected function supports(string $attribute, mixed $subject): bool

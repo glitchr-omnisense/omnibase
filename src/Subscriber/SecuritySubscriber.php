@@ -235,6 +235,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             }
 
             if (!in_array($this->router->getRouteName(), $routeRestriction)) {
+
                 if ($specialGrant) {
                     // If not let them know that this page is locked for others
                     if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isBackend()) {
@@ -256,7 +257,9 @@ class SecuritySubscriber implements EventSubscriberInterface
                 }
 
                 return false;
+
             } elseif ($specialGrant) {
+                
                 // If not let them know that this page is locked for others
                 $notification = new Notification("access_restricted.".$restrictionType.".on_deny");
                 $notification->send("info");

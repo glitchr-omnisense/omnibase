@@ -149,7 +149,8 @@ class FileType extends AbstractType implements DataMapperInterface
             'sortable-js'  => $this->parameterBag->get("base.vendor.sortablejs.javascript"),
 
             'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
-
+            'alt'          => null,
+        
             'thumbnail_width'  => null,
             'thumbnail_height' => 250,
             'max_size'        => null,
@@ -247,6 +248,11 @@ class FileType extends AbstractType implements DataMapperInterface
             }
             $event->setData($data);
         });
+
+        if ($options["alt"]   !== null) {
+            $builder->add("alt", TextType::class, $options["alt"]);
+        }
+        
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
