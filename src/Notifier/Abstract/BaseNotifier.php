@@ -173,7 +173,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         $this->testRecipients = array_map(fn ($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
 
-        $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email");
+        $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email") ?? "postmaster@".$this->router->getDomain();
         $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
         $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
         $this->technicalLoopback = $parameterBag->get("base.notifier.technical_loopback");
@@ -283,13 +283,18 @@ abstract class BaseNotifier implements BaseNotifierInterface
             return new NoRecipient();
         }
 
+        $mail = trim(explode("<", $mail)[1] ?? $mail, ">");
         $mailName = $this->settingBag->getScalar("base.settings.mail.name");
         if (!$mailName) {
-            $mailName = mb_ucwords(str_replace([".", "_"], [" ", " "], explode("@", $mail)[0]));
+            $mailName = trim(explode("<", $mail)[0]);
         }
         if (!$mailName) {
             $mailName = first($defaultMail) ?? null;
         }
+        $mailName = trim(mb_ucwords(
+            str_replace([".", "_"], [" ", " "],
+            explode("@", $mail)[0]
+        )));
 
         $phone = $this->settingBag->getScalar("base.settings.phone");
         if (!$phone) {

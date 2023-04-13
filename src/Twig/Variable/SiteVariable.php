@@ -145,7 +145,7 @@ class SiteVariable
     public function is_newcomer(int $within = 0): bool
     {
         $lastVisit = $_COOKIE["USER/LAST_VISIT"] ?? 0;
-        setcookie("USER/LAST_VISIT", time(), time()+$within);
+        setcookie("USER/LAST_VISIT", time(), time()+$within, "/", parse_url2(get_url())["domain"] ?? "");
 
         return !$lastVisit;
     }

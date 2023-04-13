@@ -49,8 +49,6 @@ class RouterSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        return;
-
         if (!$event->isMainRequest()) {
             return ;
         }
@@ -64,9 +62,13 @@ class RouterSubscriber implements EventSubscriberInterface
             $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
             if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback)
                 throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
+        }
 
+        if($ipRestriction || (!$route->getHost() && $this->router->reducesOnFallback())) {
+
+            $parsedUrl = parse_url2(get_url());
+            $parsedUrl["scheme"] = $this->router->getScheme();
             $parsedUrl["host"] = $this->router->getHostFallback();
-            $parsedUrl["port"] = $this->router->getPortFallback();
 
             $url = compose_url(
                 $parsedUrl["scheme"]  ?? null,
@@ -75,18 +77,17 @@ class RouterSubscriber implements EventSubscriberInterface
                 null,
                 null,
                 $parsedUrl["host"] ?? null,
-                $parsedUrl["port"] ?? null,
+                null,
                 $parsedUrl["path"]    ?? null,
-                $parsedUrl["query"]     ?? null
+                $parsedUrl["query"]     ?? null,
+                $parsedUrl["fragment"]     ?? null
             );
 
             // Redirect to sanitized url
-            $formattedUrl = $this->router->format($url);
-            if($formattedUrl != get_url()) {
-                exit(1);
-                $event->setResponse(new RedirectResponse($formattedUrl));
+            if($url != get_url()) {
+                $event->setResponse(new RedirectResponse($url));
+                return $event->stopPropagation();
             }
-            return $event->stopPropagation();
         }
     }
 }

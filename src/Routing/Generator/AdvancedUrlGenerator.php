@@ -152,6 +152,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     public function resolveParameters(?array $routeParameters = null): ?array
     {
         if ($routeParameters === null) {
+
             $parse = parse_url2(get_url(), -1, self::$router->getBaseDir()); // Make sure also it gets the basic context
         
         } else {

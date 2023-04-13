@@ -27,6 +27,8 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function isWdt(mixed $request = null): bool;
     public function isSecured(mixed $request = null): bool;
 
+    public function reducesOnFallback(?string $locale = null, ?string $environment = null): bool;
+
     public function getBaseDir(?string $locale = null, ?string $environment = null): string;
     public function getHost(?string $locale = null, ?string $environment = null): string;
     public function getHostFallback(?string $locale = null, ?string $environment = null): string;

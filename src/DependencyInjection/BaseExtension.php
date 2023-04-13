@@ -20,6 +20,8 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorageFactory;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Workflow\WorkflowInterface;
 
@@ -52,6 +54,7 @@ class BaseExtension extends Extension
             $config["twig"]["form_themes"],
             $container->getParameter('twig.form.resources')
         ));
+
 
         $container->registerForAutoconfiguration(AbstractIconAdapter::class)->addTag('base.service.icon');
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_subscriber');

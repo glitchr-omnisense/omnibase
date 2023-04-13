@@ -169,7 +169,7 @@ namespace {
         $port    = explode(":", $http_host ?? $_SERVER["HTTP_HOST"] ?? "")[1] ?? $_SERVER["SERVER_PORT"] ?? null;
         $port    = $port != 80 && $port != 443 ? $port : null;
 
-        $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
+        $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null; // Fragment is contained in request URI
 
         return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
@@ -236,7 +236,8 @@ namespace {
             $parse["domain"] ?? null,
             $parse["port"] ?? null,
             ($format & FORMAT_URL_KEEPSLASH) ? $parse["path"] : str_replace("//", "/", $parse["path"]) . ($pathEndsWithSlash ? "/" : ""),
-            $parse["query"] ?? null
+            $parse["query"] ?? null,
+            $query["fragment"] ?? null
         );
     }
 
@@ -249,7 +250,8 @@ namespace {
         ?string $domain = null,
         string|int|null $port = null,
         ?string $path = null,
-        ?string $query = null
+        ?string $query = null,
+        ?string $fragment = null
     ): array|string|int|false|null
     {
         $scheme    = ($domain && $scheme) ? $scheme."://" : null;
@@ -297,6 +299,9 @@ namespace {
 
             $parse["host"] = trim($parse["host"], ":");
 
+            $port = array_key_exists("port", $parse) ? ":" . $parse["port"] : "";
+            $parse["host"] = $parse["host"].$port;
+
             //
             // Check if IP address provided
             if (filter_var($parse["host"], FILTER_VALIDATE_IP)) {
@@ -312,9 +317,9 @@ namespace {
 
             //
             // Check if hostname
-            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
-                $parse["fqdn"] = $parse["host"] . ".";
-                $parse["domain"] = $match[0];
+            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
+                $parse["fqdn"] = explode(":", $parse["host"])[0] . ".";
+                $parse["domain"] = explode(":", $match[0])[0];
 
                 $subdomain = str_rstrip($parse["host"], "." . $parse["domain"]);
                 if ($parse["domain"] !== $subdomain) {

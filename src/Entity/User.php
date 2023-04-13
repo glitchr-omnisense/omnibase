@@ -152,7 +152,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return new Recipient($email, $phone, $locale, $timezone);
     }
 
-    public function logout()
+    public function logout(?string $domain)
     {
         $token = $this->getTokenStorage()->getToken();
         if ($token === null || $token->getUser() != $this) {
@@ -160,7 +160,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         } else {
             $this->getTokenStorage()->setToken(null);
             setcookie("REMEMBERME", '', time()-1);
-            setcookie("REMEMBERME", '', time()-1, "/", ".".format_url(get_url(), FORMAT_URL_NOSUBDOMAIN | FORMAT_URL_NOMACHINE));
+            setcookie("REMEMBERME", '', time()-1, "/", parse_url2(get_url())["domain"] ?? "");
         }
     }
 
@@ -190,7 +190,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
         $cookie = array_merge($cookie, [$key => $value]);
 
-        setcookie(self::__COOKIE_IDENTIFIER__, json_encode($cookie), $lifetime > 0 ? time() + $lifetime : 0, "/");
+        setcookie(self::__COOKIE_IDENTIFIER__, json_encode($cookie), $lifetime > 0 ? time() + $lifetime : 0, "/", parse_url2(get_url())["domain"] ?? "");
     }
 
     public static function getBrowser(): ?string

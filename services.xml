@@ -11,6 +11,8 @@
             <argument type="service" id="form.factory" />
         </service>
 
+        <service id="Base\Security\Session\DynamicSessionStorageFactory" public="true" parent="session.storage.factory.native" />
+
         <service id="Base\Service\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />

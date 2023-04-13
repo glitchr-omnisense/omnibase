@@ -45,21 +45,21 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
                 if (!self::$router->getDomainFallback() && str_contains($host, "\\\\\\{_domain\\\\\\}"))
                     throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
 
-                $machine = preg_quote(self::$router->getMachineFallback());
+                $machine = preg_quote(self::$router->getMachineFallback() ?? "");
                 if(in_array(self::$router->getMachine(), self::$router->getMachineFallbacks()))
-                    $machine = preg_quote(self::$router->getMachine());
+                    $machine = preg_quote(self::$router->getMachine() ?? "");
 
-                $subdomain = preg_quote(self::$router->getSubdomainFallback());
+                $subdomain = preg_quote(self::$router->getSubdomainFallback() ?? "");
                 if(in_array(self::$router->getSubdomain(), self::$router->getSubdomainFallbacks()))
-                    $subdomain = preg_quote(self::$router->getSubdomain());
+                    $subdomain = preg_quote(self::$router->getSubdomain() ?? "");
 
-                $domain = preg_quote(self::$router->getDomainFallback());
+                $domain = preg_quote(self::$router->getDomainFallback() ?? "");
                 if(in_array(self::$router->getDomain(), self::$router->getDomainFallbacks()))
-                    $domain = preg_quote(self::$router->getDomain());
+                    $domain = preg_quote(self::$router->getDomain() ?? "");
 
-                $port = preg_quote(self::$router->getPortFallback());
+                $port = preg_quote(self::$router->getPortFallback() ?? "");
                 if(in_array(self::$router->getPort(), self::$router->getPortFallbacks()))
-                    $port = preg_quote(self::$router->getPort());
+                    $port = preg_quote(self::$router->getPort() ?? "");
 
                 $search = ["\\\\\\{_machine\\\\\\}\.", "\\\\\\{_subdomain\\\\\\}\.", "\\\\\\{_domain\\\\\\}", ":\\\\\\{_port\\\\\\}"];
                 $replace = [$machine ? $machine."." : "", $subdomain ? $subdomain."." : "", preg_quote($domain), $port == 80 || $port == 443 || !$port ? "" : ":".$port];
@@ -193,14 +193,22 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
     public function match(string $pathinfo): array
     {
-        $parse = parse_url2($pathinfo) ?? [];
+        $parse = parse_url2($pathinfo);
         if($parse) {
+
+            $parse = array_merge(parse_url2(get_url()), $parse);
             if (array_key_exists("host", $parse))
                 $this->getContext()->setHost($parse["host"] ?? "");
-            if (array_key_exists("port", $parse))
+            if (array_key_exists("port", $parse)) {
+
+                $host = $this->getContext()->getHost();
+                $host = explode(":", $host)[0].":".$parse["port"];
+                $this->getContext()->setHost($host);
+
                 $this->getContext()->setHttpPort((int)($parse["port"] ?? 80));
-            if (array_key_exists("port", $parse))
                 $this->getContext()->setHttpsPort((int)($parse["port"] ?? 8000));
+            }
+
             if (array_key_exists("queryString", $parse))
                 $this->getContext()->setQueryString($parse["queryString"] ?? "");
             if (array_key_exists("path", $parse))

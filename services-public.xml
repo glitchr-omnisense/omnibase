@@ -6,6 +6,8 @@
 
         <defaults public="true" />
 
+        <service id="session.storage.factory.dynamic" alias="Base\Security\Session\DynamicSessionStorageFactory" />
+
         <service id="referrer" alias="Base\Service\Referrer" />
         <service id="Base\Service\ReferrerInterface" alias="referrer"/>
 

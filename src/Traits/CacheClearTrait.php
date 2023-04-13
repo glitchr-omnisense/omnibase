@@ -137,7 +137,7 @@ trait CacheClearTrait
     {
         file_put_contents($this->testFile, "Hello World !");
         if (!$this->testFileExists) {
-            $io->warning('Cache requires to run a second `cache:clear` to account for the custom base bundle features.');
+            $io->warning('Cache requires to run a second `cache:clear` to account for custom bundle features.');
         }
     }
 
