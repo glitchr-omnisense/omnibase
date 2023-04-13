@@ -297,8 +297,6 @@ namespace {
 
         if (array_key_exists("host", $parse)) {
 
-            $parse["host"] = trim($parse["host"], ":");
-
             $port = array_key_exists("port", $parse) ? ":" . $parse["port"] : "";
             $parse["host"] = $parse["host"].$port;
 
@@ -317,11 +315,15 @@ namespace {
 
             //
             // Check if hostname
-            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
-                $parse["fqdn"] = explode(":", $parse["host"])[0] . ".";
-                $parse["domain"] = explode(":", $match[0])[0];
+            if (preg_match('/([a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(?:\.[a-z]{1,2})?)\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
 
-                $subdomain = str_rstrip($parse["host"], "." . $parse["domain"]);
+                $hostWithoutPort = explode(":", $parse["host"])[0];
+                $parse["fqdn"] = $hostWithoutPort . ".";
+
+                $parse["domain"] = $match[1];
+                $parse["port"] = $match[2];
+
+                $subdomain = str_rstrip($hostWithoutPort, "." . $parse["domain"]);
                 if ($parse["domain"] !== $subdomain) {
                     $parse["subdomain"] = $subdomain;
                 }
@@ -335,13 +337,14 @@ namespace {
                     }
                 }
 
-                $domain = explode(".", $match[0]);
+                $domain = explode(".", $match[1]);
                 $parse["sld"] = first($domain);
                 $parse["tld"] = implode(".", tail($domain));
 
-            } elseif (preg_match('/^[a-z0-9][a-z0-9\-]{0,63}$/i', strtolower($parse["host"] ?? ""), $match)) {
+            } elseif (preg_match('/^([a-z0-9][a-z0-9\-]{0,63}?)\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
 
-                $parse["domain"] = $match[0];
+                if(count($match) > 1) $parse["domain"] = $match[1];
+                if(count($match) > 2) $parse["port"] = $match[2];
             }
         }
 

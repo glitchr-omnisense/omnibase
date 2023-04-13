@@ -2,12 +2,12 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\QuillType;
+use Base\Field\Type\WysiwygType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-final class QuillField implements FieldInterface
+final class WysiwygField implements FieldInterface
 {
     use FieldTrait;
 
@@ -25,7 +25,7 @@ final class QuillField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/textarea')
             ->shorten()
-            ->setFormType(QuillType::class)
+            ->setFormType(WysiwygType::class)
             ->setCustomOption(self::OPTION_STRIP_TAGS, true);
     }
 

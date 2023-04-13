@@ -93,23 +93,23 @@
 {%- endblock form2_row -%}
 
 {# Custom FormType widgets are below.. #}
-{%- block quill_row -%}
-{%- set row_attr = row_attr|merge({'class': 'form-quill' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+{%- block wysiwyg_row -%}
+{%- set row_attr = row_attr|merge({'class': 'form-wysiwyg' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
 <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
     <span>{{ form_label(form) }}</span>
     {{ form_errors(form) }}
     {{ form_row(form) }}
-    <div class="form-text text-muted">{{"@fields.quill.soft_linebreak"|trans}}</span></div>
+    <div class="form-text text-muted">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
 </div>
 
 
 {%- endblock -%}
 
-{%- block quill_widget -%}
+{%- block wysiwyg_widget -%}
 
     {% set attr = attr|merge({
-        'data-quill-field': form.vars.id,
-        'data-quill-options': quill
+        'data-wysiwyg-field': form.vars.id,
+        'data-wysiwyg-options': wysiwyg
     }) %}
 
     {{ form_widget(form) }}
@@ -117,7 +117,7 @@
         {{ value | raw }}
     </div>
 
-{%- endblock quill_widget -%}
+{%- endblock wysiwyg_widget -%}
 
 {%- block attribute_widget -%}
 <div class="form-control form-attribute">

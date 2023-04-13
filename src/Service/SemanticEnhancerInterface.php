@@ -4,6 +4,5 @@ namespace Base\Service;
 
 interface SemanticEnhancerInterface
 {
-    public function highlight(string|array|null $strOrArray, array $attributes = []): string|array|null;
-    public function highlightByWord(string $word, array $attributes = []);
+    public function highlight(string|array|null $strOrArray, array $attributes = [], null|array|string $word): string|array|null;
 }

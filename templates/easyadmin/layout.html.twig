@@ -92,7 +92,7 @@
 
         {% set impersonator_permission = ea.impersonator_permission %}
         {% set user_menu_dropdown %}
-            <ul class="dropdown-menu dropdown-menu-end">
+            <ul class="dropdown-menu">
                 <li class="dropdown-user-details">
                     <div>{{ user_menu_avatar }}</div>
                     <div>
@@ -157,16 +157,21 @@
                                 {% block header %}
                                 <nav class="navbar" role="navigation">
                                     {% block header_navbar %}
-                                        <div id="header-logo">
-                                            {% block header_logo %}
-                                                <a class="logo" title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
-                                                    <div class="logo-custom lazybox">
-                                                        <img class="user-avatar" alt="avatar" data-src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(250,250) }}" />
-                                                    </div>
-                                                    <span class="logo-compact"><i class="fa-solid fa-home"></i></span>
-                                                </a>
-                                            {% endblock header_logo %}
-                                        </div>
+                                    <div class="dropdown user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
+                                        <a class="user-details" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
+                                            {% set logo = ea_extra.logo(ea.crud.getCurrentPage() ?? null) %}
+                                            <img class="user-avatar" alt="avatar" data-src="{{ logo|thumbnail(250,250) }}" />
+
+                                            {% if ea.userMenu.isNameDisplayed %}
+                                            <div class="dashboard-menu">
+                                                <div class="dashboard-title">{{ ea.dashboardTitle|striptags }}</div>
+                                                <div class="user-name">{{ ea.userMenu.name }}</div>
+                                            </div>
+                                            {% endif %}
+                                        </a>
+
+                                        {{ user_menu_dropdown }}
+                                    </div>
                                     {% endblock header_navbar %}
                                 </nav>
                                 {% endblock header %}
@@ -271,25 +276,12 @@
 
                             <div class="navbar-custom-menu">
 
-                                {% block header_custom_menu %}
-                                    <div class="dropdown user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
-                                        <a class="user-details" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
-                                            {{ user_menu_avatar }}
-                                            {% if ea.userMenu.isNameDisplayed %}
-                                                <span class="user-name">{{ ea.userMenu.name }}</span>
-                                            {% endif %}
-                                        </a>
-
-                                        {{ user_menu_dropdown }}
-                                    </div>
-                                {% endblock header_custom_menu %}
-
                                 <div class="user-menu-wrapper responsive-header-menu">
                                     {% block responsive_header %}
 
                                         <div class="responsive-menu">
                                             <button id="navigation-toggler" type="button" aria-label="Toggle navigation">
-                                                <i class="fa-solid fa-solid fa-bars"></i>
+                                                <i class="fa-solid fa-bars"></i>
                                             </button>
                                         </div>
 
@@ -313,83 +305,83 @@
                         {% endblock content_top_header %}
                     </aside>
 
+                    {% block content_header_wrapper %}
+                        <section class="content-header">
+
+                            {% block content_header %}
+
+                            <div class="content-header-icon">
+                            {% set url = ea.crud is not null and ea.crud.paginator.pageNumber != 1 ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
+
+                            {% set _content_icon = block('content_icon') ?? null %}
+                            {% if _content_icon is not empty %}
+                                {{ _content_icon|raw }}
+                            {% else %}
+                                {% set image = ea_extra.image(ea.crud.getCurrentPage() ?? null)|default(null) %}
+                                {% set image_attributes = ea_extra.imageAttributes(ea.crud.getCurrentPage() ?? null)|default([]) %}
+                                {% if image is not null %}
+                                    {%- set image_attributes = image_attributes|merge({class:"ea-extra-image" ~ (row_attr.class is defined ? ' ' ~ row_attr.class : ''), "lazy":true} ) -%}
+                                    {{ asset(image)|thumbnail(500,500)|lightbox(image_attributes, null, null, {class:"ea-extra"}) }}
+                                {% else %}
+                                    {% if url is not empty %}<a href="{{url}}">{% endif %}
+                                    <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fa-solid fa-icons") }}"></i>
+                                    {% if url is not empty %}</a>{% endif %}
+                                {% endif %}
+                            {% endif %}
+
+                            </div>
+
+                            <div class="content-header-title">
+                                <h1 class="title">
+                                {% set url = ea.crud is not null and ea.crud.getCurrentPage() == "detail" ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
+                                {% set isHtml = _content_title != (_content_title|striptags) %}
+
+                                {% if url is not empty and not isHtml %}<a href="{{url}}">{% endif %}
+                                    {{ _content_title|raw }}
+                                {% if url is not empty %}</a>{% endif %}
+
+                                {% set _content_help = block('content_help') ?? null %}
+                                {% if _content_help is not empty %}
+                                    {{ _content_help|raw }}
+                                {% else %}
+                                    {% set helpMessage = "" %}
+                                    {% if ea.crud is not null %}
+                                        {% set helpMessage = ea.crud.helpMessage %}
+                                    {% endif %}
+                                    {% if helpMessage is empty %}
+                                        {% set helpMessage = ea_extra.help(ea.crud.getCurrentPage() ?? null) %}
+                                    {% endif %}
+                                    {% set has_help_message = (helpMessage is not empty) %}
+
+                                    {% if has_help_message %}
+                                    <span class="content-header-help">
+                                        <i class="fa-regular fa-question-circle" data-toggle="tooltip" title="{{ helpMessage|e('html_attr') }}"></i>
+                                    </span>
+                                    {% endif %}
+
+                                {% endif %}
+                                </h1>
+
+                                {% set _content_excerpt = block('content_excerpt') ?? null %}
+                                {% if _content_excerpt is not empty %}
+                                    <span>{{ _content_excerpt|raw }}</span>
+                                {% else %}
+                                    <span>{{ ea_extra.text(ea.crud.getCurrentPage() ?? null)|raw }}</span>
+                                {% endif %}
+
+                            </div>
+
+                            {% block page_actions_wrapper %}
+                                <div class="page-actions">{% block page_actions %}{% endblock %}</div>
+                            {% endblock %}
+                            {% endblock content_header %}
+                        </section>
+                    {% endblock content_header_wrapper %}
+
+
                     <div class="content-wrapper">
                         {% block content_wrapper %}
                             <article class="content">
-
-                                    {% block content_header_wrapper %}
-
-                                    <section class="content-header">
-
-                                        {% block content_header %}
-
-                                        <div class="content-header-icon">
-                                        {% set url = ea.crud is not null and ea.crud.paginator.pageNumber != 1 ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
-
-                                        {% set _content_icon = block('content_icon') ?? null %}
-                                        {% if _content_icon is not empty %}
-                                            {{ _content_icon|raw }}
-                                        {% else %}
-                                            {% set image = ea_extra.image(ea.crud.getCurrentPage() ?? null)|default(null) %}
-                                            {% set image_attributes = ea_extra.imageAttributes(ea.crud.getCurrentPage() ?? null)|default([]) %}
-                                            {% if image is not null %}
-                                                {%- set image_attributes = image_attributes|merge({class:"ea-extra-image" ~ (row_attr.class is defined ? ' ' ~ row_attr.class : ''), "lazy":true} ) -%}
-                                                {{ asset(image)|thumbnail(500,500)|lightbox(image_attributes, null, null, {class:"ea-extra"}) }}
-                                            {% else %}
-                                                {% if url is not empty %}<a href="{{url}}">{% endif %}
-                                                <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fa-solid fa-icons") }}"></i>
-                                                {% if url is not empty %}</a>{% endif %}
-                                            {% endif %}
-                                        {% endif %}
-
-                                        </div>
-
-                                        <div class="content-header-title">
-                                            <h1 class="title">
-                                            {% set url = ea.crud is not null and ea.crud.getCurrentPage() == "detail" ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
-                                            {% set isHtml = _content_title != (_content_title|striptags) %}
-
-                                            {% if url is not empty and not isHtml %}<a href="{{url}}">{% endif %}
-                                                {{ _content_title|raw }}
-                                            {% if url is not empty %}</a>{% endif %}
-
-                                            {% set _content_help = block('content_help') ?? null %}
-                                            {% if _content_help is not empty %}
-                                                {{ _content_help|raw }}
-                                            {% else %}
-                                                {% set helpMessage = "" %}
-                                                {% if ea.crud is not null %}
-                                                    {% set helpMessage = ea.crud.helpMessage %}
-                                                {% endif %}
-                                                {% if helpMessage is empty %}
-                                                    {% set helpMessage = ea_extra.help(ea.crud.getCurrentPage() ?? null) %}
-                                                {% endif %}
-                                                {% set has_help_message = (helpMessage is not empty) %}
-
-                                                {% if has_help_message %}
-                                                <span class="content-header-help">
-                                                    <i class="fa-regular fa-question-circle" data-toggle="tooltip" title="{{ helpMessage|e('html_attr') }}"></i>
-                                                </span>
-                                                {% endif %}
-
-                                            {% endif %}
-                                            </h1>
-
-                                            {% set _content_excerpt = block('content_excerpt') ?? null %}
-                                            {% if _content_excerpt is not empty %}
-                                                <span>{{ _content_excerpt|raw }}</span>
-                                            {% else %}
-                                                <span>{{ ea_extra.text(ea.crud.getCurrentPage() ?? null)|raw }}</span>
-                                            {% endif %}
-
-                                        </div>
-
-                                        {% block page_actions_wrapper %}
-                                            <div class="page-actions">{% block page_actions %}{% endblock %}</div>
-                                        {% endblock %}
-                                        {% endblock content_header %}
-                                    </section>
-                                {% endblock content_header_wrapper %}
 
                                 <section id="main" class="content-body page-wrapper">
                                 {% block main %}
@@ -422,13 +414,17 @@
                                                 {% set width = content_widget.getWidth()  %}
                                                 {% set col   = content_widget.getColumn() %}
 
-                                                <div class="col-md-{{ 2*col }} p-0">
-                                                <div class="content-panel m-md-1 with-background without-header without-footer"
-                                                    style="height:90%; padding:0.8em 0.6em 0.6em 0.6em;">
+                                                <div class="col col-md-{{ 2*col }} p-0">
+                                                <div class="content-panel m-md-1 with-background without-header without-footer">
 
                                                 <fieldset>
-                                                    <legend>{{content_widget.getAsDto().getLabel()|trans_quiet(domain = ea.getTranslationDomain(), nullable = false) }}</legend>
-                                                <hr>
+
+                                                {% if content_widget.getAsDto().getLabel() is not empty %}
+                                                    <legend>
+                                                        <h1><i class="{{content_widget.getAsDto().getIcon() }}"></i></h1>
+                                                        <h3>{{content_widget.getAsDto().getLabel()|trans_quiet(domain = ea.getTranslationDomain(), nullable = false)|lower|mb_ucwords }}</h3>
+                                                    </legend>
+                                                    {% endif %}
                                                 <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{width}};">
 
                                             {% elseif content_widget.getAsDto().getType() == "separator" %}

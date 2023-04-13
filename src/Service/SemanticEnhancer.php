@@ -11,35 +11,29 @@ class SemanticEnhancer implements SemanticEnhancerInterface
         $this->semanticRepository = $semanticRepository;
     }
 
-    public function highlight(string|array|null $strOrArray, array $attributes = []): string|array|null
+    public function highlight(string|array|null $strOrArray, array $attributes = [], null|array|string $words = null): string|array|null
     {
         if ($strOrArray === null) {
             return null;
         }
 
-        $semantics = $this->semanticRepository->cacheAll();
+        $words ??= [];
+        $semantics = $this->semanticRepository->cacheAll()->getResult();
 
         $array = $strOrArray;
         if (!is_array($array)) {
             $array = [$array];
         }
 
-        foreach ($array as &$entry) {
-            foreach ($semantics as $semantic) {
-                $entry = $semantic->highlight($entry);
+        foreach ($semantics as $semantic) {
+
+            foreach ($array as &$entry) {
+
+                if($words) $entry = $semantic->highlightBy($words, $entry, $attributes);
+                else $entry = $semantic->highlight($entry, $attributes);
             }
         }
 
-        return is_array($strOrArray) ? $array : is_array($strOrArray);
-    }
-
-    public function highlightByWord(string $word, array $attributes = [])
-    {
-        $semantic = $this->semanticRepository->cacheOneByInsensitiveKeywords([$word]);
-        if ($semantic === null) {
-            return $word;
-        }
-
-        return "<a href='".$semantic->generate()."' ".html_attributes($attributes).">".$word."</a>";
+        return is_array($strOrArray) ? $array : first($array);
     }
 }

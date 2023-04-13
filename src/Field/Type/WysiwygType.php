@@ -14,7 +14,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Traversable;
 
-class QuillType extends AbstractType
+class WysiwygType extends AbstractType
 {
     /** @var Environment */
     protected $twig;
@@ -34,7 +34,7 @@ class QuillType extends AbstractType
     }
     public function getBlockPrefix(): string
     {
-        return 'quill';
+        return 'wysiwyg';
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -87,16 +87,16 @@ class QuillType extends AbstractType
     {
         $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
 
-        // Quill options
+        // Wysiwyg options
         $theme = $options["theme"];
         $modules = $options["modules"] ?? [];
 
-        $quillOpts = [];
-        $quillOpts["theme"] = $theme;
-        $quillOpts["modules"] = $modules;
-        $quillOpts["placeholder"] = $options["placeholder"];
-        $quillOpts["height"] = $options["height"];
+        $wysiwygOpts = [];
+        $wysiwygOpts["theme"] = $theme;
+        $wysiwygOpts["modules"] = $modules;
+        $wysiwygOpts["placeholder"] = $options["placeholder"];
+        $wysiwygOpts["height"] = $options["height"];
 
-        $view->vars["quill"] = json_encode($quillOpts);
+        $view->vars["wysiwyg"] = json_encode($wysiwygOpts);
     }
 }

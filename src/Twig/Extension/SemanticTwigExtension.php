@@ -21,8 +21,8 @@ final class SemanticTwigExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('highlight_semantic', [SemanticEnhancer::class, 'highlight' ], ['is_safe' => ['all']]),
-            new TwigFilter('highlight_words', [SemanticEnhancer::class, 'highlightWords'], ['is_safe' => ['all']]),
+            new TwigFilter('semantify', [SemanticEnhancer::class, 'highlight' ], ['is_safe' => ['all']]),
+            new TwigFilter('semantify_only', [SemanticEnhancer::class, 'highlightOne'], ['is_safe' => ['all']]),
         ];
     }
 }

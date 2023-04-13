@@ -44,6 +44,6 @@ final class SectionWidgetItem implements MenuItemInterface
         $this->dto   = new MenuItemDto();
         $this->dto->setType(MenuItemDto::TYPE_SECTION);
         $this->dto->setLabel($label ?? '');
-        $this->dto->setIcon($icon);
+        $this->dto->setIcon($icon ?? "fa-solid fa-circle-question");
     }
 }

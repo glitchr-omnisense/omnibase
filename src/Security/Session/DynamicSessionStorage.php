@@ -24,7 +24,6 @@ class DynamicSessionStorage extends NativeSessionStorage
                 $validDomains = is_array($validDomains) ? $validDomains : array_filter([$validDomains]);
                 if (!empty($validDomains) && in_array($domain, $validDomains))
                     $options["cookie_domain"] = $domain;
-
             }
         }
 

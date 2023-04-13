@@ -1,4 +1,23 @@
 @import 'bootstrap-icons/font/bootstrap-icons';
+@font-face {
+    font-family: 'Roboto';
+    src:  local('Roboto'), url('fonts/Roboto-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Roboto';
+    src: local('Roboto'), url('fonts/Roboto-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Source Code Pro';
+    src:  local('Source Code Pro'), url('fonts/Source Code Pro.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
 
 .ql-editor img {
     float: left;

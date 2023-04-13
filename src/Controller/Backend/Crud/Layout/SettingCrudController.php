@@ -8,7 +8,7 @@ use Base\Controller\Backend\AbstractCrudController;
 use Base\Entity\Layout\Setting;
 use Base\Field\BooleanField;
 use Base\Field\SlugField;
-use Base\Field\Type\QuillType;
+use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class SettingCrudController extends AbstractCrudController
@@ -38,7 +38,7 @@ class SettingCrudController extends AbstractCrudController
                         "label" => [],
                         "class" => [],
                         "vault" => [],
-                        "help" => ["form_type" => QuillType::class]
+                        "help" => ["form_type" => WysiwygType::class]
                     ])
                     ->setExcludedFields("value");
         }, $args);

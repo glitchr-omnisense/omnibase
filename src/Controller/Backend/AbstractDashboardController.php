@@ -431,7 +431,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $logo = $this->settingBag->getScalar("base.settings.logo");
         }
         if (!$logo) {
-            $logo = $this->imageService->getPublicDir()."/bundles/base/logo.svg";
+            $logo = $this->imageService->getPublicDir()."/bundles/base/images/logo.svg";
         }
 
         $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
@@ -505,7 +505,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                          ->set("filters[roles][comparison]", "like")
                          ->set("filters[roles][value]", $role)
                          ->set(EA::MENU_INDEX, count($menu))
-                         ->set(EA::SUBMENU_INDEX, count($subItems))
+                         ->set(EA::SUBMENU_INDEX, count($subItems)+1)
                          ->generateUrl();
 
                     $subItems[] = MenuItem::linkToUrl($label, $icon, $url);
@@ -593,7 +593,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureWidgetItems(array $widgets = []): array
     {
-        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', null, 1));
+        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', "fa-solid fa-book", 1));
         if ($this->isGranted('ROLE_EDITOR')) {
             $section = $this->getSectionWidgetItem($widgets, "LAYOUT");
             if ($section) {
@@ -627,7 +627,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         if ($this->isGranted('ROLE_EDITOR')) {
 
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', null, 1));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', "fa-solid fa-pen-ruler", 1));
             $widgets = $this->addWidgetItem($widgets, "ATTRIBUTES", [
                 WidgetItem::linkToUrl(AbstractAdapter::class, AbstractAdapter::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()
                     ->setController(AbstractAdapterCrudController::class)
@@ -640,7 +640,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(AbstractScopeAdapter::class)
             ]);
 
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', null, 1));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', "fa-solid fa-wand-magic-sparkles", 1));
             $widgets = $this->addWidgetItem($widgets, "THREADS", [
                 WidgetItem::linkToCrud(Thread::class),
                 WidgetItem::linkToCrud(Mention::class),
@@ -649,7 +649,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(Like::class),
             ]);
 
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', null, 1));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', "fa-solid fa-book", 1));
             $widgets = $this->addWidgetItem($widgets, "EXTENSIONS", [
                 WidgetItem::linkToCrud(Log::class),
                 WidgetItem::linkToCrud(Ordering::class),
@@ -657,7 +657,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(TrashBall::class),
             ]);
 
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 1));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', "fa-solid fa-users-viewfinder", 2));
             $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
                 WidgetItem::linkToCrud(User::class),
                 WidgetItem::linkToCrud(UserGroup::class),

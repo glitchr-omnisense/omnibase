@@ -33,6 +33,8 @@
         {% block main_menu %}
             {% for menuItem in ea.mainMenu.items %}
                 {% block menu_item %}
+                    {% if menuItem.label is not empty %}
+
                     <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.hasSubItems ? 'has-submenu' }} {{ ea.mainMenu.isSelected(menuItem) or ea.isActive(menuItem.linkUrl) ? 'active' }} {{ ea.mainMenu.isExpanded(menuItem) ? 'expanded' }}">
                         {{ _self.render_menu_item(menuItem, ea.getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea.getTranslationDomain())|raw }}
                         {% if menuItem.hasSubItems %}
@@ -48,6 +50,7 @@
                         </ul>
                         {% endif %}
                     </li>
+                {% endif %}
                 {% endblock menu_item %}
             {% endfor %}
         {% endblock main_menu %}

@@ -87,6 +87,7 @@ class AdvancedRouter extends Router implements RouterInterface
     protected ?string $cacheName;
 
     protected bool $useAdvancedFeatures;
+    protected bool $useFallbacks;
 
     public function getLocaleLang(?string $lang   = null): string
     {
@@ -120,6 +121,7 @@ class AdvancedRouter extends Router implements RouterInterface
         $this->cacheRouteGroups  = $this->cache ? $this->cache->getItem($this->cacheName.".route_groups") : null;
 
         $this->useAdvancedFeatures = $parameterBag->get("base.router.use_custom") ?? false;
+        $this->useFallbacks        = $parameterBag->get("base.router.use_fallbacks") ?? false;
 
         AdvancedUrlMatcher::$router = $this;
         $this->router->setOption("matcher_class", AdvancedUrlMatcher::class);
@@ -130,6 +132,10 @@ class AdvancedRouter extends Router implements RouterInterface
     public function useAdvancedFeatures(): bool
     {
         return $this->useAdvancedFeatures;
+    }
+    public function useFallbacks(): bool
+    {
+        return $this->useFallbacks;
     }
 
     public function getCache(): CacheInterface
@@ -446,6 +452,8 @@ class AdvancedRouter extends Router implements RouterInterface
 
     protected function getFallbackParameters(?string $locale = null, ?string $environment = null): ?array
     {
+        if(!$this->useFallbacks()) return null;
+
         $fallbacks   = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale($locale));
@@ -525,31 +533,48 @@ class AdvancedRouter extends Router implements RouterInterface
     }
 
     public function getPortFallbacks(?string $locale = null, ?string $environment = null): array { return $this->getFallbackParameters($locale, $environment)["port"] ?? []; }
-    public function getPortFallback(?string $locale = null, ?string $environment = null): mixed { return first($this->getPortFallbacks($locale, $environment)); }
+    public function getPortFallback(?string $locale = null, ?string $environment = null): ?int
+    {
+        $portFallback = first($this->getPortFallbacks($locale, $environment));
+        $portFallback = in_array($portFallback ?? 80, [80, 443]) ? null : $portFallback;
+        return $portFallback ? intval($portFallback) : null;
+    }
     public function getPort(?string $locale = null, ?string $environment = null): ?int
     {
         $parsedUrl = parse_url2(get_url());
-        $port = in_array($parsedUrl["port"] ?? 80, [80, 443]) ? null : $parsedUrl["port"] ?? null;
-        return $port ?? $this->getPortFallback($locale, $environment) ?? null;
-    }
+        $port = $parsedUrl["port"] ?? $this->getPortFallback($locale, $environment) ?? null;
+        $port = in_array($port ?? 80, [80, 443]) ? null : $port;
 
+        return $port ?? null;
+    }
     public function getMachineFallbacks(?string $locale = null, ?string $environment = null): array { return $this->getFallbackParameters($locale, $environment)["machine"] ?? []; }
-    public function getMachineFallback(?string $locale = null, ?string $environment = null): mixed { return first($this->getMachineFallbacks($locale, $environment)); }
+    public function getMachineFallback(?string $locale = null, ?string $environment = null): ?string
+    {
+        $machineFallback = first($this->getMachineFallbacks($locale, $environment));
+        return $machineFallback ? $machineFallback : null;
+    }
     public function getMachine(?string $locale = null, ?string $environment = null): ?string
     {
         return $parsedUrl["machine"] ?? $this->getMachineFallback($locale, $environment) ?? null;
     }
 
     public function getSubdomainFallbacks(?string $locale = null, ?string $environment = null): array { return $this->getFallbackParameters($locale, $environment)["subdomain"] ?? []; }
-    public function getSubdomainFallback(?string $locale = null, ?string $environment = null): mixed { return first($this->getSubdomainFallbacks($locale, $environment)); }
+    public function getSubdomainFallback(?string $locale = null, ?string $environment = null): ?string
+    {
+        $subdomainFallback = first($this->getSubdomainFallbacks($locale, $environment));
+        return $subdomainFallback ? $subdomainFallback : null;
+    }
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string
     {
         $parsedUrl = parse_url2(get_url());
         return $parsedUrl["subdomain"] ?? $this->getSubdomainFallback($locale, $environment) ?? null;
     }
-
     public function getDomainFallbacks(?string $locale = null, ?string $environment = null): array { return $this->getFallbackParameters($locale, $environment)["domain"] ?? []; }
-    public function getDomainFallback(?string $locale = null, ?string $environment = null): mixed { return first($this->getDomainFallbacks($locale, $environment)); }
+    public function getDomainFallback(?string $locale = null, ?string $environment = null): ?string
+    {
+        $domainFallback = first($this->getDomainFallbacks($locale, $environment));
+        return $domainFallback ? $domainFallback : null;
+    }
     public function getDomain(?string $locale = null, ?string $environment = null): ?string
     {
         return parse_url2(get_url())["domain"] ?? $this->getDomainFallback($locale, $environment) ?? null;

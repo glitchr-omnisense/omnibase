@@ -167,6 +167,7 @@ trait WidgetTrait
         array_splice($widgets, $offset+1, $length-1);
         array_splice($widgets, $offset+1, 0, $widgetItems);
 
+
         return $widgets;
     }
 

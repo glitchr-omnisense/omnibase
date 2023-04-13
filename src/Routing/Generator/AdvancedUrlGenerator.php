@@ -85,9 +85,19 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $referenceType = self::ABSOLUTE_URL;
             }
 
-            if (str_contains($route->getHost().$route->getPath(), "{") && str_contains($route->getHost().$route->getPath(), "}")) {
+            $host = $route->getHost() ? $route->getHost() : self::$router->getHost();
+            $host = explode(":", self::$router->getHost())[0]; // Remove port from host..
+            $this->getContext()->setHost($host);
 
-                if (preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
+            $port = self::$router->getPort();
+            $this->getContext()->setHttpPort($port);
+            $this->getContext()->setHttpsPort($port);
+
+            $path = $route->getPath();
+
+            if (str_contains($host.$path, "{") && str_contains($host.$path, "}")) {
+
+                if (preg_match_all("/{(\w*)}/", $host.$path, $matches)) {
                     
                     $parse = array_transforms(fn($k,$v): array => ["_".$k, $v], parse_url2(get_url()));
                     $parameterNames = array_flip($matches[1]);
@@ -169,7 +179,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         }
 
         if ($parse && array_key_exists("host", $parse)) {
-            $this->getContext()->setHost($parse["host"]);
+            $host = explode(":", $parse["host"])[0];
+            $this->getContext()->setHost($host);
         }
         if ($parse && array_key_exists("base_dir", $parse)) {
             $this->getContext()->setBaseUrl($parse["base_dir"]);

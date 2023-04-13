@@ -85,6 +85,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
         );
 
         $url = parse_url($this->request->getRequestUri());
+
         $url["query"] ??= "";
         $url["query"] = explode_attributes("&", $url["query"]);
         $url["query"] = array_key_removes_startsWith($url["query"], ...$ignoredKeys);
@@ -101,6 +102,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
             $url["subdomain"] ?? null,
             $url["domain"]    ?? null,
             $url["port"]      ?? null,
+            $url["path"] ?? null,
             $url["query"]     ?? null,
             $url["fragment"]  ?? null
         );

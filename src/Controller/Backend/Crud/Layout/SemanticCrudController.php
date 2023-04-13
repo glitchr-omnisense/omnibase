@@ -31,16 +31,16 @@ class SemanticCrudController extends AbstractCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-//            yield RouteField::new('routeName')->setColumns(6)->hideOnIndex();
+            yield RouteField::new('routeName')->setColumns(6)->hideOnIndex();
             yield ArrayField::new('routeParameters')->setColumns(6)
                 ->setPatternFieldName("routeName")->useAssociativeKeys()
                 ->setLabel("Route Parameters")->hideOnIndex();
 
-//            yield TranslationField::new("label")->renderAsHtml()
-//                ->setFields([
-//                    "label" => ["required" => true],
-//                    "keywords" => ["tags" => true, "tokenSeparators" => [",", ";"]],
-//                ]);
+            yield TranslationField::new("label")->renderAsHtml()
+                ->setFields([
+                    "label" => ["required" => true],
+                    "keywords" => ["tags" => true, "tokenSeparators" => [",", ";"]],
+                ]);
         }, $args);
     }
 }

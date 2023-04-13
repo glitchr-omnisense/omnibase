@@ -6,7 +6,7 @@ use Base\Field\TranslationField;
 
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\DiscriminatorField;
-use Base\Field\Type\QuillType;
+use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -26,7 +26,7 @@ class WidgetCrudController extends AbstractCrudController
                 "title"   => TextType::class,
                 "headline"   => TextType::class,
                 "excerpt" => TextareaType::class,
-                "content" => QuillType::class,
+                "content" => WysiwygType::class,
             ]);
         }, $args);
     }
