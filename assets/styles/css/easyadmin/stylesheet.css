@@ -43,7 +43,7 @@ html, body { scroll-padding-top: 11em; }
 .content-top .content-search input[type=search][name=query] {
     background: transparent;
 }
-.mark, mark { background-color: var(--sidebar-border-color); color: var(--form-label-color); }
+
 .sf-minitoolbar {
     background-color: var(--sidebar-bg) !important;
 }

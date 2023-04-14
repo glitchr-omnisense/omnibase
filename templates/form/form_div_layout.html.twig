@@ -101,7 +101,6 @@
     {{ form_widget(form) }}
 </div>
 
-
 {%- endblock -%}
 
 {%- block editor_widget -%}
@@ -109,10 +108,12 @@
     {% set attr = attr|merge({
         'data-editor-field': form.vars.id,
         'data-editor-options': editor,
-        'data-editor-value': value,
+        'data-editor-upload-file'  : form.vars.uploadByFile,
+        'data-editor-upload-url'  : form.vars.uploadByUrl,
         'class': 'form-editor-codex' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')
     }) %}
 
+    {{ form_widget(form) }}
     <div id="{{ id }}_editor" {{ block('attributes') }}></div>
 
 {%- endblock editor_widget -%}

@@ -954,7 +954,11 @@
         <service id="Base\Field\Type\EditorType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
+            <argument type="service" id="router" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="obfuscator" />
         </service>
+
         <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="trading_market" /></service>
         <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="twig" /></service>
         <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="twig" /></service>
@@ -985,6 +989,17 @@
         </service>
 
         <service id="Base\Controller\UX\DropzoneController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+
+            <argument type="service" id="translator" />
+            <argument type="service" id="cache.adapter" />
+            <argument type="service" id="obfuscator" />
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
+        </service>
+
+        <service id="Base\Controller\UX\EditorController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>

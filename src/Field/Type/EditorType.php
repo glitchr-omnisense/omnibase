@@ -2,6 +2,8 @@
 
 namespace Base\Field\Type;
 
+use Base\Routing\RouterInterface;
+use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
@@ -10,6 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class EditorType extends AbstractType
 {
@@ -19,12 +22,24 @@ class EditorType extends AbstractType
     /** @var ParameterBagInterface */
     protected $parameterBag;
 
-    public function __construct(ParameterBagInterface $parameterBag, Environment $twig)
+    protected $router;
+    protected $csrfTokenManager;
+    protected $obfuscator;
+    
+    public function __construct(ParameterBagInterface $parameterBag, Environment $twig, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator)
     {
         $this->parameterBag = $parameterBag;
         $this->twig = $twig;
+        $this->router = $router;
+        $this->csrfTokenManager = $csrfTokenManager;
+        $this->obfuscator = $obfuscator;
     }
 
+    public function getParent()
+    {
+        return HiddenType::class;
+    }
+    
     public function getBlockPrefix(): string
     {
         return 'editor';
@@ -34,20 +49,7 @@ class EditorType extends AbstractType
     {
         $resolver->setDefaults([
             'empty_data', null,
-
             'placeholder' => "Compose an epic..",
-            'height' => "250px",
-
-            "tools" => [
-                
-                "list" => [
-                    "class" => "List",
-                    "inlineToolbar" => "true",
-                    "config" => [
-                        "defaultStyle" => 'unordered'
-                    ]
-                ],
-            ]
         ]);
     }
 
@@ -68,8 +70,12 @@ class EditorType extends AbstractType
         // Editor options
         $editorOpts = [];
         $editorOpts["placeholder"] = $options["placeholder"];
-        $editorOpts["height"] = $options["height"];
         
+        $token  = $this->csrfTokenManager->getToken("editorjs")->getValue();
+        $data = $this->obfuscator->encode(["token" => $token]);
+        $view->vars["uploadByFile"]     = $this->router->generate("ux_editorjs_endpointByFile", ["data" => $data]);
+        $view->vars["uploadByUrl"]     = $this->router->generate("ux_editorjs_endpointByUrl", ["data" => $data]);
+
         $view->vars["editor"] = json_encode($editorOpts);
     }
 }
