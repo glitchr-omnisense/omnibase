@@ -44,6 +44,11 @@ html, body { scroll-padding-top: 11em; }
     background: transparent;
 }
 
+.form-cropper .cropper
+{
+    border: var(--border-width) var(--border-style) var(--content-top-border-color);
+}
+
 .sf-minitoolbar {
     background-color: var(--sidebar-bg) !important;
 }

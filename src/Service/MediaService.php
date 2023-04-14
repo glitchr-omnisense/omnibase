@@ -363,7 +363,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
         $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
 
-        return $this->twig->render("@Base/image-lightbox.html.twig", [
+        return $this->twig->render("@Base/media/image-lightbox.html.twig", [
             "path" => $path,
             "attr" => $attributes,
             "attr_lightbox" => $lightboxAttributes,
