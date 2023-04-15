@@ -996,6 +996,8 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     flex-wrap: wrap;
 }
 
+
+.form-cropper .label-wrapper { min-width:100px; }
 .form-cropper img { object-fit:fill; max-width:100%; }
 .form-cropper { display:flex; flex-direction:row; width:100%; }
 .form-cropper-fields > .form-group { display:flex; flex-direction:column; margin:0.5em 0; }
@@ -1022,6 +1024,16 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     background-color: #FFD37F;
     padding: 0em;
     border-radius: 0.25em;
+}
+
+.ql-editor h1, .codex-editor h1,
+.ql-editor h2, .codex-editor h2,
+.ql-editor h3, .codex-editor h3,
+.ql-editor h4, .codex-editor h4,
+.ql-editor h5, .codex-editor h5,
+.ql-editor h6, .codex-editor h6
+{
+    margin-top:1em;
 }
 
 .hidden { display:none; }

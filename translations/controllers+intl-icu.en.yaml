@@ -59,7 +59,7 @@ user_profile:
 user_settings:
   title: "My Settings"
 
-security_birthdate:
+security_launchdate:
   title:
     default: "We will soon be online"
     appointment: "Please take note, launch time"

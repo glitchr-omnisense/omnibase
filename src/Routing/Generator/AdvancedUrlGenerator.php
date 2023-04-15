@@ -3,11 +3,7 @@
 namespace Base\Routing\Generator;
 
 use Base\BaseBundle;
-use Base\Routing\AdvancedRouter;
-use Base\Security\LoginFormAuthenticator;
-use Base\Security\RescueFormAuthenticator;
 use Base\Service\Localizer;
-use Base\Traits\BaseTrait;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Exception\InvalidParameterException;

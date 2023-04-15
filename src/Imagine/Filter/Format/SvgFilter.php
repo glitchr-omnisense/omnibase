@@ -22,7 +22,7 @@ class SvgFilter implements SvgFilterInterface
 
     protected $mimeTypes;
 
-    public function __construct(?string $path = null, array $filters = [], array $options = [])
+    public function __construct(?string $path = null, array $options = [], array $filters = [])
     {
         if (!$path) {
             $path = stream_get_meta_data(tmpfile())['uri'];

@@ -23,6 +23,22 @@ namespace {
         return ($n < 0) ? "-" : "+";
     }
 
+    function is_json(mixed $stringOrObject) {
+
+        if(is_string($stringOrObject)) {
+         
+            json_decode($stringOrObject);
+            return json_last_error() === JSON_ERROR_NONE;
+        }
+
+        if(is_object($stringOrObject)) {
+        
+            return get_object_vars($stringOrObject) ? TRUE : FALSE;
+        }
+
+        return false;
+     }
+
     const MAX_DIRSIZE = 255;
     function path_subdivide($path, int $subdivision, int|array $length = 1)
     {
@@ -50,6 +66,10 @@ namespace {
         return str_strip($subPath, "./", "/");
     }
 
+    function str_strip_nonprintable(string $str)
+    {
+        return preg_replace("/[^[:print:]]/", "", $str);
+    }
     function str_strip_chars(string $str)
     {
         return preg_replace("/[a-zA-Z]/", "", $str);
@@ -226,7 +246,7 @@ namespace {
         $urlButQuery   = explode("?", $url)[0] ?? "";
         $pathEndsWithSlash = str_ends_with($urlButQuery, "/");
         $parse["path"] = str_rstrip($parse["path"] ?? "","/");
-
+        
         return compose_url(
             $parse["scheme"] ?? null,
             $parse["user"] ?? null,
@@ -533,11 +553,37 @@ namespace {
         return preg_match("/^HTTP\/[0-9]\.[0-9] ".$status."/", $header);
     }
 
-    function fetch_url(string $url, string $prefix = "file", string $tmpdir = "/tmp")
+    function is_base64($s){
+        // Check if there are valid base64 characters
+        if (!preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $s)) return false;
+    
+        // Decode the string in strict mode and check the results
+        $decoded = base64_decode($s, true);
+        if(false === $decoded) return false;
+    
+        // Encode the string again
+        if(base64_encode($decoded) != $s) return false;
+    
+        return true;
+    }
+
+    function is_data($s):bool
+    {  
+        return str_starts_with($s, "data:");
+    }
+
+    function fetch_url(string $url, string $prefix = "file", string $tmpdir = "/tmp"): string
     {
         $tmpfname = tempnam($tmpdir, $prefix);
 
-        $contents = curl_get_contents($url);
+        $contents = false;
+        if(!is_data($url)) $contents = curl_get_contents($url); // Fetch url content..
+        else { // Convert base64 url..
+
+            $data = (explode(",", $url)[1] ?? false);
+            if($data && is_base64($data)) $contents = base64_decode($data);
+        }
+
         if ($contents !== false) {
             file_put_contents($tmpfname, $contents);
         }

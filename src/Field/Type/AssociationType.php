@@ -2,8 +2,6 @@
 
 namespace Base\Field\Type;
 
-use App\Entity\Article\Comment;
-use App\Entity\Article\CommentReply;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Form\FormFactory;
@@ -16,7 +14,6 @@ use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PercentType;
@@ -25,7 +22,6 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -342,12 +338,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
             }
 
-            if ($options["class"] == Comment::class) {
-                foreach ($entries as $fieldName => $entry) {
-                    $formType = $options["fields"][$fieldName]["form_type"] ?? null;
-                    if ($formType == CollectionType::class) {
-                        unset($entries[$fieldName]);
-                    }
+            foreach ($entries as $fieldName => $entry) {
+                $formType = $options["fields"][$fieldName]["form_type"] ?? null;
+                if ($formType == CollectionType::class) {
+                    unset($entries[$fieldName]);
                 }
             }
 

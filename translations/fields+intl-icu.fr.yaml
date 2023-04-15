@@ -15,6 +15,12 @@ boolean:
 stock:
   unlimited: Illimité
 
+audio:
+  unsupported_element:  "Votre navigateur ne supporte pas les audios"
+  
+video:
+  unsupported_tag:  "Votre navigateur ne supporte pas les vidéos"
+  
 wysiwyg:
   soft_linebreak: "Utilise Maj+Entrer pour faire un retour à la ligne sans changer de paragraphe"
 

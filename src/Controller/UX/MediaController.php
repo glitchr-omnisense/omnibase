@@ -102,7 +102,7 @@ class MediaController extends AbstractController
 
         $path     = $config["path"];
 
-        $contents = $this->flysystem->read($path, $config["storage"] ?? null);
+        $contents = file_exists($path) ? $path : $this->flysystem->read($path, $config["storage"] ?? null);
         if ($contents === null) {
             throw $this->createNotFoundException();
         }
@@ -225,7 +225,7 @@ class MediaController extends AbstractController
         }
 
         $output = pathinfo_extension($data."/".$identifier, $extension);
-        $path = $this->mediaService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+        $path = $this->mediaService->filter($path, ["local_cache" => $localCache, "output" => $output], new BitmapFilter(null, $options, $filters));
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
         return  $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
@@ -288,7 +288,7 @@ class MediaController extends AbstractController
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data."/image", "webp");
-        $path = $this->mediaService->filter($config["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+        $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new WebpFilter(null, $options, $filters));
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
         return  $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
@@ -316,7 +316,7 @@ class MediaController extends AbstractController
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data."/image", "svg");
-        $path = $this->mediaService->filter($config["path"], new SvgFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+        $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new SvgFilter(null, $options, $filters));
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
@@ -358,7 +358,7 @@ class MediaController extends AbstractController
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data."/image", $extension);
-        $path = $this->mediaService->filter($config["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache, "output" => $output]);
+        $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new BitmapFilter(null, $options, $filters));
         if ($debug) {
             dump($data, $config, $path);
             exit(1);

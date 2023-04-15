@@ -226,7 +226,7 @@
             <argument type="service" id="security.token_storage" />
         </service>
 
-        <service id="Base\Service\MaternityUnit" public="true">
+        <service id="Base\Service\Launcher" public="true">
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="setting_bag" />
@@ -452,6 +452,15 @@
             <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
         </service>
 
+        <service id="Base\Service\EditorEnhancer" parent="Base\Service\WysiwygEnhancer" public="true">
+            <tag name="twig.runtime" />
+        </service>
+        <service id="Base\Service\WysiwygEnhancer" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="slugger" />
+        </service>
+
         <service id="Base\Service\Model\Obfuscator\AbstractCompression"></service>
         <service id="Base\Service\Model\Obfuscator\Compression\NullCompression"    parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
         <service id="Base\Service\Model\Obfuscator\Compression\ZlibCompression"    parent="Base\Service\Model\Obfuscator\AbstractCompression"><tag name="obfuscator.compression" /></service>
@@ -583,7 +592,7 @@
             <argument type="service" id="security.firewall.map" />
             <argument type="service" id="localizer" />
             <argument type="service" id="base.service.maintenance" />
-            <argument type="service" id="base.service.maternity_unit" />
+            <argument type="service" id="base.service.launcher" />
         </service>
 
         <service id="Base\Database\Entity\EntityExtension" public="true" />
@@ -607,13 +616,13 @@
             <argument type="service" id="localizer" />
             <argument type="service" id="base.service" />
             <argument type="service" id="base.service.maintenance" />
-            <argument type="service" id="base.service.maternity_unit" />
+            <argument type="service" id="base.service.launcher" />
         </service>
 
         <service id="Base\Twig\Variable\EmailVariable" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="base.service" />
-            <argument type="service" id="base.service.maternity_unit" />
+            <argument type="service" id="base.service.launcher" />
         </service>
 
         <service id="Base\Twig\Variable\RandomVariable"     public="true"><tag name="twig.variable" /></service>
@@ -664,6 +673,8 @@
         <service id="Base\Twig\Extension\EncoreTwigExtension"><tag name="twig.extension" priority="-1" /></service>
         <service id="Base\Twig\Extension\HtmlTwigExtension"><tag name="twig.extension" />
             <argument type="service" id="twig.html_renderer" />
+            <argument type="service" id="wysiwyg_enhancer" />
+            <argument type="service" id="editor_enhancer" />
         </service>
 
         <service id="Base\Twig\Extension\FunctionTwigExtension" public="true">
@@ -807,7 +818,7 @@
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="base.service.maintenance" />
-            <argument type="service" id="base.service.maternity_unit" />
+            <argument type="service" id="base.service.launcher" />
             <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
@@ -955,7 +966,18 @@
         <service id="Base\Field\Type\WysiwygType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
+            <argument type="service" id="router" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="obfuscator" />
         </service>
+        <service id="Base\Field\Type\EditorType"><tag name="form.type" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="router" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="obfuscator" />
+        </service>
+
         <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="trading_market" /></service>
         <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="twig" /></service>
         <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="twig" /></service>
@@ -996,6 +1018,17 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
+        <service id="Base\Controller\UX\EditorController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="flysystem" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="obfuscator" />
+        </service>
+
         <service id="Base\Controller\UX\AutocompleteController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
@@ -1029,6 +1062,8 @@
 
         <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\ImageType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
+        <service id="Base\Field\Type\AudioType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
+        <service id="Base\Field\Type\VideoType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
             <argument type="service" id="parameter_bag" />
@@ -1068,7 +1103,6 @@
         <service id="Base\Field\Configurator\WysiwygConfigurator">
             <tag name="ea.field_configurator" />
         </service>
-
         <service id="Base\Field\Configurator\StockConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
@@ -1094,8 +1128,6 @@
         </service>
 
         <service id="Base\Field\Configurator\CropperConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\ImageConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\FileConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.database.metadata_manipulator" />

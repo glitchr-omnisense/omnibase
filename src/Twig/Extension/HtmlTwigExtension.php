@@ -2,8 +2,12 @@
 
 namespace Base\Twig\Extension;
 
+use Base\Service\EditorEnhancerInterface;
+use Base\Service\WysiwygEnhancerInterface;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
+use RuntimeException;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 final class HtmlTwigExtension extends AbstractExtension
@@ -13,9 +17,45 @@ final class HtmlTwigExtension extends AbstractExtension
      */
     protected $htmlTagRenderer;
 
-    public function __construct(HtmlTagRenderer $htmlTagRenderer)
+    protected $wysiwygEnhancer;
+    protected $editorEnhancer;
+
+    public function __construct(HtmlTagRenderer $htmlTagRenderer, WysiwygEnhancerInterface $wysiwygEnhancer, EditorEnhancerInterface $editorEnhancer)
     {
         $this->htmlTagRenderer = $htmlTagRenderer;
+        $this->wysiwygEnhancer  = $wysiwygEnhancer; 
+        $this->editorEnhancer  = $editorEnhancer; 
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            new TwigFilter('wysiwyg', [$this, 'renderWysiwyg']),
+            new TwigFilter('wysiwyg_toc', [$this, 'getTableOfContents']),
+        ];
+    }
+    
+    public function renderWysiwyg(?string $htmlOrJson, array $options = [], ?int $maxLevel = null) 
+    {
+        if($this->editorEnhancer->supports($htmlOrJson))
+            $enhancer = $this->editorEnhancer;
+        else if($this->wysiwygEnhancer->supports($htmlOrJson))
+            $enhancer = $this->wysiwygEnhancer;
+        else throw new RuntimeException("Unsupported wysiwyg input");
+
+        $htmlOrJson = $enhancer->highlightHeadings($htmlOrJson, $options, $maxLevel);
+        return $enhancer->render($htmlOrJson, ["attr" => $options["row_attr"] ?? []]);
+    }
+
+    public function getTableOfContents(?string $htmlOrJson, ?int $maxLevel = null): array
+    {
+        if($this->editorEnhancer->supports($htmlOrJson))
+            $enhancer = $this->editorEnhancer;
+        else if($this->wysiwygEnhancer->supports($htmlOrJson))
+            $enhancer = $this->wysiwygEnhancer;
+        else throw new RuntimeException("Unsupported wysiwyg input");
+
+        return $enhancer->getTableOfContents($htmlOrJson, $maxLevel);
     }
 
     public function getFunctions(): array
@@ -29,7 +69,7 @@ final class HtmlTwigExtension extends AbstractExtension
             new TwigFunction('html_entry_body_tags', [$this, 'renderBodyTags' ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
         ];
     }
-
+    
     public function renderLinkTags(): string
     {
         return $this->htmlTagRenderer->renderHtmlContent("stylesheet:before").

@@ -20,7 +20,6 @@ interface FlysystemInterface
     public function getOperator(FilesystemOperator|string|null $operator = null): FilesystemOperator;
     public function getAdapter(FilesystemOperator|string|null $operator = null): FilesystemAdapter;
 
-
     public function prefixPath(string $path, FilesystemOperator|string|null $operator = null);
     public function stripPrefix(string $path, FilesystemOperator|string|null $operator = null);
     public function read(string $path, FilesystemOperator|string|null $operator = null): ?string;

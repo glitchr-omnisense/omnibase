@@ -8,7 +8,9 @@ use Base\Controller\Backend\AbstractCrudController;
 use Base\Entity\Layout\Setting;
 use Base\Field\BooleanField;
 use Base\Field\SlugField;
-use Base\Field\Type\WysiwygType;
+use Base\Field\Type\EditorType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class SettingCrudController extends AbstractCrudController
@@ -38,7 +40,7 @@ class SettingCrudController extends AbstractCrudController
                         "label" => [],
                         "class" => [],
                         "vault" => [],
-                        "help" => ["form_type" => WysiwygType::class]
+                        "help" => ["form_type" => TextareaType::class]
                     ])
                     ->setExcludedFields("value");
         }, $args);

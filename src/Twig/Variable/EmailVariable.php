@@ -3,14 +3,14 @@
 namespace Base\Twig\Variable;
 
 use Base\Service\BaseService;
-use Base\Service\MaternityUnitInterface;
+use Base\Service\LauncherInterface;
 
 class EmailVariable
 {
     /**
-     * @var MaternityUnit
+     * @var Launcher
      */
-    protected $maternityUnit;
+    protected $launcher;
 
     /**
      * @var BaseService
@@ -19,11 +19,11 @@ class EmailVariable
 
     public function __construct(
         BaseService $baseService,
-        MaternityUnitInterface $maternityUnit
+        LauncherInterface $launcher
     )
     {
         $this->baseService = $baseService;
-        $this->maternityUnit = $maternityUnit;
+        $this->launcher = $launcher;
     }
 
     public function homepage()
@@ -50,6 +50,6 @@ class EmailVariable
 
     public function age(?string $locale = null): string
     {
-        return $this->maternityUnit->getAge($locale);
+        return $this->launcher->since($locale);
     }
 }

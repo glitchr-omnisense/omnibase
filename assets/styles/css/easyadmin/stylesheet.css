@@ -80,7 +80,12 @@ ul.sidebar-menu a, .user-menu-wrapper a.user-details, .user-menu-wrapper a.user-
 .content-top .content-search input[type=search][name=query] {
     background: transparent;
 }
-.mark, mark { background-color: var(--sidebar-border-color); color: var(--form-label-color); }
+
+.form-cropper .cropper
+{
+    border: var(--border-width) var(--border-style) var(--content-top-border-color);
+}
+
 .sf-minitoolbar {
     background-color: var(--sidebar-bg) !important;
 }

@@ -28,7 +28,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
         return $this;
     }
 
-    public function __construct(?string $path = null, array $filters = [], array $options = [])
+    public function __construct(?string $path = null,  array $options = [], array $filters = [])
     {
         if (!$path) {
             $path = stream_get_meta_data(tmpfile())['uri'];

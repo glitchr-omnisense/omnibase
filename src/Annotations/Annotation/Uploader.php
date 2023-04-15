@@ -487,8 +487,8 @@ class Uploader extends AbstractAnnotation
 
             $this->deleteFiles($oldEntity, $entity, $fieldName);
             $old = self::getFieldValue($oldEntity, $fieldName);
-            self::setFieldValue($entity, $fieldName, $old);
 
+            self::setFieldValue($entity, $fieldName, $old);
             //throw $e;
         }
 

@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-class MaternityUnit implements MaternityUnitInterface
+class Launcher implements LauncherInterface
 {
     /** @var Router */
     protected $router;
@@ -32,49 +32,49 @@ class MaternityUnit implements MaternityUnitInterface
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function getBirthdate(?string $locale = null): ?DateTime
+    public function getLaunchdate(?string $locale = null): ?DateTime
     {
-        $birthdate = $this->settingBag->getScalar("base.settings.birthdate", $locale);
-        if (!$birthdate) {
+        $launchdate = $this->settingBag->getScalar("base.settings.launchdate", $locale);
+        if (!$launchdate) {
             return null;
         }
 
-        return $birthdate instanceof DateTime ? $birthdate : new DateTime($birthdate);
+        return $launchdate instanceof DateTime ? $launchdate : new DateTime($launchdate);
     }
 
-    public function isBorn(?string $locale = null): ?bool
+    public function isLaunched(?string $locale = null): ?bool
     {
-        $birthdate = $this->getBirthdate($locale);
-        if ($birthdate === null) {
+        $launchdate = $this->getLaunchdate($locale);
+        if ($launchdate === null) {
             return false;
         }
 
         $now = new \DateTime("now");
-        return ($birthdate < $now);
+        return ($launchdate < $now);
     }
 
-    public function getAge(?string $locale = null): string
+    public function since(?string $locale = null): string
     {
         $currentYear = date("Y");
-        $birthdate = $this->getBirthdate($locale);
-        if (!$birthdate) {
+        $launchdate = $this->getLaunchdate($locale);
+        if (!$launchdate) {
             return $currentYear;
         }
 
-        $birthYear = $birthdate->format("Y");
-        return $this->isBorn($locale) && $birthYear < $currentYear ? date("$birthYear-Y") : $birthYear;
+        $launchYear = $launchdate->format("Y");
+        return $this->isLaunched($locale) && $launchYear < $currentYear ? date("$launchYear-Y") : $launchYear;
     }
 
     public function redirectOnDeny(?RequestEvent $event = null, ?string $locale = null): bool
     {
-        if (!$this->settingBag->getScalar("base.settings.birthdate.redirect_on_deny")) {
+        if (!$this->settingBag->getScalar("base.settings.launchdate.redirect_on_deny")) {
             return false;
         }
-        if (!$this->getBirthdate()) {
+        if (!$this->getLaunchdate()) {
             return false;
         }
 
-        $redirectOnDeny = "security_birth";
+        $redirectOnDeny = "security_launch";
         if ($this->router->isUX()) {
             return false;
         }
@@ -88,7 +88,7 @@ class MaternityUnit implements MaternityUnitInterface
             return false;
         }
 
-        if ($this->isBorn()) {
+        if ($this->isLaunched()) {
             $homepageRoute = $this->parameterBag->get("base.site.homepage");
             if ($event && $redirectOnDeny == $this->router->getRouteName()) {
                 $event->setResponse($this->router->redirect($homepageRoute, [], 302));
@@ -96,8 +96,8 @@ class MaternityUnit implements MaternityUnitInterface
 
             return false;
         } elseif ($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
-            $birthdate = $this->getBirthdate();
-            $notification = new Notification("maternityUnit.banner", [IntlDateTime::createFromDateTime($birthdate, $locale)->format("dd MMMM YYYY"), IntlDateTime::createFromDateTime($birthdate, $locale)->format("HH:mm")]);
+            $launchdate = $this->getLaunchdate();
+            $notification = new Notification("launcher.banner", [IntlDateTime::createFromDateTime($launchdate, $locale)->format("dd MMMM YYYY"), IntlDateTime::createFromDateTime($launchdate, $locale)->format("HH:mm")]);
             $notification->send("warning");
             return false;
         }
@@ -105,7 +105,7 @@ class MaternityUnit implements MaternityUnitInterface
         if ($this->router->getRouteName() == $redirectOnDeny) {
             return false;
         }
-        if ($this->authorizationChecker->isGranted("BIRTH_ACCESS")) {
+        if ($this->authorizationChecker->isGranted("LAUNCH_ACCESS")) {
             return false;
         }
 

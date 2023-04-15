@@ -6,10 +6,33 @@ import '@glitchr/imaginejs';
 import Button from 'bootstrap/js/dist/tooltip';
 import "./styles/js/button";
 
+import Popover from 'bootstrap/js/dist/popover';
+$(window).off("load.popover");
+$(window).on("load.popover", function() { $('[data-toggle="popover"]').popover({html:true}) });
+$(window).off("onbeforeunload.popover");
+$(window).on("onbeforeunload.popover",function() { $("div[id^='popover']").hide().remove(); });
+
 import Tooltip from 'bootstrap/js/dist/tooltip';
+$(window).off("load.tooltip");
 $(window).on("load.tooltip", function() { $('[data-toggle="tooltip"]').tooltip({html:true}) });
+
+$(window).off("onbeforeunload.tooltip");
 $(window).on("onbeforeunload.tooltip",function() { $("div[id^='tooltip']").hide().remove(); });
 
+import edjsHTML from "editorjs-html";
+$(window).off("DOMContentLoaded.edjs");
+$(window).on("DOMContentLoaded.edjs", function() {
+
+    const edjsParser = edjsHTML();
+    $("[data-edjs]").each(function() {
+
+        const html = edjsParser.parse($(this).data("edjs"));
+        if(html) $(this).html(html);
+    });
+})
+
+
+$(".copy-clipboard").off("click");
 $(".copy-clipboard").on("click", function () {
 
     var value = "";
@@ -30,10 +53,6 @@ $(".copy-clipboard").on("click", function () {
         }.bind(this), 300);
     }
 });
-
-import Popover from 'bootstrap/js/dist/popover';
-$(window).on("load.popover", function() { $('[data-toggle="popover"]').popover({html:true}) });
-$(window).on("onbeforeunload.popover",function() { $("div[id^='popover']").hide().remove(); });
 
 import 'bootstrap-icons/font/bootstrap-icons';
 

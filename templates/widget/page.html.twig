@@ -14,7 +14,7 @@
     </div>
 
     <hr>
-    <div class="ql-editor">{{ page.getContentWithAnchors({}, "<hr>")|default('@messages.page.empty'|trans)|raw }}</div>
+    {{ page.getContent()|default('@messages.page.empty'|trans)|wysiwyg|raw }}
 
 </article>
 {% endblock %}

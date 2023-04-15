@@ -9,6 +9,11 @@ use Twig\TwigFilter;
 
 final class SemanticTwigExtension extends AbstractExtension
 {
+    /**
+     * @var SemanticEnhancerInterface
+     */
+    protected $semanticEnhancer;
+
     public function __construct(SemanticEnhancerInterface $semanticEnhancer)
     {
         $this->semanticEnhancer = $semanticEnhancer;
@@ -18,6 +23,7 @@ final class SemanticTwigExtension extends AbstractExtension
     {
         return 'semantic_extension';
     }
+    
     public function getFilters(): array
     {
         return [

@@ -12,7 +12,23 @@
     {% set renderFormat = count %}
 {% endif %}
 
-{% if  renderFormat == 'image' or renderFormat == 'avatar' %}
+{% if renderFormat == 'audio' %}
+
+    {% if field.formattedValue is iterable %}
+
+        {% if ea.crud.currentAction == 'detail' %}
+            {% set audios = field.formattedValue %}
+        {% else %}
+            {% set path  = field.formattedValue|first %}
+            {% set audios = path is empty or null ? [] : [path] %}
+        {% endif %}
+    {% else %}
+        {% set audios = field.formattedValue is empty or null ? [] : [field.formattedValue] %}
+    {% endif %}
+
+    {{ field.formattedValue|soundify }}
+
+{% elseif renderFormat == 'image' or renderFormat == 'avatar' %}
 
     {% if renderFormat == 'avatar' %}
         {% set icon = '<i class="fa-solid fa-fw fa-user-circle fa-3x"></i>' %}

@@ -101,23 +101,45 @@
     {{ form_row(form) }}
     <div class="form-text text-muted">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
 </div>
-
-
 {%- endblock -%}
 
 {%- block wysiwyg_widget -%}
-
     {% set attr = attr|merge({
         'data-wysiwyg-field': form.vars.id,
         'data-wysiwyg-options': wysiwyg
     }) %}
 
     {{ form_widget(form) }}
-    <div id="{{ id }}_editor" {{ block('attributes') }}>
-        {{ value | raw }}
-    </div>
-
+    <div id="{{ id }}_editor" {{ block('attributes') }}></div>
+    <div class="form-text text-muted">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
 {%- endblock wysiwyg_widget -%}
+
+{%- block editor_row -%}
+{%- set row_attr = row_attr|merge({'class': 'form-editor' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+<div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+    <span>{{ form_label(form) }}</span>
+    {{ form_errors(form) }}
+    {{ form_widget(form) }}
+</div>
+{%- endblock -%}
+
+{%- block editor_widget -%}
+    {% set attr = attr|merge({
+        'data-editor-field': form.vars.id,
+        'data-editor-options': editor,
+        'data-editor-upload-file'  : form.vars.uploadByFile,
+        'data-editor-upload-url'  : form.vars.uploadByUrl,
+        'class': 'form-editor-codex' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')
+    }) %}
+
+    {{ form_widget(form) }}
+    <div id="{{ id }}_editor" {{ block('attributes') }}></div>
+    <div class="form-text text-muted">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
+
+{%- endblock editor_widget -%}
+
+
+
 
 {%- block attribute_widget -%}
 <div class="form-control form-attribute">
@@ -509,16 +531,25 @@
     {% endif %}
 
     <div class="imageupload-field">
-
-        {% if form.alt is defined %}
-            {%- set row_attr = row_attr|merge({'class': 'alt' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')}) -%}
-            {{ form_row(form.alt, {'label': form.alt.vars.label ?? "@fields.imageupload.alt"|trans, row_attr:row_attr})}}
-        {% endif %}
-
         {{ form_widget(form, { attr: form.vars.attr }) }}
     </div>
 
 </div>
+{%- endblock -%}
+
+{%- block fileupload_row -%}
+
+    {%- set widget_attr = {} -%}
+    {%- if help is not empty -%}
+        {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%}
+    {%- endif -%}
+    <div{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        {% if not form.vars.inline %}{{- form_label(form) -}}{% endif %}
+        {{- form_errors(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_help(form) -}}
+    </div>
+
 {%- endblock -%}
 
 {%- block fileupload_widget -%}
@@ -581,7 +612,7 @@
             {% if form.vars.inline  %}
             <div class="input-group-prepend">
                 <span class="input-group-text">
-                    {{ form_label(form)}}
+                    {{ form_label(form) }}
                 </span>
             </div>
             {% endif %}
@@ -601,6 +632,11 @@
             <div class="input-group-text">{{ "fa-solid fa-link"|iconify|first|raw }}</div>
             {{ form_widget(form.url, { attr: form.url.vars.attr|merge({'placeholder': ("@fields.fileupload.download_placeholder"|trans)}) }) }}
         </div>
+        {% endif %}
+
+        {% if form.alt is defined %}
+            {%- set row_attr = row_attr|merge({'class': 'alt' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')}) -%}
+            {{ form_row(form.alt, {'label': form.alt.vars.label ?? "@fields.imageupload.alt"|trans, row_attr:row_attr})}}
         {% endif %}
 
     {% endif %}
@@ -1116,6 +1152,21 @@
         <button class="btn btn-outline-secondary" id="{{form.vars.id}}-up" type="button"><i class="fa-solid fa-plus"></i></button>
     </div>
 </div>
+
+{%- endblock -%}
+
+{%- block number2_row -%}
+
+    {%- set widget_attr = {} -%}
+    {%- if help is not empty -%}
+        {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%}
+    {%- endif -%}
+    <div{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        {% if form.vars.inline is defined and not form.vars.inline %}{{- form_label(form) -}}{% endif %}
+        {{- form_errors(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_help(form) -}}
+    </div>
 
 {%- endblock -%}
 
