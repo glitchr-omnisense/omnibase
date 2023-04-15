@@ -17,9 +17,8 @@ use Base\Routing\RouterInterface;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\Localizer;
 use Base\Service\MaintenanceProviderInterface;
-use Base\Service\MaternityUnitInterface;
+use Base\Service\LauncherInterface;
 
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -64,9 +63,9 @@ class SecuritySubscriber implements EventSubscriberInterface
     private $authorizationChecker;
 
     /**
-     * @var MaternityUnitInterface
+     * @var LauncherInterface
      */
-    private $maternityUnit;
+    private $launcher;
 
     /**
      * @var MaintenanceProvider
@@ -115,7 +114,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         RouterInterface $router,
         ParameterBagInterface $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
-        MaternityUnitInterface $maternityUnit,
+        LauncherInterface $launcher,
         ?Profiler $profiler = null
     )
     {
@@ -127,7 +126,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->localizer = $localizer;
         $this->userRepository = $userRepository;
 
-        $this->maternityUnit = $maternityUnit;
+        $this->launcher = $launcher;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->parameterBag = $parameterBag;
 
@@ -142,7 +141,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         return [
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class      => [['onMaintenanceRequest', 4], ['onBirthRequest', 4], ['onAccessRequest', 6], ['onKernelRequest', 3]],
+            RequestEvent::class      => [['onMaintenanceRequest', 4], ['onLaunchRequest', 4], ['onAccessRequest', 6], ['onKernelRequest', 3]],
             ResponseEvent::class     => ['onKernelResponse'],
             LoginSuccessEvent::class => ['onLoginSuccess', -65],
             LoginFailureEvent::class => ['onLoginFailure'],
@@ -450,13 +449,13 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
     }
 
-    public function onBirthRequest(RequestEvent $event)
+    public function onLaunchRequest(RequestEvent $event)
     {
         if (!$event->isMainRequest()) {
             return;
         }
 
-        if ($this->maternityUnit->redirectOnDeny($event, $this->localizer->getLocale())) {
+        if ($this->launcher->redirectOnDeny($event, $this->localizer->getLocale())) {
             if ($this->profiler) {
                 $this->profiler->disable();
             }

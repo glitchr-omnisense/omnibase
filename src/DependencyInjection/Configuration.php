@@ -567,6 +567,14 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                         ->end()
 
+                        ->arrayNode('editor')->addDefaultsIfNotSet()
+                        ->children()
+                            ->scalarNode('operator')
+                                ->defaultValue(UltraHighDefinitionFilter::class)
+                                ->end()
+                            ->end()
+                        ->end()
+                        
                         ->arrayNode('paths')
                             ->arrayPrototype()
                                 ->children()

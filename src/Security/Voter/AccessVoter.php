@@ -5,7 +5,7 @@ namespace Base\Security\Voter;
 use App\Entity\User;
 use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
-use Base\Service\maternityUnitInterface;
+use Base\Service\launcherInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Referrer;
 use Base\Service\SettingBagInterface;
@@ -17,7 +17,7 @@ use Symfony\Component\Security\Http\FirewallMapInterface;
 
 class AccessVoter extends Voter
 {
-    public const       BIRTH_ACCESS = "BIRTH_ACCESS";
+    public const      LAUNCH_ACCESS = "LAUNCH_ACCESS";
     public const MAINTENANCE_ACCESS = "MAINTENANCE_ACCESS";
     public const   EXCEPTION_ACCESS = "EXCEPTION_ACCESS";
 
@@ -54,12 +54,12 @@ class AccessVoter extends Voter
      * */
     protected $maintenanceProvider;
     /**
-     * @var MaternityUnit
+     * @var Launcher
      * */
-    protected $maternityUnit;
+    protected $launcher;
 
     protected ?array $urlExceptions;
-    public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocalizerInterface $localizer, MaintenanceProviderInterface $maintenanceProvider, MaternityUnitInterface $maternityUnit)
+    public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocalizerInterface $localizer, MaintenanceProviderInterface $maintenanceProvider, LauncherInterface $launcher)
     {
         $this->requestStack   = $requestStack;
         $this->router         = $router;
@@ -68,7 +68,7 @@ class AccessVoter extends Voter
         $this->firewallMap    = $firewallMap;
         $this->localizer = $localizer;
         $this->maintenanceProvider = $maintenanceProvider;
-        $this->maternityUnit    = $maternityUnit;
+        $this->launcher    = $launcher;
 
         $this->urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocaleLang());
@@ -79,7 +79,7 @@ class AccessVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return in_array($attribute, [self::EXCEPTION_ACCESS, self::MAINTENANCE_ACCESS, self::BIRTH_ACCESS, self::ANONYMOUS_ACCESS, self::USER_ACCESS, self::ADMIN_ACCESS]);
+        return in_array($attribute, [self::EXCEPTION_ACCESS, self::MAINTENANCE_ACCESS, self::LAUNCH_ACCESS, self::ANONYMOUS_ACCESS, self::USER_ACCESS, self::ADMIN_ACCESS]);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -112,8 +112,8 @@ class AccessVoter extends Voter
             case self::MAINTENANCE_ACCESS:
                 return !$this->maintenanceProvider->isUnderMaintenance() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
 
-            case self::BIRTH_ACCESS:
-                return $this->maternityUnit->isBorn() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
+            case self::LAUNCH_ACCESS:
+                return $this->launcher->isLaunched() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
 
             case self::EXCEPTION_ACCESS:
 

@@ -2,19 +2,17 @@
 
 namespace Base\Controller\UX;
 
-use Base\Service\FileService;
+use Base\Service\FlysystemInterface;
 use Base\Service\ObfuscatorInterface;
+use Base\Service\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Uid\Uuid;
-
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Component\Mime\MimeTypes;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -22,24 +20,14 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * */
 class EditorController extends AbstractController
 {
-    public const CACHE_DURATION = 24*3600;
-
-    public const STATUS_OK      = "OK";
-    public const STATUS_BAD     = "BAD";
-    public const STATUS_NOTOKEN = "NO_TOKEN";
-
-    /**
-     * @var CacheInterface
-     */
-    protected $cache;
+    public const STATUS_OK      = 1;
+    public const STATUS_BAD     = 0;
+    public const STATUS_NOTOKEN = -1;
 
     /**
      * @var ObfuscatorInterface
      */
     protected $obfuscator;
-
-    /** * @var string */
-    protected $cacheDir;
 
     /**
      * @var TranslatorInterface
@@ -51,19 +39,30 @@ class EditorController extends AbstractController
      */
     protected $filesystem;
 
-    public function __construct(TranslatorInterface $translator, CacheInterface $cache, ObfuscatorInterface $obfuscator, string $cacheDir)
+    /**
+     * @var FlysystemInterface
+     */
+    protected $flysystem;
+
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    /**
+     * @var MimeTypes
+     */
+    protected $mimeTypes;
+
+    public function __construct(ParameterBagInterface $parameterBag, FlysystemInterface $flysystem, TranslatorInterface $translator, ObfuscatorInterface $obfuscator)
     {
-        $this->cache      = $cache;
-        $this->cacheDir   = $cacheDir;
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;
 
-        $this->filesystem = new \Symfony\Component\Filesystem\Filesystem();
-    }
+        $this->flysystem  = $flysystem;
+        $this->parameterBag = $parameterBag;
 
-    public function getCacheDir()
-    {
-        return $this->cacheDir;
+        $this->mimeTypes = new MimeTypes();
     }
 
     /**
@@ -77,10 +76,8 @@ class EditorController extends AbstractController
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
         }
 
-
-
         // Move.. with flysystem
-        if (!($file = $request->files->get("file"))) {
+        if (!($file = $request->files->get("image"))) {
             return new Response($this->translator->trans("fileupload.error.no_file", [], "fields"), 500);
         }
 
@@ -107,87 +104,50 @@ class EditorController extends AbstractController
             return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
         }
 
-        $cacheDir = $this->getCacheDir()."/editorjs";
-        if (!$this->filesystem->exists($cacheDir)) {
-            $this->filesystem->mkdir($cacheDir);
-        }
-
         $fileUuid = Uuid::v4();
-        $filePath = $cacheDir."/".$fileUuid;
-        $fileMetadata = [
-            "status"    => self::STATUS_OK,
-            "uuid"      => $fileUuid,
-            "mime_type" => $file->getMimeType(),
-            "size"      => $file->getSize(),
-            "error"     => $file->getError(),
-        ];
+        $mimeType = mime_content_type2($file->getPathname());
 
-        // dirname($newFileName))
-        if (!is_writable(dirname($file->getPathname()))) {
-            return new Response("Repository directory not writable.", 500);
-        }
+        $fileExtension = $mimeType ? $this->mimeTypes->getExtensions($mimeType)[0] ?? null : null;
+        $filePath = "/".$fileUuid.($fileExtension ? ".".$fileExtension : "");
+
+        $operator = $this->parameterBag->get("base.twig.editor.operator");
         if (!file_exists($file->getPathname())) {
             return new Response("Uploaded file lost in the limbo.", 500);
         }
 
-        if (!move_uploaded_file($file->getRealPath(), $filePath)) {
-            return new Response($this->translator->trans("fileupload.error.cant_write", [], "fields"), 500);
+        if (!$this->flysystem->write($filePath, file_get_contents($file->getRealPath()), $operator)) {
+            return new Response("Repository directory not writable.", 500);
         }
 
-        // $fnExpiry = function($expiry, $uuid) use ($cacheDir) {
+        $fileMetadata = [
+            "success" => self::STATUS_OK,
+            "file" => ["url" => str_lstrip($this->flysystem->getPublic($filePath, $operator), $this->flysystem->getPublicDir())]
+        ];
 
-        //     if($expiry > time()) return true;
-
-        //     if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
-        //         return new Response("Invalid uuid.", 500);
-
-        //     $fname = $cacheDir."/".$uuid;
-        //     if(file_exists($fname)) unlink($fname);
-
-        //     return false;
-        // };
-
-        // @TODO Implement a cleaning command..
-        // $cacheDropzone = $this->cache->getItem("cache:editorjs");
-        // if($cacheDropzone->isHit()) { // If cache found and didn't expired
-
-        //     $editorjs = $cacheDropzone->get();
-        //     $editorjs = array_filter($editorjs, $fnExpiry, ARRAY_FILTER_USE_BOTH);
-
-        // } else { // If cache not found or expired
-
-        //     $editorjs = $cacheDropzone->get() ?? [];
-        //     foreach($editorjs as $uuid => $_)
-        //         if(file_exists($cacheDir."/".$uuid)) unlink($cacheDir."/".$uuid);
-        // }
-
-        // $editorjs[(string) $fileUuid] = time() + self::CACHE_DURATION;
-        // $cacheDropzone->set($editorjs);
-        // $cacheDropzone->expiresAfter(self::CACHE_DURATION);
-        // $this->cache->save($cacheDropzone);
-
+        unlink($file->getRealPath());
+        
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
-        /**
+    /**
      * @Route("/ux/editorjs/{data}/fetch", name="endpointByUrl")
      */
     public function EndpointByUrl(Request $request, $data = null): Response
     {
-        dump(1);
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
         }
-        dump(2);
 
-        dump($request);
+        $content = $request->getContent();
+        $path = $content ? json_decode($content)->url : null;
+        if($path) $path = fetch_url($path);
+
         // Move.. with flysystem
-        if (!($file = $request->files->get("file"))) {
+        if (!$path || !($file = new UploadedFile($path, $path))) {
             return new Response($this->translator->trans("fileupload.error.no_file", [], "fields"), 500);
         }
-        dump(3);
 
         switch($file->getError()) {
             case UPLOAD_ERR_OK: break;
@@ -212,65 +172,27 @@ class EditorController extends AbstractController
             return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
         }
 
-        $cacheDir = $this->getCacheDir()."/editorjs";
-        if (!$this->filesystem->exists($cacheDir)) {
-            $this->filesystem->mkdir($cacheDir);
-        }
-
         $fileUuid = Uuid::v4();
-        $filePath = $cacheDir."/".$fileUuid;
-        $fileMetadata = [
-            "status"    => self::STATUS_OK,
-            "uuid"      => $fileUuid,
-            "mime_type" => $file->getMimeType(),
-            "size"      => $file->getSize(),
-            "error"     => $file->getError(),
-        ];
+        $mimeType = mime_content_type2($file->getPathname());
 
-        // dirname($newFileName))
-        if (!is_writable(dirname($file->getPathname()))) {
-            return new Response("Repository directory not writable.", 500);
-        }
+        $fileExtension = $mimeType ? $this->mimeTypes->getExtensions($mimeType)[0] ?? null : null;
+        $filePath = "/".$fileUuid.($fileExtension ? ".".$fileExtension : "");
+
+        $operator = $this->parameterBag->get("base.twig.editor.operator");
         if (!file_exists($file->getPathname())) {
             return new Response("Uploaded file lost in the limbo.", 500);
         }
-
-        if (!move_uploaded_file($file->getRealPath(), $filePath)) {
-            return new Response($this->translator->trans("fileupload.error.cant_write", [], "fields"), 500);
+        if (!$this->flysystem->write($filePath, file_get_contents($file->getRealPath()), $operator)) {
+            return new Response("Repository directory not writable.", 500);
         }
 
-        // $fnExpiry = function($expiry, $uuid) use ($cacheDir) {
+        $fileMetadata = [
+            "success" => self::STATUS_OK,
+            "file" => ["url" => str_lstrip($this->flysystem->getPublic($filePath, $operator), $this->flysystem->getPublicDir())]
+        ];
 
-        //     if($expiry > time()) return true;
-
-        //     if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
-        //         return new Response("Invalid uuid.", 500);
-
-        //     $fname = $cacheDir."/".$uuid;
-        //     if(file_exists($fname)) unlink($fname);
-
-        //     return false;
-        // };
-
-        // @TODO Implement a cleaning command..
-        // $cacheDropzone = $this->cache->getItem("cache:editorjs");
-        // if($cacheDropzone->isHit()) { // If cache found and didn't expired
-
-        //     $editorjs = $cacheDropzone->get();
-        //     $editorjs = array_filter($editorjs, $fnExpiry, ARRAY_FILTER_USE_BOTH);
-
-        // } else { // If cache not found or expired
-
-        //     $editorjs = $cacheDropzone->get() ?? [];
-        //     foreach($editorjs as $uuid => $_)
-        //         if(file_exists($cacheDir."/".$uuid)) unlink($cacheDir."/".$uuid);
-        // }
-
-        // $editorjs[(string) $fileUuid] = time() + self::CACHE_DURATION;
-        // $cacheDropzone->set($editorjs);
-        // $cacheDropzone->expiresAfter(self::CACHE_DURATION);
-        // $this->cache->save($cacheDropzone);
-
+        unlink($file->getRealPath());
+        
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 }

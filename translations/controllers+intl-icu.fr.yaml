@@ -32,7 +32,7 @@ base_contact:
 
   follow_us: Suivez-vous sur..
 
-security_birthdate:
+security_launchdate:
   title:
     default: "Le site ouvre bientot ses portes !"
     appointment: "À vos agendas, rendez-vous pris"

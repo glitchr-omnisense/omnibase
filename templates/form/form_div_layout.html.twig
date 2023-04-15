@@ -115,6 +115,7 @@
 
     {{ form_widget(form) }}
     <div id="{{ id }}_editor" {{ block('attributes') }}></div>
+    <div class="form-text text-muted">{{"@fields.editor.soft_linebreak"|trans}}</span></div>
 
 {%- endblock editor_widget -%}
 

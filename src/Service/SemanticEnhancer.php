@@ -6,6 +6,7 @@ use Base\Repository\Layout\SemanticRepository;
 
 class SemanticEnhancer implements SemanticEnhancerInterface
 {
+    protected $semanticRepository;
     public function __construct(SemanticRepository $semanticRepository)
     {
         $this->semanticRepository = $semanticRepository;

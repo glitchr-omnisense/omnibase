@@ -7,7 +7,7 @@ use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
-use Base\Service\MaternityUnitInterface;
+use Base\Service\LauncherInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
 use DateTime;
@@ -36,9 +36,9 @@ class SiteVariable
      */
     protected $maintenanceProvider;
     /**
-     * @var MaternityUnit
+     * @var Launcher
      */
-    protected $maternityUnit;
+    protected $launcher;
     /**
      * @var BaseService
      */
@@ -51,7 +51,7 @@ class SiteVariable
         LocalizerInterface $localizer,
         BaseService $baseService,
         MaintenanceProviderInterface $maintenanceProvider,
-        MaternityUnitInterface $maternityUnit
+        LauncherInterface $launcher
     )
     {
         $this->router = $router;
@@ -59,7 +59,7 @@ class SiteVariable
         $this->baseService = $baseService;
         $this->localizer = $localizer;
         $this->maintenanceProvider = $maintenanceProvider;
-        $this->maternityUnit = $maternityUnit;
+        $this->launcher = $launcher;
         $this->sitemapper = $sitemapper;
     }
 
@@ -129,17 +129,17 @@ class SiteVariable
         return $this->maintenanceProvider->isUnderMaintenance();
     }
 
-    public function birthdate(?string $locale = null): DateTime
+    public function launchdate(?string $locale = null): DateTime
     {
-        return $this->maternityUnit->getBirthdate($locale);
+        return $this->launcher->getLaunchdate($locale);
     }
-    public function is_born(?string $locale = null): bool
+    public function is_launcherd(?string $locale = null): bool
     {
-        return $this->maternityUnit->isBorn($locale);
+        return $this->launcher->isLaunched($locale);
     }
     public function age(?string $locale = null): string
     {
-        return $this->maternityUnit->getAge($locale);
+        return $this->launcher->since($locale);
     }
 
     public function is_newcomer(int $within = 0): bool

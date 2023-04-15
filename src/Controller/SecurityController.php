@@ -35,7 +35,7 @@ use Base\Repository\User\TokenRepository;
 
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\MaintenanceProviderInterface;
-use Base\Service\MaternityUnitInterface;
+use Base\Service\LauncherInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 
@@ -518,15 +518,13 @@ class SecurityController extends AbstractController
 
 
     /**
-     * Link to this controller to start the birth
-     *
-     * @Route({"fr": "/est/bientot/en/ligne", "en":"/is/coming/soon"}, name="security_birth")
+     * @Route({"fr": "/est/bientot/en/ligne", "en":"/is/coming/soon"}, name="security_launch")
      */
-    public function Birth(MaternityUnitInterface $maternityUnit): Response
+    public function Launch(LauncherInterface $launcher): Response
     {
-        return $this->render('security/birthdate.html.twig', [
-            'birthdate'  => $maternityUnit->getBirthdate(),
-            'is_born'    => $maternityUnit->isBorn()
+        return $this->render('security/launchdate.html.twig', [
+            'launchdate'  => $launcher->getLaunchdate(),
+            'is_launcherd'    => $launcher->isLaunched()
         ]);
     }
 

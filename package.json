@@ -46,6 +46,8 @@
     "@editorjs/underline": "^1.1",
     "@editorjs/code": "^2.8",
     
+    "editorjs-html": "^3.4.2",
+    
     "@popperjs/core": "^2.11.6",
     "@simonwep/pickr": "^1.8.2",
     "bootstrap": "^5.2.3",

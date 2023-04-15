@@ -15,6 +15,12 @@
         <service id="trading_market" alias="Base\Service\TradingMarket" />
         <service id="Base\Service\TradingMarketInterface" alias="trading_market"/>
 
+        <service id="wysiwyg_enhancer" alias="Base\Service\WysiwygEnhancer" />
+        <service id="Base\Service\WysiwygEnhancerInterface" alias="wysiwyg_enhancer"/>
+
+        <service id="editor_enhancer" alias="Base\Service\EditorEnhancer" />
+        <service id="Base\Service\EditorEnhancerInterface" alias="editor_enhancer"/>
+
         <service id="base.service" alias="Base\Service\BaseService" />
         <service id="base.service.icon" alias="Base\Service\IconProvider" />
         <service id="base.service.sharer" alias="Base\Service\Sharer" />
@@ -46,8 +52,8 @@
         <service id="base.service.maintenance" alias="Base\Service\MaintenanceProvider" />
         <service id="Base\Service\MaintenanceProviderInterface" alias="base.service.maintenance"/>
 
-        <service id="base.service.maternity_unit" alias="Base\Service\MaternityUnit" />
-        <service id="Base\Service\MaternityUnitInterface" alias="base.service.maternity_unit"/>
+        <service id="base.service.launcher" alias="Base\Service\Launcher" />
+        <service id="Base\Service\LauncherInterface" alias="base.service.launcher"/>
 
         <service id="flysystem" alias="Base\Service\Flysystem" />
         <service id="Base\Service\FlysystemInterface" alias="flysystem"/>
