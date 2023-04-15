@@ -5,9 +5,9 @@ namespace Base\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-use Base\Field\Type\AudioType;
+use Base\Field\Type\VideoType;
 
-class AudioField extends FileField implements FieldInterface
+class VideoField extends FileField implements FieldInterface
 {
     public const OPTION_RENDER_FORMAT  = "renderFormat";
 
@@ -17,7 +17,7 @@ class AudioField extends FileField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/file')
-            ->setFormType(AudioType::class)
+            ->setFormType(VideoType::class)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
