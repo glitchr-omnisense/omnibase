@@ -59,6 +59,7 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["divisor"]      = $options["divisor"];
         $view->vars["max"]          = $options["max"];
         $view->vars["suffix"]       = $options["suffix"];
+        $view->vars["inline"]       = $options["inline"];
         $view->vars["prefix"]       = $options["prefix"];
         $view->vars["disabled"]     = $options["disabled"];
         $view->vars["autocomplete"] = $options["autocomplete"];
@@ -75,6 +76,7 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
             'step' => 1,
             'throttleUp'  => null,
             'throttleDown' => null,
+            'inline' => false,
             'throttle' => 50,
             "min" => null,
             "max" => null,

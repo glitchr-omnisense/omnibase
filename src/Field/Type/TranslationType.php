@@ -168,6 +168,8 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     }
                 }
 
+                $entityOptions["allow_null"] = true;
+
                 if ($options["multiple"]) {
                     $entityOptions["multiple"] = true;
                     $entityOptions["group"] = false;

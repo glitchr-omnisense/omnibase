@@ -1,12 +1,17 @@
 <div class="widget-menu">
     {% if label != false %}<span class="label">{{ label }}</span>{% endif %}
     <ul class="items {{ row_attr['class'] ?? "" }}">
+
+        {% cache widget.__toKey("menu", app.request.locale) %}
+
         {% for item in widget.items %}
             {% set url = is_linkable(item) ? item.__toLink() : null %}
             {% if url is not empty %}
                 <li>{{ urlify(url, item|raw, {"class": class|default(null)}) }}</li>
             {% endif %}
         {% endfor %}
+
+        {% endcache %}
 
         {% if tail is defined %}
             {% for item in tail %}<li>{{ item }}</li>{% endfor %}

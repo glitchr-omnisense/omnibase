@@ -1155,21 +1155,9 @@ class ServiceEntityParser
         }
 
         $regexRequested    = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
-        if ($regexRequested) {
-            $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
-            if ($tableOperator == self::OPTION_STARTING_WITH) {
-                $fieldValue = $fieldValue."%";
-            } elseif ($tableOperator == self::OPTION_ENDING_WITH) {
-                $fieldValue = "%".$fieldValue;
-            } elseif ($tableOperator == self::OPTION_NOT_STARTING_WITH) {
-                $fieldValue = $fieldValue."%";
-            } elseif ($tableOperator == self::OPTION_NOT_ENDING_WITH) {
-                $fieldValue = "%".$fieldValue;
-            }
+        if ($this->classMetadataManipulator->getTypeOfField($this->classMetadata, $fieldName) == "json") {
 
-            $fieldValue = ($isInsensitive ? mb_strtolower($fieldValue) : $fieldValue);
-        } elseif ($this->classMetadataManipulator->getTypeOfField($this->classMetadata, $fieldName) == "json") {
             if (is_array($fieldValue)) {
                 if (empty($fieldValue)) {
                     return $queryBuilder->expr()->eq(1, 1);
@@ -1205,8 +1193,23 @@ class ServiceEntityParser
             }
 
             throw new LogicException("Operation not supported for json-like field \"" . $fieldName . "\" in \"" . $this->classMetadata->getName() . "\"");
-        } elseif ($this->classMetadataManipulator->getTypeOfField($this->classMetadata, $fieldName) == "json") {
-            throw new LogicException("Operation not supported for array-like field  \"" . $fieldName . "\" in \"" . $this->classMetadata->getName() . "\" is of type array.. Please consider to switch to `json`");
+
+        } elseif ($regexRequested) {
+
+            $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
+
+            if ($tableOperator == self::OPTION_STARTING_WITH) {
+                $fieldValue = $fieldValue."%";
+            } elseif ($tableOperator == self::OPTION_ENDING_WITH) {
+                $fieldValue = "%".$fieldValue;
+            } elseif ($tableOperator == self::OPTION_NOT_STARTING_WITH) {
+                $fieldValue = $fieldValue."%";
+            } elseif ($tableOperator == self::OPTION_NOT_ENDING_WITH) {
+                $fieldValue = "%".$fieldValue;
+            }
+
+            $fieldValue = ($isInsensitive ? mb_strtolower($fieldValue) : $fieldValue);
+
         }
 
         //

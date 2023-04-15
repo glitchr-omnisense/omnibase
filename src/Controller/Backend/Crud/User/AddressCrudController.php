@@ -10,7 +10,7 @@ use Base\Field\SelectField;
 use Base\Field\SlugField;
 use Base\Field\StateField;
 use Base\Field\TranslationField;
-use Base\Field\Type\QuillType;
+use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;

@@ -47,7 +47,8 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
                 $url["domain"]   ?? null,
                 $url["port"] ?? null,
                 $url["path"]    ?? null,
-                $url["query"]     ?? null
+                $url["query"]     ?? null,
+                $url["fragment"]     ?? null
             );
         }
 

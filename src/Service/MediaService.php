@@ -284,8 +284,9 @@ class MediaService extends FileService implements MediaServiceInterface
         if ($path === null) {
             return null;
         }
-        $path = "/".str_strip($path, $this->router->getAssetUrl(""));
 
+        $path = "/".str_strip($path, $this->router->getAssetUrl(""));
+        
         $config["path"] = $path;
         $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
         $config["local_cache"] = $config["local_cache"] ?? null;
@@ -294,6 +295,7 @@ class MediaService extends FileService implements MediaServiceInterface
         }
 
         while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
+            
             $path = $pathConfig["path"] ?? $path;
             $config["path"] = $path;
             $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -383,6 +385,7 @@ class MediaService extends FileService implements MediaServiceInterface
 
             list($className, $controllerName) = array_pad(explode("::", $routeMatch["_controller"] ?? ""), 2, null);
             if (is_instanceof($className, get_class($this->mediaController)) && $controllerName) {
+
                 $routeParameters = array_key_removes($routeMatch, "_route", "_controller");
                 $this->mediaController->{$controllerName}(...$routeParameters);
             }

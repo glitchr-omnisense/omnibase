@@ -102,7 +102,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
     public function match(string $keyword)
     {
-        return in_array($keyword, $this->keywords);
+        return in_array(strtolower($keyword), array_map(fn($k) => strtolower($k), $this->keywords));
     }
     public function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
@@ -116,19 +116,29 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
     public function highlight(string $search, array $attributes = [])
     {
-        foreach ($this->getKeywords() as $keyword) {
-            $search = $this->highlightByWord($search, $keyword, $attributes);
+        return preg_replace(
+            "/(".implode("|", $this->getKeywords()).")/i",
+            "<a href='".$this->generate()."' ".html_attributes($attributes).">$1</a>",
+            $search
+        );
+    }
+
+    public function highlightBy(array|string $keywords, string $search, array $attributes)
+    {
+        $keywords = is_array($keywords) ? $keywords : [$keywords];
+        foreach($keywords as $keyword) {
+
+            if (!$this->match($keyword)) {
+                return $search;
+            }
+
+            $search = preg_replace(
+                "/(" . $keyword . ")/i",
+                "<a href='" . $this->generate() . "' " . html_attributes($attributes) . ">$1</a>",
+                $search
+            );
         }
 
         return $search;
-    }
-
-    public function highlightByWord(string $search, string $word, array $attributes)
-    {
-        if (!$this->match($word)) {
-            return $word;
-        }
-
-        return str_replace($word, "<a href='".$this->generate()."' ".html_attributes($attributes).">".$word."</a>", $search);
     }
 }

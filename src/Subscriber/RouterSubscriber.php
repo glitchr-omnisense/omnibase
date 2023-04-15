@@ -4,6 +4,7 @@ namespace Base\Subscriber;
 
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
+use Payum\Core\Exception\LogicException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -51,55 +52,42 @@ class RouterSubscriber implements EventSubscriberInterface
         if (!$event->isMainRequest()) {
             return ;
         }
-        $route = $this->router->getRoute();
 
-        //
-        // Redirect IP if restriction enabled
-        if ($route && !$this->authorizationChecker->isGranted("VALIDATE_IP", $route)) {
-            $event->setResponse(new RedirectResponse(get_url(null, $this->router->getHost())));
-            return $event->stopPropagation();
+        $route = $this->router->getRoute();
+        if(!$route) return;
+
+        $ipRestriction = !$this->parameterBag->get("base.router.ip_access")        &&  $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
+        if ($ipRestriction) {
+
+            $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
+            if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback)
+                throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
         }
 
-        //
-        // If no host specified in Route, then check the list of permitted subdomain
-        if ($route && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route)) {
+        if($ipRestriction || (!$route->getHost() && $this->router->reducesOnFallback())) {
 
-            $url = get_url(); // Redirect to proper host fallback if required.
-            if (!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback()) {
+            $parsedUrl = parse_url2(get_url());
+            $parsedUrl["scheme"] = $this->router->getScheme();
+            $parsedUrl["host"] = $this->router->getHostFallback();
 
-                $url = parse_url2($url);
-                if(!$this->router->keepDomain()) {
-
-                    $url["host"] = $this->router->getHostFallback();
-                    $url["port"] = $this->router->getPortFallback();
-                }
-
-                $url = compose_url(
-                    $url["scheme"]  ?? null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    $url["host"] ?? null,
-                    $url["port"] ?? null,
-                    $url["path"]    ?? null,
-                    $url["query"]     ?? null
-                );
-            }
+            $url = compose_url(
+                $parsedUrl["scheme"]  ?? null,
+                null,
+                null,
+                null,
+                null,
+                $parsedUrl["host"] ?? null,
+                null,
+                $parsedUrl["path"]    ?? null,
+                $parsedUrl["query"]     ?? null,
+                $parsedUrl["fragment"]     ?? null
+            );
 
             // Redirect to sanitized url
-            $formattedUrl = $this->router->format($url);
-            if($formattedUrl != get_url()) {
-                $event->setResponse(new RedirectResponse($formattedUrl));
+            if($url != get_url()) {
+                $event->setResponse(new RedirectResponse($url));
+                return $event->stopPropagation();
             }
-            return $event->stopPropagation();
-        }
-
-        //
-        // If no host specified in Route, then check the list of permitted subdomain
-        if ($route && !$this->authorizationChecker->isGranted("VALIDATE_PATH", $route)) {
-            $event->setResponse(new RedirectResponse(sanitize_url(get_url())));
-            return $event->stopPropagation();
         }
     }
 }

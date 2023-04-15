@@ -2,6 +2,11 @@
     background: transparent;
     border: 0;
 }
+.main-content
+{
+    max-width:100vw;
+}
+
 table.datagrid:not(.datagrid-empty) tr:not(.empty-row) td.actions, table.datagrid:not(.datagrid-empty) tr:not(.empty-row) td.actions.actions-as-dropdown
 {
     display: flex;
@@ -14,6 +19,11 @@ table.datagrid:not(.datagrid-empty) tr:not(.empty-row) td.actions, table.datagri
 .datagrid td.text-right > span.badges
 {
     justify-content: flex-start;
+}
+
+.sidebar
+{
+    position:fixed;
 }
 
 .list-pagination-counter { text-align:center; }

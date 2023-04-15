@@ -12,6 +12,7 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface as SymfonyRouterInterface;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
@@ -25,20 +26,24 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function isUX(mixed $request = null): bool;
     public function isWdt(mixed $request = null): bool;
     public function isSecured(mixed $request = null): bool;
-    public function keepMachine(): bool;
-    public function keepSubdomain(): bool;
+
+    public function reducesOnFallback(?string $locale = null, ?string $environment = null): bool;
 
     public function getBaseDir(?string $locale = null, ?string $environment = null): string;
     public function getHost(?string $locale = null, ?string $environment = null): string;
     public function getHostFallback(?string $locale = null, ?string $environment = null): string;
     public function getMachine(?string $locale = null, ?string $environment = null): ?string;
-    public function getMachineFallback(?string $locale = null, ?string $environment = null): ?string;
+    public function getMachineFallback(?string $locale = null, ?string $environment = null): mixed;
+    public function getMachineFallbacks(?string $locale = null, ?string $environment = null): ?array;
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string;
-    public function getSubdomainFallback(?string $locale = null, ?string $environment = null): ?string;
-    public function getDomain(?string $locale = null, ?string $environment = null): string;
-    public function getDomainFallback(?string $locale = null, ?string $environment = null): string;
+    public function getSubdomainFallback(?string $locale = null, ?string $environment = null): mixed;
+    public function getSubdomainFallbacks(?string $locale = null, ?string $environment = null): ?array;
+    public function getDomain(?string $locale = null, ?string $environment = null): ?string;
+    public function getDomainFallback(?string $locale = null, ?string $environment = null): mixed;
+    public function getDomainFallbacks(?string $locale = null, ?string $environment = null): ?array;
     public function getPort(?string $locale = null, ?string $environment = null): ?int;
-    public function getPortFallback(?string $locale = null, ?string $environment = null): ?int;
+    public function getPortFallback(?string $locale = null, ?string $environment = null): mixed;
+    public function getPortFallbacks(?string $locale = null, ?string $environment = null): ?array;
 
     public function getUrl(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string;
     public function getAssetUrl(string $name, ?string $packageName = null): string;
@@ -52,14 +57,14 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function setContext(RequestContext $context);
 
     public function getGenerator(): UrlGeneratorInterface;
-    public function getMatcher(): UrlMatcherInterface;
+    public function getMatcher(): UrlMatcherInterface|RequestMatcherInterface;
 
     public function isCli(): bool;
     public function isDebug(): bool;
     public function isBackend(mixed $request = null): bool;
     public function hasFirewall(?string $routeUrl = null): ?bool;
 
-    public function getCache();
+    public function getCache(): CacheInterface;
     public function getCacheRoutes();
 
     public function getRoute(?string $routeNameOrUrl = null): ?Route;

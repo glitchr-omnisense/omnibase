@@ -10,12 +10,12 @@ export default Quill;
 
 window.addEventListener("load.form_type", function () {
 
-    document.querySelectorAll("[data-quill-field]").forEach((function (el) {
+    document.querySelectorAll("[data-wysiwyg-field]").forEach((function (el) {
 
-        var id = el.getAttribute("data-quill-field");
+        var id = el.getAttribute("data-wysiwyg-field");
 
-        var placeholder = el.getAttribute("data-quill-placeholder");
-        var placeholderHTML = el.getAttribute("data-quill-placeholder");
+        var placeholder = el.getAttribute("data-wysiwyg-placeholder");
+        var placeholderHTML = el.getAttribute("data-wysiwyg-placeholder");
 
         var editorId = id+"_editor";
         if ($('#'+editorId).hasClass("ql-container")) // Quill editor already loaded (avoid toolbar duplication)
@@ -44,7 +44,7 @@ window.addEventListener("load.form_type", function () {
         // Quill.register('modules/imageDrop', ImageDrop);
         // Quill.register('modules/imageResize', ImageResize);
 
-        var quill = JSON.parse(el.getAttribute("data-quill-options")) || {};
+        var quill = JSON.parse(el.getAttribute("data-wysiwyg-options")) || {};
 
             // TBI: HTML replacement is in conflict with soft-break line..
             quill.modules.syntax = false;

@@ -58,10 +58,14 @@ namespace {
     {
         return preg_replace("/[^a-zA-Z]/", "", $str);
     }
+    function str_strip_specials(string $str)
+    {
+        return preg_replace("/[^a-zA-Z0-9]/", "", $str);
+    }
 
     function format_uuid(string $uuid): string|false
     {
-        $uuid = str_replace("-", "", $uuid);
+        $uuid = str_strip_specials($uuid);
         if (!preg_match("/[a-f0-9]{32}/i", $uuid)) {
             return false;
         }
@@ -165,7 +169,7 @@ namespace {
         $port    = explode(":", $http_host ?? $_SERVER["HTTP_HOST"] ?? "")[1] ?? $_SERVER["SERVER_PORT"] ?? null;
         $port    = $port != 80 && $port != 443 ? $port : null;
 
-        $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
+        $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null; // Fragment is contained in request URI
 
         return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
@@ -221,16 +225,19 @@ namespace {
 
         $urlButQuery   = explode("?", $url)[0] ?? "";
         $pathEndsWithSlash = str_ends_with($urlButQuery, "/");
+        $parse["path"] = str_rstrip($parse["path"] ?? "","/");
+
         return compose_url(
             $parse["scheme"] ?? null,
             $parse["user"] ?? null,
             $parse["password"] ?? null,
             $parse["machine"] ?? null,
             $parse["subdomain"] ?? null,
-            $parse["domain"] ?? $parse["host"] ?? null,
+            $parse["domain"] ?? null,
             $parse["port"] ?? null,
-            str_replace("//", "/", $parse["path"] ?? "").(($format & FORMAT_URL_KEEPSLASH) && $pathEndsWithSlash ? "/" : ""),
-            $parse["query"] ?? null
+            ($format & FORMAT_URL_KEEPSLASH) ? $parse["path"] : str_replace("//", "/", $parse["path"]) . ($pathEndsWithSlash ? "/" : ""),
+            $parse["query"] ?? null,
+            $query["fragment"] ?? null
         );
     }
 
@@ -243,7 +250,8 @@ namespace {
         ?string $domain = null,
         string|int|null $port = null,
         ?string $path = null,
-        ?string $query = null
+        ?string $query = null,
+        ?string $fragment = null
     ): array|string|int|false|null
     {
         $scheme    = ($domain && $scheme) ? $scheme."://" : null;
@@ -269,7 +277,6 @@ namespace {
         }
 
         $parse = parse_url($url, $component);
-
         if ($parse === false) {
             return false;
         }
@@ -282,19 +289,22 @@ namespace {
         }
 
         $path = str_rstrip($parse['path'] ?? "", "/");
-        $parse["path"] = str_replace("//", "/", $path);
-
         $tail = str_strip($url, ["file://", $base], "/");
-        $root = str_strip($url, ["file://", $base], $tail);
+        $root = str_strip($url, ["file://", $base], [$tail, "/"]);
         if (!empty($root)) {
             $parse["root"] = $root;
         }
 
         if (array_key_exists("host", $parse)) {
+
+            $port = array_key_exists("port", $parse) ? ":" . $parse["port"] : "";
+            $parse["host"] = $parse["host"].$port;
+
             //
             // Check if IP address provided
             if (filter_var($parse["host"], FILTER_VALIDATE_IP)) {
                 $parse["ip"] = $parse["host"];
+                $parse["domain"] = $parse["host"];
             }
             if (filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                 $parse["ipv4"] = $parse["host"];
@@ -305,11 +315,15 @@ namespace {
 
             //
             // Check if hostname
-            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
-                $parse["fqdn"] = $parse["host"] . ".";
-                $parse["domain"] = $match[0];
+            if (preg_match('/([a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(?:\.[a-z]{1,2})?)\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
 
-                $subdomain = str_rstrip($parse["host"], "." . $parse["domain"]);
+                $hostWithoutPort = explode(":", $parse["host"])[0];
+                $parse["fqdn"] = $hostWithoutPort . ".";
+
+                $parse["domain"] = $match[1];
+                $parse["port"] = $match[2];
+
+                $subdomain = str_rstrip($hostWithoutPort, "." . $parse["domain"]);
                 if ($parse["domain"] !== $subdomain) {
                     $parse["subdomain"] = $subdomain;
                 }
@@ -323,19 +337,26 @@ namespace {
                     }
                 }
 
-                $domain = explode(".", $match[0]);
+                $domain = explode(".", $match[1]);
                 $parse["sld"] = first($domain);
                 $parse["tld"] = implode(".", tail($domain));
-            } elseif (preg_match('/^[a-z0-9][a-z0-9\-]{0,63}$/i', strtolower($parse["host"] ?? ""), $match)) {
-                $parse["domain"] = $match[0];
+
+            } elseif (preg_match('/^([a-z0-9][a-z0-9\-]{0,63}?)\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
+
+                if(count($match) > 1) $parse["domain"] = $match[1];
+                if(count($match) > 2) $parse["port"] = $match[2];
             }
         }
 
+        $parse["path"] = $root.$path;
         if (array_key_exists("root", $parse)) {
             $parse["url"] = $root.$path;
         }
         if (!array_key_exists("base_dir", $parse)) {
             $parse["base_dir"] = $base;
+        }
+        if(array_key_exists("ip", $parse)) {
+            array_key_removes($parse, "subdomain", "machine");
         }
 
         return $parse;
@@ -1275,17 +1296,19 @@ namespace {
     function get_headers2(string $url, &$redirect = null, int $mode = HEADER_FOLLOW_REDIRECT)
     {
         if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            return null;
+            return [500, "application/octet-stream"];
         }
         if ($mode != HEADER_FOLLOW_REDIRECT) {
             return get_headers($url, false);
         }
 
         do {
+
             $http_response_header = []; // Special PHP variable
             $context = stream_context_create(["http" => ["follow_location" => false]]);
+            
             get_headers($url, false, $context);
-
+            
             $pattern = "/^Location:\s*(.*)$/i";
             $location_headers = preg_grep($pattern, $http_response_header);
 
@@ -1293,6 +1316,7 @@ namespace {
             if ($repeat) {
                 $url = $matches[1];
             }
+
         } while ($repeat);
 
         $redirect = $url;
@@ -1309,6 +1333,7 @@ namespace {
     {
         // Search by looking at the header if url format
         if (filter_var($filename, FILTER_VALIDATE_URL)) {
+            
             $headers = get_headers2($filename, $filename, $mode);
             if (strpos($headers[0], '200')) {
                 return explode("Content-Type: ", $headers[1])[1] ?? null;
@@ -2792,8 +2817,12 @@ namespace {
 
     function is_serialized($str): bool
     {
-        try { $ret = unserialize($object); }
-        catch (Exception $e) { return false; }
+        if(!is_string($str)) return false;
+        if(!str_starts_with($str, "{")) return false;
+        if(!str_ends_with($str, "}")) return false;
+
+        try { $ret = unserialize($str); }
+        catch (\Exception $e) { return false; }
 
         return is_string($str) && ($str == 'b:0;' || $ret !== false);
     }
@@ -3190,7 +3219,7 @@ namespace {
         return strlen($directory) <= $maxPathLength;
     }
 
-    function mkdir_length_safe(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool
+    function mkdir_length_safe(string $directory, int $permissions = 0777, bool $recursive = true, $context = null): bool
     {
         if (is_length_safe($directory)) {
             return mkdir($directory, $permissions, $recursive, $context);
@@ -3213,7 +3242,7 @@ namespace {
             }
 
             if (!file_exists($directory)) {
-                shell_exec("mkdir -p ".$directory);
+                mkdir($directory, $permissions, $recursive, $context);
             }
             if (!is_dir($directory)) {
                 throw new LogicException("\"".getcwd()."/".$directory."\" is a file.");

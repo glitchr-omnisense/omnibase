@@ -31,7 +31,7 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
     {
         return [
             ConsoleEvents::COMMAND => ['onRequest', 2048],
-            KernelEvents::REQUEST  => ['onRequest', 256]
+            KernelEvents::REQUEST  => ['onRequest', 512]
         ];
     }
 

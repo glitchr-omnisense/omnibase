@@ -154,7 +154,6 @@ class Vault extends AbstractAnnotation
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
 
-//        dump($entity);
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
 
@@ -172,16 +171,13 @@ class Vault extends AbstractAnnotation
                 if ($entity->getSealedVaultBag($field) == $value) continue;
                 if ($entity->getPlainVaultBag($field) == $value) {
                     $propertyAccessor->setValue($entity, $field, $entity->getSealedVaultBag($field));
-//                    dump($entity);
                     continue;
                 }
 
-//                dump("SCHEDULE FOR UPDATE");
                 $this->getEntityManager()->getUnitOfWork()->scheduleForUpdate($entity);
             }
         }
     }
-
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
@@ -191,7 +187,7 @@ class Vault extends AbstractAnnotation
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
     }
-    public function preLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function preLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
@@ -219,18 +215,19 @@ class Vault extends AbstractAnnotation
         }
     }
 
-
+    public function postFlush(\Doctrine\ORM\Event\PostFlushEventArgs $args, \Doctrine\ORM\Mapping\ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+        $this->postLifecycleEvent($args, $classMetadata, $entity, $property);
+    }
 
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
-    public function postLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function postLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
-
-//        dump($entity);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
@@ -256,8 +253,6 @@ class Vault extends AbstractAnnotation
 
                     $propertyAccessor->setValue($entity, $field, $plainValue);
                     $entity->setVaultBag($field, $sealedValue, $plainValue);
-
-//                    dump($entity);
                 }
             }
         }

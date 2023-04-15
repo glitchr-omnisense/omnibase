@@ -12,7 +12,9 @@ trait SimpleCacheTrait
     {
         $phpCacheFile = $cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], static::class).".php";
         $fsCacheFile = $cacheDir."/pools/simple/fs/".str_replace(['\\', '/'], ['__', '_'], static::class);
-        $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $fsCacheFile)));
+
+        $phpArrayAdapter = new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $fsCacheFile));
+        $this->setCache($phpArrayAdapter);
 
         $this->warmUp($cacheDir);
     }
@@ -36,6 +38,11 @@ trait SimpleCacheTrait
         return $this->cache?->deleteItem($this->getCacheKey(static::class.$key)) ?? false;
     }
 
+    public function getCacheAdapter(): mixed
+    {
+        return $this->cache;
+    }
+    
     public function getCache(?string $key = null, mixed $fallback = null, int|\DateInterval|null $ttl = null, $deferred = false): mixed
     {
         if ($key === null) {
@@ -43,6 +50,8 @@ trait SimpleCacheTrait
         }
 
         if (!$this->hasCache($key)) {
+
+            if($fallback === null) return null;
             $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $ttl, $deferred);
         }
 

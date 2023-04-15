@@ -11,6 +11,8 @@
             <argument type="service" id="form.factory" />
         </service>
 
+        <service id="Base\Security\Session\DynamicSessionStorageFactory" public="true" parent="session.storage.factory.native" />
+
         <service id="Base\Service\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
@@ -124,6 +126,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="Base\Repository\Layout\SettingRepository" />
             <argument type="service" id="localizer" />
             <argument type="service" id="assets.packages" />
             <argument type="service" id="cache.adapter" />
@@ -583,13 +586,6 @@
             <argument type="service" id="base.service.maternity_unit" />
         </service>
 
-         <service id="Base\Security\Voter\RouteVoter">
-            <tag name="security.voter" />
-            <argument type="service" id="router" />
-            <argument type="service" id="parameter_bag" />
-            <argument type="service" id="localizer" />
-        </service>
-
         <service id="Base\Database\Entity\EntityExtension" public="true" />
         <service id="Base\Database\Annotation\OrderColumn"><tag name="base.entity_extension" /></service>
         <service id="Base\Database\Annotation\Versionable"><tag name="base.entity_extension" /></service>
@@ -634,24 +630,29 @@
             <bind key="$projectDir">%kernel.project_dir%</bind>
         </service>
 
+        <service id="Base\Twig\Extension\SemanticTwigExtension" public="true">
+            <tag name="twig.extension" />
+            <argument type="service" id="semantic_enhancer" />
+        </service>
+
         <service id="Base\Twig\Extension\TradingMarketTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="trading_market" />
         </service>
 
-        <service id="Base\Twig\Renderer\AbstractRenderer">
+        <service id="Base\Twig\Renderer\AbstractTagRenderer" abstract="true">
             <argument type="service" id="twig" />
             <argument type="service" id="localizer" />
             <argument type="service" id="slugger" />
             <argument type="service" id="parameter_bag" />
         </service>
-        <service id="Base\Twig\Renderer\Adapter\HtmlTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true">
+        <service id="Base\Twig\Renderer\Adapter\HtmlTagRenderer" parent="Base\Twig\Renderer\AbstractTagRenderer" public="true">
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
         </service>
-        <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractRenderer" public="true" >
+        <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractTagRenderer" public="true" >
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup_collection" on-invalid="null" />
@@ -951,7 +952,7 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Field\Type\QuillType"><tag name="form.type" />
+        <service id="Base\Field\Type\WysiwygType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
         </service>
@@ -1064,7 +1065,7 @@
 
         <service id="Base\Field\Configurator\LocaleConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\TextConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\QuillConfigurator">
+        <service id="Base\Field\Configurator\WysiwygConfigurator">
             <tag name="ea.field_configurator" />
         </service>
 

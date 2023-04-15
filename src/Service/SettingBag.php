@@ -68,11 +68,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return [ get_class($this) ];
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, LocalizerInterface $localizer, Packages $packages, CacheInterface $cache, string $environment)
+    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, SettingRepository $settingRepository, LocalizerInterface $localizer, Packages $packages, CacheInterface $cache, string $environment)
     {
         $this->parameterBag      = $parameterBag;
         $this->entityManager     = $entityManager;
-        $this->settingRepository = $entityManager->getRepository(Setting::class);
+        $this->settingRepository = $settingRepository;
 
         $this->cache           = $cache;
         $this->cacheName       = "setting_bag." . hash('md5', self::class);

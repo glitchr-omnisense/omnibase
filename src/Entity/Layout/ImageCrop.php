@@ -28,7 +28,16 @@ class ImageCrop implements LinkableInterface, SaltInterface
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        $routeName = array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image";
+        if(array_key_exists("extension", $routeParameters)) {
+            
+            if ($routeParameters["extension"] === true) {
+                $routeParameters["extension"] = $this->getImageService()->getExtension($this->getImage()->getSource());
+            } elseif ($routeParameters["extension"] === false) {
+                array_pop_key("extension", $routeParameters);
+            }
+        }
+
+        $routeName = (array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image");
         $routeParameters = array_filter($routeParameters);
         $config = [
             "reference_type" => $referenceType,
@@ -41,7 +50,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
 
     public function __toString()
     {
-        return $this->getLabel() ?? $this->getTranslator()->transEntity($this).($this->getId() ? " #".$this->getId() : null);
+        return $this->__toLink();
     }
 
     public function getRatio()

@@ -55,9 +55,12 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
             $identifier ??= implode("x", array_slice($thumbnail, 0, 2)); // Set cropper using thumbnail information if not cropper not defined
         }
 
-        if (array_key_exists("extension", $routeParameters)) {
+
+        if(array_key_exists("extension", $routeParameters)) {
+
             if ($routeParameters["extension"] === true) {
                 $routeParameters["extension"] = first($this->getMediaService()->getExtensions($this->getSource()));
+                $routeParameters["extension"] = $this->getImageService()->getExtension($this->getSource());
             } elseif ($routeParameters["extension"] === false) {
                 array_pop_key("extension", $routeParameters);
             }
@@ -85,7 +88,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
     public function __toString()
     {
-        return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.images.no_image") ?? "";
+        return $this->__toLink();
     }
     public function __construct($src = null)
     {

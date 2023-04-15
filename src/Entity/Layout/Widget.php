@@ -2,6 +2,8 @@
 
 namespace Base\Entity\Layout;
 
+use Base\Service\Model\CacheableInterface;
+use Base\Traits\CacheableTrait;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Annotation\DiscriminatorEntry;
@@ -19,6 +21,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
+use Base\Annotations\Annotation\Timestamp;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
@@ -29,10 +32,20 @@ use Base\Database\Annotation\Cache;
  *     @DiscriminatorEntry
  */
 
-class Widget implements TranslatableInterface, IconizeInterface
+class Widget implements TranslatableInterface, IconizeInterface, CacheableInterface
 {
     use BaseTrait;
     use TranslatableTrait;
+    use CacheableTrait {
+        CacheableTrait::__toKey as __toDefaultKey;
+    }
+
+    public function __toKey(?string ...$variadic):string
+    {
+        $variadic[] = $this->getId();
+        $variadic[] = $this->getUpdatedAt();
+        return $this->__toDefaultKey(...$variadic);
+    }
 
     public function __iconize(): ?array
     {
@@ -141,5 +154,25 @@ class Widget implements TranslatableInterface, IconizeInterface
     {
         $this->connexes->removeElement($connex);
         return $this;
+    }
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     * @Timestamp(on="create")
+     */
+    protected $createdAt;
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+     /**
+     * @ORM\Column(type="datetime", nullable=true)
+     * @Timestamp(on={"update", "create"})
+     */
+    protected $updatedAt;
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
     }
 }

@@ -46,7 +46,7 @@ class FileValidator extends ConstraintValidator
                 ->setParameter('{1}', implode(", ", $types))
                 ->addViolation();
 
-        } elseif ($entry->getSize() > $constraint->getMaxSize()) {
+        } elseif ($entry->getSize() > 8*$constraint->getMaxSize()) {
 
             $constraint->message = $constraint->messageMaxSize;
             $this->buildViolation($constraint, $entry)

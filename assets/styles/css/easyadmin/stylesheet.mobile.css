@@ -3,3 +3,17 @@
     scrollbar-width: none;
     overflow-x:auto;
 }
+
+.main-content
+{
+    max-width:100vw;
+}
+
+.content-header .page-actions
+{
+    justify-content: center;
+}
+.sidebar
+{
+    position:fixed;
+}

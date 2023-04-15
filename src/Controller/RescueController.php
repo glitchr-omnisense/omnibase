@@ -77,7 +77,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
             $logo = $this->settingBag->getScalar("base.settings.logo");
         }
         if (!$logo) {
-            $logo = "bundles/base/logo.svg";
+            $logo = "bundles/base/images/logo.svg";
         }
 
         $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);

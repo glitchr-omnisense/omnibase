@@ -61,7 +61,7 @@ final class MediaTwigExtension extends AbstractExtension
             new TwigFunction('image', [$this, 'image'], ['needs_context' => true]),
             new TwigFunction('video', [MediaService::class, 'video'], ["is_safe" => ['all']]),
             new TwigFunction('audio', [MediaService::class, 'audio'], ["is_safe" => ['all']]),
-          
+
             new TwigFunction('asset', [AdvancedRouter::class, 'getAssetUrl']),
         ];
     }
@@ -101,6 +101,7 @@ final class MediaTwigExtension extends AbstractExtension
                 new TwigFilter('lightbox', [MediaService::class, 'lightbox'], ["is_safe" => ['all']]),
 
                                new TwigFilter('crop', [$this, 'imageCrop'], ['needs_context' => true]),
+
                 new TwigFilter('thumbnail', [$this, 'thumbnail'], ['needs_context' => true]),
                 new TwigFilter('thumbnail_inset   ', [$this, 'thumbnailInset   '], ['needs_context' => true]),
                 new TwigFilter('thumbnail_outbound', [$this, 'thumbnailOutbound'], ['needs_context' => true]),
@@ -127,7 +128,7 @@ final class MediaTwigExtension extends AbstractExtension
             $config["webp"]   = false;
         }
 
-        return $this->mediaService->image($path, $filters, $config);
+        return $this->imageService->image($path, $filters, $config);
     }
 
     public function imageCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
@@ -164,7 +165,6 @@ final class MediaTwigExtension extends AbstractExtension
     }
     public function thumbnail(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $filters = [], array $config = []): array|string|null
     {
-        $config["local_cache"] ??= true;
         if (array_key_exists("warmup", $context)) {
             $config["warmup"] = $context["warmup"];
         }

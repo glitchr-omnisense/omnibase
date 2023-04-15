@@ -15,7 +15,7 @@ boolean:
 stock:
   unlimited: Illimité
 
-quill:
+wysiwyg:
   soft_linebreak: "Utilise Maj+Entrer pour faire un retour à la ligne sans changer de paragraphe"
 
 password:

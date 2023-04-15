@@ -88,7 +88,9 @@ class FileService implements FileServiceInterface
         if (!$fileOrMimetypeOrArray) {
             return [];
         }
+
         if (is_array($fileOrMimetypeOrArray)) {
+
             $extensions = [];
             $extensionList = array_map(fn ($mimetype) => $this->getExtensions($mimetype), $fileOrMimetypeOrArray);
             foreach ($extensionList as $extension) {
@@ -98,8 +100,10 @@ class FileService implements FileServiceInterface
             return array_unique($extensions);
         }
 
-        $mimeType = mime_content_type2($fileOrMimetypeOrArray) ?? $fileOrMimetypeOrArray;
-        return $this->mimeTypes->getExtensions($mimeType);
+        if (!filter_var($fileOrMimetypeOrArray, FILTER_VALIDATE_URL))
+            $fileOrMimetypeOrArray = mime_content_type2($fileOrMimetypeOrArray) ?? $fileOrMimetypeOrArray;
+
+        return $this->mimeTypes->getExtensions($fileOrMimetypeOrArray);
     }
 
     public function getMimeType(null|string|array $fileOrContentsOrArray): null|string|array
@@ -116,13 +120,7 @@ class FileService implements FileServiceInterface
         if ($mimeType && $mimeType !== "application/x-empty") {
             return $mimeType;
         }
-
-        // Attempt to read based on custom mime_content_content method
-        $mimeType = mime_content_type2($fileOrContentsOrArray);
-        if ($mimeType && $mimeType !== "application/x-empty") {
-            return $mimeType;
-        }
-
+        
         // Attempt to read mimetype
         $extension = pathinfo($fileOrContentsOrArray, PATHINFO_EXTENSION);
         $extension = $extension ? $extension : $fileOrContentsOrArray; // Assume extension is provided without filename
@@ -131,10 +129,20 @@ class FileService implements FileServiceInterface
             return $mimeType;
         }
 
+        
         // Attempt to guess mimetype using MimeTypes class
         try {
+        
             return $this->mimeTypes->guessMimeType($fileOrContentsOrArray);
+        
         } catch (InvalidArgumentException $e) {
+
+            // Attempt to read based on custom mime_content_content method
+            $mimeType = mime_content_type2($fileOrContentsOrArray);
+            if ($mimeType && $mimeType !== "application/x-empty") {
+                return $mimeType;
+            }
+
             return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */
         }
     }
@@ -194,6 +202,7 @@ class FileService implements FileServiceInterface
         $config["local_cache"] = $config["local_cache"] ?? null;
 
         while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
+            
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
@@ -206,11 +215,13 @@ class FileService implements FileServiceInterface
     {
         $routeMatch = $this->router->getRouteMatch($path) ?? [];
         if (array_key_exists("_route", $routeMatch) && $routeMatch["_route"] == $proxyRoute) {
+            
             $data = $routeMatch["data"];
             $config["options"] = $config["options"] ?? [];
             $config["local_cache"] = $config["local_cache"] ?? null;
 
             if (($pathConfig = $this->obfuscator->decode($data))) {
+
                 $path = $pathConfig["path"] ?? $path;
                 $config["path"] = $path;
                 $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -231,6 +242,8 @@ class FileService implements FileServiceInterface
 
         $host = array_pop_key("_host", $config); // Use custom _host if found
         $referenceType = array_pop_key("reference_type", $config); // Get reference type
+       
+       
         $data = $this->obfuscate($path, $config);
         if (!$data) {
             return null;
@@ -245,6 +258,7 @@ class FileService implements FileServiceInterface
         if ($referenceType !== null) {
             $variadic[] = $referenceType;
         }
+
         return $this->router->generate(...$variadic);
     }
 

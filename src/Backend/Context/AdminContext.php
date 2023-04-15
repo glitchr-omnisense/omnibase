@@ -80,10 +80,12 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
             $referenceUrl["domain"]   ?? null,
             $referenceUrl["port"] ?? null,
             $referenceUrl["path"]    ?? null,
-            $referenceUrl["query"]     ?? null
+            $referenceUrl["query"]     ?? null,
+            $referenceUrl["fragment"]     ?? null
         );
 
         $url = parse_url($this->request->getRequestUri());
+
         $url["query"] ??= "";
         $url["query"] = explode_attributes("&", $url["query"]);
         $url["query"] = array_key_removes_startsWith($url["query"], ...$ignoredKeys);
@@ -93,15 +95,16 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
 
         $url["query"] = str_replace("\"", "", implode_attributes("&", $url["query"]));
         $url = compose_url(
-            $url["scheme"]  ?? null,
+            $url["scheme"]    ?? null,
             $url["user"]      ?? null,
-            $url["password"] ?? null,
-            $url["machine"] ?? null,
+            $url["password"]  ?? null,
+            $url["machine"]   ?? null,
             $url["subdomain"] ?? null,
-            $url["domain"]   ?? null,
-            $url["port"] ?? null,
-            $url["path"]    ?? null,
-            $url["query"]     ?? null
+            $url["domain"]    ?? null,
+            $url["port"]      ?? null,
+            $url["path"] ?? null,
+            $url["query"]     ?? null,
+            $url["fragment"]  ?? null
         );
 
         return $url == $referenceUrl;

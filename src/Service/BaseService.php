@@ -13,6 +13,7 @@ use Base\Service\ParameterBagInterface;
 use Symfony\Component\Form\FormInterface;
 
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\BaseCommonTrait;
@@ -301,7 +302,7 @@ class BaseService implements RuntimeExtensionInterface
     {
         return $this->getParameterBag("kernel.secret");
     }
-    public function getProfiler()
+    public function getProfiler(): ?Profiler
     {
         return $this->kernel->getContainer()->get('profiler');
     }
@@ -435,8 +436,11 @@ class BaseService implements RuntimeExtensionInterface
 
     public function isDevelopment()
     {
-        return $this->isDebug() || $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_");
+        return  $this->isDebug() || 
+		$this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_") ||
+		$this->kernel->getEnvironment() == "local" || str_starts_with($this->kernel->getEnvironment(), "local_");
     }
+
     public function isProduction()
     {
         return !$this->isDevelopment();
