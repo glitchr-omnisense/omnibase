@@ -1,0 +1,52 @@
+{
+    "name": "@glitchr/base-bundle",
+    "description": "Base component integration for Symfony",
+    "license": "MIT",
+    "version": "2.0",
+    "symfony": {
+    },
+    "devDependencies": {
+    "@babel/core": "^7.17.0",
+    "@babel/preset-env": "^7.16.0",
+    "@symfony/webpack-encore": "^4.1.1",
+    "file-loader": "^6.0.0",
+    "postcss": "^8.0",
+    "postcss-loader": "^7.0",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-notifier": "^1.15.0",
+    "webpackbar": "^5.0"
+    },
+    "peerDependencies": {
+    "@eastdesire/jscolor": "^2.5.1",
+    "flatpickr": "^4.6",
+
+    "@glitchr/ajaxer": "^1.0",
+    "@glitchr/breakpoints": "^1.0",
+    "@fortawesome/fontawesome-free": "^6.4",
+    "@glitchr/clipboardjs": "^1.0",
+    "@glitchr/cookie": "^1.0",
+    "@glitchr/dockjs": "^1.0",
+    "@glitchr/imaginejs": "^1.0",
+    "@glitchr/lightbox2": "^1.0",
+    "@glitchr/media-query-plugin": "^1.5",
+    "@glitchr/quill": "^1.0",
+    "@glitchr/select2": "^1.0",
+    "@picmo/popup-picker": "5.7.2",
+    "@popperjs/core": "^2.11.6",
+    "@simonwep/pickr": "^1.8.2",
+    "bootstrap": "^5.2.3",
+    "bootstrap-icons": "^1.10.2",
+    "chart.js": "4.0.1",
+    "core-js": "^3.23.0",
+    "country-flag-icons": "^1.4.25",
+    "cropperjs": "1.5.13",
+    "dropzone": "^6.0.0-beta.2",
+    "highlight.js": "11.6.0",
+    "picmo": "5.7.2",
+    "regenerator-runtime": "^0.13.9",
+    "sass": "^1.56.1",
+    "sass-loader": "^13.0.0",
+    "sortablejs": "^1.15.0"
+  }
+}
