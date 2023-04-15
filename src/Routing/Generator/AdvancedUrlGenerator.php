@@ -89,7 +89,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $host = explode(":", self::$router->getHost())[0]; // Remove port from host..
             $this->getContext()->setHost($host);
 
-            $port = self::$router->getPort();
+            $port = self::$router->getPort() ?? 80;
             $this->getContext()->setHttpPort($port);
             $this->getContext()->setHttpsPort($port);
 

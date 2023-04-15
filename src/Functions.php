@@ -320,8 +320,8 @@ namespace {
                 $hostWithoutPort = explode(":", $parse["host"])[0];
                 $parse["fqdn"] = $hostWithoutPort . ".";
 
-                $parse["domain"] = $match[1];
-                $parse["port"] = $match[2];
+                if(count($match) > 1) $parse["domain"] = $match[1];
+                if(count($match) > 2) $parse["port"] = $match[2];
 
                 $subdomain = str_rstrip($hostWithoutPort, "." . $parse["domain"]);
                 if ($parse["domain"] !== $subdomain) {
