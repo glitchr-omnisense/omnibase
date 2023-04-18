@@ -665,7 +665,7 @@ body {
 
 body.ea-edit .content-header, body.ea-new .content-header {
     top: 0px;
-    padding: 2em 2.5em 1.5em 2.5em;
+    padding: 1em 3em 1em 2em;
 }
 
 .content-wrapper { padding:0; }
@@ -1109,8 +1109,8 @@ ul.sidebar-menu a { white-space: nowrap; }
     border-radius:100%;
 
     margin:0 0.5em;
-    height:70px;
-    width:70px;
+    height:60px;
+    width:60px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -1149,7 +1149,7 @@ fieldset .sidebar-menu { margin:0.25em 0em 0.25em 0; }
 }
 
 .content-header-icon i {
-    font-size:2.5em;
+    font-size:2em;
 }
 .datagrid .ea-lightbox-thumbnail img
 {
