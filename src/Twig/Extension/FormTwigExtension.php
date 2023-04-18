@@ -23,7 +23,6 @@ final class FormTwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('use_advanced_form', [$this, 'advancedForm']),
             new TwigFunction('form_proxy', [$this, 'getForm']),
             new TwigFunction('form_view', [$this, 'getView']),
         ];

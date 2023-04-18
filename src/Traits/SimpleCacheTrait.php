@@ -43,6 +43,16 @@ trait SimpleCacheTrait
         return $this->cache;
     }
     
+    public function invalidateCache(?string $key = null): self
+    {
+        if ($key === null) {
+            return $this->cache;
+        }
+
+        $this->cache?->deleteItem($this->getCacheKey(static::class.$key));
+        return $this;
+    }
+
     public function getCache(?string $key = null, mixed $fallback = null, int|\DateInterval|null $ttl = null, $deferred = false): mixed
     {
         if ($key === null) {

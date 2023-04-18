@@ -12,7 +12,7 @@ class SemanticEnhancer implements SemanticEnhancerInterface
         $this->semanticRepository = $semanticRepository;
     }
 
-    public function highlight(string|array|null $strOrArray, array $attributes = [], null|array|string $words = null): string|array|null
+    public function highlight(string|array|null $strOrArray, null|array|string $words = null, array $attributes = []): string|array|null
     {
         if ($strOrArray === null) {
             return null;

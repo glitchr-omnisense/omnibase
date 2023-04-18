@@ -100,11 +100,12 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return $this->generate();
     }
 
-    public function match(string $keyword)
+    protected function match(string $keyword): bool
     {
         return in_array(strtolower($keyword), array_map(fn($k) => strtolower($k), $this->keywords));
     }
-    public function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+
+    protected function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         try {
             return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType);
@@ -114,31 +115,41 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return null;
     }
 
-    public function highlight(string $search, array $attributes = [])
+    protected function doHighlight(string $text, array $keywords, array $attributes = [])
     {
-        return preg_replace(
-            "/(".implode("|", $this->getKeywords()).")/i",
-            "<a href='".$this->generate()."' ".html_attributes($attributes).">$1</a>",
-            $search
-        );
-    }
+        $keywords = array_filter($keywords);
+        if(!$keywords) return $text;
 
-    public function highlightBy(array|string $keywords, string $search, array $attributes)
-    {
-        $keywords = is_array($keywords) ? $keywords : [$keywords];
-        foreach($keywords as $keyword) {
+        $dom = new \DomDocument();
+        $encoding = mb_detect_encoding($text);
+        $dom->loadHTML(mb_convert_encoding($text, 'HTML-ENTITIES', $encoding));
 
-            if (!$this->match($keyword)) {
-                return $search;
+        $xpath = new \DOMXPath($dom);
+        foreach ($xpath->query('//text()') as $text) {
+
+            if (trim($text->nodeValue)) {
+
+                $text->nodeValue = preg_replace(
+                    "/(\b".implode("\b|\b", $keywords)."\b)/i",
+                    "<a href='".$this->generate()."' ".html_attributes($attributes).">$1</a>",
+                    $text->nodeValue
+                );
             }
-
-            $search = preg_replace(
-                "/(" . $keyword . ")/i",
-                "<a href='" . $this->generate() . "' " . html_attributes($attributes) . ">$1</a>",
-                $search
-            );
         }
 
-        return $search;
+        $node = $dom->getElementsByTagName('body')->item(0);
+        return html_entity_decode(trim(implode(array_map([$node->ownerDocument,"saveHTML"], iterator_to_array($node->childNodes)))));
+    }
+
+    public function highlight(string $text, array $attributes = [])
+    {
+        return $this->doHighlight($text, $this->getKeywords(), $attributes); 
+    }
+
+    public function highlightBy(string $text, array|string $keywords,  array $attributes)
+    {
+        $keywords = array_filter(is_array($keywords) ? $keywords : [$keywords], fn($k) => $this->match($k));
+     
+        return $this->doHighlight($text, $keywords, $attributes); 
     }
 }

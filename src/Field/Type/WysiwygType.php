@@ -41,6 +41,7 @@ class WysiwygType extends AbstractType
     {
         $resolver->setDefaults([
             'empty_data', null,
+            "webpack_entry" => "form.wysiwyg",
 
             'theme' => "snow",
             'placeholder' => "Compose an epic..",

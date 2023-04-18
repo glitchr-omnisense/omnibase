@@ -166,10 +166,10 @@ class SecurityController extends AbstractController
     {
         // If user is found.. go to the logout request page
         if ($this->getUser()) {
-            $response = $this->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
-            $response->headers->clearCookie('REMEMBERME', "/");
-            $response->headers->clearCookie('REMEMBERME', "/", ".".format_url(get_url(), FORMAT_URL_NOMACHINE|FORMAT_URL_NOSUBDOMAIN));
 
+            $response = $this->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
+            $response->headers->clearCookie('REMEMBERME', "/", $this->router->getDomain());
+            
             return $response;
         }
 
@@ -190,8 +190,9 @@ class SecurityController extends AbstractController
             $user->removeExpiredTokens();
         }
 
+        $returnUrl = $referrer->getUrl() ?? $this->router->getUrlIndex();
         // Redirect to previous page
-        return $this->redirect($referrer->getUrl() ?? $this->router->getUrlIndex());
+        return $this->redirect($returnUrl);
     }
 
     /**

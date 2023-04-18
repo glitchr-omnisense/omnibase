@@ -9,10 +9,13 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
 {
     protected $twig;
     protected $slugger;
-    public function __construct(Environment $twig, SluggerInterface $slugger)
+    protected $semanticEnhancer;
+
+    public function __construct(Environment $twig, SluggerInterface $slugger, SemanticEnhancerInterface $semanticEnhancer)
     {
         $this->twig = $twig;
         $this->slugger = $slugger;
+        $this->semanticEnhancer = $semanticEnhancer;
     }
 
     public function supports(mixed $html): bool
@@ -27,17 +30,16 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         return $this->twig->render("@Base/form/wysiwyg/quill.html.twig", ["html" => $html, "options" => $options]);
     }
 
-    public function highlightHeadings(mixed $html, array $attrs = [], ?int $maxLevel = null): mixed
+    public function highlightHeadings(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
     {
         if($html === null) {
             return null;
         }
-
         if(is_array($html)) {
 
             $toc = [];
             foreach($html as $htmlEntry) {
-                $toc[] = $this->highlightHeadings($htmlEntry, $attrs, $maxLevel);
+                $toc[] = $this->highlightHeadings($htmlEntry, $maxLevel, $attrs);
             }
 
             return $toc;
@@ -48,10 +50,10 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
 
         $dom = new \DOMDocument('1.0', $encoding);
         $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding));
-
+    
         $attrs = [];
         $attrs["class"] = $attrs["class"] ?? "";
-        $attrs["class"] = trim($attrs["class"] . " anchor");
+        $attrs["class"] = trim($attrs["class"] . " markdown-anchor");
 
         for($i = 1; $i <= $maxLevel; $i++) {
 
@@ -71,7 +73,27 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
             }
         }
 
-        return $dom->saveHTML();
+        $node = $dom->getElementsByTagName('body')->item(0);
+        return trim(implode(array_map([$node->ownerDocument,"saveHTML"], iterator_to_array($node->childNodes))));
+    }
+
+    public function highlightSemantics(mixed $html, null|array|string $words = null, array $attrs = []): mixed
+    {
+        if($html === null) {
+            return null;
+        }
+
+        if(is_array($html)) {
+
+            $htmlRet = [];
+            foreach($html as $htmlEntry) {
+                $htmlRet[] = $this->semanticEnhancer->highlight($htmlEntry, $words, $attrs);
+            }
+
+            return $htmlRet;
+        }
+
+        return $this->semanticEnhancer->highlight($html, $words, $attrs);
     }
 
     public function getTableOfContents(mixed $html, ?int $maxLevel = null): array
@@ -93,7 +115,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         $maxLevel ??= 6;
 
         $headlines = [];
-        preg_replace_callback("/\<(h[1-".$maxLevel."])\>([^\<\>]*)\<\/h[1-".$maxLevel."]\>/", function ($match) use (&$headlines) {
+        preg_replace_callback("/\<[ ]*(h[1-".$maxLevel."])(?:[^\<\>]*)\>([^\<\>]*)\<\/[ ]*h[1-".$maxLevel."][ ]*\>/", function ($match) use (&$headlines) {
             $headlines[] = [
                 "tag" => $match[1],
                 "slug"  => strtolower($this->slugger->slug($match[2])),

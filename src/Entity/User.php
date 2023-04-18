@@ -160,7 +160,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         } else {
             $this->getTokenStorage()->setToken(null);
             setcookie("REMEMBERME", '', time()-1);
-            setcookie("REMEMBERME", '', time()-1, "/", parse_url2(get_url())["domain"] ?? "");
+            setcookie("REMEMBERME", '', time()-1, "/", $this->getRouter()->getDomain());
         }
     }
 

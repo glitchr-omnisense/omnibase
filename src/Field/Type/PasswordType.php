@@ -71,7 +71,6 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
             "required"          => false,
             'options'           => [],
             'options[repeater]' => [],
-            'use_advanced_form' => true,
             'invalid_message'   => '@fields.password.invalid_message'
         ]);
 

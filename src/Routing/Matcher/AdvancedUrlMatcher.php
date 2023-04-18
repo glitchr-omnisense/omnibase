@@ -192,22 +192,25 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
     public function match(string $pathinfo): array
     {
-        $pathinfo2 = $pathinfo;
-        $parse = parse_url2($pathinfo) ?? [];
-        if($parse) {
-            if (array_key_exists("host", $parse))
-                $this->getContext()->setHost($parse["host"] ?? "localhost");
-            if (array_key_exists("port", $parse))
-                $this->getContext()->setHttpPort((int)($parse["port"] ?? 80));
-            if (array_key_exists("port", $parse))
-                $this->getContext()->setHttpsPort((int)($parse["port"] ?? 8000));
-            if (array_key_exists("query", $parse))
-                $this->getContext()->setQueryString($parse["query"] ?? "");
-            if (array_key_exists("path", $parse))
-                $this->getContext()->setBaseUrl("");
+        if (self::$router?->useAdvancedFeatures())
+        {
+            $parse = parse_url2($pathinfo) ?? [];
+            if($parse) {
 
-            $this->getContext()->setPathInfo("");
-            $pathinfo = ($parse["path"] ?? "");
+                if (array_key_exists("host", $parse))
+                    $this->getContext()->setHost($parse["host"] ?? "localhost");
+                if (array_key_exists("port", $parse))
+                    $this->getContext()->setHttpPort((int)($parse["port"] ?? 80));
+                if (array_key_exists("port", $parse))
+                    $this->getContext()->setHttpsPort((int)($parse["port"] ?? 8000));
+                if (array_key_exists("query", $parse))
+                    $this->getContext()->setQueryString($parse["query"] ?? "");
+                if (array_key_exists("path", $parse))
+                    $this->getContext()->setBaseUrl("");
+
+                $this->getContext()->setPathInfo("");
+                $pathinfo = ($parse["path"] ?? "");
+            }
         }
 
         //
@@ -216,8 +219,8 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         try { $match = parent::match($pathinfo); }
         catch (Exception $e) { $match = []; }
 
-        if (str_starts_with($match["_route"] ?? "", "_") || !self::$router?->useAdvancedFeatures()) {
-
+        if (!self::$router?->useAdvancedFeatures())
+        {
             return $match;
         }
 
@@ -227,4 +230,6 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
         return $match;
     }
+    public static $i = 0;
+
 }

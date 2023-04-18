@@ -185,9 +185,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             "dropdownCssClass"   => null,
             "containerCssClass"  => null,
 
-            'use_html'               => false,
-            'href'               => null,
-            'use_advanced_form' => true,
+            'use_html'      => false,
+            'href'          => null,
+            'webpack_entry' => "form.select2",
 
             // Autocomplete
             'autocomplete'                     => null,

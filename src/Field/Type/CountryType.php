@@ -94,8 +94,7 @@ class CountryType extends SelectType implements SelectInterface
             'choices' => $this->getChoices(),
             'alpha3' => false,
             "use_html" => true,
-            "empty_data" => User::getCookie("country") ?? null,
-            'use_advanced_form' => true
+            "empty_data" => User::getCookie("country") ?? null
         ]);
     }
 }

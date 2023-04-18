@@ -68,6 +68,7 @@ class CropperType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
             "data_class" => ImageCrop::class,
             "label" => false,
+            "webpack_entry" => "form.cropper",
             'cropper_info' => true,
             'cropper_actions' => true,
             'cropper'     => [

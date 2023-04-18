@@ -116,8 +116,8 @@
     }
 }
 
-.content .content-body { transition: opacity 0.25s ease-out; }
-.content:not(.loaded) .content-body {
+.spinner > * { transition: opacity 0.25s ease-out; }
+.spinner:not(.loaded) > * {
     opacity: 0;
 }
 
@@ -259,6 +259,11 @@ form .label-wrapper .badge
 }
 
 .form-switch:first-child { padding-left:0; }
+
+.action-see {
+    background-color: var(--bs-info) !important;
+    color: #fff!important;
+}
 
 hr { margin: 0.5rem 0; }
 .locale-dropdown .actions .action-icon { top: 0 !important;}

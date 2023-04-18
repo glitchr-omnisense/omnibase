@@ -10,11 +10,19 @@
   width: 20px;
 }
 
+.select2-container .select2-search--inline,
+.select2-container .select2-search--inline .select2-search__field
+{
+  width:100%;
+}
+
 .select2-selection__choice { order:0; }
 .select2-container .select2-search--inline
 {
   margin-top:0.2em;
   order:1;
+  
+  float:none;
 }
 
 .select2-selection--single.required::after { display: none; }

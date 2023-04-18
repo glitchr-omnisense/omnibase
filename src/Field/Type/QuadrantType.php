@@ -35,8 +35,7 @@ class QuadrantType extends AbstractType implements DataMapperInterface
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            "class" => Quadrant8::class,
-            'use_advanced_form' => true
+            "class" => Quadrant8::class
         ]);
     }
 

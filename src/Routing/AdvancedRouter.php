@@ -174,6 +174,7 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         return $this->isEasyAdmin($request) || $this->isProfiler($request);
     }
+
     public function isProfiler(mixed $request = null): bool
     {
         if (!$request) {
@@ -750,6 +751,7 @@ class AdvancedRouter extends Router implements RouterInterface
         }
 
         $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
+
         foreach ($exceptions as $pattern) {
             if (preg_match($pattern, $this->getRouteName())) {
                 return false;
@@ -763,6 +765,7 @@ class AdvancedRouter extends Router implements RouterInterface
         if (is_callable($callback)) {
             $callback();
         }
+        
         return true;
     }
 

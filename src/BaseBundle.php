@@ -44,6 +44,7 @@ class BaseBundle extends Bundle
         }
     }
 
+    public static $sessionStorage = null;
     public const VERSION   = '1.0.0';
     public const USE_CACHE = true;
 

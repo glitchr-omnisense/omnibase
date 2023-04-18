@@ -17,6 +17,7 @@ var localCacheData = {};
 
 window.addEventListener("load.form_type", function () {
 
+    console.log("SLEECT2");
     document.querySelectorAll("[data-select2-field]").forEach((function (el) {
 
         var term = "";

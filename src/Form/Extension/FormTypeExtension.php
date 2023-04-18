@@ -78,7 +78,6 @@ class FormTypeExtension extends AbstractTypeExtension
             'form_flow_id'      => '_flow_token',
             'validation_entity' => null,
             'use_model'         => false,
-            'use_advanced_form' => false,
             'submit_on_enter'   => true,
         ]);
 
@@ -107,9 +106,6 @@ class FormTypeExtension extends AbstractTypeExtension
         if ($options["easyadmin"]) {
             $this->applyEA($view, $form);
         }
-        if ($options["use_advanced_form"] ?? false) {
-            $this->formProxy->useAdvancedForm();
-        }
 
         if ($this->authorizationChecker->isGranted(UserRole::ADMIN) && $this->router->isEasyAdmin()) {
             $this->markDbProperties($view, $form, $options);
@@ -125,9 +121,6 @@ class FormTypeExtension extends AbstractTypeExtension
             $childOptions = $childForm->getConfig()->getOptions();
             $childOptions["form2"] = $options["form2"];
             $childOptions["easyadmin"] = $options["easyadmin"];
-            if ($childOptions["use_advanced_form"] ?? false) {
-                $this->formProxy->useAdvancedForm();
-            }
 
             $this->browseView($childView, $childForm, $childOptions);
         }

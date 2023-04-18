@@ -233,7 +233,7 @@
         .form-control::placeholder { color: inherit; }
         .main-header { display: block; }
         p { margin-left: 1em; margin-bottom: 0; }
-        .alert.alert-info { display: flex; align-items: center; }
+        .alert.alert-info { display: flex; }
     </style>
 {% endblock %}
 
@@ -250,7 +250,7 @@
 
     {% include '@EasyAdmin/flash_messages.html.twig' %}
 
-    <div class="login-wrapper">
+    <div class="login-wrapper spinner">
 
         <header class="main-header">
             <div id="header-logo" style="padding: 1em !important;">

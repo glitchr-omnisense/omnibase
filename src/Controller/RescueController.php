@@ -20,13 +20,9 @@ use Base\Service\SettingBagInterface;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-/**
- * @Route(priority="-1")
- */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
     /**
@@ -90,7 +86,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
      * Link to this controller to start the "connect" process
      *
      * @Route("/rescue", name="security_rescue")
-     * @Iconize({"fa-solid fa-lock","fa-solid fa-unlock"})
+     * @Iconize({"fa-solid fa-lock", "fa-solid fa-unlock"})
      */
     public function LoginRescue(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
@@ -99,7 +95,11 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
 
         // Redirect to the right page when access denied
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->redirect($referrer->getUrl() ?? $this->router->generate("backoffice"));
+            
+            $targetUrl = $referrer->getUrl() ?? $this->router->generate("backoffice");
+            $referrer->clear();
+
+            return $this->redirect($targetUrl);
         }
 
         // Generate form

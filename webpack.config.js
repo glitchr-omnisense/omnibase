@@ -14,49 +14,17 @@ Encore.addPlugin(new WebpackBar())
     .enableSourceMaps(!Encore.isProduction())
     .enableVersioning(Encore.isProduction())
 
-    .copyFiles({
-        from: './node_modules/@fortawesome/fontawesome-free/metadata/',
-        pattern: /icons.yml$/,
-        to: 'metadata/[name].[ext]'
-    })
-    .copyFiles({
-        from: './node_modules/@fortawesome/fontawesome-free/webfonts/',
-        to: 'fonts/[name].[hash].[ext]'
-    })
+    .copyFiles({from: './node_modules/@fortawesome/fontawesome-free/metadata/', pattern: /icons.yml$/, to: 'metadata/[name].[ext]'})
+    .copyFiles({from: './node_modules/@fortawesome/fontawesome-free/webfonts/', to: 'fonts/[name].[hash].[ext]'})
 
-    .copyFiles({
-        from: './node_modules/bootstrap-icons/font/fonts',
-        to: 'fonts/[name].[ext]'
-    })
-    .copyFiles({
-        from: './node_modules/@fortawesome/fontawesome-free/webfonts/',
-        to: 'fonts/[name].[hash].[ext]'
-    })
+    .copyFiles({from: './node_modules/bootstrap-icons/font/fonts', to: 'fonts/[name].[ext]'})
+    .copyFiles({from: './node_modules/@fortawesome/fontawesome-free/webfonts/', to: 'fonts/[name].[hash].[ext]'})
+    .copyFiles({from: './node_modules/country-flag-icons/3x2/', to: 'images/flags/[path][name].[ext]', pattern: /\.svg$/})
 
-    .copyFiles({
-        from: './node_modules/country-flag-icons/3x2/',
-        to: 'images/flags/[path][name].[ext]',
-        pattern: /\.svg$/
-    })
-
-    .copyFiles({
-        from: './assets/styles/images/flags/',
-        to: 'images/flags/[path][name].[ext]',
-        pattern: /\.svg$/
-    })
-    .copyFiles({
-        from: './assets/styles/fonts',
-        to: 'fonts/[path][name].[ext]'
-    })
-    .copyFiles({
-        from: './assets/styles/images/bundles/',
-        to: 'images/bundles/[path][name].[ext]'
-    })
-    .copyFiles({
-        from: './assets/styles/images/',
-        to: 'images/[path][name].[ext]',
-        pattern: /\.svg$/
-    })
+    .copyFiles({from: './assets/styles/images/flags/', to: 'images/flags/[path][name].[ext]', pattern: /\.svg$/})
+    .copyFiles({from: './assets/styles/fonts', to: 'fonts/[path][name].[ext]'})
+    .copyFiles({from: './assets/styles/images/bundles/', to: 'images/bundles/[path][name].[ext]'})
+    .copyFiles({from: './assets/styles/images/', to: 'images/[path][name].[ext]', pattern: /\.svg$/})
 
     .disableSingleRuntimeChunk()
 
@@ -72,7 +40,17 @@ Encore.addPlugin(new WebpackBar())
     .addEntry('base-async', './assets/base-async.js')
     .addEntry('base-defer', './assets/base-defer.js')
     .addEntry('easyadmin-async', './assets/easyadmin-async.js')
+
     .addEntry('form-defer', './assets/form-defer.js')
+    .addEntry('form-defer.editor', './assets/form-defer.editor.js')
+    .addEntry('form-defer.array', './assets/form-defer.array.js')
+    .addEntry('form-defer.datetime', './assets/form-defer.datetime.js')
+    .addEntry('form-defer.select2', './assets/form-defer.select2.js')
+    .addEntry('form-defer.color', './assets/form-defer.color.js')
+    .addEntry('form-defer.wysiwyg', './assets/form-defer.wysiwyg.js')
+    .addEntry('form-defer.cropper', './assets/form-defer.cropper.js')
+    .addEntry('form-defer.emoji', './assets/form-defer.emoji.js')
+    .addEntry('form-defer.dropzone', './assets/form-defer.dropzone.js')
 
     .enableSassLoader()
     .enablePostCssLoader()

@@ -2,18 +2,16 @@
 
 namespace Base\Controller;
 
+use Base\Routing\RouterInterface;
 use Base\Service\ReferrerInterface;
-use Base\Service\Localizer;
 use Base\Service\LocalizerInterface;
 use Base\Service\TranslatorInterface;
-use Base\Subscriber\LocaleSubscriber;
+use Base\Subscriber\LocalizerSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
-use Symfony\Component\Routing\RouterInterface;
 
 class LocalizerController extends AbstractController
 {
@@ -21,6 +19,11 @@ class LocalizerController extends AbstractController
      * @var LocalizerInterface
      */
     protected $localizer;
+
+    protected $router;
+    protected $referrer;
+    protected $translator;
+    protected $entityManager;
 
     public function __construct(LocalizerInterface $localizer, EntityManagerInterface $entityManager, RouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
     {
@@ -37,7 +40,7 @@ class LocalizerController extends AbstractController
     public function Locale(Request $request, ReferrerInterface $referrer, ?string $_locale = null)
     {
         if ($_locale === null) {
-            setcookie(LocaleSubscriber::__LOCALE_IDENTIFIER__, null);
+            setcookie(LocalizerSubscriber::__LANG_IDENTIFIER__, null, "/", ".".$this->router->getDomain());
         }
 
         $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
@@ -76,7 +79,7 @@ class LocalizerController extends AbstractController
     public function Timezone(Request $request, ReferrerInterface $referrer, ?string $_locale = null)
     {
         if ($_locale === null) {
-            setcookie(LocaleSubscriber::__LOCALE_IDENTIFIER__, null);
+            setcookie(LocalizerSubscriber::__LANG_IDENTIFIER__, null);
         }
 
         $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);

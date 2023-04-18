@@ -1,0 +1,1 @@
+import './styles/js/forms/form-type-array.js';

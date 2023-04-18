@@ -5,6 +5,7 @@ namespace Base\Backend\Config;
 class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
 {
     public const GOTO_PREV = 'prev';
+    public const GOTO_SEE  = 'see';
     public const GOTO_NEXT = 'next';
     public const SEPARATOR = 'separator';
     public const GROUP = 'group';

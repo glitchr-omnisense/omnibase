@@ -459,6 +459,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="twig" />
             <argument type="service" id="slugger" />
+            <argument type="service" id="semantic_enhancer" />
         </service>
 
         <service id="Base\Service\Model\Obfuscator\AbstractCompression"></service>
@@ -707,6 +708,10 @@
             <argument type="service" id="form.factory" />
             <argument type="service" id="form.proxy" />
             <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+         <service id="Base\Form\Extension\FormTypeWebpackExtension"><tag name="form.type_extension" />
+            <argument type="service" id="form.proxy" />
+            <argument type="service" id="twig.encore_renderer" />
         </service>
         <service id="Base\Form\Extension\FormTypeCollectionExtension"         ><tag name="form.type_extension" />
             <argument type="service" id="base.service" />
@@ -994,8 +999,6 @@
         <service id="Base\Field\Type\ColorPickerType">
             <tag name="form.type" />
             <argument type="service" id="translator" />
-            <argument type="service" id="twig" />
-            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Field\Type\EmojiPickerType">

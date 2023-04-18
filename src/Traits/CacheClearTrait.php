@@ -2,6 +2,7 @@
 
 namespace Base\Traits;
 
+use Base\BaseBundle;
 use Base\Database\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -155,9 +156,9 @@ trait CacheClearTrait
         $memoryLimitStr = $memoryLimit > 1 ? byte2str($memoryLimit, array_slice(DECIMAL_PREFIX, 0, 3)) : "";
 
         if ($percentSpace > 95) {
-            $fn = "warning";
+            $fn = "error";
         } elseif ($percentSpace > 75) {
-            $fn = "note";
+            $fn = "warning";
         } else {
             $fn = "info";
         }

@@ -85,6 +85,7 @@ class RouterSubscriber implements EventSubscriberInterface
 
             // Redirect to sanitized url
             if($url != get_url()) {
+
                 $event->setResponse(new RedirectResponse($url));
                 return $event->stopPropagation();
             }

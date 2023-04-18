@@ -211,7 +211,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      * Link to this controller to start the "connect" process
      *
      * @Route("", name="")
-     * @Iconize({"fa-solid  fa-fw fa-toolbox", "fa-solid  fa-fw fa-home"})
+     * @Iconize({"fa-solid fa-fw fa-toolbox", "fa-solid fa-fw fa-home"})
      */
     public function index(): Response
     {
@@ -220,7 +220,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     /**
      * @Route({"fr": "/clef-api", "en": "/api-key"}, name="_apikey")
-     * @Iconize({"fa-solid  fa-fw fa-fingerprint", "fa-solid  fa-fw fa-key"})
+     * @Iconize({"fa-solid fa-fw fa-fingerprint", "fa-solid fa-fw fa-key"})
      * @IsGranted("IS_AUTHENTICATED_FULLY")
      */
     public function ApiKey(Request $request, array $fields = []): Response
@@ -301,7 +301,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      * Link to this controller to start the "connect" process
      *
      * @Route({"fr": "/parametres", "en": "/settings"}, name="_settings")
-     * @Iconize("fa-solid  fa-fw fa-tools")
+     * @Iconize("fa-solid fa-fw fa-tools")
      */
     public function Settings(Request $request, array $fields = []): Response
     {
@@ -382,7 +382,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      * Link to this controller to start the "connect" process
      *
      * @Route({"fr": "/personnaliser", "en": "/widgets"}, name="_widgets")
-     * @Iconize("fa-solid  fa-fw fa-th-large")
+     * @Iconize("fa-solid fa-fw fa-th-large")
      */
     public function Widgets(Request $request, array $widgetSlots = []): Response
     {
@@ -439,7 +439,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         $this->configureExtension(
             $this->extension
-            ->setIcon("fa-solid  fa-laptop-house")
+            ->setIcon("fa-solid fa-laptop-house")
             ->setTitle($title)
             ->setText($subtitle)
             ->setLogo($logo)
@@ -472,7 +472,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             }
 
             $label = $this->translator->transEnum($role, $class, Translator::NOUN_PLURAL);
-            $icon  = UserRole::getIcon($role, 1) ?? "fa-solid  fa-fw fa-user";
+            $icon  = UserRole::getIcon($role, 1) ?? "fa-solid fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
                  ->unsetAll()
@@ -491,7 +491,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $subItems = [];
                 foreach ($values as $role) {
                     $label = mb_ucfirst($this->translator->transEnum($role, $class, Translator::NOUN_PLURAL));
-                    $icon  = UserRole::getIcon($role, 1) ?? "fa-solid  fa-fw fa-user";
+                    $icon  = UserRole::getIcon($role, 1) ?? "fa-solid fa-fw fa-user";
 
                     $crudController = UserRole::getCrudController($role);
                     if (!$crudController) {
@@ -528,7 +528,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $menu[] = MenuItem::linkToRoute("backoffice_apikey");
         $menu[] = MenuItem::linkToRoute("backoffice_settings");
         $menu[] = MenuItem::linkToRoute("backoffice_widgets");
-        $menu[] = MenuItem::linkToRoute("app_index", [], 'Back to website', 'fa-solid  fa-fw fa-door-open');
+        $menu[] = MenuItem::linkToRoute("app_index", [], 'Back to website', 'fa-solid fa-fw fa-door-open');
 
         $menu[] = MenuItem::section('BUSINESS CARD');
         if (UserRole::class != \Base\Enum\UserRole::class) {
@@ -539,8 +539,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $menu[] = MenuItem::section('MEMBERSHIP');
 
             $menu   = $this->addRoles($menu, \Base\Enum\UserRole::class);
-            $menu[] = MenuItem::linkToCrud(User::class, "All users", 'fa-solid  fa-fw fa-tags', );
-            $menu[] = MenuItem::linkToCrud(User::class, 'Add user', 'fa-solid  fa-fw fa-plus-circle')->setPermission('ROLE_EDITOR')
+            $menu[] = MenuItem::linkToCrud(User::class, "All users", 'fa-solid fa-fw fa-tags', );
+            $menu[] = MenuItem::linkToCrud(User::class, 'Add user', 'fa-solid fa-fw fa-plus-circle')->setPermission('ROLE_EDITOR')
                 ->setAction('new');
         }
 
@@ -551,28 +551,30 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         return Actions::new($this->adminUrlGenerator, $this->entityManager)
 
-            ->add(Crud::PAGE_INDEX, Action::NEW, 'fa-solid  fa-fw fa-edit')
-            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fa-solid  fa-fw fa-pencil-alt', fn (EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_INDEX, Action::DETAIL, 'fa-solid  fa-fw fa-search', fn (EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fa-solid  fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::NEW, 'fa-solid fa-fw fa-edit')
+            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt', fn (EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DETAIL, 'fa-solid fa-fw fa-search', fn (EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
 
-            ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT, 'fa-solid  fa-fw fa-angle-right')
-            ->add(Crud::PAGE_DETAIL, Action::INDEX, 'fa-solid  fa-fw fa-undo')
-            ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV, 'fa-solid  fa-fw fa-solid fa-solid fa-angle-left')
-            ->add(Crud::PAGE_DETAIL, Action::EDIT, 'fa-solid  fa-fw fa-pencil-alt')
-            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fa-solid  fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right')
+            ->add(Crud::PAGE_DETAIL, Action::INDEX, 'fa-solid fa-fw fa-undo')
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right')
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left')
+            ->add(Crud::PAGE_DETAIL, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt')
+            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
 
-            ->add(Crud::PAGE_EDIT, Action::INDEX, 'fa-solid  fa-fw fa-undo')
-            ->add(Crud::PAGE_EDIT, Action::DETAIL, 'fa-solid  fa-fw fa-search')
-            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fa-solid  fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_EDIT, Action::INDEX, 'fa-solid fa-fw fa-undo')
+            ->add(Crud::PAGE_EDIT, Action::DETAIL, 'fa-solid fa-fw fa-search')
+            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
             ->add(Crud::PAGE_EDIT, Action::SEPARATOR)
-            ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fa-solid  fa-fw fa-angle-right')
-            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fa-solid  fa-fw fa-edit')
-            ->add(Crud::PAGE_EDIT, Action::GOTO_PREV, 'fa-solid  fa-fw fa-solid fa-solid fa-angle-left')
+            ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right')
+            ->add(Crud::PAGE_EDIT, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right')
+            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-edit')
+            ->add(Crud::PAGE_EDIT, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left')
 
-            ->add(Crud::PAGE_NEW, Action::INDEX, 'fa-solid  fa-fw fa-backspace')
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN, 'fa-solid  fa-fw fa-edit')
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER, 'fa-solid  fa-fw fa-edit');
+            ->add(Crud::PAGE_NEW, Action::INDEX, 'fa-solid fa-fw fa-backspace')
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN, 'fa-solid fa-fw fa-edit')
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER, 'fa-solid fa-fw fa-edit');
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu

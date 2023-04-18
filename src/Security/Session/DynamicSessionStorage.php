@@ -2,7 +2,6 @@
 
 namespace Base\Security\Session;
 
-use Symfony\Bundle\SecurityBundle\DependencyInjection\Compiler\AddSessionDomainConstraintPass;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 class DynamicSessionStorage extends NativeSessionStorage
@@ -16,7 +15,6 @@ class DynamicSessionStorage extends NativeSessionStorage
     {
         if(isset($_SERVER['HTTP_HOST'])) {
 
-            $parsedUrl = parse_url2($_SERVER['HTTP_HOST']);
             $domain = parse_url2($_SERVER['HTTP_HOST'])["domain"] ?? null;
             if ($domain) {
 
@@ -24,6 +22,7 @@ class DynamicSessionStorage extends NativeSessionStorage
                 $validDomains = is_array($validDomains) ? $validDomains : array_filter([$validDomains]);
                 if (!empty($validDomains) && in_array($domain, $validDomains))
                     $options["cookie_domain"] = $domain;
+
             }
         }
 

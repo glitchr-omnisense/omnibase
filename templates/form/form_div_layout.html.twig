@@ -99,7 +99,6 @@
     <span>{{ form_label(form) }}</span>
     {{ form_errors(form) }}
     {{ form_row(form) }}
-    <div class="form-text text-muted">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
 </div>
 {%- endblock -%}
 
@@ -110,7 +109,7 @@
     }) %}
 
     {{ form_widget(form) }}
-    <div id="{{ id }}_editor" {{ block('attributes') }}></div>
+    <div id="{{ id }}_editor" {{ block('attributes') }}>{{ value|wysiwyg|raw }}</div>
     <div class="form-text text-muted">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
 {%- endblock wysiwyg_widget -%}
 

@@ -52,11 +52,9 @@ final class ColorPickerType extends AbstractType
     /** @var TranslatorInterface */
     protected $translator;
 
-    public function __construct(TranslatorInterface $translator, Environment $twig, ParameterBagInterface $parameterBag)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator   = $translator;
-        $this->twig         = $twig;
-        $this->parameterBag = $parameterBag;
     }
 
     public function getParent(): ?string
@@ -206,6 +204,7 @@ final class ColorPickerType extends AbstractType
                     'cancel' => $this->translator->trans('@fields.color.buttons.cancel'),
                 ],
             ],
+            "webpack_entry" => "form.color",
 
             'is_nullable' => true
         ]);

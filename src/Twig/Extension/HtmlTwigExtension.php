@@ -42,8 +42,15 @@ final class HtmlTwigExtension extends AbstractExtension
         else if($this->wysiwygEnhancer->supports($htmlOrJson))
             $enhancer = $this->wysiwygEnhancer;
         else throw new RuntimeException("Unsupported wysiwyg input");
+        
+        $applySemantics = array_pop_key("semantics", $options);
+        if($applySemantics)
+            $htmlOrJson = $enhancer->highlightSemantics($htmlOrJson);
+        
+        $applyHeadings = array_pop_key("headings", $options);
+        if($applyHeadings)
+            $htmlOrJson = $enhancer->highlightHeadings($htmlOrJson, $maxLevel);
 
-        $htmlOrJson = $enhancer->highlightHeadings($htmlOrJson, $options, $maxLevel);
         return $enhancer->render($htmlOrJson, ["attr" => $options["row_attr"] ?? []]);
     }
 

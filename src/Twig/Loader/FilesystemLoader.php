@@ -7,7 +7,6 @@ use Base\Traits\BaseTrait;
 use Twig\Loader\ChainLoader;
 use Twig\Environment;
 
-use Base\Service\BaseService;
 use Base\Twig\AppVariable;
 use Base\Twig\Variable\RandomVariable;
 use Exception;

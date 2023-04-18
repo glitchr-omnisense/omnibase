@@ -3,6 +3,7 @@
 namespace Base\Backend\Config;
 
 use Base\Database\Repository\ServiceEntityRepository;
+use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -71,7 +72,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
         if (Action::GOTO_PREV === $actionName) {
             return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'backoffice'))
                 ->setCssClass('action-'.Action::GOTO_PREV)
-                ->addCssClass('btn btn-secondary action-save')
+                ->addCssClass('btn btn-secondary')
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
@@ -90,10 +91,26 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 });
         }
 
+        if (Action::GOTO_SEE === $actionName) {
+
+            return Action::new(Action::GOTO_SEE, t('action.goto_see', domain: 'backoffice'))
+                ->setCssClass('action-'.Action::GOTO_SEE)
+                ->addCssClass('btn btn-secondary')
+                ->displayAsLink()
+                ->renderAsTooltip()
+                ->linkToUrl(function (mixed $entity) {
+                    
+                    try { $linkToEntity = $entity instanceof LinkableInterface ? $entity->__toLink() : ""; }
+                    catch(\Exception $e) { $linkToEntity = ""; }
+
+                    return $linkToEntity;
+                });
+        }
+
         if (Action::GOTO_NEXT === $actionName) {
             return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'backoffice'))
                 ->setCssClass('action-'.Action::GOTO_NEXT)
-                ->addCssClass('btn btn-secondary action-save')
+                ->addCssClass('btn btn-secondary')
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {

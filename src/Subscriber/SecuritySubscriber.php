@@ -293,6 +293,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         if ($user->isKicked()) {
+            
             $notification = new Notification("kickout", [$user]);
             $notification->send("warning");
 

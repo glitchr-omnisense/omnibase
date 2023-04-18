@@ -2,11 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Symfony\Component\Form\ButtonTypeInterface;
 use Symfony\Component\Form\Extension\Core\Type\BaseType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\SubmitButtonTypeInterface;
@@ -32,7 +28,6 @@ class ButtonType extends BaseType implements SubmitButtonTypeInterface // NB: A 
         $resolver->setDefault('confirmation', false);
         $resolver->setDefault('confirmation-bubbleup', true);
         $resolver->setDefault('label_html', true);
-        $resolver->setDefault('use_advanced_form', true);
         $resolver->setDefault('type', "button");
     }
 

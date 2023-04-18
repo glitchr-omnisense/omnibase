@@ -50,6 +50,7 @@ class EditorType extends AbstractType
         $resolver->setDefaults([
             'empty_data', null,
             'placeholder' => "Compose an epic..",
+            "webpack_entry" => "form.editor"
         ]);
     }
 

@@ -47,4 +47,5 @@ action:
   save: 'Enregistrer'
   save_and_continue: 'Enregistrer et continuer'
   goto_next: "Suivant"
+  goto_see: "Voir la page"
   goto_prev: "Précédent"

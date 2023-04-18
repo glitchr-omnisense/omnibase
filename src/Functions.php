@@ -1059,6 +1059,14 @@ namespace {
         return true;
     }
 
+    function read_property(object $object, string $property): mixed
+    {
+        $reflProperty = new ReflectionProperty(get_class($object), $property);
+        $reflProperty->setAccessible(true);
+
+        return $reflProperty->getValue($object);
+    }
+
     function path_suffix(string|array|null $path, $suffix, $separator = "_"): string|array|null
     {
         if ($path === null) {

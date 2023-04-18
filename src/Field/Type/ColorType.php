@@ -42,7 +42,8 @@ final class ColorType extends AbstractType
     {
         $resolver->setDefaults([
             'jscolor'     => [],
-            'is_nullable' => true
+            'is_nullable' => true,
+            "webpack_entry" => "form.color"
         ]);
     }
 

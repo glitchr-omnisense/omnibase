@@ -64,7 +64,7 @@ class LocalizerSubscriber implements EventSubscriberInterface
         if (!is_instanceof(User::class, BaseUser::class)) {
             return;
         }
-        setcookie(self::__LANG_IDENTIFIER__, $event->getTargetUser()->getLocale(), 0, "/", parse_url2(get_url())["domain"] ?? "");
+        setcookie(self::__LANG_IDENTIFIER__, $event->getTargetUser()->getLocale(), 0, "/", $this->router->getDomain());
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -83,7 +83,7 @@ class LocalizerSubscriber implements EventSubscriberInterface
 
         if ($_locale !== null) {
             if (is_instanceof(User::class, BaseUser::class)) {
-                setcookie(self::__LANG_IDENTIFIER__, $_locale, 0, "/", parse_url2(get_url())["domain"] ?? "");
+                setcookie(self::__LANG_IDENTIFIER__, $_locale, 0, "/", $this->router->getDomain());
             }
 
             $this->localizer->markAsChanged();

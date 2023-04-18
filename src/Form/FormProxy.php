@@ -31,17 +31,6 @@ class FormProxy implements FormProxyInterface
         return $this->forms;
     }
 
-    protected bool $advancedForm = false;
-    public function advancedForm()
-    {
-        return $this->advancedForm;
-    }
-    public function useAdvancedForm(bool $advancedForm = true)
-    {
-        $this->advancedForm = $advancedForm;
-        return $this;
-    }
-
     public function empty(): bool
     {
         return empty($this->forms);

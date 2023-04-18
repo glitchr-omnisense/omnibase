@@ -3,8 +3,8 @@ import './styles/easyadmin-async.scss';
 var spinnerTimeout = setTimeout(function() { $(".content").addClass("spinner"); }, 1000);
 $(window).on("load", function(e) {
 
-    $(".content").addClass("loaded");
-    $(".content").removeClass("spinner");
+    $(".content").addClass("spinner");
+    $(".spinner").addClass("spinner loaded");
     clearTimeout(spinnerTimeout);
 });
 

@@ -25,6 +25,7 @@ action:
   batch_delete: "Delete"
 
   goto_next: "Next"
+  goto_see: "See the page"
   goto_prev: "Previous"
 
   create_and_continue: 'Create and continue'
