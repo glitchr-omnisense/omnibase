@@ -22,7 +22,7 @@
   margin-top:0.2em;
   order:1;
   
-  float:none;
+  float:none !important;
 }
 
 .select2-selection--single.required::after { display: none; }
