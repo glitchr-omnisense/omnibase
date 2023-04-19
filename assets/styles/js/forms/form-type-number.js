@@ -22,6 +22,11 @@ window.addEventListener("load.form_type", function () {
         var btnDown = $("#"+id+"-down");
         var btnUp = $("#"+id+"-up");
 
+        if(min == max) {
+            btnDown.prop("disabled", true);
+            btnUp.prop("disabled", true);
+        }
+
         var invervalBtnUp, invervalBtnDown;
         var intervalKeyUp, intervalKeyDown;
 

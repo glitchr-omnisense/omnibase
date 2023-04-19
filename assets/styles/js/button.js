@@ -20,8 +20,13 @@ $("[type=submit]").on("click", function(e) {
     if (form.length == 1) {
 
         var submitter = form.find("[type=submit]");
-        if(submitter.length == 1) submitter.click();
-        else {
+        if(submitter.length == 1) { 
+        
+            console.log(submitter, this);
+            if (submitter[0] != this) 
+                submitter.click();
+        
+        } else if(id != undefined) {
             
             form = form[0];
             if ( $(form).hasClass("needs-validation") ) {

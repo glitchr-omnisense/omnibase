@@ -1,3 +1,4 @@
+import Modal from 'bootstrap/js/dist/modal';
 window.addEventListener("load.form_type", function () {
 
     document.querySelectorAll("[data-button-field]").forEach((function (el) {
@@ -19,7 +20,7 @@ window.addEventListener("load.form_type", function () {
             $("#"+id+"-request").on("click", function (e) {
 
                 $('#'+id+'-modal').modal('show');
-
+               
                 e.preventDefault();
 
                 return false;

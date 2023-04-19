@@ -76,6 +76,10 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
                 if (!self::$router->getDomainFallback() && str_contains($regexp, "\\\\\\{_domain\\\\\\}"))
                     throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
 
+                // @todo: Some cases might be problematic: to be improved later
+                //e.g. machine1.machine2.subdomain.domain.com
+                //e.g. machine1.machine2.domain.com
+                
                 $machine = self::$router->getMachineFallback();
                 if(in_array(self::$router->getMachine(), self::$router->getMachineFallbacks()))
                     $machine = self::$router->getMachine();
