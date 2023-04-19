@@ -40,7 +40,7 @@
     padding: 1em 0 !important;
 }
 
-.form-inline button:first-of-type:not(last-of-type)
+.form-inline button:first-of-type:not(:last-of-type)
 {
     border-bottom-right-radius:0;
     border-top-right-radius:0;

@@ -225,6 +225,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      */
     public function ApiKey(Request $request, array $fields = []): Response
     {
+        $this->settingBag->clearAll(); // Clear cache
+
         $fields = array_reverse(array_merge(array_reverse([
             "api.spam.akismet" => [],
             "api.currency.fixer" => [],
@@ -285,6 +287,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             }
 
             $this->settingRepository->flush();
+        
+            $this->settingBag->clearAll(); // Clear cache
 
             $notification = new Notification("@controllers.backoffice_apikey.success");
             $notification->send("success");
@@ -328,6 +332,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.mail.contact"                        => ["form_type" => EmailType::class],
         ]), array_reverse($fields)));
 
+        $this->settingBag->clearAll(); // Clear cache
+
         foreach ($fields as $name => &$options) {
 
             $roles = array_pop_key("roles", $options);
@@ -348,8 +354,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data     = $form->getData();
-
+            $data = $form->getData();
             foreach($data as $setting)
             {
                 $translations = $setting->getTranslations();

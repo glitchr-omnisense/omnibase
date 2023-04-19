@@ -64,20 +64,42 @@ class RouterSubscriber implements EventSubscriberInterface
                 throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
         }
 
-        if($ipRestriction || (!$route->getHost() && $this->router->reducesOnFallback())) {
+        $url = null;
+        if($ipRestriction) {
+
+
+        } else if (!$route->getHost() && $this->router->reducesOnFallback()) {
 
             $parsedUrl = parse_url2(get_url());
             $parsedUrl["scheme"] = $this->router->getScheme();
+
+            if($ipRestriction) {}
+            $machine = $this->router->getMachineFallback();
+            if(in_array($this->router->getMachine(), $this->router->getMachineFallbacks()))
+                $machine = $this->router->getMachine();
+            
+            $subdomain = $this->router->getSubdomainFallback();
+            if(in_array($this->router->getSubdomain(), $this->router->getSubdomainFallbacks()))
+                $subdomain = $this->router->getSubdomain();
+
+            $domain = $this->router->getDomainFallback();
+            if(in_array($this->router->getDomain(), $this->router->getDomainFallbacks()))
+                $domain = $this->router->getDomain();
+
+            $port = $this->router->getPortFallback();
+            if(in_array($this->router->getPort(), $this->router->getPortFallbacks()))
+                $port = $this->router->getPort();
+
             $parsedUrl["host"] = $this->router->getHostFallback();
 
             $url = compose_url(
                 $parsedUrl["scheme"]  ?? null,
                 null,
                 null,
-                null,
-                null,
-                $parsedUrl["host"] ?? null,
-                null,
+                $parsedUrl["machine"] ?? null,
+                $parsedUrl["subdomain"] ?? null,
+                $parsedUrl["domain"] ?? null,
+                $parsedUrl["port"] ?? null,
                 $parsedUrl["path"]    ?? null,
                 $parsedUrl["query"]     ?? null,
                 $parsedUrl["fragment"]     ?? null

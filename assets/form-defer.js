@@ -1,6 +1,7 @@
 import './styles/form-defer.scss';
 
 import './styles/js/form.js';
+import './styles/js/forms/form-type-button.js';
 import './styles/js/forms/form-type-attribute.js';
 import './styles/js/forms/form-type-boolean.js';
 import './styles/js/forms/form-type-collection.js';
