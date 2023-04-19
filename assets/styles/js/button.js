@@ -12,14 +12,50 @@ $.fn.prependon = function(evtype, fnc) {
 
 $("[type=submit]").on("click", function(e) {
 
-    var closestForm = $(this).closest("form");
-    if (closestForm.length == 0) {
+    var id = $(this).attr("form") ?? undefined;
 
-        var form = $("form");
-        if(form.length == 1) {
+    var form = id != undefined ? $("#"+id) : $(this).closest("form");
+    if (form.length == 0) form = $("form");
 
-            var submitter = form.find("[type=submit]");
-            if(submitter.length == 1) submitter.click();
+    if (form.length == 1) {
+
+        var submitter = form.find("[type=submit]");
+        if(submitter.length == 1) submitter.click();
+        else {
+            
+            form = form[0];
+            if ( $(form).hasClass("needs-validation") ) {
+
+                if (!form.checkValidity()) {
+    
+                    e.preventDefault();
+                    e.stopPropagation();
+    
+                    var invalid = $(form).find(".form-control:invalid");
+                    if (invalid.length) {
+                        var navPane = $(invalid[0]).closest(".tab-pane");
+    
+                        var navButton = $("#"+navPane.attr("aria-labelledby"));
+                            navButton.one('shown.bs.tab', function() {
+                                invalidRequiredField[0].reportValidity();
+                            });
+    
+                        location.hash = navButton.data("bs-target");
+                    }
+    
+                }
+    
+                var el = $(form).find(":invalid, .has-error");
+                if (el.length) {
+    
+                    // Flag elements as..
+                    const style = getComputedStyle(document.body);
+                    $([document.documentElement, document.body]).animate(
+                        {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
+                        function () { $(form).addClass('was-validated'); }.bind(form)
+                    );
+                }
+            }
         }
     }
 });

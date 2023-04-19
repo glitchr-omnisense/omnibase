@@ -195,10 +195,9 @@ class MediaService extends FileService implements MediaServiceInterface
         $pathList = is_array($path) ? $path : [$path];
         foreach ($pathList as $p) {
 
-            if($supports_webp)
-                $output[] = $supports_webp ? 
-                    $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters])) :
-                    $this->generate(array_key_exists("extension", $config) ? "ux_imageExtension" : "ux_image", [], $path, array_merge($config, ["extension" => $extension, "filters" => $filters]));
+            $output[] = $supports_webp ? 
+                $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters])) :
+                $this->generate("ux_imageExtension", [], $path, array_merge($config, ["extension" => $extension, "filters" => $filters]));
         }
 
         return is_array($path) ? $output : first($output);
