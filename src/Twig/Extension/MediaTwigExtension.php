@@ -100,7 +100,7 @@ final class MediaTwigExtension extends AbstractExtension
                 new TwigFilter('obfuscate_image', [MediaService::class, 'obfuscate']),
                 new TwigFilter('lightbox', [MediaService::class, 'lightbox'], ["is_safe" => ['all']]),
 
-                               new TwigFilter('crop', [$this, 'imageCrop'], ['needs_context' => true]),
+                new TwigFilter('crop', [$this, 'imageCrop'], ['needs_context' => true]),
 
                 new TwigFilter('thumbnail', [$this, 'thumbnail'], ['needs_context' => true]),
                 new TwigFilter('thumbnail_inset   ', [$this, 'thumbnailInset   '], ['needs_context' => true]),

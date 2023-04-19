@@ -60,7 +60,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
             if ($routeParameters["extension"] === true) {
                 $routeParameters["extension"] = first($this->getMediaService()->getExtensions($this->getSource()));
-                $routeParameters["extension"] = $this->getImageService()->getExtension($this->getSource());
+                $routeParameters["extension"] = $this->getMediaService()->getExtension($this->getSource());
             } elseif ($routeParameters["extension"] === false) {
                 array_pop_key("extension", $routeParameters);
             }
@@ -88,7 +88,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
     public function __toString()
     {
-        return $this->__toLink();
+        return $this->__toLink() ?? "";
     }
     public function __construct($src = null)
     {

@@ -27,7 +27,8 @@ class AvatarType extends ImageType
             'thumbnail'   => "bundles/base/images/user.svg",
             "lightbox"    => null,
             'clipboard'   => false,
-            'cropper'     => null
+            'cropper'     => null,
+            "inline" => true
         ]);
 
         $resolver->setNormalizer('cropper', function (Options $options, $value) {

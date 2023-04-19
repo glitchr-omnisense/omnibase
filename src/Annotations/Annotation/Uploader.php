@@ -317,6 +317,7 @@ class Uploader extends AbstractAnnotation
     protected function uploadFiles($entity, $oldEntity, ?string $fieldName = null)
     {
         $new = self::getFieldValue($entity, $fieldName);
+
         $newList = is_array($new) ? $new : [$new];
         $newListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $newList));
 

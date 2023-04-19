@@ -160,7 +160,7 @@ class FileType extends AbstractType implements DataMapperInterface
             "parallel_uploads" => 5,
             "upload_multiple"  => false,
 
-            "inline" => true
+            "inline" => false
         ]);
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
