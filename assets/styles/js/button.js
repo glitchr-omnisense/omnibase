@@ -22,10 +22,9 @@ $("[type=submit]").on("click", function(e) {
         var submitter = form.find("[type=submit]");
         if(submitter.length == 1) { 
         
-            console.log(submitter, this);
             if (submitter[0] != this) 
                 submitter.click();
-        
+
         } else if(id != undefined) {
             
             form = form[0];
