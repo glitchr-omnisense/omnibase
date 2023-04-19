@@ -7,7 +7,7 @@
         {% for item in widget.items %}
             {% set url = is_linkable(item) ? item.__toLink() : null %}
             {% if url is not empty %}
-                <li>{{ urlify(url, item|raw, {"class": class|default(null)}) }}</li>
+                <li>{{ url|urlify(item|raw, {"class": class|default(null)}) }}</li>
             {% endif %}
         {% endfor %}
 

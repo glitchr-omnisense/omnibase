@@ -33,7 +33,8 @@ class ImageType extends FileType
 
             'cropper'     => null,
 
-            'mime_types'  => ["image/*"]
+            'mime_types'  => ["image/*"],
+            "inline" => false
         ]);
 
         $resolver->setAllowedTypes("cropper", ['null', 'array']);
