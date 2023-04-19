@@ -88,7 +88,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
     public function __toString()
     {
-        return $this->__toLink();
+        return $this->__toLink() ?? "";
     }
     public function __construct($src = null)
     {
