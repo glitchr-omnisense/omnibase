@@ -408,7 +408,7 @@
 
         <service id="Base\DatabaseSubscriber\EnumSubscriber"><tag name="doctrine.event_subscriber" /></service>
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_subscriber" priority="2048" />
+            <tag name="doctrine.event_subscriber" priority="2049" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.annotation_reader" />

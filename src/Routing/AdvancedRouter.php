@@ -487,8 +487,8 @@ class AdvancedRouter extends Router implements RouterInterface
         if (!is_cli()) {
             $baseDir = $_SERVER['PHP_SELF'] ? dirname($_SERVER['PHP_SELF']) : null;
         }
-        $baseDir ??= $host["base_dir"] ?? "";
 
+        $baseDir ??= first($host["base_dir"]) ?? "";
         return $baseDir;
     }
 

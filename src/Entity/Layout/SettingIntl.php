@@ -24,7 +24,7 @@ class SettingIntl implements TranslationInterface
 
     public function isEmpty(): bool
     {
-        return $this->value == null;
+        return $this->value === null;
     }
 
     /**
