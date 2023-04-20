@@ -59,58 +59,72 @@ class RouterSubscriber implements EventSubscriberInterface
         $ipRestriction = !$this->parameterBag->get("base.router.ip_access")        &&  $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
         if ($ipRestriction) {
 
+        }
+
+        $url = get_url();
+        if($ipRestriction) {
+
             $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
             if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback)
                 throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
-        }
 
-        $url = null;
-        if($ipRestriction) {
-
+            $parsedUrl = parse_url2(get_url());
+            $parsedUrl["scheme"] = $this->router->getScheme();
+            $parsedUrl["host"] = $this->router->getHostFallback();
+    
+            $url = compose_url(
+                $parsedUrl["scheme"]   ?? null,
+                null,
+                null,
+                null,
+                null,
+                $parsedUrl["host"]     ?? null,
+                null,
+                $parsedUrl["path"]     ?? null,
+                $parsedUrl["query"]    ?? null,
+                $parsedUrl["fragment"] ?? null
+            );
 
         } else if (!$route->getHost() && $this->router->reducesOnFallback()) {
 
             $parsedUrl = parse_url2(get_url());
             $parsedUrl["scheme"] = $this->router->getScheme();
 
-            if($ipRestriction) {}
-            $machine = $this->router->getMachineFallback();
-            if(in_array($this->router->getMachine(), $this->router->getMachineFallbacks()))
-                $machine = $this->router->getMachine();
+            $parsedUrl["machine"] = $this->router->getMachine();
+            if(in_array($parsedUrl["machine"], $this->router->getMachineFallbacks()))
+                $parsedUrl["machine"] = $this->router->getMachine();
             
-            $subdomain = $this->router->getSubdomainFallback();
-            if(in_array($this->router->getSubdomain(), $this->router->getSubdomainFallbacks()))
-                $subdomain = $this->router->getSubdomain();
+            $parsedUrl["subdomain"] = $this->router->getSubdomain();
+            if(in_array($parsedUrl["subdomain"], $this->router->getSubdomainFallbacks()))
+                $parsedUrl["subdomain"] = $this->router->getSubdomain();
 
-            $domain = $this->router->getDomainFallback();
-            if(in_array($this->router->getDomain(), $this->router->getDomainFallbacks()))
-                $domain = $this->router->getDomain();
+            $parsedUrl["domain"] = $this->router->getDomain();
+            if(in_array($parsedUrl["domain"], $this->router->getDomainFallbacks()))
+                $parsedUrl["domain"] = $this->router->getDomain();
 
-            $port = $this->router->getPortFallback();
-            if(in_array($this->router->getPort(), $this->router->getPortFallbacks()))
-                $port = $this->router->getPort();
-
-            $parsedUrl["host"] = $this->router->getHostFallback();
+            $parsedUrl["port"] = $this->router->getPort();
+            if(in_array($parsedUrl["port"], $this->router->getPortFallbacks()))
+                $parsedUrl["port"] = $this->router->getPort();
 
             $url = compose_url(
                 $parsedUrl["scheme"]  ?? null,
                 null,
                 null,
-                $parsedUrl["machine"] ?? null,
+                $parsedUrl["machine"]   ?? null,
                 $parsedUrl["subdomain"] ?? null,
-                $parsedUrl["domain"] ?? null,
-                $parsedUrl["port"] ?? null,
-                $parsedUrl["path"]    ?? null,
+                $parsedUrl["domain"]    ?? null,
+                $parsedUrl["port"]      ?? null,
+                $parsedUrl["path"]      ?? null,
                 $parsedUrl["query"]     ?? null,
-                $parsedUrl["fragment"]     ?? null
+                $parsedUrl["fragment"]  ?? null
             );
+        }
 
-            // Redirect to sanitized url
-            if($url != get_url()) {
+        // Redirect to sanitized url
+        if($url != get_url()) {
 
-                $event->setResponse(new RedirectResponse($url));
-                return $event->stopPropagation();
-            }
+            $event->setResponse(new RedirectResponse($url));
+            return $event->stopPropagation();
         }
     }
 }

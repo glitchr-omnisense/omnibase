@@ -552,7 +552,8 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getMachineFallback(?string $locale = null, ?string $environment = null): ?string
     {
         $machineFallback = first($this->getMachineFallbacks($locale, $environment));
-        return $machineFallback ? $machineFallback : null;
+        $subdomainVeto = empty(parse_url(get_url())["subdomain"] ?? null);
+        return $machineFallback && !$subdomainVeto ? $machineFallback : null;
     }
     public function getMachine(?string $locale = null, ?string $environment = null): ?string
     {
