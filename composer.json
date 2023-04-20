@@ -60,7 +60,7 @@
         "florianv/swap": "^4.0",
         "scienta/doctrine-json-functions": "~4.3",
         "phpoffice/phpspreadsheet": "^1.23",
-        "easycorp/easyadmin-bundle": "<=4.5",
+        "easycorp/easyadmin-bundle": "^4.5",
         "league/flysystem-bundle": "^2.4",
     	"league/flysystem-ftp": "^3.0",
 
