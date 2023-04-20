@@ -66,6 +66,14 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
         $this->formProxy  = $formProxy;
     }
 
+    /**
+     * @Route({"fr": "/rescue-request", "en": "/rescue-request"}, name="backoffice_rescue")
+     */
+    public function index(): Response
+    {
+        return $this->redirectToRoute("security_rescue");
+    }
+
     public function configureDashboard(): Dashboard
     {
         $logo  = $this->settingBag->getScalar("base.settings.logo.backoffice");

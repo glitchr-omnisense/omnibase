@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    {{ '@emails.thread.publish.content'|trans([(thread|trans_entity), thread.excerpt])|raw }}
+    {{ '@emails.thread.publish.content'|trans([(thread|trans_entity), thread.excerpt ?? (thread.content|str_shorten)])|raw }}
 {% endblock %}
 
 {% block action_text %}

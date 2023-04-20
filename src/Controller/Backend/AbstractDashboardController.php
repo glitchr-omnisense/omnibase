@@ -83,7 +83,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice", priority="-1")
+ * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice")
  */
 class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
