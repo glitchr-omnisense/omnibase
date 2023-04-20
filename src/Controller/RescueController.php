@@ -67,7 +67,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
     }
 
     /**
-     * @Route({"fr": "/rescue-request", "en": "/rescue-request"}, name="backoffice_rescue")
+     * @Route({"fr": "/rescue-request", "en": "/rescue-request"}, name="backoffice_rescue", priority=-1)
      */
     public function index(): Response
     {

@@ -186,7 +186,7 @@
                     </aside>
                 </div>
 
-                <section class="main-content">
+                <section class="main-content content spinner">
                     {% set has_search = ea.crud is not null and ea.crud.isSearchEnabled %}
                     <aside class="content-top {{ has_search ? 'ea-search-enabled' : 'ea-search-disabled' }}">
 
@@ -381,7 +381,7 @@
 
                     <div class="content-wrapper">
                         {% block content_wrapper %}
-                            <article class="content spinner">
+                            <article>
 
                                 <section id="main" class="content-body page-wrapper">
                                 {% block main %}

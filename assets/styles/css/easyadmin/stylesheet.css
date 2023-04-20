@@ -854,7 +854,7 @@ body.ea-edit .content-header, body.ea-new .content-header {
 }
 .ea-index .main-content .content-wrapper,
 .ea-edit .main-content .content-wrapper,
-.ea-details .main-content .content-wrapper { margin-bottom:2em; overflow:scroll; }
+.ea-details .main-content .content-wrapper { margin-bottom:0em; overflow:scroll; }
 .ea-sidebar-width-compact .content-header { width: calc(100vw - 44px); }
 #header-logo
 {
