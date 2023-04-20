@@ -141,7 +141,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             return $this->router->redirect($targetPath->getUrl());
         }
         $defaultTargetPath = $request->getSession()->get('_security.'.$this->router->getRouteFirewall()->getName().'.target_path');
-        return $this->router->redirectToRoute($this->router->getRouteName($defaultTargetPath ?? "/"));
+        return $this->router->redirect($defaultTargetPath ?? $this->router->getBaseDir());
     }
 
     protected function getLoginUrl(Request $request): string

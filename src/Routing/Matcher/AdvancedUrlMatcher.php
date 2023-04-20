@@ -36,23 +36,12 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
                 if (!self::$router->getDomainFallback() && str_contains($host, "\\\\\\{_domain\\\\\\}"))
                     throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
 
-                $machine = self::$router->getMachineFallback();
-                if(in_array(self::$router->getMachine(), self::$router->getMachineFallbacks()))
-                    $machine = self::$router->getMachine();
-                
-                $subdomain = self::$router->getSubdomainFallback();
-                if(in_array(self::$router->getSubdomain(), self::$router->getSubdomainFallbacks()))
-                    $subdomain = self::$router->getSubdomain();
+                $machine   = self::$router->getMachine() ?? null;
+                $subdomain = self::$router->getSubdomain() ?? null;
+                $domain    = self::$router->getDomain() ?? null;
+                $port      = self::$router->getPort() ?? null;
 
-                $domain = self::$router->getDomainFallback();
-                if(in_array(self::$router->getDomain(), self::$router->getDomainFallbacks()))
-                    $domain = self::$router->getDomain();
-
-                $port = self::$router->getPortFallback();
-                if(in_array(self::$router->getPort(), self::$router->getPortFallbacks()))
-                    $port = self::$router->getPort();
-
-                $machine   = $machine   ? preg_quote($machine)   : $machine;            
+                $machine   = $machine   ? preg_quote($machine)   : $machine;
                 $subdomain = $subdomain ? preg_quote($subdomain) : $subdomain;
                 $domain    = $domain    ? preg_quote($domain)    : $domain;
 
@@ -76,27 +65,12 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
                 if (!self::$router->getDomainFallback() && str_contains($regexp, "\\\\\\{_domain\\\\\\}"))
                     throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
 
-                // @todo: Some cases might be problematic: to be improved later
-                //e.g. machine1.machine2.subdomain.domain.com
-                //e.g. machine1.machine2.domain.com
-                
-                $machine = self::$router->getMachineFallback();
-                if(in_array(self::$router->getMachine(), self::$router->getMachineFallbacks()))
-                    $machine = self::$router->getMachine();
-                
-                $subdomain = self::$router->getSubdomainFallback();
-                if(in_array(self::$router->getSubdomain(), self::$router->getSubdomainFallbacks()))
-                    $subdomain = self::$router->getSubdomain();
+                $machine   = self::$router->getMachine() ?? null;
+                $subdomain = self::$router->getSubdomain() ?? null;
+                $domain    = self::$router->getDomain() ?? null;
+                $port      = self::$router->getPort() ?? null;
 
-                $domain = self::$router->getDomainFallback();
-                if(in_array(self::$router->getDomain(), self::$router->getDomainFallbacks()))
-                    $domain = self::$router->getDomain();
-
-                $port = self::$router->getPortFallback();
-                if(in_array(self::$router->getPort(), self::$router->getPortFallbacks()))
-                    $port = self::$router->getPort();
-
-                $machine   = $machine   ? preg_quote($machine)   : $machine;            
+                $machine   = $machine   ? preg_quote($machine)   : $machine;
                 $subdomain = $subdomain ? preg_quote($subdomain) : $subdomain;
                 $domain    = $domain    ? preg_quote($domain)    : $domain;
 
@@ -198,23 +172,16 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     {
         if (self::$router?->useAdvancedFeatures())
         {
-            $parse = parse_url2($pathinfo) ?? [];
-            if($parse) {
+            $parse = parse_url2($pathinfo);
+            if(!$parse || !array_key_exists("host", $parse))
+                $parse = parse_url2(get_url()) ?? [];
 
-                if (array_key_exists("host", $parse))
-                    $this->getContext()->setHost($parse["host"] ?? "localhost");
-                if (array_key_exists("port", $parse))
-                    $this->getContext()->setHttpPort((int)($parse["port"] ?? 80));
-                if (array_key_exists("port", $parse))
-                    $this->getContext()->setHttpsPort((int)($parse["port"] ?? 8000));
-                if (array_key_exists("query", $parse))
-                    $this->getContext()->setQueryString($parse["query"] ?? "");
-                if (array_key_exists("path", $parse))
-                    $this->getContext()->setBaseUrl("");
+            $this->getContext()->setHost( $parse["host"] ?? "localhost");
+            $this->getContext()->setHttpPort((int)($parse["port"] ?? 80));
+            $this->getContext()->setHttpsPort((int)($parse["port"] ?? 8000));
+            $this->getContext()->setQueryString($parse["query"] ?? "");
 
-                $this->getContext()->setPathInfo("");
-                $pathinfo = ($parse["path"] ?? "");
-            }
+            $pathinfo = parse_url2($pathinfo)["path"] ?? "";
         }
 
         //

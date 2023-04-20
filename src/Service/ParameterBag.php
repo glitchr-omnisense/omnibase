@@ -10,6 +10,7 @@ class ParameterBag extends ContainerBag implements ParameterBagInterface, Contai
 {
     use BagTrait;
 
+    #[SentitiveParameter]
     protected ?array $normalizedAll = null;
     public function normalizeAll(): array
     {
@@ -19,16 +20,7 @@ class ParameterBag extends ContainerBag implements ParameterBagInterface, Contai
 
     public function get(string $path = "", ?array $bag = null): array|bool|string|int|float|null
     {
-        if (array_key_exists($path, $bag ?? [])) {
-            return $bag[$path];
-        }
-
-        if (!$bag) {
-            $bag = $this->normalizeAll();
-        } else {
-            $bag = $this->normalize(null, $bag);
-        }
-
+        $bag = array_merge_recursive2($this->normalizeAll(), $this->normalize(null, $bag ?? []));
         return $this->read($path, $bag);
     }
 

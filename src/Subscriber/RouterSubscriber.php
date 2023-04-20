@@ -88,23 +88,11 @@ class RouterSubscriber implements EventSubscriberInterface
         } else if (!$route->getHost() && $this->router->reducesOnFallback()) {
 
             $parsedUrl = parse_url2(get_url());
-            $parsedUrl["scheme"] = $this->router->getScheme();
-
-            $parsedUrl["machine"] = $this->router->getMachine();
-            if(in_array($parsedUrl["machine"], $this->router->getMachineFallbacks()))
-                $parsedUrl["machine"] = $this->router->getMachine();
-            
-            $parsedUrl["subdomain"] = $this->router->getSubdomain();
-            if(in_array($parsedUrl["subdomain"], $this->router->getSubdomainFallbacks()))
-                $parsedUrl["subdomain"] = $this->router->getSubdomain();
-
-            $parsedUrl["domain"] = $this->router->getDomain();
-            if(in_array($parsedUrl["domain"], $this->router->getDomainFallbacks()))
-                $parsedUrl["domain"] = $this->router->getDomain();
-
-            $parsedUrl["port"] = $this->router->getPort();
-            if(in_array($parsedUrl["port"], $this->router->getPortFallbacks()))
-                $parsedUrl["port"] = $this->router->getPort();
+            $parsedUrl["scheme"]    = $this->router->getScheme();
+            $parsedUrl["machine"]   = $this->router->getMachine() ?? null;
+            $parsedUrl["subdomain"] = $this->router->getSubdomain() ?? null;
+            $parsedUrl["domain"]    = $this->router->getDomain() ?? null;
+            $parsedUrl["port"]      = $this->router->getPort() ?? null;
 
             $url = compose_url(
                 $parsedUrl["scheme"]  ?? null,

@@ -23,7 +23,6 @@ class Route extends \Symfony\Component\Routing\Annotation\Route
         private ?string $domain = null,
         private ?string $subdomain = null,
         private ?string $machine = null,
-        private ?string $port = null,
         array|string $methods = [],
         array|string $schemes = [],
         private ?string $condition = null,

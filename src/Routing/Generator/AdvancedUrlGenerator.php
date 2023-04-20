@@ -24,9 +24,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function __construct(array $compiledRoutes, RequestContext $context, LoggerInterface $logger = null, string $defaultLocale = null)
     {
-        // NB: This generator needs separate context.. Matcher class is changing context.
-        $context = new RequestContext($context->getBaseUrl(), $context->getMethod(), $context->getHost(), $context->getScheme(), $context->getHttpPort(), $context->getHttpsPort(), $context->getPathInfo(), $context->getQueryString());
-
         //
         // NB: Static routes using multiple host, or domains might be screened.. imo
 
@@ -37,21 +34,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             foreach ($compiledRoutes as &$compiledRoute) {
 
-                $machine = self::$router->getMachineFallback();
-                if(in_array(self::$router->getMachine(), self::$router->getMachineFallbacks()))
-                    $machine = self::$router->getMachine();
-
-                $subdomain = self::$router->getSubdomainFallback();
-                if(in_array(self::$router->getSubdomain(), self::$router->getSubdomainFallbacks()))
-                    $subdomain = self::$router->getSubdomain();
-
-                $domain = self::$router->getDomainFallback();
-                if(in_array(self::$router->getDomain(), self::$router->getDomainFallbacks()))
-                    $domain = self::$router->getDomain();
-
-                $port = self::$router->getPortFallback();
-                if(in_array(self::$router->getPort(), self::$router->getPortFallbacks()))
-                    $port = self::$router->getPort();
+                $machine   = self::$router->getMachine() ?? null;
+                $subdomain = self::$router->getSubdomain() ?? null;
+                $domain    = self::$router->getDomain() ?? null;
+                $port      = self::$router->getPort() ?? null;
 
                 $search = ["\\{_machine\\}.", "\\{_subdomain\\}.", "\\{_domain\\}", ":\\{_port\\}"];
                 $replace = [$machine ? $machine."." : "", $subdomain ? $subdomain."." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : ":".$port];
@@ -82,7 +68,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
 
             $host = $route->getHost() ? $route->getHost() : self::$router->getHost();
-            $host = explode(":", self::$router->getHost())[0]; // Remove port from host..
+            $host = explode(":", $host)[0]; // Remove port from host..
             $this->getContext()->setHost($host);
 
             $port = self::$router->getPort() ?? 80;
@@ -97,7 +83,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                     
                     $parse = array_transforms(fn($k,$v): array => ["_".$k, $v], parse_url2(get_url()));
                     $parameterNames = array_flip($matches[1]);
-                 
+
                     $routeParameters = array_merge(
                         array_intersect_key($parse, $parameterNames),
                         $route->getDefaults(),
@@ -107,6 +93,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                     $search  = array_map(fn ($k) => "{".$k."}", array_keys($parse));
                     $replace = array_values($parse);
                     foreach ($routeParameters as $key => $routeParameter) {
+                        if(!$routeParameter) continue;
                         $routeParameters[$key] = str_replace($search, $replace, $routeParameter ?? "");
                     }
                 }
@@ -128,6 +115,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         }
 
         if(!$routeUrl) {
+
             try { $routeUrl = sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType)); }
             catch (InvalidParameterException|RouteNotFoundException $_) { $e = $_; }
         }
@@ -160,14 +148,14 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if ($routeParameters === null) {
 
             $parse = parse_url2(get_url(), -1, self::$router->getBaseDir()); // Make sure also it gets the basic context
-        
+
         } else {
-        
+
             // Use either parameters or $_SERVER variables to determine the host to provide
-            $scheme    = array_pop_key("_scheme", $routeParameters) ?? self::$router->getScheme();
-            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? self::$router->getBaseDir();
-            $host      = array_pop_key("_host", $routeParameters) ?? self::$router->getHost();
-            $port      = array_pop_key("_port", $routeParameters) ?? explode(":", $host)[1] ?? self::$router->getPort();
+            $scheme    = array_pop_key("_scheme", $routeParameters) ?? $this->getContext()->getScheme();
+            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getContext()->getBaseUrl();
+            $host      = array_pop_key("_host", $routeParameters) ?? $this->getContext()->getHost();
+            $port      = array_pop_key("_port", $routeParameters) ?? explode(":", $host)[1] ?? $this->getContext()->getHttpPort();
             $host      = explode(":", $host)[0].":".$port;
 
             $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
@@ -175,16 +163,16 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         }
 
         if ($parse && array_key_exists("host", $parse)) {
-            $host = explode(":", $parse["host"])[0];
             $this->getContext()->setHost($host);
         }
         if ($parse && array_key_exists("base_dir", $parse)) {
             $this->getContext()->setBaseUrl($parse["base_dir"]);
         }
 
-        $this->getContext()->setHttpPort($parse["port"] ?? 80);
-        $this->getContext()->setHttpsPort($parse["port"] ?? 443);
+        $this->getContext()->setHttpPort(80);    // Port already included in host
+        $this->getContext()->setHttpsPort(443); // Port already included in host
         $this->getContext()->setScheme($parse["scheme"] ?? "https");
+        $this->getContext()->setQueryString($parse["query"] ?? "");
 
         return $routeParameters;
     }

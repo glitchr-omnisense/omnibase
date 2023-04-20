@@ -513,23 +513,7 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function getHost(?string $locale = null, ?string $environment = null): string
     {
-        $parsedUrl = parse_url2(get_url());
-        $machine = $parsedUrl["machine"] ?? null;
-        if ($machine) {
-            $machine = $machine . ".";
-        }
-
-        $subdomain = $parsedUrl["subdomain"] ?? null;
-        if ($subdomain) {
-            $subdomain = $subdomain . ".";
-        }
-
-        $domain = $parsedUrl["domain"] ?? null;
-
-        $port = $parsedUrl["port"] ?? null;
-        $port = is_array($port) && first($port) != false && !in_array(first($port), [80,443]) ? ":" . first($port) : "";
-
-        $host = $machine.$subdomain.$domain.$port;
+        $host = compose_url(null, null, null, $this->getMachine(), $this->getSubdomain(), $this->getDomain(), $this->getPort());
         return $host ? $host : $this->getHostFallback();
     }
 
@@ -543,21 +527,25 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getPort(?string $locale = null, ?string $environment = null): ?int
     {
         $parsedUrl = parse_url2(get_url());
-        $port = $parsedUrl["port"] ?? $this->getPortFallback($locale, $environment) ?? null;
-        $port = in_array($port ?? 80, [80, 443]) ? null : $port;
+        $port = $parsedUrl["port"] ?? null;
+        if(!in_array($port, $this->getPortFallbacks()))
+            $port = $this->getPortFallback();
 
-        return $port ?? null;
+        return in_array($port ?? 80, [80, 443]) ? null : $port;
     }
     public function getMachineFallbacks(?string $locale = null, ?string $environment = null): array { return $this->getFallbackParameters($locale, $environment)["machine"] ?? []; }
     public function getMachineFallback(?string $locale = null, ?string $environment = null): ?string
     {
         $machineFallback = first($this->getMachineFallbacks($locale, $environment));
-        $subdomainVeto = empty(parse_url(get_url())["subdomain"] ?? null);
-        return $machineFallback && !$subdomainVeto ? $machineFallback : null;
+        return $machineFallback ? $machineFallback : null;
     }
     public function getMachine(?string $locale = null, ?string $environment = null): ?string
     {
-        return $parsedUrl["machine"] ?? $this->getMachineFallback($locale, $environment) ?? null;
+        $parsedUrl = parse_url2(get_url());
+        if(!in_array($parsedUrl["machine"] ?? null, $this->getMachineFallbacks()))
+            return $this->getMachineFallback();
+
+        return $parsedUrl["machine"] ?? null;
     }
 
     public function getSubdomainFallbacks(?string $locale = null, ?string $environment = null): array { return $this->getFallbackParameters($locale, $environment)["subdomain"] ?? []; }
@@ -569,7 +557,10 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string
     {
         $parsedUrl = parse_url2(get_url());
-        return $parsedUrl["subdomain"] ?? $this->getSubdomainFallback($locale, $environment) ?? null;
+        if(!in_array($parsedUrl["subdomain"] ?? null, $this->getSubdomainFallbacks()))
+            return $this->getSubdomainFallback();
+
+        return $parsedUrl["subdomain"] ?? null;
     }
     public function getDomainFallbacks(?string $locale = null, ?string $environment = null): array { return $this->getFallbackParameters($locale, $environment)["domain"] ?? []; }
     public function getDomainFallback(?string $locale = null, ?string $environment = null): ?string
@@ -579,7 +570,11 @@ class AdvancedRouter extends Router implements RouterInterface
     }
     public function getDomain(?string $locale = null, ?string $environment = null): ?string
     {
-        return parse_url2(get_url())["domain"] ?? $this->getDomainFallback($locale, $environment) ?? null;
+        $parsedUrl = parse_url2(get_url());
+        if(!in_array($parsedUrl["domain"] ?? null, $this->getDomainFallbacks()))
+            return $this->getDomainFallback();
+
+        return $parsedUrl["domain"] ?? null;
     }
 
     public function getRouteIndex(): string
@@ -601,7 +596,6 @@ class AdvancedRouter extends Router implements RouterInterface
         }
 
         $routeMatch = $this->getRouteMatch($routeUrl) ?? [];
-
         $isLocalized = ($routeMatch["_locale"] ?? false) && $routeMatch["_locale"] != $this->localizer->getDefaultLocaleLang();
         return $routeMatch ? $routeMatch["_route"] . ($isLocalized ? "." . $routeMatch["_locale"] : "") : null;
     }
@@ -692,10 +686,12 @@ class AdvancedRouter extends Router implements RouterInterface
             unset($headers["callback"]);
         }
 
-        $url   = $this->generate($routeName, $routeParameters) ?? $routeName;
+        $url   = $this->generate($routeName, $routeParameters, 0) ?? $routeName;
         $routeName = $this->getRouteName($url);
 
         if (!$routeName) {
+
+            exit(1);
             throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
         }
 
