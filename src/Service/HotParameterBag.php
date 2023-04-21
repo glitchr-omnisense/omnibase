@@ -22,6 +22,11 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
         return $this;
     }
 
+    public function all(): array
+    {
+        return array_merge(parent::all(), $this->hotBag);
+    }
+
     public function get(string $key = "", array $bag = null, bool $useHotBag = true): array|bool|string|int|float|null
     {
         if (!parent::get("base.parameter_bag.use_hot_bag") ?? false) {

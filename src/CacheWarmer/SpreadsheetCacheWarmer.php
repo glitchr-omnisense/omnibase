@@ -11,9 +11,11 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
     /** @var int */
     protected int $shellVerbosity;
 
-    public function __construct()
+    protected string $cacheDir;
+    public function __construct(string $cacheDir)
     {
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");
+	$this->cacheDir = $cacheDir;
     }
 
     public function isOptional(): bool
@@ -27,7 +29,7 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
         }
 
         // Implement phpspreadsheet cache
-        $psr6Cache = new FilesystemAdapter("phpspreadsheet");
+        $psr6Cache = new FilesystemAdapter("phpspreadsheet", 0, $this->cacheDir);
         $psr16Cache = new Psr16Cache($psr6Cache);
         \PhpOffice\PhpSpreadsheet\Settings::setCache($psr16Cache);
 

@@ -97,7 +97,7 @@ class BaseBundle extends Bundle
     public function warmUp()
     {
         $needsWarmup = !file_exists($this->getCacheDir()."/pools/base/bundle.php");
-        self::$cache = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter());
+        self::$cache = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter("", 0, $this->getCacheDir()."/pools/base/fallback"));
         self::$filePaths = self::$filePaths ?? self::$cache->getItem('base.file_paths')->get() ?? [];
         self::$classes = self::$classes ?? self::$cache->getItem('base.classes')->get() ?? [];
         self::$aliasList = self::$aliasList ?? self::$cache->getItem('base.alias_list')->get() ?? [];

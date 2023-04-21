@@ -162,17 +162,20 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $parse["base_dir"] = $baseDir;
         }
 
-        if ($parse && array_key_exists("host", $parse)) {
-            $this->getContext()->setHost($host);
-        }
-        if ($parse && array_key_exists("base_dir", $parse)) {
-            $this->getContext()->setBaseUrl($parse["base_dir"]);
-        }
+        if(is_array($parse)) {
 
-        $this->getContext()->setHttpPort(80);    // Port already included in host
-        $this->getContext()->setHttpsPort(443); // Port already included in host
-        $this->getContext()->setScheme($parse["scheme"] ?? "https");
-        $this->getContext()->setQueryString($parse["query"] ?? "");
+            if ($parse && array_key_exists("host", $parse)) {
+                $this->getContext()->setHost($host);
+            }
+            if ($parse && array_key_exists("base_dir", $parse)) {
+                $this->getContext()->setBaseUrl($parse["base_dir"]);
+            }
+
+            $this->getContext()->setHttpPort(80);    // Port already included in host
+            $this->getContext()->setHttpsPort(443); // Port already included in host
+            $this->getContext()->setScheme($parse["scheme"] ?? "https");
+            $this->getContext()->setQueryString($parse["query"] ?? "");
+        }
 
         return $routeParameters;
     }
