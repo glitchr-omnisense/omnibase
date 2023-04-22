@@ -37,7 +37,7 @@ class FileValidator extends ConstraintValidator
         foreach ($mimeTypes as $mimeType) {
             $compatibleMimeType |= preg_match("/" . str_replace("/", "\/", $mimeType) . "/", $entry->getMimeType());
         }
-
+        
         if (!$compatibleMimeType) {
 
             $constraint->message = $constraint->messageMimeType;
@@ -46,12 +46,12 @@ class FileValidator extends ConstraintValidator
                 ->setParameter('{1}', implode(", ", $types))
                 ->addViolation();
 
-        } elseif ($entry->getSize() > 8*$constraint->getMaxSize()) {
+        } elseif ($entry->getSize() > $constraint->getMaxSize()) {
 
             $constraint->message = $constraint->messageMaxSize;
             $this->buildViolation($constraint, $entry)
                 ->setParameter('{1}', byte2str($entry->getSize()))
-                ->setParameter('{0}', byte2str(8*$constraint->getMaxSize()))
+                ->setParameter('{0}', byte2str($constraint->getMaxSize()))
                 ->addViolation();
         }
     }
