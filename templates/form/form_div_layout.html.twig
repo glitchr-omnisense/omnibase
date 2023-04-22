@@ -323,7 +323,9 @@
 
 {%- block button2_widget -%}
 
-    {% set attr_request = attr %}
+    {% set attr_request = attr|merge(form.vars.attr) %}
+    {% set attr_request = attr_request|merge({"class": (attr.class ?? "") ~ " " ~ (attr_request.class ?? "")}) %}
+
     {% set attr = attr|merge({
         'data-button-field'          : form.vars.id,
         'data-button-confirmation'   : form.vars.confirmation,
@@ -375,7 +377,6 @@
     </button>
 
     {% if form.vars.confirmation %}
-
     <div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">

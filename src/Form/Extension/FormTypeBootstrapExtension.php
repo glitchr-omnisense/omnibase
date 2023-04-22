@@ -76,9 +76,8 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
                 self::addLabelAttribute($view, "class", "form-check-label");
                 break;
 
+            case "ButtonType":
             case "SubmitType":
-                self::addAttribute($view, "class", "btn btn-primary");
-                self::addLabelAttribute($view, "class", "btn btn-primary");
                 break;
 
             case "HiddenType":

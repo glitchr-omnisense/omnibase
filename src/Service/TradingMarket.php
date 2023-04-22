@@ -165,11 +165,9 @@ class TradingMarket implements TradingMarketInterface
 
     public function getLatest(string $from, string $to, array $options = []): ?ExchangeRate
     {
-        if (!$this->build()) {
-            return null;
-        }
         $options = array_merge($this->options, $options);
         $options["use_swap"] ??= true;
+        $options["use_swap"] &= $this->build();
 
         if (!$options["use_swap"]) {
             return $this->getFallback($from, $to);
@@ -188,11 +186,9 @@ class TradingMarket implements TradingMarketInterface
             return $this->getLatest($from, $to, $options);
         }
 
-        if (!$this->build()) {
-            return null;
-        }
         $options = array_merge($this->options, $options);
         $options["use_swap"] ??= true;
+        $options["use_swap"] &= $this->build();
 
         if (!$options["use_swap"]) {
             return null;
@@ -215,7 +211,9 @@ class TradingMarket implements TradingMarketInterface
         if($source == $target) return $cash;
 
         $rate = $this->get($source, $target, $options, $timeAgo)?->getValue();
-        if($rate == null) throw new \Exception("No source available for currency exchange.");
+        if($rate == null) {
+            throw new \Exception("No source available for currency exchange.");
+        }
 
         return $cash * $rate;
     }

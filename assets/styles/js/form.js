@@ -9,40 +9,40 @@ window.addEventListener('load', function(event) {
 
 window.addEventListener('load', function(event) {
 
-    $("form :input").keydown(function(event){
-
-        if(event.keyCode == 13) {
-
-            if(event.target.tagName == "TEXTAREA")
-                return true;
-
-            var target = $(event.target);
-
-            var submitter = undefined;
-            while(target.parent().length) {
-
-                submitter = $(target).find("button[type=submit]");
-                if(submitter.length) break;
-
-                target = target.parent();
-
-                if(target.length && target[0].tagName == "FORM") {
-
-                    target.submit();
-                    break;
-                }
-            }
-
-            if(submitter != undefined && submitter.length) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                submitter.trigger("click");
-                return false;
-            }
-        }
-    });
+    // $("form :input").keydown(function(event){
+    //
+    //     if(event.keyCode == 13) {
+    //
+    //         if(event.target.tagName == "TEXTAREA")
+    //             return true;
+    //
+    //         var target = $(event.target);
+    //
+    //         var submitter = undefined;
+    //         while(target.parent().length) {
+    //
+    //             submitter = $(target).find("button");
+    //             if(submitter.length) break;
+    //
+    //             target = target.parent();
+    //
+    //             if(target.length && target[0].tagName == "FORM") {
+    //
+    //                 target.submit();
+    //                 break;
+    //             }
+    //         }
+    //
+    //         if(submitter != undefined && submitter.length) {
+    //
+    //             event.preventDefault();
+    //             event.stopPropagation();
+    //
+    //             submitter.trigger("click");
+    //             return false;
+    //         }
+    //     }
+    // });
 
     $("form").addClass("needs-validation").attr("novalidate", "");
     $("form").on("submit", function(e) {
@@ -58,7 +58,7 @@ window.addEventListener('load', function(event) {
             $(".popover").remove();
         }
 
-        if ( $(this).hasClass("needs-validation") ) {
+        if ( $(this).hasClass("needs-validation") && !$(submitter).hasClass("skip-validation")) {
 
             if (!this.checkValidity()) {
 
