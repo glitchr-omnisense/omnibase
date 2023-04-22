@@ -5,22 +5,18 @@ abstract_attribute:
    code:
       unique: "Code {value} est déjà utilisé"
 
-barcode:
-   value:
-      unique: "Le code barre {value} est déjà utilisé"
-
 user:
    email:
       unique: "Cet email est déjà utilisé"
    username:
       unique: "Ce pseudo existe déjà"
 
-unique_entity: \"{{value}}\" est déjà utilisé.
+unique_entity: "\"{value}\" est déjà utilisé."
 
 email:
    unique: "Cet email est déjà utilisé"
 
-string_case: "Le champ \"{{field}}\" ne peut pas changer d'orthographe (seulement la casse)"
+string_case: "Le champ \"{field}\" ne peut pas changer d'orthographe (seulement la casse)"
 
 hexcode:
    "class": Color {{ value }} is not a valid hexadecimal value.

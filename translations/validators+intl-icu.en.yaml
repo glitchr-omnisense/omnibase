@@ -5,11 +5,7 @@ abstract_attribute:
    code:
       unique: "Code \"{value}\" is already used"
 
-barcode:
-   value:
-      unique: "Barcode \"{value}\" is already used"
-
-unique_entity: \"{{value}}\"" is already used
+unique_entity: "\"{value}\" is already used"
 
 email:
    unique: "This email is already used"

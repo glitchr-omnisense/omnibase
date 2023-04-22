@@ -1315,12 +1315,12 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-active-item-color); }
 .user-menu hr { display:none; }
 .actions a:last-child { margin-right:10px; }
 
-.form-collection-add-button { border-bottom:1px solid var(--sidebar-border-color); }
+.form-collection-add-button { border-bottom:0; }
 .form-collection {
     border:1px solid var(--sidebar-border-color);
-    border-bottom: 0;
 }
 
+.form-errors { margin:0 1em; border-radius:5px; width: calc(100% - 2em); }
 .form-array .accordion-button .form-group { padding: 3px; }
 .form-array .form-array-items .form-array-item:first-of-type { border-top:0; }
 .form-array .form-array-items .form-array-item{ border-top:1px solid var(--sidebar-border-color); }

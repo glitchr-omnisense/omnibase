@@ -4,6 +4,7 @@ namespace Base\Validator;
 
 use Base\BaseBundle;
 use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
@@ -16,6 +17,9 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
  */
 abstract class ConstraintEntityValidator extends ConstraintValidator
 {
+    /**
+     * @var EntityManager
+     */
     protected $em;
 
     public function getOriginalEntity($entity)
