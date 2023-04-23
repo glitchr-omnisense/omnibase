@@ -239,7 +239,7 @@ class Vault extends AbstractAnnotation
             if ($propertyAccessor->isReadable($entity, $field)) {
 
                 $sealedValue = $propertyAccessor->getValue($entity, $field);
-                $plainValue = $sealedValue ? base64_decode($propertyAccessor->getValue($entity, $field)) : false;
+                $plainValue = is_string($sealedValue) ? base64_decode($sealedValue) : false;
 
                 if ($plainValue === false) {
                     $plainValue = null;
