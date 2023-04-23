@@ -9,8 +9,8 @@
 .ql-editor .ql-align-justify img { float: left; }
 .ql-editor .ql-align-center img { float: initial; }
 .ql-editor .ql-align-center { clear: both; text-align:center; }
-.ql-align-right img { float: right; }
-.ql-align-left img { float: left; }
+.ql-align-right img { float: right; margin: 0 1em 1em 2em; }
+.ql-align-left img { float: left; margin: 0 2em 1em 1em; }
 .ql-editor {
     text-align:inherit;
     white-space: pre-line;
@@ -30,8 +30,8 @@
         max-width: 100%;
     }
 
-    .ql-align-left img { float:none !important; }
-    .ql-align-right img { float:none !important; }
+    .ql-align-left img { float:none !important; margin: 0; }
+    .ql-align-right img { float:none !important; margin: 0; }
     .ql-align-justify img { float: none !important; }
     .ql-align-center img { float: none !important; }
 }
