@@ -289,6 +289,11 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if (is_instanceof($childFormType, NumberType::class)) {
                     $value = floatval($value);
                 }
+
+                if (is_instanceof($childFormType, BooleanType::class)) {
+                    $value = boolval($value);
+                }
+
                 if (is_instanceof($childFormType, PercentType::class)) {
                     $value = intval($value);
                 }
