@@ -16,6 +16,7 @@
     white-space: pre-line;
 }
 
+
 @media all and (max-width: 470px) {
     
     .ql-editor img
@@ -26,12 +27,13 @@
 
         display: block;
         width:auto;
+        max-width: 100%;
     }
 
-    .ql-align-left img { float:none; }
-    .ql-align-right img { float:none; }
-    .ql-align-justify img { float: none; }
-    .ql-align-center img { float: none; }
+    .ql-align-left img { float:none !important; }
+    .ql-align-right img { float:none !important; }
+    .ql-align-justify img { float: none !important; }
+    .ql-align-center img { float: none !important; }
 }
 
 .ql-container { background-color: #FFF !important; }
@@ -114,6 +116,11 @@
 }
 
 @media all and (max-width: 1024px) {
+
+    .ql-editor img
+    {
+        margin: auto;
+    }
 
     .ql-editor h2 {
         margin:0 !important;
