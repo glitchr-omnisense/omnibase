@@ -287,7 +287,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             }
 
             $this->settingRepository->flush();
-        
             $this->settingBag->clearAll(); // Clear cache
 
             $notification = new Notification("@controllers.backoffice_apikey.success");
@@ -436,7 +435,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $logo = $this->settingBag->getScalar("base.settings.logo");
         }
         if (!$logo) {
-            $logo = $this->imageService->getPublicDir()."/bundles/base/images/logo.svg";
+            $logo = $this->mediaService->getPublicDir()."/bundles/base/images/logo.svg";
         }
 
         $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);

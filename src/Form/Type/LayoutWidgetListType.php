@@ -113,7 +113,7 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
             }
 
             if (count($options["widgets"]) > 0) {
-                $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "backoffice_widgets.valid"]);
+                $form->add('valid', SubmitType::class, ["attr" => ["class" => "btn btn-primary"], "translation_domain" => "controllers", "label_format" => "backoffice_widgets.valid"]);
             }
         });
     }
@@ -121,6 +121,7 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
     public function mapDataToForms($viewData, \Traversable $forms): void
     {
     }
+
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);

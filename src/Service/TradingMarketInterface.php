@@ -11,7 +11,7 @@ interface TradingMarketInterface
     public function get(string $from, string $to, array $options = []): ?ExchangeRate;
     public function getFallback(string $source, ?string $target = null): ExchangeRate|array|null;
     public function getLatest(string $source, string $target, array $options = []): ?ExchangeRate;
-    //public function refresh(): bool; // not satisfying way to refresh cache from swap found
+    //public function refresh(): bool; // not satisfying way to refresh cache from swap found.. imo
 
     public function convert(string|float $cash, string $source, string $target, array $options = [], string $timeAgo = "now"): ?float;
     public function convertLatest(string|float $cash, string $source, string $target, array $options = []): ?float;

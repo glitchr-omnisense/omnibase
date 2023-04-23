@@ -36,6 +36,7 @@ class TranslatableWalker extends SqlWalker
     public function walkFromClause($fromClause): string
     {
         $sql = parent::walkFromClause($fromClause);
+
         $statements = explodeByArray([" LEFT JOIN", " INNER JOIN", self::FOREIGN_KEY], $sql, true);
         $statementsIntls = [];
 

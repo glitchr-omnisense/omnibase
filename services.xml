@@ -154,7 +154,6 @@
         <service id="Base\Cache\Abstract\AbstractLocalCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
         <service id="Base\Cache\Abstract\AbstractLocalCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
 
-        <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="setting_bag" /></service>
         <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
         <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
             <tag name="kernel.cache_warmer" />
@@ -408,13 +407,7 @@
 
         <service id="Base\DatabaseSubscriber\EnumSubscriber"><tag name="doctrine.event_subscriber" /></service>
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-<!--            <tag name="doctrine.event_listener" event="postPersist" priority="-2048" connection="default"/>-->
-<!--            <tag name="doctrine.event_listener" event="postUpdate"  priority="-1" connection="default"/>-->
-<!--            <tag name="doctrine.event_listener" event="preRemove"   priority="-1" connection="default"/>-->
-<!--            <tag name="doctrine.event_listener" event="postRemove"  priority="-1" connection="default"/>-->
-<!--            <tag name="doctrine.event_listener" event="postFlush"   priority="-1" connection="default"/>-->
-<!--            -->
-            <tag name="doctrine.event_subscriber" priority="2049" />
+            <tag name="doctrine.event_subscriber" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.annotation_reader" />

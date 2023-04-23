@@ -198,7 +198,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return [];
         }
 
-        $this->clear($path);
+        if(!$useCache) $this->clear($path);
 
         if (is_array($paths = $path)) {
             $settings = [];
@@ -344,7 +344,8 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
 
         if ($useCache) {
-            $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+            if($path == null) $this->cache->delete($this->cacheName);
+            else $this->cache->save($this->cacheSettingBag->set($this->settingBag));
         }
     }
 
