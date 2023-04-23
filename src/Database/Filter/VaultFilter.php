@@ -35,7 +35,7 @@ class VaultFilter extends SQLFilter
         $vaultFieldName = end($vaultAnnotation)->vault;
         $operator = str_contains($this->environment, "%") ? "LIKE" : "=";
         if ($targetEntity->hasField($vaultFieldName)) {
-            return $alias.".".$vaultFieldName." $operator '".$this->environment."'";
+            return $alias.".".$vaultFieldName." IS NULL OR ".$alias.".".$vaultFieldName." $operator '".$this->environment."'";
         }
 
         return "";
