@@ -15,7 +15,7 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
 
     public function __construct(string $cacheDir)
     {
-        $phpCacheFile = trim($cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], IconProvider::class).".php", "\"' ");
+        $phpCacheFile = $cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], IconProvider::class).".php";
 
         $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter("", 0, str_rstrip($phpCacheFile, ".php"))));
         $this->warmUp($cacheDir);
