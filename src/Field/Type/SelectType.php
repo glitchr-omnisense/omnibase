@@ -498,7 +498,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $dataChoices = [$dataChoices];
             }
 
-            foreach (array_diff($oldData, $dataChoices) as $entry) {
+            foreach (array_diff_object($oldData, $dataChoices) as $entry) {
 
                 if (!$isOwningSide && $mappedBy) {
 
