@@ -127,7 +127,7 @@
 .avatarupload .field-raw { display:none; }
 
 @media all and (max-width: 470px) {
-
+    
     .ql-editor img
     {
         margin: auto;
@@ -136,12 +136,17 @@
 
         display: block;
         width:auto;
-    }
 
-    .ql-align-left img { float:none; }
-    .ql-align-right img { float:none; }
-    .ql-align-justify img { float: none; }
-    .ql-align-center img { float: none; }
+        padding: 0;
+        margin-bottom: 1em;
+        max-width:100%;
+    }
+    
+
+    .ql-editor .ql-align-left    img,
+    .ql-editor .ql-align-right   img,
+    .ql-editor .ql-align-justify img,
+    .ql-editor .ql-align-center  img { float:none; margin: 1em auto;}
 }
 
 .timezone-dropdown .timezone,
