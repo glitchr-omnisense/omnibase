@@ -434,8 +434,8 @@ class SecurityController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $notification = new Notification("resetPassword.confirmation");
 
-            $email = $username = $form->get('email')->getData();
-            if (($user = $this->userRepository->findOneByUsernameOrEmail($email, $username))) {
+            $email = $form->get('email')->getData();
+            if (($user = $this->userRepository->findOneByEmail($email))) {
                 $user->removeExpiredTokens("reset-password");
                 if (!$user->getToken("reset-password")) {
                     $resetPasswordToken = new Token("reset-password", 3600);

@@ -17,7 +17,11 @@ html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
     min-width:50%;
     width:auto;
 }
-
+.modal.show .modal-dialog { max-width: 700px; }
+.modal .btn-close
+{
+    margin-top:-20px;
+}
 #main-menu .menu .menu-item.active:not(.expanded) .menu-icon, #main-menu .menu .menu-item.active:not(.expanded) a {
     color: var(--sidebar-menu-active-item-color);
 }

@@ -20,7 +20,7 @@ class ParameterBag extends ContainerBag implements ParameterBagInterface, Contai
 
     public function get(string $path = "", ?array $bag = null): array|bool|string|int|float|null
     {
-        $bag = array_merge_recursive2($this->normalizeAll(), $this->normalize(null, $bag ?? []));
+        $bag = array_replace_recursive($this->normalizeAll(), $this->normalize(null, $bag ?? []));
         return $this->read($path, $bag);
     }
 
