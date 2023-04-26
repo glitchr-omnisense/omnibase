@@ -84,6 +84,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     public function warmUp(string $cacheDir): bool
     {
         $this->encoreEntrypoints        = $this->getCache("/Entrypoints", $this->encoreEntrypoints ?? []);
+        $this->encoreEntrypointHashes   = $this->getCache("/Entrypoints/Hashes", $this->encoreEntrypointHashes ?? []);
         $this->encoreOptionalEntryNames = $this->getCache("/Optional/Entrynames", $this->encoreOptionalEntryNames ?? []);
         $this->renderedCssSource        = $this->getCache("/Source", $this->renderedCssSource ?? []);
         $this->renderedLinkTags         = $this->getCache("/Link", $this->renderedLinkTags ?? []);
@@ -96,6 +97,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     protected array $encoreEntryLinkTags   = [];
     protected array $encoreEntryScriptTags = [];
 
+    protected array $encoreEntrypointHashes;
     protected array $encoreBreakpoints = [];
 
     public function getMedia(string $filename): ?string
@@ -217,8 +219,12 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
             foreach($this->encoreEntrypoints as $id => $entrypoint) {
                 
                 $entrypointJsonPath = read_property($entrypoint, "entrypointJsonPath");
-                if(!is_cli() && filemtime($entrypointJsonPath) > filemtime($this->getCacheFile())) {
+                $entrypointHash = hash_file("md5", $entrypointJsonPath);
 
+                $this->encoreEntrypointHashes[$entrypointJsonPath] ??= $entrypointHash;
+                if(!is_cli() && $entrypointHash != $this->encoreEntrypointHashes[$entrypointJsonPath]) {
+
+                    $this->encoreEntrypointHashes[$entrypointJsonPath] = $entrypointHash;
                     throw new \RuntimeException("Entrypoint '".$id."' got modified.. please refresh your cache");
                 }
             }

@@ -102,7 +102,7 @@ class MediaController extends AbstractController
 
         $path     = $config["path"];
 
-        $contents = file_exists($path) ? $path : $this->flysystem->read($path, $config["storage"] ?? null);
+        $contents = file_exists($path) ? file_get_contents($path) : $this->flysystem->read($path, $config["storage"] ?? null);
         if ($contents === null) {
             throw $this->createNotFoundException();
         }

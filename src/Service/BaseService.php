@@ -196,7 +196,7 @@ class BaseService implements RuntimeExtensionInterface
             "title"   => $this->getSettingBag()->getScalar("base.settings.title.email") ?? $this->getSettingBag()->getScalar("base.settings.title"),
             "slogan"  => $this->getSettingBag()->getScalar("base.settings.slogan.email") ?? $this->getSettingBag()->getScalar("base.settings.slogan"),
             "logo"    => $this->getSettingBag()->getScalar("base.settings.logo.email") ?? $this->getSettingBag()->getScalar("base.settings.logo"),
-            "address" => $this->getSettingBag()->getScalar("base.settings.mail")
+            "address" => $this->getSettingBag()->getScalar("base.settings.mail.contact")
         ];
     }
 

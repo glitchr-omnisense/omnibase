@@ -1,0 +1,17 @@
+<address class="">
+    {{ entity.name }}<br>
+    {{ entity.streetAddress }},
+    {{ entity.city }}<br>
+    {{ entity.zipCode }},
+    {{ entity.country|upper }}<br>
+
+    {% set phone = entity.phone %}
+    {% if phone is not null %}
+        {{ "@messages.phone"|trans([phone]) }}<br>
+    {% endif %}
+
+    {% set fax = entity.fax %}
+    {% if fax is not null %}
+        {{ "@messages.fax"|trans([fax]) }}<br>
+    {% endif %}
+</address>

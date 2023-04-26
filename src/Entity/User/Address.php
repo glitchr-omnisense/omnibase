@@ -4,7 +4,9 @@ namespace Base\Entity\User;
 
 use Base\Entity\User;
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Service\Model\HtmlizeInterface;
 use Base\Service\Model\IconizeInterface;
+use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\AddressRepository;
 use Base\Database\Annotation\Cache;
@@ -19,12 +21,16 @@ use Base\Database\Annotation\Cache;
  *     @DiscriminatorEntry
 */
 
-class Address implements IconizeInterface
+class Address implements IconizeInterface, HtmlizeInterface
 {
+    use BaseTrait;
+
+    public function __toHtml(array $options = [], ...$args): ?string { return null; }
     public function __toString()
     {
         return $this->streetAddress.", ".ucfirst($this->city).", ".$this->country;
     }
+
     public function __iconize(): ?array
     {
         return null;

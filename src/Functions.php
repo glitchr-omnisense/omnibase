@@ -565,6 +565,17 @@ namespace {
         return preg_match("/^HTTP\/[0-9]\.[0-9] ".$status."/", $header);
     }
 
+    function base64_image(?string $path, ?string $type = null): ?string
+    {
+        if($path === null) return null;
+
+        $type ??= pathinfo($path, PATHINFO_EXTENSION);
+        if(!$type) $type = "svg+xml";
+
+        $data = file_exists($path) ? file_get_contents($path) : $path;
+        return 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+
     function is_base64($s){
         // Check if there are valid base64 characters
         if (!preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $s)) return false;

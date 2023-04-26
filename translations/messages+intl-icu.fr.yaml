@@ -11,7 +11,12 @@ paginator:
 
 page:
     empty: Cette page est vide !
-    
+
+phone:
+    "Téléphone : {0}"
+fax:
+    "Fax : {0}"
+
 words:
     by: par
     and: et

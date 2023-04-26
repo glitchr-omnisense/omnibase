@@ -7,6 +7,7 @@ use Base\Service\Model\Color\Intl\Colors;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
 use Base\Service\Model\ColorizeInterface;
+use Base\Service\Model\HtmlizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Base\Service\TranslatorInterface;
 use DateInterval;
@@ -18,6 +19,7 @@ use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Twig\Environment;
 use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -178,7 +180,8 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('empty', "empty"),
 
             new TwigFilter('colorify', [$this, 'colorify']),
-            new TwigFilter('crudify', [$this, 'crudify'], ["is_safe" => ['all']])
+            new TwigFilter('crudify', [$this, 'crudify'], ["is_safe" => ['all']]),
+            new TwigFilter('htmlify', [$this, 'htmlify'], ["is_safe" => ['all']])
         ];
     }
 
@@ -193,6 +196,26 @@ final class FunctionTwigExtension extends AbstractExtension
                                 ->includeReferrer()
                                 ->generateUrl()
         ]);
+    }
+
+    public function htmlify(?HtmlizeInterface $object, array $options = [], ...$args): ?string
+    {
+        if ($object === null) return null;
+
+        $html = $object->__toHtml($options, ...$args);
+        if ($html !== null) return $html;
+
+        $className = get_class($object);
+        while($className) {
+
+            $path = str_replace("\\_", "/", camel2snake(str_lstrip($className, ["Proxies\\__CG__\\", "App\\", "Base\\"])));
+            try { return $this->twig->render($path . ".html.twig", ["options" => $options, "entity" => $object]); }
+            catch (\RuntimeException|LoaderError $e) { }
+
+            $className = get_parent_class($className);
+        }
+
+        return null;
     }
 
     public function email(array $context)
@@ -295,22 +318,22 @@ final class FunctionTwigExtension extends AbstractExtension
         return $class::$$propertyName;
     }
 
-    public function property_accessor(mixed $entity, array|string $propertyName, bool $enableMagicCall = false): mixed
+    public function property_accessor(mixed $object, array|string $propertyName, bool $enableMagicCall = false): mixed
     {
-        if ($entity == null) {
+        if ($object == null) {
             return null;
         }
 
         // Shape property path
         $propertyPath = is_string($propertyName) ? explode(".", $propertyName) : $propertyName;
         if (!$propertyPath) {
-            return $entity;
+            return $object;
         }
 
         // Special case for array
-        if (is_array($entity) || $entity instanceof Collection) {
+        if (is_array($object) || $object instanceof Collection) {
             $id = array_unshift($attributes);
-            $entity = $entity[$id] ?? null;
+            $object = $object[$id] ?? null;
         }
 
         // Extract head
@@ -321,12 +344,12 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         $propertyAccessor =  $propertyAccessorBuilder->getPropertyAccessor();
-        if (!$propertyAccessor->isReadable($entity, $propertyName)) {
+        if (!$propertyAccessor->isReadable($object, $propertyName)) {
             return null;
         }
 
-        $entity = $propertyAccessor->getValue($entity, $propertyName);
-        return $this->property_accessor($entity, tail($propertyPath)); // Recursive processing
+        $object = $propertyAccessor->getValue($object, $propertyName);
+        return $this->property_accessor($object, tail($propertyPath)); // Recursive processing
     }
 
     public function color_name(string $hex)
