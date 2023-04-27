@@ -11,7 +11,10 @@ window.addEventListener('load', function(event) {
 
     $("form :input").keydown(function(event){
         if(event.keyCode == 13) {
-            return false; // Prevent submission form submission using ENTER
+
+            var form = $(this).closest("form");
+            if(form.find("[type=submit]").length > 0)
+                return false; // Prevent submission form submission using ENTER
         }
     });
 
