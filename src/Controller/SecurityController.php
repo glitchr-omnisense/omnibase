@@ -99,8 +99,7 @@ class SecurityController extends AbstractController
         TokenStorageInterface $tokenStorage,
         TranslatorInterface $translator,
         ParameterBagInterface $parameterBag
-    )
-    {
+    ) {
         $this->router          = $router;
         $this->translator      = $translator;
         $this->tokenStorage    = $tokenStorage;
@@ -166,10 +165,9 @@ class SecurityController extends AbstractController
     {
         // If user is found.. go to the logout request page
         if ($this->getUser()) {
-
             $response = $this->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
             $response->headers->clearCookie('REMEMBERME', "/", $this->router->getDomain());
-            
+
             return $response;
         }
 

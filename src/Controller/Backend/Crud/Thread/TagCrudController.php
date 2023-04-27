@@ -26,7 +26,6 @@ class TagCrudController extends AbstractCrudController
                 'label' => [],
                 'keywords' => ['form_type' => SelectType::class, 'tags' => [',', ';'], 'required' => false],
             ])->setTextAlign(TextAlign::RIGHT)->hideOnDetail();
-
         });
     }
 }

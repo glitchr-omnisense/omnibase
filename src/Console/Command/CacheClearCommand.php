@@ -64,8 +64,7 @@ class CacheClearCommand extends Command
         RouterInterface $router,
         string $projectDir,
         string $cacheDir
-    )
-    {
+    ) {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
 

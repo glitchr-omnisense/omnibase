@@ -75,8 +75,7 @@ class MediaService extends FileService implements MediaServiceInterface
         ImagineInterface $imagineBitmap,
         ImagineInterface $imagineSvg,
         ?Profiler $profiler
-    )
-    {
+    ) {
         parent::__construct($twig, $router, $obfuscator, $flysystem);
 
         $this->profiler      = $profiler;
@@ -117,7 +116,6 @@ class MediaService extends FileService implements MediaServiceInterface
 
         $pathList = is_array($path) ? $path : [$path];
         foreach ($pathList as $p) {
-
             $output[] = $this->generate("ux_serve", [], $path, $config);
         }
 
@@ -134,7 +132,6 @@ class MediaService extends FileService implements MediaServiceInterface
 
         $pathList = is_array($path) ? $path : [$path];
         foreach ($pathList as $p) {
-
             $output[] = $this->generate("ux_serve", [], $path, $config);
         }
 
@@ -194,8 +191,7 @@ class MediaService extends FileService implements MediaServiceInterface
 
         $pathList = is_array($path) ? $path : [$path];
         foreach ($pathList as $p) {
-
-            $output[] = $supports_webp ? 
+            $output[] = $supports_webp ?
                 $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters])) :
                 $this->generate("ux_imageExtension", [], $path, array_merge($config, ["extension" => $extension, "filters" => $filters]));
         }
@@ -240,7 +236,7 @@ class MediaService extends FileService implements MediaServiceInterface
             "lazybox"  => $lazybox
         ]);
     }
-    
+
     public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $config = [], array $filters = []): array|string|null
     {
         $filters[] = new CropFilter(
@@ -291,7 +287,7 @@ class MediaService extends FileService implements MediaServiceInterface
         }
 
         $path = "/".str_strip($path, $this->router->getAssetUrl(""));
-        
+
         $config["path"] = $path;
         $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
         $config["local_cache"] = $config["local_cache"] ?? null;
@@ -300,7 +296,6 @@ class MediaService extends FileService implements MediaServiceInterface
         }
 
         while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
-            
             $path = $pathConfig["path"] ?? $path;
             $config["path"] = $path;
             $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -325,8 +320,7 @@ class MediaService extends FileService implements MediaServiceInterface
         array|string $lightboxTitle = null,
         array $lightboxAttributes = [],
         ...$srcset
-    ): ?string
-    {
+    ): ?string {
         $lightboxPathType = gettype($path);
         $lightboxIdType = gettype($lightboxId);
         $lightboxTitleType = gettype($lightboxTitle);
@@ -390,7 +384,6 @@ class MediaService extends FileService implements MediaServiceInterface
 
             list($className, $controllerName) = array_pad(explode("::", $routeMatch["_controller"] ?? ""), 2, null);
             if (is_instanceof($className, get_class($this->mediaController)) && $controllerName) {
-
                 $routeParameters = array_key_removes($routeMatch, "_route", "_controller");
                 $this->mediaController->{$controllerName}(...$routeParameters);
             }
@@ -587,7 +580,6 @@ class MediaService extends FileService implements MediaServiceInterface
 
                 $filteredPath = $this->filter($path, array_merge($config, ["local_cache" => false]), $filters) ?? $path;
                 if (!file_exists($filteredPath)) {
-
                     if (!$this->fallback) {
                         throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provided.");
                     }
@@ -621,29 +613,32 @@ class MediaService extends FileService implements MediaServiceInterface
         // GD does not support other palette than RGB..
         //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
         //   cmyk2rgb($pathPublic); // Not working yet..
-        try { $image = $imagine->open($path); }
-        catch (Exception $e) { return $this->fallback ? $this->getNoImage($this->getExtension($path)) : null; }
+        try {
+            $image = $imagine->open($path);
+        } catch (Exception $e) {
+            return $this->fallback ? $this->getNoImage($this->getExtension($path)) : null;
+        }
 
         try {
-
             if ($formatter instanceof BitmapFilterInterface) {
                 $image->usePalette(new \Imagine\Image\Palette\RGB());
                 $image->strip();
             }
-
         } catch (Exception $e) {
-
-            if(!$this->fallback) throw $e;
+            if (!$this->fallback) {
+                throw $e;
+            }
         }
 
         // Apply filters
         foreach ($filters as $filter) {
-
             $oldImage = $image;
-            try { $image = $filter->apply($oldImage); }
-            catch (\Exception $e) {
-
-                if(!$this->fallback) throw $e;
+            try {
+                $image = $filter->apply($oldImage);
+            } catch (\Exception $e) {
+                if (!$this->fallback) {
+                    throw $e;
+                }
                 $image = $oldImage;
             }
 
@@ -657,26 +652,30 @@ class MediaService extends FileService implements MediaServiceInterface
         $image->__destruct();
 
         // Fallback
-        if(!file_exists($formatter->getPath()) && $this->fallback)
+        if (!file_exists($formatter->getPath()) && $this->fallback) {
             return $this->getNoImage($this->getExtension($path));
+        }
 
         return $formatter->getPath();
     }
 
     public function getNoImage(null|string|FormatFilterInterface $extensionOrFormatter = null)
     {
-        if(is_string($extensionOrFormatter))
+        if (is_string($extensionOrFormatter)) {
             $extension = $extensionOrFormatter;
+        }
 
         $extension ??= "png";
-        if($extensionOrFormatter instanceof SvgFilterInterface)
+        if ($extensionOrFormatter instanceof SvgFilterInterface) {
             $extension = "svg";
+        }
 
-        $extensions = array_map(fn($a) => $a["extension"], $this->noImage);
+        $extensions = array_map(fn ($a) => $a["extension"], $this->noImage);
 
         $noImage = first(array_search_by($this->noImage, "extension", $extension));
-        if(!$noImage) {
-            throw new Exception("Replacement image not defined for \"" . strtoupper($extension) . "\"." . PHP_EOL .
+        if (!$noImage) {
+            throw new Exception(
+                "Replacement image not defined for \"" . strtoupper($extension) . "\"." . PHP_EOL .
                 "Please define `base.images.no_image." . $extension . "` or disable `base.images.fallback`"
             );
         }

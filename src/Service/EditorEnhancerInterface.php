@@ -2,6 +2,6 @@
 
 namespace Base\Service;
 
-interface EditorEnhancerInterface extends WysiwygEnhancerInterface 
+interface EditorEnhancerInterface extends WysiwygEnhancerInterface
 {
 }

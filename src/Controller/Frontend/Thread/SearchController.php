@@ -38,10 +38,9 @@ class SearchController extends AbstractController
                 ]);
             })
             ->onDefault(function (FormProcessorInterface $formProcessor) use ($request) {
-
                 $threads = [];
                 $data = $formProcessor->getData() ? clone $formProcessor->getData() : null;
-                if($data) {
+                if ($data) {
                     $data->content = $data->content ?? $data->generic ?? "";
                     $data->title = $data->title   ?? $data->generic ?? "";
                     $data->excerpt = $data->excerpt ?? $data->generic ?? "";

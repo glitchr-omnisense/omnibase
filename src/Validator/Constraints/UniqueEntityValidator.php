@@ -44,23 +44,22 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             // Property path
             $fieldPath = explode(".", $fieldName);
             if (count($fieldPath) > 1) {
-
                 $fieldName = head($fieldPath);
                 if (!$classMetadata->hasAssociation($fieldName)) {
                     throw new ConstraintDefinitionException(sprintf('The field "%s" is expected to be an association.', $fieldName));
                 }
 
                 foreach ($classMetadata->getFieldValue($entity, $fieldName) as $association) {
-
                     $constraint->fields[$key] = implode(".", tail($fieldPath));
                     $classname = explode("\\", get_class($constraint));
                     $classname = array_pop($classname);
 
                     $defaultMessage = "@validators.".camel2snake($classname);
-                    if($constraint->message == $defaultMessage) {
-
+                    if ($constraint->message == $defaultMessage) {
                         $constraint->message = "@validators.".$this->translator->parseClass($association).".".implode(".", tail($fieldPath)).".unique";
-                        if(!$this->translator->transExists($constraint->message)) $constraint->message = "@validators.unique_entity";
+                        if (!$this->translator->transExists($constraint->message)) {
+                            $constraint->message = "@validators.unique_entity";
+                        }
                     }
 
                     $constraint->entity = $association;
@@ -128,19 +127,23 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         $identityMap = $this->em->getUnitOfWork()->getIdentityMap()[get_root_class($entity)] ?? [];
         $siblingEntities = array_filter(
             $identityMap ?? null,
-            fn($k) => ($k != $entity->getId()) && $identityMap[$k] instanceof $entity,
+            fn ($k) => ($k != $entity->getId()) && $identityMap[$k] instanceof $entity,
             ARRAY_FILTER_USE_KEY
         );
 
         $result = null;
-        foreach($siblingEntities as $siblingEntity)
-        {
-            if($entity->getId() > $siblingEntity->getId()) continue;
-            if($classMetadata->getFieldValue($siblingEntity, $fieldName) == $classMetadata->getFieldValue($entity, $fieldName))
+        foreach ($siblingEntities as $siblingEntity) {
+            if ($entity->getId() > $siblingEntity->getId()) {
+                continue;
+            }
+            if ($classMetadata->getFieldValue($siblingEntity, $fieldName) == $classMetadata->getFieldValue($entity, $fieldName)) {
                 $result = $siblingEntity->getId();
+            }
         }
 
-        if(!$result) $result = $repository->{$constraint->repositoryMethod}($criteria);
+        if (!$result) {
+            $result = $repository->{$constraint->repositoryMethod}($criteria);
+        }
         if ($result instanceof \IteratorAggregate) {
             $result = $result->getIterator();
         }

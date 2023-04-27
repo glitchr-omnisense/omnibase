@@ -29,8 +29,7 @@ class TranslationSettingsCommand extends Command
         EntityManagerInterface $entityManager,
         ParameterBagInterface $parameterBag,
         SettingBagInterface $settingBag
-    )
-    {
+    ) {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->settingBag = $settingBag;
     }
@@ -64,9 +63,9 @@ class TranslationSettingsCommand extends Command
         }
         $settings = array_map_recursive(
             fn ($s) => array_transforms(
-            fn ($i, $k): array => [$k, null],
-            $s->getTranslations()->getKeys()
-        ),
+                fn ($i, $k): array => [$k, null],
+                $s->getTranslations()->getKeys()
+            ),
             $rawSettings
         );
 

@@ -22,10 +22,13 @@ namespace {
     function get_root_class(object|string $object_or_class): string|false
     {
         $class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
-        if(!$class) return false;
+        if (!$class) {
+            return false;
+        }
 
-        while(get_parent_class($class))
+        while (get_parent_class($class)) {
             $class = get_parent_class($class);
+        }
 
         return $class;
     }
@@ -35,21 +38,19 @@ namespace {
         return ($n < 0) ? "-" : "+";
     }
 
-    function is_json(mixed $stringOrObject) {
-
-        if(is_string($stringOrObject)) {
-         
+    function is_json(mixed $stringOrObject)
+    {
+        if (is_string($stringOrObject)) {
             json_decode($stringOrObject);
             return json_last_error() === JSON_ERROR_NONE;
         }
 
-        if(is_object($stringOrObject)) {
-        
-            return get_object_vars($stringOrObject) ? TRUE : FALSE;
+        if (is_object($stringOrObject)) {
+            return get_object_vars($stringOrObject) ? true : false;
         }
 
         return false;
-     }
+    }
 
     const MAX_DIRSIZE = 255;
     function path_subdivide($path, int $subdivision, int|array $length = 1)
@@ -257,8 +258,8 @@ namespace {
 
         $urlButQuery   = explode("?", $url)[0] ?? "";
         $pathEndsWithSlash = str_ends_with($urlButQuery, "/");
-        $parse["path"] = str_rstrip($parse["path"] ?? "","/");
-        
+        $parse["path"] = str_rstrip($parse["path"] ?? "", "/");
+
         return compose_url(
             $parse["scheme"] ?? null,
             $parse["user"] ?? null,
@@ -284,8 +285,7 @@ namespace {
         ?string $path = null,
         ?string $query = null,
         ?string $fragment = null
-    ): array|string|int|false|null
-    {
+    ): array|string|int|false|null {
         $scheme    = ($domain && $scheme) ? $scheme."://" : null;
         $user      = ($domain && $user) ? $user."@" : null;
         $password  = ($domain && $user && $password) ? ":".$password : null;
@@ -328,7 +328,6 @@ namespace {
         }
 
         if (array_key_exists("host", $parse)) {
-
             $port = array_key_exists("port", $parse) ? ":" . $parse["port"] : "";
             $parse["host"] = $parse["host"].$port;
 
@@ -348,12 +347,15 @@ namespace {
             //
             // Check if hostname
             if (preg_match('/([a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(?:\.[a-z]{1,2})?)\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
-
                 $hostWithoutPort = explode(":", $parse["host"])[0];
                 $parse["fqdn"] = $hostWithoutPort . ".";
 
-                if(count($match) > 1) $parse["domain"] = $match[1];
-                if(count($match) > 2) $parse["port"] = $match[2];
+                if (count($match) > 1) {
+                    $parse["domain"] = $match[1];
+                }
+                if (count($match) > 2) {
+                    $parse["port"] = $match[2];
+                }
 
                 $subdomain = str_rstrip($hostWithoutPort, "." . $parse["domain"]);
                 if ($parse["domain"] !== $subdomain) {
@@ -372,11 +374,13 @@ namespace {
                 $domain = explode(".", $match[1]);
                 $parse["sld"] = first($domain);
                 $parse["tld"] = implode(".", tail($domain));
-
             } elseif (preg_match('/^([a-z0-9][a-z0-9\-]{0,63}?)\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
-
-                if(count($match) > 1) $parse["domain"] = $match[1];
-                if(count($match) > 2) $parse["port"] = $match[2];
+                if (count($match) > 1) {
+                    $parse["domain"] = $match[1];
+                }
+                if (count($match) > 2) {
+                    $parse["port"] = $match[2];
+                }
             }
         }
 
@@ -387,7 +391,7 @@ namespace {
         if (!array_key_exists("base_dir", $parse)) {
             $parse["base_dir"] = $base;
         }
-        if(array_key_exists("ip", $parse)) {
+        if (array_key_exists("ip", $parse)) {
             array_key_removes($parse, "subdomain", "machine");
         }
 
@@ -398,7 +402,6 @@ namespace {
     {
         // At least one class detection
         if (is_array($instanceOf)) {
-
             foreach ($instanceOf as $_instanceOf) {
                 if (is_instanceof($object_or_class, $_instanceOf)) {
                     return true;
@@ -567,31 +570,42 @@ namespace {
 
     function base64_image(?string $path, ?string $type = null): ?string
     {
-        if($path === null) return null;
+        if ($path === null) {
+            return null;
+        }
 
         $type ??= pathinfo($path, PATHINFO_EXTENSION);
-        if(!$type) $type = "svg+xml";
+        if (!$type) {
+            $type = "svg+xml";
+        }
 
         $data = file_exists($path) ? file_get_contents($path) : $path;
         return 'data:image/' . $type . ';base64,' . base64_encode($data);
     }
 
-    function is_base64($s){
+    function is_base64($s)
+    {
         // Check if there are valid base64 characters
-        if (!preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $s)) return false;
-    
+        if (!preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $s)) {
+            return false;
+        }
+
         // Decode the string in strict mode and check the results
         $decoded = base64_decode($s, true);
-        if(false === $decoded) return false;
-    
+        if (false === $decoded) {
+            return false;
+        }
+
         // Encode the string again
-        if(base64_encode($decoded) != $s) return false;
-    
+        if (base64_encode($decoded) != $s) {
+            return false;
+        }
+
         return true;
     }
 
-    function is_data($s):bool
-    {  
+    function is_data($s): bool
+    {
         return str_starts_with($s, "data:");
     }
 
@@ -600,11 +614,14 @@ namespace {
         $tmpfname = tempnam($tmpdir, $prefix);
 
         $contents = false;
-        if(!is_data($url)) $contents = curl_get_contents($url); // Fetch url content..
+        if (!is_data($url)) {
+            $contents = curl_get_contents($url);
+        } // Fetch url content..
         else { // Convert base64 url..
-
             $data = (explode(",", $url)[1] ?? false);
-            if($data && is_base64($data)) $contents = base64_decode($data);
+            if ($data && is_base64($data)) {
+                $contents = base64_decode($data);
+            }
         }
 
         if ($contents !== false) {
@@ -844,17 +861,19 @@ namespace {
                 case SHORTEN_BACK_EXTEND:
 
                     if ($position == SHORTEN_BACK_SHRINK) {
-
-                        $pos = strrpos(substr($haystack,0, $length), ".");
-                        if($pos === false) return "";
+                        $pos = strrpos(substr($haystack, 0, $length), ".");
+                        if ($pos === false) {
+                            return "";
+                        }
 
                         $length = $pos+1;
                     }
 
-                    if ($position == SHORTEN_BACK_EXTEND){
-
+                    if ($position == SHORTEN_BACK_EXTEND) {
                         $pos = strpos(substr($haystack, $length), ".");
-                        if($pos !== false) $length += $pos+1;
+                        if ($pos !== false) {
+                            $length += $pos+1;
+                        }
                     }
 
                     return substr($haystack, 0, $length) . rtrim($separator);
@@ -1380,12 +1399,11 @@ namespace {
         }
 
         do {
-
             $http_response_header = []; // Special PHP variable
             $context = stream_context_create(["http" => ["follow_location" => false]]);
-            
+
             get_headers($url, false, $context);
-            
+
             $pattern = "/^Location:\s*(.*)$/i";
             $location_headers = preg_grep($pattern, $http_response_header);
 
@@ -1393,7 +1411,6 @@ namespace {
             if ($repeat) {
                 $url = $matches[1];
             }
-
         } while ($repeat);
 
         $redirect = $url;
@@ -1410,7 +1427,6 @@ namespace {
     {
         // Search by looking at the header if url format
         if (filter_var($filename, FILTER_VALIDATE_URL)) {
-            
             $headers = get_headers2($filename, $filename, $mode);
             if (strpos($headers[0], '200')) {
                 return explode("Content-Type: ", $headers[1])[1] ?? null;
@@ -2894,12 +2910,21 @@ namespace {
 
     function is_serialized($str): bool
     {
-        if(!is_string($str)) return false;
-        if(!str_starts_with($str, "{")) return false;
-        if(!str_ends_with($str, "}")) return false;
+        if (!is_string($str)) {
+            return false;
+        }
+        if (!str_starts_with($str, "{")) {
+            return false;
+        }
+        if (!str_ends_with($str, "}")) {
+            return false;
+        }
 
-        try { $ret = unserialize($str); }
-        catch (\Exception $e) { return false; }
+        try {
+            $ret = unserialize($str);
+        } catch (\Exception $e) {
+            return false;
+        }
 
         return is_string($str) && ($str == 'b:0;' || $ret !== false);
     }

@@ -83,8 +83,7 @@ class DoctrineDatabaseImportCommand extends Command
         EntityHydrator $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator,
         Notifier $notifier
-    )
-    {
+    ) {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
 
         $this->entityHydrator = $entityHydrator;

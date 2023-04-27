@@ -25,7 +25,10 @@ class Address implements IconizeInterface, HtmlizeInterface
 {
     use BaseTrait;
 
-    public function __toHtml(array $options = [], ...$args): ?string { return null; }
+    public function __toHtml(array $options = [], ...$args): ?string
+    {
+        return null;
+    }
     public function __toString()
     {
         return $this->streetAddress.", ".ucfirst($this->city).", ".$this->country;

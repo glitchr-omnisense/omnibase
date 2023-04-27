@@ -131,7 +131,9 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             return null;
         }, array_values($orderedIndexes));
 
-        if(!$entityValue) $entityValue = [];
+        if (!$entityValue) {
+            $entityValue = [];
+        }
         $nEntries = $entityValue instanceof Collection ? $entityValue->count() : count($entityValue ?? []);
         while (count($orderedIndexes) < $nEntries) {
             $orderedIndexes[] = count($orderedIndexes);

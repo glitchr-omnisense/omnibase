@@ -35,7 +35,6 @@ class FileConfigurator implements FieldConfiguratorInterface
 
         $preferredDownloadName = $field->getCustomOption(FileField::OPTION_PREFERRED_DOWNLOAD_NAME);
         if ($preferredDownloadName) {
-
             $entity = $entityDto->getInstance();
             if ($this->classMetadataManipulator->hasField(get_class($entity), $preferredDownloadName)) {
                 $preferredDownloadName = $this->classMetadataManipulator->getFieldValue($entity, $preferredDownloadName);
@@ -44,7 +43,7 @@ class FileConfigurator implements FieldConfiguratorInterface
             $field->setCustomOption(FileField::OPTION_PREFERRED_DOWNLOAD_NAME, $preferredDownloadName);
         }
 
-        $file = Uploader::getPublic($entityDto->getInstance(), $field->getProperty()) ?? "";        
+        $file = Uploader::getPublic($entityDto->getInstance(), $field->getProperty()) ?? "";
         $field->setFormattedValue($file);
     }
 }

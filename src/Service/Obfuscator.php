@@ -117,17 +117,18 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         }
 
         $data = $this->getCompression($this->compression)->decode($data);
-        try { 
-
-		if ($data) $data = unserialize($data);
-		return $data ? $data : null;
-
-	} catch (\ErrorException $e) { }
-
-        if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
-            $this->deleteCache("/Identifiers/".$uuid);
+        try {
+            if ($data) {
+                $data = unserialize($data);
+            }
+            return $data ? $data : null;
+        } catch (\ErrorException $e) {
         }
 
-        return null;
+            if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
+                $this->deleteCache("/Identifiers/".$uuid);
+            }
+
+            return null;
     }
 }

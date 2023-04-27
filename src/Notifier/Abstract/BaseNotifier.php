@@ -296,9 +296,12 @@ abstract class BaseNotifier implements BaseNotifierInterface
             $mailName = first($defaultMail) ?? null;
         }
         $mailName = trim(mb_ucwords(
-            str_replace([".", "_"], [" ", " "],
-            explode("@", $mail)[0]
-        )));
+            str_replace(
+                [".", "_"],
+                [" ", " "],
+                explode("@", $mail)[0]
+            )
+        ));
 
         $phone = $this->settingBag->getScalar("base.settings.phone");
         if (!$phone) {
@@ -374,7 +377,6 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         $channels = [];
         foreach ($this->getDefaultChannels($importance) as $channel) {
-
             // Replace email by email+ for user..
             // Users should not receive the default admin email sent by Symfony notifier
             if (str_starts_with($channel, "email")) {
@@ -395,8 +397,9 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
             // If recipient implement Email interface, check if email is available
             elseif (str_starts_with($channel, "email")) {
-
-                if (!$this->useMailer) continue;
+                if (!$this->useMailer) {
+                    continue;
+                }
                 if ($recipient instanceof EmailRecipientInterface && empty($recipient->getEmail())) {
                     continue;
                 }
@@ -442,12 +445,12 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
             // If recipient implement Email interface, check if email is available
             elseif (str_starts_with($channel, "email+")) {
-
-                if (!$this->useMailer) continue;
+                if (!$this->useMailer) {
+                    continue;
+                }
                 if ($recipient instanceof EmailRecipientInterface && empty($recipient->getEmail())) {
                     continue;
                 }
-                
             } elseif (str_starts_with($channel, "chat/")) {
                 $firstAdminRecipient = $this->getAdminRecipients()[0] ?? null;
                 if ($recipient != $firstAdminRecipient) {

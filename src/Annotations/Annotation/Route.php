@@ -33,9 +33,10 @@ class Route extends \Symfony\Component\Routing\Annotation\Route
         bool $stateless = null,
         private ?string $env = null
     ) {
-
         $parsedUrl = parse_url2($host ?? "");
-        if(!$parsedUrl) $parsedUrl = [];
+        if (!$parsedUrl) {
+            $parsedUrl = [];
+        }
 
         $parsedUrl["domain"]    ??= $domain    ?? "\{_domain\}"   ;
         $parsedUrl["subdomain"] ??= $subdomain ?? "\{_subdomain\}";

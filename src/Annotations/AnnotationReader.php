@@ -163,8 +163,7 @@ class AnnotationReader extends AbstractLocalCache
         string $projectDir,
         string $environment,
         string $cacheDir
-    )
-    {
+    ) {
         if (!self::getInstance(false)) {
             self::setInstance($this);
         }

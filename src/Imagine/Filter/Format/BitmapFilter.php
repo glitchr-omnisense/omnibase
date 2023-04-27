@@ -82,10 +82,12 @@ class BitmapFilter implements BitmapFilterInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         foreach ($this->filters as $filter) {
-
             $oldImage = $image;
-            try { $image = $filter->apply($oldImage); }
-            catch (Exception $e) { $image = $oldImage; }
+            try {
+                $image = $filter->apply($oldImage);
+            } catch (Exception $e) {
+                $image = $oldImage;
+            }
 
             if (spl_object_id($image) != spl_object_id($oldImage)) {
                 $oldImage->__destruct();

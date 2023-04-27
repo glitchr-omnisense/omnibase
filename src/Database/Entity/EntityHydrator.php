@@ -370,7 +370,6 @@ class EntityHydrator implements EntityHydratorInterface
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
 
         foreach ($data as $propertyName => $value) {
-
             if ($this->classMetadataManipulator->hasAssociation($entity, $propertyName)) {
                 continue;
             }

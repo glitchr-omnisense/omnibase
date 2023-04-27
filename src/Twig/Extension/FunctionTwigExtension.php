@@ -72,12 +72,12 @@ final class FunctionTwigExtension extends AbstractExtension
      * @var AdminUrlGenerator
      */
     protected $adminUrlGenerator;
-    
+
     /**
      * @var Environment
      */
     protected $twig;
-    
+
     public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGenerator $adminUrlGenerator, string $projectDir)
     {
         $this->translator     = $translator;
@@ -200,17 +200,22 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function htmlify(?HtmlizeInterface $object, array $options = [], ...$args): ?string
     {
-        if ($object === null) return null;
+        if ($object === null) {
+            return null;
+        }
 
         $html = $object->__toHtml($options, ...$args);
-        if ($html !== null) return $html;
+        if ($html !== null) {
+            return $html;
+        }
 
         $className = get_class($object);
-        while($className) {
-
+        while ($className) {
             $path = str_replace("\\_", "/", camel2snake(str_lstrip($className, ["Proxies\\__CG__\\", "App\\", "Base\\"])));
-            try { return $this->twig->render($path . ".html.twig", ["options" => $options, "entity" => $object]); }
-            catch (\RuntimeException|LoaderError $e) { }
+            try {
+                return $this->twig->render($path . ".html.twig", ["options" => $options, "entity" => $object]);
+            } catch (\RuntimeException|LoaderError $e) {
+            }
 
             $className = get_parent_class($className);
         }

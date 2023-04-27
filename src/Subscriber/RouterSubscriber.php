@@ -54,24 +54,25 @@ class RouterSubscriber implements EventSubscriberInterface
         }
 
         $route = $this->router->getRoute();
-        if(!$route) return;
+        if (!$route) {
+            return;
+        }
 
         $ipRestriction = !$this->parameterBag->get("base.router.ip_access")        &&  $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
         if ($ipRestriction) {
-
         }
 
         $url = get_url();
-        if($ipRestriction) {
-
+        if ($ipRestriction) {
             $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
-            if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback)
+            if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback) {
                 throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
+            }
 
             $parsedUrl = parse_url2(get_url());
             $parsedUrl["scheme"] = $this->router->getScheme();
             $parsedUrl["host"] = $this->router->getHostFallback();
-    
+
             $url = compose_url(
                 $parsedUrl["scheme"]   ?? null,
                 null,
@@ -84,9 +85,7 @@ class RouterSubscriber implements EventSubscriberInterface
                 $parsedUrl["query"]    ?? null,
                 $parsedUrl["fragment"] ?? null
             );
-
-        } else if (!$route->getHost() && $this->router->reducesOnFallback()) {
-
+        } elseif (!$route->getHost() && $this->router->reducesOnFallback()) {
             $parsedUrl = parse_url2(get_url());
             $parsedUrl["scheme"]    = $this->router->getScheme();
             $parsedUrl["machine"]   = $this->router->getMachine() ?? null;
@@ -109,8 +108,7 @@ class RouterSubscriber implements EventSubscriberInterface
         }
 
         // Redirect to sanitized url
-        if($url != get_url()) {
-
+        if ($url != get_url()) {
             $event->setResponse(new RedirectResponse($url));
             return $event->stopPropagation();
         }

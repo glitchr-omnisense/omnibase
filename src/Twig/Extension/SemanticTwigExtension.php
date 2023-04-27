@@ -23,7 +23,7 @@ final class SemanticTwigExtension extends AbstractExtension
     {
         return 'semantic_extension';
     }
-    
+
     public function getFilters(): array
     {
         return [

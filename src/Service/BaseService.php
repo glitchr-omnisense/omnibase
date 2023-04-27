@@ -129,8 +129,7 @@ class BaseService implements RuntimeExtensionInterface
         EntityHydratorInterface $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator,
         AdminUrlGenerator $adminUrlGenerator
-    )
-    {
+    ) {
         $this->setInstance($this);
         $this->startTime($kernel->getStartTime());
 
@@ -225,8 +224,8 @@ class BaseService implements RuntimeExtensionInterface
     public function settings()
     {
         return $this->getSettingBag();
-    } 
-    
+    }
+
     // Used in twig environment
     public function crudify($entity): string
     {
@@ -436,9 +435,9 @@ class BaseService implements RuntimeExtensionInterface
 
     public function isDevelopment()
     {
-        return  $this->isDebug() || 
-		$this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_") ||
-		$this->kernel->getEnvironment() == "local" || str_starts_with($this->kernel->getEnvironment(), "local_");
+        return  $this->isDebug() ||
+        $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_") ||
+        $this->kernel->getEnvironment() == "local" || str_starts_with($this->kernel->getEnvironment(), "local_");
     }
 
     public function isProduction()

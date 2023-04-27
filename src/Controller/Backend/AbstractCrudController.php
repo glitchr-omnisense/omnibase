@@ -89,8 +89,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         SettingBagInterface $settingBag,
         RouterInterface $router,
         TranslatorInterface $translator
-    )
-    {
+    ) {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
         $this->entityManager = $entityManager;
@@ -118,8 +117,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static $crudNamespaceCandidates = ["\\\Controller\\\Crud\\", "\\\Controller\\\Backend\\\Crud\\"];
     public static function addCrudNamespaceCandidate(string $namespace)
     {
-        if(in_array($namespace, self::$crudNamespaceCandidates))
+        if (in_array($namespace, self::$crudNamespaceCandidates)) {
             self::$crudNamespaceCandidates[] = $namespace;
+        }
     }
     public static function removeCrudNamespaceCandidate(string $namespace)
     {
@@ -128,24 +128,25 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public static function getEntityFqcn(): string
     {
-        if(is_abstract(get_called_class())) return false;
+        if (is_abstract(get_called_class())) {
+            return false;
+        }
 
         $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
-        foreach(self::$crudNamespaceCandidates as $namespace) {
-
+        foreach (self::$crudNamespaceCandidates as $namespace) {
             try {
-
                 $entityFqcn = preg_replace("/".$namespace."\/", "\\Entity\\", $entityFqcn);
                 $aliasEntityFqcn = BaseBundle::getInstance()->getAlias($entityFqcn);
-                if($aliasEntityFqcn) $entityFqcn = $aliasEntityFqcn;
+                if ($aliasEntityFqcn) {
+                    $entityFqcn = $aliasEntityFqcn;
+                }
 
-                if(class_exists($entityFqcn)) {
-
+                if (class_exists($entityFqcn)) {
                     self::$crudController[$entityFqcn] = get_called_class();
                     return $entityFqcn;
                 }
-
-            } catch(\ErrorException $e) { }
+            } catch(\ErrorException $e) {
+            }
         }
 
         throw new \LogicException("Failed to find Entity FQCN from \"".get_called_class()."\" CRUD controller..\nDid you remove the Entity but kept the CRUD controller ?", 500);
@@ -163,8 +164,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             return self::$crudController[$entityFqcn];
         }
 
-        foreach(self::$crudNamespaceCandidates as $namespace) {
-
+        foreach (self::$crudNamespaceCandidates as $namespace) {
             $crudController = preg_replace('/\\\Entity\\\/', $namespace, $entityFqcn);
             $crudController = $crudController . "CrudController";
 
@@ -175,14 +175,17 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $appCrudController = preg_replace("/^Base/", 'App', $crudController);
             $baseCrudController = preg_replace("/^App/", 'Base', $appCrudController);
             if (str_starts_with($crudController, "Base")) {
-
                 if (class_exists($appCrudController) and !class_exists($crudController)) {
                     return $appCrudController;
                 }
             }
 
-            if(class_exists($appCrudController) ) return $appCrudController;
-            if(class_exists($baseCrudController)) return $baseCrudController;
+            if (class_exists($appCrudController)) {
+                return $appCrudController;
+            }
+            if (class_exists($baseCrudController)) {
+                return $baseCrudController;
+            }
         }
 
         return $inheritance ? self::getCrudControllerFqcn(get_parent_class($entity)) : null;

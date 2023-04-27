@@ -43,9 +43,9 @@ class SearchController extends AbstractController
             $users = array_map(
                 fn ($t) => $t->getTranslatable(),
                 $this->userRepository->findByInsensitivePartialModel(
-                ["username" => "%" . ($formattedData->username) . "%",],
-                ["translatable.state" => UserState::VERIFIED]
-            )->getResult()
+                    ["username" => "%" . ($formattedData->username) . "%",],
+                    ["translatable.state" => UserState::VERIFIED]
+                )->getResult()
             );
         }
 

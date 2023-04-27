@@ -48,8 +48,11 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
         }
 
         $allRaw = [];
-        try { $allRaw = $this->settingBag->allRaw(true, true); }
-        catch(\PDOException $e) { return; }
+        try {
+            $allRaw = $this->settingBag->allRaw(true, true);
+        } catch(\PDOException $e) {
+            return;
+        }
 
         array_map_recursive(function ($setting) {
             if ($setting === null) {

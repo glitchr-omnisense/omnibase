@@ -55,8 +55,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         Packages $packages,
         string $publicDir,
         string $cacheDir
-    )
-    {
+    ) {
         $this->entrypointLookupCollection = $entrypointLookupCollection;
         if ($this->entrypointLookupCollection == null) {
             return;
@@ -180,8 +179,9 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
             throw new \LogicException('You cannot use "'.__CLASS__."::".__METHOD__.'" as the "symfony/webpack-encore-bundle" package is not installed. Try running "composer require symfony/webpack-encore-bundle".');
         }
 
-        if(array_key_exists($value, $this->encoreEntrypoints))
+        if (array_key_exists($value, $this->encoreEntrypoints)) {
             unset($this->encoreEntrypoints[$value]);
+        }
 
         return $this;
     }
@@ -214,16 +214,13 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
 
     protected function refreshCacheIfNeeded()
     {
-        if($this->debug) {
-           
-            foreach($this->encoreEntrypoints as $id => $entrypoint) {
-                
+        if ($this->debug) {
+            foreach ($this->encoreEntrypoints as $id => $entrypoint) {
                 $entrypointJsonPath = read_property($entrypoint, "entrypointJsonPath");
                 $entrypointHash = hash_file("md5", $entrypointJsonPath);
 
                 $this->encoreEntrypointHashes[$entrypointJsonPath] ??= $entrypointHash;
-                if(!is_cli() && $entrypointHash != $this->encoreEntrypointHashes[$entrypointJsonPath]) {
-
+                if (!is_cli() && $entrypointHash != $this->encoreEntrypointHashes[$entrypointJsonPath]) {
                     $this->encoreEntrypointHashes[$entrypointJsonPath] = $entrypointHash;
                     throw new \RuntimeException("Entrypoint '".$id."' got modified.. please refresh your cache");
                 }
@@ -235,7 +232,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     public function markAsOptional(array|string $value, bool $isOptional = true)
     {
         $values = is_array($value) ? $value : [$value];
-        foreach($values as $value) {
+        foreach ($values as $value) {
             $this->encoreOptionalEntryNames[$value] = $isOptional;
         }
     }
@@ -251,22 +248,21 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
 
         $entryName = (string) $this->slugify($value);
         if (!array_key_exists($entryName, $this->encoreEntryLinkTags)) {
-
             $this->encoreEntryLinkTags[$entryName] = array_filter([
                 "value" => $value,
                 "webpack_package_name" => $webpackPackageName,
                 "webpack_entrypoint_name" => $webpackEntrypointName,
                 "html_attributes" => $htmlAttributes
             ]);
-        }  
-        
+        }
+
         return $this;
     }
 
     protected function slugify(string $entryName, ?string $alternative = null): string
     {
         $entryNameArray = [];
-        foreach(explode(".", $entryName) as $id => $entry) {
+        foreach (explode(".", $entryName) as $id => $entry) {
             $entryNameArray[] = (string) $this->slugger->slug($entry) . ($id == 0 && $alternative ? "-".$alternative : "");
         }
 
@@ -301,13 +297,12 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     public function removeLinkTag(string $entryName)
     {
         $entryValue = [];
-        foreach(explode(".", $this->slugify($entryName)) as $slugValue) {
-
+        foreach (explode(".", $this->slugify($entryName)) as $slugValue) {
             $entryValue[] = $slugValue;
             $linkTag = implode(".", $entryValue);
             if (array_key_exists($linkTag, $this->encoreEntryScriptTags)) {
                 unset($this->encoreEntryScriptTags[$linkTag]);
-           }
+            }
         }
 
         return $this;
@@ -320,8 +315,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         }
 
         $entryValue = [];
-        foreach(explode(".", $this->slugify($entryName)) as $slugValue) {
-
+        foreach (explode(".", $this->slugify($entryName)) as $slugValue) {
             $entryValue[] = $slugValue;
             $scriptTag = implode(".", $entryValue);
             if (array_key_exists($scriptTag, $this->encoreEntryScriptTags)) {
@@ -349,11 +343,13 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     public function renderOptionalCssSource(string $entryName, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null): string
     {
         $renderedCssSource = [];
-        foreach($this->encoreOptionalEntryNames as $id => $tag) {
-
-            if($tag == true) continue;
-            if (str_starts_with($id, $entryName) && $entryName != $id)
+        foreach ($this->encoreOptionalEntryNames as $id => $tag) {
+            if ($tag == true) {
+                continue;
+            }
+            if (str_starts_with($id, $entryName) && $entryName != $id) {
                 $renderedCssSource[] = $this->renderCssSource($id, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+            }
         }
 
         return implode(PHP_EOL, $renderedCssSource);
@@ -402,11 +398,13 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     public function renderOptionalLinkTags(null|string|array $entryName = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []): string
     {
         $renderedLinkTags = [];
-        foreach($this->encoreOptionalEntryNames as $id => $tag) {
-
-            if($tag == true) continue;
-            if (str_starts_with($id, $entryName) && $entryName != $id)
+        foreach ($this->encoreOptionalEntryNames as $id => $tag) {
+            if ($tag == true) {
+                continue;
+            }
+            if (str_starts_with($id, $entryName) && $entryName != $id) {
                 $renderedLinkTags[] = $this->renderLinkTags($id, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+            }
         }
 
         return implode(PHP_EOL, $renderedLinkTags);
@@ -434,31 +432,25 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
 
         $tags = [];
         foreach ($this->getEntrypoints() as $entrypoint) {
-
             $files = [];
-            
+
             $entryValue = [];
-            foreach(explode(".", $this->slugify($entryName)) as $slugValue) {
-
+            foreach (explode(".", $this->slugify($entryName)) as $slugValue) {
                 try {
-
                     $entryValue[] = $slugValue;
                     $files = array_merge($files, $entrypoint->getCssFiles(implode(".", $entryValue)));
-
-                } catch(UndefinedBuildException|EntrypointNotFoundException $e) { }
+                } catch(UndefinedBuildException|EntrypointNotFoundException $e) {
+                }
             }
 
             foreach ($this->encoreAlternatives as $alternative) {
-
                 $entryValue = [];
-                foreach(explode(".", $this->slugify($entryName, $alternative)) as $slugValue) {
-
+                foreach (explode(".", $this->slugify($entryName, $alternative)) as $slugValue) {
                     try {
-
                         $entryValue[] = $slugValue;
                         $files = array_merge($files, $entrypoint->getCssFiles(implode(".", $entryValue)));
-
-                    } catch(UndefinedBuildException|EntrypointNotFoundException $e) { }
+                    } catch(UndefinedBuildException|EntrypointNotFoundException $e) {
+                    }
                 }
             }
 
@@ -470,7 +462,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
             for ($i = 0, $N = count($files); $i < $N; $i++) {
                 foreach ($this->encoreBreakpoints as $_) {
                     foreach ($_ as $name) {
-
                         $file = explode(".", $files[$i])[0];
                         $file = path_suffix($file, $name, "-").".css";
                         if (str_starts_with($file, $basePackage->getBasePath())) {
@@ -501,7 +492,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
 
             $this->renderedLinkTags[$entryName] = $this->twig->render("@Base/webpack/link_tags.html.twig", ["tags" => $tags]);
             return $this->renderedLinkTags[$entryName].$this->renderOptionalLinkTags($entryName);
-
         }
 
         throw new EntrypointNotFoundException("Failed to find \"".$entryName."\" in the lookup collection: ".implode(", ", array_keys($this->getEntrypoints())));
@@ -510,11 +500,13 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     public function renderOptionalScriptTags(null|string|array $entryName = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []): string
     {
         $renderedScriptTags = [];
-        foreach($this->encoreOptionalEntryNames as $id => $tag) {
-
-            if($tag == true) continue;
-            if (str_starts_with($id, $entryName) && $entryName != $id)
+        foreach ($this->encoreOptionalEntryNames as $id => $tag) {
+            if ($tag == true) {
+                continue;
+            }
+            if (str_starts_with($id, $entryName) && $entryName != $id) {
                 $renderedScriptTags[] = $this->renderScriptTags($id, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+            }
         }
 
         return implode(PHP_EOL, $renderedScriptTags);
@@ -539,33 +531,27 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         if (!array_key_exists($entryName, $this->encoreEntryScriptTags)) {
             $this->addScriptTag($entryName, $webpackPackageName, $webpackEntrypointName, html_attributes($htmlAttributes));
         }
-        
-        foreach ($this->getEntrypoints() as $entrypoint) {
 
+        foreach ($this->getEntrypoints() as $entrypoint) {
             $files = [];
 
             $entryValue = [];
-            foreach(explode(".", $this->slugify($entryName)) as $slugValue) {
-
+            foreach (explode(".", $this->slugify($entryName)) as $slugValue) {
                 try {
-
                     $entryValue[] = $slugValue;
                     $files = array_merge($files, $entrypoint->getJavaScriptFiles(implode(".", $entryValue)));
-
-                } catch(UndefinedBuildException|EntrypointNotFoundException $e) { }
+                } catch(UndefinedBuildException|EntrypointNotFoundException $e) {
+                }
             }
 
             foreach ($this->encoreAlternatives as $alternative) {
-
                 $entryValue = [];
-                foreach(explode(".", $this->slugify($entryName, $alternative)) as $slugValue) {
-
+                foreach (explode(".", $this->slugify($entryName, $alternative)) as $slugValue) {
                     try {
-
                         $entryValue[] = $slugValue;
                         $files = array_merge($files, $entrypoint->getJavaScriptFiles(implode(".", $entryValue)));
-
-                    } catch(UndefinedBuildException|EntrypointNotFoundException $e) { }
+                    } catch(UndefinedBuildException|EntrypointNotFoundException $e) {
+                    }
                 }
             }
 
@@ -600,17 +586,23 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     {
         $content = $response->getContent();
         foreach ($this->getEntryLinkTags() as $tag) {
-
-            if($this->isOptional($tag["value"])) continue;
-            if(array_key_exists($tag["value"], $this->renderedLinkTags)) continue;
+            if ($this->isOptional($tag["value"])) {
+                continue;
+            }
+            if (array_key_exists($tag["value"], $this->renderedLinkTags)) {
+                continue;
+            }
 
             $content = preg_replace('/<\/head\b[^>]*>/', $this->renderLinkTags($tag)."$0", $content, 1);
         }
 
         foreach ($this->getEntryScriptTags() as $tag) {
-
-            if($this->isOptional($tag["value"])) continue;
-            if(array_key_exists($tag["value"], $this->renderedScriptTags)) continue;
+            if ($this->isOptional($tag["value"])) {
+                continue;
+            }
+            if (array_key_exists($tag["value"], $this->renderedScriptTags)) {
+                continue;
+            }
 
             $content = preg_replace('/<\/body\b[^>]*>/', $this->renderScriptTags($tag)."$0", $content, 1);
         }

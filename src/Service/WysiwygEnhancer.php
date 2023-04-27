@@ -25,20 +25,21 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
 
     public function render(mixed $html, array $options = []): string
     {
-        if($html === null) return "";
+        if ($html === null) {
+            return "";
+        }
 
         return $this->twig->render("@Base/form/wysiwyg/quill.html.twig", ["html" => $html, "options" => $options]);
     }
 
     public function highlightHeadings(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
     {
-        if($html === null) {
+        if ($html === null) {
             return null;
         }
-        if(is_array($html)) {
-
+        if (is_array($html)) {
             $toc = [];
-            foreach($html as $htmlEntry) {
+            foreach ($html as $htmlEntry) {
                 $toc[] = $this->highlightHeadings($htmlEntry, $maxLevel, $attrs);
             }
 
@@ -50,13 +51,12 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
 
         $dom = new \DOMDocument('1.0', $encoding);
         $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding));
-    
+
         $attrs = [];
         $attrs["class"] = $attrs["class"] ?? "";
         $attrs["class"] = trim($attrs["class"] . " markdown-anchor");
 
-        for($i = 1; $i <= $maxLevel; $i++) {
-
+        for ($i = 1; $i <= $maxLevel; $i++) {
             $hX = "h".$i;
             $tags = $dom->getElementsByTagName($hX);
             foreach ($tags as $tag) {
@@ -79,14 +79,13 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
 
     public function highlightSemantics(mixed $html, null|array|string $words = null, array $attrs = []): mixed
     {
-        if($html === null) {
+        if ($html === null) {
             return null;
         }
 
-        if(is_array($html)) {
-
+        if (is_array($html)) {
             $htmlRet = [];
-            foreach($html as $htmlEntry) {
+            foreach ($html as $htmlEntry) {
                 $htmlRet[] = $this->semanticEnhancer->highlight($htmlEntry, $words, $attrs);
             }
 
@@ -98,14 +97,13 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
 
     public function getTableOfContents(mixed $html, ?int $maxLevel = null): array
     {
-        if($html === null) {
+        if ($html === null) {
             return [];
         }
 
-        if(is_array($html)) {
-
+        if (is_array($html)) {
             $toc = [];
-            foreach($html as $htmlEntry) {
+            foreach ($html as $htmlEntry) {
                 $toc[] = $this->getTableOfContents($htmlEntry, $maxLevel);
             }
 

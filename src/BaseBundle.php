@@ -111,7 +111,6 @@ class BaseBundle extends Bundle
         }
 
         if ($needsWarmup) {
-
             $this->setMapping("./Enum", "Base\Enum", "App\Enum");
             $this->setMapping("./Notifier", "Base\Notifier", "App\Notifier");
 

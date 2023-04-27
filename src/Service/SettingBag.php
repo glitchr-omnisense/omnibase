@@ -198,7 +198,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return [];
         }
 
-        if(!$useCache) $this->clear($path);
+        if (!$useCache) {
+            $this->clear($path);
+        }
 
         if (is_array($paths = $path)) {
             $settings = [];
@@ -225,7 +227,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             if ($settings instanceof Query) {
                 $settings = $settings->getResult();
             }
-
         } catch(TableNotFoundException  $e) {
             throw $e;
         } catch(EntityNotFoundException $e) {
@@ -296,8 +297,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)];
         }
 
-        try { $values = $this->getRaw($path, $useCache) ?? []; }
-        catch (Exception $e) {
+        try {
+            $values = $this->getRaw($path, $useCache) ?? [];
+        } catch (Exception $e) {
             throw $e;
             return [];
         }
@@ -323,7 +325,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
         if (is_array($paths = $path)) {
-
             foreach ($paths as $path) {
                 $this->clear($path, $locale, $useCache);
             }
@@ -344,8 +345,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
 
         if ($useCache) {
-            if($path == null) $this->cache->delete($this->cacheName);
-            else $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+            if ($path == null) {
+                $this->cache->delete($this->cacheName);
+            } else {
+                $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+            }
         }
     }
 

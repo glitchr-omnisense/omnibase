@@ -36,8 +36,7 @@ class TimeMachineSnapshotCommand extends Command
         ParameterBagInterface $parameterBag,
         TimeMachineInterface $timeMachine,
         FlysystemInterface $flysystem
-    )
-    {
+    ) {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->timeMachine = $timeMachine;
         $this->flysystem = $flysystem;

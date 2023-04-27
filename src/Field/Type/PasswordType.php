@@ -77,7 +77,6 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $resolver->setNormalizer('revealer', function (Options $options, $value) {
             return $value || !$options["repeater"];
         });
-
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -133,7 +132,8 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         }
 
         $viewData = $plainPasswordType->getViewData();
-        if(!$viewData)
+        if (!$viewData) {
             $viewData = null;
+        }
     }
 }

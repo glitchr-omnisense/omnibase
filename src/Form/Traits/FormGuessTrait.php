@@ -184,7 +184,6 @@ trait FormGuessTrait
         }
 
         if ($options["allow_null"] === null) {
-
             $parentForm = $form->getParent();
             if ($parentForm) {
                 $options = $parentForm->getConfig()->getOptions();
@@ -197,7 +196,6 @@ trait FormGuessTrait
             }
 
             if ($this->classMetadataManipulator->isEntity($target)) {
-
                 $targetField = $form->getName();
                 $this->classMetadataManipulator->getMapping($target, $targetField)["allow_null"] ?? false;
             }

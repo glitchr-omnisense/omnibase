@@ -28,7 +28,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
         return $this;
     }
 
-    public function __construct(?string $path = null,  array $options = [], array $filters = [])
+    public function __construct(?string $path = null, array $options = [], array $filters = [])
     {
         if (!$path) {
             $path = stream_get_meta_data(tmpfile())['uri'];
@@ -63,10 +63,12 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         foreach ($this->filters as $filter) {
-
             $oldImage = $image;
-            try { $image = $filter->apply($oldImage); }
-            catch (\Exception $e) { $image = $oldImage; }
+            try {
+                $image = $filter->apply($oldImage);
+            } catch (\Exception $e) {
+                $image = $oldImage;
+            }
 
             if (spl_object_id($image) != spl_object_id($oldImage)) {
                 $oldImage->__destruct();

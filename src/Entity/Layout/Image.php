@@ -56,8 +56,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         }
 
 
-        if(array_key_exists("extension", $routeParameters)) {
-
+        if (array_key_exists("extension", $routeParameters)) {
             if ($routeParameters["extension"] === true) {
                 $routeParameters["extension"] = first($this->getMediaService()->getExtensions($this->getSource()));
                 $routeParameters["extension"] = $this->getMediaService()->getExtension($this->getSource());
@@ -200,8 +199,11 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     }
     public function getCrop(string $identifier): ?ImageCrop
     {
-        foreach($this->crops as $crop)
-            if($crop->getSlug() == $identifier) return $crop;
+        foreach ($this->crops as $crop) {
+            if ($crop->getSlug() == $identifier) {
+                return $crop;
+            }
+        }
 
         return null;
     }

@@ -23,8 +23,8 @@ final class HtmlTwigExtension extends AbstractExtension
     public function __construct(HtmlTagRenderer $htmlTagRenderer, WysiwygEnhancerInterface $wysiwygEnhancer, EditorEnhancerInterface $editorEnhancer)
     {
         $this->htmlTagRenderer = $htmlTagRenderer;
-        $this->wysiwygEnhancer  = $wysiwygEnhancer; 
-        $this->editorEnhancer  = $editorEnhancer; 
+        $this->wysiwygEnhancer  = $wysiwygEnhancer;
+        $this->editorEnhancer  = $editorEnhancer;
     }
 
     public function getFilters(): array
@@ -34,33 +34,39 @@ final class HtmlTwigExtension extends AbstractExtension
             new TwigFilter('wysiwyg_toc', [$this, 'getTableOfContents']),
         ];
     }
-    
-    public function renderWysiwyg(?string $htmlOrJson, array $options = [], ?int $maxLevel = null) 
+
+    public function renderWysiwyg(?string $htmlOrJson, array $options = [], ?int $maxLevel = null)
     {
-        if($this->editorEnhancer->supports($htmlOrJson))
+        if ($this->editorEnhancer->supports($htmlOrJson)) {
             $enhancer = $this->editorEnhancer;
-        else if($this->wysiwygEnhancer->supports($htmlOrJson))
+        } elseif ($this->wysiwygEnhancer->supports($htmlOrJson)) {
             $enhancer = $this->wysiwygEnhancer;
-        else throw new RuntimeException("Unsupported wysiwyg input");
-        
+        } else {
+            throw new RuntimeException("Unsupported wysiwyg input");
+        }
+
         $applySemantics = array_pop_key("semantics", $options);
-        if($applySemantics)
+        if ($applySemantics) {
             $htmlOrJson = $enhancer->highlightSemantics($htmlOrJson);
-        
+        }
+
         $applyHeadings = array_pop_key("headings", $options);
-        if($applyHeadings)
+        if ($applyHeadings) {
             $htmlOrJson = $enhancer->highlightHeadings($htmlOrJson, $maxLevel);
+        }
 
         return $enhancer->render($htmlOrJson, ["attr" => $options["row_attr"] ?? []]);
     }
 
     public function getTableOfContents(?string $htmlOrJson, ?int $maxLevel = null): array
     {
-        if($this->editorEnhancer->supports($htmlOrJson))
+        if ($this->editorEnhancer->supports($htmlOrJson)) {
             $enhancer = $this->editorEnhancer;
-        else if($this->wysiwygEnhancer->supports($htmlOrJson))
+        } elseif ($this->wysiwygEnhancer->supports($htmlOrJson)) {
             $enhancer = $this->wysiwygEnhancer;
-        else throw new RuntimeException("Unsupported wysiwyg input");
+        } else {
+            throw new RuntimeException("Unsupported wysiwyg input");
+        }
 
         return $enhancer->getTableOfContents($htmlOrJson, $maxLevel);
     }
@@ -76,7 +82,7 @@ final class HtmlTwigExtension extends AbstractExtension
             new TwigFunction('html_entry_body_tags', [$this, 'renderBodyTags' ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
         ];
     }
-    
+
     public function renderLinkTags(): string
     {
         return $this->htmlTagRenderer->renderHtmlContent("stylesheet:before").

@@ -48,8 +48,7 @@ abstract class EnumType extends Type implements SelectInterface
 
     public static function getColor(string $id): ?string
     {
-        if(is_instanceof(static::class, ColorizeInterface::class)) {
-
+        if (is_instanceof(static::class, ColorizeInterface::class)) {
             $colors = static::__colorizeStatic()[$id] ?? [];
             return $colors ? first($colors) : null;
         }

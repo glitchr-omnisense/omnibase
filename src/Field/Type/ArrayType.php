@@ -71,7 +71,6 @@ class ArrayType extends CollectionType
     public function buildFormArray(FormBuilderInterface $builder, array $options)
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-
             $data = $event->getData() ?? [];
             $event->setData(array_values($data));
         });
@@ -109,19 +108,17 @@ class ArrayType extends CollectionType
         $builder->add($prototype);
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options, $builder, $prototypeOptions) {
-
             $form = $event->getForm();
             $data = $event->getData();
 
-            $data = array_transforms(fn($key, $entry):array => [null, [
+            $data = array_transforms(fn ($key, $entry): array => [null, [
                     "key" => is_array($entry) ? ($entry["key"] ?? null) : $key,
                     "value" => is_array($entry) ? ($entry["value"] ?? first($entry) ?? null) : $entry,
             ]], $data);
 
             $event->setData($data);
 
-            foreach($data ?? [] as $id => $element) {
-
+            foreach ($data ?? [] as $id => $element) {
                 $form->add(
                     $builder->create($id, FormType::class, ["label" => false, 'auto_initialize' => false])
                         ->add("key", TextType::class, ["label" => false, "attr" => ["placeholder" => $this->translator->trans("@fields.array.key")]])
@@ -131,12 +128,10 @@ class ArrayType extends CollectionType
         });
 
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options, $builder, $prototypeOptions) {
-
             $form = $event->getForm();
             $data = $event->getData();
 
-            foreach($data ?? [] as $id => $element) {
-
+            foreach ($data ?? [] as $id => $element) {
                 $form->add(
                     $builder->create($id, FormType::class, ["label" => false, 'auto_initialize' => false])
                         ->add("key", TextType::class, ["label" => false, "attr" => ["placeholder" => $this->translator->trans("@fields.array.key")]])
@@ -146,8 +141,8 @@ class ArrayType extends CollectionType
         });
 
         $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use (&$options, $builder, $prototypeOptions) {
-
-            $event->setData(array_transforms(fn($k, $v):array => [
+            $event->setData(
+                array_transforms(fn ($k, $v): array => [
                     first($v) ?? null,
                     second($v) ?? null
                 ], $event->getData())
@@ -160,8 +155,11 @@ class ArrayType extends CollectionType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if ($options['associative']) $this->buildFormAssociativeArray($builder, $options);
-        else $this->buildFormArray($builder, $options);
+        if ($options['associative']) {
+            $this->buildFormAssociativeArray($builder, $options);
+        } else {
+            $this->buildFormArray($builder, $options);
+        }
     }
 
     public function getNumberOfArguments($pattern): int
@@ -177,6 +175,5 @@ class ArrayType extends CollectionType
         $view->vars["pattern"] = $options["pattern"];
         $view->vars["placeholder"] = $options["placeholder"];
         $view->vars["associative"] = $options['associative'];
-
     }
 }

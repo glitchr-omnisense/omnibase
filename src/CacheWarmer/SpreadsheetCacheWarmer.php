@@ -15,7 +15,7 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
     public function __construct(string $cacheDir)
     {
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");
-	$this->cacheDir = $cacheDir;
+        $this->cacheDir = $cacheDir;
     }
 
     public function isOptional(): bool

@@ -27,11 +27,12 @@ class SemanticEnhancer implements SemanticEnhancerInterface
         }
 
         foreach ($semantics as $semantic) {
-
             foreach ($array as &$entry) {
-
-                if($words) $entry = $semantic->highlightBy($words, $entry, $attributes);
-                else $entry = $semantic->highlight($entry, $attributes);
+                if ($words) {
+                    $entry = $semantic->highlightBy($words, $entry, $attributes);
+                } else {
+                    $entry = $semantic->highlight($entry, $attributes);
+                }
             }
         }
 

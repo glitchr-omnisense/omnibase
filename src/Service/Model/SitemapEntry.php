@@ -99,9 +99,9 @@ class SitemapEntry
         ];
 
         foreach ($this->alternates as $alternate) {
-
-            if(in_array($alternate->getLocale(), array_column($entry["alternates"], "locale")))
+            if (in_array($alternate->getLocale(), array_column($entry["alternates"], "locale"))) {
                 continue;
+            }
 
             $entry["alternates"][] = [
                 "href" => $alternate->getLoc(),

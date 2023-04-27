@@ -20,8 +20,7 @@ class EmailVariable
     public function __construct(
         BaseService $baseService,
         LauncherInterface $launcher
-    )
-    {
+    ) {
         $this->baseService = $baseService;
         $this->launcher = $launcher;
     }

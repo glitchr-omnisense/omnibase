@@ -92,16 +92,17 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
         }
 
         if (Action::GOTO_SEE === $actionName) {
-
             return Action::new(Action::GOTO_SEE, t('action.goto_see', domain: 'backoffice'))
                 ->setCssClass('action-'.Action::GOTO_SEE)
                 ->addCssClass('btn btn-secondary')
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
-                    
-                    try { $linkToEntity = $entity instanceof LinkableInterface ? $entity->__toLink() : ""; }
-                    catch(\Exception $e) { $linkToEntity = ""; }
+                    try {
+                        $linkToEntity = $entity instanceof LinkableInterface ? $entity->__toLink() : "";
+                    } catch(\Exception $e) {
+                        $linkToEntity = "";
+                    }
 
                     return $linkToEntity;
                 });

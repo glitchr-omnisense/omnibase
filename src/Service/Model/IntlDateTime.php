@@ -22,8 +22,7 @@ class IntlDateTime extends DateTime
         int $timeType = IntlDateFormatter::FULL,
         IntlTimeZone|DateTimeZone|string|null $timezone = null,
         IntlCalendar|int|null $calendar = null
-    )
-    {
+    ) {
         if (is_string($datetime)) {
             parent::__construct($datetime, $timezone);
         } else {
@@ -48,8 +47,7 @@ class IntlDateTime extends DateTime
         int $timeType = IntlDateFormatter::FULL,
         IntlTimeZone|DateTimeZone|string|null $timezone = null,
         IntlCalendar|int|null $calendar = null
-    )
-    {
+    ) {
         return new IntlDateTime($datetime, $locale, $dateType, $timeType, $timezone, $calendar);
     }
 }

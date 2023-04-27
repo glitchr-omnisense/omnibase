@@ -79,7 +79,7 @@ final class MediaTwigExtension extends AbstractExtension
         return
             [
                 new TwigFilter('soundify', [MediaService::class, 'soundify'], ["is_safe" => ['all']]),
-                new TwigFilter('vidify'  , [MediaService::class, 'vidify'], ["is_safe" => ['all']]),
+                new TwigFilter('vidify', [MediaService::class, 'vidify'], ["is_safe" => ['all']]),
                 new TwigFilter('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
                 new TwigFilter('imagify', [MediaService::class, 'imagify'], ["is_safe" => ['all']]),
                 new TwigFilter('urlify', [$this, 'urlify'], ["is_safe" => ['all']]),
@@ -245,13 +245,12 @@ final class MediaTwigExtension extends AbstractExtension
         $path = $src;
         $url  = explode("/", $src);
         try {
-
             $path = $twig->getLoader()->getSourceContext($src)->getPath();
             $contentType = mime_content_type($twig->getLoader()->getSourceContext($src)->getPath());
 
             $url = explode("/", $twig->getLoader()->getSourceContext($src)->getName());
-
-        } catch (LoaderError $e) { }
+        } catch (LoaderError $e) {
+        }
 
         $prefix = str_rstrip($path, [implode("/", tail($url)), "/"]);
         $email = $options["email"] ?? $context["email"] ?? null;

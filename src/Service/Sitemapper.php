@@ -111,8 +111,9 @@ class Sitemapper implements SitemapperInterface
 
         $routeDefaults = $route->getDefaults();
         $routeParameters = array_filter($routeParameters, fn ($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
-        if(array_key_exists("_locale", $routeDefaults))
+        if (array_key_exists("_locale", $routeDefaults)) {
             $routeParameters["_locale"] = $routeDefaults["_locale"];
+        }
 
         $url = $this->router->generate($routeName, $routeParameters, Router::ABSOLUTE_URL);
 
@@ -125,11 +126,13 @@ class Sitemapper implements SitemapperInterface
         $sitemapEntry->setLocale($locale);
 
         $routeParameters = array_filter($routeParameters, fn ($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
-        if(!array_key_exists($routeName.".".md5(serialize($routeParameters)), $this->urlset))
+        if (!array_key_exists($routeName.".".md5(serialize($routeParameters)), $this->urlset)) {
             $this->urlset[$routeName.".".md5(serialize($routeParameters))] = $sitemapEntry;
+        }
 
-        if(array_key_exists("_locale", $routeDefaults))
+        if (array_key_exists("_locale", $routeDefaults)) {
             $this->urlset[$routeName.".".md5(serialize($routeParameters))]->addAlternate($sitemapEntry);
+        }
 
         return $this;
     }
@@ -148,7 +151,6 @@ class Sitemapper implements SitemapperInterface
     {
         $this->computeFlag = false;
         foreach ($this->router->getRouteCollection() as $routeName => $route) {
-
             $sitemap = $this->getSitemap($route);
             if (!$sitemap) {
                 continue;
@@ -160,8 +162,10 @@ class Sitemapper implements SitemapperInterface
                 continue;
             }
 
-            try { $this->register($route); }
-            catch(\Base\Exception\SitemapNotFoundException $e) {}
+            try {
+                $this->register($route);
+            } catch(\Base\Exception\SitemapNotFoundException $e) {
+            }
         }
 
         return $this;
@@ -242,20 +246,17 @@ class Sitemapper implements SitemapperInterface
 
         $entries = array_inflate(".", $this->urlset);
         foreach ($entries as $group => $entry) {
-
             if ($entry instanceof SitemapEntry) {
                 $this->urlset[$group] = $entry;
                 continue;
             }
 
             array_map_recursive(function ($sitemap) use ($group) {
-
                 if (!array_key_exists($group, $this->urlset)) {
                     $urlset[$group] = $sitemap;
                 }
 
                 $this->urlset[$group]->addAlternate($sitemap);
-
             }, $entry);
         }
 
@@ -271,12 +272,13 @@ class Sitemapper implements SitemapperInterface
         $mimeTypes = $this->mimeTypes->getMimeTypes($extension);
 
         $response = new Response(
-            $this->twig->render($name,
-            array_merge($context, [
-                'urlset' => $urlset,
-                'hostname' => $this->hostname
-            ])
-        )
+            $this->twig->render(
+                $name,
+                array_merge($context, [
+                    'urlset' => $urlset,
+                    'hostname' => $this->hostname
+                ])
+            )
         );
 
         if ($mimeTypes) {

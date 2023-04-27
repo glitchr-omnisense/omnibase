@@ -54,8 +54,7 @@ class LogSubscriber implements EventSubscriberInterface
         UserRepository $userRepository,
         BaseService $baseService,
         ParameterBagInterface $parameterBag
-    )
-    {
+    ) {
         $this->tokenStorage = $tokenStorage;
         $this->baseService = $baseService;
         $this->parameterBag = $parameterBag;

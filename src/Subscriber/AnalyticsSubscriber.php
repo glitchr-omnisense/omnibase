@@ -50,8 +50,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         Environment $twig,
         UserRepository $userRepository,
         ?GaService $googleAnalyticsService = null
-    )
-    {
+    ) {
         $this->tokenStorage = $tokenStorage;
         $this->router = $router;
 

@@ -42,7 +42,7 @@ trait SimpleCacheTrait
     {
         return $this->cache;
     }
-    
+
     public function invalidateCache(?string $key = null): self
     {
         if ($key === null) {
@@ -60,8 +60,9 @@ trait SimpleCacheTrait
         }
 
         if (!$this->hasCache($key)) {
-
-            if($fallback === null) return null;
+            if ($fallback === null) {
+                return null;
+            }
             $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $ttl, $deferred);
         }
 

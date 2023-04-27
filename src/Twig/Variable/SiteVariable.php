@@ -52,8 +52,7 @@ class SiteVariable
         BaseService $baseService,
         MaintenanceProviderInterface $maintenanceProvider,
         LauncherInterface $launcher
-    )
-    {
+    ) {
         $this->router = $router;
         $this->translator = $translator;
         $this->baseService = $baseService;

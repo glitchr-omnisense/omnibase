@@ -160,7 +160,6 @@ class CollectionType extends AbstractType
 
         // Resize collection according to length option
         if (is_int($options["length"]) && $options["length"] > 0) {
-
             $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
                 $data = $event->getData() ?? [];
                 if ($data instanceof Collection) {

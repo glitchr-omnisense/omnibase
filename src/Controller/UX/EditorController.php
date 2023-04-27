@@ -125,7 +125,7 @@ class EditorController extends AbstractController
         ];
 
         unlink($file->getRealPath());
-        
+
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
@@ -142,7 +142,9 @@ class EditorController extends AbstractController
 
         $content = $request->getContent();
         $path = $content ? json_decode($content)->url : null;
-        if($path) $path = fetch_url($path);
+        if ($path) {
+            $path = fetch_url($path);
+        }
 
         // Move.. with flysystem
         if (!$path || !($file = new UploadedFile($path, $path))) {
@@ -192,7 +194,7 @@ class EditorController extends AbstractController
         ];
 
         unlink($file->getRealPath());
-        
+
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 }

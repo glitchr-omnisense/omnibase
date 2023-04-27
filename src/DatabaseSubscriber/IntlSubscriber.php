@@ -26,8 +26,8 @@ class IntlSubscriber implements EventSubscriberInterface
     public function getSubscribedEvents(): array
     {
         return [
-            Events::loadClassMetadata, 
-            Events::postLoad, 
+            Events::loadClassMetadata,
+            Events::postLoad,
             Events::onFlush
         ];
     }
@@ -131,9 +131,7 @@ class IntlSubscriber implements EventSubscriberInterface
         }
 
         if ($entity instanceof TranslationInterface) {
-
             if ($entity->isEmpty()) {
-
                 $translatable = $entity->getTranslatable();
                 if ($translatable) {
                     $translatable->removeTranslation($entity);
@@ -143,9 +141,7 @@ class IntlSubscriber implements EventSubscriberInterface
                 if ($this->entityManager->contains($entity)) {
                     $this->entityManager->remove($entity);
                 }
-
             } else {
-
                 $uow->cancelOrphanRemoval($entity);
             }
         }

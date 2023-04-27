@@ -25,7 +25,7 @@ class EditorType extends AbstractType
     protected $router;
     protected $csrfTokenManager;
     protected $obfuscator;
-    
+
     public function __construct(ParameterBagInterface $parameterBag, Environment $twig, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator)
     {
         $this->parameterBag = $parameterBag;
@@ -39,7 +39,7 @@ class EditorType extends AbstractType
     {
         return HiddenType::class;
     }
-    
+
     public function getBlockPrefix(): string
     {
         return 'editor';
@@ -71,7 +71,7 @@ class EditorType extends AbstractType
         // Editor options
         $editorOpts = [];
         $editorOpts["placeholder"] = $options["placeholder"];
-        
+
         $token  = $this->csrfTokenManager->getToken("editorjs")->getValue();
         $data = $this->obfuscator->encode(["token" => $token]);
         $view->vars["uploadByFile"]     = $this->router->generate("ux_editorjs_endpointByFile", ["data" => $data]);

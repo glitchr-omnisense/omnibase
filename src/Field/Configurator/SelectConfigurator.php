@@ -80,7 +80,6 @@ class SelectConfigurator implements FieldConfiguratorInterface
         }
 
         if ($values instanceof Collection) {
-
             foreach ($values as $key => $value) {
                 $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
                 $dataClass = $dataClass ?? $defaultClass;
@@ -97,9 +96,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
                     }
                 }
             }
-
         } else {
-
             $value = $field->getValue();
 
             $field->setCustomOption(SelectField::OPTION_RENDER_FORMAT, "text");

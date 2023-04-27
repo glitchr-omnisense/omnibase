@@ -229,6 +229,4 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->isVisible = $isVisible;
         return $this;
     }
-
-
 }

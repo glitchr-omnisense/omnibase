@@ -156,19 +156,19 @@ class Vault extends AbstractAnnotation
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
-
             if (!$entity->isSecured()) {
                 continue;
             }
 
             if ($propertyAccessor->isReadable($entity, $field)) {
-
                 $value = $propertyAccessor->getValue($entity, $field);
                 if ($value === null) {
                     continue;
                 }
 
-                if ($entity->getSealedVaultBag($field) == $value) continue;
+                if ($entity->getSealedVaultBag($field) == $value) {
+                    continue;
+                }
                 if ($entity->getPlainVaultBag($field) == $value) {
                     $propertyAccessor->setValue($entity, $field, $entity->getSealedVaultBag($field));
                     continue;
@@ -198,7 +198,6 @@ class Vault extends AbstractAnnotation
                 continue;
             }
             if ($propertyAccessor->isReadable($entity, $field)) {
-
                 $plainValue = $propertyAccessor->getValue($entity, $field);
                 if ($plainValue === null) {
                     continue;
@@ -231,13 +230,11 @@ class Vault extends AbstractAnnotation
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
-
             if (!$entity->isSecured()) {
                 continue;
             }
 
             if ($propertyAccessor->isReadable($entity, $field)) {
-
                 $sealedValue = $propertyAccessor->getValue($entity, $field);
                 $plainValue = is_string($sealedValue) && !empty($sealedValue) ? base64_decode($sealedValue) : false;
 
@@ -246,10 +243,10 @@ class Vault extends AbstractAnnotation
                 }
 
                 if (is_string($plainValue)) {
-
                     $plainValue = $this->reveal($marshaller, $plainValue);
-                    if (is_serialized($plainValue))
+                    if (is_serialized($plainValue)) {
                         $plainValue = unserialize($plainValue);
+                    }
 
                     $propertyAccessor->setValue($entity, $field, $plainValue);
                     $entity->setVaultBag($field, $sealedValue, $plainValue);

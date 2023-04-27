@@ -545,7 +545,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
-                        
+
                         ->arrayNode('paths')
                             ->arrayPrototype()
                                 ->children()

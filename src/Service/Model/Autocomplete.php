@@ -26,7 +26,6 @@ class Autocomplete
         }
 
         if (is_object($entry) && $class !== null) {
-
             $accessor = PropertyAccess::createPropertyAccessor();
             $id = $accessor->isReadable($entry, "id") ? strval($accessor->getValue($entry, "id")) : null;
 
@@ -69,9 +68,7 @@ class Autocomplete
                 $color = $entry::__colorizeStatic();
             }
             $color = null;
-
         } elseif (class_implements_interface($class, SelectInterface::class)) {
-
             $id    = $entry;
             $icon  = $class::getIcon($entry, 0);
             $text  = $class::getText($entry, $this->translator);
@@ -79,9 +76,9 @@ class Autocomplete
             $data  = $class::getData($entry);
 
             $color = null;
-            if (class_implements_interface($entry, ColorizeInterface::class))
+            if (class_implements_interface($entry, ColorizeInterface::class)) {
                 $color = $class::getColor($entry);
-
+            }
         } else {
             $icon  = is_array($entry) ? ($entry[2] ?? $entry[1] ?? $entry[0]) : null  ;
             $text  = is_array($entry) ? ($entry[1] ?? $entry[0]) : $entry;

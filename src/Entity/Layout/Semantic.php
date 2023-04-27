@@ -102,7 +102,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
     protected function match(string $keyword): bool
     {
-        return in_array(strtolower($keyword), array_map(fn($k) => strtolower($k), $this->keywords));
+        return in_array(strtolower($keyword), array_map(fn ($k) => strtolower($k), $this->keywords));
     }
 
     protected function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
@@ -118,7 +118,9 @@ class Semantic implements TranslatableInterface, IconizeInterface
     protected function doHighlight(string $text, array $keywords, array $attributes = [])
     {
         $keywords = array_filter($keywords);
-        if(!$keywords) return $text;
+        if (!$keywords) {
+            return $text;
+        }
 
         $dom = new \DomDocument();
         $encoding = mb_detect_encoding($text);
@@ -126,9 +128,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
         $xpath = new \DOMXPath($dom);
         foreach ($xpath->query('//text()') as $text) {
-
             if (trim($text->nodeValue)) {
-
                 $text->nodeValue = preg_replace(
                     "/(\b".implode("\b|\b", $keywords)."\b)/i",
                     "<a href='".$this->generate()."' ".html_attributes($attributes).">$1</a>",
@@ -143,13 +143,13 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
     public function highlight(string $text, array $attributes = [])
     {
-        return $this->doHighlight($text, $this->getKeywords(), $attributes); 
+        return $this->doHighlight($text, $this->getKeywords(), $attributes);
     }
 
-    public function highlightBy(string $text, array|string $keywords,  array $attributes)
+    public function highlightBy(string $text, array|string $keywords, array $attributes)
     {
-        $keywords = array_filter(is_array($keywords) ? $keywords : [$keywords], fn($k) => $this->match($k));
-     
-        return $this->doHighlight($text, $keywords, $attributes); 
+        $keywords = array_filter(is_array($keywords) ? $keywords : [$keywords], fn ($k) => $this->match($k));
+
+        return $this->doHighlight($text, $keywords, $attributes);
     }
 }

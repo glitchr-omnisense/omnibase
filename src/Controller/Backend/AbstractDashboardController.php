@@ -170,8 +170,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         Environment $twig,
         EntityManagerInterface $entityManager,
         SettingBagInterface $settingBag
-    )
-    {
+    ) {
         $this->extension = $extension;
         $this->requestStack = $requestStack;
         $this->adminUrlGenerator = $adminUrlGenerator;
@@ -240,7 +239,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         foreach ($fields as $key => $field) {
-
             if (!array_key_exists("form_type", $field)) {
                 $fields[$key]["form_type"] = PasswordType::class;
             }
@@ -261,7 +259,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $data     = array_filter($form->getData(), function ($v, $k) use ($fields) {
                 // If field is required but empty, update skip.. (to make sure the value is not empty)
                 if ($fields[$k]["required"] ?? true) {
@@ -334,10 +331,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->settingBag->clearAll(); // Clear cache
 
         foreach ($fields as $name => &$options) {
-
             $roles = array_pop_key("roles", $options);
             if ($roles && !$this->getUser()->isGranted($roles)) {
-
                 unset($fields[$name]);
             }
         }
@@ -352,15 +347,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         );
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $data = $form->getData();
-            foreach($data as $setting)
-            {
+            foreach ($data as $setting) {
                 $translations = $setting->getTranslations();
-                foreach($translations as $locale => $translation) {
-
-                    if($translation->isEmpty())
+                foreach ($translations as $locale => $translation) {
+                    if ($translation->isEmpty()) {
                         $setting->removeTranslation($translation);
+                    }
                 }
             }
 
@@ -632,7 +625,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ]);
 
         if ($this->isGranted('ROLE_EDITOR')) {
-
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', "fa-solid fa-pen-ruler", 1));
             $widgets = $this->addWidgetItem($widgets, "ATTRIBUTES", [
                 WidgetItem::linkToUrl(AbstractAdapter::class, AbstractAdapter::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()

@@ -51,7 +51,7 @@ class Aco
         $mimetype = mime_content_type($handle);
         switch($mimetype) {
             case "text/plain": $colors = self::parseAscii($handle, $flags);
-            // no break
+                // no break
             default: $colors = self::parseBinary($handle, $flags);
         }
 

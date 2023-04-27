@@ -93,7 +93,6 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
-
             $settingBag = [];
 
             $formattedFields = $this->getFormattedData($options["fields"]);
@@ -109,7 +108,6 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
             $intlData = [];
 
             foreach ($settingBag as $formattedField => $setting) {
-
                 // Exclude requested fields
                 $field = str_replace("-", ".", $formattedField);
                 if (in_array($field, $options["excluded_fields"])) {
@@ -149,11 +147,9 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
                 $translations = $setting->getTranslations();
                 foreach ($translations as $locale => $settingTranslation) {
-
                     $settingValue = $settingTranslation->getValue();
 
                     switch($fieldOptions["form_type"]) {
-
                         case DateTimePickerType::class:
                             $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
                             if (!$datetime) {
@@ -178,7 +174,6 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             if ($intlData) {
-
                 $form->add("intl", TranslationType::class, [
                     "fields" => $fields,
                     "autoload" => false,
@@ -191,7 +186,6 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
             }
 
             if ($unvData) {
-
                 $form->add("unv", TranslationType::class, [
                     "fields" => $fields,
                     "autoload" => false,
@@ -217,30 +211,25 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         foreach (iterator_to_array($forms) as $formName => $form) {
-
             if ($formName == "valid") {
-
                 continue;
-
             } elseif ($formName == "intl" || $formName == "unv") {
-
                 foreach ($form->getData() as $formattedField => $translations) {
-
                     $field = str_replace("-", ".", $formattedField);
                     foreach ($translations as $locale => $translation) {
-
-                        $viewData[$field] = $viewData[$field] ?? $this->settingBag->getRawScalar($field) ?? new Setting($field);;
+                        $viewData[$field] = $viewData[$field] ?? $this->settingBag->getRawScalar($field) ?? new Setting($field);
+                        ;
                         if ($viewData[$field]->isLocked()) {
                             throw new \Exception("Setting \"".$viewData[$field]->getPath()."\" is locked, you cannot edit this variable.");
                         }
 
-                        if($translation->getValue() == []) $translation->setValue(null);
+                        if ($translation->getValue() == []) {
+                            $translation->setValue(null);
+                        }
                         $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null, $locale);
                     }
                 }
-
             } else {
-
                 $field = str_replace("-", ".", $formName);
                 if (!$viewData[$formName] instanceof Setting) {
                     $viewData[$formName] = $viewData[$formName] ?? new Setting($formName);
@@ -253,10 +242,11 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 $translation = $form->getViewData();
                 $locale      = $translation->getLocale();
 
-                if($translation->getValue() == []) $translation->setValue(null);
+                if ($translation->getValue() == []) {
+                    $translation->setValue(null);
+                }
                 $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null, $locale);
             }
-
         }
     }
 }

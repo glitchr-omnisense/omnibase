@@ -103,7 +103,6 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
 
         // Redirect to the right page when access denied
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            
             $targetUrl = $referrer->getUrl() ?? $this->router->generate("backoffice");
             $referrer->clear();
 

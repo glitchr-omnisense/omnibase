@@ -10,7 +10,7 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
 trait CacheClearTrait
 {
-    protected function checkCache(SymfonyStyle $io): void 
+    protected function checkCache(SymfonyStyle $io): void
     {
         $io->write("<info> [INFO] Cache directory:</info> ".$this->cacheDir.PHP_EOL, true);
     }
@@ -165,13 +165,10 @@ trait CacheClearTrait
 
         $io->write("<$fn> [".strtoupper($fn)."] Disk space information: </$fn>".$diskSpaceStr.PHP_EOL, true);
         if ($memoryLimit > 1) {
-            
-            if($memoryLimit < str2dec("512M")) {
+            if ($memoryLimit < str2dec("512M")) {
                 $io->write("<warning> [WARNING] </warning> Memory limit is very low.. Please consider increasing it", true);
                 $io->write('PHP Memory limit: ' . $memoryLimitStr);
-
             } else {
-
                 $io->write("<$fn> [".strtoupper($fn)."] PHP Memory limit: </$fn>".$memoryLimitStr.PHP_EOL, true);
             }
         }

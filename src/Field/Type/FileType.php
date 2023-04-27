@@ -96,8 +96,7 @@ class FileType extends AbstractType implements DataMapperInterface
         MediaService $mediaService,
         ObfuscatorInterface $obfuscator,
         string $cacheDir
-    )
-    {
+    ) {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
         $this->router           = $router;
@@ -150,7 +149,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
             'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
             'alt'          => null,
-        
+
             'thumbnail_width'  => null,
             'thumbnail_height' => 250,
             'max_size'        => null,
@@ -252,7 +251,6 @@ class FileType extends AbstractType implements DataMapperInterface
         if ($options["alt"]   !== null) {
             $builder->add("alt", TextType::class, $options["alt"]);
         }
-        
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)

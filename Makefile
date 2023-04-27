@@ -19,8 +19,13 @@ deploy:
 	@composer update
 	@yarn install
 
-linter:
-	@echo "Not implemented yet."
+
+linter: phpstan phpcs
+
+phpcs:
+	../../../bin/php-cs-fixer fix src
+phpstan:
+	../../vendor/bin/phpstan analyse
 
 tests:
 	@echo "Not implemented yet."

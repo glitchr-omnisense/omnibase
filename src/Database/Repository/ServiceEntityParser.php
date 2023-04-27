@@ -1157,7 +1157,6 @@ class ServiceEntityParser
         $regexRequested    = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
 
         if ($this->classMetadataManipulator->getTypeOfField($this->classMetadata, $fieldName) == "json") {
-
             if (is_array($fieldValue)) {
                 if (empty($fieldValue)) {
                     return $queryBuilder->expr()->eq(1, 1);
@@ -1193,9 +1192,7 @@ class ServiceEntityParser
             }
 
             throw new LogicException("Operation not supported for json-like field \"" . $fieldName . "\" in \"" . $this->classMetadata->getName() . "\"");
-
         } elseif ($regexRequested) {
-
             $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
             if ($tableOperator == self::OPTION_STARTING_WITH) {
@@ -1209,7 +1206,6 @@ class ServiceEntityParser
             }
 
             $fieldValue = ($isInsensitive ? mb_strtolower($fieldValue) : $fieldValue);
-
         }
 
         //

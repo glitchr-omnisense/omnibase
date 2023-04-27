@@ -122,8 +122,10 @@ class AccessVoter extends Voter
                 $isRestrictedFirewall = false;
 
                 $firewall = $this->router->getRouteFirewall($url);
-                if($firewall == null) return true;
-                
+                if ($firewall == null) {
+                    return true;
+                }
+
                 foreach ($firewallNames as $firewallName) {
                     $isRestrictedFirewall |= $firewall->getName() == $firewallName;
                 }

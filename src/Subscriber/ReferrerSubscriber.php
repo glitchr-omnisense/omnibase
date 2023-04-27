@@ -33,8 +33,7 @@ class ReferrerSubscriber implements EventSubscriberInterface
         ReferrerInterface $referrer,
         RouterInterface $router,
         ParameterBagInterface $parameterBag
-    )
-    {
+    ) {
         $this->router = $router;
         $this->parameterBag = $parameterBag;
         $this->referrer = $referrer;

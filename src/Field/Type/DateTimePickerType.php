@@ -42,7 +42,7 @@ class DateTimePickerType extends AbstractType
             "widget" => "single_text",
             "required" => false,
             "webpack_entry" => "form.datetime",
-            
+
             "debug" => false,
             "datetimepicker" => [
                 "enableTime" => true,

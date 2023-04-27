@@ -139,9 +139,9 @@ class Uploader extends AbstractAnnotation
             $namespaceDir = implode("/", array_map(
                 "lcfirst",
                 explode(
-                "\\",
-                substr($namespace, strpos($namespace, $namespaceRoot)+strlen($namespaceRoot))
-            )
+                    "\\",
+                    substr($namespace, strpos($namespace, $namespaceRoot)+strlen($namespaceRoot))
+                )
             ));
         }
 
@@ -365,7 +365,6 @@ class Uploader extends AbstractAnnotation
         $fileList = []; // Field value can be an array or just a single path
         $uploadList = array_values(array_intersect($newList, $oldList));
         foreach (array_union($uploadList, array_diff($newList, $oldList)) as $index => $entry) {
-
             //
             // In case of string casting, and UploadedFile might be returned as a string..
             $file = is_string($entry) && !str_contains($entry, "://") && is_file($entry) ? new File($entry) : $entry;
@@ -479,13 +478,10 @@ class Uploader extends AbstractAnnotation
     {
         $oldEntity = $this->getOldEntity($entity);
         try {
-
             if ($this->uploadFiles($entity, $oldEntity, $fieldName)) {
                 $this->deleteFiles($entity, $oldEntity, $fieldName);
             }
-
         } catch(Exception $e) {
-
             $this->deleteFiles($oldEntity, $entity, $fieldName);
             $old = self::getFieldValue($oldEntity, $fieldName);
 

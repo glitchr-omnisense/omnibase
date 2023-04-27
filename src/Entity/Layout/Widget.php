@@ -40,7 +40,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         CacheableTrait::__toKey as __toDefaultKey;
     }
 
-    public function __toKey(?string ...$variadic):string
+    public function __toKey(?string ...$variadic): string
     {
         $variadic[] = $this->getId();
         $variadic[] = $this->getUpdatedAt();

@@ -337,7 +337,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
 
         if (!$options["multiple"] && $this->classMetadataManipulator->isEntity($options["class"])) {
-
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["class"]);
             if (!$classMetadata) {
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
@@ -351,14 +350,16 @@ class AssociationType extends AbstractType implements DataMapperInterface
             }
 
             $aggregateModel = EntityHydrator::CLASS_METHODS;
-            if(!$options["allow_null"]) $aggregateModel |= EntityHydrator::IGNORE_NULLS;
+            if (!$options["allow_null"]) {
+                $aggregateModel |= EntityHydrator::IGNORE_NULLS;
+            }
             $viewData = $this->entityHydrator->hydrate(
                 is_object($viewData) ? $viewData : $options["class"],
-                $entries instanceof Collection ? $entries->toArray() : $entries, [], $aggregateModel
+                $entries instanceof Collection ? $entries->toArray() : $entries,
+                [],
+                $aggregateModel
             );
-
         } elseif ($viewData instanceof PersistentCollection) {
-
             $mappedBy =  $viewData->getMapping()["mappedBy"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
             $oldData = $viewData->toArray();
@@ -397,33 +398,25 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $viewData->clear();
 
             foreach ($entries as $entry) {
-
                 $viewData->add($entry);
                 if (!$isOwningSide && $mappedBy) {
-
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
-
                         $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                     } elseif (!$owningSide->contains($viewData->getOwner())) {
-
                         $owningSide->add($viewData->getOwner());
                     }
                 }
             }
-
         } elseif ($options["multiple"]) {
-
             $viewData = new ArrayCollection();
             foreach (iterator_to_array($forms) as $fieldName => $childForm) {
                 foreach ($childForm as $key => $value) {
                     $viewData[$key] = $value->getViewData();
                 }
             }
-
         } else {
             $viewData = current(iterator_to_array($forms))->getViewData();
         }
-
     }
 }

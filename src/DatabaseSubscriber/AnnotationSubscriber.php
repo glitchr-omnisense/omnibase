@@ -131,7 +131,6 @@ class AnnotationSubscriber implements EventSubscriberInterface
         $uow = $event->getEntityManager()->getUnitOfWork();
 
         foreach ($uow->getIdentityMap() as $class => $entities) {
-
             foreach ($entities as $entity) {
                 $className = get_class($entity);
                 $classMetadata = $this->entityManager->getClassMetadata($className);
@@ -207,7 +206,6 @@ class AnnotationSubscriber implements EventSubscriberInterface
 
         $entities = array_merge($this->entityInsertionBuffer, $this->entityUpdateBuffer, $this->entityDeletionBuffer);
         foreach ($entities as $entity) {
-
             $className = get_class($entity);
             $classMetadata  = $this->entityManager->getClassMetadata($className);
 
@@ -267,7 +265,6 @@ class AnnotationSubscriber implements EventSubscriberInterface
 
         $entities = array_merge($this->entityCandidateBuffer, $this->entityInsertionBuffer, $this->entityUpdateBuffer, $this->entityDeletionBuffer);
         foreach ($entities as $entity) {
-
             $className = get_class($entity);
             $classMetadata  = $this->entityManager->getClassMetadata($className);
 

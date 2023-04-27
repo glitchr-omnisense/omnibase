@@ -96,8 +96,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         ObfuscatorInterface $obfuscator,
         ParameterBagInterface $parameterBag,
         RouterInterface $router
-    )
-    {
+    ) {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->twig = $twig;
@@ -296,7 +295,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                 }
 
                 $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options): Generator {
-
                     if ($choices === null) {
                         return null;
                     }
@@ -467,7 +465,6 @@ class SelectType extends AbstractType implements DataMapperInterface
         //
         // Retrieve existing entities
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
-
             $classRepository = $this->entityManager->getRepository($options["class"]);
             $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
             if (!$options["multiple"]) {
@@ -489,7 +486,6 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
         if ($viewData instanceof PersistentCollection) {
-
             $mappedBy =  $viewData->getMapping()["mappedBy"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
             $oldData = $viewData->toArray();
@@ -500,9 +496,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
 
             foreach (array_diff_object($oldData, $dataChoices) as $entry) {
-
                 if (!$isOwningSide && $mappedBy) {
-
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
                         $this->propertyAccessor->setValue($entry, $mappedBy, null);
@@ -513,10 +507,8 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
 
             if ($this->entityManager->getCache()) {
-
                 $mapping = $viewData->getMapping(); // Evict caches and collection caches.
                 foreach (array_unique_object(array_union($oldData, $dataChoices)) as $data) {
-
                     $this->entityManager->getCache()->evictEntity(get_class($data), $data->getId());
                     if ($mapping["inversedBy"]) {
                         $this->entityManager->getCache()->evictCollection(get_class($data), $mapping["inversedBy"], $data->getId());

@@ -11,13 +11,16 @@ class PdfResponse extends Response
 {
     public function __construct(string|Response $data = null, int $status = 200, array $headers = [])
     {
-        if ($data instanceof Response)
+        if ($data instanceof Response) {
             $data = $data->getContent();
+        }
 
         $options = array_pop_key("options", $headers) ?? [];
         $stream  = array_pop_key("stream", $headers) ?? [];
         $debug   = array_pop_key("debug", $headers) ?? false;
-        if($debug) return parent::__construct($data, $status, $headers);
+        if ($debug) {
+            return parent::__construct($data, $status, $headers);
+        }
 
         $dompdf = new Dompdf(array_merge([
             'isFontSubsettingEnabled' => false,
@@ -30,7 +33,8 @@ class PdfResponse extends Response
         parent::__construct(
             $dompdf->stream('document.pdf', array_merge(['compress' => true, 'Attachment' => false], $stream)),
             $status,
-            array_merge($headers, ['Content-Type' => 'application/pdf']));
+            array_merge($headers, ['Content-Type' => 'application/pdf'])
+        );
     }
 
     /**

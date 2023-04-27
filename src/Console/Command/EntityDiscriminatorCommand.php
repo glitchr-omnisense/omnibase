@@ -29,8 +29,7 @@ class EntityDiscriminatorCommand extends Command
         EntityManagerInterface $entityManager,
         ParameterBagInterface $parameterBag,
         ClassMetadataManipulator $classMetadataManipulator
-    )
-    {
+    ) {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }

@@ -77,10 +77,12 @@ class SvgFilter implements SvgFilterInterface
         pathinfo_extension($this->path, $extension);
 
         foreach ($this->filters as $filter) {
-
             $oldImage = $image;
-            try { $image = $filter->apply($oldImage); }
-            catch (\Exception $e) { $image = $oldImage; }
+            try {
+                $image = $filter->apply($oldImage);
+            } catch (\Exception $e) {
+                $image = $oldImage;
+            }
 
             if (spl_object_id($image) != spl_object_id($oldImage)) {
                 $oldImage->__destruct();

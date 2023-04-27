@@ -46,8 +46,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
         ParameterBagInterface $parameterBag,
         MediaServiceInterface $mediaService,
         MediaController $mediaController
-    )
-    {
+    ) {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->mediaController = $mediaController;
 

@@ -23,16 +23,15 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
         $appJsonPath = array_filter((array) $entrypointLookup, fn ($k) => str_ends_with($k, "entrypointJsonPath"), ARRAY_FILTER_USE_KEY);
         $appJsonPath = first($appJsonPath);
         if (file_exists($appJsonPath)) {
-            
             $encoreTagRenderer->addEntrypoint("_default", $appJsonPath);
             $entrypoints = json_decode(file_get_contents($appJsonPath), true)["entrypoints"];
 
             $tags = array_unique(array_map(fn ($t) => str_rstrip($t, ["-async", "-defer"]), array_keys($entrypoints)));
             foreach ($tags as $tag) {
-
                 $encoreTagRenderer->addTag($tag);
-                if(str_contains($tag, "."))
+                if (str_contains($tag, ".")) {
                     $encoreTagRenderer->markAsOptional($tag);
+                }
             }
         }
 
@@ -45,8 +44,9 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
             $tags = array_unique(array_map(fn ($t) => str_rstrip($t, ["-async", "-defer"]), array_keys($entrypoints)));
             foreach ($tags as $tag) {
                 $encoreTagRenderer->addTag($tag, "_base");
-                if(str_contains($tag, "."))
+                if (str_contains($tag, ".")) {
                     $encoreTagRenderer->markAsOptional($tag);
+                }
             }
         }
 

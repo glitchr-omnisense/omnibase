@@ -82,8 +82,7 @@ class AppVariable
         ReferrerInterface $referrer,
         Environment $twig,
         Localizer $localizer
-    )
-    {
+    ) {
         $this->settingBag     = $settingBag;
         $this->referrer       = $referrer;
         $this->twig           = $twig;

@@ -1007,7 +1007,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\OneToMany(targetEntity=Address::class, mappedBy="user")
      */
     protected $addresses;
-    public function getAddresses(): Collection { return $this->addresses; }
+    public function getAddresses(): Collection
+    {
+        return $this->addresses;
+    }
     public function getAddress(int $i = 0): ?Address
     {
         return $this->addresses[$i] ?? null;

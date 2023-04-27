@@ -373,11 +373,9 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");
 
         foreach (iterator_to_array($forms) as $locale => $form) {
-
             $data = $form->getData();
 
             if (!$multiple) {
-
                 if ($data instanceof TranslationInterface) {
                     if ($data->isEmpty()) {
                         unset($viewData[$locale]);
@@ -386,9 +384,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                         $viewData[$locale]->setLocale($locale);
                     }
                 }
-
             } else {
-
                 foreach ($data as $key => $translation) {
                     if ($translation === null) {
                         continue;
@@ -408,7 +404,6 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
                     if ($translation) {
                         $viewData[$key][$locale] = $translation;
-
                     }
                 }
             }

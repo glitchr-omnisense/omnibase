@@ -48,7 +48,7 @@ class TradingMarket implements TradingMarketInterface
     protected $providers = [];
     public function getProviders()
     {
-        return array_filter($this->providers, fn($p) => $p->getKey() !== null);
+        return array_filter($this->providers, fn ($p) => $p->getKey() !== null);
     }
     public function getProvider(string $idOrClass): ?CurrencyApiInterface
     {
@@ -208,10 +208,12 @@ class TradingMarket implements TradingMarketInterface
             $cash = (string) $cash;
         }
 
-        if($source == $target) return $cash;
+        if ($source == $target) {
+            return $cash;
+        }
 
         $rate = $this->get($source, $target, $options, $timeAgo)?->getValue();
-        if($rate == null) {
+        if ($rate == null) {
             throw new \Exception("No source available for currency exchange.");
         }
 
