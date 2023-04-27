@@ -112,6 +112,26 @@ spam_score:
     _singular: "blatant spam"
     _plural: "blatant spams"
 
+operation:
+  equal:
+    _singular: "equals to"
+    _plural: "equal to"
+  notequal:
+    _singular: "different from"
+    _plural: "different from"
+  less:
+    _singular: "less than"
+    _plural: "less than"
+  less_equal:
+    _singular: "less than or equal to"
+    _plural: "less than or equal to"
+  greater:
+    _singular: "greater than"
+    _plural: "greater than"
+  greater_equal:
+    _singular: "greater than or equal to"
+    _plural: "greater than or equal to"
+
 gender:
   _singular: "gender"
   _plural: "genders"

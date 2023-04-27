@@ -9,6 +9,26 @@ entity_action:
     _singular: "suppression"
     _plural: "suppressions"
 
+operation:
+  equal:
+    _singular: "égal à"
+    _plural: "égaux à"
+  notequal:
+    _singular: "different de"
+    _plural: "different de"
+  less:
+    _singular: "inférieur à"
+    _plural: "inférieur à"
+  less_equal:
+    _singular: "inférieur ou égal à"
+    _plural: "inférieurs ou égaux à"
+  greater:
+    _singular: "supérieur à"
+    _plural: "supérieurs à"
+  greater_equal:
+    _singular: "supérieur ou égal à"
+    _plural: "supérieurs ou égaux à"
+
 user_role:
   _singular: "générique"
   _plural: "génériques"

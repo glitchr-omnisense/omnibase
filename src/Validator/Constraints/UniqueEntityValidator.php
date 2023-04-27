@@ -125,7 +125,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         }
 
         // Find duplicates among the submitted entities
-        $identityMap = $this->em->getUnitOfWork()->getIdentityMap()[get_root_class($entity)];
+        $identityMap = $this->em->getUnitOfWork()->getIdentityMap()[get_root_class($entity)] ?? [];
         $siblingEntities = array_filter(
             $identityMap ?? null,
             fn($k) => ($k != $entity->getId()) && $identityMap[$k] instanceof $entity,

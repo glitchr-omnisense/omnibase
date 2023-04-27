@@ -49,6 +49,7 @@ ul.sidebar-menu a, .user-menu-wrapper a.user-details, .user-menu-wrapper a.user-
     font-weight:bold;
 }
 
+.dropdown-menu { max-width: none;}
 .dropdown-menu .dropdown-item {margin:0.5em;}
 .field-association .accordion-body { margin:0 1em !important; }
 

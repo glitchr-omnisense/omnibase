@@ -22,11 +22,6 @@ window.addEventListener("load.form_type", function () {
         var btnDown = $("#"+id+"-down");
         var btnUp = $("#"+id+"-up");
 
-        if(min == max) {
-            btnDown.prop("disabled", true);
-            btnUp.prop("disabled", true);
-        }
-
         var invervalBtnUp, invervalBtnDown;
         var intervalKeyUp, intervalKeyDown;
 
@@ -172,6 +167,17 @@ window.addEventListener("load.form_type", function () {
 
         if (isNaN(number) || !number)
             number = 0;
+
+        if(typeof(min) != "string") {
+
+            if(number <= min) number = min;
+            else if(number > max) number = max;
+
+            if (min == max) {
+                btnDown.prop("disabled", true);
+                btnUp.prop("disabled", true);
+            }
+        }
 
         $(input).val(prefix+number+suffix);
     }));

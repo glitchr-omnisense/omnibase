@@ -249,13 +249,13 @@ class SelectType extends AbstractType implements DataMapperInterface
             $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
 
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
-            if (!$options["choices"] && $options["choice_loader"] === null) {
+            if ($options["choices"] === null && $options["choice_loader"] === null) {
                 $options["choices"] = $this->formFactory->guessChoices($form, $options);
                 $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
 
                 /* Override options.. I couldn't done that without accessing data */
                 // It might be good to get read of that and be able to use normalizer.. as expected
-                if (!$options["tags"] && !$options["choices"] && !$options["autocomplete"]) {
+                if (!$options["tags"] && $options["choices"] === null && !$options["autocomplete"]) {
                     throw new \Exception("No choices, or autocomplete option, could be guessed without using data information for \"".$form->getName()."\"");
                 }
             }
@@ -296,6 +296,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 }
 
                 $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options): Generator {
+
                     if ($choices === null) {
                         return null;
                     }
@@ -566,7 +567,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["sortable"]      = $this->formFactory->guessSortable($form, $options);
 
         $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
-        if (!$options["choices"] && $options["choice_loader"] === null) {
+        if ($options["choices"] === null && $options["choice_loader"] === null) {
             $options["choices"]       = $this->formFactory->guessChoices($form, $options);
             $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
         }

@@ -229,7 +229,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $lazyload = array_pop_key("lazy", $attributes);
         $lazybox  = array_pop_key("lazy-box", $attributes);
 
-        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
+        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src, $src], 2, null), $srcset);
         $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
         $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
 
