@@ -21,8 +21,7 @@
 
 .ql-editor img {
     float: left;
-    margin: 0 2em 1em 1em;
-    max-height:400px;
+    margin: 1em 2em 1em 1em;
 }
 
 .ql-editor .ql-align-justify img { float: left; }
@@ -32,7 +31,6 @@
 .ql-align-left img { float: left; }
 .ql-editor {
     text-align:inherit;
-    white-space: pre-line;
 }
 
 .form-errors ul
