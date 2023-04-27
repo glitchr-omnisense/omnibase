@@ -168,15 +168,12 @@ window.addEventListener("load.form_type", function () {
         if (isNaN(number) || !number)
             number = 0;
 
-        if(typeof(min) != "string") {
+        if(typeof(min) != "string" && number <= min) number = min;
+        else if(typeof(max) != "string" && number > max) number = max;
 
-            if(number <= min) number = min;
-            else if(number > max) number = max;
-
-            if (min == max) {
-                btnDown.prop("disabled", true);
-                btnUp.prop("disabled", true);
-            }
+        if(typeof(min) != "string" && min == max) {
+            btnDown.prop("disabled", true);
+            btnUp.prop("disabled", true);
         }
 
         $(input).val(prefix+number+suffix);
