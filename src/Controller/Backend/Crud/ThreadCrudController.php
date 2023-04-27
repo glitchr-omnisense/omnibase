@@ -2,6 +2,7 @@
 
 namespace Base\Controller\Backend\Crud;
 
+use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use Base\Field\DateTimePickerField;
 use Base\Field\DiscriminatorField;
 
@@ -9,6 +10,7 @@ use Base\Field\SelectField;
 use Base\Field\SlugField;
 use Base\Field\StateField;
 use Base\Field\TranslationField;
+use Base\Field\Type\SelectType;
 use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -33,6 +35,8 @@ class ThreadCrudController extends ThreadActionCrudController
 
             yield SlugField::new('slug')->setTargetFieldName("translations.title");
             yield TranslationField::new()->setFields([
+
+                'keywords' => ['form_type' => SelectType::class, 'tags' => [',', ';'], 'required' => false],
                 "excerpt" => ["form_type" => TextareaType::class],
                 "content" => ["form_type" => WysiwygType::class]
             ]);

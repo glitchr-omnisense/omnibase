@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Thread;
 
+use Base\Database\Annotation\OrderColumn;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Database\TranslationInterface;
@@ -41,6 +42,22 @@ class TaxonIntl implements TranslationInterface
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="array")
+     * @OrderColumn
+     */
+    protected $keywords = [];
+    public function getKeywords(): array
+    {
+        return $this->keywords ?? [];
+    }
+    public function setKeywords(array $keywords)
+    {
+        $this->keywords = $keywords;
 
         return $this;
     }
