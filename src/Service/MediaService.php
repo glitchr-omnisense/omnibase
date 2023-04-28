@@ -199,11 +199,25 @@ class MediaService extends FileService implements MediaServiceInterface
         return is_array($path) ? $output : first($output);
     }
 
+    public function imageBase64(null|array|string $path): ?string
+    {
+        iF(!$path) {
+            return null;
+        }
+
+        if (is_array($path)) {
+            return array_map(fn ($s) => $this->imageBase64($s), $path);
+        }
+
+        return base64_image($path, $this->getExtension($path));
+    }
+
     public function imageSet(null|array|string $path, ...$srcset): ?string
     {
         if (!$path) {
             return null;
         }
+
         if (is_array($path)) {
             return array_map(fn ($s) => $this->imageSet($s), $path);
         }

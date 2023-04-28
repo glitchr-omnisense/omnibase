@@ -18,7 +18,6 @@ namespace {
         throw new RuntimeException("bcmath is not installed");
     }
 
-
     function get_root_class(object|string $object_or_class): string|false
     {
         $class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;

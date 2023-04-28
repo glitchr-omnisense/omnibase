@@ -56,7 +56,7 @@ final class MediaTwigExtension extends AbstractExtension
     {
         return [
             new TwigFunction('embed', [$this, 'embed'], ['needs_environment' => true, 'needs_context' => true]),
-            new TwigFunction('embed_base64', 'base64_image'),
+            new TwigFunction('embed_base64', [MediaService::class, 'imageBase64']),
             new TwigFunction('url', [$this, 'url'], ['needs_context' => true]),
             new TwigFunction('imageset', [MediaService::class, 'imageSet'], ["is_safe" => ['all']]),
             new TwigFunction('image', [$this, 'image'], ['needs_context' => true]),
@@ -92,6 +92,7 @@ final class MediaTwigExtension extends AbstractExtension
 
                 new TwigFilter('inline_css_email', [$this, 'inline_css_email'], ['needs_context' => true, "is_safe" => ['all']]),
                 new TwigFilter('embed', [$this, 'embed'], ['needs_environment' => true, 'needs_context' => true]),
+                new TwigFilter('embed_base64', [MediaService::class, 'imageBase64']),
                 new TwigFilter('url', [$this, 'url'], ['needs_context' => true]),
 
                 new TwigFilter('asset', [AdvancedRouter::class, 'getAssetUrl']),
@@ -245,11 +246,15 @@ final class MediaTwigExtension extends AbstractExtension
         $path = $src;
         $url  = explode("/", $src);
         try {
+
             $path = $twig->getLoader()->getSourceContext($src)->getPath();
             $contentType = mime_content_type($twig->getLoader()->getSourceContext($src)->getPath());
 
             $url = explode("/", $twig->getLoader()->getSourceContext($src)->getName());
+
         } catch (LoaderError $e) {
+
+            return $src;
         }
 
         $prefix = str_rstrip($path, [implode("/", tail($url)), "/"]);

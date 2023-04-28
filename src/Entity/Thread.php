@@ -307,7 +307,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     protected $owners;
     public function getOwner(int $i = 0)
     {
-        return $this->getOwners()->containsKey($i) ? $this->getOwners()->get($i) : null;
+        return $this->getOwners()->get($i);
     }
     public function getOwners(): Collection
     {
