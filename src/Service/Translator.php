@@ -457,12 +457,12 @@ class Translator implements TranslatorInterface
             $years = intdiv($time, 12);
 
             $str =
-                ($years ? $years : "") . " " . $this->trans("base.years", [$years]) . " " .
-                ($months ? $months : "") . " " . $this->trans("base.months", [$months]) . " " .
-                ($days ? $days : "") . " " . $this->trans("base.days", [$days]) . " " .
-                ($hours ? $hours : "") . " " . $this->trans("base.hours", [$hours]) . " " .
-                ($minutes ? $minutes : "") . " " . $this->trans("base.minutes", [$minutes]) . " " .
-                ($seconds ? $seconds : "") . " " . $this->trans("base.seconds", [$seconds]);
+                ($years ?: "") . " " . $this->trans("base.years", [$years]) . " " .
+                ($months ?: "") . " " . $this->trans("base.months", [$months]) . " " .
+                ($days ?: "") . " " . $this->trans("base.days", [$days]) . " " .
+                ($hours ?: "") . " " . $this->trans("base.hours", [$hours]) . " " .
+                ($minutes ?: "") . " " . $this->trans("base.minutes", [$minutes]) . " " .
+                ($seconds ?: "") . " " . $this->trans("base.seconds", [$seconds]);
 
             return trim($str);
         }

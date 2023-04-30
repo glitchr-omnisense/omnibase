@@ -19,7 +19,9 @@ use Base\Database\Traits\VaultTrait;
  */
 class SettingIntl implements TranslationInterface
 {
-    use TranslationTrait { isEmpty as _isEmpty; }
+    use TranslationTrait {
+        TranslationTrait::isEmpty as _isEmpty;
+    }
     use VaultTrait;
 
     public function isEmpty(): bool
@@ -31,10 +33,12 @@ class SettingIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $label;
+
     public function getLabel(): ?string
     {
         return $this->label;
     }
+
     public function setLabel(?string $label)
     {
         $this->label = $label;
@@ -45,10 +49,12 @@ class SettingIntl implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $help;
+
     public function getHelp(): ?string
     {
         return $this->help;
     }
+
     public function setHelp(?string $help)
     {
         $this->help = $help;
@@ -61,17 +67,20 @@ class SettingIntl implements TranslationInterface
      * @Associate(metadata="class")
      */
     protected $value;
+
     public function getValue()
     {
         return Uploader::getPublic($this, "value") ?? $this->value;
     }
+
     public function getValueFile()
     {
         return Uploader::get($this, "value");
     }
+
     public function setValue($value)
     {
-        $this->value      = $value;
+        $this->value = $value;
         return $this;
     }
 
@@ -84,6 +93,7 @@ class SettingIntl implements TranslationInterface
     {
         return $this->class;
     }
+
     public function setClass(?string $class)
     {
         $this->class = $class;

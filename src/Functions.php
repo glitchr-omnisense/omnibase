@@ -304,7 +304,7 @@ namespace {
         $query = $query ? "?" . $query : null;
 
         $url = $scheme . $machine . $subdomain . $domain . $port . $user . $password . $path . $query;
-        return $url ? $url : "/";
+        return $url ?: "/";
     }
 
     // NB: Path variable should not be removed, at most empty string..
@@ -1924,7 +1924,7 @@ namespace {
             }
         }
 
-        return $results ? $results : null;
+        return $results ?: null;
     }
 
 
@@ -2847,7 +2847,7 @@ namespace {
         }
 
         $name ??= first($address);
-        $name = $name ? $name : array_keys($address)[0] ?? $email;
+        $name = $name ?: array_keys($address)[0] ?? $email;
 
         $name = str_replace("@", "[at]", $name);
         return $name . " <" . $email . ">";

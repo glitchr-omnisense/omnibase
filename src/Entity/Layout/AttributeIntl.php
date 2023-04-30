@@ -16,11 +16,13 @@ use Base\Validator\Constraints as AssertBase;
  */
 class AttributeIntl implements TranslationInterface
 {
-    use TranslationTrait { isEmpty as _isEmpty; }
+    use TranslationTrait {
+        TranslationTrait::isEmpty as _isEmpty;
+    }
 
     public function isEmpty(): bool
     {
-        return $this->_isEmpty([], fn ($n, $v) => is_array($v) && array_filter($v) === []);
+        return $this->_isEmpty([], fn($n, $v) => is_array($v) && array_filter($v) === []);
     }
 
     /**
@@ -35,10 +37,12 @@ class AttributeIntl implements TranslationInterface
     {
         return Uploader::getPublic($this, "value") ?? $this->value;
     }
+
     public function getValueFile()
     {
         return Uploader::get($this, "value");
     }
+
     public function setValue($value)
     {
         $this->value = $value;
@@ -54,6 +58,7 @@ class AttributeIntl implements TranslationInterface
     {
         return $this->class;
     }
+
     public function setClass(?string $class)
     {
         $this->class = $class;

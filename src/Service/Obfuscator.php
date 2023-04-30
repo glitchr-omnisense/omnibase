@@ -28,12 +28,12 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 
     public function __construct(ParameterBagInterface $parameterBag, string $cacheDir)
     {
-        $this->uuid        = $parameterBag->get("base.obfuscator.uuid") ?? Uuid::NAMESPACE_URL;
+        $this->uuid = $parameterBag->get("base.obfuscator.uuid") ?? Uuid::NAMESPACE_URL;
 
         $this->compression = $parameterBag->get("base.obfuscator.compression") ?? "null";
-        $this->maxLength   = $parameterBag->get("base.obfuscator.max_length");
-        $this->level       = $parameterBag->get("base.obfuscator.level");
-        $this->encoding    = $parameterBag->get("base.obfuscator.encoding");
+        $this->maxLength = $parameterBag->get("base.obfuscator.max_length");
+        $this->level = $parameterBag->get("base.obfuscator.level");
+        $this->encoding = $parameterBag->get("base.obfuscator.encoding");
 
         parent::__construct($cacheDir);
     }
@@ -54,6 +54,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     {
         return $this->compressions;
     }
+
     public function getCompression(string $idOrClass): ?CompressionInterface
     {
         if (class_exists($idOrClass)) {
@@ -69,7 +70,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 
         if ($compression == null) {
             $compressionIds = array_keys($this->getCompressions());
-            throw new \LogicException("No compression class retrieved from \"" . $compressionId . "\" identifier (available: ".implode(", ", $compressionIds).")");
+            throw new \LogicException("No compression class retrieved from \"" . $compressionId . "\" identifier (available: " . implode(", ", $compressionIds) . ")");
         }
 
         $compression->setLevel($this->level);
@@ -83,6 +84,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     {
         return $this->uuid !== null;
     }
+
     public function getUuid(string $name): ?UuidV5
     {
         return Uuid::v5(Uuid::fromString($this->uuid), $name);
@@ -102,7 +104,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
             return $identifier;
         }
 
-        $this->setCache("/Identifiers/".$identifier, $this->getCompression($this->compression)->encode($data));
+        $this->setCache("/Identifiers/" . $identifier, $this->getCompression($this->compression)->encode($data));
         return $identifier;
     }
 
@@ -121,14 +123,14 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
             if ($data) {
                 $data = unserialize($data);
             }
-            return $data ? $data : null;
+            return $data ?: null;
         } catch (\ErrorException $e) {
         }
 
-            if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
-                $this->deleteCache("/Identifiers/".$uuid);
-            }
+        if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
+            $this->deleteCache("/Identifiers/" . $uuid);
+        }
 
-            return null;
+        return null;
     }
 }

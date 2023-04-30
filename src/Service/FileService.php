@@ -124,7 +124,7 @@ class FileService implements FileServiceInterface
 
         // Attempt to read mimetype
         $extension = pathinfo($fileOrContentsOrArray, PATHINFO_EXTENSION);
-        $extension = $extension ? $extension : $fileOrContentsOrArray; // Assume extension is provided without filename
+        $extension = $extension ?: $fileOrContentsOrArray; // Assume extension is provided without filename
         $mimeType = $this->mimeTypes->getMimeTypes($extension)[0] ?? null;
         if ($mimeType && $mimeType !== "application/x-empty") {
             return $mimeType;

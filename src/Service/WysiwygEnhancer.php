@@ -111,7 +111,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         }
 
         $maxLevel ??= 6;
-
+        $maxLevel = max(1, $maxLevel);
         $headlines = [];
         preg_replace_callback("/\<[ ]*(h[1-" . $maxLevel . "])(?:[^\<\>]*)\>([^\<\>]*)\<\/[ ]*h[1-" . $maxLevel . "][ ]*\>/", function ($match) use (&$headlines) {
             $headlines[] = [

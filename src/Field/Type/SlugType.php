@@ -35,6 +35,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
     {
         return TextType::class;
     }
+
     public function getBlockPrefix(): string
     {
         return 'slug';
@@ -45,9 +46,9 @@ final class SlugType extends AbstractType implements AutovalidateInterface
         $resolver
             ->setDefaults([
                 "separator" => "-",
-                "keep"   => null,
-                "upper"  => false,
-                "lock"   => null,
+                "keep" => null,
+                "upper" => false,
+                "lock" => null,
                 "strict" => null,
                 "target" => null,
                 "required" => false
@@ -63,17 +64,17 @@ final class SlugType extends AbstractType implements AutovalidateInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["keep"]      = $options["keep"] ? preg_quote($options["keep"]) : null;
-        $view->vars["separator"] = $options["separator"] ? $options["separator"] : null;
-        $view->vars["upper"]     = json_encode($options["upper"]);
-        $view->vars["strict"]    = json_encode($options["strict"]);
-        $view->vars["lock"]      = json_encode($options["lock"]);
+        $view->vars["keep"] = $options["keep"] ? preg_quote($options["keep"]) : null;
+        $view->vars["separator"] = $options["separator"] ?: null;
+        $view->vars["upper"] = json_encode($options["upper"]);
+        $view->vars["strict"] = json_encode($options["strict"]);
+        $view->vars["lock"] = json_encode($options["lock"]);
 
         // Make sure field is not rquired when slugis nullable
         $dataClass = $form->getParent()->getConfig()->getDataClass();
         if ($dataClass && $this->classMetadataManipulator->hasField($dataClass, $form->getName())) {
             $fieldMapping = $this->classMetadataManipulator->getFieldMapping($dataClass, $form->getName());
-            $isNullable   = $fieldMapping["nullable"] ?? false;
+            $isNullable = $fieldMapping["nullable"] ?? false;
             $view->vars["required"] = $options["required"] || !$isNullable;
         }
 
@@ -103,7 +104,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
         $targetPath = $targetPath ? explode(".", $targetPath) : null;
         foreach ($targetPath ?? [] as $path) {
             if (!$target->has($path)) {
-                throw new \Exception("Child form \"$path\" related to view data \"".get_class($target->getViewData())."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
+                throw new \Exception("Child form \"$path\" related to view data \"" . get_class($target->getViewData()) . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["target"] . "\")");
             }
 
             $target = $target->get($path);

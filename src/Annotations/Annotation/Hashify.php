@@ -48,9 +48,9 @@ class Hashify extends AbstractAnnotation
 
     public function __construct(array $data)
     {
-        $this->data            = $data;
-        $this->nullable        = $data["nullable"] ?? false;
-        $this->random          = $data["random"] ?? false;
+        $this->data = $data;
+        $this->nullable = $data["nullable"] ?? false;
+        $this->random = $data["random"] ?? false;
         $this->referenceColumn = $data["reference"] ?? null;
     }
 
@@ -60,22 +60,22 @@ class Hashify extends AbstractAnnotation
         $that = $annotations[$property] ?? [];
         $that = array_pop($that);
 
-        return ($that ? $that : null);
+        return ($that ?: null);
     }
 
     public function getMessageHasher($entity)
     {
-        $hasherFactory  = new PasswordHasherFactory([ClassUtils::getClass($entity) => [
-            "algorithm"        => $this->data["algorithm"] ?? "auto",
-            "hash_algorithm"   => $this->data["hash_algorithm"] ?? "sha512",
-            "migrate_from"     => $this->data["migrate_from"] ?? [],
-            "key_length"       => $this->data["key_length"] ?? 40,
-            "ignore_case"      => $this->data["ignore_case"] ?? false,
+        $hasherFactory = new PasswordHasherFactory([ClassUtils::getClass($entity) => [
+            "algorithm" => $this->data["algorithm"] ?? "auto",
+            "hash_algorithm" => $this->data["hash_algorithm"] ?? "sha512",
+            "migrate_from" => $this->data["migrate_from"] ?? [],
+            "key_length" => $this->data["key_length"] ?? 40,
+            "ignore_case" => $this->data["ignore_case"] ?? false,
             "encode_as_base64" => $this->data["encode_as_base64"] ?? true,
-            "iterations"       => $this->data["iterations"] ?? 5000,
-            "cost"             => $this->data["cost"] ?? null,
-            "memory_cost"      => $this->data["memory_cost"] ?? null,
-            "time_cost"        => $this->data["time_cost"] ?? null
+            "iterations" => $this->data["iterations"] ?? 5000,
+            "cost" => $this->data["cost"] ?? null,
+            "memory_cost" => $this->data["memory_cost"] ?? null,
+            "time_cost" => $this->data["time_cost"] ?? null
         ]]);
 
         return $hasherFactory->getPasswordHasher(ClassUtils::getClass($entity)) ?? null;

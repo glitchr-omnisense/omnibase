@@ -32,6 +32,7 @@ class WysiwygType extends AbstractType
     {
         return HiddenType::class;
     }
+
     public function getBlockPrefix(): string
     {
         return 'wysiwyg';
@@ -63,8 +64,8 @@ class WysiwygType extends AbstractType
                     ['image', 'link', 'blockquote', 'code-block'],
 
                     [
-                        [ 'list' => 'ordered'],
-                        [ 'list' => 'bullet' ],
+                        ['list' => 'ordered'],
+                        ['list' => 'bullet'],
                         ['align' => []],
                     ],
 
@@ -74,7 +75,7 @@ class WysiwygType extends AbstractType
         ]);
     }
 
-    public function getFormID($view): string
+    public function getFormID($view): ?string
     {
         $parent = $view->parent;
         while ($parent->parent) {

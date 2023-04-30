@@ -524,7 +524,7 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getHost(?string $locale = null, ?string $environment = null): string
     {
         $host = compose_url(null, null, null, $this->getMachine(), $this->getSubdomain(), $this->getDomain(), $this->getPort());
-        return $host ? $host : $this->getHostFallback();
+        return $host ?: $this->getHostFallback();
     }
 
     public function getPortFallbacks(?string $locale = null, ?string $environment = null): array
@@ -558,7 +558,7 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getMachineFallback(?string $locale = null, ?string $environment = null): ?string
     {
         $machineFallback = first($this->getMachineFallbacks($locale, $environment));
-        return $machineFallback ? $machineFallback : null;
+        return $machineFallback ?: null;
     }
 
     public function getMachine(?string $locale = null, ?string $environment = null): ?string
@@ -579,7 +579,7 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getSubdomainFallback(?string $locale = null, ?string $environment = null): ?string
     {
         $subdomainFallback = first($this->getSubdomainFallbacks($locale, $environment));
-        return $subdomainFallback ? $subdomainFallback : null;
+        return $subdomainFallback ?: null;
     }
 
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string
@@ -600,7 +600,7 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getDomainFallback(?string $locale = null, ?string $environment = null): ?string
     {
         $domainFallback = first($this->getDomainFallbacks($locale, $environment));
-        return $domainFallback ? $domainFallback : null;
+        return $domainFallback ?: null;
     }
 
     public function getDomain(?string $locale = null, ?string $environment = null): ?string

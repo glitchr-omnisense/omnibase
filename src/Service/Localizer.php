@@ -99,7 +99,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         $langCountries = $availableCountries[$lang] ?? self::getLocales()[$lang] ?? [];
 
         $country = substr($locale, 3, 2);
-        $country = $country ? $country : null;
+        $country = $country ?: null;
         $country = $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
 
         return $country;
@@ -290,7 +290,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         $langCountries = $availableCountries[$lang] ?? [];
 
         $country = substr($locale, 3, 2);
-        $country = $country ? $country : null;
+        $country = $country ?: null;
         $country = $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
 
         self::$cacheLocales[$locale] = $lang . self::SEPARATOR . $country;

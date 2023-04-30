@@ -42,7 +42,7 @@ use Base\Traits\CacheableTrait;
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "common" )
+ * @DiscriminatorEntry( value = "common" )
  *
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
@@ -69,6 +69,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     {
         return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-box"];
@@ -78,16 +79,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     {
         return $this->getTitle() ?? $this->getSlug() ?? $this->getTranslator()->transEntity(static::class);
     }
+
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
-        $this->tags      = new ArrayCollection();
-        $this->children  = new ArrayCollection();
+        $this->tags = new ArrayCollection();
+        $this->children = new ArrayCollection();
         $this->followers = new ArrayCollection();
-        $this->mentions  = new ArrayCollection();
-        $this->likes     = new ArrayCollection();
-        $this->owners    = new ArrayCollection();
-        $this->connexes  = new ArrayCollection();
-        $this->taxa      = new ArrayCollection();
+        $this->mentions = new ArrayCollection();
+        $this->likes = new ArrayCollection();
+        $this->owners = new ArrayCollection();
+        $this->connexes = new ArrayCollection();
+        $this->taxa = new ArrayCollection();
 
         $this->setParent($parent);
         $this->addOwner($owner);
@@ -105,6 +107,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -116,6 +119,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @GenerateUuid(version=4)
      */
     protected $uuid;
+
     public function getUuid()
     {
         return $this->uuid;
@@ -126,10 +130,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $parent;
+
     public function getParent(): ?self
     {
         return $this->parent;
     }
+
     public function setParent(?self $parent): self
     {
         $this->parent = $parent;
@@ -145,10 +151,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))
      */
     protected $children;
+
     public function getChildren(): Collection
     {
         return $this->children;
     }
+
     public function addChild(self $child): self
     {
         if (!$this->children->contains($child)) {
@@ -175,10 +183,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\ManyToMany(targetEntity=Thread::class)
      */
     protected $connexes;
+
     public function getConnexes(): Collection
     {
         return $this->connexes;
     }
+
     public function addConnex($connex): self
     {
         if (!$this->connexes->contains($connex)) {
@@ -199,10 +209,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @Slugify(reference="title")
      */
     protected $slug;
+
     public function getSlug(): ?string
     {
         return $this->slug;
     }
+
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
@@ -214,10 +226,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $state;
+
     public function getState()
     {
         return $this->state;
     }
+
     public function setState($state): self
     {
         $this->state = $state;
@@ -238,18 +252,22 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     {
         return str_starts_with($this->state, ThreadState::FUTURE);
     }
+
     public function isDeleted(): bool
     {
         return str_starts_with($this->state, ThreadState::DELETE);
     }
+
     public function isScheduled(): bool
     {
         return str_starts_with($this->state, ThreadState::FUTURE) && $this->publishedAt && !$this->isPublished();
     }
+
     public function isSecret(): bool
     {
         return str_starts_with($this->state, ThreadState::SECRET);
     }
+
     public function isPublished(null|\DateTime|string $within = null): bool
     {
         if ($within) {
@@ -286,14 +304,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $workflow;
+
     public function isApproved()
     {
         return $this->workflow == WorkflowState::APPROVED;
     }
+
     public function getWorkflow()
     {
         return $this->workflow;
     }
+
     public function setWorkflow($workflow): self
     {
         $this->workflow = $workflow;
@@ -305,14 +326,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @OrderColumn
      */
     protected $owners;
+
     public function getOwner(int $i = 0)
     {
         return $this->getOwners()->get($i);
     }
+
     public function getOwners(): Collection
     {
         return $this->owners;
     }
+
     public function addOwner(?User $owner): self
     {
         if (!$owner) {
@@ -337,10 +361,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="followedThreads")
      */
     protected $followers;
+
     public function getFollowers(): Collection
     {
         return $this->followers;
     }
+
     public function addFollower(User $follower): self
     {
         if (!$this->followers->contains($follower)) {
@@ -361,19 +387,23 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @OrderColumn
      */
     protected $tags;
+
     public function getPrimaryTag()
     {
         $first = $this->tags->first();
-        return ($first ? $first : null);
+        return ($first ?: null);
     }
+
     public function getSecondaryTags(): array
     {
         return $this->tags->slice(1);
     }
+
     public function getTags(): Collection
     {
         return $this->tags;
     }
+
     public function addTag(Tag $tag): self
     {
         if (!$this->tags->contains($tag)) {
@@ -395,14 +425,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @OrderColumn
      */
     protected $taxa;
+
     public function getTaxa(): Collection
     {
         return $this->taxa;
     }
+
     public function getTaxonomy(): Collection
     {
         return $this->getTaxa();
     }
+
     public function addTaxon($taxon): self
     {
         if (!$this->taxa->contains($taxon)) {
@@ -411,6 +444,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 
         return $this;
     }
+
     public function removeTaxon($taxon): self
     {
         $this->taxa->removeElement($taxon);
@@ -421,6 +455,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ColumnAlias(column="taxa")
      */
     protected $taxons;
+
     public function getTaxons(): Collection
     {
         return $this->taxons;
@@ -430,10 +465,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="thread", orphanRemoval=true, cascade={"persist"})
      */
     protected $mentions;
+
     public function getMentions(): Collection
     {
         return $this->mentions;
     }
+
     public function addMention(Mention $mention): self
     {
         if (!$this->mentions->contains($mention)) {
@@ -460,10 +497,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\OneToMany(targetEntity=Like::class, mappedBy="thread", orphanRemoval=true, cascade={"persist"})
      */
     protected $likes;
+
     public function getLikes(): Collection
     {
         return $this->likes;
     }
+
     public function addLike(Like $like): self
     {
         // Check if user already likes
@@ -513,6 +552,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @Timestamp(on="create")
      */
     protected $createdAt;
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
@@ -523,10 +563,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @Timestamp(on={"update", "create"})
      */
     protected $updatedAt;
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
     }
+
     public function poke(): self
     {
         $this->updatedAt = new DateTime("now");
@@ -537,19 +579,23 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $publishedAt;
+
     public function getPublishedAt(): ?\DateTimeInterface
     {
         return $this->publishedAt;
     }
+
     public function getPublishTime(): ?int
     {
         return $this->publishedAt ? $this->publishedAt->getTimestamp() - time() : null;
     }
+
     public function getPublishTimeStr(): ?string
     {
         $publishTime = $this->getPublishTime();
         return $publishTime ? $this->getTranslator()->transTime($publishTime) : null;
     }
+
     public function setPublishedAt(?\DateTimeInterface $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
