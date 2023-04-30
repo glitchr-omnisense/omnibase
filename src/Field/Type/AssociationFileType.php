@@ -80,8 +80,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityHydrator = $entityHydrator;
 
-        $this->mediaService     = $mediaService;
-        $this->fileService      = cast($mediaService, FileService::class);
+        $this->mediaService = $mediaService;
+        $this->fileService = cast($mediaService, FileService::class);
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
@@ -92,19 +92,19 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             'class' => null,
             'form_type' => FileType::class,
 
-            'entity_file'    => null,
-            'entity_data'    => [],
+            'entity_file' => null,
+            'entity_data' => [],
 
-            "multiple"     => null,
+            "multiple" => null,
             'allow_delete' => false,
             "allow_delete[confirmation]" => true,
 
-            'href'         => null,
+            'href' => null,
 
             'max_size' => null,
-            'max_files'    => null,
-            'mime_types'   => null,
-            'sortable'     => null
+            'max_files' => null,
+            'mime_types' => null,
+            'sortable' => null
         ]);
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
@@ -146,7 +146,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     {
         //
         // Set controller url
-        $options["class"]    = $this->formFactory->guessClass($form, $options);
+        $options["class"] = $this->formFactory->guessClass($form, $options);
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
 
@@ -165,11 +165,11 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 ->generateUrl();
         }
 
-        $view->vars["href"]         = $options["href"] ?? $href;
-        $view->vars["multiple"]     = $options["multiple"];
+        $view->vars["href"] = $options["href"] ?? $href;
+        $view->vars["multiple"] = $options["multiple"];
         $view->vars["allow_delete"] = $options["allow_delete"];
 
-        $view->vars["required"]     = $options["required"] ?? (!$isNullable && !$this->classMetadataManipulator->isToManySide($dataClass, $form->getName()));
+        $view->vars["required"] = $options["required"] ?? (!$isNullable && !$this->classMetadataManipulator->isToManySide($dataClass, $form->getName()));
 
         $data = $form->getData();
         $view->vars["entityId"] = json_encode(array_transforms(function ($k, $e) use ($options, $form): array {
@@ -190,12 +190,12 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $data = $event->getData();
 
-            $options["class"]    = $this->formFactory->guessClass($event, $options);
+            $options["class"] = $this->formFactory->guessClass($event, $options);
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 
             $fieldName = explode(".", $options["entity_file"] ?? "");
-            $baseName  = first($fieldName);
+            $baseName = first($fieldName);
             $fieldName = implode(".", $fieldName);
 
             $parentForm = $form->getParent();
@@ -203,15 +203,15 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;
 
             $form->add($baseName, $options["form_type"], [
-                'class'         => $options["class"],
-                'allow_delete'  => $options["allow_delete"],
-                'required'      => !$isNullable,
-                'multiple'      => $options["multiple"] ?? false,
-                'href'          => $options["href"] ?? null,
-                'max_size'      => $options["max_size"],
-                'max_files'     => $options["max_files"],
-                'mime_types'    => $options["mime_types"],
-                'sortable'      => $options["sortable"]
+                'class' => $options["class"],
+                'allow_delete' => $options["allow_delete"],
+                'required' => !$isNullable,
+                'multiple' => $options["multiple"] ?? false,
+                'href' => $options["href"] ?? null,
+                'max_size' => $options["max_size"],
+                'max_files' => $options["max_files"],
+                'mime_types' => $options["mime_types"],
+                'sortable' => $options["sortable"]
             ]);
 
             if ($options["multiple"]) {
@@ -230,6 +230,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     public function mapDataToForms($viewData, \Traversable $forms): void
     {
     }
+
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $parentForm = current(iterator_to_array($forms))->getParent();
@@ -242,17 +243,17 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
         $options = $parentForm->getConfig()->getOptions();
         $options["data_class"] = $options["data_class"] ?? $this->formFactory->guessClass($parentForm, $options);
-        $options["multiple"]   = $options["multiple"]   ?? $this->formFactory->guessMultiple($parentForm, $options);
+        $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($parentForm, $options);
 
         $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["data_class"]);
         if (!$classMetadata) {
-            throw new \Exception("Entity \"".$options['data_class']."\" not found.");
+            throw new \Exception("Entity \"" . $options['data_class'] . "\" not found.");
         }
 
         $newData = new ArrayCollection();
 
         $fieldName = explode(".", $options["entity_file"] ?? "");
-        $baseName  = first($fieldName);
+        $baseName = first($fieldName);
         $fieldName = implode(".", $fieldName);
 
         $form = iterator_to_array($forms)[$baseName] ?? null;
@@ -282,11 +283,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                                 $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]), [], EntityHydrator::CONSTRUCT);
                             }
                         } elseif ($entity->getId() === null) {
-                            try {
-                                $this->propertyAccessor->setValue($entity, $fieldName, $file);
-                            } catch (Error $e) {
-                                throw $e;
-                            }
+                            $this->propertyAccessor->setValue($entity, $fieldName, $file);
                         }
 
                         $newData[] = $entity;
@@ -309,7 +306,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
             if ($options["multiple"]) {
                 if ($viewData instanceof PersistentCollection) {
-                    $mappedBy =  $viewData->getMapping()["mappedBy"];
+                    $mappedBy = $viewData->getMapping()["mappedBy"];
                     $fieldName = $viewData->getMapping()["fieldName"];
                     $isOwningSide = $viewData->getMapping()["isOwningSide"];
 

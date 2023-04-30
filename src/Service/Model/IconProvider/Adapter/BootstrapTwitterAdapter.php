@@ -8,12 +8,13 @@ use Base\Service\Model\IconProvider\AbstractIconAdapter;
 class BootstrapTwitterAdapter extends AbstractIconAdapter
 {
     public const STYLE_REGULAR = "regular";
-    public const STYLE_FILL    = "filled";
+    public const STYLE_FILL = "filled";
 
     public static function getName(): string
     {
         return "bi";
     }
+
     public static function getOptions(): array
     {
         return [];
@@ -46,7 +47,7 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
             $icon = first($icon);
         }
 
-        return count(array_filter(explode(" ", $icon), fn ($id) => $id == $this->getName()));
+        return count(array_filter(explode(" ", $icon), fn($id) => $id == $this->getName()));
     }
 
     public function warmUp(string $cacheDir): bool
@@ -71,7 +72,7 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
             $label = str_replace("-", " ", $key);
             $style = str_ends_with($key, "-fill") ? self::STYLE_FILL : self::STYLE_REGULAR;
             if ($style == self::STYLE_FILL) {
-                $label  = substr($label, 0, strlen($label) - 5);
+                $label = substr($label, 0, strlen($label) - 5);
             }
 
             $label = ucwords($label);
@@ -82,7 +83,7 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
             if (!$termFound) {
                 continue;
             }
-            $choices[mb_ucfirst($style)." Style"][$label] = $this->getName()." ".$this->getName()."-".$key;
+            $choices[mb_ucfirst($style) . " Style"][$label] = $this->getName() . " " . $this->getName() . "-" . $key;
         }
 
         return $choices;
@@ -90,13 +91,13 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
 
     public function getStyle(string $name)
     {
-        return array_filter(explode(" ", $name), fn ($n) => in_array($n, [self::STYLE_FILL]))[0] ?? null;
+        return array_filter(explode(" ", $name), fn($n) => $n == self::STYLE_FILL)[0] ?? null;
     }
 
     public function getIdentifier(string $name)
     {
         return array_transforms(
-            fn ($k, $v, $callback, $i): ?array => preg_match("/".$this->getName()."-(.*)/", $v, $matches) ? [$i, $matches[1]] : null,
+            fn($k, $v, $callback, $i): ?array => preg_match("/" . $this->getName() . "-(.*)/", $v, $matches) ? [$i, $matches[1]] : null,
             explode(" ", $name)
         )[0];
     }
@@ -105,6 +106,7 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
     {
         return array_keys($this->contents);
     }
+
     public function getValue(string $name)
     {
         $identifier = $this->getIdentifier($name);
@@ -120,6 +122,7 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
             return $icon["label"];
         }, $this->contents);
     }
+
     public function getLabel(string $name)
     {
         $identifier = $this->getIdentifier($name);

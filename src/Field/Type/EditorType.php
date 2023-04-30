@@ -54,7 +54,7 @@ class EditorType extends AbstractType
         ]);
     }
 
-    public function getFormID($view): string
+    public function getFormID($view): ?string
     {
         $parent = $view->parent;
         while ($parent->parent) {

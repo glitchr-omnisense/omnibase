@@ -115,11 +115,11 @@ class LogSubscriber implements EventSubscriberInterface
         }
 
         // Format monitored entries
-        foreach ($monitoredEntries as $key => $entry) {
-            if (!array_key_exists("event", $monitoredEntries[$key])) {
+        foreach ($monitoredEntries as $key => $monitoredEntry) {
+            if (!array_key_exists("event", $entry)) {
                 throw new Exception("Missing key \"event\" in monitored events #" . $key);
             }
-            if (!array_key_exists("pretty", $monitoredEntries[$key])) {
+            if (!array_key_exists("pretty", $entry)) {
                 $monitoredEntries[$key]["pretty"] = "*";
             }
             if (!array_key_exists("statusCode", $monitoredEntries[$key])) {

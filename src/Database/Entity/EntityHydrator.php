@@ -45,7 +45,7 @@ class EntityHydrator implements EntityHydratorInterface
      */
     protected $reflProperties = [];
 
-    public const HYDRATE_BY_FIELD  = 1; // The keys in the data array are entity field names
+    public const HYDRATE_BY_FIELD = 1; // The keys in the data array are entity field names
     public const HYDRATE_BY_COLUMN = 2; // The keys in the data array are database column names
 
     /**
@@ -66,18 +66,18 @@ class EntityHydrator implements EntityHydratorInterface
     /**
      * Aggregate methods: by default, it is "object properties" by "deep copy" method without fallback, but initializing properties
      */
-    public const DEFAULT_AGGREGATE    = 0b00000000000;
-    public const CLASS_METHODS        = 0b00000000001;
-    public const OBJECT_PROPERTIES    = 0b00000000010;
+    public const DEFAULT_AGGREGATE = 0b00000000000;
+    public const CLASS_METHODS = 0b00000000001;
+    public const OBJECT_PROPERTIES = 0b00000000010;
     public const PREVENT_ASSOCIATIONS = 0b00000000100;
-    public const ARRAY_OBJECT         = 0b00000001000;
-    public const DEEPCOPY             = 0b00000010000;
-    public const CONSTRUCT            = 0b00000100000;
-    public const INITIALIZE           = 0b00001000000;
-    public const IGNORE_NULLS         = 0b00010000000;
-    public const AUTOTYPE             = 0b00100000000;
-    public const OBJECT_INHERITED     = 0b01000000000;
-    public const FETCH_ASSOCIATIONS   = 0b10000000000;
+    public const ARRAY_OBJECT = 0b00000001000;
+    public const DEEPCOPY = 0b00000010000;
+    public const CONSTRUCT = 0b00000100000;
+    public const INITIALIZE = 0b00001000000;
+    public const IGNORE_NULLS = 0b00010000000;
+    public const AUTOTYPE = 0b00100000000;
+    public const OBJECT_INHERITED = 0b01000000000;
+    public const FETCH_ASSOCIATIONS = 0b10000000000;
 
     /**
      * PropertyAccessorInterface
@@ -114,14 +114,14 @@ class EntityHydrator implements EntityHydratorInterface
         }
 
         if (!is_object($entity)) {
-            throw new Exception('Entity passed to '.__CLASS__.'::'.__FUNCTION__.'() must be a class name or entity object');
+            throw new Exception('Entity passed to ' . __CLASS__ . '::' . __FUNCTION__ . '() must be a class name or entity object');
         }
 
         $this->setDefaults($entity, $aggregateModel);
 
         $entityName = get_class($entity);
         if (is_object($data) && !$data instanceof Collection && !is_instanceof($entityName, get_class($data)) && ($aggregateModel & self::OBJECT_INHERITED)) {
-            throw new Exception("\"".get_class($data)."\" data passed to ".__CLASS__."::".__FUNCTION__."() must inherit from \"".get_class($entity)."\"");
+            throw new Exception("\"" . get_class($data) . "\" data passed to " . __CLASS__ . "::" . __FUNCTION__ . "() must inherit from \"" . get_class($entity) . "\"");
         }
 
         $data = $this->dehydrate($data, $fieldExceptions);
@@ -140,7 +140,7 @@ class EntityHydrator implements EntityHydratorInterface
         return $entity;
     }
 
-    public function dehydrate(mixed $entity, array $fieldExceptions = [], int $aggregateModel = self::CLASS_METHODS|self::OBJECT_PROPERTIES): ?array
+    public function dehydrate(mixed $entity, array $fieldExceptions = [], int $aggregateModel = self::CLASS_METHODS | self::OBJECT_PROPERTIES): ?array
     {
         if ($entity === null) {
             return null;
@@ -161,7 +161,7 @@ class EntityHydrator implements EntityHydratorInterface
                         return [$varName, $e instanceof ArrayCollection && $e->isEmpty() ? null : $e];
                     }
                 },
-                (array) $data
+                (array)$data
             );
         }
 
@@ -171,7 +171,7 @@ class EntityHydrator implements EntityHydratorInterface
     public function fromProxy(Proxy $proxy)
     {
         $entity = str_strip(get_class($proxy), "Proxies\\__CG__\\");
-        $classMetadata   = $this->entityManager->getClassMetadata($entity);
+        $classMetadata = $this->entityManager->getClassMetadata($entity);
 
         $this->entityManager->detach($proxy);
         return $this->entityManager->find($entity, $this->getPropertyValue($proxy, begin($classMetadata->identifier)));
@@ -225,8 +225,8 @@ class EntityHydrator implements EntityHydratorInterface
         $reflEntity = new ReflectionObject($entity);
         $metaEntity = $this->entityManager->getClassMetadata(get_class($entity));
 
-        $reflData   = new ReflectionObject($data);
-        $metaData   = $this->entityManager->getClassMetadata(get_class($data));
+        $reflData = new ReflectionObject($data);
+        $metaData = $this->entityManager->getClassMetadata(get_class($data));
 
         foreach ($metaData->identifier as $id) {
             if (in_array($id, $metaEntity->identifier)) {
@@ -267,7 +267,7 @@ class EntityHydrator implements EntityHydratorInterface
                 continue;
             }
             $fn = function () use ($alias, $column) {
-                $aliasValue  = $this->$alias;
+                $aliasValue = $this->$alias;
 
                 $columnValue = $this->$column;
                 if ($aliasValue instanceof ArrayCollection && $columnValue instanceof ArrayCollection) {
@@ -344,7 +344,8 @@ class EntityHydrator implements EntityHydratorInterface
                         $value = 0;
                         break;
 
-                    default: $value = null;
+                    default:
+                        $value = null;
                 }
 
                 $this->setPropertyValue($entity, $fieldName, $value, $reflEntity);
@@ -379,7 +380,7 @@ class EntityHydrator implements EntityHydratorInterface
 
             //
             // Fetch associations
-            $isId   = str_ends_with($propertyName, "_id");
+            $isId = str_ends_with($propertyName, "_id");
             $isUuid = str_ends_with($propertyName, "_uuid");
             $isSlug = str_ends_with($propertyName, "_slug");
             if ($aggregateModel & self::FETCH_ASSOCIATIONS && ($isId || $isUuid || $isSlug)) {
@@ -392,7 +393,7 @@ class EntityHydrator implements EntityHydratorInterface
             if ($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
                 try {
                     $this->propertyAccessor->setValue($entity, $propertyName, $value);
-                } catch(AccessException $e) {
+                } catch (AccessException $e) {
                 }
                 $this->markAsHydrated($entity, $propertyName);
             } elseif ($aggregateModel & self::OBJECT_PROPERTIES || $aggregateFallback) {
@@ -418,11 +419,12 @@ class EntityHydrator implements EntityHydratorInterface
 
     protected function isHydrated(mixed $entity, string $propertyName)
     {
-        return in_array(spl_object_hash($entity)."::".$propertyName, $this->hydratationMapping);
+        return in_array(spl_object_hash($entity) . "::" . $propertyName, $this->hydratationMapping);
     }
-    protected function markAsHydrated(mixed$entity, string $propertyName)
+
+    protected function markAsHydrated(mixed $entity, string $propertyName)
     {
-        $this->hydratationMapping[] = spl_object_hash($entity)."::".$propertyName;
+        $this->hydratationMapping[] = spl_object_hash($entity) . "::" . $propertyName;
         return $this;
     }
 
@@ -437,15 +439,15 @@ class EntityHydrator implements EntityHydratorInterface
         foreach ($data as $propertyName => $value) {
             //
             // Fetch associations
-            $isId   = str_ends_with($propertyName, "_id");
+            $isId = str_ends_with($propertyName, "_id");
             $isUuid = str_ends_with($propertyName, "_uuid");
             $isSlug = str_ends_with($propertyName, "_slug");
             if ($aggregateModel & self::FETCH_ASSOCIATIONS && ($isId || $isUuid || $isSlug)) {
                 $data = array_key_removes($data, $propertyName);
-                $identifier   = $this->classMetadataManipulator->resolveFieldPath($classMetadata->getName(), str_rstrip($propertyName, ["_id", "_uuid"]));
+                $identifier = $this->classMetadataManipulator->resolveFieldPath($classMetadata->getName(), str_rstrip($propertyName, ["_id", "_uuid"]));
                 $targetEntity = $this->classMetadataManipulator->fetchEntityName($classMetadata->getName(), $identifier);
 
-                $repository   = $this->classMetadataManipulator->getRepository($targetEntity);
+                $repository = $this->classMetadataManipulator->getRepository($targetEntity);
                 if ($repository != null && !array_key_exists($identifier, $data) && !array_key_exists($propertyName, $data)) {
                     if ($isId) {
                         $data[$identifier] = $repository->cacheOneById($value);
@@ -468,16 +470,12 @@ class EntityHydrator implements EntityHydratorInterface
             }
 
             $mapping = $classMetadata->associationMappings[$this->classMetadataManipulator->getFieldName($entity, $propertyName)];
-            try {
-                if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName)) {
-                    $this->hydrateAssociationToOne($entity, $propertyName, $mapping, $value, $aggregateModel);
-                }
+            if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName)) {
+                $this->hydrateAssociationToOne($entity, $propertyName, $mapping, $value, $aggregateModel);
+            }
 
-                if ($this->classMetadataManipulator->isToManySide($entity, $propertyName)) {
-                    $this->hydrateAssociationToMany($entity, $propertyName, $mapping, $value, $aggregateModel);
-                }
-            } catch (Exception|ErrorException $e) {
-                throw $e;
+            if ($this->classMetadataManipulator->isToManySide($entity, $propertyName)) {
+                $this->hydrateAssociationToMany($entity, $propertyName, $mapping, $value, $aggregateModel);
             }
         }
 
@@ -521,7 +519,7 @@ class EntityHydrator implements EntityHydratorInterface
         }
 
         if ($values !== null && !is_object($values) && !is_array($values)) {
-            throw new Exception("Failed to turn \"$values\" into an association in \"".get_class($entity)."\". Did you pass an object?");
+            throw new Exception("Failed to turn \"$values\" into an association in \"" . get_class($entity) . "\". Did you pass an object?");
         }
 
         // Fetch or hydrate association
@@ -552,7 +550,7 @@ class EntityHydrator implements EntityHydratorInterface
         // Fix identification in owning side definition
         $isOwningSide = $mapping["isOwningSide"];
         if (!$isOwningSide) {
-            $mappedBy =  $mapping["mappedBy"];
+            $mappedBy = $mapping["mappedBy"];
 
             if ($this->classMetadataManipulator->isManyToSide($entity, $propertyName)) {
                 $association = $association->toArray();
@@ -595,6 +593,7 @@ class EntityHydrator implements EntityHydratorInterface
     {
         return $this->getProperties($entity, $reflEntity)[$propertyName] ?? null;
     }
+
     protected function getProperties(mixed $entity, ?ReflectionObject $reflEntity = null): array
     {
         $reflEntity = $reflEntity === null ? new ReflectionObject($entity) : $reflEntity;
@@ -624,12 +623,14 @@ class EntityHydrator implements EntityHydratorInterface
 
     protected function getPropertyValues(mixed $entity, ?ReflectionObject $reflEntity = null): array
     {
-        return array_map(fn ($rp) => $rp->getValue($entity), $this->getProperties($entity, $reflEntity));
+        return array_map(fn($rp) => $rp->getValue($entity), $this->getProperties($entity, $reflEntity));
     }
+
     protected function getPropertyValue(mixed $entity, string $propertyName, ?ReflectionObject $reflEntity = null): mixed
     {
         return $this->getPropertyValues($entity, $reflEntity)[$propertyName] ?? null;
     }
+
     protected function setPropertyValue(mixed $entity, string $propertyName, $value, ?ReflectionObject $reflEntity = null): mixed
     {
         $reflEntity = $reflEntity === null ? new ReflectionObject($entity) : $reflEntity;
@@ -666,7 +667,7 @@ class EntityHydrator implements EntityHydratorInterface
         }
 
         $fieldNames = $this->classMetadataManipulator->getFieldNames($className);
-        $fields  = array_intersect_key($data, array_flip($fieldNames));
+        $fields = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
         $entity = $this->hydrate($className, array_merge($fields, $associations));
@@ -675,6 +676,7 @@ class EntityHydrator implements EntityHydratorInterface
 
 
     protected static $entitySerializer = null;
+
     public function getOriginalEntity($eventOrEntity)
     {
         if (!self::$entitySerializer) {

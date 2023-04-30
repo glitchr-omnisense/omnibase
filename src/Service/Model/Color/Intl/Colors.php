@@ -12,8 +12,9 @@ final class Colors extends ResourceBundle
 
     protected static function getPath(): string
     {
-        return Intl::getDataDirectory().'/'.self::COLOR_DIR;
+        return Intl::getDataDirectory() . '/' . self::COLOR_DIR;
     }
+
     public static function getLocaleLanguageCodes(): array
     {
         return self::readEntry(['Colors'], 'meta');
@@ -31,11 +32,7 @@ final class Colors extends ResourceBundle
 
     public static function getName(string $color, string $displayLocale = null): string
     {
-        try {
-            return self::readEntry(['Names', $color], $displayLocale);
-        } catch (MissingResourceException $e) {
-            throw $e;
-        }
+        return self::readEntry(['Names', $color], $displayLocale);
     }
 
     public static function getNames(string $displayLocale = null): array
@@ -47,14 +44,17 @@ final class Colors extends ResourceBundle
     {
         return hex2hsl(self::readEntry(['HexCode', $color], 'meta'));
     }
+
     public static function getRGB(string $color): array
     {
         return hex2rgb(self::readEntry(['HexCode', $color], 'meta'));
     }
+
     public static function getHexCode(string $color): string
     {
         return self::readEntry(['HexCode', $color], 'meta');
     }
+
     public static function getHexCodes(): array
     {
         return self::readEntry(['HexCodes'], 'meta');

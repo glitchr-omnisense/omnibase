@@ -17,6 +17,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     protected $cachedRoutes = [];
     protected $compiledRoutes;
+
     public function getCompiledRoutes(): array
     {
         return $this->compiledRoutes;
@@ -29,16 +30,16 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];
         $replacementChars = array_pad([], count($reservedChars), "_");
-        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName().".compiled_routes[".self::$router->getLocale()."][".self::$router->getHost()."]");
+        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".compiled_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
         $compiledRoutes = self::$router->getCache()->get($cacheKey, function () use ($compiledRoutes) {
             foreach ($compiledRoutes as &$compiledRoute) {
-                $machine   = self::$router->getMachine() ?? null;
+                $machine = self::$router->getMachine() ?? null;
                 $subdomain = self::$router->getSubdomain() ?? null;
-                $domain    = self::$router->getDomain() ?? null;
-                $port      = self::$router->getPort() ?? null;
+                $domain = self::$router->getDomain() ?? null;
+                $port = self::$router->getPort() ?? null;
 
                 $search = ["\\{_machine\\}.", "\\{_subdomain\\}.", "\\{_domain\\}", ":\\{_port\\}"];
-                $replace = [$machine ? $machine."." : "", $subdomain ? $subdomain."." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : ":".$port];
+                $replace = [$machine ? $machine . "." : "", $subdomain ? $subdomain . "." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : ":" . $port];
 
                 foreach ($compiledRoute[4] as &$variable) {
                     $variable[1] = str_replace($search, $replace, $variable[1]);
@@ -74,9 +75,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             $path = $route->getPath();
 
-            if (str_contains($host.$path, "{") && str_contains($host.$path, "}")) {
-                if (preg_match_all("/{(\w*)}/", $host.$path, $matches)) {
-                    $parse = array_transforms(fn ($k, $v): array => ["_".$k, $v], parse_url2(get_url()));
+            if (str_contains($host . $path, "{") && str_contains($host . $path, "}")) {
+                if (preg_match_all("/{(\w*)}/", $host . $path, $matches)) {
+                    $parse = array_transforms(fn($k, $v): array => ["_" . $k, $v], parse_url2(get_url()));
                     $parameterNames = array_flip($matches[1]);
 
                     $routeParameters = array_merge(
@@ -85,7 +86,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                         $routeParameters,
                     );
 
-                    $search  = array_map(fn ($k) => "{".$k."}", array_keys($parse));
+                    $search = array_map(fn($k) => "{" . $k . "}", array_keys($parse));
                     $replace = array_values($parse);
                     foreach ($routeParameters as $key => $routeParameter) {
                         if (!$routeParameter) {
@@ -102,12 +103,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         //
         // Lookup for lang in current group
         $e = null;
-        $routeParameters = array_filter($routeParameters, fn ($p) => $p !== null);
+        $routeParameters = array_filter($routeParameters, fn($p) => $p !== null);
 
         $routeUrl = null;
-        if (!str_ends_with($routeName, ".".self::$router->getLocaleLang())) {
+        if (!str_ends_with($routeName, "." . self::$router->getLocaleLang())) {
             try {
-                $routeUrl = sanitize_url(parent::generate($routeName.".".self::$router->getLocaleLang(), $routeParameters, $referenceType));
+                $routeUrl = sanitize_url(parent::generate($routeName . "." . self::$router->getLocaleLang(), $routeParameters, $referenceType));
             } catch (InvalidParameterException|RouteNotFoundException $_) {
                 $e = $_;
             }
@@ -124,15 +125,15 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if (!$routeUrl) {
             //
             // Lookup for lang in default group
-            $routeGroups  = self::$router->getRouteGroups($routeName);
-            $routeDefaultName = array_filter($routeGroups, fn ($r) => str_ends_with($r, ".".self::$router->getLocaleLang()))[0] ?? null;
+            $routeGroups = self::$router->getRouteGroups($routeName);
+            $routeDefaultName = array_filter($routeGroups, fn($r) => str_ends_with($r, "." . self::$router->getLocaleLang()))[0] ?? null;
             if (!$routeDefaultName) {
                 throw $e;
             }
 
-            if (!str_ends_with($routeDefaultName, ".".self::$router->getLocaleLang())) {
+            if (!str_ends_with($routeDefaultName, "." . self::$router->getLocaleLang())) {
                 try {
-                    $routeUrl = sanitize_url(parent::generate($routeDefaultName.".".self::$router->getLocaleLang(), $routeParameters, $referenceType));
+                    $routeUrl = sanitize_url(parent::generate($routeDefaultName . "." . self::$router->getLocaleLang(), $routeParameters, $referenceType));
                 } catch (InvalidParameterException|RouteNotFoundException $_) {
                 }
             }
@@ -155,13 +156,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $parse = parse_url2(get_url(), -1, self::$router->getBaseDir()); // Make sure also it gets the basic context
         } else {
             // Use either parameters or $_SERVER variables to determine the host to provide
-            $scheme    = array_pop_key("_scheme", $routeParameters) ?? $this->getContext()->getScheme();
-            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getContext()->getBaseUrl();
-            $host      = array_pop_key("_host", $routeParameters) ?? $this->getContext()->getHost();
-            $port      = array_pop_key("_port", $routeParameters) ?? explode(":", $host)[1] ?? $this->getContext()->getHttpPort();
-            $host      = explode(":", $host)[0].":".$port;
+            $scheme = array_pop_key("_scheme", $routeParameters) ?? $this->getContext()->getScheme();
+            $baseDir = array_pop_key("_base_dir", $routeParameters) ?? $this->getContext()->getBaseUrl();
+            $host = array_pop_key("_host", $routeParameters) ?? $this->getContext()->getHost();
+            $port = array_pop_key("_port", $routeParameters) ?? explode(":", $host)[1] ?? $this->getContext()->getHttpPort();
+            $host = explode(":", $host)[0] . ":" . $port;
 
-            $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
+            $parse = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
             $parse["base_dir"] = $baseDir;
         }
 
@@ -189,18 +190,14 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         if (str_starts_with($routeName, "_") || !self::$router->useAdvancedFeatures()) {
             $routeParameters = $this->resolveParameters($routeParameters);
-            try {
-                return parent::generate($routeName, $routeParameters, $referenceType);
-            } catch (Exception $e) {
-                throw $e;
-            }
+            return parent::generate($routeName, $routeParameters, $referenceType);
         }
 
         //
         // Extract locale from route name if found
         foreach (self::$router->getLocalizer()->getAvailableLocaleLangs() as $lang) {
-            if (str_ends_with($routeName, ".".$lang)) {
-                $routeName = str_rstrip($routeName, ".".$lang);
+            if (str_ends_with($routeName, "." . $lang)) {
+                $routeName = str_rstrip($routeName, "." . $lang);
                 $locale = $lang;
             }
         }
@@ -212,33 +209,33 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             $locale = array_key_exists("_locale", $routeParameters) ? self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]) : self::$router->getLocalizer()->getLocaleLang();
             try {
-                return $this->resolveUrl($cachedRoute["_name"].($locale ? ".".$locale : ""), $routeParameters, $referenceType);
-            } catch(\Exception $exception) {
+                return $this->resolveUrl($cachedRoute["_name"] . ($locale ? "." . $locale : ""), $routeParameters, $referenceType);
+            } catch (\Exception $exception) {
                 return $this->resolveUrl($cachedRoute["_name"], $routeParameters, $referenceType);
             }
         }
 
-        $routeGroups  = self::$router->getRouteGroups($routeName);
+        $routeGroups = self::$router->getRouteGroups($routeName);
         $routeDefaultName = first($routeGroups);
         if (array_key_exists("_locale", $routeParameters)) {
             $locale = self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
-            if (!str_ends_with($routeName, ".".$locale)) {
-                $routeDefaultName .= ".".self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
+            if (!str_ends_with($routeName, "." . $locale)) {
+                $routeDefaultName .= "." . self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
             }
         }
 
-        $routes = array_filter(array_transforms(fn ($k, $routeName): array => [$routeName, self::$router->getRoute($routeName)], $routeGroups));
+        $routes = array_filter(array_transforms(fn($k, $routeName): array => [$routeName, self::$router->getRoute($routeName)], $routeGroups));
 
         //
         // Try to compute subgroup (if not found compute base)
         try {
             $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             if (str_starts_with($routeName, "app_")) {
-                $routeName = "base_".substr($routeName, 4);
+                $routeName = "base_" . substr($routeName, 4);
                 try {
                     $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
-                } catch(Exception $_) {
+                } catch (Exception $_) {
                     throw $e;
                 }
             } elseif ($routeName == $routeDefaultName || $routeDefaultName === null) {
@@ -276,11 +273,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         $routeNames = array_keys($this->getCompiledRoutes());
         $routeGroups = array_transforms(function ($k, $_routeName) use ($routeName): ?\Generator {
-            if ($_routeName !== $routeName && !str_starts_with($_routeName, $routeName.".")) {
+            if ($_routeName !== $routeName && !str_starts_with($_routeName, $routeName . ".")) {
                 return null;
             }
 
-            $_routeNameWithoutLocale = str_rstrip($_routeName, ".".Localizer::getDefaultLocaleLang());
+            $_routeNameWithoutLocale = str_rstrip($_routeName, "." . Localizer::getDefaultLocaleLang());
             if ($_routeName != $_routeNameWithoutLocale) {
                 yield null => $_routeNameWithoutLocale;
             }

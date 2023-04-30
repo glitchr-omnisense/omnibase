@@ -68,6 +68,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         return $this->entityManager;
     }
+
     public function isEntity($entityOrClassOrMetadata): bool
     {
         if (is_object($entityOrClassOrMetadata)) {
@@ -95,10 +96,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
     public const DEFAULT_TRACKING = 0;
 
     protected $globalTrackingPolicy = self::DEFAULT_TRACKING;
+
     public function getGlobalTrackingPolicy()
     {
         return $this->globalTrackingPolicy;
     }
+
     public function setGlobalTrackingPolicy(int $policy)
     {
         $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
@@ -111,10 +114,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
     }
 
     protected $trackingPolicy = [];
+
     public function getTrackingPolicy($className)
     {
         return $this->trackingPolicy[$className] ?? $this->globalTrackingPolicy;
     }
+
     public function setTrackingPolicy($className, int $policy)
     {
         $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
@@ -161,14 +166,17 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorColumn["fieldName"] : null;
     }
+
     public function getDiscriminatorValue($entity): ?string
     {
         return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorValue : null;
     }
+
     public function getDiscriminatorMap($entity): array
     {
         return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorMap : [];
     }
+
     public function getRootEntityName($entity): ?string
     {
         return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->rootEntityName : null;
@@ -197,7 +205,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         }
 
         $entityOrClassOrMetadataName = is_object($entityOrClassOrMetadata) ? get_class($entityOrClassOrMetadata) : $entityOrClassOrMetadata;
-        $classMetadata  = class_exists($entityOrClassOrMetadataName) ? $this->doctrine->getManagerForClass($entityOrClassOrMetadataName)?->getClassMetadata($entityOrClassOrMetadataName) : null;
+        $classMetadata = class_exists($entityOrClassOrMetadataName) ? $this->doctrine->getManagerForClass($entityOrClassOrMetadataName)?->getClassMetadata($entityOrClassOrMetadataName) : null;
         if (!$classMetadata) {
             throw new InvalidArgumentException("Entity expected, '" . $entityOrClassOrMetadataName . "' is not an entity.");
         }
@@ -208,13 +216,13 @@ class ClassMetadataManipulator extends AbstractLocalCache
     public function getFields(null|string|object $entityOrClassOrMetadata, array $fields = [], array $excludedFields = []): array
     {
         if (!empty($fields) && !is_associative($fields)) {
-            throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
+            throw new \Exception("Associative array expected for 'fields' parameter, '" . gettype($fields) . "' received");
         }
 
         $fieldKeys = array_keys($fields);
 
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
-        $validFields  = array_fill_keys(array_merge($classMetadata->getFieldNames()), []);
+        $validFields = array_fill_keys(array_merge($classMetadata->getFieldNames()), []);
         $validFields += $this->getAssociationFormType($classMetadata, $classMetadata->getAssociationNames());
 
         // Auto detect some fields..
@@ -230,7 +238,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
                 $validFields[$fieldName] = [
                     "form_type" => TranslationType::class,
                     "translatable_class" => $classMetadata->getName(),
-                    "translation_class"  => $classMetadata->getName()::getTranslationEntityClass(),
+                    "translation_class" => $classMetadata->getName()::getTranslationEntityClass(),
                 ];
             } elseif ($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "datetime") {
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
@@ -249,10 +257,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
             }
         }
 
-        $fields = array_map(fn ($f) => is_array($f) ? $f : ["form_type" => $f], $fields);
+        $fields = array_map(fn($f) => is_array($f) ? $f : ["form_type" => $f], $fields);
         foreach ($fields as $fieldName => $field) {
-            if (is_array($fields[$fieldName]) && !empty($fields[$fieldName])) {
-                $fields[$fieldName]["form_type"] = $fields[$fieldName]["form_type"] ?? $validFields[$fieldName]["form_type"] ?? null;
+            if (is_array($field) && !empty($field)) {
+                $fields[$fieldName]["form_type"] = $field["form_type"] ?? $validFields[$fieldName]["form_type"] ?? null;
 
                 $validFields[$fieldName] = $fields[$fieldName] ?? $validFields[$fieldName] ?? [];
 
@@ -296,9 +304,9 @@ class ClassMetadataManipulator extends AbstractLocalCache
         }
 
         $fields = $validFields + $unmappedFields;
-        $aliasFields = array_filter($fields, fn ($k) => in_array($k, $aliasNames), ARRAY_FILTER_USE_KEY);
+        $aliasFields = array_filter($fields, fn($k) => in_array($k, $aliasNames), ARRAY_FILTER_USE_KEY);
 
-        $fields = array_transforms(fn ($k, $v): ?array => array_key_exists($k, $aliasNames) ? [$aliasNames[$k], $aliasFields[$aliasNames[$k]]] : [$k,$v], $fields);
+        $fields = array_transforms(fn($k, $v): ?array => array_key_exists($k, $aliasNames) ? [$aliasNames[$k], $aliasFields[$aliasNames[$k]]] : [$k, $v], $fields);
 
         return array_filter(array_replace(array_fill_keys($fieldKeys, null), $fields));
     }
@@ -399,7 +407,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             $fieldPath = explode(".", $fieldPath);
         }
         if (empty($fieldPath)) {
-            throw new \Exception("No field path provided for \"".get_class($entity)."\" ");
+            throw new \Exception("No field path provided for \"" . get_class($entity) . "\" ");
         }
 
         if (!$entity) {
@@ -414,7 +422,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         // Check entity validity
         if ($entity === null || !is_object($entity)) {
             if (!empty($fieldName)) {
-                throw new \Exception("Failed to find property \"".implode('.', array_merge([$fieldName], $fieldPath))."\" using \"".(is_object($entity) ? get_class($entity) : "NULL")."\" data");
+                throw new \Exception("Failed to find property \"" . implode('.', array_merge([$fieldName], $fieldPath)) . "\" using \"" . (is_object($entity) ? get_class($entity) : "NULL") . "\" data");
             } else {
                 return null;
             }
@@ -422,7 +430,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         // Extract key information
         $fieldRegex = ["/(\w*)\[(\w*)\]/", "/(\w*)%(\w*)%/", "/(\w*){(\w*)}/", "/(\w*)\((\w*)\)/"];
-        $fieldKey   = preg_replace($fieldRegex, "$2", $fieldName, 1);
+        $fieldKey = preg_replace($fieldRegex, "$2", $fieldName, 1);
         if ($fieldKey) {
             $fieldName = preg_replace($fieldRegex, "$1", $fieldName, 1);
         } else {
@@ -441,7 +449,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         if (class_implements_interface($entity, TranslatableInterface::class) && $fieldName == "translations") {
             $fieldValue = $entity->getTranslations();
-            $fieldName  = implode(".", $fieldPath);
+            $fieldName = implode(".", $fieldPath);
             $fieldPath = "";
         }
 
@@ -463,7 +471,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             if (empty($fieldPath)) {
                 return $fieldValue;
             }
-            throw new \Exception("Failed to resolve property path \"".implode('.', array_merge([$fieldName], $fieldPath))."\" in \"".$entityName."\"");
+            throw new \Exception("Failed to resolve property path \"" . implode('.', array_merge([$fieldName], $fieldPath)) . "\" in \"" . $entityName . "\"");
         }
 
         // If field path is not empty
@@ -565,7 +573,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function isCollectionOwner(object $entityOrForm, ?Collection $collection = null): ?bool
     {
-        $entity       = $this->isEntity($entityOrForm) ? $entityOrForm : $this->getClosestEntity($entityOrForm);
+        $entity = $this->isEntity($entityOrForm) ? $entityOrForm : $this->getClosestEntity($entityOrForm);
         if ($entity == null) {
             return null;
         }
@@ -634,19 +642,19 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function getTypeOfField(null|string|object $entityOrClassOrMetadata, string $property)
     {
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
 
         if (($dot = strpos($property, ".")) > 0) {
-            $field    = trim(substr($property, 0, $dot));
+            $field = trim(substr($property, 0, $dot));
             $field = $this->getFieldName($entityOrClassOrMetadata, $field) ?? $field;
 
-            $property = trim(substr($property, $dot+1));
+            $property = trim(substr($property, $dot + 1));
 
             if (!$classMetadata->hasAssociation($field)) {
-                throw new \Exception("No association found for field \"$field\" in \"".get_class($entityOrClassOrMetadata)."\"");
+                throw new \Exception("No association found for field \"$field\" in \"" . get_class($entityOrClassOrMetadata) . "\"");
             }
 
             $entityOrClassOrMetadata = $this->getTypeOfField($entityOrClassOrMetadata, $field);
@@ -664,19 +672,19 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function getTypeOfAssociation(null|string|object $entityOrClassOrMetadata, string $property)
     {
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
 
         if (($dot = strpos($property, ".")) > 0) {
-            $field    = trim(substr($property, 0, $dot));
+            $field = trim(substr($property, 0, $dot));
             $field = $this->getFieldName($entityOrClassOrMetadata, $field) ?? $field;
 
-            $property = trim(substr($property, $dot+1));
+            $property = trim(substr($property, $dot + 1));
 
             if (!$classMetadata->hasAssociation($field)) {
-                throw new \Exception("No association found for field \"$field\" in \"".get_class($entityOrClassOrMetadata)."\"");
+                throw new \Exception("No association found for field \"$field\" in \"" . get_class($entityOrClassOrMetadata) . "\"");
             }
 
             $entityOrClassOrMetadata = $this->getTypeOfAssociation($entityOrClassOrMetadata, $field);
@@ -696,6 +704,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         return $this->fetchEntityMapping($entityName, $fieldPath)["targetEntity"] ?? null;
     }
+
     public function fetchEntityMapping(string $entityName, array|string $fieldPath): ?array
     {
         $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
@@ -790,7 +799,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function resolveFieldPath(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string
     {
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
@@ -826,7 +835,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             return null;
         }
 
-        return $fieldName.".".$filePath;
+        return $fieldName . "." . $filePath;
     }
 
     public function getAssociationTargetClass(null|string|object $entityOrClassOrMetadata, string $fieldName): string
@@ -870,7 +879,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function getFieldMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
     {
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
@@ -880,7 +889,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function getAssociationMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
     {
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
@@ -891,7 +900,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function getUniqueKeys(null|string|object $entityOrClassOrMetadata, bool $inherits = false): array
     {
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
@@ -916,9 +925,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         return $this->hasAssociation($entityOrClassOrMetadata, "translations");
     }
+
     public function getTranslationMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
     {
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
@@ -956,7 +966,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         if (!$this->hasAssociation($entityOrClassOrMetadata, $fieldName)) {
             return false;
         }
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
@@ -970,7 +980,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         if (!$this->hasAssociation($entityOrClassOrMetadata, $fieldName)) {
             return false;
         }
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
@@ -983,37 +993,45 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true);
     }
+
     public function isToManySide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
         return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
     }
+
     public function isManyToSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
         return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true);
     }
+
     public function isOneToSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
         return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true);
     }
+
     public function isManyToMany(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_MANY], true);
+        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::MANY_TO_MANY;
     }
+
     public function isOneToMany(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY], true);
+        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::ONE_TO_MANY;
     }
+
     public function isManyToOne(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_ONE], true);
+        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::MANY_TO_ONE;
     }
+
     public function isOneToOne(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_ONE], true);
+        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::ONE_TO_ONE;
     }
+
     public function getAssociationType(null|string|object $entityOrClassOrMetadata, string $fieldName)
     {
-        $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;
         }
@@ -1037,6 +1055,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     }
 
     protected static array $completors = [];
+
     protected function getCompletorFor(object|string $className)
     {
         $className = is_object($className) ? get_class($className) : $className;

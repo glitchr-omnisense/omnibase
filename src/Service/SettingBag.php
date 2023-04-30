@@ -65,44 +65,47 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         $this->all();
         $this->allRaw();
 
-        return [ get_class($this) ];
+        return [get_class($this)];
     }
 
     public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, SettingRepository $settingRepository, LocalizerInterface $localizer, Packages $packages, CacheInterface $cache, string $environment)
     {
-        $this->parameterBag      = $parameterBag;
-        $this->entityManager     = $entityManager;
+        $this->parameterBag = $parameterBag;
+        $this->entityManager = $entityManager;
         $this->settingRepository = $settingRepository;
 
-        $this->cache           = $cache;
-        $this->cacheName       = "setting_bag." . hash('md5', self::class);
+        $this->cache = $cache;
+        $this->cacheName = "setting_bag." . hash('md5', self::class);
         $this->cacheSettingBag = $cache->getItem($this->cacheName);
 
-        $this->packages       = $packages;
+        $this->packages = $packages;
         $this->localizer = $localizer;
-        $this->environment    = $environment;
+        $this->environment = $environment;
     }
 
     public function all(?string $locale = null): array
     {
         return $this->get(null, $locale);
     }
+
     public function allRaw($useCache = BaseBundle::USE_CACHE, $onlyLinkedBag = false): array
     {
         return $this->getRaw(null, $useCache, $onlyLinkedBag);
     }
+
     public function __call($name, $_)
     {
-        return $this->get("base.settings.".$name);
+        return $this->get("base.settings." . $name);
     }
 
     public function getEnvironment(): ?string
     {
         return $this->environment;
     }
+
     public function getPaths(null|string|array $path = null)
     {
-        return array_map(fn ($s) => $s instanceof Setting ? $s->getPath() : null, array_filter_recursive($this->getRaw($path)) ?? []);
+        return array_map(fn($s) => $s instanceof Setting ? $s->getPath() : null, array_filter_recursive($this->getRaw($path)) ?? []);
     }
 
     protected function read(?string $path, array $bag)
@@ -113,7 +116,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
         $pathArray = explode(".", $path);
         foreach ($pathArray as $index => $key) {
-            if ($key == "_self" && $index != count($pathArray)-1) {
+            if ($key == "_self" && $index != count($pathArray) - 1) {
                 throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
             }
 
@@ -136,7 +139,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
         if ($path !== null) {
             $el = explode(".", $path);
-            $last = count($el)-1;
+            $last = count($el) - 1;
             foreach ($el as $index => $key) {
                 if ($key == "_self" && $index != $last) {
                     throw new \Exception("Failed to normalize \"$path\": \"_self\" key can only be used as tail parameter");
@@ -171,7 +174,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
 
         $settings = array_transforms(
-            fn ($k, $v): ?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v],
+            fn($k, $v): ?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v],
             array_flatten(".", $settings, -1, ARRAY_FLATTEN_PRESERVE_KEYS)
         );
 
@@ -216,10 +219,10 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
 
         try {
-            $fn  = $useCache ? "cache" : "find";
+            $fn = $useCache ? "cache" : "find";
             $fn .= $onlyLinkedBag ?
-                    ($path ? "ByInsensitivePathStartingWithAndBagNotEmpty" : "ByBagNotEmpty") :
-                    ($path ? "ByInsensitivePathStartingWith" : "All");
+                ($path ? "ByInsensitivePathStartingWithAndBagNotEmpty" : "ByBagNotEmpty") :
+                ($path ? "ByInsensitivePathStartingWith" : "All");
 
             $args = $path ? [$path] : [];
 
@@ -227,9 +230,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             if ($settings instanceof Query) {
                 $settings = $settings->getResult();
             }
-        } catch(TableNotFoundException  $e) {
-            throw $e;
-        } catch(EntityNotFoundException $e) {
+        } catch (EntityNotFoundException $e) {
             return $useCache ? $this->getRaw($path, false) : [];
         } // Cache fallback
 
@@ -281,6 +282,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     }
 
     protected array $settingBag = [];
+
     public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = BaseBundle::USE_CACHE): array
     {
         if (is_array($paths = $path)) {
@@ -293,8 +295,8 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
 
         $this->settingBag ??= $useCache && $this->cacheSettingBag !== null ? $this->cacheSettingBag->get() ?? [] : [];
-        if (array_key_exists($path.":".($locale ?? Localizer::LOCALE_FORMAT), $this->settingBag)) {
-            return $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)];
+        if (array_key_exists($path . ":" . ($locale ?? Localizer::LOCALE_FORMAT), $this->settingBag)) {
+            return $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)];
         }
 
         try {
@@ -304,7 +306,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return [];
         }
 
-        $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)] ??= array_map_recursive(function ($v) use ($locale) {
+        $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)] ??= array_map_recursive(function ($v) use ($locale) {
             if (!$v instanceof Setting) {
                 return $v;
             }
@@ -315,13 +317,14 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             $this->cache->save($this->cacheSettingBag->set($this->settingBag));
         }
 
-        return $this->settingBag[$path.":".($locale ?? Localizer::LOCALE_FORMAT)];
+        return $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)];
     }
 
     public function clearAll()
     {
         return $this->clear(null);
     }
+
     public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
         if (is_array($paths = $path)) {
@@ -338,7 +341,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             $pathByArray = explode(".", $path);
             while (!empty($pathByArray)) {
                 $currentPath = implode(".", $pathByArray);
-                $this->settingBag = array_key_removes_startsWith($this->settingBag, true, $currentPath.":");
+                $this->settingBag = array_key_removes_startsWith($this->settingBag, true, $currentPath . ":");
 
                 array_pop($pathByArray);
             }
@@ -429,10 +432,12 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         return $this->setLock($path, true);
     }
+
     public function unlock(string $path)
     {
         return $this->setLock($path, false);
     }
+
     public function setLock(string $path, bool $flag = true)
     {
         $setting = $this->generateRaw($path);
@@ -446,10 +451,12 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         return $this->setSecure($path, true);
     }
+
     public function unsecure(string $path)
     {
         return $this->setSecure($path, false);
     }
+
     public function setSecure(string $path, bool $flag = true)
     {
         $setting = $this->generateRaw($path);

@@ -5,8 +5,8 @@ namespace Base\Entity\Extension;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 
+use Base\Repository\Extension\TrashBallRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Extension\OrderingRepository;
 use Base\Database\Annotation\Cache;
 
 /**
@@ -25,10 +25,12 @@ class TrashBall extends AbstractExtension
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $permanentAfter;
+
     public function getPermanentAfter(): ?\DateTimeInterface
     {
         return $this->permanentAfter;
     }
+
     public function setPermanentAfter(\DateTimeInterface $permanentAfter): self
     {
         $this->permanentAfter = $permanentAfter;

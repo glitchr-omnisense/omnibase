@@ -38,7 +38,7 @@ class ImmutableValidator extends ConstraintEntityValidator
         $criteria = [];
         $hasNullValue = false;
 
-        $fields = array_map(fn ($f) => $classMetadata->getFieldName($f), $constraint->fields);
+        $fields = array_map(fn($f) => $classMetadata->getFieldName($f), $constraint->fields);
         foreach ($fields as $key => $fieldName) {
             //
             // Property path
@@ -66,11 +66,11 @@ class ImmutableValidator extends ConstraintEntityValidator
         }
 
         if ($constraint instanceof \Base\Validator\ConstraintEntity) {
-            $constraint->entity  = $entity;
+            $constraint->entity = $entity;
         }
 
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];
-        $invalidValue = $criteria[$errorPath] ?? $criteria[$fields[0]];
+        $invalidValue = $errorPath ?? $fields[0] ?? null;
 
         $this->buildViolation($constraint, $invalidValue)->addViolation();
     }

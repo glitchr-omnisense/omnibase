@@ -21,7 +21,7 @@ class BackgroundFilter implements FilterInterface
 
     public function __toString()
     {
-        return "bkg:".$this->getRGBA(false).":".$this->getPosition().":".($this->getSize() ? implode("x", $this->getSize()) : "");
+        return "bkg:" . $this->getRGBA(false) . ":" . $this->getPosition() . ":" . ($this->getSize() ? implode("x", $this->getSize()) : "");
     }
 
     public function __construct(ImagineInterface $imagine, array $options = [])
@@ -32,25 +32,29 @@ class BackgroundFilter implements FilterInterface
 
     public function getRGB($hashtag = true): string
     {
-        return ($hashtag ? "#" : "").ltrim($this->options['transparency'] ?? "FFF", "#");
+        return ($hashtag ? "#" : "") . ltrim($this->options['transparency'] ?? "FFF", "#");
     }
+
     public function getAlpha(): float
     {
-        return $this->options['transparency'] ?? null;
+        return $this->options['transparency'] ?? 1;
     }
+
     public function getRGBA($hashtag = true): string
     {
-        return $this->getRGB($hashtag).hex2rgba($this->options['transparency'] ?? 1, false);
+        return $this->getRGB($hashtag) . hex2rgba($this->options['transparency'] ?? 1);
     }
 
     public function getPosition(): string
     {
         return $this->options["position"] ?? "center";
     }
-    public function getSize(): array
+
+    public function getSize(): ?array
     {
         return $this->options["size"] ?? null;
     }
+
     public function getXY(ImageInterface $image): array
     {
         list($width, $height) = $this->getSize();
@@ -105,7 +109,7 @@ class BackgroundFilter implements FilterInterface
                 break;
         }
 
-        return [$x,$y];
+        return [$x, $y];
     }
 
     /**
@@ -118,7 +122,7 @@ class BackgroundFilter implements FilterInterface
         $size = $image->getSize();
 
         if (isset($this->options['size'])) {
-            list($width, $height) = $this->getSize() ?? [null,null];
+            list($width, $height) = $this->getSize() ?? [null, null];
             list($x, $y) = $this->getXY($image);
 
             $size = new Box($width ?? $size[0], $height ?? $size[1]);

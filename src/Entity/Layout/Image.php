@@ -30,7 +30,7 @@ use Base\Service\Model\SaltInterface;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
- *     @DiscriminatorEntry
+ * @DiscriminatorEntry
  */
 class Image implements IconizeInterface, ImageInterface, SaltInterface
 {
@@ -48,7 +48,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
             return null;
         }
 
-        $thumbnail  = array_pop_key("thumbnail", $routeParameters);
+        $thumbnail = array_pop_key("thumbnail", $routeParameters);
         $identifier = array_pop_key("crop", $routeParameters);
         if (is_array($thumbnail)) {
             $filters[] = new ThumbnailFilter($thumbnail[0] ?? null, $thumbnail[1] ?? null);
@@ -69,7 +69,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         $routeParameters = array_merge($routeParameters, [
             "data" => $this->getMediaService()->obfuscate($this->getSource(), [
                 "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
-                "salt"       => $this->getSalt()
+                "salt" => $this->getSalt()
             ], $filters),
         ]);
 
@@ -80,6 +80,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-images"];
@@ -89,6 +90,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     {
         return $this->__toLink() ?? "";
     }
+
     public function __construct($src = null)
     {
         $this->crops = new ArrayCollection();
@@ -101,6 +103,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -111,14 +114,17 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
      * @Uploader(storage="local.storage", max_size="32MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
      */
     protected $source;
+
     public function getSource()
     {
         return Uploader::getPublic($this, "source");
     }
+
     public function getSourceFile()
     {
         return Uploader::get($this, "source");
     }
+
     public function setSource($source): static
     {
         $this->source = $source;
@@ -127,14 +133,17 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     }
 
     protected $sourceMeta;
+
     public function getNaturalWidth(): ?int
     {
         return $this->getSourceMeta()["width"] ?? 0;
     }
+
     public function getNaturalHeight(): ?int
     {
         return $this->getSourceMeta()["height"] ?? 0;
     }
+
     public function getSourceMeta(): array|null|false
     {
         $sourceFile = $this->getSourceFile();
@@ -162,10 +171,12 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     {
         return $this->getSource();
     }
+
     public function getFile()
     {
         return $this->getSourceFile();
     }
+
     public function set($source): self
     {
         return $this->setSource($source);
@@ -175,14 +186,17 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
      * @ORM\Column(type="quadrant8")
      */
     protected $quadrant = Quadrant::O;
+
     public function getQuadrant(): string
     {
         return $this->quadrant;
     }
+
     public function getQuadrantPosition(): string
     {
         return Quadrant8::getPosition($this->quadrant);
     }
+
     public function setQuadrant(string $quadrant): self
     {
         $this->quadrant = $quadrant;
@@ -193,10 +207,12 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
      * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $crops;
+
     public function getCrops(): Collection
     {
         return $this->crops;
     }
+
     public function getCrop(string $identifier): ?ImageCrop
     {
         foreach ($this->crops as $crop) {
@@ -207,6 +223,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
         return null;
     }
+
     public function addCrop(ImageCrop $crop): self
     {
         if (!$this->crops->contains($crop)) {

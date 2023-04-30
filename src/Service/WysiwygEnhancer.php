@@ -52,12 +52,12 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         $dom = new \DOMDocument('1.0', $encoding);
         $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding));
 
-        $attrs = [];
+        $attrs ??= [];
         $attrs["class"] = $attrs["class"] ?? "";
         $attrs["class"] = trim($attrs["class"] . " markdown-anchor");
 
         for ($i = 1; $i <= $maxLevel; $i++) {
-            $hX = "h".$i;
+            $hX = "h" . $i;
             $tags = $dom->getElementsByTagName($hX);
             foreach ($tags as $tag) {
                 $content = $tag->nodeValue;
@@ -67,14 +67,14 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
                 $tag->setAttribute("id", $id);
 
                 $template = $dom->createDocumentFragment();
-                $template->appendXML("<a ".html_attributes($attrs). " href='#".$id."'>".$content."</a>");
+                $template->appendXML("<a " . html_attributes($attrs) . " href='#" . $id . "'>" . $content . "</a>");
 
                 $tag->appendChild($template);
             }
         }
 
         $node = $dom->getElementsByTagName('body')->item(0);
-        return trim(implode(array_map([$node->ownerDocument,"saveHTML"], iterator_to_array($node->childNodes))));
+        return trim(implode(array_map([$node->ownerDocument, "saveHTML"], iterator_to_array($node->childNodes))));
     }
 
     public function highlightSemantics(mixed $html, null|array|string $words = null, array $attrs = []): mixed
@@ -113,10 +113,10 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         $maxLevel ??= 6;
 
         $headlines = [];
-        preg_replace_callback("/\<[ ]*(h[1-".$maxLevel."])(?:[^\<\>]*)\>([^\<\>]*)\<\/[ ]*h[1-".$maxLevel."][ ]*\>/", function ($match) use (&$headlines) {
+        preg_replace_callback("/\<[ ]*(h[1-" . $maxLevel . "])(?:[^\<\>]*)\>([^\<\>]*)\<\/[ ]*h[1-" . $maxLevel . "][ ]*\>/", function ($match) use (&$headlines) {
             $headlines[] = [
                 "tag" => $match[1],
-                "slug"  => strtolower($this->slugger->slug($match[2])),
+                "slug" => strtolower($this->slugger->slug($match[2])),
                 "title" => $match[2]
             ];
         }, $html);

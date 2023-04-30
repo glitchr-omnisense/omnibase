@@ -55,9 +55,9 @@ class FormTypeExtension extends AbstractTypeExtension
         $this->parameterBag = $parameterBag;
         $this->authorizationChecker = $authorizationChecker;
 
-        $this->router       = $router;
-        $this->formFactory  = $formFactory;
-        $this->formProxy    = $formProxy;
+        $this->router = $router;
+        $this->formFactory = $formFactory;
+        $this->formProxy = $formProxy;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -72,13 +72,13 @@ class FormTypeExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'form2'          => $this->parameterBag->get("base.twig.use_form2"),
-            'easyadmin'      => $this->parameterBag->get("base.twig.use_ea"),
-            'form_flow'         => true,
-            'form_flow_id'      => '_flow_token',
+            'form2' => $this->parameterBag->get("base.twig.use_form2"),
+            'easyadmin' => $this->parameterBag->get("base.twig.use_ea"),
+            'form_flow' => true,
+            'form_flow_id' => '_flow_token',
             'validation_entity' => null,
-            'use_model'         => false,
-            'submit_on_enter'   => true,
+            'use_model' => false,
+            'submit_on_enter' => true,
         ]);
 
         $resolver->setNormalizer('form_flow_id', function (Options $options, $value) {
@@ -130,8 +130,8 @@ class FormTypeExtension extends AbstractTypeExtension
     {
         // Add to all form custom base style..
         // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
-        if (array_search("form", $view->vars['block_prefixes']) !== false &&
-            array_search("form2", $view->vars['block_prefixes']) === false) {
+        if (in_array("form", $view->vars['block_prefixes']) &&
+            !in_array("form2", $view->vars['block_prefixes'])) {
             array_splice($view->vars['block_prefixes'], 1, 0, ["form2"]);
         }
     }
@@ -155,7 +155,7 @@ class FormTypeExtension extends AbstractTypeExtension
                 $view->vars["row_attr"]["class"] = "";
             }
 
-            $view->vars["row_attr"]["class"] .= " ".$columns;
+            $view->vars["row_attr"]["class"] .= " " . $columns;
         }
     }
 

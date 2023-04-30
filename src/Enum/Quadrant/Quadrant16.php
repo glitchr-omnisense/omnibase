@@ -6,19 +6,20 @@ use Base\Service\Model\IconizeInterface;
 
 class Quadrant16 extends Quadrant8
 {
-    public const NNE  = "NORTH_NORTHEAST";
-    public const ENE  = "EAST_NORTHEAST";
-    public const ESE  = "EAST_SOUTHEAST";
-    public const SSE  = "SOUTH_SOUTHEAST";
-    public const SSW  = "SOUTH_SOUTHWEST";
-    public const WSW  = "WEST_SOUTHWEST";
-    public const WNW  = "WEST_NORTHWEST";
-    public const NNW  = "NORTH_NORTHWEST";
+    public const NNE = "NORTH_NORTHEAST";
+    public const ENE = "EAST_NORTHEAST";
+    public const ESE = "EAST_SOUTHEAST";
+    public const SSE = "SOUTH_SOUTHEAST";
+    public const SSW = "SOUTH_SOUTHWEST";
+    public const WSW = "WEST_SOUTHWEST";
+    public const WNW = "WEST_NORTHWEST";
+    public const NNW = "NORTH_NORTHWEST";
 
     public function __iconize(): ?array
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return [
@@ -35,21 +36,22 @@ class Quadrant16 extends Quadrant8
 
     public static function getTheta()
     {
-        return parent::getTheta()/2;
+        return parent::getTheta() / 2;
     }
 
     public static function getRotation(string $quadrant): ?float
     {
         return self::getRotations()[$quadrant] ?? self::getRotations()[self::O];
     }
+
     public static function getRotations(): array
     {
         return array_merge(parent::getRotations(), [
-            self::ENE =>  1 * self::getTheta(),
-            self::NNE =>  3 * self::getTheta(),
-            self::NNW =>  5 * self::getTheta(),
-            self::WNW =>  7 * self::getTheta(),
-            self::WSW =>  9 * self::getTheta(),
+            self::ENE => self::getTheta(),
+            self::NNE => 3 * self::getTheta(),
+            self::NNW => 5 * self::getTheta(),
+            self::WNW => 7 * self::getTheta(),
+            self::WSW => 9 * self::getTheta(),
             self::SSW => 11 * self::getTheta(),
             self::SSE => 13 * self::getTheta(),
             self::ESE => 15 * self::getTheta(),
@@ -60,6 +62,7 @@ class Quadrant16 extends Quadrant8
     {
         return self::getPositions()[$quadrant] ?? self::getPositions()[self::O];
     }
+
     public static function getPositions(): array
     {
         return array_merge(parent::getPositions(), [

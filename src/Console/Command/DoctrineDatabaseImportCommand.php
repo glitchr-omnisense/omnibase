@@ -305,7 +305,7 @@ class DoctrineDatabaseImportCommand extends Command
             $discriminatorMap = $this->entityManager->getClassMetadata($baseName)->discriminatorMap ?? [];
 
             if (empty($entityRequiredFields[$spreadsheet][$baseName])) {
-                foreach ($rawData[$spreadsheet] as $_) {
+                foreach ($entry as $_) {
                     foreach ($_ as $fieldPath => $__) {
                         if (!str_contains($fieldPath, ":unique")) {
                             continue;
@@ -321,7 +321,7 @@ class DoctrineDatabaseImportCommand extends Command
 
             //
             // Clean up empty fields
-            $rawData[$spreadsheet] = array_filter_recursive($rawData[$spreadsheet], fn ($d) => $d !== null);
+            $rawData[$spreadsheet] = array_filter_recursive($entry, fn ($d) => $d !== null);
 
             // Process them
             foreach ($rawData[$spreadsheet] as &$data) {

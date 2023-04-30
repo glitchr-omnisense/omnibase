@@ -23,7 +23,7 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
             $json = json_decode($json);
         }
 
-        $attrs = [];
+        $attrs ??= [];
         $attrs["class"] = $attrs["class"] ?? "";
         $attrs["class"] = trim($attrs["class"] . " markdown-anchor");
 
@@ -46,7 +46,7 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
             $json = json_decode($json);
         }
 
-        $attrs = [];
+        $attrs ??= [];
         $attrs["class"] = $attrs["class"] ?? "";
         $attrs["class"] = trim($attrs["class"] . " markdown-semantic");
 

@@ -24,12 +24,12 @@ class AssociationFilter implements FilterInterface
         $parts = explode('.', $propertyName);
 
         return $filter
-           ->setFilterFqcn(__CLASS__)
-           ->setAlias($parts[0])
-           ->setProperty(str_replace('.', '_', $propertyName))
-           ->setLabel($label)
-           ->setFormType(TextFilterType::class)
-           ->setFormTypeOption('translation_domain', 'EasyAdminBundle');
+            ->setFilterFqcn(__CLASS__)
+            ->setAlias($parts[0])
+            ->setProperty(str_replace('.', '_', $propertyName))
+            ->setLabel($label)
+            ->setFormType(TextFilterType::class)
+            ->setFormTypeOption('translation_domain', 'EasyAdminBundle');
     }
 
     public function setAlias($alias)
@@ -40,7 +40,7 @@ class AssociationFilter implements FilterInterface
 
     public function apply(QueryBuilder $queryBuilder, FilterDataDto $filterDataDto, ?FieldDto $fieldDto, EntityDto $entityDto): void
     {
-        $property = str_replace($this->alias.'_', '', $filterDataDto->getProperty());
+        $property = str_replace($this->alias . '_', '', $filterDataDto->getProperty());
         $comparison = $filterDataDto->getComparison();
         $parameterName = $filterDataDto->getParameterName();
         $parameter = $filterDataDto->getValue();
@@ -50,8 +50,8 @@ class AssociationFilter implements FilterInterface
         $mappingInfo = $meta->getAssociationMapping($this->alias);
 
         $queryBuilder
-           ->innerJoin($mappingInfo['targetEntity'], $this->alias, Expr\Join::WITH, 'entity.'. $this->alias.' = '. $this->alias.'')
-           ->andWhere(sprintf('%s.%s %s :%s', $this->alias, $property, $comparison, $parameterName))
-           ->setParameter($parameterName, $parameter);
+            ->innerJoin($mappingInfo['targetEntity'], $this->alias, Expr\Join::WITH, 'entity.' . $this->alias . ' = ' . $this->alias)
+            ->andWhere(sprintf('%s.%s %s :%s', $this->alias, $property, $comparison, $parameterName))
+            ->setParameter($parameterName, $parameter);
     }
 }

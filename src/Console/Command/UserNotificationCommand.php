@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'user:notifications', aliases:[], description:'')]
+#[AsCommand(name: 'user:notifications', aliases: [], description: '')]
 class UserNotificationCommand extends Command
 {
     protected function configure(): void
@@ -33,8 +33,8 @@ class UserNotificationCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $userIdentifier = $input->getOption('user');
-        $actionClear    = $input->getOption('clear');
-        $actionShow     = $input->getOption('show');
+        $actionClear = $input->getOption('clear');
+        $actionShow = $input->getOption('show');
 
         $notificationRepository = $this->entityManager->getRepository(Notification::class);
         $userRepository = $this->entityManager->getRepository(User::class);
@@ -42,15 +42,15 @@ class UserNotificationCommand extends Command
         $notificationExpiry = $this->baseService->getParameterBag("base.user.notifications.expiry");
 
         // Format monitored entries
-        $user               = $userRepository->loadUserByIdentifier($userIdentifier);
+        $user = $userRepository->loadUserByIdentifier($userIdentifier);
         if ($user) {
-            $notifications  = $notificationRepository->findByUser($user)->getResult();
-            $notifications_toErase  = $notificationRepository->findByUserAndIsReadAndSentAtOlderThan($user, true, $notificationExpiry, [], "user.id")->getResult();
-            $notifications_isRead  = $notificationRepository->findByUserAndByIsRead($user, true, [], "user.id")->getResult();
+            $notifications = $notificationRepository->findByUser($user)->getResult();
+            $notifications_toErase = $notificationRepository->findByUserAndIsReadAndSentAtOlderThan($user, true, $notificationExpiry, [], "user.id")->getResult();
+            $notifications_isRead = $notificationRepository->findByUserAndByIsRead($user, true, [], "user.id")->getResult();
         } else {
-            $notifications  = $notificationRepository->findAll();
-            $notifications_toErase  = $notificationRepository->findByIsReadAndSentAtOlderThan(true, $notificationExpiry, [], "user.id")->getResult();
-            $notifications_isRead  = $notificationRepository->findByIsRead(true, [], "user.id")->getResult();
+            $notifications = $notificationRepository->findAll();
+            $notifications_toErase = $notificationRepository->findByIsReadAndSentAtOlderThan(true, $notificationExpiry, [], "user.id")->getResult();
+            $notifications_isRead = $notificationRepository->findByIsRead(true, [], "user.id")->getResult();
         }
 
         // Show notification list
@@ -60,8 +60,7 @@ class UserNotificationCommand extends Command
 
         if ($actionShow) {
             foreach ($notifications as $key => $notification) {
-                $message = "";
-                $message .= "<info>Entry ID #" .($key+1) . "</info> / <red>User \"".$notification->getUser()."\"</red> / <ln>Notifications #" . $notification->getId()."</ln> : ". str_shorten($notification->getContent(), 50);
+                $message = "<info>Entry ID #" . ($key + 1) . "</info> / <red>User \"" . $notification->getUser() . "\"</red> / <ln>Notifications #" . $notification->getId() . "</ln> : " . str_shorten($notification->getContent(), 50);
 
                 if (in_array($notification, $notifications_toErase)) {
                     $message .= "<warning><<-- READY TO ERASE</warning>";
@@ -69,7 +68,7 @@ class UserNotificationCommand extends Command
                 $output->section()->writeln($message);
             }
         }
-        $output->section()->writeln("<info>".$nbNotifications . " notification(s)</info> found, <warning>".$nbNotifications_isRead." notification(s)</warning> are marked as read, <red>".$nbNotifications_toErase. " notification(s)</red> older than ".$notificationExpiry);
+        $output->section()->writeln("<info>" . $nbNotifications . " notification(s)</info> found, <warning>" . $nbNotifications_isRead . " notification(s)</warning> are marked as read, <red>" . $nbNotifications_toErase . " notification(s)</red> older than " . $notificationExpiry);
 
         if ($actionClear && $nbNotifications_toErase) {
             $output->section()->writeln('<warning>These notifications are now erased..</warning>');

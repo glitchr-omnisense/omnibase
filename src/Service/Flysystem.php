@@ -118,13 +118,9 @@ class Flysystem extends LazyFactory implements FlysystemInterface
     {
         $operator = $this->getOperator($operator);
 
-        try {
-            $reflProperty = new \ReflectionProperty(get_class($operator), 'adapter');
-        } catch (ReflectionException $e) {
-            return null;
-        }
-
+        $reflProperty = new \ReflectionProperty(get_class($operator), 'adapter');
         $reflProperty->setAccessible(true);
+
         return $reflProperty->getValue($operator);
     }
 
@@ -134,15 +130,10 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
         //
         // Prefixer
-        try {
-            $reflProperty = new \ReflectionProperty(get_class($adapter), 'prefixer');
-        } catch (ReflectionException $e) {
-            return null;
-        }
-
+        $reflProperty = new \ReflectionProperty(get_class($adapter), 'prefixer');
         $reflProperty->setAccessible(true);
+
         return $reflProperty->isInitialized($adapter) ? $reflProperty->getValue($adapter) : new PathPrefixer($this->getConnectionOptions($operator)["root"] ?? "/");
-        ;
     }
 
     public function getConnectionOptions(FilesystemOperator|string|null $operator = null): ?array

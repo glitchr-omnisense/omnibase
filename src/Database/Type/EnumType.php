@@ -17,6 +17,7 @@ use UnexpectedValueException;
 abstract class EnumType extends Type implements SelectInterface
 {
     protected static $icons = [];
+
     public static function getIcons(): array
     {
         $class = static::class;
@@ -32,7 +33,7 @@ abstract class EnumType extends Type implements SelectInterface
         while ($class) {
             if (class_implements_interface($class, IconizeInterface::class)) {
                 if (($missingKeys = array_keys(array_key_removes($class::__iconizeStatic(), ...$class::getPermittedValues(false))))) {
-                    throw new UnexpectedValueException("The following keys \"".implode(",", $missingKeys)."\" are missing in the list of the available icons on class \"".get_called_class()."\".");
+                    throw new UnexpectedValueException("The following keys \"" . implode(",", $missingKeys) . "\" are missing in the list of the available icons on class \"" . get_called_class() . "\".");
                 }
 
                 $icons = array_union($icons, $class::__iconizeStatic());
@@ -58,16 +59,19 @@ abstract class EnumType extends Type implements SelectInterface
 
     public static function getIcon(string $id, int $index = -1): ?string
     {
-        return array_map(fn ($values) => ($index < 0 || !is_array($values)) ? $values : closest($values, $index), self::getIcons())[$id] ?? null;
+        return array_map(fn($values) => ($index < 0 || !is_array($values)) ? $values : closest($values, $index), self::getIcons())[$id] ?? null;
     }
+
     public static function getText(string $id, ?TranslatorInterface $translator = null): ?string
     {
         return $translator ? $translator->transEnum($id, get_called_class(), Translator::NOUN_SINGULAR) : $id;
     }
+
     public static function getHtml(string $id): ?string
     {
         return null;
     }
+
     public static function getData(string $id): ?array
     {
         return null;
@@ -77,6 +81,7 @@ abstract class EnumType extends Type implements SelectInterface
     {
         return self::getStaticName();
     }
+
     public static function getStaticName()
     {
         $array = explode('\\', get_called_class());
@@ -92,9 +97,10 @@ abstract class EnumType extends Type implements SelectInterface
     {
         return self::getPermittedValues($inheritance, true)[$key] ?? null;
     }
+
     public static function hasValue(string $value, bool $inheritance = true)
     {
-        return array_search($value, self::getPermittedValues($inheritance, true)) !== false;
+        return in_array($value, self::getPermittedValues($inheritance, true));
     }
 
     public static function getOrderingKeys(array $array): array
@@ -102,8 +108,8 @@ abstract class EnumType extends Type implements SelectInterface
         $permittedValues = self::getPermittedValues();
 
         $ordering = array_filter(
-            array_map(fn ($a) => ($pos = array_search($a, $permittedValues)) !== false ? $pos : null, $array),
-            fn ($c) => $c !== null
+            array_map(fn($a) => ($pos = array_search($a, $permittedValues)) !== false ? $pos : null, $array),
+            fn($c) => $c !== null
         );
 
         asort($ordering);
@@ -127,7 +133,7 @@ abstract class EnumType extends Type implements SelectInterface
         }
 
         if (!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values) {
-            throw new \Exception("\"".get_called_class()."\" is empty");
+            throw new \Exception("\"" . get_called_class() . "\" is empty");
         }
 
         return $values;
@@ -138,12 +144,12 @@ abstract class EnumType extends Type implements SelectInterface
         $valuesByGroup = [];
         $values = self::getPermittedValues($inheritance, $preserve_keys);
 
-        $pathway = array_map(fn ($a) => explode("_", $a), $values);
+        $pathway = array_map(fn($a) => explode("_", $a), $values);
         foreach ($pathway as $i => $_) {
             $value = $values[$i];
             $group = &$valuesByGroup;
 
-            $kLast = count($_)-1;
+            $kLast = count($_) - 1;
             foreach ($_ as $k => $path) {
                 if ($k == $kLast) {
                     $group[$path] = $value;
@@ -168,11 +174,11 @@ abstract class EnumType extends Type implements SelectInterface
                         $key = array_keys($vv)[0] ?? null;
                         $kkp = explode("::", $key);
 
-                        $kk .= "_".($kkp[1] ?? $kkp[0]);
-                        $vv  = $vv[$key];
+                        $kk .= "_" . ($kkp[1] ?? $kkp[0]);
+                        $vv = $vv[$key];
                     }
 
-                    yield static::class."::".$k."_".$kk => $vv;
+                    yield static::class . "::" . $k . "_" . $kk => $vv;
                 }
 
                 return null;
@@ -205,28 +211,30 @@ abstract class EnumType extends Type implements SelectInterface
     {
         return true;
     }
+
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
     {
         if ($platform instanceof SqlitePlatform) {
             return "TEXT";
         }
 
-        $values = array_map(fn ($val) => "'".$val."'", $this->getPermittedValues());
+        $values = array_map(fn($val) => "'" . $val . "'", $this->getPermittedValues());
 
-        return "ENUM(".implode(", ", $values).")";
+        return "ENUM(" . implode(", ", $values) . ")";
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         return $value;
     }
+
     public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if (is_array($value)) {
-            throw new \InvalidArgumentException("Enum type \"".get_class($this)."\" is not expecting an array \"['" . (is_array($value) ? implode("', '", $value) : $value) . "'] received.");
+            throw new \InvalidArgumentException("Enum type \"" . get_class($this) . "\" is not expecting an array \"['" . (is_array($value) ? implode("', '", $value) : $value) . "'] received.");
         }
         if ($value !== null && !in_array($value, $this->getPermittedValues())) {
-            throw new \InvalidArgumentException("Invalid '" . (is_array($value) ? implode(", ", $value) : $value) . "' value. (Expected values are: ".implode(", ", $this->getPermittedValues()).")");
+            throw new \InvalidArgumentException("Invalid '" . (is_array($value) ? implode(", ", $value) : $value) . "' value. (Expected values are: " . implode(", ", $this->getPermittedValues()) . ")");
         }
 
         return $value;

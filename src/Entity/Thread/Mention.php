@@ -17,7 +17,7 @@ use Base\Database\Annotation\Cache;
  *
  * @ORM\InheritanceType( "JOINED" )
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ * @DiscriminatorEntry( value = "abstract" )
  */
 class Mention implements IconizeInterface
 {
@@ -25,6 +25,7 @@ class Mention implements IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-quote-right"];
@@ -36,6 +37,7 @@ class Mention implements IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -46,10 +48,12 @@ class Mention implements IconizeInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $target;
+
     public function getTarget(): ?User
     {
         return $this->target;
     }
+
     public function setTarget(?User $target): self
     {
         $this->target = $target;
@@ -61,10 +65,12 @@ class Mention implements IconizeInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $author;
+
     public function getAuthor(): ?User
     {
         return $this->author;
     }
+
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
@@ -77,10 +83,12 @@ class Mention implements IconizeInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $thread;
+
     public function getThread(): ?Thread
     {
         return $this->thread;
     }
+
     public function setThread(?Thread $thread): self
     {
         $this->thread = $thread;
