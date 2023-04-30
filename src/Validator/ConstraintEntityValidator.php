@@ -93,13 +93,13 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
 
     public function validate($entity, Constraint $constraint)
     {
-        $fields = (array) $constraint->fields;
+        $fields = (array)$constraint->fields;
         if (0 === \count($fields)) {
             throw new ConstraintDefinitionException('At least one field has to be specified.');
         }
 
         if (null === $entity) {
-            return false;
+            return;
         }
 
         if (!is_instanceof($constraint, $this->constraintClass)) {
@@ -126,7 +126,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
             array_shift($className);
             array_shift($className);
 
-            $id = trim("@entities." . implode(".", array_map(fn ($c) => camel2snake($c), $className)) . "._validators.".$constraint->message, ".");
+            $id = trim("@entities." . implode(".", array_map(fn($c) => camel2snake($c), $className)) . "._validators." . $constraint->message, ".");
             if ($this->translator->transExists($id)) {
                 $message = $id;
                 break; // Intl found

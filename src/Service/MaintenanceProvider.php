@@ -41,6 +41,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
 
     protected ?string $lockPath = null;
     protected bool $ready = false;
+
     protected function parseLockPath(): self
     {
         if ($this->lockPath) {
@@ -57,26 +58,26 @@ class MaintenanceProvider implements MaintenanceProviderInterface
             fclose($f);
         } else {
             $downtime = $this->settingBag->get("base.settings.maintenance.downtime")["_self"] ?? null;
-            $uptime   = $this->settingBag->get("base.settings.maintenance.uptime")["_self"] ?? null;
+            $uptime = $this->settingBag->get("base.settings.maintenance.uptime")["_self"] ?? null;
         }
 
         $downtime = $downtime ? $downtime->getTimestamp() : 0;
         $uptime = $uptime ? $uptime->getTimestamp() : 0;
 
         $this->remainingTime = $uptime ? $uptime - time() : 0;
-        if ($downtime-time() > 0 || $downtime < 1) {
+        if ($downtime - time() > 0 || $downtime < 1) {
             $downtime = 0;
         }
-        if ($uptime-time() < 0 || $uptime < 1) {
+        if ($uptime - time() < 0 || $uptime < 1) {
             $uptime = 0;
         }
 
         $this->percentage = -1;
-        if ($downtime && ($uptime-$downtime > 0) && ($uptime-time() > 0)) {
-            $this->percentage = round(100 * (time()-$downtime)/($uptime-$downtime));
+        if ($downtime && ($uptime - $downtime > 0) && ($uptime - time() > 0)) {
+            $this->percentage = round(100 * (time() - $downtime) / ($uptime - $downtime));
         }
 
-        $this->uptime   = $uptime;
+        $this->uptime = $uptime;
         $this->downtime = $downtime;
         return $this;
     }
@@ -85,14 +86,17 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     {
         return $this->parseLockPath()->remainingTime;
     }
+
     public function getPercentage(): int
     {
         return $this->parseLockPath()->percentage;
     }
+
     public function getDowntime(): int
     {
         return $this->parseLockPath()->downtime;
     }
+
     public function getUptime(): int
     {
         return $this->parseLockPath()->uptime;
@@ -120,7 +124,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         if (!$this->isUnderMaintenance()) {
             $homepageRoute = $this->parameterBag->get("base.site.homepage");
             if ($event && $redirectOnDeny == $this->router->getRouteName()) {
-                $event->setResponse($this->router->redirect($homepageRoute, [], 302));
+                $event->setResponse($this->router->redirect($homepageRoute));
             }
 
             return false;

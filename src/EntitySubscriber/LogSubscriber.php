@@ -49,12 +49,13 @@ class LogSubscriber implements EventSubscriberInterface
     protected $dispatchers = [];
 
     public function __construct(
-        ServiceLocator $dispatcherLocator,
+        ServiceLocator        $dispatcherLocator,
         TokenStorageInterface $tokenStorage,
-        UserRepository $userRepository,
-        BaseService $baseService,
+        UserRepository        $userRepository,
+        BaseService           $baseService,
         ParameterBagInterface $parameterBag
-    ) {
+    )
+    {
         $this->tokenStorage = $tokenStorage;
         $this->baseService = $baseService;
         $this->parameterBag = $parameterBag;
@@ -73,14 +74,15 @@ class LogSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            TerminateEvent::class  => ['onKernelTerminate'],
-            ExceptionEvent::class  => ['onKernelException', -1024],
+            TerminateEvent::class => ['onKernelTerminate'],
+            ExceptionEvent::class => ['onKernelException', -1024],
 
-            LogoutEvent::class       => ['onLogout'],
+            LogoutEvent::class => ['onLogout'],
         ];
     }
 
     private $loggingOutUser = null;
+
     public function onLogout(LogoutEvent $event)
     {
         $token = $event->getToken();
@@ -154,13 +156,13 @@ class LogSubscriber implements EventSubscriberInterface
                 throw new Exception("Array key \"pretty\" missing in dispatcher listener");
             }
 
-            $event  = $listener["event"];
+            $event = $listener["event"];
             $pretty = $listener["pretty"];
 
             foreach ($monitoredEntries as $monitoredEntry) {
                 $monitoredStatusCode = $monitoredEntry["statusCode"];
-                $monitoredPretty   = $monitoredEntry["pretty"];
-                $monitoredEvent      = $monitoredEntry["event"];
+                $monitoredPretty = $monitoredEntry["pretty"];
+                $monitoredEvent = $monitoredEntry["event"];
                 if ($monitoredEvent != $event) {
                     continue;
                 }
@@ -206,14 +208,13 @@ class LogSubscriber implements EventSubscriberInterface
 
     public function onKernelTerminate(TerminateEvent $event)
     {
-        if (!$this->baseService->isDebug()) {
-            return;
+        if ($this->baseService->isDebug()) {
+            $this->storeLog($event);
         }
-
-        return $this->storeLog($event);
     }
 
     private static $exceptionOnHold = null;
+
     public function onKernelException(ExceptionEvent $event)
     {
         if (!$this->baseService->isDebug()) {
@@ -225,7 +226,7 @@ class LogSubscriber implements EventSubscriberInterface
         // Initial exception held here, this is in case of nested exceptions..
         // This guard must be set here, otherwise you are going to miss the first exception..
         // In case the initial exception is related to doctrine, entity manager will be closed.
-        if (self::$exceptionOnHold) {
+        if (self::$exceptionOnHold instanceof \Throwable) {
             throw self::$exceptionOnHold;
         }
 

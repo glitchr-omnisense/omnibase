@@ -430,7 +430,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function lock(string $path)
     {
-        return $this->setLock($path, true);
+        return $this->setLock($path);
     }
 
     public function unlock(string $path)
@@ -449,7 +449,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function secure(string $path)
     {
-        return $this->setSecure($path, true);
+        return $this->setSecure($path);
     }
 
     public function unsecure(string $path)

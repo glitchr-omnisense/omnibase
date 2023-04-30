@@ -19,12 +19,12 @@ class Notifier extends BaseNotifier implements NotifierInterface
 
         $url = null;
         if (!str_ends_with($this->router->getRouteName(), "_send")) {
-            $url = $this->router->generate($this->router->getRouteName()."_send");
+            $url = $this->router->generate($this->router->getRouteName() . "_send");
         }
 
         $notification->setContext([
             "importance" => "high",
-            "markdown"   => false,
+            "markdown" => false,
             "exception" => null,
 
             "subject" => $_GET["subject"] ?? $this->translator->trans('@emails.itWorks'),
@@ -88,7 +88,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
 
         $notification->setHtmlParameters([
             "subject" => $this->translator->trans("@emails.contact_confirmation.subject", [$contactModel->name]),
-            "excerpt" => $this->translator->trans("@emails.contact_confirmation.excerpt", []),
+            "excerpt" => $this->translator->trans("@emails.contact_confirmation.excerpt"),
             "content" => $this->translator->trans("@emails.contact_confirmation.content", [$contactModel->subject, $contactModel->message]),
         ]);
 
@@ -156,7 +156,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "action_url" => $this->router->getUrl("security_resetPasswordWithToken", ["token" => $token->get()])
         ]);
 
-        if ($token->getLifetime() > 0 && $token->getLifetime() < 3600*24*7) {
+        if ($token->getLifetime() > 0 && $token->getLifetime() < 3600 * 24 * 7) {
             $notification->addHtmlParameter(
                 "footer_text",
                 $this->translator->trans("@emails.resetPassword.expiry", [

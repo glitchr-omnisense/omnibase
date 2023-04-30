@@ -20,10 +20,11 @@ class Referrer implements ReferrerInterface
     {
         return $this->getUrl() ?? "";
     }
+
     public function __construct(RequestStack $requestStack, RouterInterface $router)
     {
         $this->requestStack = $requestStack;
-        $this->router       = $router;
+        $this->router = $router;
     }
 
     public function redirect(array $headers = []): RedirectResponse
@@ -48,6 +49,8 @@ class Referrer implements ReferrerInterface
         if (LoginFormAuthenticator::isSecurityRoute($routeName)) {
             return true;
         }
+
+        return false;
     }
 
     public function clear()
@@ -73,7 +76,7 @@ class Referrer implements ReferrerInterface
     public function sameSite(): bool
     {
         $currentHost = parse_url2(get_url())["host"] ?? null;
-        $targetHost  = parse_url2($this->getUrl())["host"] ?? $currentHost ?? null;
+        $targetHost = parse_url2($this->getUrl())["host"] ?? $currentHost ?? null;
 
         return $currentHost == $targetHost;
     }

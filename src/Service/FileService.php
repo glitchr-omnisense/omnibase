@@ -12,7 +12,7 @@ use Symfony\Component\Mime\MimeTypes;
 
 class FileService implements FileServiceInterface
 {
-    protected const CACHE_SUBDIVISION        = 3;
+    protected const CACHE_SUBDIVISION = 3;
     protected const CACHE_SUBDIVISION_LENGTH = 1;
 
     /**
@@ -53,12 +53,12 @@ class FileService implements FileServiceInterface
 
     public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
-        $this->twig       = $twig;
-        $this->router     = $router;
+        $this->twig = $twig;
+        $this->router = $router;
         $this->obfuscator = $obfuscator;
-        $this->flysystem  = $flysystem;
+        $this->flysystem = $flysystem;
         $this->projectDir = $flysystem->getProjectDir();
-        $this->publicDir  = $flysystem->getPublicDir();
+        $this->publicDir = $flysystem->getPublicDir();
 
         $this->mimeTypes = new MimeTypes();
     }
@@ -73,6 +73,7 @@ class FileService implements FileServiceInterface
     {
         return $this->projectDir;
     }
+
     public function getPublicDir()
     {
         return $this->publicDir;
@@ -91,7 +92,7 @@ class FileService implements FileServiceInterface
 
         if (is_array($fileOrMimetypeOrArray)) {
             $extensions = [];
-            $extensionList = array_map(fn ($mimetype) => $this->getExtensions($mimetype), $fileOrMimetypeOrArray);
+            $extensionList = array_map(fn($mimetype) => $this->getExtensions($mimetype), $fileOrMimetypeOrArray);
             foreach ($extensionList as $extension) {
                 $extensions = array_merge($extensions, $extension);
             }
@@ -112,7 +113,7 @@ class FileService implements FileServiceInterface
             return null;
         }
         if (is_array($fileOrContentsOrArray)) {
-            return array_map(fn ($f) => $this->getMimeType($f), $fileOrContentsOrArray);
+            return array_map(fn($f) => $this->getMimeType($f), $fileOrContentsOrArray);
         }
 
         // Attempt to read from flysystem
@@ -163,6 +164,7 @@ class FileService implements FileServiceInterface
     {
         return $this->flysystem->getPublic($path, $storage);
     }
+
     public function asset(string $path, ?string $packageName = null): ?string
     {
         return $this->router->getAssetUrl($path, $packageName);
@@ -172,10 +174,12 @@ class FileService implements FileServiceInterface
     {
         return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file));
     }
+
     public function isImage(?string $file)
     {
-        return $file ? preg_match("/image\/.*/", $this->getMimeType($file)) : false;
+        return $file ? preg_match("/image\//", $this->getMimeType($file)) : false;
     }
+
     public function isSvg(?string $file)
     {
         return $this->getMimeType($file) == "image/svg+xml";
@@ -193,7 +197,7 @@ class FileService implements FileServiceInterface
         }
 
         $path = realpath($path);
-        $path = "/".str_strip($path, $this->router->getAssetUrl(""));
+        $path = "/" . str_strip($path, $this->router->getAssetUrl(""));
 
         $config["path"] = $path;
         $config["options"] = $config["options"] ?? [];
@@ -294,9 +298,10 @@ class FileService implements FileServiceInterface
     {
         return $this->serveContents(file_get_contents($file), $status, $headers);
     }
+
     public function serveContents(?string $contents, int $status = 200, array $headers = []): ?Response
     {
-        $httpCache  = array_pop_key("http_cache", $headers) ?? false;
+        $httpCache = array_pop_key("http_cache", $headers) ?? false;
         $attachment = array_pop_key("attachment", $headers) ?? false;
 
         $response = new Response($contents, $status, $headers);
@@ -308,7 +313,7 @@ class FileService implements FileServiceInterface
             $response->setMaxAge(300);
             $response->setPublic();
             $response->setEtag(md5($response->getContent()));
-            $response->headers->addCacheControlDirective('must-revalidate', true);
+            $response->headers->addCacheControlDirective('must-revalidate');
         }
 
         $mimeType = $this->getMimeType($contents);
@@ -316,12 +321,12 @@ class FileService implements FileServiceInterface
         $response->headers->set('Content-Length', strlen($contents));
 
         if ($attachment) {
-            $extension  = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
+            $extension = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
             $extensions = $this->getExtensions($mimeType);
 
             if ($attachment === true) {
                 if ($mimeType && str_starts_with($mimeType, "image/")) {
-                    $attachment = "image".$extension;
+                    $attachment = "image" . $extension;
                 } else {
                     $attachment = "unnamed";
                 }
@@ -333,7 +338,7 @@ class FileService implements FileServiceInterface
 
             $attachment = pathinfo_extension($attachment, first($extensions));
 
-            $response->headers->set('Content-Disposition', 'attachment; filename="'.basename($attachment).'"');
+            $response->headers->set('Content-Disposition', 'attachment; filename="' . basename($attachment) . '"');
         }
 
         return $response;

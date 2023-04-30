@@ -70,8 +70,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, Environment $twig)
     {
-        $this->twig   = $twig;
-        $this->formFactory   = $formFactory;
+        $this->twig = $twig;
+        $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -83,26 +83,26 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $resolver->setDefaults([
             'abstract_class' => null,
-            'class'          => null,
+            'class' => null,
 
-            'recursive'    => false,
-            "multiple"     => null,
-            'multivalue'   => false,
+            'recursive' => false,
+            "multiple" => null,
+            'multivalue' => false,
 
-            'filter'       => null,
-            'filter_code'  => null,
-            'sortable'     => null,
+            'filter' => null,
+            'filter_code' => null,
+            'sortable' => null,
 
-            'allow_add'    => true,
+            'allow_add' => true,
             'allow_delete' => true
         ]);
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
             if ($value !== null && !class_exists($value)) {
-                throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't exists");
+                throw new InvalidArgumentException("\"class\" option is \"" . $value . "\", but the class itself doesn't exists");
             }
             if ($value !== null && !class_exists($value, AbstractAttribute::class)) {
-                throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't inherit from \"".AbstractAttribute::class."\"");
+                throw new InvalidArgumentException("\"class\" option is \"" . $value . "\", but the class itself doesn't inherit from \"" . AbstractAttribute::class . "\"");
             }
 
             return $value;
@@ -110,10 +110,10 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $resolver->setNormalizer('abstract_class', function (Options $options, $value) {
             if ($value !== null && !class_exists($value)) {
-                throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but the class itself doesn't exists");
+                throw new InvalidArgumentException("\"abstract_class\" option is \"" . $value . "\", but the class itself doesn't exists");
             }
             if ($value !== null && !is_instanceof($value, AbstractAdapter::class)) {
-                throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but doesn't inherit from \"".AbstractAdapter::class."\"");
+                throw new InvalidArgumentException("\"abstract_class\" option is \"" . $value . "\", but doesn't inherit from \"" . AbstractAdapter::class . "\"");
             }
 
             return $value;
@@ -129,9 +129,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["multiple"]     = $this->formFactory->guessMultiple($form, $options);
+        $view->vars["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $view->vars["allow_delete"] = $options["allow_delete"];
-        $view->vars["allow_add"]    = $options["allow_add"];
+        $view->vars["allow_add"] = $options["allow_add"];
         $view->vars["is_inherited"] = $view->children["choice"]->vars["is_inherited"] ?? false;
     }
 
@@ -163,17 +163,17 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $parentData = $form->getParent()?->getData();
             $form->add("choice", SelectType::class, [
-                "class"               => $options["abstract_class"],
+                "class" => $options["abstract_class"],
                 "autocomplete_fields" => ["code" => $options["filter_code"]],
-                "choice_filter"       => $options["filter"],
-                "multiple"            => $options["multiple"],
-                "multivalue"          => $options["multivalue"],
-                "href"                => false,
+                "choice_filter" => $options["filter"],
+                "multiple" => $options["multiple"],
+                "multivalue" => $options["multivalue"],
+                "href" => false,
 
-                "disable" => $parentData === null ? false : ($parentData->getId() === null),
-                "sortable"            => $options["sortable"],
-                "dropdownCssClass"    => "field-attribute-dropdown",
-                "containerCssClass"   => "field-attribute-selection"
+                "disable" => !($parentData === null) && $parentData->getId() === null,
+                "sortable" => $options["sortable"],
+                "dropdownCssClass" => "field-attribute-dropdown",
+                "containerCssClass" => "field-attribute-selection"
             ]);
 
             $data = $event->getData() ?? [];
@@ -192,20 +192,20 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                 //
                 // First process universal data..
-                $unvFields  = array_transforms(fn ($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(),
+                $unvFields = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode() . "-" . $v->getId(),
                     array_merge(
                         $v->getAdapter()->getOptions(),
                         [
-                        "label" => $v->getAdapter()->getLabel(),
-                        "help" => $v->getAdapter()->getHelp(),
-                        "required" => false,
+                            "label" => $v->getAdapter()->getLabel(),
+                            "help" => $v->getAdapter()->getHelp(),
+                            "required" => false,
 
-                        "form_type" => $v->getAdapter()::getType(),]
+                            "form_type" => $v->getAdapter()::getType(),]
                     )
                 ] : null, $data);
 
                 if (!empty($unvFields)) {
-                    $unvData = array_transforms(fn ($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->get() ?? ""] : null, $data);
+                    $unvData = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode() . "-" . $v->getId(), $v->get() ?? ""] : null, $data);
                     foreach ($unvFields as $code => $field) {
                         $form->add($code, AssociationType::class, [
                             "label" => false,
@@ -222,7 +222,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                 //
                 // Then process translatable data
-                $intlFields  = array_transforms(fn ($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), array_merge($v->getAdapter()->getOptions(), [
+                $intlFields = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode() . "-" . $v->getId(), array_merge($v->getAdapter()->getOptions(), [
                     "label" => $v->getAdapter()->getLabel(),
                     "help" => $v->getAdapter()->getHelp(),
                     "required" => false,
@@ -230,13 +230,13 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 ] : null, $data);
 
                 if (!empty($intlFields)) {
-                    $intlData = array_transforms(fn ($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->getTranslations()] : null, $data);
+                    $intlData = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode() . "-" . $v->getId(), $v->getTranslations()] : null, $data);
 
                     $form->add("intl", TranslationType::class, [
-                        "translatable_class"   => $options["class"],
+                        "translatable_class" => $options["class"],
                         "multiple" => true,
                         "autoload" => false,
-                        "fields"   => ["value" => $intlFields]
+                        "fields" => ["value" => $intlFields]
                     ]);
 
                     $form->get("intl")->setData($intlData);
@@ -256,9 +256,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $choiceForm = $forms["choice"];
 
         if ($viewData instanceof PersistentCollection) {
-            $choiceForm->setData($viewData->map(fn ($e) => $e->getAdapter()));
+            $choiceForm->setData($viewData->map(fn($e) => $e->getAdapter()));
             foreach ($viewData as $attribute) {
-                $key = array_search_user($forms, fn (string $k, $_) => str_starts_with($k, $attribute->getAdapter()->getCode()));
+                $key = array_search_user($forms, fn(string $k, $_) => str_starts_with($k, $attribute->getAdapter()->getCode()));
                 if ($key !== false) {
                     $forms[$key]->setData($attribute);
                     array_key_removes($forms, $key);
@@ -266,7 +266,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             }
         } elseif ($viewData instanceof Attribute) {
             $choiceForm->setData($viewData->getAdapter());
-            $key = array_search_user($forms, fn (string $k, $_) => str_starts_with($k, $viewData->getAdapter()->getCode()));
+            $key = array_search_user($forms, fn(string $k, $_) => str_starts_with($k, $viewData->getAdapter()->getCode()));
             if ($key !== false) {
                 $forms[$key]->setData($viewData);
                 array_key_removes($forms, $key);
@@ -278,14 +278,14 @@ class AttributeType extends AbstractType implements DataMapperInterface
     {
         $form = iterator_to_array($forms)["choice"]->getParent();
         $options = $form->getConfig()->getOptions();
-        $options["class"]    = $attributeClass = $options["class"] ?? $this->formFactory->guessClass($form, $options) ?? AbstractAttribute::class;
+        $options["class"] = $attributeClass = $options["class"] ?? $this->formFactory->guessClass($form, $options) ?? AbstractAttribute::class;
         $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($form, $options);
 
-        $choiceForm     = iterator_to_array($forms)["choice"];
+        $choiceForm = iterator_to_array($forms)["choice"];
         $choiceMultiple = $choiceForm->getConfig()->getOption("multiple") ?? false;
-        $choiceData     = $choiceForm->getData();
+        $choiceData = $choiceForm->getData();
 
-        if ($choiceMultiple !=  $options["multiple"]) {
+        if ($choiceMultiple != $options["multiple"]) {
             throw new \Exception("Unexpected mismatching between choices and attributes");
         }
 
@@ -301,8 +301,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $viewData->clear();
 
             foreach ($choiceData as $choice) {
-                if (($attribute = $bakData->filter(fn (AbstractAttribute $e) => $e->getAdapter() === $choice)->first())) {
-                    $key = array_search_user(iterator_to_array($forms), fn (string $k, $_) => str_starts_with($k, $attribute->getAdapter()->getCode()));
+                if (($attribute = $bakData->filter(fn(AbstractAttribute $e) => $e->getAdapter() === $choice)->first())) {
+                    $key = array_search_user(iterator_to_array($forms), fn(string $k, $_) => str_starts_with($k, $attribute->getAdapter()->getCode()));
                     if (($attributeForm = iterator_to_array($forms)[$key] ?? null)) {
                         $data = $attributeForm->getData();
                         $attribute->set($data ? $data->get() : null);
@@ -313,7 +313,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 } elseif ($choice instanceof AbstractAdapter) {
                     $viewData->add(new ($attributeClass)($choice));
                 } else {
-                    throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAdapter::class);
+                    throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form " . AbstractAdapter::class);
                 }
             }
 
@@ -324,7 +324,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             }
 
             if ($viewData instanceof PersistentCollection) {
-                $mappedBy =  $viewData->getMapping()["mappedBy"];
+                $mappedBy = $viewData->getMapping()["mappedBy"];
                 $isOwningSide = $viewData->getMapping()["isOwningSide"];
                 if (!$isOwningSide) {
                     foreach ($viewData as $entry) {

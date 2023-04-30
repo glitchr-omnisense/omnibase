@@ -20,9 +20,9 @@ class XmlResponse extends Response
      *     return JsonResponse::fromJsonString('{"key": "value"}')
      *         ->setSharedMaxAge(300);
      *
-     * @param string $data    The JSON response string
-     * @param int    $status  The response status code
-     * @param array  $headers An array of response headers
+     * @param string $data The JSON response string
+     * @param int $status The response status code
+     * @param array $headers An array of response headers
      *
      * @return static
      */
@@ -30,13 +30,13 @@ class XmlResponse extends Response
     {
         $dom = new DOMDocument();
         $dom->loadXML($source, $options);
-        return new static($dom->saveXML(), $status, $headers, true);
+        return new static($dom->saveXML(), $status, $headers);
     }
 
     public static function fromXmlFile(string $filename, int $options = null, int $status = 200, array $headers = []): Response
     {
         $dom = new DOMDocument();
         $dom->load($filename, $options);
-        return new static($dom->saveXML(), $status, $headers, true);
+        return new static($dom->saveXML(), $status, $headers);
     }
 }

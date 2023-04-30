@@ -2,12 +2,12 @@
 
 namespace Base\Controller\Backend;
 
-use App\Entity\User              as User;
-use App\Entity\User\Group        as UserGroup;
+use App\Entity\User as User;
+use App\Entity\User\Group as UserGroup;
 use App\Entity\User\Notification as UserNotification;
-use App\Entity\User\Permission   as UserPermission;
-use App\Entity\User\Penalty      as UserPenalty;
-use App\Entity\User\Token        as UserToken;
+use App\Entity\User\Permission as UserPermission;
+use App\Entity\User\Penalty as UserPenalty;
+use App\Entity\User\Token as UserToken;
 
 use App\Entity\Thread;
 use App\Entity\Thread\Like;
@@ -155,26 +155,27 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     protected $slotRepository;
 
     public const TRANSLATION_DASHBOARD = "backoffice";
-    public const TRANSLATION_ENTITY    = "entities";
-    public const TRANSLATION_ENUM      = "enums";
+    public const TRANSLATION_ENTITY = "entities";
+    public const TRANSLATION_ENUM = "enums";
 
     public function __construct(
-        Extension $extension,
-        RequestStack $requestStack,
-        TranslatorInterface $translator,
-        AdminContextProvider $adminContextProvider,
-        AdminUrlGenerator $adminUrlGenerator,
-        RouterInterface $router,
-        IconProvider $iconProvider,
-        MediaService $mediaService,
-        Environment $twig,
+        Extension              $extension,
+        RequestStack           $requestStack,
+        TranslatorInterface    $translator,
+        AdminContextProvider   $adminContextProvider,
+        AdminUrlGenerator      $adminUrlGenerator,
+        RouterInterface        $router,
+        IconProvider           $iconProvider,
+        MediaService           $mediaService,
+        Environment            $twig,
         EntityManagerInterface $entityManager,
-        SettingBagInterface $settingBag
-    ) {
+        SettingBagInterface    $settingBag
+    )
+    {
         $this->extension = $extension;
         $this->requestStack = $requestStack;
         $this->adminUrlGenerator = $adminUrlGenerator;
-        $this->adminContextProvider  = $adminContextProvider;
+        $this->adminContextProvider = $adminContextProvider;
 
         $this->translator = $translator;
         WidgetItem::$translator = $translator;
@@ -185,21 +186,22 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         MenuItem::$router = $router;
         MenuItem::$iconProvider = $iconProvider;
 
-        $this->twig              = $twig;
-        $this->mediaService      = $mediaService;
-        $this->settingBag        = $settingBag;
-        $this->entityManager     = $entityManager;
+        $this->twig = $twig;
+        $this->mediaService = $mediaService;
+        $this->settingBag = $settingBag;
+        $this->entityManager = $entityManager;
         $this->router = $router;
 
         $this->settingRepository = $entityManager->getRepository(Setting::class);
-        $this->widgetRepository  = $entityManager->getRepository(Widget::class);
-        $this->slotRepository    = $entityManager->getRepository(Slot::class);
+        $this->widgetRepository = $entityManager->getRepository(Widget::class);
+        $this->slotRepository = $entityManager->getRepository(Slot::class);
     }
 
     public function getExtension()
     {
         return $this->extension;
     }
+
     public function setExtension(Extension $extension)
     {
         $this->extension = $extension;
@@ -244,13 +246,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             }
 
             if ($fields[$key]["form_type"] == PasswordType::class) {
-                $fields[$key]["inline"]       = true;
-                $fields[$key]["revealer"]     = true;
-                $fields[$key]["repeater"]     = false;
-                $fields[$key]["min_length"]   = 0;
+                $fields[$key]["inline"] = true;
+                $fields[$key]["revealer"] = true;
+                $fields[$key]["repeater"] = false;
+                $fields[$key]["min_length"] = 0;
                 $fields[$key]["max_strength"] = 0;
-                $fields[$key]["secure"]       = false;
-                $fields[$key]["hint"]         = false;
+                $fields[$key]["secure"] = false;
+                $fields[$key]["hint"] = false;
                 $fields[$key]["autocomplete"] = false;
             }
         }
@@ -259,7 +261,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data     = array_filter($form->getData(), function ($v, $k) use ($fields) {
+            $data = array_filter($form->getData(), function ($v, $k) use ($fields) {
                 // If field is required but empty, update skip.. (to make sure the value is not empty)
                 if ($fields[$k]["required"] ?? true) {
                     return !is_null($v) && $v->getValue() != null;
@@ -269,9 +271,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 return !($fields[$k]["secure"] ?? true);
             }, ARRAY_FILTER_USE_BOTH);
 
-            $fields   = array_keys($form->getConfig()->getOption("fields"));
+            $fields = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
-                fn ($k, $s): ?array => $s === null ? null : [$s->getPath(), $s],
+                fn($k, $s): ?array => $s === null ? null : [$s->getPath(), $s],
                 $this->settingBag->getRawScalar($fields, false)
             );
 
@@ -306,26 +308,26 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_reverse(array_merge(array_reverse([
-            "base.settings.logo"                                => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
-            "base.settings.logo.backoffice"                     => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
-            "base.settings.logo.email"                          => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
-            "base.settings.title"                               => ["translatable" => true],
-            "base.settings.slogan"                              => ["translatable" => true, "required" => false],
-            "base.settings.meta.author"                         => ["translatable" => true, "required" => false],
-            "base.settings.meta.description"                    => ["form_type" => TextareaType::class, "translatable" => true, "required" => false],
-            "base.settings.meta.keywords"                       => ["form_type" => SelectType::class, "required" => false, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
-            "base.settings.launchdate"                           => ["form_type" => DateTimePickerType::class],
-            "base.settings.launchdate.redirect_on_deny"          => ["form_type" => BooleanType::class],
+            "base.settings.logo" => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
+            "base.settings.logo.backoffice" => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
+            "base.settings.logo.email" => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
+            "base.settings.title" => ["translatable" => true],
+            "base.settings.slogan" => ["translatable" => true, "required" => false],
+            "base.settings.meta.author" => ["translatable" => true, "required" => false],
+            "base.settings.meta.description" => ["form_type" => TextareaType::class, "translatable" => true, "required" => false],
+            "base.settings.meta.keywords" => ["form_type" => SelectType::class, "required" => false, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
+            "base.settings.launchdate" => ["form_type" => DateTimePickerType::class],
+            "base.settings.launchdate.redirect_on_deny" => ["form_type" => BooleanType::class],
             "base.settings.access_restriction.redirect_on_deny" => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class, "required" => false],
-            "base.settings.access_restriction.public_access"    => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
-            "base.settings.access_restriction.user_access"      => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
-            "base.settings.access_restriction.admin_access"     => ["roles" => "ROLE_EDITOR", "form_type" => BooleanType::class],
-            "base.settings.maintenance"                         => ["form_type" => BooleanType::class],
-            "base.settings.maintenance.downtime"                => ["form_type" => DateTimePickerType::class, "required" => false],
-            "base.settings.maintenance.uptime"                  => ["form_type" => DateTimePickerType::class, "required" => false],
-            "base.settings.mail"                                => ["form_type" => EmailType::class],
-            "base.settings.mail.name"                           => ["translatable" => true],
-            "base.settings.mail.contact"                        => ["form_type" => EmailType::class],
+            "base.settings.access_restriction.public_access" => ["roles" => "ROLE_SUPERADMIN", "form_type" => BooleanType::class],
+            "base.settings.access_restriction.user_access" => ["roles" => "ROLE_SUPERADMIN", "form_type" => BooleanType::class],
+            "base.settings.access_restriction.admin_access" => ["roles" => "ROLE_EDITOR", "form_type" => BooleanType::class],
+            "base.settings.maintenance" => ["form_type" => BooleanType::class],
+            "base.settings.maintenance.downtime" => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.maintenance.uptime" => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.mail" => ["form_type" => EmailType::class],
+            "base.settings.mail.name" => ["translatable" => true],
+            "base.settings.mail.contact" => ["form_type" => EmailType::class],
         ]), array_reverse($fields)));
 
         $this->settingBag->clearAll(); // Clear cache
@@ -340,9 +342,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form = $this->createForm(LayoutSettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
 
-        $fields   = array_keys($form->getConfig()->getOption("fields"));
+        $fields = array_keys($form->getConfig()->getOption("fields"));
         $settings = array_transforms(
-            fn ($k, $s): ?array => $s === null ? null : [$s->getPath(), $s],
+            fn($k, $s): ?array => $s === null ? null : [$s->getPath(), $s],
             $this->settingBag->getRawScalar($fields, false)
         );
 
@@ -423,24 +425,24 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->settingBag->getScalar("base.settings.logo.backoffice");
+        $logo = $this->settingBag->getScalar("base.settings.logo.backoffice");
         if (!$logo) {
             $logo = $this->settingBag->getScalar("base.settings.logo");
         }
         if (!$logo) {
-            $logo = $this->mediaService->getPublicDir()."/bundles/base/images/logo.svg";
+            $logo = $this->mediaService->getPublicDir() . "/bundles/base/images/logo.svg";
         }
 
-        $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
+        $title = $this->settingBag->getScalar("base.settings.title") ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
         $subtitle = $this->settingBag->getScalar("base.settings.slogan") ?? $this->translator->trans("backoffice.subtitle", [], self::TRANSLATION_DASHBOARD);
 
         $this->configureExtension(
             $this->extension
-            ->setIcon("fa-solid fa-laptop-house")
-            ->setTitle($title)
-            ->setText($subtitle)
-            ->setLogo($logo)
-            ->setWidgets($this->configureWidgetItems())
+                ->setIcon("fa-solid fa-laptop-house")
+                ->setTitle($title)
+                ->setText($subtitle)
+                ->setLogo($logo)
+                ->setWidgets($this->configureWidgetItems())
         );
 
         $logo = $this->twig->getAsset($logo);
@@ -469,16 +471,16 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             }
 
             $label = $this->translator->transEnum($role, $class, Translator::NOUN_PLURAL);
-            $icon  = UserRole::getIcon($role, 1) ?? "fa-solid fa-fw fa-user";
+            $icon = UserRole::getIcon($role, 1) ?? "fa-solid fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
-                 ->unsetAll()
-                 ->setController($crudController)
-                 ->setAction(Action::INDEX)
-                 ->set("filters[roles][comparison]", "like")
-                 ->set("filters[roles][value]", $role)
-                 ->set(EA::MENU_INDEX, count($menu))
-                 ->generateUrl();
+                ->unsetAll()
+                ->setController($crudController)
+                ->setAction(Action::INDEX)
+                ->set("filters[roles][comparison]", "like")
+                ->set("filters[roles][value]", $role)
+                ->set(EA::MENU_INDEX, count($menu))
+                ->generateUrl();
 
             if (empty($values)) {
                 $item = MenuItem::linkToUrl($label, $icon, $url);
@@ -488,7 +490,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $subItems = [];
                 foreach ($values as $role) {
                     $label = mb_ucfirst($this->translator->transEnum($role, $class, Translator::NOUN_PLURAL));
-                    $icon  = UserRole::getIcon($role, 1) ?? "fa-solid fa-fw fa-user";
+                    $icon = UserRole::getIcon($role, 1) ?? "fa-solid fa-fw fa-user";
 
                     $crudController = UserRole::getCrudController($role);
                     if (!$crudController) {
@@ -496,14 +498,14 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                     }
 
                     $url = $this->adminUrlGenerator
-                         ->unsetAll()
-                         ->setController($crudController)
-                         ->setAction(Action::INDEX)
-                         ->set("filters[roles][comparison]", "like")
-                         ->set("filters[roles][value]", $role)
-                         ->set(EA::MENU_INDEX, count($menu))
-                         ->set(EA::SUBMENU_INDEX, count($subItems)+1)
-                         ->generateUrl();
+                        ->unsetAll()
+                        ->setController($crudController)
+                        ->setAction(Action::INDEX)
+                        ->set("filters[roles][comparison]", "like")
+                        ->set("filters[roles][value]", $role)
+                        ->set(EA::MENU_INDEX, count($menu))
+                        ->set(EA::SUBMENU_INDEX, count($subItems) + 1)
+                        ->generateUrl();
 
                     $subItems[] = MenuItem::linkToUrl($label, $icon, $url);
                 }
@@ -519,7 +521,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureMenuItems(): iterable
     {
-        $menu   = [];
+        $menu = [];
         $menu[] = MenuItem::section();
         $menu[] = MenuItem::linkToRoute("backoffice", [], "Home");
         $menu[] = MenuItem::linkToRoute("backoffice_apikey");
@@ -529,7 +531,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         $menu[] = MenuItem::section('BUSINESS CARD');
         if (UserRole::class != \Base\Enum\UserRole::class) {
-            $menu   = $this->addRoles($menu, UserRole::class);
+            $menu = $this->addRoles($menu, UserRole::class);
         }
 
 //        if ($this->isGranted('ROLE_EDITOR')) {
@@ -545,28 +547,24 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function configureActions(): Actions
     {
         return Actions::new($this->adminUrlGenerator, $this->entityManager)
-
             ->add(Crud::PAGE_INDEX, Action::NEW, 'fa-solid fa-fw fa-edit')
-            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt', fn (EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_INDEX, Action::DETAIL, 'fa-solid fa-fw fa-search', fn (EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
-
+            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DETAIL, 'fa-solid fa-fw fa-search', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
             ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right')
             ->add(Crud::PAGE_DETAIL, Action::INDEX, 'fa-solid fa-fw fa-undo')
             ->add(Crud::PAGE_DETAIL, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right')
             ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left')
             ->add(Crud::PAGE_DETAIL, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt')
-            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
-
+            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
             ->add(Crud::PAGE_EDIT, Action::INDEX, 'fa-solid fa-fw fa-undo')
             ->add(Crud::PAGE_EDIT, Action::DETAIL, 'fa-solid fa-fw fa-search')
-            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn (EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
             ->add(Crud::PAGE_EDIT, Action::SEPARATOR)
             ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right')
             ->add(Crud::PAGE_EDIT, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right')
             ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-edit')
             ->add(Crud::PAGE_EDIT, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left')
-
             ->add(Crud::PAGE_NEW, Action::INDEX, 'fa-solid fa-fw fa-backspace')
             ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN, 'fa-solid fa-fw fa-edit')
             ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER, 'fa-solid fa-fw fa-edit');
@@ -590,7 +588,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureWidgetItems(array $widgets = []): array
     {
-        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', "fa-solid fa-book", 1));
+        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', "fa-solid fa-book"));
         if ($this->isGranted('ROLE_EDITOR')) {
             $section = $this->getSectionWidgetItem($widgets, "LAYOUT");
             if ($section) {
@@ -615,15 +613,15 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             WidgetItem::linkToCrud(Menu::class),
             WidgetItem::linkToCrud(Page::class),
             WidgetItem::linkToUrl(Widget::class, Widget::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()
-            ->setController(WidgetCrudController::class)
-            ->setAction(Action::INDEX)
-            ->set("filters[class][comparison]", "!=")
-            ->set("filters[class][value]", "layoutWidget_slot")->generateUrl()),
+                ->setController(WidgetCrudController::class)
+                ->setAction(Action::INDEX)
+                ->set("filters[class][comparison]", "!=")
+                ->set("filters[class][value]", "layoutWidget_slot")->generateUrl()),
             WidgetItem::linkToCrud(Image::class)
         ]);
 
         if ($this->isGranted('ROLE_EDITOR')) {
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', "fa-solid fa-pen-ruler", 1));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('ATTRIBUTES', "fa-solid fa-pen-ruler"));
             $widgets = $this->addWidgetItem($widgets, "ATTRIBUTES", [
                 WidgetItem::linkToUrl(AbstractAdapter::class, AbstractAdapter::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()
                     ->setController(AbstractAdapterCrudController::class)
@@ -636,7 +634,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(AbstractScopeAdapter::class)
             ]);
 
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', "fa-solid fa-wand-magic-sparkles", 1));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', "fa-solid fa-wand-magic-sparkles"));
             $widgets = $this->addWidgetItem($widgets, "THREADS", [
                 WidgetItem::linkToCrud(Thread::class),
                 WidgetItem::linkToCrud(Mention::class),
@@ -645,7 +643,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(Like::class),
             ]);
 
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', "fa-solid fa-book", 1));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', "fa-solid fa-book"));
             $widgets = $this->addWidgetItem($widgets, "EXTENSIONS", [
                 WidgetItem::linkToCrud(Log::class),
                 WidgetItem::linkToCrud(Ordering::class),

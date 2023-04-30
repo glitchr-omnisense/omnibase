@@ -56,19 +56,19 @@ use App\Enum\UserState;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "common" )
+ * @DiscriminatorEntry( value = "common" )
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
  */
-
 class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface
 {
     use BaseTrait;
 
     public function __iconize(): ?array
     {
-        return array_map(fn ($r) => UserRole::getIcon($r, 0), array_filter($this->getRoles()));
+        return array_map(fn($r) => UserRole::getIcon($r, 0), array_filter($this->getRoles()));
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-user"];
@@ -81,12 +81,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->getService()->isGranted($role, $this);
     }
+
     public function killSession()
     {
         $this->logout();
     }
 
     public static $identifier = self::__DEFAULT_IDENTIFIER__;
+
     public function getUserIdentifier(): string
     {
         $identifier = null;
@@ -116,12 +118,13 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->getUserIdentifier();
     }
+
     public function __construct(?string $email = null)
     {
         $this->email = $email;
 
         $role = strtoupper(class_basename(get_called_class()));
-        $this->roles  = [UserRole::hasKey($role) ? UserRole::getValue($role) : UserRole::USER];
+        $this->roles = [UserRole::hasKey($role) ? UserRole::getValue($role) : UserRole::USER];
         $this->states = [UserState::ENABLED, UserState::NEWCOMER];
 
         $this->tokens = new ArrayCollection();
@@ -144,8 +147,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function getRecipient(): Recipient
     {
-        $email  = $this->getUserIdentifier() . " <".$this->getEmail().">";
-        $phone  = $this->getPhone() ?? '';
+        $email = $this->getUserIdentifier() . " <" . $this->getEmail() . ">";
+        $phone = $this->getPhone() ?? '';
         $locale = $this->getLocale();
         $timezone = $this->getTimezone();
 
@@ -159,8 +162,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             $this->kick();
         } else {
             $this->getTokenStorage()->setToken(null);
-            setcookie("REMEMBERME", '', time()-1);
-            setcookie("REMEMBERME", '', time()-1, "/", $this->getRouter()->getDomain());
+            setcookie("REMEMBERME", '', time() - 1);
+            setcookie("REMEMBERME", '', time() - 1, "/", $this->getRouter()->getDomain());
         }
     }
 
@@ -197,6 +200,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $_SERVER['HTTP_USER_AGENT'] ?? null;
     }
+
     public static function getIp(): ?string
     {
         $keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
@@ -219,6 +223,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->id;
     }
+
     public function setId($id): self
     {
         $this->id = $id;
@@ -230,17 +235,19 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $secret;
 
-    public const TOTP_LENGTH  = 6;
+    public const TOTP_LENGTH = 6;
     public const TOTP_TIMEOUT = 30;
 
     public function getSecret()
     {
         return $this->secret;
     }
+
     public function isTotpAuthenticationEnabled(): bool
     {
-        return $this->secret ? true : false;
+        return (bool)$this->secret;
     }
+
     public function getTotpAuthenticationUsername(): string
     {
         return $this->getUserIdentifier();
@@ -270,6 +277,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->email;
     }
+
     public function setEmail(string $email): self
     {
         $this->email = strtolower($email);
@@ -281,10 +289,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\Column(type="string", length=15, nullable=true)
      */
     protected $phone;
+
     public function getPhone(): ?string
     {
         return $this->phone;
     }
+
     public function setPhone(?string $phone): self
     {
         $this->phone = $phone;
@@ -297,14 +307,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @AssertBase\File(max_size="5MB", mime_types={"image/*"})
      */
     protected $avatar;
+
     public function getAvatar()
     {
         return Uploader::getPublic($this, "avatar");
     }
+
     public function getAvatarFile()
     {
         return Uploader::get($this, "avatar");
     }
+
     public function setAvatar($avatar)
     {
         $this->avatar = $avatar;
@@ -316,10 +329,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Assert\Locale(canonicalize = true)
      */
     protected $locale;
+
     public function getLocale(): ?string
     {
         return $this->locale ?? Localizer::__toLocale($this->getTranslator()->getLocale());
     }
+
     public function setLocale(?string $locale = null): self
     {
         if (empty($locale)) {
@@ -338,14 +353,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $timezone;
+
     public function getCountryCode(): string
     {
         return Timezones::getCountryCode($this->getTimezone());
     }
+
     public function getTimezone(): string
     {
         return $this->timezone ?? "UTC";
     }
+
     public function setTimezone(string $timezone = null): self
     {
         if (empty($timezone)) {
@@ -365,19 +383,23 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @AssertBase\Password(min_strength=4, min_length=8)
      */
     protected $plainPassword;
+
     public function getPlainPassword(): ?string
     {
         return $this->plainPassword;
     }
+
     public function setPlainPassword(?string $password): void
     {
         $this->plainPassword = $password;
         $this->updatedAt = new \DateTime("now"); // Plain password is not an ORM variable..
     }
+
     public function eraseCredentials()
     {
         $this->plainPassword = null;
     }
+
     public function erasePlainPassword()
     {
         $this->plainPassword = null;
@@ -391,10 +413,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Hashify(reference="plainPassword", algorithm="auto")
      */
     protected $password;
+
     public function getPassword(): ?string
     {
-        return (string) $this->password;
+        return (string)$this->password;
     }
+
     public function setPassword(string $password): self
     {
         $this->password = $password;
@@ -413,10 +437,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return in_array(UserRole::SOCIAL, $this->roles);
     }
+
     public function isPersistent(): bool
     {
         return (!$this->isSocial() || $this->id > 0);
     }
+
     public function getRoles(): array
     {
         if (empty($this->roles)) {
@@ -441,10 +467,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $logs;
+
     public function getLogs(): Collection
     {
         return $this->logs;
     }
+
     public function addLog(Log $log): self
     {
         if (!$this->logs->contains($log)) {
@@ -471,10 +499,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="members", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $groups;
+
     public function getGroups(): Collection
     {
         return $this->groups;
     }
+
     public function addGroup(Group $group): self
     {
         if (!$this->groups->contains($group)) {
@@ -500,6 +530,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->permissions;
     }
+
     public function addPermission(Permission $permission): self
     {
         if (!$this->permissions->contains($permission)) {
@@ -519,10 +550,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $penalties;
+
     public function getPenalties(): Collection
     {
         return $this->penalties;
     }
+
     public function addPenalty(Penalty $penalty): self
     {
         if (!$this->penalties->contains($penalty)) {
@@ -543,10 +576,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\OneToMany(targetEntity=Notification::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $notifications;
+
     public function getNotifications()
     {
         return $this->notifications;
     }
+
     public function addNotification(Notification $notification): self
     {
         if (!$this->notifications->contains($notification)) {
@@ -575,7 +610,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         }
 
         foreach ($this->getService()->getParameterBag("base.notifier.test_recipients") as $testRecipient) {
-            if (preg_match("/".$testRecipient."/", $this->getEmail())) {
+            if (preg_match("/" . $testRecipient . "/", $this->getEmail())) {
                 return true;
             }
         }
@@ -587,18 +622,21 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\OneToMany(targetEntity=Token::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $tokens;
+
     public function getExpiredTokens(): Collection
     {
         return $this->getTokens(Token::EXPIRED);
     }
+
     public function getValidTokens(): Collection
     {
         return $this->getTokens(Token::VALID);
     }
+
     public function getTokens($type = Token::ALL): Collection
     {
         return $this->tokens->filter(function ($token) use ($type) {
-            switch($type) {
+            switch ($type) {
                 case Token::VALID:
                     return $token->isValid();
                 case Token::EXPIRED:
@@ -623,10 +661,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->getToken($name, Token::EXPIRED);
     }
+
     public function getValidToken(string $name): ?Token
     {
         return $this->getToken($name, Token::VALID);
     }
+
     public function getToken(string $name, $type = Token::ALL): ?Token
     {
         $tokens = $this->getTokens($type);
@@ -679,10 +719,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="owners")
      */
     protected $threads;
+
     public function getThreads(): Collection
     {
         return $this->threads;
     }
+
     public function addThread(Thread $thread): self
     {
         if (!$this->threads->contains($thread)) {
@@ -706,10 +748,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $followedThreads;
+
     public function getFollowedThreads(): Collection
     {
         return $this->followedThreads;
     }
+
     public function addFollowedThread(Thread $followedThread): self
     {
         if (!$this->followedThreads->contains($followedThread)) {
@@ -733,10 +777,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="target", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $mentions;
+
     public function getMentions(): Collection
     {
         return $this->mentions;
     }
+
     public function addMention(Mention $mention): self
     {
         if (!$this->mentions->contains($mention)) {
@@ -763,10 +809,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\OneToMany(targetEntity=Like::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $likes;
+
     public function getLikes(): Collection
     {
         return $this->likes;
     }
+
     public function addLike(Like $like): self
     {
         if (!$this->likes->contains($like)) {
@@ -794,10 +842,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\Column(type="user_state")
      */
     protected $states = [];
+
     public function getStates(): array
     {
         return $this->states;
     }
+
     public function setStates(array $states): self
     {
         $this->states = array_unique($states);
@@ -808,18 +858,22 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->setIsNewcomer($newState);
     }
+
     public function elder(bool $newState = true): self
     {
         return $this->setIsNewcomer(!$newState);
     }
+
     public function isNewcomer(): bool
     {
         return in_array(UserState::NEWCOMER, $this->states);
     }
+
     public function isElder(): bool
     {
         return !$this->isNewcomer();
     }
+
     public function setIsNewcomer(bool $newState): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::NEWCOMER) : array_values_remove($this->states, UserState::NEWCOMER);
@@ -830,18 +884,22 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->setIsApproved($newState);
     }
+
     public function disregarded(bool $newState = true): self
     {
         return $this->setIsApproved(!$newState);
     }
+
     public function isApproved(): bool
     {
         return in_array(UserState::APPROVED, $this->states);
     }
+
     public function isDisregarded(): bool
     {
         return !$this->isApproved();
     }
+
     public function setIsApproved(bool $newState): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::APPROVED) : array_values_remove($this->states, UserState::APPROVED);
@@ -852,10 +910,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->setIsVerified($newState);
     }
+
     public function isVerified(): bool
     {
         return in_array(UserState::VERIFIED, $this->states);
     }
+
     public function setIsVerified(bool $newState)
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::VERIFIED) : array_values_remove($this->states, UserState::VERIFIED);
@@ -866,18 +926,22 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->setIsEnabled($newState);
     }
+
     public function disable(bool $newState = true): self
     {
         return $this->setIsEnabled(!$newState);
     }
+
     public function isEnabled(): bool
     {
         return in_array(UserState::ENABLED, $this->states);
     }
+
     public function isDisabled(): bool
     {
         return !$this->isEnabled();
     }
+
     public function setIsEnabled(bool $newState): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::ENABLED) : array_values_remove($this->states, UserState::ENABLED);
@@ -888,14 +952,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->setIsLocked($newState);
     }
+
     public function unlock(bool $newState = true): self
     {
         return $this->setIsLocked(!$newState);
     }
+
     public function isLocked(): bool
     {
         return in_array(UserState::LOCKED, $this->states);
     }
+
     public function setIsLocked(bool $newState): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::LOCKED) : array_values_remove($this->states, UserState::LOCKED);
@@ -906,14 +973,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->setIsBanned($newState);
     }
+
     public function unban(bool $newState = true): self
     {
         return $this->setIsBanned(!$newState);
     }
+
     public function isBanned(): bool
     {
         return in_array(UserState::BANNED, $this->states);
     } // TO IMPLEMENT..
+
     public function setIsBanned(bool $newState = true): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::BANNED) : array_values_remove($this->states, UserState::BANNED);
@@ -924,14 +994,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->setIsKicked($newState);
     }
+
     public function unkick(bool $newState = true): self
     {
         return $this->setIsKicked(!$newState);
     }
+
     public function isKicked(): bool
     {
         return in_array(UserState::KICKED, $this->states);
     }
+
     public function setIsKicked(bool $newState = true): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::KICKED) : array_values_remove($this->states, UserState::KICKED);
@@ -942,10 +1015,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return $this->setIsGhost($newState);
     }
+
     public function isGhost(): bool
     {
         return in_array(UserState::GHOST, $this->states);
     }
+
     public function setIsGhost(bool $newState): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::GHOST) : array_values_remove($this->states, UserState::GHOST);
@@ -957,6 +1032,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Timestamp(on="create")
      */
     protected $createdAt;
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
@@ -967,6 +1043,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Timestamp(on={"create", "update"})
      */
     protected $updatedAt;
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
@@ -976,10 +1053,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $activeAt;
+
     public function getActiveAt(): ?\DateTimeInterface
     {
         return $this->activeAt;
     }
+
     public function poke(?\DateTimeInterface $activeAt): self
     {
         $this->activeAt = $activeAt;
@@ -990,27 +1069,32 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         return self::getParameterBag()->get("base.user.active_delay");
     }
+
     public function isActive(): bool
     {
-        return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getActiveDelay().' seconds ago');
+        return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getActiveDelay() . ' seconds ago');
     }
+
     public static function getOnlineDelay(): int
     {
         return self::getParameterBag()->get("base.user.online_delay");
     }
+
     public function isOnline(): bool
     {
-        return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getOnlineDelay().' seconds ago');
+        return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getOnlineDelay() . ' seconds ago');
     }
 
     /**
      * @ORM\OneToMany(targetEntity=Address::class, mappedBy="user")
      */
     protected $addresses;
+
     public function getAddresses(): Collection
     {
         return $this->addresses;
     }
+
     public function getAddress(int $i = 0): ?Address
     {
         return $this->addresses[$i] ?? null;

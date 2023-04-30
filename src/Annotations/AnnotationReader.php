@@ -30,8 +30,8 @@ class AnnotationReader extends AbstractLocalCache
 {
     use SingletonTrait;
 
-    public const TARGET_CLASS    = "class";
-    public const TARGET_METHOD   = "method";
+    public const TARGET_CLASS = "class";
+    public const TARGET_METHOD = "method";
     public const TARGET_PROPERTY = "property";
 
     public const ALL_TARGETS = [
@@ -42,6 +42,7 @@ class AnnotationReader extends AbstractLocalCache
 
     // Annotation pass..
     protected $annotations = [];
+
     public function addAnnotation($annotations): self
     {
         $this->annotations[get_class($annotations)] = $annotations;
@@ -52,14 +53,17 @@ class AnnotationReader extends AbstractLocalCache
      * @var EntityManager
      */
     protected $entityManager = null;
+
     public function getEntityManager()
     {
         return $this->entityManager;
     }
+
     public function getRepository($entity)
     {
         return $this->entityManager->getRepository($entity);
     }
+
     public function isEntity(mixed $entity): bool
     {
         return $this->classMetadataManipulator->isEntity($entity);
@@ -69,6 +73,7 @@ class AnnotationReader extends AbstractLocalCache
      * @var EntityHydrator
      */
     protected $entityHydrator = null;
+
     public function getEntityHydrator(): EntityHydratorInterface
     {
         return $this->entityHydrator;
@@ -78,6 +83,7 @@ class AnnotationReader extends AbstractLocalCache
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator = null;
+
     public function getClassMetadataManipulator(): ClassMetadataManipulator
     {
         return $this->classMetadataManipulator;
@@ -87,6 +93,7 @@ class AnnotationReader extends AbstractLocalCache
      * @var FlysystemInterface
      */
     protected $flysystem = null;
+
     public function getFlysystem(): FlysystemInterface
     {
         return $this->flysystem;
@@ -96,6 +103,7 @@ class AnnotationReader extends AbstractLocalCache
      * @var ParameterBagInterface
      */
     protected $parameterBag;
+
     public function getParameterBag(): ParameterBagInterface
     {
         return $this->parameterBag;
@@ -105,6 +113,7 @@ class AnnotationReader extends AbstractLocalCache
      * @var DoctrineAnnotationReader
      */
     protected $reader = null;
+
     public function getDefaultReader(): DoctrineAnnotationReader
     {
         return $this->reader;
@@ -152,18 +161,19 @@ class AnnotationReader extends AbstractLocalCache
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
-        RouterInterface $router,
-        EntityManager $entityManager,
-        ParameterBagInterface $parameterBag,
-        FlysystemInterface $flysystem,
-        RequestStack $requestStack,
-        TokenStorageInterface $tokenStorage,
-        EntityHydrator $entityHydrator,
+        RouterInterface          $router,
+        EntityManager            $entityManager,
+        ParameterBagInterface    $parameterBag,
+        FlysystemInterface       $flysystem,
+        RequestStack             $requestStack,
+        TokenStorageInterface    $tokenStorage,
+        EntityHydrator           $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator,
-        string $projectDir,
-        string $environment,
-        string $cacheDir
-    ) {
+        string                   $projectDir,
+        string                   $environment,
+        string                   $cacheDir
+    )
+    {
         if (!self::getInstance(false)) {
             self::setInstance($this);
         }
@@ -174,7 +184,7 @@ class AnnotationReader extends AbstractLocalCache
         $this->parameterBag = $parameterBag;
         $this->enabled = $parameterBag->get("base.annotations.use_custom") ?? false;
 
-        $paths   = [];
+        $paths = [];
         $paths[] = __DIR__ . "/Annotation";
         $paths[] = __DIR__ . "/../Database/Annotation";
         if (($matches = preg_grep('/^base.annotations.paths\.[0-9]*\.[.*]*$/', array_keys($parameterBag->all())))) {
@@ -188,17 +198,17 @@ class AnnotationReader extends AbstractLocalCache
             $this->addPath($path);
         }
 
-        $this->entityManager   = $entityManager;
-        $this->entityHydrator  = $entityHydrator;
-        $this->requestStack    = $requestStack;
-        $this->tokenStorage    = $tokenStorage;
-        $this->flysystem       = $flysystem;
+        $this->entityManager = $entityManager;
+        $this->entityHydrator = $entityHydrator;
+        $this->requestStack = $requestStack;
+        $this->tokenStorage = $tokenStorage;
+        $this->flysystem = $flysystem;
         $this->eventDispatcher = $eventDispatcher;
-        $this->router          = $router;
-        $this->classMetadataManipulator  = $classMetadataManipulator;
+        $this->router = $router;
+        $this->classMetadataManipulator = $classMetadataManipulator;
 
         $this->environment = $environment;
-        $this->projectDir  = $projectDir;
+        $this->projectDir = $projectDir;
 
         parent::__construct($cacheDir);
     }
@@ -207,6 +217,7 @@ class AnnotationReader extends AbstractLocalCache
     {
         return $this->environment;
     }
+
     public function getProjectDir()
     {
         return $this->projectDir;
@@ -217,22 +228,24 @@ class AnnotationReader extends AbstractLocalCache
 
     protected array $annotationTargets = [];
 
-    protected array $classAncestors    = [];
-    protected array $classHierarchies  = [];
+    protected array $classAncestors = [];
+    protected array $classHierarchies = [];
 
-    protected array $familyAnnotations   = [];
-    protected array $classAnnotations    = [];
-    protected array $methodAnnotations   = [];
+    protected array $familyAnnotations = [];
+    protected array $classAnnotations = [];
+    protected array $methodAnnotations = [];
     protected array $propertyAnnotations = [];
 
     /**
      * @var array
      */
     protected array $paths = [];
+
     public function getPaths(): array
     {
         return $this->paths;
     }
+
     public function addPath(string $path): self
     {
         if (in_array($path, $this->paths)) {
@@ -264,7 +277,7 @@ class AnnotationReader extends AbstractLocalCache
         if ($path == "/") {
             return $baseDir;
         } elseif (!str_starts_with($path, "/")) {
-            $path = $baseDir."/".$path;
+            $path = $baseDir . "/" . $path;
         }
 
         return $path;
@@ -274,6 +287,7 @@ class AnnotationReader extends AbstractLocalCache
     {
         return $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
     }
+
     public function getImpersonator(): ?User
     {
         $token = $this->tokenStorage->getToken();
@@ -281,10 +295,12 @@ class AnnotationReader extends AbstractLocalCache
     }
 
     protected array $annotationNames = [];
+
     public function getAnnotationNames(): array
     {
         return $this->annotationNames;
     }
+
     public function addAnnotationName(string $annotationName)
     {
         if (!is_subclass_of($annotationName, AbstractAnnotation::class)) {
@@ -360,6 +376,7 @@ class AnnotationReader extends AbstractLocalCache
     {
         return $this->classHierarchies[$className] ?? null;
     }
+
     public function getAncestor($className): ?string
     {
         if (!array_key_exists($className, $this->classAncestors)) {
@@ -424,7 +441,7 @@ class AnnotationReader extends AbstractLocalCache
         $annotations = $this->getDefaultReader()->getClassAnnotations($reflClass);
         $annotationNames = $this->normalizeNames($annotationNames, false);
 
-        return array_filter($annotations, fn ($a) => $annotationNames === null || in_array(get_class($a), $annotationNames));
+        return array_filter($annotations, fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames));
     }
 
     public function getClassAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null, array $annotationTargets = []): array
@@ -441,7 +458,7 @@ class AnnotationReader extends AbstractLocalCache
             $this->classAnnotations[$reflClass->name] = [];
             foreach ($this->getDefaultReader()->getClassAnnotations($reflClass) as $annotation) {
                 if (!is_serializable($annotation)) {
-                    throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                    throw new Exception("Annotation \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                 }
 
                 $this->classAnnotations[$reflClass->name][] = $annotation;
@@ -483,7 +500,7 @@ class AnnotationReader extends AbstractLocalCache
         foreach ($reflClass->getMethods() as $reflMethod) {
             $annotations[$reflMethod->getName()] = array_filter(
                 $this->getDefaultReader()->getMethodAnnotations($reflMethod),
-                fn ($a) => $annotationNames === null || in_array(get_class($a), $annotationNames)
+                fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames)
             );
         }
 
@@ -506,7 +523,7 @@ class AnnotationReader extends AbstractLocalCache
                 $this->methodAnnotations[$reflClass->name][$reflMethod->name] = [];
                 foreach ($this->getDefaultReader()->getMethodAnnotations($reflMethod) as $annotation) {
                     if (!is_serializable($annotation)) {
-                        throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                        throw new Exception("Annotation \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                     }
 
                     $this->methodAnnotations[$reflClass->name][$reflMethod->name][] = $annotation;
@@ -551,7 +568,7 @@ class AnnotationReader extends AbstractLocalCache
         foreach ($reflClass->getProperties() as $reflProperty) {
             $annotations[$reflProperty->getName()] = array_filter(
                 $this->getDefaultReader()->getPropertyAnnotations($reflProperty),
-                fn ($a) => $annotationNames === null || in_array(get_class($a), $annotationNames)
+                fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames)
             );
         }
 
@@ -574,7 +591,7 @@ class AnnotationReader extends AbstractLocalCache
                 $this->propertyAnnotations[$reflClass->name][$reflProperty->name] = [];
                 foreach ($this->getDefaultReader()->getPropertyAnnotations($reflProperty) as $annotation) {
                     if (!is_serializable($annotation)) {
-                        throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                        throw new Exception("Annotation \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                     }
 
                     $this->propertyAnnotations[$reflClass->name][$reflProperty->name][] = $annotation;
@@ -627,26 +644,26 @@ class AnnotationReader extends AbstractLocalCache
         }
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
-        $annotations = [self::TARGET_CLASS => [],self::TARGET_METHOD => [],self::TARGET_PROPERTY => []];
+        $annotations = [self::TARGET_CLASS => [], self::TARGET_METHOD => [], self::TARGET_PROPERTY => []];
         $annotationNames = $this->normalizeNames($annotationNames, false);
         $annotationTargets = $this->normalizeTargets($annotationTargets, $annotationNames);
 
         // Get class annotations
         if (in_array(self::TARGET_CLASS, $annotationTargets)) {
             $annotations[self::TARGET_CLASS][$reflClass->getName()] =
-                $this->getDefaultClassAnnotations($reflClass, $annotationNames, $annotationTargets);
+                $this->getDefaultClassAnnotations($reflClass, $annotationNames);
         }
 
         // Get method annotations
         if (in_array(self::TARGET_METHOD, $annotationTargets)) {
             $annotations[self::TARGET_METHOD][$reflClass->getName()] =
-                $this->getDefaultMethodAnnotations($reflClass, $annotationNames, $annotationTargets);
+                $this->getDefaultMethodAnnotations($reflClass, $annotationNames);
         }
 
         // Get properties annotations
         if (in_array(self::TARGET_PROPERTY, $annotationTargets)) {
             $annotations[self::TARGET_PROPERTY][$reflClass->getName()] =
-                $this->getDefaultPropertyAnnotations($reflClass, $annotationNames, $annotationTargets);
+                $this->getDefaultPropertyAnnotations($reflClass, $annotationNames);
         }
 
         return $annotations;
@@ -656,8 +673,8 @@ class AnnotationReader extends AbstractLocalCache
     {
         $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
-            (is_object($annotationNames) ? [get_class($annotationNames)] :
-            (is_string($annotationNames) ? [$annotationNames] : [])))
+                (is_object($annotationNames) ? [get_class($annotationNames)] :
+                    (is_string($annotationNames) ? [$annotationNames] : [])))
         );
 
         if ($fallbackAnnotationNames && empty($annotationNames)) {
@@ -686,11 +703,11 @@ class AnnotationReader extends AbstractLocalCache
 
     public function warmUp(string $cacheDir): bool
     {
-        $this->annotationTargets   = $this->getCache("/Targets") ?? [];
-        $this->classHierarchies    = $this->getCache("/Hierarchies") ?? [];
-        $this->classAncestors      = $this->getCache("/Ancestors") ?? [];
-        $this->classAnnotations    = $this->getCache("/ClassAnnotations") ?? [];
-        $this->methodAnnotations   = $this->getCache("/MethodAnnotations") ?? [];
+        $this->annotationTargets = $this->getCache("/Targets") ?? [];
+        $this->classHierarchies = $this->getCache("/Hierarchies") ?? [];
+        $this->classAncestors = $this->getCache("/Ancestors") ?? [];
+        $this->classAnnotations = $this->getCache("/ClassAnnotations") ?? [];
+        $this->methodAnnotations = $this->getCache("/MethodAnnotations") ?? [];
         $this->propertyAnnotations = $this->getCache("/PropertyAnnotations") ?? [];
 
         $this->executeOnce(function () {

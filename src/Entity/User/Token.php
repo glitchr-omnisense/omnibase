@@ -24,13 +24,14 @@ class Token implements IconizeInterface
     {
         return self::__iconizeStatic()[$this->isValid() ? 1 : 0];
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-drumstick-bite", "fa-solid fa-drumstick"];
     }
 
-    public const ALL     = "ALL_TOKENS";
-    public const VALID   = "VALID_TOKENS";
+    public const ALL = "ALL_TOKENS";
+    public const VALID = "VALID_TOKENS";
     public const EXPIRED = "EXPIRED_TOKENS";
 
     public function __construct(string $name, ?int $expiry = null, ?int $throttle = null)
@@ -85,7 +86,7 @@ class Token implements IconizeInterface
         }
         if ($expiry) {
             $expireAt = clone $createdAt;
-            $expireAt->modify(is_numeric($expiry) ? "+ ".floor($expiry)." seconds" : $expiry);
+            $expireAt->modify(is_numeric($expiry) ? "+ " . floor($expiry) . " seconds" : $expiry);
             $this->setExpiry($expireAt);
         }
 
@@ -95,7 +96,7 @@ class Token implements IconizeInterface
         }
         if ($throttle) {
             $allowAt = clone $createdAt;
-            $allowAt->modify(is_numeric($throttle) ? "+ ".floor($throttle)." seconds" : $throttle);
+            $allowAt->modify(is_numeric($throttle) ? "+ " . floor($throttle) . " seconds" : $throttle);
             $this->setExpiry($allowAt);
         }
 
@@ -110,6 +111,7 @@ class Token implements IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -125,6 +127,7 @@ class Token implements IconizeInterface
     {
         return $this->user;
     }
+
     public function setUser(?User $user): self
     {
         if ($this->user && $this->user != $user) {
@@ -149,6 +152,7 @@ class Token implements IconizeInterface
     {
         return $this->name;
     }
+
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -164,10 +168,12 @@ class Token implements IconizeInterface
     {
         return $this->getValue();
     }
+
     public function getValue(): ?string
     {
         return $this->value;
     }
+
     public function generate(?int $expiry = null, ?int $throttle = null): self
     {
         // Creation date
@@ -177,19 +183,19 @@ class Token implements IconizeInterface
         // Expiry date calculation
         if ($expiry) {
             $expireAt = clone $now;
-            $expireAt->modify(is_numeric($expiry) ? "+ ".floor($expiry)." seconds" : $expiry);
+            $expireAt->modify(is_numeric($expiry) ? "+ " . floor($expiry) . " seconds" : $expiry);
             $this->setExpiry($expireAt);
         }
 
         // Rate date calculation
         if ($throttle) {
             $allowAt = clone $now;
-            $allowAt->modify(is_numeric($throttle) ? "+ ".floor($throttle)." seconds" : $throttle);
+            $allowAt->modify(is_numeric($throttle) ? "+ " . floor($throttle) . " seconds" : $throttle);
             $this->setThrottleTime($allowAt);
         }
 
         // Generate token value
-        $this->value = rtrim(str_replace(["+","/"], ["",""], base64_encode(random_bytes(16))), '=');
+        $this->value = rtrim(str_replace(["+", "/"], ["", ""], base64_encode(random_bytes(16))), '=');
 
         return $this;
     }
@@ -199,10 +205,12 @@ class Token implements IconizeInterface
      * @Timestamp(on="create")
      */
     protected $createdAt;
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
+
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
@@ -218,6 +226,7 @@ class Token implements IconizeInterface
     {
         return $this->expireAt;
     }
+
     public function setExpireAt(\DateTimeInterface $expireAt): self
     {
         if (!$this->getCreatedAt()) {
@@ -236,14 +245,17 @@ class Token implements IconizeInterface
     {
         return $this->getExpireAt();
     }
+
     public function setExpiry(\DateTimeInterface $expireAt): self
     {
         return $this->setExpireAt($expireAt);
     }
+
     protected function isExpired(): bool
     {
-        return $this->getExpiry() == null ? false : new \DateTime("now") >= $this->getExpiry();
+        return !($this->getExpiry() == null) && new \DateTime("now") >= $this->getExpiry();
     }
+
     protected function isHit(): bool
     {
         return $this->isExpired();
@@ -258,14 +270,17 @@ class Token implements IconizeInterface
     {
         return time() - $this->createdAt->getTimestamp();
     }
+
     public function getLifetime(): int
     {
         return ($this->expireAt == null ? -1 : $this->expireAt->getTimestamp() - $this->createdAt->getTimestamp());
     }
+
     public function getRemainingTime(): int
     {
         return $this->expireAt->getTimestamp() - time();
     }
+
     public function getRemainingTimeStr(): string
     {
         return $this->getTranslator()->transTime($this->getRemainingTime());
@@ -281,6 +296,7 @@ class Token implements IconizeInterface
     {
         return $this->allowAt;
     }
+
     public function setAllowAt(\DateTimeInterface $allowAt): self
     {
         if (!$this->getCreatedAt()) {
@@ -297,20 +313,24 @@ class Token implements IconizeInterface
 
     public function hasVeto(): bool
     {
-        return $this->isValid() && ($this->getAllowAt() == null ? false : new \DateTime("now") < $this->getAllowAt());
+        return $this->isValid() && (!($this->getAllowAt() == null) && new \DateTime("now") < $this->getAllowAt());
     }
+
     public function getThrottleTime(): int
     {
         return $this->allowAt->getTimestamp() - time();
     }
+
     public function getThrottleTimeStr(): string
     {
         return $this->getTranslator()->transTime($this->getThrottleTime());
     }
+
     public function setThrottleTime(\DateTimeInterface $allowAt): self
     {
         return $this->setAllowAt($allowAt);
     }
+
     public function isThrottled(): bool
     {
         return $this->getAllowAt() != $this->getCreatedAt();
@@ -325,10 +345,12 @@ class Token implements IconizeInterface
     {
         return $this->markAsRevoked();
     }
+
     public function isRevoked(): bool
     {
         return $this->isRevoked;
     }
+
     public function markAsRevoked(): self
     {
         $this->isRevoked = true;

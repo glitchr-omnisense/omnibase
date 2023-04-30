@@ -14,8 +14,6 @@ class GroupByWalker extends TreeWalkerAdapter
 
     /**
      * Walks down a SelectStatement AST node, thereby generating the appropriate SQL.
-     *
-     * @return string The SQL.
      */
     public function walkSelectStatement(SelectStatement $AST)
     {
@@ -34,7 +32,7 @@ class GroupByWalker extends TreeWalkerAdapter
 
         $groupBy = $this->_getQuery()->getHint(self::HINT_GROUP_ARRAY);
         if ($groupBy !== null && !is_array($groupBy)) {
-            throw new InvalidArgumentException("Invalid hint \"".self::HINT_GROUP_ARRAY."\" type provided. Array expected");
+            throw new InvalidArgumentException("Invalid hint \"" . self::HINT_GROUP_ARRAY . "\" type provided. Array expected");
         }
 
         foreach ($groupBy as $columnName) {

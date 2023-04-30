@@ -46,7 +46,7 @@ use App\Repository\User\NotificationRepository;
  * @ORM\InheritanceType( "JOINED" )
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "common" )
+ * @DiscriminatorEntry( value = "common" )
  */
 class Notification extends SymfonyNotification implements BaseNotificationInterface, SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface, IconizeInterface
 {
@@ -69,6 +69,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-bell"];
@@ -79,9 +80,9 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     // Browser notification
     public const IMPORTANCE_SUCCESS = "success";
-    public const IMPORTANCE_INFO    = "info";
-    public const IMPORTANCE_NOTICE  = "notice";
-    public const IMPORTANCE_DANGER  = "danger";
+    public const IMPORTANCE_INFO = "info";
+    public const IMPORTANCE_NOTICE = "notice";
+    public const IMPORTANCE_DANGER = "danger";
 
     /**
      * @ORM\Id
@@ -105,6 +106,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->user;
     }
+
     public function setUser(?User $user): self
     {
         if ($this->user) {
@@ -119,10 +121,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     }
 
     protected $attachments = [];
+
     public function getAttachments(): array
     {
         return $this->attachments;
     }
+
     public function addAttachment(UploadedFile $attachment): self
     {
         if (!in_array($attachment, $this->attachments)) {
@@ -139,10 +143,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     }
 
     protected $recipients = [];
+
     public function getRecipients(): array
     {
         return $this->recipients;
     }
+
     public function addRecipient(RecipientInterface $recipient): self
     {
         if (!in_array($recipient, $this->recipients)) {
@@ -167,6 +173,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->channels;
     }
+
     public function setChannels(array $channels): self
     {
         $this->channels = array_unique($channels);
@@ -182,6 +189,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->importance;
     }
+
     public function setImportance(?string $importance): self
     {
         $this->importance = $importance;
@@ -197,6 +205,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->subject;
     }
+
     public function setSubject(string $subject): self
     {
         $this->subject = $subject;
@@ -212,6 +221,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->content;
     }
+
     public function setContent(string $content): self
     {
         $this->content = trim($content);
@@ -228,6 +238,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->title;
     }
+
     public function setTitle(string $title): self
     {
         $this->title = trim($title);
@@ -239,10 +250,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @ORM\Column(type="boolean")
      */
     protected $isRead = false;
+
     public function isRead(): bool
     {
         return $this->isRead;
     }
+
     public function setIsRead(bool $isRead): self
     {
         $this->isRead = $isRead;
@@ -253,6 +266,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->setIsRead($isRead);
     }
+
     public function markAsReadIfNeeded(array $channels = [])
     {
         $options = [];
@@ -271,10 +285,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @ORM\Column(type="datetime", nullable="true")
      */
     protected $sentAt = null;
+
     public function getSentAt(): ?\DateTimeInterface
     {
         return $this->sentAt;
     }
+
     public function setSentAt(?\DateTimeInterface $sentAt): self
     {
         $this->sentAt = $sentAt;
@@ -285,6 +301,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @ORM\Column(type="text")
      */
     protected string $backtrace = ""; // Internal use only (code line might be changing..)
+
     public function getBacktrace(): string
     {
         return $this->backtrace;
@@ -299,6 +316,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->markAsAdmin;
     }
+
     public function markAsAdmin(bool $markAsAdmin = true)
     {
         $this->markAsAdmin = $markAsAdmin;
@@ -309,6 +327,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @var array
      */
     protected array $context = [];
+
     public function getContext(array $additionalContext = [])
     {
         if ($additionalContext) {
@@ -321,6 +340,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->addContext([$key => $value]);
     }
+
     public function addContext(array $context = []): self
     {
         if (empty($context)) {
@@ -328,6 +348,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
         return $this->setContext(array_merge($this->context, $context));
     }
+
     public function setContext(array $context): self
     {
         if (array_key_exists("subject", $context)) {
@@ -356,10 +377,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     /* Handle custom emails */
     protected string $htmlTemplate = "";
+
     public function getHtmlTemplate()
     {
         return $this->htmlTemplate;
     }
+
     public function setHtmlTemplate(?string $htmlTemplate, array $htmlParameters = [])
     {
         $this->htmlTemplate = $htmlTemplate;
@@ -371,20 +394,24 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     }
 
     protected array $htmlParameters = [];
+
     public function getHtmlParameters(): array
     {
         return $this->htmlParameters;
     }
+
     public function setHtmlParameters(array $htmlParameters)
     {
         $this->htmlParameters = $htmlParameters;
         return $this;
     }
+
     public function addHtmlParameter(string $key, $value)
     {
         $this->htmlParameters[$key] = $value;
         return $this;
     }
+
     public function removeHtmlParameter(string $key)
     {
         array_remove($this->htmlParameters, $key);
@@ -394,8 +421,9 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     public function getExcerpt()
     {
-        return  $this->context["excerpt"] ?? "";
+        return $this->context["excerpt"] ?? "";
     }
+
     public function setExcerpt(string $excerpt)
     {
         $this->context["excerpt"] = $excerpt;
@@ -406,6 +434,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         return $this->context["footer_text"] ?? "";
     }
+
     public function setFooter(string $footer)
     {
         $this->context["footer_text"] = $footer;
@@ -415,7 +444,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     public function __construct($content = null, array $parameters = array(), string $domain = "@notifications", ?string $locale = null)
     {
         $backtrace = debug_backtrace()[0];
-        $this->backtrace = $backtrace["file"].":".$backtrace["line"];
+        $this->backtrace = $backtrace["file"] . ":" . $backtrace["line"];
         $this->recipients = [];
 
         // Inject service from base class..
@@ -435,12 +464,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             $location = str_replace($this->getProjectDir(), '.', $exception->getFile()) . ":" . $exception->getLine();
             $message = $exception->getMessage();
 
-            $this->setContent("<div class='title'>".$location."</div><div class='message'>".$message.'</div>');
+            $this->setContent("<div class='title'>" . $location . "</div><div class='message'>" . $message . '</div>');
         } elseif ($content instanceof FlattenException || $content instanceof Throwable) {
             $location = str_replace($this->getProjectDir(), '.', $content->getFile()) . ":" . $content->getLine();
             $message = $content->getMessage();
 
-            $this->setContent("<div class='title'>".$location."</div><div class='message'>".$message.'</div>');
+            $this->setContent("<div class='title'>" . $location . "</div><div class='message'>" . $message . '</div>');
         } elseif ($this->getTwig()->getLoader()->exists($content)) {
             $this->setHtmlTemplate($content);
             $this->setContent("");
@@ -452,7 +481,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     public function render(): Response
     {
         $htmlTemplate = $this->getHtmlTemplate();
-        $context      = $this->getContext();
+        $context = $this->getContext();
 
         if ($htmlTemplate) {
             $context = array_merge([
@@ -482,7 +511,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             }
         }
 
-        $recipients = array_filter($recipients, fn ($r) => !$r instanceof NoRecipient);
+        $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
         $this->getNotifier()->sendUsers($this, ...array_unique($recipients));
 
         return $this;
@@ -503,7 +532,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             }
         }
 
-        $recipients = array_filter($recipients, fn ($r) => !$r instanceof NoRecipient);
+        $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
         $this->getNotifier()->sendUsersBy($channels, $this, ...array_unique($recipients));
 
         return $this;
@@ -526,7 +555,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
     {
         $notifier = $this->getNotifier();
-        $notification = EmailMessage::fromNotification($this, $recipient, $transport);
+        $notification = EmailMessage::fromNotification($this, $recipient);
 
         /**
          * @var EmailRecipientInterface
@@ -546,12 +575,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         $fwd = "";
         $subject = $this->getSubject();
         $from = $technicalRecipient->getEmail();
-        $to   = $recipient->getEmail();
+        $to = $recipient->getEmail();
 
         if ($this->isMarkAsAdmin()) {
-            $user = $this->user ?? "User \"".User::getIp()."\"";
+            $user = $this->user ?? "User \"" . User::getIp() . "\"";
             $fwd .= "Admin: ";
-            $title   = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
+            $title = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
             $content = $this->getContent();
         }
 
@@ -559,10 +588,10 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             $fwd .= "Test: ";
             $email = mailparse($recipient->getEmail());
             $email = mailformat(mailparse($technicalRecipient->getEmail()), first($email));
-            $to   = "[".$notifier->getTranslator()->trans("@emails.fake_test.author")."] ". $email;
+            $to = "[" . $notifier->getTranslator()->trans("@emails.fake_test.author") . "] " . $email;
 
-            $footer  = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
-            $footer  = implode(" - ", array_filter($footer));
+            $footer = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
+            $footer = implode(" - ", array_filter($footer));
         }
 
         /**
@@ -577,11 +606,11 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             "warmup" => true, // e.g. when sending emails..
 
         ], $this->getContext([
-            "importance"  => $importance,
-            "title"       => $title,
-            "content"     => $content,
+            "importance" => $importance,
+            "title" => $title,
+            "content" => $content,
             "footer_text" => $footer,
-            "recipient"   => $recipient
+            "recipient" => $recipient
         ]), $this->getHtmlParameters());
 
         // Append notification attachments
@@ -616,9 +645,9 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         // I was hoping to replace content with html(), but this gets overriden by Symfony notification
         try {
             $htmlTemplate = $this->getTwig()->render($this->htmlTemplate, $context);
-        } catch(\Twig\Error\LoaderError $e) {
+        } catch (\Twig\Error\LoaderError $e) {
             $htmlTemplate = $this->getTwig()->render("@Base/notifier/email.html.twig", $context);
-        } catch(\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             throw new UnexpectedValueException("Template \"$this->htmlTemplate\" not found.", 500, $e);
         }
 
@@ -627,7 +656,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
 
         $subject ??= $this->getSubject();
-        $subject = $fwd.$subject;
+        $subject = $fwd . $subject;
 
         $priority = [self::IMPORTANCE_HIGH, self::IMPORTANCE_MEDIUM, self::IMPORTANCE_LOW];
         $email
@@ -645,7 +674,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     public function asChatMessage(RecipientInterface $recipient, string $transport = null): ?ChatMessage
     {
-        $chatMessage = ChatMessage::fromNotification($this->__toPrune(), $recipient, $transport);
+        $chatMessage = ChatMessage::fromNotification($this->__toPrune());
 
         $fwd = "";
         $content = $this->getContent();
@@ -656,16 +685,18 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             $content = $userIdentifier . " forwarded its notification: \"" . $this->getContent() . "\"";
         } elseif (in_array($recipient, $this->getRecipients()) && $this->getNotifier()->isTest($recipient)) {
             $user = $recipient;
-            $fwd = "Fwd: [TEST:".$recipient."] ";
+            $fwd = "Fwd: [TEST:" . $recipient . "] ";
             $content = $this->getContent();
         }
 
         switch ($transport) {
             case 'discord':
                 $chatMessage->options(new DiscordOptions(["username" => $userIdentifier]));
+                break;
+            //case '[...]':
         }
 
-        $chatMessage->subject($fwd . "[" . $this->getSubject(). "] " . $content);
+        $chatMessage->subject($fwd . "[" . $this->getSubject() . "] " . $content);
         return $chatMessage;
     }
 }

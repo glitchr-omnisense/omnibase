@@ -29,34 +29,42 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         return AnnotationReader::getInstance();
     }
+
     public static function getEnvironment()
     {
         return AnnotationReader::getInstance()->getEnvironment();
     }
+
     public static function getService()
     {
         return AnnotationReader::getInstance()->getService();
     }
+
     public static function getProjectDir()
     {
         return AnnotationReader::getInstance()->getProjectDir();
     }
+
     public static function getParameterBag()
     {
         return AnnotationReader::getInstance()->getParameterBag();
     }
+
     public static function getDoctrineReader()
     {
         return AnnotationReader::getInstance()->getDoctrineReader();
     }
+
     public static function getEntityManager()
     {
         return AnnotationReader::getInstance()->getEntityManager();
     }
+
     public static function getEntityHydrator()
     {
         return AnnotationReader::getInstance()->getEntityHydrator();
     }
+
     public static function getTypeOfField($className, string $property)
     {
         return AnnotationReader::getInstance()->getClassMetadataManipulator()->getTypeOfField($className, $property);
@@ -66,10 +74,12 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         return self::getEntityManager()->getClassMetadata(is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);
     }
+
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator
     {
         return AnnotationReader::getInstance()->getClassMetadataManipulator();
     }
+
     public static function getClassMetadataCompletor(mixed $entityOrClassOrMetadata): ?ClassMetadataCompletor
     {
         return AnnotationReader::getInstance()->getClassMetadataManipulator()->getClassMetadataCompletor($entityOrClassOrMetadata);
@@ -79,18 +89,22 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         return AnnotationReader::getInstance()->getFlysystem();
     }
+
     public static function getImpersonator(): ?User
     {
         return AnnotationReader::getInstance()->getImpersonator();
     }
+
     public static function getUser(): ?User
     {
         return AnnotationReader::getInstance()->getUser();
     }
+
     public static function getRepository($className)
     {
         return AnnotationReader::getInstance()->getRepository($className);
     }
+
     public static function getAsset($url)
     {
         return AnnotationReader::getInstance()->getAsset($url);
@@ -108,7 +122,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $mapping = $mappingPath;
         if (($dot = strpos($mapping, ".")) > 0) {
             $fieldPath = trim(substr($mapping, 0, $dot));
-            $mapping   = trim(substr($mapping, $dot+1));
+            $mapping = trim(substr($mapping, $dot + 1));
 
             $entityOrClassNameOrMetadataOrRefl = self::getClassMetadataManipulator()->getTargetClass($entityOrClassNameOrMetadataOrRefl, $fieldPath);
             if (!$entityOrClassNameOrMetadataOrRefl) {
@@ -119,7 +133,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($entityOrClassNameOrMetadataOrRefl);
         foreach ($annotations as $column => $annotation) {
             if ($annotationClass !== null) {
-                $annotations[$column] = array_filter($annotation, fn ($a) => is_instanceof($a, $annotationClass));
+                $annotations[$column] = array_filter($annotation, fn($a) => is_instanceof($a, $annotationClass));
             }
         }
 
@@ -146,6 +160,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         return AnnotationReader::getInstance()->getEntityManager()->getUnitOfWork();
     }
+
     public static function getEntityChangeSet($entity)
     {
         // (NB: /!\ computeChangeSets != recomputeSingleChangeSets)
@@ -158,6 +173,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
 
     protected static $entitySerializer = null;
+
     public static function getSerializer()
     {
         if (!self::$entitySerializer) {
@@ -208,8 +224,8 @@ abstract class AbstractAnnotation implements AnnotationInterface
             return null;
         }
 
-        $fieldNames          = self::getClassMetadata($classname)->getFieldNames();
-        $fields  = array_intersect_key($data, array_flip($fieldNames));
+        $fieldNames = self::getClassMetadata($classname)->getFieldNames();
+        $fields = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
         $entity = AnnotationReader::getInstance()->getEntityHydrator()->hydrate($classname, array_merge($fields, $associations));
@@ -220,6 +236,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         return self::getEntityFromData(get_class($entity), self::getOriginalEntityData($entity));
     }
+
     public static function getOriginalEntityData($entity): ?array
     {
         $primaryKey = self::getClassMetadataManipulator()->getPrimaryKey($entity); // primaryKey information missing
@@ -236,11 +253,12 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
     public static function getOldEntity($entity): ?object
     {
-        return self::getEntityFromData(get_class($entity), self::getOldEntityData($entity), [], EntityHydrator::OBJECT_PROPERTIES);
+        return self::getEntityFromData(get_class($entity), self::getOldEntityData($entity));
     }
+
     public static function getOldEntityData($entity): ?array
     {
-        $changeSet  = self::getEntityChangeSet($entity);
+        $changeSet = self::getEntityChangeSet($entity);
 
         // Replace original entity values by the changeSet
         //   It happens that "original" entity data doesn't mean,
@@ -260,10 +278,12 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         return self::getClassMetadataManipulator()->hasField($entity, $property);
     }
+
     public static function getFieldValue($entity, string $property)
     {
         return self::getClassMetadataManipulator()->getFieldValue($entity, $property);
     }
+
     public static function setFieldValue($entity, string $property, $value)
     {
         return self::getClassMetadataManipulator()->setFieldValue($entity, $property, $value);
@@ -273,10 +293,12 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         return property_exists($entity, $property);
     }
+
     public static function getPropertyValue($entity, string $property)
     {
         return self::getClassMetadataManipulator()->getPropertyValue($entity, $property);
     }
+
     public static function setPropertyValue($entity, string $property, $value)
     {
         return self::getClassMetadataManipulator()->setPropertyValue($entity, $property, $value);
@@ -291,9 +313,11 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public function preFlush(PreFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
+
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
+
     public function postFlush(PostFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
@@ -301,9 +325,11 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public function prePersist(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
+
     public function preUpdate(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
+
     public function preRemove(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
@@ -311,12 +337,15 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public function postLoad(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
+
     public function postPersist(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
+
     public function postUpdate(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
+
     public function postRemove(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }

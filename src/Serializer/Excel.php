@@ -30,7 +30,7 @@ class Excel
         $this->context = $context;
     }
 
-    private $filesystem;
+    protected $filesystem;
 
     public const AS_COLLECTION_KEY = CsvEncoder::AS_COLLECTION_KEY;
     public const HEADERS_IN_BOLD_KEY = 'headers_in_bold';
@@ -39,9 +39,9 @@ class Excel
     public const COLUMNS_MAXSIZE_KEY = 'columns_maxsize';
 
     /**
+     * @throws NotNormalizableValueException when a value is not valid
      * @internal
      *
-     * @throws NotNormalizableValueException when a value is not valid
      */
     private static function flatten(iterable $data, array &$result, string $parentKey = ''): void
     {
@@ -51,11 +51,11 @@ class Excel
             }
 
             if (is_iterable($value)) {
-                self::flatten($value, $result, $parentKey."[".$key."]");
+                self::flatten($value, $result, $parentKey . "[" . $key . "]");
                 continue;
             }
 
-            $newKey = $parentKey.$key;
+            $newKey = $parentKey . $key;
 
             if (!is_scalar($value)) {
                 throw new NotNormalizableValueException(sprintf('Expected key "%s" of type object, array or scalar, %s given', $newKey, gettype($value)));
@@ -79,7 +79,7 @@ class Excel
                 $writer = new Writers\Xls($spreadsheet);
                 break;
 
-                // Excel 2007
+            // Excel 2007
             case ExcelEncoder::XLSM:
             case ExcelEncoder::XLSX:
                 $writer = new Writers\Xlsx($spreadsheet);
@@ -103,7 +103,7 @@ class Excel
             $spreadsheet->setActiveSheetIndex($sheetIndex);
             $worksheet = $spreadsheet->getActiveSheet();
             $worksheet->setTitle($sheetName);
-            $sheetData = (array) $sheetData;
+            $sheetData = (array)$sheetData;
 
             foreach ($sheetData as $rowIndex => $cells) {
                 if (!is_iterable($cells)) {
@@ -124,7 +124,7 @@ class Excel
 
             array_unshift($sheetData, $headers);
             $worksheet->fromArray($sheetData, null, 'A1', true);
-            $headerLineStyle = $worksheet->getStyle('A1:'.$worksheet->getHighestDataColumn().'1');
+            $headerLineStyle = $worksheet->getStyle('A1:' . $worksheet->getHighestDataColumn() . '1');
 
             if ($this->context[self::HEADERS_HORIZONTAL_ALIGNMENT_KEY]) {
                 switch ($this->context[self::HEADERS_HORIZONTAL_ALIGNMENT_KEY]) {
@@ -146,8 +146,7 @@ class Excel
 
                 $headerLineStyle
                     ->getAlignment()
-                    ->setHorizontal($alignment)
-                ;
+                    ->setHorizontal($alignment);
             }
 
             if (true === $this->context[self::HEADERS_IN_BOLD_KEY]) {
@@ -169,11 +168,11 @@ class Excel
         }
 
         try {
-            $tmpFile = self::$filesystem->tempnam(sys_get_temp_dir(), $this->format);
+            $tmpFile = $this->filesystem->tempnam(sys_get_temp_dir(), $this->format);
             $writer->save($tmpFile);
 
-            $content = (string) file_get_contents($tmpFile);
-            self::$filesystem->remove($tmpFile);
+            $content = (string)file_get_contents($tmpFile);
+            $this->filesystem->remove($tmpFile);
         } catch (Exception $e) {
             throw new RuntimeException(sprintf('Excel encoding failed - %s', $e->getMessage()), 0, $e);
         }
@@ -212,7 +211,7 @@ class Excel
             throw new NotEncodableValueException(sprintf('Expected data of type scalar, %s given', gettype($data)));
         }
 
-        $tmpFile = (string) tempnam(sys_get_temp_dir(), $format);
+        $tmpFile = (string)tempnam(sys_get_temp_dir(), $format);
 
         $filesystem = new Filesystem();
         $filesystem->dumpFile($tmpFile, $data);
@@ -223,7 +222,7 @@ class Excel
                 $reader = new Readers\Xls();
                 break;
 
-                // Excel 2007
+            // Excel 2007
             case ExcelEncoder::XLSM:
             case ExcelEncoder::XLSX:
                 $reader = new Readers\Xlsx();
@@ -260,7 +259,7 @@ class Excel
             $headers = null;
 
             foreach ($sheetData as $rowIndex => $cells) {
-                $rowIndex = (int) $rowIndex;
+                $rowIndex = (int)$rowIndex;
 
                 if (null === $headers) {
                     $headers = [];
@@ -278,7 +277,7 @@ class Excel
 
                 foreach ($cells as $key => $value) {
                     if (array_key_exists($key, $headers)) {
-                        $labelledRows[$rowIndex - 1][(string) $headers[$key]] = $value;
+                        $labelledRows[$rowIndex - 1][(string)$headers[$key]] = $value;
                     } else {
                         $labelledRows[$rowIndex - 1][''][$key] = $value;
                     }

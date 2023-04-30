@@ -57,6 +57,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
     {
         return 'translatable';
     }
+
     public function getDefaultLocale()
     {
         return $this->localizer->getDefaultLocale();
@@ -70,22 +71,22 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
             'label' => false,
 
-            'locale'            => $this->localizer->getLocale(),
-            'locale_options'    => [],
+            'locale' => $this->localizer->getLocale(),
+            'locale_options' => [],
 
-            'single_locale'     => false,
-            'default_locale'    => $this->localizer->getDefaultLocale(),
-            'required_locales'  =>  [],
+            'single_locale' => false,
+            'default_locale' => $this->localizer->getDefaultLocale(),
+            'required_locales' => [],
             'available_locales' => $this->localizer->getAvailableLocales(),
 
             'by_reference' => false,
-            'empty_data'   => fn (FormInterface $form) => new ArrayCollection(),
+            'empty_data' => fn(FormInterface $form) => new ArrayCollection(),
 
             'autoload' => true,
-            'fields'   => [],
+            'fields' => [],
             'excluded_fields' => [],
 
-            'translation_class'  => null,
+            'translation_class' => null,
             'translatable_class' => null,
             'multiple' => false
         ]);
@@ -150,12 +151,12 @@ class TranslationType extends AbstractType implements DataMapperInterface
                             throw new InvalidArgumentException("\$value parameter in \"required\" closure must be a boolean");
                         }
 
-                        $parameterLocale   = $reflFn->getParameters()[1];
+                        $parameterLocale = $reflFn->getParameters()[1];
                         if ($parameterLocale->getType() != "string") {
                             throw new InvalidArgumentException("\$locale parameter in \"required\" closure must be a string");
                         }
 
-                        $parameterOptions  = $reflFn->getParameters()[2];
+                        $parameterOptions = $reflFn->getParameters()[2];
                         if ($parameterOptions->getType() != "array") {
                             throw new InvalidArgumentException("\$options parameter in \"required\" closure must be an array");
                         }
@@ -216,13 +217,13 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["locale"]            = $options["locale"];
-        $view->vars["single_locale"]     = $options["single_locale"];
+        $view->vars["locale"] = $options["locale"];
+        $view->vars["single_locale"] = $options["single_locale"];
 
-        $view->vars["default_locale"]    = $options["default_locale"];
+        $view->vars["default_locale"] = $options["default_locale"];
         $view->vars["available_locales"] = $options["available_locales"];
-        $view->vars["required_locales"]  = $options["required_locales"];
-        $view->vars["nonempty_locales"]  = [];
+        $view->vars["required_locales"] = $options["required_locales"];
+        $view->vars["nonempty_locales"] = [];
 
         foreach (iterator_to_array($form) as $locale => $child) {
             if ($child->getViewData() instanceof TranslationInterface && !$child->getViewData()->isEmpty()) {
@@ -258,14 +259,14 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $excludedFields = $options["excluded_fields"] ?? [];
         foreach ($excludedFields as $field) {
             if (!property_exists($classMetadata->getName(), $field)) {
-                throw new \Exception("Field \"".$field."\" requested for exclusion doesn't exist in \"".$translationClass."\"");
+                throw new \Exception("Field \"" . $field . "\" requested for exclusion doesn't exist in \"" . $translationClass . "\"");
             }
         }
 
         // Prepare raw fields
         $fields = $this->classMetadataManipulator->getFields($translationClass, $options["fields"], $options["excluded_fields"]);
         if (!$options["autoload"]) {
-            $fields = array_filter($fields, fn ($k) => array_key_exists($k, $options["fields"]), ARRAY_FILTER_USE_KEY);
+            $fields = array_filter($fields, fn($k) => array_key_exists($k, $options["fields"]), ARRAY_FILTER_USE_KEY);
         }
 
         // Compute fields including locale information
@@ -318,14 +319,14 @@ class TranslationType extends AbstractType implements DataMapperInterface
         };
 
         if (!$translatableClass) {
-            throw new \Exception("No \"translation_class\" found in \"".$form->getName()."\" and no hint (data_class or data) from inherited from FormType \"".$formInit->getName()."\" (".get_class($formInit->getConfig()->getType()->getInnerType()).") or any of its parents");
+            throw new \Exception("No \"translation_class\" found in \"" . $form->getName() . "\" and no hint (data_class or data) from inherited from FormType \"" . $formInit->getName() . "\" (" . get_class($formInit->getConfig()->getType()->getInnerType()) . ") or any of its parents");
         }
 
         if (!is_subclass_of($translatableClass, TranslatableInterface::class)) {
-            throw new \Exception("Translatable interface not implemented in \"".$translatableClass."\"");
+            throw new \Exception("Translatable interface not implemented in \"" . $translatableClass . "\"");
         }
 
-        return $translatableClass::getTranslationEntityClass(true, false); //, false);
+        return $translatableClass::getTranslationEntityClass(); //, false);
     }
 
     private function getTranslatableClass(FormInterface $form)
@@ -390,7 +391,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                         continue;
                     }
                     if (!($translation instanceof TranslationInterface)) {
-                        throw new UnexpectedValueException("Object expected to be an instance of TranslationInterface, \"".(is_object($translation) ? get_class($translation) : $translation)."\" received.");
+                        throw new UnexpectedValueException("Object expected to be an instance of TranslationInterface, \"" . (is_object($translation) ? get_class($translation) : $translation) . "\" received.");
                     }
 
                     $translation->setLocale($locale);

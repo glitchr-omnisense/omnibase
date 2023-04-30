@@ -70,9 +70,9 @@ class MediaController extends AbstractController
         $this->profiler = $profiler;
 
         $this->fileService = cast($mediaService, FileService::class);
-        $this->flysystem   = $flysystem;
+        $this->flysystem = $flysystem;
 
-        $this->localCache    = $localCache ?? true;
+        $this->localCache = $localCache ?? true;
         $this->requestStack = $requestStack;
     }
 
@@ -86,8 +86,8 @@ class MediaController extends AbstractController
             $this->profiler->disable();
         }
 
-        $cacheless = $this->localCache == false ? "_cacheless" : "";
-        return parent::redirectToRoute($route.$cacheless, $parameters, $status);
+        $cacheless = !$this->localCache ? "_cacheless" : "";
+        return parent::redirectToRoute($route . $cacheless, $parameters, $status);
     }
 
     /**
@@ -100,7 +100,7 @@ class MediaController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $path     = $config["path"];
+        $path = $config["path"];
 
         $contents = file_exists($path) ? file_get_contents($path) : $this->flysystem->read($path, $config["storage"] ?? null);
         if ($contents === null) {
@@ -136,9 +136,9 @@ class MediaController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $filters    = $config["filters"] ?? [];
-        $options    = $config["options"] ?? [];
-        $path       = $config["path"] ?? null;
+        $filters = $config["filters"] ?? [];
+        $options = $config["options"] ?? [];
+        $path = $config["path"] ?? null;
         if (!$path) {
             throw $this->createNotFoundException();
         }
@@ -173,28 +173,28 @@ class MediaController extends AbstractController
         // Providing just a "ratio" number
         if ($imageCrop === null && preg_match("/^(\d+|\d*\.\d+)$/", $identifier, $matches)) {
             $ratio = floatval($matches[1]);
-            $ratio0 = $ratio/($naturalWidth/$naturalHeight);
+            $ratio0 = $ratio / ($naturalWidth / $naturalHeight);
 
             $imageCrop = $this->imageCropRepository->cacheOneByRatio0ClosestTo($ratio0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
         }
 
         // Providing a "width:height" information
-        $width  = null;
+        $width = null;
         $height = null;
         if ($imageCrop === null && preg_match("/([0-9]+)[:x]([0-9]+)/", $identifier, $matches)) {
-            $width   = $matches[1];
-            $width0  = $width/$naturalWidth;
-            $height  = $matches[2];
-            $height0 = $height/$naturalHeight;
+            $width = $matches[1];
+            $width0 = $width / $naturalWidth;
+            $height = $matches[2];
+            $height0 = $height / $naturalHeight;
 
-            $ratio   = $height ? $width/$height : 0;
-            $ratio0  = $width0/$height0;
+            $ratio = $height ? $width / $height : 0;
+            $ratio0 = $width0 / $height0;
             if ($ratio0 == 0) {
                 throw $this->createNotFoundException();
             }
 
             $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
-            $identifier = $imageCrop->getWidth()."x".$imageCrop->getHeight();
+            $identifier = $imageCrop->getWidth() . "x" . $imageCrop->getHeight();
         }
 
         //
@@ -224,11 +224,11 @@ class MediaController extends AbstractController
             $identifier = "image";
         }
 
-        $output = pathinfo_extension($data."/".$identifier, $extension);
+        $output = pathinfo_extension($data . "/" . $identifier, $extension);
         $path = $this->mediaService->filter($path, ["local_cache" => $localCache, "output" => $output], new BitmapFilter(null, $options, $filters));
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        return  $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
+        return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
@@ -287,11 +287,11 @@ class MediaController extends AbstractController
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
-        $output = pathinfo_extension($data."/image", "webp");
+        $output = pathinfo_extension($data . "/image", "webp");
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new WebpFilter(null, $options, $filters));
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        return  $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
+        return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
     /**
@@ -315,7 +315,7 @@ class MediaController extends AbstractController
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
-        $output = pathinfo_extension($data."/image", "svg");
+        $output = pathinfo_extension($data . "/image", "svg");
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new SvgFilter(null, $options, $filters));
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
@@ -335,9 +335,9 @@ class MediaController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $filters    = $config["filters"] ?? [];
-        $options    = $config["options"] ?? [];
-        $path       = $config["path"] ?? null;
+        $filters = $config["filters"] ?? [];
+        $options = $config["options"] ?? [];
+        $path = $config["path"] ?? null;
         $identifier = $config["identifier"] ?? null;
 
         // Redirect to proper path
@@ -357,7 +357,7 @@ class MediaController extends AbstractController
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
-        $output = pathinfo_extension($data."/image", $extension);
+        $output = pathinfo_extension($data . "/image", $extension);
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new BitmapFilter(null, $options, $filters));
         if ($debug) {
             dump($data, $config, $path);
@@ -365,6 +365,6 @@ class MediaController extends AbstractController
         }
 
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
-        return  $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
+        return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 }

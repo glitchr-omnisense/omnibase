@@ -150,7 +150,8 @@ class EntityHydrator implements EntityHydratorInterface
         $data = $data instanceof Collection ? $data->toArray() : $data;
         if (is_object($data)) {
             $data = array_transforms(
-                function ($k, $e) use ($aggregateModel, $data): array {
+                function ($k, $e) use ($aggregateModel, $data): ?array {
+                    
                     $varName = explode("\x00", $k);
                     $varName = last($varName);
                     if ($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isReadable($data, $varName)) {
@@ -160,6 +161,8 @@ class EntityHydrator implements EntityHydratorInterface
                     if ($aggregateModel & self::OBJECT_PROPERTIES) {
                         return [$varName, $e instanceof ArrayCollection && $e->isEmpty() ? null : $e];
                     }
+
+                    return null;
                 },
                 (array)$data
             );

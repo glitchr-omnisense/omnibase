@@ -39,6 +39,7 @@ class DataCollector extends AbstractDataCollector
     private $baseService;
 
     public array $dataBundles = [];
+
     public function __construct(AdminContextProvider $adminContextProvider, ManagerRegistry $doctrine, ParameterBagInterface $parameterBag, RouterInterface $router, BaseService $baseService)
     {
         $this->adminContextProvider = $adminContextProvider;
@@ -62,6 +63,7 @@ class DataCollector extends AbstractDataCollector
     {
         return $this->data;
     }
+
     public function getDataBundle(string $bundle): ?array
     {
         if (!array_key_exists($bundle, $this->dataBundles)) {
@@ -83,19 +85,19 @@ class DataCollector extends AbstractDataCollector
             return false;
         }
 
-        $bundleLocation = \Composer\InstalledVersions::getRootPackage($bundleIdentifier)["install_path"];
-        $bundleLocation = realpath($bundleLocation."vendor/".$bundleIdentifier);
+        $bundleLocation = \Composer\InstalledVersions::getRootPackage()["install_path"];
+        $bundleLocation = realpath($bundleLocation . "vendor/" . $bundleIdentifier);
 
         $bundleVersion = \Composer\InstalledVersions::getPrettyVersion($bundleIdentifier);
         $bundleDevRequirements = !\Composer\InstalledVersions::isInstalled($bundleIdentifier, false);
-        $bundleSuffix = $bundleSuffix ? "@".$bundleSuffix : "";
+        $bundleSuffix = $bundleSuffix ? "@" . $bundleSuffix : "";
 
         $this->dataBundles[$bundle] = [
-            "identifier"  => $bundleIdentifier,
+            "identifier" => $bundleIdentifier,
             "name" => trim(str_rstrip(mb_ucwords(camel2snake(class_basename($bundle), " ")), "Bundle")),
             "location" => $bundleLocation,
-            "version"  => str_lstrip($bundleVersion, "v").$bundleSuffix,
-            "dev_requirements"  => $bundleDevRequirements,
+            "version" => str_lstrip($bundleVersion, "v") . $bundleSuffix,
+            "dev_requirements" => $bundleDevRequirements,
         ];
 
         return true;
@@ -104,8 +106,8 @@ class DataCollector extends AbstractDataCollector
     public function collect(Request $request, Response $response, $exception = null)
     {
         $context = $this->adminContextProvider->getContext();
-        $dbname  = $this->doctrine->getConnection($this->doctrine->getDefaultConnectionName())->getParams()["dbname"] ?? null;
-        $dbname  = str_shorten($dbname, 10, SHORTEN_MIDDLE, "[..]");
+        $dbname = $this->doctrine->getConnection($this->doctrine->getDefaultConnectionName())->getParams()["dbname"] ?? null;
+        $dbname = str_shorten($dbname, 10, SHORTEN_MIDDLE, "[..]");
 
         $this->collectDataBundle(BaseBundle::class);
         $this->collectDataBundle(TwigBundle::class);
@@ -113,7 +115,7 @@ class DataCollector extends AbstractDataCollector
         $this->collectDataBundle(DoctrineBundle::class, $dbname);
         $this->collectDataBundle(EasyAdminBundle::class);
 
-        $this->data = array_map_recursive(fn ($v) => $this->cloneVar($v), $this->collectData($context));
+        $this->data = array_map_recursive(fn($v) => $this->cloneVar($v), $this->collectData($context));
         $this->data["_bundles"] = $this->dataBundles;
     }
 
@@ -131,8 +133,8 @@ class DataCollector extends AbstractDataCollector
         $bundleRoot = dirname($reflector->getFileName());
 
         foreach (\Composer\InstalledVersions::getInstalledPackages() as $bundleIdentifier) {
-            $bundleLocation = \Composer\InstalledVersions::getRootPackage($bundleIdentifier)["install_path"];
-            $bundleLocation = realpath($bundleLocation."vendor/".$bundleIdentifier);
+            $bundleLocation = \Composer\InstalledVersions::getRootPackage()["install_path"];
+            $bundleLocation = realpath($bundleLocation . "vendor/" . $bundleIdentifier);
 
             if ($bundleLocation && str_starts_with($bundleRoot, $bundleLocation)) {
                 return $bundleIdentifier;
@@ -152,21 +154,21 @@ class DataCollector extends AbstractDataCollector
         }
 
         $driver = $params["driver"] ?? null;
-        $driver = $driver ? $driver."://" : "";
+        $driver = $driver ? $driver . "://" : "";
 
         $user = $params["user"] ?? null;
-        $user = $user ? $user."@" : "";
+        $user = $user ? $user . "@" : "";
 
         $port = $params["port"] ?? null;
-        $port = $port ? ":".$port : "";
+        $port = $port ? ":" . $port : "";
 
         $dbname = $params["dbname"] ?? null;
-        $dbname = $dbname ? "/".$dbname : "";
+        $dbname = $dbname ? "/" . $dbname : "";
 
         $charset = $params["charset"] ?? null;
-        $charset = $charset ? " (".$params["charset"].")" : "";
+        $charset = $charset ? " (" . $params["charset"] . ")" : "";
 
-        return $driver.$user.$host.$port.$dbname.$charset;
+        return $driver . $user . $host . $port . $dbname . $charset;
     }
 
     private function getDoctrineConnections()
@@ -175,8 +177,8 @@ class DataCollector extends AbstractDataCollector
         foreach ($this->doctrine->getConnectionNames() as $connectionName => $_) {
             $connection = $this->doctrine->getConnection($connectionName);
 
-            $isDefaultName  = $defaultConnectionName == $connectionName;
-            $connectionName = $isDefaultName ? $connectionName." (*)" : $connectionName;
+            $isDefaultName = $defaultConnectionName == $connectionName;
+            $connectionName = $isDefaultName ? $connectionName . " (*)" : $connectionName;
 
             $connections[$connectionName] = $this->getFormattedConnection($connection);
         }
@@ -188,8 +190,8 @@ class DataCollector extends AbstractDataCollector
     {
         $bundleName = $this->getDataBundle($bundle)["name"] ?? null;
         $bundleVersion = $this->getDataBundle($bundle)["version"] ?? null;
-        $bundleVersion = ($bundleVersion ? " (".$bundleVersion.")" : "");
-        return $bundleName.$bundleVersion;
+        $bundleVersion = ($bundleVersion ? " (" . $bundleVersion . ")" : "");
+        return $bundleName . $bundleVersion;
     }
 
     private function collectData(?AdminContext $context): array

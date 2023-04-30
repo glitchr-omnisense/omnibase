@@ -46,23 +46,24 @@ class Uploader extends AbstractAnnotation
     protected array $config;
     protected array $formats;
     protected array $mimeTypes;
-    protected int   $maxSize;
+    protected int $maxSize;
 
     public function __construct(array $data)
     {
-        $this->pool      = (!empty($data["pool"]   ?? null) ? $data["pool"] : "default");
+        $this->pool = (!empty($data["pool"] ?? null) ? $data["pool"] : "default");
 
-        $this->storage   = $data["storage"]    ?? null;
-        $this->missable  = $data["missable"]   ?? false;
-        $this->fetch     = $data["fetch"]      ?? false;
-        $this->config    = $data["config"]     ?? [];
+        $this->storage = $data["storage"] ?? null;
+        $this->missable = $data["missable"] ?? false;
+        $this->fetch = $data["fetch"] ?? false;
+        $this->config = $data["config"] ?? [];
         $this->mimeTypes = $data["mime_types"] ?? [];
-        $this->formats   = $data["formats"]    ?? [];
+        $this->formats = $data["formats"] ?? [];
 
-        $this->maxSize   = str2dec($data["max_size"] ?? 8*UploadedFile::getMaxFilesize())/8;
+        $this->maxSize = str2dec($data["max_size"] ?? 8 * UploadedFile::getMaxFilesize()) / 8;
     }
 
     protected array $ancestorEntity = [];
+
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         if (!$this->getEntityManager()->contains($entity)) {
@@ -80,10 +81,12 @@ class Uploader extends AbstractAnnotation
     {
         return $this->config;
     }
+
     public function getStorage()
     {
         return $this->storage;
     }
+
     public function getFormats()
     {
         return $this->formats;
@@ -93,10 +96,12 @@ class Uploader extends AbstractAnnotation
     {
         return $this->storage;
     }
+
     public function formats()
     {
         return $this->formats;
     }
+
     public function mimeTypes()
     {
         return $this->mimeTypes;
@@ -104,12 +109,14 @@ class Uploader extends AbstractAnnotation
 
     public function isImage()
     {
-        return !empty(array_filter($this->mimeTypes, fn ($type) => str_starts_with($type, "image/")));
+        return !empty(array_filter($this->mimeTypes, fn($type) => str_starts_with($type, "image/")));
     }
+
     public function getPool()
     {
         return $this->pool;
     }
+
     public function getMissable()
     {
         return $this->missable;
@@ -122,8 +129,8 @@ class Uploader extends AbstractAnnotation
 
     public function getPath(mixed $entity, string $fieldPath, ?string $uuid = null): ?string
     {
-        $pool     = $this->pool;
-        $uuid     = $uuid ?? Uuid::v4();
+        $pool = $this->pool;
+        $uuid = $uuid ?? Uuid::v4();
 
         if ($uuid && !preg_match('/^[a-f0-9\-]{36}$/i', $uuid)) {
             return null;
@@ -140,17 +147,17 @@ class Uploader extends AbstractAnnotation
                 "lcfirst",
                 explode(
                     "\\",
-                    substr($namespace, strpos($namespace, $namespaceRoot)+strlen($namespaceRoot))
+                    substr($namespace, strpos($namespace, $namespaceRoot) + strlen($namespaceRoot))
                 )
             ));
         }
 
         $fieldName = $fieldPath;
         if (($dot = strpos($fieldPath, ".")) > 0) {
-            $fieldName = trim(substr($fieldPath, $dot+1));
+            $fieldName = trim(substr($fieldPath, $dot + 1));
         }
 
-        return rtrim($pool . $namespaceDir . "/_".camel2snake($fieldName)."/" . $uuid, ".");
+        return rtrim($pool . $namespaceDir . "/_" . camel2snake($fieldName) . "/" . $uuid, ".");
     }
 
     public static function getPublic($entity, $fieldName)
@@ -244,6 +251,7 @@ class Uploader extends AbstractAnnotation
     }
 
     protected static $tmpHashTable = [];
+
     public static function get($entity, string $fieldName)
     {
         if ($entity === null) {
@@ -257,13 +265,13 @@ class Uploader extends AbstractAnnotation
         /**
          * @var Uploader
          */
-        $that       = self::getAnnotation($entity, $fieldName, self::class);
+        $that = self::getAnnotation($entity, $fieldName, self::class);
         if (!$that) {
             return null;
         }
 
         $operator = $that->getFlysystem()->getOperator($that->storage);
-        $adapter  = $that->getFlysystem()->getAdapter($operator);
+        $adapter = $that->getFlysystem()->getAdapter($operator);
 
         $fieldValue = self::getFieldValue($entity, $fieldName);
         if (!$fieldValue) {
@@ -319,7 +327,7 @@ class Uploader extends AbstractAnnotation
         $new = self::getFieldValue($entity, $fieldName);
 
         $newList = is_array($new) ? $new : [$new];
-        $newListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $newList));
+        $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
 
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // These elements are not meant to be uploaded
@@ -330,17 +338,17 @@ class Uploader extends AbstractAnnotation
         // File instances are filtered below, in case of UOW manipulation..
         $old = array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName) : self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
-        $oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
+        //$oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
 
         // No change in the list.. (NB: Not good approach in case of UOW manipulation)
-        $potentialMemoryLeak = array_filter($oldList, fn ($f) => $f instanceof File);
+        $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File);
         if ($potentialMemoryLeak && $newList !== $oldList) {
-            throw new Exception(File::class." instance found the old list of ".get_class($entity)."::".$fieldName."\n Did you called unit of work change set ? Please process file manually");
+            throw new Exception(File::class . " instance found the old list of " . get_class($entity) . "::" . $fieldName . "\n Did you called unit of work change set ? Please process file manually");
         } elseif (!$potentialMemoryLeak && $newList === $oldList) {
             return true;
         }
 
-        $oldList = array_filter($oldList, fn ($f) => !$f instanceof File);
+        $oldList = array_filter($oldList, fn($f) => !$f instanceof File);
 
         // Nothing to upload, empty field..
         if ($newList === null) {
@@ -360,7 +368,7 @@ class Uploader extends AbstractAnnotation
         }
 
         $entityId = $entity->getId();
-        $entityId = $entityId ? "#".$entityId : "";
+        $entityId = $entityId ? "#" . $entityId : "";
 
         $fileList = []; // Field value can be an array or just a single path
         $uploadList = array_values(array_intersect($newList, $oldList));
@@ -380,31 +388,31 @@ class Uploader extends AbstractAnnotation
             //
             // Check size restriction
             if (!file_exists($file->getPathname())) {
-                throw new FileNotFoundException("File got erased \"$fieldName\" in ".get_class($entity).".");
+                throw new FileNotFoundException("File got erased \"$fieldName\" in " . get_class($entity) . ".");
             }
 
             if ($file->getSize() > $this->maxSize) {
-                throw new InvalidSizeException("Invalid filesize \"".$entry."\" exception for field \"$fieldName\" in ".get_class($entity)." ".$entityId." (".$file->getSize()."B > ".$this->maxSize."B)");
+                throw new InvalidSizeException("Invalid filesize \"" . $entry . "\" exception for field \"$fieldName\" in " . get_class($entity) . " " . $entityId . " (" . $file->getSize() . "B > " . $this->maxSize . "B)");
             }
 
             //
             // Check mime restriction
             $compatibleMimeType = empty($this->mimeTypes);
             foreach ($this->mimeTypes as $mimeType) {
-                $compatibleMimeType |= preg_match("/".str_replace("/", "\/", $mimeType)."/", $file->getMimeType());
+                $compatibleMimeType |= preg_match("/" . str_replace("/", "\/", $mimeType) . "/", $file->getMimeType());
             }
 
             if (!$compatibleMimeType) {
-                throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for field \"$fieldName\" in ".get_class($entity)." ".$entityId." (expected: \"".implode(", ", $this->mimeTypes)."\").");
+                throw new InvalidMimeTypeException("Invalid MIME type \"" . $file->getMimeType() . "\" received for field \"$fieldName\" in " . get_class($entity) . " " . $entityId . " (expected: \"" . implode(", ", $this->mimeTypes) . "\").");
             }
 
             //
             // Upload files
-            $path     = $this->getPath($entity ?? $oldEntity ?? null, $fieldName);
+            $path = $this->getPath($entity ?? $oldEntity ?? null, $fieldName);
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
 
             if (!$this->getFlysystem()->write($path, $contents, $this->getStorage(), $this->getConfig())) {
-                throw new InvalidMimeTypeException("Failed to write \"".$path."\" in ".get_class($entity).".");
+                throw new InvalidMimeTypeException("Failed to write \"" . $path . "\" in " . get_class($entity) . ".");
             }
 
             $fileList[] = basename($path);
@@ -418,7 +426,7 @@ class Uploader extends AbstractAnnotation
     {
         $new = self::getFieldValue($entity, $fieldName);
         $newList = is_array($new) ? $new : [$new];
-        $newListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $newList));
+        $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
 
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // This means that these elements are not meant to be uploaded
@@ -428,7 +436,7 @@ class Uploader extends AbstractAnnotation
 
         $old = $entity !== null && array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName) : self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
-        $oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
+        $oldListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $oldList));
 
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // This means that these elements are not meant to be uploaded
@@ -437,7 +445,7 @@ class Uploader extends AbstractAnnotation
         }
 
         if (!$oldList) {
-            return;
+            return false;
         }
 
         foreach (array_diff($oldList, $newList) as $file) {
@@ -455,6 +463,8 @@ class Uploader extends AbstractAnnotation
                 $this->getFlysystem()->delete($path, $this->getStorage());
             }
         }
+
+        return true;
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
@@ -466,7 +476,7 @@ class Uploader extends AbstractAnnotation
     {
         try {
             $this->uploadFiles($entity, null, $fieldName);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->deleteFiles(null, $entity, $fieldName);
             self::setFieldValue($entity, $fieldName, null);
 
@@ -481,7 +491,7 @@ class Uploader extends AbstractAnnotation
             if ($this->uploadFiles($entity, $oldEntity, $fieldName)) {
                 $this->deleteFiles($entity, $oldEntity, $fieldName);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->deleteFiles($oldEntity, $entity, $fieldName);
             $old = self::getFieldValue($oldEntity, $fieldName);
 

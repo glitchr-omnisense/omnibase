@@ -81,22 +81,24 @@ class AdvancedRouter extends Router implements RouterInterface
 
     protected $firewallMap;
 
-    protected string  $environment;
+    protected string $environment;
 
-    protected bool    $debug;
+    protected bool $debug;
     protected ?string $cacheName;
 
     protected bool $useAdvancedFeatures;
     protected bool $useFallbacks;
 
-    public function getLocaleLang(?string $lang   = null): string
+    public function getLocaleLang(?string $lang = null): string
     {
         return $this->localizer->getLocaleLang($lang);
     }
+
     public function getLocale(?string $locale = null): string
     {
         return $this->localizer->getLocale($locale);
     }
+
     public function getEnvironment(): string
     {
         return $this->environment;
@@ -104,24 +106,24 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function __construct(Router $router, RequestStack $requestStack, FirewallMapInterface $firewallMap, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, AssetExtension $assetTwigExtension, CacheInterface $cache, string $debug, string $environment)
     {
-        $this->debug  = $debug;
+        $this->debug = $debug;
         $this->environment = $environment;
 
         $this->router = $router;
-        $this->requestStack       = $requestStack;
-        $this->parameterBag       = $parameterBag;
-        $this->localizer          = $localizer;
+        $this->requestStack = $requestStack;
+        $this->parameterBag = $parameterBag;
+        $this->localizer = $localizer;
         $this->assetTwigExtension = $assetTwigExtension;
-        $this->firewallMap        = $firewallMap;
+        $this->firewallMap = $firewallMap;
 
-        $this->cache             = $cache;
-        $this->cacheName         = "router." . hash('md5', self::class);
-        $this->cacheRoutes       = $this->cache ? $this->cache->getItem($this->cacheName.".routes") : null;
-        $this->cacheRouteMatches = $this->cache ? $this->cache->getItem($this->cacheName.".route_matches") : null;
-        $this->cacheRouteGroups  = $this->cache ? $this->cache->getItem($this->cacheName.".route_groups") : null;
+        $this->cache = $cache;
+        $this->cacheName = "router." . hash('md5', self::class);
+        $this->cacheRoutes = $this->cache ? $this->cache->getItem($this->cacheName . ".routes") : null;
+        $this->cacheRouteMatches = $this->cache ? $this->cache->getItem($this->cacheName . ".route_matches") : null;
+        $this->cacheRouteGroups = $this->cache ? $this->cache->getItem($this->cacheName . ".route_groups") : null;
 
         $this->useAdvancedFeatures = $parameterBag->get("base.router.use_custom") ?? false;
-        $this->useFallbacks        = $parameterBag->get("base.router.use_fallbacks") ?? false;
+        $this->useFallbacks = $parameterBag->get("base.router.use_fallbacks") ?? false;
 
         AdvancedUrlMatcher::$router = $this;
         $this->router->setOption("matcher_class", AdvancedUrlMatcher::class);
@@ -133,6 +135,7 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         return $this->useAdvancedFeatures;
     }
+
     public function useFallbacks(): bool
     {
         return $this->useFallbacks;
@@ -156,7 +159,7 @@ class AdvancedRouter extends Router implements RouterInterface
     public function warmUp(string $cacheDir): array
     {
         if (getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli") {
-            echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
+            echo " // Warming up cache... Advanced router" . PHP_EOL . PHP_EOL;
         }
 
         return $this->router->warmUp($cacheDir);
@@ -166,10 +169,12 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         return is_cli();
     }
+
     public function isDebug(): bool
     {
         return $this->debug;
     }
+
     public function isBackend(mixed $request = null): bool
     {
         return $this->isEasyAdmin($request) || $this->isProfiler($request);
@@ -281,7 +286,7 @@ class AdvancedRouter extends Router implements RouterInterface
             $parents[] = $parent;
         }
 
-        $eaParents = array_filter($parents, fn ($c) => str_starts_with($c, "EasyCorp\Bundle\EasyAdminBundle"));
+        $eaParents = array_filter($parents, fn($c) => str_starts_with($c, "EasyCorp\Bundle\EasyAdminBundle"));
         return !empty($eaParents);
     }
 
@@ -289,7 +294,7 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         $parsedUrl = parse_url($nameOrUrl);
         $parameters = array_merge(
-            array_transforms(fn ($k, $v): array => [explode("=", $v)[0], explode("=", $v)[1] ?? ""], explode("&", $parsedUrl["query"])),
+            array_transforms(fn($k, $v): array => [explode("=", $v)[0], explode("=", $v)[1] ?? ""], explode("&", $parsedUrl["query"])),
             $parameters
         );
 
@@ -306,7 +311,7 @@ class AdvancedRouter extends Router implements RouterInterface
         $nameOrUrl ??= get_url();
         $nameOrUrl = trim($nameOrUrl);
         if ($referenceType == self::ABSOLUTE_PATH) {
-            $host = $this->getScheme()."://".$this->getHost();
+            $host = $this->getScheme() . "://" . $this->getHost();
             if (str_starts_with($nameOrUrl, $host)) {
                 $nameOrUrl = preg_replace('#^.+://[^/]+#', '', $nameOrUrl);
             }
@@ -314,7 +319,7 @@ class AdvancedRouter extends Router implements RouterInterface
 
         if (filter_var($nameOrUrl, FILTER_VALIDATE_URL) || str_contains($nameOrUrl, "/")) {
             if (!str_contains($nameOrUrl, "://") && $referenceType == self::ABSOLUTE_URL) {
-                return $this->getScheme()."://".$this->getHost()."/".str_lstrip($this->getBaseDir(), "/").str_lstrip($nameOrUrl, "/");
+                return $this->getScheme() . "://" . $this->getHost() . "/" . str_lstrip($this->getBaseDir(), "/") . str_lstrip($nameOrUrl, "/");
             }
 
             return $nameOrUrl;
@@ -332,6 +337,7 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         return $this->router->getContext();
     }
+
     public function setContext(RequestContext $context)
     {
         $this->router->setContext($context);
@@ -352,10 +358,12 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         return $this->router->match($pathinfo);
     }
+
     public function matchRequest(Request $request): array
     {
         return $this->router->matchRequest($request);
     }
+
     public function getMatcher(): UrlMatcherInterface
     {
         $matcher = $this->router->getMatcher();
@@ -391,6 +399,7 @@ class AdvancedRouter extends Router implements RouterInterface
     // NB: Don't get confused, here. This route is not same as annotations and...
     // ... it is computed based on compiled routes from generator (not matcher)
     protected array $routes = [];
+
     public function getRoute(?string $routeNameOrUrl = null): ?Route
     {
         if ($routeNameOrUrl === null) {
@@ -403,18 +412,18 @@ class AdvancedRouter extends Router implements RouterInterface
         }
 
         $generator = $this->getGenerator();
-        $matcher   = $this->getMatcher();
-        $lang      = $this->localizer->getLocaleLang();
+        $matcher = $this->getMatcher();
+        $lang = $this->localizer->getLocaleLang();
 
         $compiledRoutes = $generator->getCompiledRoutes();
-        $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName.".".$lang] ?? null;
+        $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName . "." . $lang] ?? null;
 
         if ($compiledRoute !== null) {
-            $args = array_transforms(fn ($k, $v): array => [$k, in_array($k, [3,4]) ? $matcher->getCompiledPath($v) : $v], $compiledRoute);
+            $args = array_transforms(fn($k, $v): array => [$k, in_array($k, [3, 4]) ? $matcher->getCompiledPath($v) : $v], $compiledRoute);
             $locale = $args[1]["_locale"] ?? null;
             $locale = $locale ? ["_locale" => $locale] : [];
 
-            $search  = array_map(fn ($k) => "{".$k."}", array_keys($args[1]));
+            $search = array_map(fn($k) => "{" . $k . "}", array_keys($args[1]));
             $replace = array_values($args[1]);
             $args[4] = str_replace($search, $replace, $args[4]);
 
@@ -436,14 +445,14 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function reducesOnFallback(?string $locale = null, ?string $environment = null): bool
     {
-        $fallbacks   = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
+        $fallbacks = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocaleLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale());
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocaleLang());
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", null) ?? [];
 
         if ($environment) {
-            $fallbacks = array_filter($fallbacks, fn ($h) => ($h["env"] ?? null) == $environment);
+            $fallbacks = array_filter($fallbacks, fn($h) => ($h["env"] ?? null) == $environment);
         }
 
         $fallback = first($fallbacks);
@@ -456,18 +465,18 @@ class AdvancedRouter extends Router implements RouterInterface
             return null;
         }
 
-        $fallbacks   = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
+        $fallbacks = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocaleLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale());
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocaleLang());
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", null) ?? [];
 
         if ($environment) {
-            $fallbacks = array_filter($fallbacks, fn ($h) => ($h["env"] ?? null) == $environment);
+            $fallbacks = array_filter($fallbacks, fn($h) => ($h["env"] ?? null) == $environment);
         }
 
         $fallback = first($fallbacks);
-        $fallback = array_map(fn ($h) => is_array($h) || $h === null ? $h : [$h], $fallback);
+        $fallback = array_map(fn($h) => is_array($h) || $h === null ? $h : [$h], $fallback);
 
         return $fallback;
     }
@@ -507,9 +516,9 @@ class AdvancedRouter extends Router implements RouterInterface
         $domain = is_array($domain) && first($domain) != false ? first($domain) : "";
 
         $port = $host["port"] ?? null;
-        $port = is_array($port) && first($port) != false && !in_array(first($port), [80,443]) ? ":" . first($port) : "";
+        $port = is_array($port) && first($port) != false && !in_array(first($port), [80, 443]) ? ":" . first($port) : "";
 
-        return $machine.$subdomain.$domain.$port;
+        return $machine . $subdomain . $domain . $port;
     }
 
     public function getHost(?string $locale = null, ?string $environment = null): string
@@ -522,12 +531,14 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         return $this->getFallbackParameters($locale, $environment)["port"] ?? [];
     }
+
     public function getPortFallback(?string $locale = null, ?string $environment = null): ?int
     {
         $portFallback = first($this->getPortFallbacks($locale, $environment));
         $portFallback = in_array($portFallback ?? 80, [80, 443]) ? null : $portFallback;
         return $portFallback ? intval($portFallback) : null;
     }
+
     public function getPort(?string $locale = null, ?string $environment = null): ?int
     {
         $parsedUrl = parse_url2(get_url());
@@ -538,15 +549,18 @@ class AdvancedRouter extends Router implements RouterInterface
 
         return in_array($port ?? 80, [80, 443]) ? null : $port;
     }
+
     public function getMachineFallbacks(?string $locale = null, ?string $environment = null): array
     {
         return $this->getFallbackParameters($locale, $environment)["machine"] ?? [];
     }
+
     public function getMachineFallback(?string $locale = null, ?string $environment = null): ?string
     {
         $machineFallback = first($this->getMachineFallbacks($locale, $environment));
         return $machineFallback ? $machineFallback : null;
     }
+
     public function getMachine(?string $locale = null, ?string $environment = null): ?string
     {
         $parsedUrl = parse_url2(get_url());
@@ -561,11 +575,13 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         return $this->getFallbackParameters($locale, $environment)["subdomain"] ?? [];
     }
+
     public function getSubdomainFallback(?string $locale = null, ?string $environment = null): ?string
     {
         $subdomainFallback = first($this->getSubdomainFallbacks($locale, $environment));
         return $subdomainFallback ? $subdomainFallback : null;
     }
+
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string
     {
         $parsedUrl = parse_url2(get_url());
@@ -575,15 +591,18 @@ class AdvancedRouter extends Router implements RouterInterface
 
         return $parsedUrl["subdomain"] ?? null;
     }
+
     public function getDomainFallbacks(?string $locale = null, ?string $environment = null): array
     {
         return $this->getFallbackParameters($locale, $environment)["domain"] ?? [];
     }
+
     public function getDomainFallback(?string $locale = null, ?string $environment = null): ?string
     {
         $domainFallback = first($this->getDomainFallbacks($locale, $environment));
         return $domainFallback ? $domainFallback : null;
     }
+
     public function getDomain(?string $locale = null, ?string $environment = null): ?string
     {
         $parsedUrl = parse_url2(get_url());
@@ -598,6 +617,7 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         return $this->parameterBag->get("base.site.index") ?? $this->getRouteName("/");
     }
+
     public function getUrlIndex(): string
     {
         return $this->getUrl($this->getRouteIndex());
@@ -697,13 +717,13 @@ class AdvancedRouter extends Router implements RouterInterface
         if (array_key_exists("callback", $headers)) {
             $callback = $headers["callback"];
             if (!is_callable($callback)) {
-                throw new InvalidArgumentException("header variable \"callback\" must be callable, value received: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
+                throw new InvalidArgumentException("header variable \"callback\" must be callable, value received: " . (is_object($callback) ? get_class($callback) : gettype($callback)));
             }
 
             unset($headers["callback"]);
         }
 
-        $url   = $this->generate($routeName, $routeParameters, 0) ?? $routeName;
+        $url = $this->generate($routeName, $routeParameters, 0) ?? $routeName;
         $routeName = $this->getRouteName($url);
 
         if (!$routeName) {
@@ -741,7 +761,7 @@ class AdvancedRouter extends Router implements RouterInterface
         if (array_key_exists("exceptions", $headers)) {
             $exceptions = $headers["exceptions"];
             if (!is_string($exceptions) && !is_array($exceptions)) {
-                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", value received: ".(is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
+                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", value received: " . (is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
             }
 
             unset($headers["exceptions"]);
@@ -751,13 +771,13 @@ class AdvancedRouter extends Router implements RouterInterface
         if (array_key_exists("callback", $headers)) {
             $callback = $headers["callback"];
             if (!is_callable($callback)) {
-                throw new InvalidArgumentException("header variable \"callback\" must be callable, value received: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
+                throw new InvalidArgumentException("header variable \"callback\" must be callable, value received: " . (is_object($callback) ? get_class($callback) : gettype($callback)));
             }
 
             unset($headers["callback"]);
         }
 
-        $url   = $this->generate($routeName, $routeParameters) ?? $routeName;
+        $url = $this->generate($routeName, $routeParameters) ?? $routeName;
         $routeName = $this->getRouteName($url);
         if (!$routeName) {
             throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));

@@ -47,7 +47,7 @@ namespace {
         }
 
         if (is_object($stringOrObject)) {
-            return get_object_vars($stringOrObject) ? true : false;
+            return (bool)get_object_vars($stringOrObject);
         }
 
         return false;
@@ -703,7 +703,7 @@ namespace {
 
     function unlink_tmpfile(string $fname): bool
     {
-        return is_tmpfile($fname) && file_exists($fname) ? unlink($fname) : false;
+        return is_tmpfile($fname) && file_exists($fname) && unlink($fname);
     }
 
     function belongs_to(string $fname, string $base): bool
@@ -742,17 +742,20 @@ namespace {
     {
         foreach ($args as $object) {
             if (!$object) {
-                return dump("Object passed is null");
+                dump("Object passed is null");
+                return;
             }
             $objectID = (is_object($object)) ? "Object: 0x" . spl_object_hash($object) . "\n" : "";
 
             if (!is_object($object) && !is_string($object)) {
-                return dump($object);
+                dump($object);
+                return;
             }
 
             $className = (is_string($object) ? $object : get_class($object));
             if (!class_exists($className)) {
-                return dump("Class \"$className\" not found.");
+                dump("Class \"$className\" not found.");
+                return;
             }
 
             $classParent = get_parent_class($className);
@@ -1427,7 +1430,7 @@ namespace {
             return [500, "application/octet-stream"];
         }
         if ($mode != HEADER_FOLLOW_REDIRECT) {
-            return get_headers($url, false);
+            return get_headers($url);
         }
 
         do {
@@ -2114,7 +2117,7 @@ namespace {
     function cmyk_profile(string $path, string $name)
     {
         $image = new \Imagick($path); // load image
-        return $image->getImageProfiles($name, true)[$name] ?? null; // get profiles
+        return $image->getImageProfiles($name)[$name] ?? null; // get profiles
     }
 
     function write_cmyk_profiles(string $path, array $profiles)
@@ -2139,20 +2142,21 @@ namespace {
     function cmyk_profiles(string $path)
     {
         $image = new \Imagick($path); // load image
-        return $image->getImageProfiles('*', true); // get profiles
+        return $image->getImageProfiles(); // get profiles
     }
 
     function cmyk_icc_profile(string $path)
     {
         $image = new \Imagick($path); // load image
-        return $image->getImageProfiles('icc', true)['icc'] ?? null; // get profiles
+        return $image->getImageProfiles('icc')['icc'] ?? null; // get profiles
     }
 
-    function cmyk2rgb(string $path) // Not working... color are distorded
+    function cmyk2rgb(string $path): string
     {
         if (is_rgb($path)) {
             return $path;
         }
+
         if (!class_exists("Imagick")) {
             throw new Exception(__FUNCTION__ . "(): Imagick driver not found.");
         }
@@ -2161,9 +2165,11 @@ namespace {
         $image->transformImageColorspace(\Imagick::COLORSPACE_SRGB);
         $image->writeImage($path);
         $image->destroy();
+
+        return $path;
     }
 
-    function rgb2cmyk($path)
+    function rgb2cmyk($path): string
     {
         if (is_cmyk($path)) {
             return $path;
@@ -2176,9 +2182,11 @@ namespace {
         $image->transformImageColorspace(\Imagick::COLORSPACE_CMYK);
         $image->writeImage($path);
         $image->destroy();
+
+        return $path;
     }
 
-    function is_emptydir($dir)
+    function is_emptydir($dir): bool
     {
         $handle = opendir($dir);
         while (false !== ($entry = readdir($handle))) {
@@ -2369,7 +2377,7 @@ namespace {
     function curlimagesize(string $url): ?array
     {
         $raw = curlranger($url);
-        if ($raw == false) {
+        if (!$raw) {
             return null;
         }
 
@@ -3116,13 +3124,13 @@ namespace {
 
         return usort($array, function ($a1, $a2) use ($startingWith) {
             foreach ($startingWith as $needle) {
-                if (str_starts_with($a1, $needle) == true && str_starts_with($a2, $needle) == true) {
+                if (str_starts_with($a1, $needle) && str_starts_with($a2, $needle)) {
                     return 0;
                 }
-                if (str_starts_with($a1, $needle) == false && str_starts_with($a2, $needle) == true) {
+                if (!str_starts_with($a1, $needle) && str_starts_with($a2, $needle)) {
                     return 1;
                 }
-                if (str_starts_with($a1, $needle) == true && str_starts_with($a2, $needle) == false) {
+                if (str_starts_with($a1, $needle) && !str_starts_with($a2, $needle)) {
                     return -1;
                 }
             }
@@ -3139,13 +3147,13 @@ namespace {
 
         return usort($array, function ($a1, $a2) use ($startingWith) {
             foreach ($startingWith as $needle) {
-                if (str_ends_with($a1, $needle) == true && str_ends_with($a2, $needle) == true) {
+                if (str_ends_with($a1, $needle) && str_ends_with($a2, $needle)) {
                     return 0;
                 }
-                if (str_ends_with($a1, $needle) == true && str_ends_with($a2, $needle) == false) {
+                if (str_ends_with($a1, $needle) && !str_ends_with($a2, $needle)) {
                     return 1;
                 }
-                if (str_ends_with($a1, $needle) == false && str_ends_with($a2, $needle) == true) {
+                if (!str_ends_with($a1, $needle) && str_ends_with($a2, $needle)) {
                     return -1;
                 }
             }
@@ -3201,8 +3209,8 @@ namespace {
         $g /= 255;
         $b /= 255;
 
-        $min = min($r, min($g, $b));
-        $max = max($r, max($g, $b));
+        $min = min($r, $g, $b);
+        $max = max($r, $g, $b);
         $delta = $max - $min;
 
         $s = 0;
@@ -3346,7 +3354,7 @@ namespace {
 
         $datetime = cast_datetime($datetime);
         $today = new DateTime("today");
-        $diff = $today->diff($datetime->setTime(0, 0, 0));
+        $diff = $today->diff($datetime->setTime(0, 0));
         return (int)$diff->format("%R%a");
     }
 
@@ -3445,7 +3453,7 @@ namespace {
             return false;
         }
 
-        return $datetime1 != null || $datetime1 != null;
+        return $datetime1 != null || $datetime2 != null;
     }
 
     function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null)
@@ -3455,11 +3463,11 @@ namespace {
             return false;
         }
 
-        $datetime->setTime(0, 0, 0);
+        $datetime->setTime(0, 0);
         $datetime1 = cast_datetime($d1);
-        $datetime1->setTime(0, 0, 0);
+        $datetime1->setTime(0, 0);
         $datetime2 = cast_datetime($d2);
-        $datetime2->setTime(0, 0, 0);
+        $datetime2->setTime(0, 0);
 
         return datetime_is_between($datetime, $datetime1, $datetime2);
     }

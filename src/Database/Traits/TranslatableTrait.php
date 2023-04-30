@@ -17,14 +17,17 @@ use Symfony\Component\PropertyAccess\Exception\AccessException;
 trait TranslatableTrait
 {
     private static $translationClass;
+
     public static function getEntityFqcn(): string
     {
         return self::getTranslationEntityClass()::getTranslatableEntityClass();
     }
+
     public static function getTranslationEntityClass(
         bool $withInheritance = true, // This is required in some cases, where you must access main class without inheritance
         bool $selfClass = false // Proxies\__CG__ error, if not true during discriminator map building (TranslationType)
-    ): ?string {
+    ): ?string
+    {
         $class = ($selfClass ? self::class : static::class);
 
         $prefix = "Proxies\__CG__\\";
@@ -36,7 +39,7 @@ trait TranslatableTrait
             self::$translationClass = $class . NamingStrategy::TABLE_I18N_SUFFIX;
             while (!class_exists(self::$translationClass) || !is_subclass_of(self::$translationClass, TranslationInterface::class)) {
                 if (!get_parent_class($class)) {
-                    throw new Exception("No translation entity found for ".$class);
+                    throw new Exception("No translation entity found for " . $class);
                 }
 
                 $class = get_parent_class($class);
@@ -58,6 +61,7 @@ trait TranslatableTrait
      * @var TranslationInterface[]|Collection
      */
     protected $translations;
+
     public function getTranslations()
     {
         if ($this->translations === null) {
@@ -108,13 +112,13 @@ trait TranslatableTrait
 
         $locale = intval($locale) < 0 ? $defaultLocale : $locale;
         $normLocale = $localizer->getLocale($locale); // Locale normalizer
-        $translationClass = self::getTranslationEntityClass(true, false);
+        $translationClass = self::getTranslationEntityClass();
         $translations = $this->getTranslations();
 
         $translation = $translations[$normLocale] ?? null;
         if (!$translation && $locale === null) {
             // First entry is default locale
-            $locales = array_filter($translations->getKeys(), fn ($l) => in_array($l, $availableLocales));
+            $locales = array_filter($translations->getKeys(), fn($l) => in_array($l, $availableLocales));
             foreach ($locales as $locale) {
                 $translation = $translations[$locale] ?? null;
                 if ($translation) {
@@ -125,8 +129,8 @@ trait TranslatableTrait
 
             // Search for compatible lang
             if ($translation == null) {
-                $locales = array_filter($translations->getKeys(), fn ($l) => !in_array($l, $availableLocales));
-                $fallbackLocales = array_map(fn ($l) => $localizer->getLocale($localizer->getLocaleLang($l)), $locales);
+                $locales = array_filter($translations->getKeys(), fn($l) => !in_array($l, $availableLocales));
+                $fallbackLocales = array_map(fn($l) => $localizer->getLocale($localizer->getLocaleLang($l)), $locales);
 
                 foreach (array_keys($fallbackLocales, $normLocale) as $normKey) {
                     $translation = $translations[$locales[$normKey]] ?? null;
@@ -153,7 +157,7 @@ trait TranslatableTrait
 
     public function __call(string $method, array $arguments)
     {
-        $className   = get_class($this);
+        $className = get_class($this);
         $translationClassName = $this->getTranslationEntityClass();
         $parentClass = get_parent_class();
 
@@ -163,7 +167,7 @@ trait TranslatableTrait
             $property = lcfirst(substr($method, 3));
 
             if (empty($arguments)) {
-                throw new AccessException("Missing argument for setter property \"$property\" in ". $className);
+                throw new AccessException("Missing argument for setter property \"$property\" in " . $className);
             }
 
             try {
@@ -215,7 +219,7 @@ trait TranslatableTrait
         }
 
         if (!method_exists($className, $method)) {
-            throw new AccessException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+            throw new AccessException("Method \"$method\" not found in class \"" . get_class($this) . "\" or its corresponding translation class \"" . $this->getTranslationEntityClass() . "\".");
         }
 
         return null;
@@ -229,11 +233,11 @@ trait TranslatableTrait
 
         //
         // Setter method in called class
-        if (method_exists($entity, "set".mb_ucfirst($property))) {
-            return $entity->{"set".mb_ucfirst($property)}($value);
+        if (method_exists($entity, "set" . mb_ucfirst($property))) {
+            return $entity->{"set" . mb_ucfirst($property)}($value);
         } elseif (property_exists($this, $property)) {
             if (!$accessor->isWritable($this, $property)) {
-                throw new AccessException("Property \"$property\" not writable in ". get_class($this));
+                throw new AccessException("Property \"$property\" not writable in " . get_class($this));
             }
 
             $accessor->setValue($this, $property, $value);
@@ -243,11 +247,11 @@ trait TranslatableTrait
         //
         // Proxy setter method for current locale
         $entityIntl = $this->translate();
-        if (method_exists($entityIntl, "set".mb_ucfirst($property))) {
-            return $entityIntl->{"set".mb_ucfirst($property)}($value);
+        if (method_exists($entityIntl, "set" . mb_ucfirst($property))) {
+            return $entityIntl->{"set" . mb_ucfirst($property)}($value);
         } elseif (property_exists($entityIntl, $property)) {
             if (!$accessor->isWritable($entityIntl, $property)) {
-                throw new AccessException("Property \"$property\" not writable in ". get_class($entityIntl));
+                throw new AccessException("Property \"$property\" not writable in " . get_class($entityIntl));
             }
 
             $accessor->setValue($entityIntl, $property, $value);
@@ -259,7 +263,7 @@ trait TranslatableTrait
             return $this;
         }
 
-        throw new AccessException("Can't get a way to write property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+        throw new AccessException("Can't get a way to write property \"$property\" in class \"" . get_class($this) . "\" or its corresponding translation class \"" . $this->getTranslationEntityClass() . "\".");
     }
 
     public function __get($property)
@@ -272,8 +276,8 @@ trait TranslatableTrait
         $entity = $this;
         if (method_exists($entity, $property)) {
             return $entity->{$property}();
-        } elseif (method_exists($entity, "get".mb_ucfirst($property))) {
-            return $entity->{"get".mb_ucfirst($property)}();
+        } elseif (method_exists($entity, "get" . mb_ucfirst($property))) {
+            return $entity->{"get" . mb_ucfirst($property)}();
         } elseif (property_exists($entity, $property) && $accessor->isReadable($entity, $property)) {
             return $accessor->getValue($entity, $property);
         }
@@ -286,8 +290,8 @@ trait TranslatableTrait
         $value = null;
         if (method_exists($entityIntl, $property)) {
             $value = $entityIntl->{$property}();
-        } elseif (method_exists($entityIntl, "get".mb_ucfirst($property))) {
-            $value = $entityIntl->{"get".mb_ucfirst($property)}();
+        } elseif (method_exists($entityIntl, "get" . mb_ucfirst($property))) {
+            $value = $entityIntl->{"get" . mb_ucfirst($property)}();
         } elseif (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
             $value = $accessor->getValue($entityIntl, $property);
         }
@@ -307,8 +311,8 @@ trait TranslatableTrait
         $entityIntl = $this->translate($defaultLocale);
         if (method_exists($entityIntl, $property)) {
             return $entityIntl->{$property}();
-        } elseif (method_exists($entityIntl, "get".mb_ucfirst($property))) {
-            return $entityIntl->{"get".mb_ucfirst($property)}();
+        } elseif (method_exists($entityIntl, "get" . mb_ucfirst($property))) {
+            return $entityIntl->{"get" . mb_ucfirst($property)}();
         } elseif (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
             return $accessor->getValue($entityIntl, $property);
         }
@@ -318,6 +322,6 @@ trait TranslatableTrait
             return null;
         }
 
-        throw new AccessException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+        throw new AccessException("Can't get a way to read property \"$property\" in class \"" . get_class($this) . "\" or its corresponding translation class \"" . $this->getTranslationEntityClass() . "\".");
     }
 }

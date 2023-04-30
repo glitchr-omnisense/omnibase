@@ -90,25 +90,26 @@ class SecurityController extends AbstractController
     protected $tokenRepository;
 
     public function __construct(
-        NotifierInterface $notifier,
+        NotifierInterface      $notifier,
         EntityManagerInterface $entityManager,
-        TokenRepository $tokenRepository,
-        UserRepository $userRepository,
-        RouterInterface $router,
-        FormProxy $formProxy,
-        TokenStorageInterface $tokenStorage,
-        TranslatorInterface $translator,
-        ParameterBagInterface $parameterBag
-    ) {
-        $this->router          = $router;
-        $this->translator      = $translator;
-        $this->tokenStorage    = $tokenStorage;
-        $this->formProxy       = $formProxy;
-        $this->parameterBag    = $parameterBag;
-        $this->notifier        = $notifier;
+        TokenRepository        $tokenRepository,
+        UserRepository         $userRepository,
+        RouterInterface        $router,
+        FormProxy              $formProxy,
+        TokenStorageInterface  $tokenStorage,
+        TranslatorInterface    $translator,
+        ParameterBagInterface  $parameterBag
+    )
+    {
+        $this->router = $router;
+        $this->translator = $translator;
+        $this->tokenStorage = $tokenStorage;
+        $this->formProxy = $formProxy;
+        $this->parameterBag = $parameterBag;
+        $this->notifier = $notifier;
 
-        $this->entityManager   = $entityManager;
-        $this->userRepository  = $userRepository;
+        $this->entityManager = $entityManager;
+        $this->userRepository = $userRepository;
         $this->tokenRepository = $tokenRepository;
     }
 
@@ -216,9 +217,9 @@ class SecurityController extends AbstractController
 
         // Prepare registration form
         $formProcessor = $this->formProxy->createProcessor("form:login", SecurityRegistrationType::class, [
-                'validation_groups' => ['new'],
-                'validation_entity' => User::class
-            ])
+            'validation_groups' => ['new'],
+            'validation_entity' => User::class
+        ])
             ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($userAuthenticator, $authenticator) {
                 $newUser = $formProcessor->hydrate((new User()));
 
@@ -245,14 +246,12 @@ class SecurityController extends AbstractController
                 $userAuthenticator->authenticateUser($newUser, $authenticator, $request, [$rememberMeBadge]);
                 return $this->redirectToRoute('user_profile');
             })
-
             ->onDefault(function (FormProcessorInterface $formProcessor) {
                 return $this->render('security/register.html.twig', [
                     'form' => $formProcessor->getForm()->createView(),
                     'user' => $formProcessor->getData()
                 ]);
             })
-
             ->handleRequest($request);
 
         return $formProcessor->getResponse();
@@ -275,7 +274,7 @@ class SecurityController extends AbstractController
                 $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getThrottleTimeStr()]);
                 $notification->send("danger");
             } else {
-                $verifyEmailToken = new Token("verify-email", 24*3600, 3600);
+                $verifyEmailToken = new Token("verify-email", 24 * 3600, 3600);
                 $verifyEmailToken->setUser($user);
 
                 $notification = $this->notifier->sendVerificationEmail($user, $verifyEmailToken);
@@ -299,7 +298,7 @@ class SecurityController extends AbstractController
         }
 
         $user = $this->getUser();
-        $user->removeExpiredTokens("verify-email");
+        $user->removeExpiredTokens();
 
         if ($user->isVerified()) {
             $notification = new Notification('verifyEmail.already');
@@ -313,7 +312,7 @@ class SecurityController extends AbstractController
                 $notification->setUser($user);
                 $notification->send("danger");
             } else {
-                $user->verify(true);
+                $user->verify();
                 $verifyEmailToken->revoke();
 
                 $notification = new Notification("verifyEmail.success");
@@ -336,7 +335,7 @@ class SecurityController extends AbstractController
     public function AdminApprovalRequest(Request $request)
     {
         $user = $this->getUser();
-        $user->removeExpiredTokens("admin-approval");
+        $user->removeExpiredTokens();
 
         if (!$user->isVerified()) {
             $notification = new Notification("adminApproval.verifyFirst");
@@ -509,9 +508,9 @@ class SecurityController extends AbstractController
     {
         return $this->render('security/maintenance.html.twig', [
             'remainingTime' => $maintenanceProvider->getRemainingTime(),
-            'percentage'    => $maintenanceProvider->getPercentage(),
-            'downtime'      => $maintenanceProvider->getDowntime(),
-            'uptime'        => $maintenanceProvider->getUptime()
+            'percentage' => $maintenanceProvider->getPercentage(),
+            'downtime' => $maintenanceProvider->getDowntime(),
+            'uptime' => $maintenanceProvider->getUptime()
         ]);
     }
 
@@ -522,8 +521,8 @@ class SecurityController extends AbstractController
     public function Launch(LauncherInterface $launcher): Response
     {
         return $this->render('security/launchdate.html.twig', [
-            'launchdate'  => $launcher->getLaunchdate(),
-            'is_launcherd'    => $launcher->isLaunched()
+            'launchdate' => $launcher->getLaunchdate(),
+            'is_launcherd' => $launcher->isLaunched()
         ]);
     }
 

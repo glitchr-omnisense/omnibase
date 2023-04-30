@@ -103,24 +103,25 @@ class SecuritySubscriber implements EventSubscriberInterface
     private $translator;
 
     public function __construct(
-        UserRepository $userRepository,
-        AuthorizationChecker $authorizationChecker,
-        TokenStorageInterface $tokenStorage,
-        TranslatorInterface $translator,
-        RequestStack $requestStack,
-        ReferrerInterface $referrer,
-        SettingBagInterface $settingBag,
-        Localizer $localizer,
-        RouterInterface $router,
-        ParameterBagInterface $parameterBag,
+        UserRepository               $userRepository,
+        AuthorizationChecker         $authorizationChecker,
+        TokenStorageInterface        $tokenStorage,
+        TranslatorInterface          $translator,
+        RequestStack                 $requestStack,
+        ReferrerInterface            $referrer,
+        SettingBagInterface          $settingBag,
+        Localizer                    $localizer,
+        RouterInterface              $router,
+        ParameterBagInterface        $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
-        LauncherInterface $launcher,
-        ?Profiler $profiler = null
-    ) {
+        LauncherInterface            $launcher,
+        ?Profiler                    $profiler = null
+    )
+    {
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
-        $this->translator  = $translator;
-        $this->router  = $router;
+        $this->translator = $translator;
+        $this->router = $router;
 
         $this->localizer = $localizer;
         $this->userRepository = $userRepository;
@@ -140,11 +141,11 @@ class SecuritySubscriber implements EventSubscriberInterface
         return [
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class      => [['onMaintenanceRequest', 4], ['onLaunchRequest', 4], ['onAccessRequest', 6], ['onKernelRequest', 3]],
-            ResponseEvent::class     => ['onKernelResponse'],
+            RequestEvent::class => [['onMaintenanceRequest', 4], ['onLaunchRequest', 4], ['onAccessRequest', 6], ['onKernelRequest', 3]],
+            ResponseEvent::class => ['onKernelResponse'],
             LoginSuccessEvent::class => ['onLoginSuccess', -65],
             LoginFailureEvent::class => ['onLoginFailure'],
-            LogoutEvent::class       => ['onLogout']
+            LogoutEvent::class => ['onLogout']
         ];
     }
 
@@ -166,9 +167,9 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         //
         // Redirect if basic access not granted
-        $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
-        $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
-        $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
+        $adminAccess = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
+        $userAccess = $this->authorizationChecker->isGranted("USER_ACCESS");
+        $anonymousAccess = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
 
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if ($accessRestricted) {
@@ -218,7 +219,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             // Let's notify connected user that there is a special access grant for this page
             if (!$this->router->isProfiler() && !$this->router->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
                 if ($specialGrant) {
-                    $notification = new Notification("access_restricted.".$restrictionType.".exception");
+                    $notification = new Notification("access_restricted." . $restrictionType . ".exception");
                     $notification->send("info");
                 }
 
@@ -229,21 +230,21 @@ class SecuritySubscriber implements EventSubscriberInterface
             // If not, then user is redirected to a specific route
             $routeRestriction = $this->settingBag->getScalar("base.settings.access_restriction.redirect_on_deny") ?? [];
             foreach ($routeRestriction as $i => $route) {
-                $routeRestriction[$i] = str_rstrip($route, ".".$this->localizer->getDefaultLocaleLang());
+                $routeRestriction[$i] = str_rstrip($route, "." . $this->localizer->getDefaultLocaleLang());
             }
 
             if (!in_array($this->router->getRouteName(), $routeRestriction)) {
                 if ($specialGrant) {
                     // If not let them know that this page is locked for others
                     if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isBackend()) {
-                        $notification = new Notification("access_restricted.".$restrictionType.".message");
+                        $notification = new Notification("access_restricted." . $restrictionType . ".message");
                         $notification->send("warning");
                     }
 
                     return true;
                 }
 
-                $response   = $routeRestriction ? $this->router->redirect(first($routeRestriction) ?? $this->router->getRoute(RescueFormAuthenticator::PENDING_ROUTE)) : null;
+                $response = $routeRestriction ? $this->router->redirect(first($routeRestriction) ?? $this->router->getRoute(RescueFormAuthenticator::PENDING_ROUTE)) : null;
                 $response ??= $this->router->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
                 if ($event) {
@@ -256,7 +257,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 return false;
             } elseif ($specialGrant) {
                 // If not let them know that this page is locked for others
-                $notification = new Notification("access_restricted.".$restrictionType.".on_deny");
+                $notification = new Notification("access_restricted." . $restrictionType . ".on_deny");
                 $notification->send("info");
 
                 return true;
@@ -296,7 +297,9 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
 
             $this->userRepository->flush($user);
-            return $event->stopPropagation();
+            $event->stopPropagation();
+
+            return;
         }
 
         //
@@ -314,9 +317,9 @@ class SecuritySubscriber implements EventSubscriberInterface
                 }
             };
 
-            $response    = $event->getResponse();
+            $response = $event->getResponse();
             $alreadyRedirected = $response && $response->getStatusCode() == 302;
-            $isException =  $this->router->isEasyAdmin() || $this->router->isProfiler() || !$this->router->isSecured();
+            $isException = $this->router->isEasyAdmin() || $this->router->isProfiler() || !$this->router->isSecured();
 
             if ($alreadyRedirected || $isException) {
                 $callbackFn();
@@ -428,7 +431,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->requestStack->getSession()?->set("_user", $user);
         }
 
-        $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_ROUTE, [], 302);
+        $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_ROUTE);
     }
 
     public function onMaintenanceRequest(RequestEvent $event)
@@ -437,10 +440,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             return;
         }
 
-        if ($this->maintenanceProvider->redirectOnDeny($event, $this->localizer->getLocale())) {
-            if ($this->profiler) {
-                $this->profiler->disable();
-            }
+        if ($this->maintenanceProvider->redirectOnDeny($event)) {
+            $this->profiler?->disable();
             $event->stopPropagation();
         }
     }
@@ -452,9 +453,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         if ($this->launcher->redirectOnDeny($event, $this->localizer->getLocale())) {
-            if ($this->profiler) {
-                $this->profiler->disable();
-            }
+            $this->profiler?->disable();
             $event->stopPropagation();
         }
     }

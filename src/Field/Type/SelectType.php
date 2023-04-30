@@ -84,19 +84,20 @@ class SelectType extends AbstractType implements DataMapperInterface
     protected $router;
 
     public function __construct(
-        FormFactory $formFactory,
-        EntityManagerInterface $entityManager,
-        TranslatorInterface $translator,
-        ClassMetadataManipulator $classMetadataManipulator,
+        FormFactory               $formFactory,
+        EntityManagerInterface    $entityManager,
+        TranslatorInterface       $translator,
+        ClassMetadataManipulator  $classMetadataManipulator,
         CsrfTokenManagerInterface $csrfTokenManager,
-        Localizer $localizer,
-        AdminUrlGenerator $adminUrlGenerator,
-        Environment $twig,
-        AuthorizationChecker $authorizationChecker,
-        ObfuscatorInterface $obfuscator,
-        ParameterBagInterface $parameterBag,
-        RouterInterface $router
-    ) {
+        Localizer                 $localizer,
+        AdminUrlGenerator         $adminUrlGenerator,
+        Environment               $twig,
+        AuthorizationChecker      $authorizationChecker,
+        ObfuscatorInterface       $obfuscator,
+        ParameterBagInterface     $parameterBag,
+        RouterInterface           $router
+    )
+    {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->twig = $twig;
@@ -121,12 +122,10 @@ class SelectType extends AbstractType implements DataMapperInterface
     }
 
     protected static $icons = [];
+
     public static function getIcons(): array
     {
-        $class = static::class;
-        if (array_key_exists(self::$icons, self::$icons)) {
-            return self::$icons[$class];
-        }
+        return self::$icons[static::class] ?? [];
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -143,63 +142,63 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //'query_builder'   => null,　// To be implemented if necessary... (currently relying on Autocomplete model and Association*Type..)
 
-            "disable"           => false,
-            'choices'           => null,
-            'choice_loader'     => null,
+            "disable" => false,
+            'choices' => null,
+            'choice_loader' => null,
             'choice_thumbnails' => [],
-            'choice_filter'     => false,
+            'choice_filter' => false,
 
-            'choice_value'      => function ($value) {
+            'choice_value' => function ($value) {
                 return $value;
             },   // Return key code
-            'choice_label'      => function ($value, $label, $id) {
+            'choice_label' => function ($value, $label, $id) {
                 return $label;
             },   // Return translated label
 
-            'select2'                   => [],
-            "select2-template"          => null,
-            "select2-templateResult"    => null,
+            'select2' => [],
+            "select2-template" => null,
+            "select2-templateResult" => null,
             "select2-templateSelection" => null,
-            'theme'                     => "bootstrap4",
-            'empty_data'                => null,
+            'theme' => "bootstrap4",
+            'empty_data' => null,
 
             // Generic parameters
-            'placeholder'        => "@fields.select.placeholder",
-            'capitalize'         => null,
-            'language'           => null,
-            'required'           => null,
-            'multiple'           => null,
-            'multivalue'         => false,
+            'placeholder' => "@fields.select.placeholder",
+            'capitalize' => null,
+            'language' => null,
+            'required' => null,
+            'multiple' => null,
+            'multivalue' => false,
 
-            'vertical'           => false,
-            'maximum'            => 0,
-            'tabulation'         => "1.75em",
-            'tags'               => false,
-            'highlight'          => null,
+            'vertical' => false,
+            'maximum' => 0,
+            'tabulation' => "1.75em",
+            'tags' => false,
+            'highlight' => null,
             'minimumInputLength' => 0,
-            'tokenSeparators'    => [' ', ',', ';'],
-            'closeOnSelect'      => null,
-            'selectOnClose'      => false,
+            'tokenSeparators' => [' ', ',', ';'],
+            'closeOnSelect' => null,
+            'selectOnClose' => false,
             'minimumResultsForSearch' => 0,
-            "dropdownCssClass"   => null,
-            "containerCssClass"  => null,
+            "dropdownCssClass" => null,
+            "containerCssClass" => null,
 
-            'use_html'      => false,
-            'href'          => null,
+            'use_html' => false,
+            'href' => null,
             'webpack_entry' => "form.select2",
 
             // Autocomplete
-            'autocomplete'                     => null,
-            'autocomplete_endpoint'            => "ux_autocomplete",
+            'autocomplete' => null,
+            'autocomplete_endpoint' => "ux_autocomplete",
             'autocomplete_endpoint_parameters' => [],
-            'autocomplete_fields'              => [],
-            'autocomplete_data'                => null,
-            'autocomplete_processResults'      => null,
-            'autocomplete_delay'               => 500,
-            'autocomplete_type'                => $this->router->isDebug() ? "GET" : "POST",
+            'autocomplete_fields' => [],
+            'autocomplete_data' => null,
+            'autocomplete_processResults' => null,
+            'autocomplete_delay' => 500,
+            'autocomplete_type' => $this->router->isDebug() ? "GET" : "POST",
 
             // Sortable option
-            'sortable'              => null
+            'sortable' => null
         ]);
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
@@ -243,28 +242,28 @@ class SelectType extends AbstractType implements DataMapperInterface
             );
 
             // Guess some options
-            $options["class"]    = $this->formFactory->guessClass($event, $options);
+            $options["class"] = $this->formFactory->guessClass($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
             $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
 
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
             if ($options["choices"] === null && $options["choice_loader"] === null) {
                 $options["choices"] = $this->formFactory->guessChoices($form, $options);
-                $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
+                $options["autocomplete"] = $this->formFactory->guessChoiceAutocomplete($form, $options);
 
                 /* Override options.. I couldn't done that without accessing data */
                 // It might be good to get read of that and be able to use normalizer.. as expected
                 if (!$options["tags"] && $options["choices"] === null && !$options["autocomplete"]) {
-                    throw new \Exception("No choices, or autocomplete option, could be guessed without using data information for \"".$form->getName()."\"");
+                    throw new \Exception("No choices, or autocomplete option, could be guessed without using data information for \"" . $form->getName() . "\"");
                 }
             }
 
             $formOptions = [
-                'choices'       => [],
+                'choices' => [],
                 'choice_loader' => $options["choice_loader"],
-                'choice_label'  => $options["choice_label"],
-                'choice_value'  => $options["choice_value"],
-                'multiple'      => $options["multiple"]
+                'choice_label' => $options["choice_label"],
+                'choice_value' => $options["choice_value"],
+                'multiple' => $options["multiple"]
             ];
 
             $form->add('choice', ChoiceType::class, $formOptions);
@@ -276,7 +275,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Guess including class_priority
             $options["guess_priority"] = $options["class_priority"];
-            $options["class"]          = $this->formFactory->guessClass($event, $options);
+            $options["class"] = $this->formFactory->guessClass($event, $options);
 
             $dataChoice = $data["choice"] ?? null;
             $dataChoices = $options["multiple"] ? $dataChoice ?? [] : [];
@@ -314,7 +313,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                         $text = empty($text) ? $key : $text;
                         $self = array_pop_key("_self", $choices);
 
-                        if (! $self) {
+                        if (!$self) {
                             yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
                         } else {
                             $yields = $callback(null, $self, $callback, $i, $d++);
@@ -379,7 +378,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                         $text = empty($text) ? $key : $text;
                         $self = array_pop_key("_self", $choices);
 
-                        if (! $self) {
+                        if (!$self) {
                             yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
                         } else {
                             $yields = $callback(null, $self, $callback, $i, $d++);
@@ -422,11 +421,11 @@ class SelectType extends AbstractType implements DataMapperInterface
                     if (!array_key_exists($label, $choices)) {
                         $choices[$label] = $id;
                     } else {
-                        for ($ii = 2; array_key_exists($label ."/" . $ii, $choices); $ii++) {
+                        for ($ii = 2; array_key_exists($label . "/" . $ii, $choices); $ii++) {
                             continue;
                         }
 
-                        $choices[$label ."/" . $ii] = $id;
+                        $choices[$label . "/" . $ii] = $id;
                     }
                 }
             } else {
@@ -434,7 +433,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
 
             $formOptions = [
-                'choices'  => array_unique($choices),
+                'choices' => array_unique($choices),
                 'multiple' => $options["multiple"]
             ];
 
@@ -445,6 +444,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function mapDataToForms($viewData, Traversable $forms)
     { /* done in buildView due to select2 extend */
     }
+
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $choiceType = current(iterator_to_array($forms));
@@ -458,7 +458,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         if (!$options["multiple"]) {
             $dataChoices = $choiceType->getViewData();
         } else {
-            $dataChoices = $options["multivalue"] ? array_map(fn ($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
+            $dataChoices = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
         }
         $multiple = $options["multiple"];
 
@@ -478,7 +478,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $dataChoices = $classRepository->cacheById($dataChoices, [])->getResult();
                 }
 
-                usort($dataChoices, fn ($a, $b) => (is_object($a) ? ($orderBy[$a->getId()] ?? $default) : $default) <=> (is_object($b) ? ($orderBy[$b->getId()] ?? $default) : $default));
+                usort($dataChoices, fn($a, $b) => (is_object($a) ? ($orderBy[$a->getId()] ?? $default) : $default) <=> (is_object($b) ? ($orderBy[$b->getId()] ?? $default) : $default));
             }
         }
 
@@ -486,7 +486,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
         if ($viewData instanceof PersistentCollection) {
-            $mappedBy =  $viewData->getMapping()["mappedBy"];
+            $mappedBy = $viewData->getMapping()["mappedBy"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
             $oldData = $viewData->toArray();
 
@@ -554,14 +554,14 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         /* Override options.. I couldn't done that without accessing data */
-        $options["class"]         = $this->formFactory->guessClass($form, $options);
-        $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
-        $options["sortable"]      = $this->formFactory->guessSortable($form, $options);
+        $options["class"] = $this->formFactory->guessClass($form, $options);
+        $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
+        $options["sortable"] = $this->formFactory->guessSortable($form, $options);
 
         $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
         if ($options["choices"] === null && $options["choice_loader"] === null) {
-            $options["choices"]       = $this->formFactory->guessChoices($form, $options);
-            $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
+            $options["choices"] = $this->formFactory->guessChoices($form, $options);
+            $options["autocomplete"] = $this->formFactory->guessChoiceAutocomplete($form, $options);
         }
 
         $data = $form->getData();
@@ -603,12 +603,12 @@ class SelectType extends AbstractType implements DataMapperInterface
                 if ($this->classMetadataManipulator->isEntity($data)) {
                     $data = [$data];
                 }
-                $data = array_map(fn ($d) => $this->classMetadataManipulator->isEntity($d) ? $d->getId() : $d, $data);
+                $data = array_map(fn($d) => $this->classMetadataManipulator->isEntity($d) ? $d->getId() : $d, $data);
                 $orderBy = array_flip($data ?? []);
                 $default = count($orderBy);
 
                 $data = $classRepository->cacheById($data, [])->getResult();
-                usort($data, fn ($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+                usort($data, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
             } else {
                 $data = $this->classMetadataManipulator->isEntity($data) ? $data : $classRepository->cacheOneById($data);
             }
@@ -623,12 +623,12 @@ class SelectType extends AbstractType implements DataMapperInterface
             // * If database can accept multiples, it can also accept single elements
             // * But database with single entry cannot accept multiple elements.. So I arbitrarily keep only the first element..
             $multipleExpected = $data instanceof Collection || is_array($data);
-            if ($options["multiple"] == false &&  $multipleExpected && $data !== null) {
+            if (!$options["multiple"] && $multipleExpected && $data !== null) {
                 $data = $data instanceof Collection ? $data->toArray() : $data;
                 $data = first($data);
             }
 
-            if ($options["multiple"] == true  && !$multipleExpected && $data !== null) {
+            if ($options["multiple"] && !$multipleExpected && $data !== null) {
                 $data = null;
             }
 
@@ -638,13 +638,13 @@ class SelectType extends AbstractType implements DataMapperInterface
             $token = $this->csrfTokenManager->getToken($tokenName)->getValue();
 
             $array = [
-                "class"      => $options["class"],
-                "fields"     => $options["autocomplete_fields"],
-                "filters"    => $options["choice_filter"],
+                "class" => $options["class"],
+                "fields" => $options["autocomplete_fields"],
+                "filters" => $options["choice_filter"],
                 'capitalize' => $options["capitalize"],
-                "html"       => $options["use_html"],
+                "html" => $options["use_html"],
                 "token_name" => $tokenName,
-                "token"      => $token
+                "token" => $token
             ];
 
             $hash = $this->obfuscator->encode($array);
@@ -690,18 +690,18 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $selectOpts["selectOnClose"] = $options["selectOnClose"];
             }
             if (!array_key_exists("dropdownCssClass", $selectOpts) && $options["dropdownCssClass"] !== null) {
-                $selectOpts["dropdownCssClass"]  = $options["dropdownCssClass"];
+                $selectOpts["dropdownCssClass"] = $options["dropdownCssClass"];
             }
 
             $selectOpts["containerCssClass"] = $selectOpts["containerCssClass"] ?? "";
             $selectOpts["dropdownCssClass"] = $selectOpts["dropdownCssClass"] ?? "";
-            if ($options["vertical"] != false) {
+            if ($options["vertical"]) {
                 $selectOpts["containerCssClass"] .= " select2-selection--vertical";
             }
 
             if ($options["tags"] && !$options["autocomplete"] && empty($options["choices"])) {
                 $selectOpts["containerCssClass"] .= " select2-selection--wrap";
-                $selectOpts["dropdownCssClass"]  .= " select2-selection--hide";
+                $selectOpts["dropdownCssClass"] .= " select2-selection--hide";
             }
 
             $view->vars["highlight"] = $options["highlight"];
@@ -725,13 +725,13 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $selectOpts["tokenSeparators"] = $selectOpts["tokenSeparators"] ?? $options["tokenSeparators"];
             }
             if (!array_key_exists("allowClear", $selectOpts)) {
-                $selectOpts["allowClear"]  = (array_key_exists("required", $options) && !$options["required"]) ? true : false;
+                $selectOpts["allowClear"] = array_key_exists("required", $options) && !$options["required"];
             }
             if (!array_key_exists("maximum", $selectOpts)) {
-                $selectOpts["maximum"]     = (array_key_exists("maximum", $options) &&  $options["maximum"] > 0) ? $options["maximum"] : "";
+                $selectOpts["maximum"] = (array_key_exists("maximum", $options) && $options["maximum"] > 0) ? $options["maximum"] : "";
             }
             if (!array_key_exists("tags", $selectOpts)) {
-                $selectOpts["tags"]        = (array_key_exists("tags", $options) &&  $options["tags"]) ? true : false;
+                $selectOpts["tags"] = array_key_exists("tags", $options) && $options["tags"];
             }
 
             if (!array_key_exists("theme", $selectOpts)) {
@@ -742,11 +742,11 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Format preselected values
             $dataset = [];
             if ($options["choice_loader"] === null) {
-                $dataset   = $data instanceof Collection ? $data->toArray() : null;
+                $dataset = $data instanceof Collection ? $data->toArray() : null;
                 $dataset ??= !is_array($data) ? [$data] : $data;
             }
 
-            $selectedData   = $data instanceof Collection ? $data->toArray() : null;
+            $selectedData = $data instanceof Collection ? $data->toArray() : null;
             $selectedData ??= $data !== null && !is_array($data) ? [$data] : $data ?? [];
 
             $innerType = get_class($form->getConfig()->getType()->getInnerType());
@@ -765,7 +765,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     }
 
                     $self = array_pop_key("_self", $choices);
-                    if (! $self) {
+                    if (!$self) {
                         yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
                     } else {
                         $yields = $callback(null, $self, $callback, $i, $d++);
@@ -809,7 +809,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 }
             }, $options["choices"] ?? $dataset ?? []);
 
-            $selectOpts["data"]     = $formattedData;
+            $selectOpts["data"] = $formattedData;
             $selectOpts["selected"] = $selectedData;
 
             //
@@ -819,29 +819,29 @@ class SelectType extends AbstractType implements DataMapperInterface
             $href = $options["href"];
             if ($href === null && $crudController && $this->authorizationChecker->isGranted(UserRole::ADMIN)) {
                 $href = $this->adminUrlGenerator
-                        ->unsetAll()
-                        ->setController($crudController)
-                        ->setAction(Action::EDIT)
-                        ->setEntityId("{0}")
-                        ->generateUrl();
+                    ->unsetAll()
+                    ->setController($crudController)
+                    ->setAction(Action::EDIT)
+                    ->setEntityId("{0}")
+                    ->generateUrl();
             }
 
             //
             // Default select2 initialializer
-            $view->vars["select2"]        = json_encode($selectOpts);
-            $view->vars["select2-href"]   = $href;
-            $view->vars["tabulation"]     = $options["tabulation"];
-            $view->vars["disabled"]       = $options["disable"];
+            $view->vars["select2"] = json_encode($selectOpts);
+            $view->vars["select2-href"] = $href;
+            $view->vars["tabulation"] = $options["tabulation"];
+            $view->vars["disabled"] = $options["disable"];
 
             // NB: Sorting elements is not working at the moment for multivalue SelectType, reason why I disable it here..
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
         }
 
-        $view->vars["choices"]        = array_filter($options["choices"] ?? $dataset ?? []);
-        $view->vars["data"]           = $selectedData;
+        $view->vars["choices"] = array_filter($options["choices"] ?? $dataset ?? []);
+        $view->vars["data"] = $selectedData;
 
         $view->vars["choice_thumbnails"] = is_callable($options["choice_thumbnails"])
-            ? array_map(fn ($c) => $options["choice_thumbnails"]($c), $view->vars["choices"] ?? [])
+            ? array_map(fn($c) => $options["choice_thumbnails"]($c), $view->vars["choices"] ?? [])
             : $options["choice_thumbnails"] ?? [];
 
         foreach ($view->vars["choice_thumbnails"] as $key => $choice) {

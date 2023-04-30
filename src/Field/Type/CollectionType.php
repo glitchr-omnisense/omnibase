@@ -65,7 +65,7 @@ class CollectionType extends AbstractType
             'allow_object' => false, // This is introduced because object should be stringeable, otherwise there will be some error turning it into string
             'allow_add' => false,
             'allow_delete' => true,
-            'html'      => false,
+            'html' => false,
             'href' => null,
             'prototype' => true,
             'prototype_data' => null,
@@ -81,12 +81,12 @@ class CollectionType extends AbstractType
                 }
 
                 if (!is_object($label)) {
-                    return $this->translator->trans("@fields.collection.entry"). " #".(((int)$i)+1);
+                    return $this->translator->trans("@fields.collection.entry") . " #" . (((int)$i) + 1);
                 }
 
-                $_label = $this->translator->transEntity($label). " #".(((int)$label->getId())+1);
+                $_label = $this->translator->transEntity($label) . " #" . (((int)$label->getId()) + 1);
                 if (is_stringeable($label)) {
-                    $_label .= " : ". ((string) $label);
+                    $_label .= " : " . ((string)$label);
                 }
                 return $_label;
             },
@@ -112,8 +112,8 @@ class CollectionType extends AbstractType
             return true;
         });
 
-        $resolver->setNormalizer('allow_add', fn (Options $options, $value) => $options["length"] == 0 && $value);
-        $resolver->setNormalizer('allow_delete', fn (Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('allow_add', fn(Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('allow_delete', fn(Options $options, $value) => $options["length"] == 0 && $value);
 
         $resolver->setAllowedTypes('delete_empty', ['bool', 'callable']);
     }
@@ -150,7 +150,7 @@ class CollectionType extends AbstractType
             $data ??= [];
 
             foreach ($data as $id => $entry) {
-                if (is_object($entry) && $options["allow_object"] == false) {
+                if (is_object($entry) && !$options["allow_object"]) {
                     throw new \Exception("Object data are not allowed in collection unless you mark it as so.. (use `allow_object` option)");
                 }
             }
@@ -190,16 +190,16 @@ class CollectionType extends AbstractType
     {
         //
         // Set controller url
-        $view->vars['href']            = $options["href"];
-        $view->vars['html']            = $options["html"];
+        $view->vars['href'] = $options["href"];
+        $view->vars['html'] = $options["html"];
         $view->vars['entry_collapsed'] = $options['entry_collapsed'];
-        $view->vars['entry_label']     = $options['entry_label'];
-        $view->vars['entry_options']   = $options['entry_options'];
-        $view->vars['data_class']      = $options['data_class'];
-        $view->vars['group']           = $options['group'];
-        $view->vars['row_group']       = $options['row_group'];
-        $view->vars['allow_add']       = $options['allow_add'];
-        $view->vars['allow_delete']    = $options['allow_delete'];
+        $view->vars['entry_label'] = $options['entry_label'];
+        $view->vars['entry_options'] = $options['entry_options'];
+        $view->vars['data_class'] = $options['data_class'];
+        $view->vars['group'] = $options['group'];
+        $view->vars['row_group'] = $options['row_group'];
+        $view->vars['allow_add'] = $options['allow_add'];
+        $view->vars['allow_delete'] = $options['allow_delete'];
 
         if ($form->getConfig()->hasAttribute('prototype')) {
             $prototype = $form->getConfig()->getAttribute('prototype');
@@ -226,7 +226,7 @@ class CollectionType extends AbstractType
         }
 
         foreach ($view as $entryView) {
-            array_splice($entryView->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix().'_entry');
+            array_splice($entryView->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix() . '_entry');
         }
 
         /** @var FormInterface $prototype */
@@ -240,7 +240,7 @@ class CollectionType extends AbstractType
                 --$prefixOffset;
             }
 
-            array_splice($prototypeView->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix().'_entry');
+            array_splice($prototypeView->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix() . '_entry');
         }
     }
 }

@@ -65,7 +65,7 @@ class ContactController extends AbstractController
                 $this->notifier->sendContactEmail($contactModel);
                 $this->notifier->sendContactEmailConfirmation($contactModel);
 
-                return $this->render('client/contact/success.html.twig', []);
+                return $this->render('client/contact/success.html.twig');
             })
             ->handleRequest($request)
             ->getResponse();

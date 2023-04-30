@@ -67,31 +67,32 @@ class MediaService extends FileService implements MediaServiceInterface
     protected ?bool $enableWebp;
 
     public function __construct(
-        Environment $twig,
-        RouterInterface $router,
-        ObfuscatorInterface $obfuscator,
-        FlysystemInterface $flysystem,
+        Environment           $twig,
+        RouterInterface       $router,
+        ObfuscatorInterface   $obfuscator,
+        FlysystemInterface    $flysystem,
         ParameterBagInterface $parameterBag,
-        ImagineInterface $imagineBitmap,
-        ImagineInterface $imagineSvg,
-        ?Profiler $profiler
-    ) {
+        ImagineInterface      $imagineBitmap,
+        ImagineInterface      $imagineSvg,
+        ?Profiler             $profiler
+    )
+    {
         parent::__construct($twig, $router, $obfuscator, $flysystem);
 
-        $this->profiler      = $profiler;
+        $this->profiler = $profiler;
 
         $this->imagineBitmap = $imagineBitmap;
-        $this->imagineSvg    = $imagineSvg;
+        $this->imagineSvg = $imagineSvg;
 
-        $this->timeout       = $parameterBag->get("base.images.timeout");
-        $this->fallback      = $parameterBag->get("base.images.fallback");
+        $this->timeout = $parameterBag->get("base.images.timeout");
+        $this->fallback = $parameterBag->get("base.images.fallback");
         $this->maxResolution = $parameterBag->get("base.images.max_resolution");
-        $this->maxQuality    = $parameterBag->get("base.images.max_quality");
-        $this->enableWebp    = $parameterBag->get("base.images.enable_webp");
-        $this->noImage       = $parameterBag->get("base.images.no_image") ?? [];
-        $this->debug         = $parameterBag->get("base.images.debug");
+        $this->maxQuality = $parameterBag->get("base.images.max_quality");
+        $this->enableWebp = $parameterBag->get("base.images.enable_webp");
+        $this->noImage = $parameterBag->get("base.images.no_image") ?? [];
+        $this->debug = $parameterBag->get("base.images.debug");
 
-        $this->twig          = $twig;
+        $this->twig = $twig;
 
         // Local cache directory for filtered images
         $this->localCache = "local.cache";
@@ -101,6 +102,7 @@ class MediaService extends FileService implements MediaServiceInterface
     {
         return $this->maxQuality;
     }
+
     public function isWebpEnabled()
     {
         return $this->enableWebp;
@@ -144,15 +146,15 @@ class MediaService extends FileService implements MediaServiceInterface
             return $path;
         }
         if (is_array($path)) {
-            return array_map(fn ($s) => $this->soundify($s, $attributes), $path);
+            return array_map(fn($s) => $this->soundify($s, $attributes), $path);
         }
 
         $sources = $this->audio($path);
         $sources = is_array($sources) ? $sources : [$sources];
 
         return $this->twig->render("@Base/media/audio.html.twig", [
-            "sources"  => $sources,
-            "attr"     => $attributes,
+            "sources" => $sources,
+            "attr" => $attributes,
         ]);
     }
 
@@ -162,21 +164,21 @@ class MediaService extends FileService implements MediaServiceInterface
             return $path;
         }
         if (is_array($path)) {
-            return array_map(fn ($s) => $this->vidify($s, $attributes), $path);
+            return array_map(fn($s) => $this->vidify($s, $attributes), $path);
         }
 
         $sources = $this->video($path);
         $sources = is_array($sources) ? $sources : [$sources];
 
         return $this->twig->render("@Base/media/video.html.twig", [
-            "sources"  => $sources,
-            "attr"     => $attributes,
+            "sources" => $sources,
+            "attr" => $attributes,
         ]);
     }
 
     public function image(array|string|null $path, array $config = [], array $filters = []): array|string|null
     {
-        $supports_webp   = array_pop_key("webp", $config) ?? browser_supports_webp();
+        $supports_webp = array_pop_key("webp", $config) ?? browser_supports_webp();
 
         $extension = array_pop_key("extension", $config) ?? $this->getExtension($path);
         if ($extension) {
@@ -201,12 +203,12 @@ class MediaService extends FileService implements MediaServiceInterface
 
     public function imageBase64(null|array|string $path): ?string
     {
-        iF(!$path) {
+        if (!$path) {
             return null;
         }
 
         if (is_array($path)) {
-            return array_map(fn ($s) => $this->imageBase64($s), $path);
+            return array_map(fn($s) => $this->imageBase64($s), $path);
         }
 
         return base64_image($path, $this->getExtension($path));
@@ -219,12 +221,12 @@ class MediaService extends FileService implements MediaServiceInterface
         }
 
         if (is_array($path)) {
-            return array_map(fn ($s) => $this->imageSet($s), $path);
+            return array_map(fn($s) => $this->imageSet($s), $path);
         }
 
-        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
-        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
-        return str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
+        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src, $src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]) . " " . $src[0] . "w " . $src[1] . "h", $srcset));
+        return str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "") . "," . $srcset, ",");
     }
 
     public function imagify(null|array|string $path, array $attributes = [], ...$srcset): ?string
@@ -233,21 +235,21 @@ class MediaService extends FileService implements MediaServiceInterface
             return $path;
         }
         if (is_array($path)) {
-            return array_map(fn ($s) => $this->imagify($s, $attributes), $path);
+            return array_map(fn($s) => $this->imagify($s, $attributes), $path);
         }
 
         $lazyload = array_pop_key("lazy", $attributes);
-        $lazybox  = array_pop_key("lazy-box", $attributes);
+        $lazybox = array_pop_key("lazy-box", $attributes);
 
-        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src, $src], 2, null), $srcset);
-        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
-        $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
+        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src, $src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]) . " " . $src[0] . "w " . $src[1] . "h", $srcset));
+        $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "") . "," . $srcset, ",");
 
         return $this->twig->render("@Base/media/image.html.twig", [
-            "path"     => $this->image($path),
-            "attr"     => $attributes,
+            "path" => $this->image($path),
+            "attr" => $attributes,
             "lazyload" => $lazyload,
-            "lazybox"  => $lazybox
+            "lazybox" => $lazybox
         ]);
     }
 
@@ -269,24 +271,28 @@ class MediaService extends FileService implements MediaServiceInterface
     {
         return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]));
     }
+
     public function thumbnailOutbound(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]));
     }
+
     public function thumbnailNoclone(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]));
     }
+
     public function thumbnailUpscale(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]));
     }
+
     public function thumbnail(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         $filters[] = new ThumbnailFilter(
             $width,
             $height ?? null,
-            $config["mode"]  ?? ImageInterface::THUMBNAIL_INSET,
+            $config["mode"] ?? ImageInterface::THUMBNAIL_INSET,
             $config["resampling"] ?? ImageInterface::FILTER_UNDEFINED
         );
 
@@ -300,7 +306,7 @@ class MediaService extends FileService implements MediaServiceInterface
             return null;
         }
 
-        $path = "/".str_strip($path, $this->router->getAssetUrl(""));
+        $path = "/" . str_strip($path, $this->router->getAssetUrl(""));
 
         $config["path"] = $path;
         $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
@@ -329,28 +335,29 @@ class MediaService extends FileService implements MediaServiceInterface
 
     public function lightbox(
         null|array|string $path,
-        array $attributes = [],
-        array|string $lightboxId = null,
-        array|string $lightboxTitle = null,
-        array $lightboxAttributes = [],
-        ...$srcset
-    ): ?string {
+        array             $attributes = [],
+        array|string      $lightboxId = null,
+        array|string      $lightboxTitle = null,
+        array             $lightboxAttributes = [],
+                          ...$srcset
+    ): ?string
+    {
         $lightboxPathType = gettype($path);
         $lightboxIdType = gettype($lightboxId);
         $lightboxTitleType = gettype($lightboxTitle);
 
         if ($path != null && $lightboxPathType !== $lightboxIdType && $lightboxIdType !== gettype(null)) {
-            throw new Exception("Unexpected `lightboxId` type parameter received: ".$lightboxIdType." (expected:".$lightboxPathType.")");
+            throw new Exception("Unexpected `lightboxId` type parameter received: " . $lightboxIdType . " (expected:" . $lightboxPathType . ")");
         }
         if ($path != null && $lightboxPathType !== $lightboxTitleType && $lightboxTitleType !== gettype(null)) {
-            throw new Exception("Unexpected `lightboxTitle` type parameter received: ".$lightboxIdType." (expected:".$lightboxPathType.")");
+            throw new Exception("Unexpected `lightboxTitle` type parameter received: " . $lightboxIdType . " (expected:" . $lightboxPathType . ")");
         }
 
         if (!$path) {
             return $path;
         }
         if (is_array($path)) {
-            return array_map(fn ($k) => $this->lightbox($path[$k], $attributes, $lightboxId[$k], $lightboxTitle[$k], $lightboxAttributes), array_keys($path));
+            return array_map(fn($k) => $this->lightbox($path[$k], $attributes, $lightboxId[$k], $lightboxTitle[$k], $lightboxAttributes), array_keys($path));
         }
 
         $routeName = $this->router->getRouteName($path);
@@ -359,7 +366,7 @@ class MediaService extends FileService implements MediaServiceInterface
         }
 
         $lightboxAttributes["loading"] ??= "lazy";
-        $lightboxAttributes["class"] = trim(($lightboxAttributes["class"] ?? "")." lightbox-wrapper");
+        $lightboxAttributes["class"] = trim(($lightboxAttributes["class"] ?? "") . " lightbox-wrapper");
         $lightboxAttributes["data-lightbox"] = $lightboxId ?? "lightbox";
         if ($lightboxTitle !== null) {
             $lightboxAttributes["data-title"] = $lightboxTitle;
@@ -368,16 +375,16 @@ class MediaService extends FileService implements MediaServiceInterface
         $lazyload = array_pop_key("lazy", $attributes);
         $lazybox = array_pop_key("lazy-box", $attributes);
 
-        $srcset = array_map(fn ($src) => array_pad(is_array($src) ? $src : [$src,$src], 2, null), $srcset);
-        $srcset = implode(", ", array_map(fn ($src) => $this->thumbnail($path, $src[0], $src[1]). " ".$src[0]."w ".$src[1]."h", $srcset));
-        $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "").",".$srcset, ",");
+        $srcset = array_map(fn($src) => array_pad(is_array($src) ? $src : [$src, $src], 2, null), $srcset);
+        $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]) . " " . $src[0] . "w " . $src[1] . "h", $srcset));
+        $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "") . "," . $srcset, ",");
 
         return $this->twig->render("@Base/media/image-lightbox.html.twig", [
             "path" => $path,
             "attr" => $attributes,
             "attr_lightbox" => $lightboxAttributes,
             "lazyload" => $lazyload,
-            "lazybox"  => $lazybox
+            "lazybox" => $lazybox
         ]);
     }
 
@@ -409,7 +416,7 @@ class MediaService extends FileService implements MediaServiceInterface
     public function resolve(string $data, array $filters = []): array
     {
         $config = parent::resolve($data) ?? [];
-        $config["filters"]  = array_merge($config["filters"] ?? [], $filters);
+        $config["filters"] = array_merge($config["filters"] ?? [], $filters);
         return $config;
     }
 
@@ -443,20 +450,20 @@ class MediaService extends FileService implements MediaServiceInterface
         //
         // Resolve nested paths
         $options = $this->resolve($path, $filters);
-        $path    = $config["path"]    ?? $options["path"]    ?? $path; // Cache directory location
+        $path = $config["path"] ?? $options["path"] ?? $path; // Cache directory location
         $filters = $config["filters"] ?? $options["filters"] ?? [];
         $storage = $config["storage"] ?? $options["storage"] ?? null;
-        $output  = $config["output"]  ?? $options["output"]  ?? realpath($path);
+        $output = $config["output"] ?? $options["output"] ?? realpath($path);
 
         //
         // Apply image resolution limitation
         if (!is_instanceof($this->maxResolution, ThumbnailFilter::class)) {
-            throw new NotFoundHttpException("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
+            throw new NotFoundHttpException("Resolution filter \"" . $this->maxResolution . "\" must inherit from " . ThumbnailFilter::class);
         }
 
         //
         // Extract last filter
-        $filters = array_filter($filters, fn ($f) => class_implements_interface($f, FilterInterface::class));
+        $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
         if ($formatter === null) {
             throw new NotFoundHttpException("Last filter is missing.");
@@ -465,20 +472,20 @@ class MediaService extends FileService implements MediaServiceInterface
         //
         // Apply size limitation to bitmap only
         if (class_implements_interface($formatter, BitmapFilterInterface::class)) {
-            $definitionFilters = array_filter($formatter->getFilters(), fn ($f) => $f instanceof ThumbnailFilter);
+            $definitionFilters = array_filter($formatter->getFilters(), fn($f) => $f instanceof ThumbnailFilter);
             if (empty($definitionFilters)) {
                 $formatter->addFilter(new $this->maxResolution());
             }
 
             if (!class_implements_interface($formatter, FormatFilterInterface::class)) {
-                throw new NotFoundHttpException("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
+                throw new NotFoundHttpException("Last filter \"" . ($formatter ? get_class($formatter) : null) . "\" must implement \"" . FormatFilterInterface::class . "\"");
             }
         }
 
-        $filtersButLast = array_slice($filters, 0, count($filters)-1);
+        $filtersButLast = array_slice($filters, 0, count($filters) - 1);
         foreach ($filtersButLast as $filter) {
             if (class_implements_interface($filter, FormatFilterInterface::class)) {
-                throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
+                throw new NotFoundHttpException("Only last filter must implement \"" . FormatFilterInterface::class . "\"");
             }
         }
 
@@ -498,7 +505,7 @@ class MediaService extends FileService implements MediaServiceInterface
                 $localCache = $this->localCache;
             }
             if (!$this->flysystem->hasStorage($this->localCache)) {
-                throw new InvalidArgumentException("\"".$this->localCache."\" storage not found in your Flysystem configuration.");
+                throw new InvalidArgumentException("\"" . $this->localCache . "\" storage not found in your Flysystem configuration.");
             }
 
             return $this->flysystem->fileExists($pathCache, $localCache);
@@ -519,45 +526,45 @@ class MediaService extends FileService implements MediaServiceInterface
         //
         // Resolve nested paths
         $options = $this->resolve($path, $filters);
-        $path    = $config["path"]    ?? $options["path"]    ?? $path; // Cache directory location
+        $path = $config["path"] ?? $options["path"] ?? $path; // Cache directory location
         $filters = $config["filters"] ?? $options["filters"] ?? [];
         $storage = $config["storage"] ?? $options["storage"] ?? null;
-        $output  = $config["output"]  ?? $options["output"]  ?? realpath($path);
+        $output = $config["output"] ?? $options["output"] ?? realpath($path);
 
         //
         // Apply image resolution limitation
         if (!is_instanceof($this->maxResolution, ThumbnailFilter::class)) {
-            throw new NotFoundHttpException("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
+            throw new NotFoundHttpException("Resolution filter \"" . $this->maxResolution . "\" must inherit from " . ThumbnailFilter::class);
         }
 
         //
         // Extract last filter
-        $filters = array_filter($filters, fn ($f) => class_implements_interface($f, FilterInterface::class));
+        $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
         if ($formatter === false) {
-            throw new NotFoundHttpException("No filter provided at least one must be provided (and must implement \"".FormatFilterInterface::class."\").");
+            throw new NotFoundHttpException("No filter provided at least one must be provided (and must implement \"" . FormatFilterInterface::class . "\").");
         }
         if (!$formatter instanceof FormatFilterInterface) {
-            throw new NotFoundHttpException("The last filter must implement \"".FormatFilterInterface::class."\"). A \"".get_class($formatter)."\" received.");
+            throw new NotFoundHttpException("The last filter must implement \"" . FormatFilterInterface::class . "\"). A \"" . get_class($formatter) . "\" received.");
         }
 
         //
         // Apply size limitation to bitmap only
         if (class_implements_interface($formatter, BitmapFilterInterface::class)) {
-            $definitionFilters = array_filter($formatter->getFilters(), fn ($f) => $f instanceof ThumbnailFilter);
+            $definitionFilters = array_filter($formatter->getFilters(), fn($f) => $f instanceof ThumbnailFilter);
             if (empty($definitionFilters)) {
                 $formatter->addFilter(new $this->maxResolution());
             }
 
             if (!class_implements_interface($formatter, FormatFilterInterface::class)) {
-                throw new NotFoundHttpException("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
+                throw new NotFoundHttpException("Last filter \"" . ($formatter ? get_class($formatter) : null) . "\" must implement \"" . FormatFilterInterface::class . "\"");
             }
         }
 
-        $filtersButLast = array_slice($filters, 0, count($filters)-1);
+        $filtersButLast = array_slice($filters, 0, count($filters) - 1);
         foreach ($filtersButLast as $filter) {
             if (class_implements_interface($filter, FormatFilterInterface::class)) {
-                throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
+                throw new NotFoundHttpException("Only last filter must implement \"" . FormatFilterInterface::class . "\"");
             }
         }
 
@@ -585,7 +592,7 @@ class MediaService extends FileService implements MediaServiceInterface
                 $localCache = $this->localCache;
             }
             if (!$this->flysystem->hasStorage($this->localCache)) {
-                throw new InvalidArgumentException("\"".$this->localCache."\" storage not found in your Flysystem configuration.");
+                throw new InvalidArgumentException("\"" . $this->localCache . "\" storage not found in your Flysystem configuration.");
             }
 
             if (!$this->flysystem->fileExists($pathCache, $localCache)) {
@@ -604,9 +611,9 @@ class MediaService extends FileService implements MediaServiceInterface
                 try {
                     $this->flysystem->mkdir(dirname($pathCache), $localCache);
                     $this->flysystem->write($pathCache, file_get_contents($filteredPath), $localCache);
-                } catch(\League\Flysystem\UnableToCreateDirectory $e) {
+                } catch (\League\Flysystem\UnableToCreateDirectory $e) {
                     $localDir = $this->flysystem->prefixPath("", $localCache);
-                    mkdir_length_safe($localDir."/".dirname($pathCache), 0777, true);
+                    mkdir_length_safe($localDir . "/" . dirname($pathCache));
                 }
 
                 set_time_limit($maxExecutionTime);
@@ -684,7 +691,7 @@ class MediaService extends FileService implements MediaServiceInterface
             $extension = "svg";
         }
 
-        $extensions = array_map(fn ($a) => $a["extension"], $this->noImage);
+        $extensions = array_map(fn($a) => $a["extension"], $this->noImage);
 
         $noImage = first(array_search_by($this->noImage, "extension", $extension));
         if (!$noImage) {

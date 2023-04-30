@@ -2,7 +2,6 @@
 
 namespace Base\Response;
 
-use DOMDocument;
 use Dompdf\Dompdf;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -16,8 +15,8 @@ class PdfResponse extends Response
         }
 
         $options = array_pop_key("options", $headers) ?? [];
-        $stream  = array_pop_key("stream", $headers) ?? [];
-        $debug   = array_pop_key("debug", $headers) ?? false;
+        $stream = array_pop_key("stream", $headers) ?? [];
+        $debug = array_pop_key("debug", $headers) ?? false;
         if ($debug) {
             return parent::__construct($data, $status, $headers);
         }
@@ -45,9 +44,9 @@ class PdfResponse extends Response
      *     return JsonResponse::fromJsonString('{"key": "value"}')
      *         ->setSharedMaxAge(300);
      *
-     * @param string $data    The JSON response string
-     * @param int    $status  The response status code
-     * @param array  $headers An array of response headers
+     * @param string $data The JSON response string
+     * @param int $status The response status code
+     * @param array $headers An array of response headers
      *
      * @return static
      */

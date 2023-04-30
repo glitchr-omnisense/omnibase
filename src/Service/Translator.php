@@ -286,7 +286,7 @@ class Translator implements TranslatorInterface
         $noun = $noun ? "." . $noun : "";
 
         $in = array_filter([$politeness, $genderness, $noun]);
-        $permutations = array_map(fn($a) => implode("", $a), get_permutations($in, true));
+        $permutations = array_map(fn($a) => implode("", $a), get_permutations($in));
         $permutations[] = "";
 
         $trans = null;
@@ -341,7 +341,7 @@ class Translator implements TranslatorInterface
         $noun = $noun ? "." . $noun : "";
 
         $in = array_filter([$politeness, $genderness, $noun]);
-        $permutations = array_map(fn($a) => implode("", $a), get_permutations($in, true));
+        $permutations = array_map(fn($a) => implode("", $a), get_permutations($in));
         $permutations[] = "";
 
         $trans = null;
@@ -409,7 +409,7 @@ class Translator implements TranslatorInterface
         $class = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
         $class = implode(".", array_slice(explode(".", $class), 0, $offset));
 
-        return $class ? $this->transPermExists($class . $value, $options, self::DOMAIN_ENUM) : false;
+        return $class && $this->transPermExists($class . $value, $options, self::DOMAIN_ENUM);
     }
 
     public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): ?string
@@ -421,7 +421,7 @@ class Translator implements TranslatorInterface
             $entityOrClassName = get_class($entityOrClassName);
         }
 
-        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
+        $entityOrClassName = $this->parseClass($entityOrClassName);
         $property = $property ? "." . $property : "";
 
         return $entityOrClassName ? $this->transPerms($entityOrClassName . camel2snake($property), $options, [], self::DOMAIN_ENTITY) : null;
@@ -436,7 +436,7 @@ class Translator implements TranslatorInterface
             $entityOrClassName = get_class($entityOrClassName);
         }
 
-        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
+        $entityOrClassName = $this->parseClass($entityOrClassName);
         $property = $property ? "." . $property : "";
 
         return $this->transPermExists($entityOrClassName . camel2snake($property), $options, self::DOMAIN_ENTITY);

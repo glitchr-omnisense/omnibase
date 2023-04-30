@@ -22,7 +22,7 @@ class ResampleFilter implements FilterInterface
     public function __toString()
     {
         $md5sum = md5(serialize($this->options));
-        return mod($this->angle, 360) ? "resample:".$md5sum : "";
+        return mod($this->angle, 360) ? "resample:" . $md5sum : "";
     }
 
     public function __construct(ImagineInterface $imagine, array $options = [])
@@ -41,7 +41,7 @@ class ResampleFilter implements FilterInterface
             $this->delTemporaryFile($tmpFile);
         } catch (\Exception $exception) {
             $this->delTemporaryFile($tmpFile);
-            throw new FileNotFoundException('Unable to save/open file in resample filter loader.', $exception->getCode(), $exception);
+            throw new FileNotFoundException('Unable to save/open file in resample filter loader.');
         }
 
         return $image;
@@ -50,9 +50,9 @@ class ResampleFilter implements FilterInterface
     /**
      * @param string $path
      *
+     * @return string
      * @throws \RuntimeException
      *
-     * @return string
      */
     private function getTemporaryFile($path)
     {
@@ -122,7 +122,7 @@ class ResampleFilter implements FilterInterface
                 }
             }
 
-            throw new InvalidArgumentException('Invalid value for "filter" option: must be a valid constant resolvable using one of formats '.'"\Imagine\Image\ImageInterface::FILTER_%s", "\Imagine\Image\ImageInterface::%s", or "%s".');
+            throw new InvalidArgumentException('Invalid value for "filter" option: must be a valid constant resolvable using one of formats ' . '"\Imagine\Image\ImageInterface::FILTER_%s", "\Imagine\Image\ImageInterface::%s", or "%s".');
         });
 
         try {

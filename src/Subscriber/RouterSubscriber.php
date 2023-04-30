@@ -44,13 +44,13 @@ class RouterSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-        return [KernelEvents::REQUEST  => ['onKernelRequest', 7]];
+        return [KernelEvents::REQUEST => ['onKernelRequest', 7]];
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
         if (!$event->isMainRequest()) {
-            return ;
+            return;
         }
 
         $route = $this->router->getRoute();
@@ -58,12 +58,11 @@ class RouterSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $ipRestriction = !$this->parameterBag->get("base.router.ip_access")        &&  $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
-        if ($ipRestriction) {
-        }
-
         $url = get_url();
+
+        $ipRestriction = !$this->parameterBag->get("base.router.ip_access") && $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
         if ($ipRestriction) {
+
             $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
             if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback) {
                 throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
@@ -74,43 +73,43 @@ class RouterSubscriber implements EventSubscriberInterface
             $parsedUrl["host"] = $this->router->getHostFallback();
 
             $url = compose_url(
-                $parsedUrl["scheme"]   ?? null,
+                $parsedUrl["scheme"] ?? null,
                 null,
                 null,
                 null,
                 null,
-                $parsedUrl["host"]     ?? null,
+                $parsedUrl["host"] ?? null,
                 null,
-                $parsedUrl["path"]     ?? null,
-                $parsedUrl["query"]    ?? null,
+                $parsedUrl["path"] ?? null,
+                $parsedUrl["query"] ?? null,
                 $parsedUrl["fragment"] ?? null
             );
         } elseif (!$route->getHost() && $this->router->reducesOnFallback()) {
             $parsedUrl = parse_url2(get_url());
-            $parsedUrl["scheme"]    = $this->router->getScheme();
-            $parsedUrl["machine"]   = $this->router->getMachine() ?? null;
+            $parsedUrl["scheme"] = $this->router->getScheme();
+            $parsedUrl["machine"] = $this->router->getMachine() ?? null;
             $parsedUrl["subdomain"] = $this->router->getSubdomain() ?? null;
-            $parsedUrl["domain"]    = $this->router->getDomain() ?? null;
-            $parsedUrl["port"]      = $this->router->getPort() ?? null;
+            $parsedUrl["domain"] = $this->router->getDomain() ?? null;
+            $parsedUrl["port"] = $this->router->getPort() ?? null;
 
             $url = compose_url(
-                $parsedUrl["scheme"]  ?? null,
+                $parsedUrl["scheme"] ?? null,
                 null,
                 null,
-                $parsedUrl["machine"]   ?? null,
+                $parsedUrl["machine"] ?? null,
                 $parsedUrl["subdomain"] ?? null,
-                $parsedUrl["domain"]    ?? null,
-                $parsedUrl["port"]      ?? null,
-                $parsedUrl["path"]      ?? null,
-                $parsedUrl["query"]     ?? null,
-                $parsedUrl["fragment"]  ?? null
+                $parsedUrl["domain"] ?? null,
+                $parsedUrl["port"] ?? null,
+                $parsedUrl["path"] ?? null,
+                $parsedUrl["query"] ?? null,
+                $parsedUrl["fragment"] ?? null
             );
         }
 
         // Redirect to sanitized url
         if ($url != get_url()) {
             $event->setResponse(new RedirectResponse($url));
-            return $event->stopPropagation();
+            $event->stopPropagation();
         }
     }
 }

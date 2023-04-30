@@ -42,14 +42,17 @@ class FormProcessor implements FormProcessorInterface
     {
         return $this->form;
     }
+
     public function getFormType(): string
     {
         return get_class($this->form);
     }
+
     public function getOption(string $name): mixed
     {
         return $this->getOptions()[$name] ?? null;
     }
+
     public function getOptions(): array
     {
         return $this->form->getConfig()->getType()->getOptionsResolver()->resolve();
@@ -76,7 +79,7 @@ class FormProcessor implements FormProcessorInterface
     public function setData(mixed $data): self
     {
         $array = is_array($data) ? $data : $this->getEntityHydrator()->dehydrate($data) ?? [];
-        $array = array_map(fn ($c) => $c instanceof PersistentCollection ? $this->getEntityHydrator()->dehydrate($c) : $c, $array);
+        $array = array_map(fn($c) => $c instanceof PersistentCollection ? $this->getEntityHydrator()->dehydrate($c) : $c, $array);
 
         $formData = $this->form->getData();
         if (is_object($this->form->getData())) {
@@ -108,10 +111,11 @@ class FormProcessor implements FormProcessorInterface
             }
         }
 
-        return $this->getEntityHydrator()->hydrate($entity, $data, $ignoredFields, EntityHydrator::CLASS_METHODS|EntityHydrator::FETCH_ASSOCIATIONS);
+        return $this->getEntityHydrator()->hydrate($entity, $data, $ignoredFields, EntityHydrator::CLASS_METHODS | EntityHydrator::FETCH_ASSOCIATIONS);
     }
 
     protected $onDefaultCallback;
+
     public function onDefault(callable $callback): static
     {
         $this->onDefaultCallback = $callback;
@@ -119,6 +123,7 @@ class FormProcessor implements FormProcessorInterface
     }
 
     protected $onInvalidCallback;
+
     public function onInvalid(callable $callback): static
     {
         $this->onInvalidCallback = $callback;
@@ -126,6 +131,7 @@ class FormProcessor implements FormProcessorInterface
     }
 
     protected array $onSubmitCallbacks;
+
     public function onSubmit(callable ...$callbacks): static
     {
         $this->onSubmitCallbacks = $callbacks;
@@ -133,22 +139,24 @@ class FormProcessor implements FormProcessorInterface
     }
 
     protected $response;
+
     public function hasResponse(): bool
     {
         return $this->response instanceof Response;
     }
+
     public function getResponse(): Response
     {
         if (!$this->response instanceof Response) {
             if ($this->form->isSubmitted()) {
                 if ($this->form->isValid()) {
-                    throw new Exception("Unexpected returned value from " . get_class($this) . "::onSubmit(".$this->form->getName().")#" . ($this->getStep()-1) . ": instance of " . Response::class . " expected");
+                    throw new Exception("Unexpected returned value from " . get_class($this) . "::onSubmit(" . $this->form->getName() . ")#" . ($this->getStep() - 1) . ": instance of " . Response::class . " expected");
                 }
 
-                throw new Exception("Unexpected returned value from " . get_class($this) . "::onInvalid(".$this->form->getName().")#" . ($this->getStep()-1) . ": instance of " . Response::class . " expected");
+                throw new Exception("Unexpected returned value from " . get_class($this) . "::onInvalid(" . $this->form->getName() . ")#" . ($this->getStep() - 1) . ": instance of " . Response::class . " expected");
             }
 
-            throw new Exception("Unexpected returned value from " . get_class($this) . "::onDefault(".$this->form->getName()."): instance of " . Response::class . " expected");
+            throw new Exception("Unexpected returned value from " . get_class($this) . "::onDefault(" . $this->form->getName() . "): instance of " . Response::class . " expected");
         }
 
         return $this->response;
@@ -162,10 +170,12 @@ class FormProcessor implements FormProcessorInterface
 
 
     protected $entity;
+
     public function getEntity()
     {
         return $this->entity;
     }
+
     public function handleRequest(Request $request): static
     {
         if (!$this->form) {
@@ -177,17 +187,17 @@ class FormProcessor implements FormProcessorInterface
         $step = 0;
         $stepMax = 0;
 
-        $step    = $this->getStep();
+        $step = $this->getStep();
         $stepMax = $this->getStepMax();
 
         $formType = $this->getFormType();
-        $session  = $this->getSession();
+        $session = $this->getSession();
 
         $nextStep = true; //false;
 
         $submitCount = count($this->onSubmitCallbacks);
         if ($stepMax > 0 && $submitCount > 1 && $stepMax != $submitCount) {
-            throw new Exception("Number of FormProcessor::onSubmit() calls is not matching the number of steps in ".$formType);
+            throw new Exception("Number of FormProcessor::onSubmit() calls is not matching the number of steps in " . $formType);
         }
 
         // Bind session to form (retrieve previous step information)
@@ -224,7 +234,7 @@ class FormProcessor implements FormProcessorInterface
         if ($this->form->isSubmitted()) {
             // Prepare response either calling onDefault or onSubmit step
             if ($this->form->isValid()) {
-                $this->response = count($this->onSubmitCallbacks) > $step-1 ? call_user_func($this->onSubmitCallbacks[$step-1], $this, $request) : null;
+                $this->response = count($this->onSubmitCallbacks) > $step - 1 ? call_user_func($this->onSubmitCallbacks[$step - 1], $this, $request) : null;
             } else {
                 $this->response = $this->onInvalidCallback ? call_user_func($this->onInvalidCallback, $this, $request) : null;
             }
@@ -258,7 +268,7 @@ class FormProcessor implements FormProcessorInterface
     public function getToken()
     {
         $options = $this->getConfig()->getOptions();
-        $name  = $options['flow_form_id'] ?? "";
+        $name = $options['flow_form_id'] ?? "";
         $token = $_POST[$name] ?? "";
 
         if (!empty($token) && preg_match("/(.*)#([0-9]*)/", $token, $matches)) {
@@ -277,6 +287,7 @@ class FormProcessor implements FormProcessorInterface
     {
         $options = $this->getConfig()->getOptions();
         return $this->addStep($options, function (FormBuilderInterface $builder, array $options) {
+            //@TODO..
         });
     }
 

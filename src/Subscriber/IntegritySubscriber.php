@@ -37,7 +37,7 @@ class IntegritySubscriber implements EventSubscriberInterface
     protected $tokenStorage;
 
     /**
-     * @var Doctrine
+     * @var ManagerRegistry
      */
     protected $doctrine;
 
@@ -47,12 +47,12 @@ class IntegritySubscriber implements EventSubscriberInterface
     protected $requestStack;
 
     /**
-     * @var Translator
+     * @var TranslatorInterface
      */
     protected $translator;
 
     /**
-     * @var Router
+     * @var RouterInterface
      */
     protected $router;
 
@@ -70,43 +70,29 @@ class IntegritySubscriber implements EventSubscriberInterface
     {
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
-        $this->translator   = $translator;
-        $this->doctrine     = $doctrine;
-        $this->router       = $router;
+        $this->translator = $translator;
+        $this->doctrine = $doctrine;
+        $this->router = $router;
 
-        $this->secret       = $secret;
-        $this->vault        = new Vault();
+        $this->secret = $secret;
+        $this->vault = new Vault();
     }
 
     public static function getSubscribedEvents(): array
     {
         return
-        [
-            KernelEvents::EXCEPTION  => ['onException'],
-            RequestEvent::class      => ['onKernelRequest', 7],
-            LoginSuccessEvent::class => ['onLoginSuccess', 1],
-        ];
-    }
-
-    public function onLoginSuccess(LoginSuccessEvent $event)
-    {
-        $token = $this->tokenStorage->getToken();
-        if (!$token) {
-            return true;
-        }
-
-        $user = $token->getUser();
-        if ($user === null) {
-            return true;
-        }
+            [
+                KernelEvents::EXCEPTION => ['onException'],
+                RequestEvent::class => ['onKernelRequest', 7],
+            ];
     }
 
     public function onException(ExceptionEvent $event)
     {
         $throwable = $event->getThrowable();
         $instanceOf = ($throwable instanceof TypeError || $throwable instanceof DoctrineException ||
-                       $throwable instanceof ErrorException || $throwable instanceof InvalidArgumentException ||
-                       $throwable instanceof EntityNotFoundException);
+            $throwable instanceof ErrorException || $throwable instanceof InvalidArgumentException ||
+            $throwable instanceof EntityNotFoundException);
 
         if ($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace())) {
             throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
@@ -136,7 +122,7 @@ class IntegritySubscriber implements EventSubscriberInterface
             return;
         }
 
-        $integrity  = $this->checkUserIntegrity();
+        $integrity = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
 
@@ -153,12 +139,12 @@ class IntegritySubscriber implements EventSubscriberInterface
             $session->remove("_integrity/doctrine");
 
             $response = new Response();
-            $response->headers->clearCookie('REMEMBERME', "/");
+            $response->headers->clearCookie('REMEMBERME');
             $response->headers->clearCookie('REMEMBERME', "/", $this->router->getDomain());
 
             $response->sendHeaders();
 
-            $response = $this->router->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE, [], 302);
+            $response = $this->router->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE);
             $event->setResponse($response);
             $event->stopPropagation();
         }
@@ -182,23 +168,22 @@ class IntegritySubscriber implements EventSubscriberInterface
         }
 
         $driver = $params["driver"] ?? null;
-        $driver = $driver ? $driver."://" : "";
+        $driver = $driver ? $driver . "://" : "";
 
         $user = $params["user"] ?? null;
-        $user = $user ? $user."@" : "";
+        $user = $user ? $user . "@" : "";
 
         $port = $params["port"] ?? null;
-        $port = $port ? ":".$port : "";
+        $port = $port ? ":" . $port : "";
 
         $dbname = $params["dbname"] ?? null;
-        $dbname = $dbname ? "/".$dbname : "";
+        $dbname = $dbname ? "/" . $dbname : "";
 
         $charset = $params["charset"] ?? null;
-        $charset = $charset ? " (".$params["charset"].")" : "";
+        $charset = $charset ? " (" . $params["charset"] . ")" : "";
 
-        return md5($driver.$user.$host.$port.$dbname.$charset);
+        return md5($driver . $user . $host . $port . $dbname . $charset);
     }
-
 
 
     public function checkUserIntegrity()
@@ -219,7 +204,7 @@ class IntegritySubscriber implements EventSubscriberInterface
             return true;
         }
 
-        $persistentCollection = ($user->getLogs() instanceof PersistentCollection ? (array) $user->getLogs() : null);
+        $persistentCollection = ($user->getLogs() instanceof PersistentCollection ? (array)$user->getLogs() : null);
         if ($persistentCollection === null) {
             return false;
         }

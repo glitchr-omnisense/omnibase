@@ -42,22 +42,22 @@ class UserSubscriber implements EventSubscriberInterface
     public function __construct(NotifierInterface $notifier, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage, RouterInterface $router)
     {
         $this->entityManager = $entityManager;
-        $this->router        = $router;
-        $this->tokenStorage  = $tokenStorage;
-        $this->notifier      = $notifier;
+        $this->router = $router;
+        $this->tokenStorage = $tokenStorage;
+        $this->notifier = $notifier;
     }
 
     public static function getSubscribedEvents(): array
     {
         return
-        [
-            UserEvent::REGISTER => ['onRegistration'],
-            UserEvent::APPROVAL => ['onApproval'],
-            UserEvent::VERIFIED => ['onVerification'],
-            UserEvent::ENABLED  => ['onEnabling'],
-            UserEvent::DISABLED => ['onDisabling'],
-            UserEvent::KICKED   => ['onKickout']
-        ];
+            [
+                UserEvent::REGISTER => ['onRegistration'],
+                UserEvent::APPROVAL => ['onApproval'],
+                UserEvent::VERIFIED => ['onVerification'],
+                UserEvent::ENABLED => ['onEnabling'],
+                UserEvent::DISABLED => ['onDisabling'],
+                UserEvent::KICKED => ['onKickout']
+            ];
     }
 
     public function onEnabling(UserEvent $event)
@@ -123,7 +123,7 @@ class UserSubscriber implements EventSubscriberInterface
             $notification->send("success");
         }
 
-        $this->router->redirectToRoute("user_profile", [], 302);
+        $this->router->redirectToRoute("user_profile");
     }
 
     public function onApproval(UserEvent $event)

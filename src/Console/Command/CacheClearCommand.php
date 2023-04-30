@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 use Base\Routing\RouterInterface;
 
-#[AsCommand(name:'cache:clear', aliases:[], description:'')]
+#[AsCommand(name: 'cache:clear', aliases: [], description: '')]
 class CacheClearCommand extends Command
 {
     use CacheClearTrait;
@@ -54,26 +54,27 @@ class CacheClearCommand extends Command
     protected $router;
 
     public function __construct(
-        LocalizerInterface $localizer,
-        TranslatorInterface $translator,
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
+        LocalizerInterface       $localizer,
+        TranslatorInterface      $translator,
+        EntityManagerInterface   $entityManager,
+        ParameterBagInterface    $parameterBag,
         SymfonyCacheClearCommand $cacheClearCommand,
-        Flysystem $flysystem,
-        Notifier $notifier,
-        RouterInterface $router,
-        string $projectDir,
-        string $cacheDir
-    ) {
+        Flysystem                $flysystem,
+        Notifier                 $notifier,
+        RouterInterface          $router,
+        string                   $projectDir,
+        string                   $cacheDir
+    )
+    {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
 
         $this->flysystem = $flysystem;
-        $this->notifier  = $notifier;
-        $this->router    = $router;
+        $this->notifier = $notifier;
+        $this->router = $router;
 
-        $this->projectDir  = $projectDir;
-        $this->cacheDir    = $cacheDir;
+        $this->projectDir = $projectDir;
+        $this->cacheDir = $cacheDir;
     }
 
     protected function configure(): void
@@ -93,8 +94,7 @@ and debug mode:
   <info>php %command.full_name% --env=dev</info>
   <info>php %command.full_name% --env=prod --no-debug</info>
 EOF
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -109,11 +109,11 @@ EOF
             $this->checkCache($io);
             $this->checkExtensions($io);
 
-            $this->testFile = $this->cacheDir."/.test";
+            $this->testFile = $this->cacheDir . "/.test";
             $this->testFileExists = file_exists($this->testFile);
         }
 
-        $noWarmup          = $input->getOption('no-warmup');
+        $noWarmup = $input->getOption('no-warmup');
         $noOptionalWarmers = $input->getOption('no-optional-warmers') || $noWarmup;
         if (!$noOptionalWarmers) {
             $io->write("\n // <info>All</info> cache warmers requested.", true);
@@ -132,7 +132,7 @@ EOF
         }
 
         if ($noWarmup) {
-            $io->warning("Warm up is disabled.", true);
+            $io->warning("Warm up is disabled.");
         } elseif ($noOptionalWarmers) {
             $environment = $this->parameterBag->get("kernel.environment");
             if (str_starts_with($environment, "prod")) {

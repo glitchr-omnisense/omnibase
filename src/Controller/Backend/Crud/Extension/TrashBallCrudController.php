@@ -24,8 +24,8 @@ class TrashBallCrudController extends AbstractCrudController
 
         return parent::configureFields($pageName, function () {
             yield SelectField::new('action')->hideOnForm();
-            yield TextField::new('entityClass')->setDisabled(true);
-            yield NumberField::new('entityId')->setDisabled(true);
+            yield TextField::new('entityClass')->setDisabled();
+            yield NumberField::new('entityId')->setDisabled();
 
             yield DateTimePickerField::new('permanentAfter');
         });

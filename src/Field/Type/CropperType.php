@@ -71,30 +71,30 @@ class CropperType extends AbstractType implements DataMapperInterface
             "webpack_entry" => "form.cropper",
             'cropper_info' => true,
             'cropper_actions' => true,
-            'cropper'     => [
-                "dragMode"     => "none",
-                "responsive"   => true,
-                "movable"      => false,
-                "zoomable"     => false,
-                "restore"      => false,
-                "viewMode"     => 2,
+            'cropper' => [
+                "dragMode" => "none",
+                "responsive" => true,
+                "movable" => false,
+                "zoomable" => false,
+                "restore" => false,
+                "viewMode" => 2,
                 "autoCropArea" => 1,
-                "center"       => true,
+                "center" => true,
             ],
 
-            "quadrant"          => null,
-            "target"         => null,
-            "natural_width"  => null,
+            "quadrant" => null,
+            "target" => null,
+            "natural_width" => null,
             "natural_height" => null,
 
             "fields" => null,
 
             "aspectRatios" => [
-                "@fields.cropper.aspect_ratio.standard"  => 4/3,
-                "@fields.cropper.aspect_ratio.large"     => 16/9,
-                "@fields.cropper.aspect_ratio.square"    => 1,
-                "@fields.cropper.aspect_ratio.facebook"  => 1200/630,  # > 16:9
-                "@fields.cropper.aspect_ratio.pinterest" => 1000/1500, # 2:3
+                "@fields.cropper.aspect_ratio.standard" => 4 / 3,
+                "@fields.cropper.aspect_ratio.large" => 16 / 9,
+                "@fields.cropper.aspect_ratio.square" => 1,
+                "@fields.cropper.aspect_ratio.facebook" => 1200 / 630,  # > 16:9
+                "@fields.cropper.aspect_ratio.pinterest" => 1000 / 1500, # 2:3
             ],
         ]);
 
@@ -110,10 +110,10 @@ class CropperType extends AbstractType implements DataMapperInterface
             $fields = array_reverse(array_merge(array_reverse([
 
                 // Displayed variables
-                "x"      => ["label"  => "Left"   , "form_type" => NumberType::class, "min" => -1],
-                "y"      => ["label"  => "Top"    , "form_type" => NumberType::class, "min" => -1],
-                "width"  => ["label"  => "Width"  , "form_type" => NumberType::class, "min" => -1],
-                "height" => ["label"  => "Height" , "form_type" => NumberType::class, "min" => -1],
+                "x" => ["label" => "Left", "form_type" => NumberType::class, "min" => -1],
+                "y" => ["label" => "Top", "form_type" => NumberType::class, "min" => -1],
+                "width" => ["label" => "Width", "form_type" => NumberType::class, "min" => -1],
+                "height" => ["label" => "Height", "form_type" => NumberType::class, "min" => -1],
 
                 // Not implemented for the moment
                 // "rotate"  => ["label"  => "Rotate" , "form_type" => HiddenType::class],
@@ -123,13 +123,13 @@ class CropperType extends AbstractType implements DataMapperInterface
                 // "pivotY"      => ["label"  => "Pivot Y", "form_type" => HiddenType::class],
 
                 // Behind the scene
-                "is_normalized" => ["form_type" => HiddenType::class, "label" => "Is Normalized ?"     ],
-                "x0"            => ["form_type" => HiddenType::class, "label" => "Left (normalized)"   ],
-                "y0"            => ["form_type" => HiddenType::class, "label" => "Top (normalized)"    ],
-                "width0"        => ["form_type" => HiddenType::class, "label" => "Width (normalized)"  ],
-                "height0"       => ["form_type" => HiddenType::class, "label" => "Height (normalized)" ],
-                "xP"            => ["form_type" => HiddenType::class, "label" => "Pivot X (normalized)"],
-                "yP"            => ["form_type" => HiddenType::class, "label" => "Pivot Y (normalized)"],
+                "is_normalized" => ["form_type" => HiddenType::class, "label" => "Is Normalized ?"],
+                "x0" => ["form_type" => HiddenType::class, "label" => "Left (normalized)"],
+                "y0" => ["form_type" => HiddenType::class, "label" => "Top (normalized)"],
+                "width0" => ["form_type" => HiddenType::class, "label" => "Width (normalized)"],
+                "height0" => ["form_type" => HiddenType::class, "label" => "Height (normalized)"],
+                "xP" => ["form_type" => HiddenType::class, "label" => "Pivot X (normalized)"],
+                "yP" => ["form_type" => HiddenType::class, "label" => "Pivot Y (normalized)"],
 
             ]), array_reverse($options["fields"] ?? [])));
 
@@ -142,7 +142,7 @@ class CropperType extends AbstractType implements DataMapperInterface
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["cropper"]      = json_encode($options["cropper"]);
+        $view->vars["cropper"] = json_encode($options["cropper"]);
         $view->vars["aspectRatios"] = $options["aspectRatios"];
     }
 
@@ -170,7 +170,7 @@ class CropperType extends AbstractType implements DataMapperInterface
             $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
             foreach ($targetPath ?? [] as $path) {
                 if (!array_key_exists($path, $target->children)) {
-                    throw new \Exception("Child form \"$path\" related to view data \"".$target->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
+                    throw new \Exception("Child form \"$path\" related to view data \"" . $target->vars["name"] . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["target"] . "\")");
                 }
 
                 $target = $target->children[$path];
@@ -195,7 +195,7 @@ class CropperType extends AbstractType implements DataMapperInterface
             $quadrantPath = $options["quadrant"] ? explode(".", $options["quadrant"]) : null;
             foreach ($quadrantPath ?? [] as $path) {
                 if (!array_key_exists($path, $quadrant->children)) {
-                    throw new \Exception("Child form \"$path\" related to view data \"".$quadrant->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["quadrant"]."\")");
+                    throw new \Exception("Child form \"$path\" related to view data \"" . $quadrant->vars["name"] . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["quadrant"] . "\")");
                 }
 
                 $quadrant = $quadrant->children[$path];
@@ -221,7 +221,7 @@ class CropperType extends AbstractType implements DataMapperInterface
         }
 
         $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));
-        $fieldNames = $classMetadata->getFieldNames($viewData);
+        $fieldNames = $classMetadata->getFieldNames();
         $fieldNames[] = "is_normalized"; // Include normalization information
         foreach (iterator_to_array($forms) as $formName => $form) {
             if (!in_array($formName, $fieldNames)) {
@@ -234,7 +234,7 @@ class CropperType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));
-        $fieldNames = $classMetadata->getFieldNames($viewData);
+        $fieldNames = $classMetadata->getFieldNames();
 
         foreach (iterator_to_array($forms) as $formName => $form) {
             if (!in_array($formName, $fieldNames)) {

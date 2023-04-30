@@ -51,7 +51,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
     public function getBlockPrefix(): string
     {
-        return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+        return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -127,8 +127,8 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
                 if ($fieldOptions["form_type"] == FileType::class || $fieldOptions["form_type"] == ImageType::class || $fieldOptions["form_type"] == AvatarType::class) {
                     $fieldOptions["max_size"] = $fieldOptions["max_size"] ?? Uploader::getMaxFilesize(SettingIntl::class, "value");
-                    $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingIntl::class, "value");
-                    $fieldOptions["empty_data"]   = $settingValue ?? "";
+                    $fieldOptions["mime_types"] = $fieldOptions["mime_types"] ?? Uploader::getMimeTypes(SettingIntl::class, "value");
+                    $fieldOptions["empty_data"] = $settingValue ?? "";
                 }
 
                 if (!array_key_exists("help", $fieldOptions)) {
@@ -149,7 +149,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 foreach ($translations as $locale => $settingTranslation) {
                     $settingValue = $settingTranslation->getValue();
 
-                    switch($fieldOptions["form_type"]) {
+                    switch ($fieldOptions["form_type"]) {
                         case DateTimePickerType::class:
                             $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
                             if (!$datetime) {
@@ -160,7 +160,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
                         case CheckboxType::class:
                             $bool = !empty($settingValue) && $settingValue != "0";
-                            $settingTranslation->setValue($bool ? true : false);
+                            $settingTranslation->setValue((bool)$bool);
                             break;
                     }
                 }
@@ -217,16 +217,15 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 foreach ($form->getData() as $formattedField => $translations) {
                     $field = str_replace("-", ".", $formattedField);
                     foreach ($translations as $locale => $translation) {
-                        $viewData[$field] = $viewData[$field] ?? $this->settingBag->getRawScalar($field) ?? new Setting($field);
-                        ;
+                        $viewData[$field] = $viewData[$field] ?? $this->settingBag->getRawScalar($field) ?? new Setting($field);;
                         if ($viewData[$field]->isLocked()) {
-                            throw new \Exception("Setting \"".$viewData[$field]->getPath()."\" is locked, you cannot edit this variable.");
+                            throw new \Exception("Setting \"" . $viewData[$field]->getPath() . "\" is locked, you cannot edit this variable.");
                         }
 
                         if ($translation->getValue() == []) {
                             $translation->setValue(null);
                         }
-                        $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null, $locale);
+                        $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
                     }
                 }
             } else {
@@ -236,16 +235,16 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 }
 
                 if ($viewData[$formName]->isLocked()) {
-                    throw new \Exception("Setting \"".$viewData[$formName]->getPath()."\" is currently locked.");
+                    throw new \Exception("Setting \"" . $viewData[$formName]->getPath() . "\" is currently locked.");
                 }
 
                 $translation = $form->getViewData();
-                $locale      = $translation->getLocale();
+                $locale = $translation->getLocale();
 
                 if ($translation->getValue() == []) {
                     $translation->setValue(null);
                 }
-                $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null, $locale);
+                $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);
             }
         }
     }

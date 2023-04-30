@@ -25,6 +25,7 @@ abstract class AbstractCompression implements CompressionInterface
     {
         return $this->level;
     }
+
     public function setLevel(int $level)
     {
         $this->level = $level;
@@ -35,6 +36,7 @@ abstract class AbstractCompression implements CompressionInterface
     {
         return $this->encoding;
     }
+
     public function setEncoding(?string $encoding)
     {
         $this->encoding = $encoding;
@@ -45,6 +47,7 @@ abstract class AbstractCompression implements CompressionInterface
     {
         return $this->maxLength;
     }
+
     public function setMaxLength(int $maxLength)
     {
         $this->maxLength = $maxLength;
@@ -52,13 +55,15 @@ abstract class AbstractCompression implements CompressionInterface
     }
 
     abstract protected function encodeHex(string $hex): string|false;
+
     public function encode(string $data): ?string
     {
         $hex = $this->encodeHex(bin2hex($data));
-        return $hex ? $hex : null;
+        return $hex ?: null;
     }
 
     abstract protected function decodeHex(string $data): string|false;
+
     public function decode(string $hex): ?string
     {
         try {

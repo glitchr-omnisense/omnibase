@@ -22,10 +22,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * */
 class DropzoneController extends AbstractController
 {
-    public const CACHE_DURATION = 24*3600;
+    public const CACHE_DURATION = 24 * 3600;
 
-    public const STATUS_OK      = "OK";
-    public const STATUS_BAD     = "BAD";
+    public const STATUS_OK = "OK";
+    public const STATUS_BAD = "BAD";
     public const STATUS_NOTOKEN = "NO_TOKEN";
 
     /**
@@ -53,8 +53,8 @@ class DropzoneController extends AbstractController
 
     public function __construct(TranslatorInterface $translator, CacheInterface $cache, ObfuscatorInterface $obfuscator, string $cacheDir)
     {
-        $this->cache      = $cache;
-        $this->cacheDir   = $cacheDir;
+        $this->cache = $cache;
+        $this->cacheDir = $cacheDir;
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;
 
@@ -84,8 +84,9 @@ class DropzoneController extends AbstractController
             return new Response($this->translator->trans("fileupload.error.no_file", [], "fields"), 500);
         }
 
-        switch($file->getError()) {
-            case UPLOAD_ERR_OK: break;
+        switch ($file->getError()) {
+            case UPLOAD_ERR_OK:
+                break;
             case UPLOAD_ERR_INI_SIZE:
             case UPLOAD_ERR_FORM_SIZE:
                 return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
@@ -103,23 +104,23 @@ class DropzoneController extends AbstractController
                 return new Response("Unknown error during upload.", 500);
         }
 
-        if (array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6*$config["maxFilesize"]) {
+        if (array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6 * $config["maxFilesize"]) {
             return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
         }
 
-        $cacheDir = $this->getCacheDir()."/dropzone";
+        $cacheDir = $this->getCacheDir() . "/dropzone";
         if (!$this->filesystem->exists($cacheDir)) {
             $this->filesystem->mkdir($cacheDir);
         }
 
         $fileUuid = Uuid::v4();
-        $filePath = $cacheDir."/".$fileUuid;
+        $filePath = $cacheDir . "/" . $fileUuid;
         $fileMetadata = [
-            "status"    => self::STATUS_OK,
-            "uuid"      => $fileUuid,
+            "status" => self::STATUS_OK,
+            "uuid" => $fileUuid,
             "mime_type" => $file->getMimeType(),
-            "size"      => $file->getSize(),
-            "error"     => $file->getError(),
+            "size" => $file->getSize(),
+            "error" => $file->getError(),
         ];
 
         // dirname($newFileName))
@@ -190,8 +191,8 @@ class DropzoneController extends AbstractController
             return new Response("Invalid uuid.", 500);
         }
 
-        $cacheDir = $this->getCacheDir()."/dropzone";
-        $path = $cacheDir."/".$uuid;
+        $cacheDir = $this->getCacheDir() . "/dropzone";
+        $path = $cacheDir . "/" . $uuid;
         if (file_exists($path)) {
             $content = file_get_contents2($path);
             $mimetype = mime_content_type2($path);
@@ -202,7 +203,7 @@ class DropzoneController extends AbstractController
             $response->setMaxAge(300);
             $response->setPublic();
             $response->setEtag(md5($response->getContent()));
-            $response->headers->addCacheControlDirective('must-revalidate', true);
+            $response->headers->addCacheControlDirective('must-revalidate');
 
             $response->headers->set('Content-Type', $mimetype);
             return $response;
@@ -232,12 +233,12 @@ class DropzoneController extends AbstractController
             return new Response("Invalid uuid.", 500);
         }
 
-        $cacheDir = $this->getCacheDir()."/dropzone";
-        $path = $cacheDir."/".$uuid;
+        $cacheDir = $this->getCacheDir() . "/dropzone";
+        $path = $cacheDir . "/" . $uuid;
         if (file_exists($path)) {
             !unlink($path);
         }
 
-        return JsonResponse::fromJsonString(json_encode(["status"    => self::STATUS_OK, 'uuid' => $uuid]));
+        return JsonResponse::fromJsonString(json_encode(["status" => self::STATUS_OK, 'uuid' => $uuid]));
     }
 }

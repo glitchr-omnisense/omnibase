@@ -928,14 +928,11 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function getTranslationMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
     {
-        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
-        if (!$classMetadata) {
-            return false;
+        if ($this->hasAssociation($entityOrClassOrMetadata, "translations")) {
+            return $this->getMapping($this->getClassMetadata($entityOrClassOrMetadata)->getAssociationMapping("translations")["targetEntity"], $fieldName);
         }
 
-        if ($this->hasAssociation($entityOrClassOrMetadata, "translations")) {
-            return $this->getMapping($classMetadata->getAssociationMapping("translations")["targetEntity"], $fieldName);
-        }
+        return false;
     }
 
     public function getMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
