@@ -532,14 +532,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $menu   = $this->addRoles($menu, UserRole::class);
         }
 
-        if ($this->isGranted('ROLE_EDITOR')) {
-            $menu[] = MenuItem::section('MEMBERSHIP');
-
-            $menu   = $this->addRoles($menu, \Base\Enum\UserRole::class);
-            $menu[] = MenuItem::linkToCrud(User::class, "All users", 'fa-solid fa-fw fa-tags', );
-            $menu[] = MenuItem::linkToCrud(User::class, 'Add user', 'fa-solid fa-fw fa-plus-circle')->setPermission('ROLE_EDITOR')
-                ->setAction('new');
-        }
+//        if ($this->isGranted('ROLE_EDITOR')) {
+//
+//            $menu[] = MenuItem::section('DOCUMENTATION');
+//            $menu[] = MenuItem::linkToRoute("backoffice_manual", [], 'Manual', 'fa-solid fa-fw fa-book');
+//            $menu[] = MenuItem::linkToRoute("backoffice_manual_developer", [], 'Developer', 'fa-solid fa-fw fa-life-ring');
+//        }
 
         return $menu;
     }
