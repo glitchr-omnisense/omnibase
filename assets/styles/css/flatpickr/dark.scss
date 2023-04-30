@@ -1,5 +1,4 @@
 .flatpickr-calendar {
-    background: transparent;
     opacity: 0;
     display: none;
     text-align: center;
@@ -307,7 +306,6 @@
 }
 .flatpickr-current-month {
     font-size: 135%;
-    line-height: inherit;
     font-weight: 300;
     color: inherit;
     position: absolute;

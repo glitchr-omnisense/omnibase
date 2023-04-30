@@ -9,9 +9,9 @@ use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method MoneyAdapter|null find($id, $lockMode = null, $lockVersion = null)
- * @method MoneyAdapter|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method MoneyAdapter|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method MoneyAdapter[]    findAll()
- * @method MoneyAdapter[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method MoneyAdapter[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class MoneyAdapterRepository extends AbstractAdapterRepository

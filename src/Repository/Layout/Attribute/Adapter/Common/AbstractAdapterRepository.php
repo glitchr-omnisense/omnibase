@@ -8,9 +8,9 @@ use Base\Database\Repository\ServiceEntityRepository;
 
 /**
  * @method AbstractAdapter|null find($id, $lockMode = null, $lockVersion = null)
- * @method AbstractAdapter|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method AbstractAdapter|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method AbstractAdapter[]    findAll()
- * @method AbstractAdapter[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method AbstractAdapter[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class AbstractAdapterRepository extends ServiceEntityRepository

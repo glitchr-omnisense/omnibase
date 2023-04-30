@@ -8,9 +8,9 @@ use Base\Repository\Layout\WidgetRepository;
 
 /**
  * @method Network|null find($id, $lockMode = null, $lockVersion = null)
- * @method Network|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method Network|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Network[]    findAll()
- * @method Network[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method Network[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class NetworkRepository extends WidgetRepository

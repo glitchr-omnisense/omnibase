@@ -133,16 +133,13 @@
     
     .ql-editor img
     {
-        margin: auto;
-        max-width:auto;
-        max-height:auto;
+        margin: auto auto 1em auto;
 
         display: block;
         width:auto;
 
         padding: 0;
-        margin-bottom: 1em;
-        max-width:100%;
+        max-width: 100%;
     }
     
 
@@ -330,7 +327,6 @@ textarea { min-height:150px !important; }
 {
     background-color:lightpink;
     border: 1px solid lightcoral;
-    border-radius: 10px;
     padding:0.75em;
     width:100%;
     border-radius: 5px;
@@ -421,9 +417,18 @@ form.was-validated select:invalid ~ .select2-selection, .form-control.is-invalid
 }
 .form-collection-items.form-control { border: 0; }
 
-.form-collection-items.form-collection-no-add-button > .form-collection-item:last-child {
+.form-collection-items.form-collection-no-add-button > .form-collection-item:last-child,
+.form-collection-items.form-collection-no-add-button > .form-collection-item:last-child .accordion-button
+{
     border-bottom: 0;
 }
+
+.form-collection-items.form-collection-no-add-button > .form-collection-item:last-child,
+.form-collection-items.form-collection-no-add-button > .form-collection-item:last-child .accordion-button
+{
+    border-bottom: 0;
+}
+
 .form-collection { border: 1px solid lightgrey; }
 .form-collection-items .accordion-header { min-height: 1.5em; }
 .form-collection .collection-empty { border-bottom: 1px solid lightgrey; }
@@ -995,7 +1000,6 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     width:100%;
     min-height: 350px;
     border-radius: 0;
-    border-top-left-radius:4px;
     border-bottom-left-radius:4px;
 
     border: 1px solid lightgrey;
@@ -1211,9 +1215,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .imageupload figcaption {
     cursor: pointer;
     position: absolute;
-    top: 0px;
-    width: inherit;
-    height: inherit;
+    top: 0;
     border-radius: inherit;
     opacity: 0;
     transition: all ease-in-out .3s;
@@ -1262,7 +1264,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .imageupload figcaption i {
     color: #FFF;
 
-    text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.4);
+    text-shadow:0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .avatarupload .form-filesize
@@ -1360,8 +1362,29 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 }
 
 .accordion-item:first-of-type .accordion-button {
-    border-top-left-radius: calc(4px - 1px);
-    border-top-right-radius: calc(4px - 1px)
+    border-top-left-radius: 3px !important;
+    border-top-right-radius: 3px !important;
+}
+
+.accordion-item .accordion-button {
+    border-radius:0 !important;
+    box-shadow: none !important;
+}
+
+.form-collection-item .accordion-collapse.show
+{
+    border-bottom: var(--bs-accordion-border-width) solid var(--bs-accordion-border-color) !important;
+}
+
+.accordion-body {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.accordion-collapse.show {
+    border-radius:0 !important;
+    border-bottom: var(--bs-accordion-border-width) solid var(--bs-accordion-border-color);
 }
 
 .accordion-item:not(:first-of-type) {
@@ -1437,8 +1460,8 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .alert .title { font-weight:bold; }
 .input-group button, .input-group button:active, .input-group button:focus, .input-group button:hover {
     /* height:auto; */
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
+    border-top-left-radius:0;
+    border-bottom-left-radius:0;
 }
 
 /* Additional customization for select2 */
@@ -1481,7 +1504,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 
 .select2-results__option.loading-results { order:1 !important; }
 .select2-results__option--load-more { order:0 !important; }
-.select2-container .select2-selection--multiple .select2-selection__rendered { padding-right: 25px !important; }
+.select2-container .select2-selection--multiple .select2-selection__rendered { padding-right: 30px !important; }
 .select2-container .select2-search--inline .select2-search__field {
     margin-top: 6px;
     margin-left: 3px;
@@ -1512,7 +1535,6 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .input-group-text .btn:not(:disabled):not(.disabled):not(.btn-link):focus { background-color:transparent; border:0; box-shadow:none; height:100%; padding:1px; margin:0; }
 
 .form-number .label-wrapper { padding:0; }
-.select2-selection__entry span:last-of-child { margin-left:1em; }
 .select2-selection__entry i { text-align: center; width: 1.25em; }
 
 select.form-select2:empty { height: 38px; }
@@ -1613,15 +1635,15 @@ select.form-select2:empty { height: 38px; }
 
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
-        border-bottom-left-radius: 0px;
-        border-bottom-right-radius: 0px;
+        border-bottom-left-radius:0;
+        border-bottom-right-radius:0;
         border-bottom:0;
     }
 
     .form-password-block .form-password
     {
-        border-top-left-radius: 0px;
-        border-top-right-radius: 0px;
+        border-top-left-radius:0;
+        border-top-right-radius:0;
         border-bottom-left-radius: 4px;
         border-bottom-right-radius: 4px;
     }

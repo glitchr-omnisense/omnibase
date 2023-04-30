@@ -3,8 +3,8 @@
 {% block content %}
 {% if launchdate is defined and launchdate is not null %}
 <div class="container text-center">
-    {% if is_launcherd %}
-        <p>{{ '@controllers.security_launchdate.title.open'|trans([app.site.index])|raw }}</pp>
+    {% if is_launcher %}
+        <p>{{ '@controllers.security_launchdate.title.open'|trans([app.site.index])|raw }}</p>
     {% else %} 
         <h2>{{ '@controllers.security_launchdate.title.appointment' | trans }}</h2><br/>
         <p>{{ launchdate }}</p>

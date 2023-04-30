@@ -20,15 +20,13 @@
     
     .ql-editor img
     {
-        margin: auto;
-        max-width:auto;
-        max-height:auto;
+        max-height:initial;
 
         display: block;
         width:auto;
 
         padding: 0;
-        margin-bottom: 1em;
+        margin: auto auto 1em;
         max-width:100%;
     }
 
@@ -69,8 +67,8 @@
 .ql-editor.ql-blank::before { color: rgba(0,0,0,0.8); }
 
 .btn-matrix i { font-size: 13pt; }
-.ql-editor h1:first-of-type { margin-top: 0em !important; }
-.ql-editor h1 { margin: 1.0em 0.00em 0.5em 0.00 !important; }
+.ql-editor h1:first-of-type { margin-top: 0 !important; }
+.ql-editor h1 { margin: 1.0em 0.00em 0.5em 0 !important; }
 .ql-editor h2 { margin: 0.5em 1.00em !important; }
 .ql-editor h3 { margin: 0.5em 2.00em !important; }
 .ql-editor h4 { margin: 0.5em 3.00em !important; }

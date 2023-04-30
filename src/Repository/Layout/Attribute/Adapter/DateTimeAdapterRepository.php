@@ -9,9 +9,9 @@ use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method DateTimeAdapter|null find($id, $lockMode = null, $lockVersion = null)
- * @method DateTimeAdapter|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method DateTimeAdapter|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method DateTimeAdapter[]    findAll()
- * @method DateTimeAdapter[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method DateTimeAdapter[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class DateTimeAdapterRepository extends AbstractAdapterRepository

@@ -7,9 +7,9 @@ use Base\Repository\Layout\WidgetRepository;
 
 /**
  * @method Slot|null find($id, $lockMode = null, $lockVersion = null)
- * @method Slot|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method Slot|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Slot[]    findAll()
- * @method Slot[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method Slot[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class SlotRepository extends WidgetRepository

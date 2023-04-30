@@ -8,9 +8,9 @@ use Base\Repository\Layout\WidgetRepository;
 
 /**
  * @method AttachmentBox|null find($id, $lockMode = null, $lockVersion = null)
- * @method AttachmentBox|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method AttachmentBox|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method AttachmentBox[]    findAll()
- * @method AttachmentBox[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method AttachmentBox[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class AttachmentBoxRepository extends WidgetRepository

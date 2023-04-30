@@ -156,7 +156,7 @@ th.columns .column center,
 th.columns .columns center,
 th.column .column center,
 th.column .columns center {
-    min-width: none !important;
+    min-width: initial !important;
 }
 
 td.columns table:not(.button),
@@ -168,7 +168,7 @@ th.column table:not(.button) {
 
 td.large-1,
 th.large-1 {
-    width: 32.33333px;
+    width: 32px;
     padding-left: 8px;
     padding-right: 8px;
 }
@@ -187,19 +187,19 @@ th.large-1.last {
 .collapse>tbody>tr>th.large-1 {
     padding-right: 0;
     padding-left: 0;
-    width: 48.33333px;
+    width: 48px;
 }
 
 .collapse td.large-1.first,
 .collapse th.large-1.first,
 .collapse td.large-1.last,
 .collapse th.large-1.last {
-    width: 56.33333px;
+    width: 56px;
 }
 
 td.large-1 center,
 th.large-1 center {
-    min-width: 0.33333px;
+    min-width: 0px;
 }
 
 .body .columns td.large-1,
@@ -211,7 +211,7 @@ th.large-1 center {
 
 td.large-2,
 th.large-2 {
-    width: 80.66667px;
+    width: 80px;
     padding-left: 8px;
     padding-right: 8px;
 }
@@ -230,26 +230,26 @@ th.large-2.last {
 .collapse>tbody>tr>th.large-2 {
     padding-right: 0;
     padding-left: 0;
-    width: 96.66667px;
+    width: 96px;
 }
 
 .collapse td.large-2.first,
 .collapse th.large-2.first,
 .collapse td.large-2.last,
 .collapse th.large-2.last {
-    width: 104.66667px;
+    width: 104px;
 }
 
 td.large-2 center,
 th.large-2 center {
-    min-width: 48.66667px;
+    min-width: 48px;
 }
 
 .body .columns td.large-2,
 .body .column td.large-2,
 .body .columns th.large-2,
 .body .column th.large-2 {
-    width: 16.66667%;
+    width: 16%;
 }
 
 td.large-3,
@@ -297,7 +297,7 @@ th.large-3 center {
 
 td.large-4,
 th.large-4 {
-    width: 177.33333px;
+    width: 177px;
     padding-left: 8px;
     padding-right: 8px;
 }
@@ -316,19 +316,19 @@ th.large-4.last {
 .collapse>tbody>tr>th.large-4 {
     padding-right: 0;
     padding-left: 0;
-    width: 193.33333px;
+    width: 193px;
 }
 
 .collapse td.large-4.first,
 .collapse th.large-4.first,
 .collapse td.large-4.last,
 .collapse th.large-4.last {
-    width: 201.33333px;
+    width: 201px;
 }
 
 td.large-4 center,
 th.large-4 center {
-    min-width: 145.33333px;
+    min-width: 145px;
 }
 
 .body .columns td.large-4,
@@ -340,7 +340,7 @@ th.large-4 center {
 
 td.large-5,
 th.large-5 {
-    width: 225.66667px;
+    width: 225px;
     padding-left: 8px;
     padding-right: 8px;
 }
@@ -359,26 +359,26 @@ th.large-5.last {
 .collapse>tbody>tr>th.large-5 {
     padding-right: 0;
     padding-left: 0;
-    width: 241.66667px;
+    width: 241px;
 }
 
 .collapse td.large-5.first,
 .collapse th.large-5.first,
 .collapse td.large-5.last,
 .collapse th.large-5.last {
-    width: 249.66667px;
+    width: 249px;
 }
 
 td.large-5 center,
 th.large-5 center {
-    min-width: 193.66667px;
+    min-width: 193px;
 }
 
 .body .columns td.large-5,
 .body .column td.large-5,
 .body .columns th.large-5,
 .body .column th.large-5 {
-    width: 41.66667%;
+    width: 41%;
 }
 
 td.large-6,
@@ -426,7 +426,7 @@ th.large-6 center {
 
 td.large-7,
 th.large-7 {
-    width: 322.33333px;
+    width: 322px;
     padding-left: 8px;
     padding-right: 8px;
 }
@@ -445,19 +445,19 @@ th.large-7.last {
 .collapse>tbody>tr>th.large-7 {
     padding-right: 0;
     padding-left: 0;
-    width: 338.33333px;
+    width: 338px;
 }
 
 .collapse td.large-7.first,
 .collapse th.large-7.first,
 .collapse td.large-7.last,
 .collapse th.large-7.last {
-    width: 346.33333px;
+    width: 346px;
 }
 
 td.large-7 center,
 th.large-7 center {
-    min-width: 290.33333px;
+    min-width: 290px;
 }
 
 .body .columns td.large-7,
@@ -469,7 +469,7 @@ th.large-7 center {
 
 td.large-8,
 th.large-8 {
-    width: 370.66667px;
+    width: 370px;
     padding-left: 8px;
     padding-right: 8px;
 }
@@ -488,26 +488,26 @@ th.large-8.last {
 .collapse>tbody>tr>th.large-8 {
     padding-right: 0;
     padding-left: 0;
-    width: 386.66667px;
+    width: 386px;
 }
 
 .collapse td.large-8.first,
 .collapse th.large-8.first,
 .collapse td.large-8.last,
 .collapse th.large-8.last {
-    width: 394.66667px;
+    width: 394px;
 }
 
 td.large-8 center,
 th.large-8 center {
-    min-width: 338.66667px;
+    min-width: 338px;
 }
 
 .body .columns td.large-8,
 .body .column td.large-8,
 .body .columns th.large-8,
 .body .column th.large-8 {
-    width: 66.66667%;
+    width: 66%;
 }
 
 td.large-9,
@@ -555,26 +555,26 @@ th.large-9 center {
 
 td.large-10,
 th.large-10 {
-    width: 467.33333px;
+    width: 467px;
 }
 
 .collapse>tbody>tr>td.large-10,
 .collapse>tbody>tr>th.large-10 {
     padding-right: 0;
     padding-left: 0;
-    width: 483.33333px;
+    width: 483px;
 }
 
 .collapse td.large-10.first,
 .collapse th.large-10.first,
 .collapse td.large-10.last,
 .collapse th.large-10.last {
-    width: 491.33333px;
+    width: 491px;
 }
 
 td.large-10 center,
 th.large-10 center {
-    min-width: 435.33333px;
+    min-width: 435px;
 }
 
 .body .columns td.large-10,
@@ -586,7 +586,7 @@ th.large-10 center {
 
 td.large-11,
 th.large-11 {
-    width: 515.66667px;
+    width: 515px;
     padding-left: 8px;
     padding-right: 8px;
 }
@@ -605,26 +605,26 @@ th.large-11.last {
 .collapse>tbody>tr>th.large-11 {
     padding-right: 0;
     padding-left: 0;
-    width: 531.66667px;
+    width: 531px;
 }
 
 .collapse td.large-11.first,
 .collapse th.large-11.first,
 .collapse td.large-11.last,
 .collapse th.large-11.last {
-    width: 539.66667px;
+    width: 539px;
 }
 
 td.large-11 center,
 th.large-11 center {
-    min-width: 483.66667px;
+    min-width: 483px;
 }
 
 .body .columns td.large-11,
 .body .column td.large-11,
 .body .columns th.large-11,
 .body .column th.large-11 {
-    width: 91.66667%;
+    width: 91%;
 }
 
 td.large-12,
@@ -676,7 +676,7 @@ td.large-offset-1.last,
 th.large-offset-1,
 th.large-offset-1.first,
 th.large-offset-1.last {
-    padding-left: 64.33333px;
+    padding-left: 64px;
 }
 
 td.large-offset-2,
@@ -685,7 +685,7 @@ td.large-offset-2.last,
 th.large-offset-2,
 th.large-offset-2.first,
 th.large-offset-2.last {
-    padding-left: 112.66667px;
+    padding-left: 112px;
 }
 
 td.large-offset-3,
@@ -703,7 +703,7 @@ td.large-offset-4.last,
 th.large-offset-4,
 th.large-offset-4.first,
 th.large-offset-4.last {
-    padding-left: 209.33333px;
+    padding-left: 209px;
 }
 
 td.large-offset-5,
@@ -712,7 +712,7 @@ td.large-offset-5.last,
 th.large-offset-5,
 th.large-offset-5.first,
 th.large-offset-5.last {
-    padding-left: 257.66667px;
+    padding-left: 257px;
 }
 
 td.large-offset-6,
@@ -730,7 +730,7 @@ td.large-offset-7.last,
 th.large-offset-7,
 th.large-offset-7.first,
 th.large-offset-7.last {
-    padding-left: 354.33333px;
+    padding-left: 354px;
 }
 
 td.large-offset-8,
@@ -739,7 +739,7 @@ td.large-offset-8.last,
 th.large-offset-8,
 th.large-offset-8.first,
 th.large-offset-8.last {
-    padding-left: 402.66667px;
+    padding-left: 402px;
 }
 
 td.large-offset-9,
@@ -757,7 +757,7 @@ td.large-offset-10.last,
 th.large-offset-10,
 th.large-offset-10.first,
 th.large-offset-10.last {
-    padding-left: 499.33333px;
+    padding-left: 499px;
 }
 
 td.large-offset-11,
@@ -766,7 +766,7 @@ td.large-offset-11.last,
 th.large-offset-11,
 th.large-offset-11.first,
 th.large-offset-11.last {
-    padding-left: 547.66667px;
+    padding-left: 547px;
 }
 
 td.expander,
@@ -1389,7 +1389,6 @@ table.menu {
 table.menu td.menu-item,
 table.menu th.menu-item {
     padding: 10px;
-    padding-right: 10px;
 }
 
 table.menu td.menu-item a,
@@ -1399,8 +1398,7 @@ table.menu th.menu-item a {
 
 table.menu.vertical td.menu-item,
 table.menu.vertical th.menu-item {
-    padding: 10px;
-    padding-right: 0;
+    padding: 10px 0 10px 10px;
     display: block;
 }
 
@@ -1466,7 +1464,7 @@ body.outlook p {
     td.small-2,
     th.small-2 {
         display: inline-block !important;
-        width: 16.66667% !important;
+        width: 16% !important;
     }
     td.small-3,
     th.small-3 {
@@ -1481,7 +1479,7 @@ body.outlook p {
     td.small-5,
     th.small-5 {
         display: inline-block !important;
-        width: 41.66667% !important;
+        width: 41% !important;
     }
     td.small-6,
     th.small-6 {
@@ -1496,7 +1494,7 @@ body.outlook p {
     td.small-8,
     th.small-8 {
         display: inline-block !important;
-        width: 66.66667% !important;
+        width: 66% !important;
     }
     td.small-9,
     th.small-9 {
@@ -1511,7 +1509,7 @@ body.outlook p {
     td.small-11,
     th.small-11 {
         display: inline-block !important;
-        width: 91.66667% !important;
+        width: 91% !important;
     }
     td.small-12,
     th.small-12 {
@@ -1531,7 +1529,7 @@ body.outlook p {
     }
     table.body td.small-offset-2,
     table.body th.small-offset-2 {
-        margin-left: 16.66667% !important;
+        margin-left: 16% !important;
     }
     table.body td.small-offset-3,
     table.body th.small-offset-3 {
@@ -1543,7 +1541,7 @@ body.outlook p {
     }
     table.body td.small-offset-5,
     table.body th.small-offset-5 {
-        margin-left: 41.66667% !important;
+        margin-left: 41% !important;
     }
     table.body td.small-offset-6,
     table.body th.small-offset-6 {
@@ -1555,7 +1553,7 @@ body.outlook p {
     }
     table.body td.small-offset-8,
     table.body th.small-offset-8 {
-        margin-left: 66.66667% !important;
+        margin-left: 66% !important;
     }
     table.body td.small-offset-9,
     table.body th.small-offset-9 {
@@ -1567,7 +1565,7 @@ body.outlook p {
     }
     table.body td.small-offset-11,
     table.body th.small-offset-11 {
-        margin-left: 91.66667% !important;
+        margin-left: 91% !important;
     }
     table.body table.columns td.expander,
     table.body table.columns th.expander {

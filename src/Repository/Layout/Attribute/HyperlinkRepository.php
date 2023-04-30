@@ -8,9 +8,9 @@ use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method Hyperlink|null find($id, $lockMode = null, $lockVersion = null)
- * @method Hyperlink|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method Hyperlink|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Hyperlink[]    findAll()
- * @method Hyperlink[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method Hyperlink[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class HyperlinkRepository extends AttributeRepository

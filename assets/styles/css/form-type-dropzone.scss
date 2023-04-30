@@ -59,14 +59,12 @@
     top: -2em;
     z-index:11;
     background-color: rgba(255,255,255,.4);
-    border-radius: 3px;
     padding: 0.1em .4em;
     color:#000;
     text-decoration: none;
     margin-bottom: -2em;
     height:2em;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-radius: 3px 3px 20px 20px;
 }
 
 .dropzone .dz-preview .dz-remove:hover
@@ -102,16 +100,13 @@
 {
     position: relative;
     top: -2em;
-    z-index:11;
     background-color: rgba(255,255,255,.4);
-    border-radius: 3px;
     padding: 0.1em .4em;
     color:#000;
     text-decoration: none;
     margin-bottom: -2em;
     height:2em;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-radius: 3px 3px 20px 20px;
     z-index:20;
 }
 

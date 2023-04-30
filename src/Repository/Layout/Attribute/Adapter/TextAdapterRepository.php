@@ -9,9 +9,9 @@ use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method TextAdapter|null find($id, $lockMode = null, $lockVersion = null)
- * @method TextAdapter|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method TextAdapter|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method TextAdapter[]    findAll()
- * @method TextAdapter[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method TextAdapter[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class TextAdapterRepository extends AbstractAdapterRepository

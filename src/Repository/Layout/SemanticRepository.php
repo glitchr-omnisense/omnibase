@@ -8,9 +8,9 @@ use Base\Database\Repository\ServiceEntityRepository;
 
 /**
  * @method Semantic|null find($id, $lockMode = null, $lockVersion = null)
- * @method Semantic|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method Semantic|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Semantic[]    findAll()
- * @method Semantic[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method Semantic[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class SemanticRepository extends ServiceEntityRepository

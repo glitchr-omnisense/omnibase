@@ -9,9 +9,9 @@ use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method HyperpatternAdapter|null find($id, $lockMode = null, $lockVersion = null)
- * @method HyperpatternAdapter|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method HyperpatternAdapter|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method HyperpatternAdapter[]    findAll()
- * @method HyperpatternAdapter[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method HyperpatternAdapter[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class HyperpatternAdapterRepository extends AbstractAdapterRepository

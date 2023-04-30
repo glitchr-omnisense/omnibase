@@ -9,9 +9,9 @@ use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method ScalarAdapter|null find($id, $lockMode = null, $lockVersion = null)
- * @method ScalarAdapter|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method ScalarAdapter|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method ScalarAdapter[]    findAll()
- * @method ScalarAdapter[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method ScalarAdapter[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class ScalarAdapterRepository extends AbstractAdapterRepository

@@ -7,10 +7,15 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\TranslatableInterface;
 use Base\Entity\Extension\Ordering;
+use Base\Enum\EntityAction;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Proxy\Proxy;
+use Doctrine\Persistence\Event\LifecycleEventArgs as BaseLifecycleEventArgs;
 use Exception;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * Caching to an entity or a collection.
@@ -88,11 +93,21 @@ final class Cache extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
     }
 
+    public function getRegion(ClassMetadata $classMetadata)
+    {
+        return $this->region ?? $this->getEntityManager()->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName);
+    }
+
+    public function getRegionProperty(ClassMetadata $classMetadata, string $property)
+    {
+        return $this->getRegion($classMetadata)."__".$property;
+    }
+
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
-        $region = $this->region ?? $this->getEntityManager()->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName);
+        $region = $this->getRegion($classMetadata);
 
-        switch($this->usage) {
+        switch ($this->usage) {
             case self::READ_ONLY:
                 $usage = ClassMetadata::CACHE_USAGE_READ_ONLY;
                 break;
@@ -104,11 +119,12 @@ final class Cache extends AbstractAnnotation
                 break;
         }
 
-        switch($target) {
+        switch ($target) {
+
             case AnnotationReader::TARGET_CLASS:
 
                 $classMetadata->cache = [
-                    "usage"  => $usage,
+                    "usage" => $usage,
                     "region" => $region,
                 ];
 
@@ -130,11 +146,61 @@ final class Cache extends AbstractAnnotation
                 }
 
                 $classMetadata->associationMappings[$targetValue]["cache"] = $classMetadata->associationMappings[$targetValue]["cache"] ?? [
-                    "usage"  => $usage,
-                    "region" => $region."__".$targetValue,
+                    "usage" => $usage,
+                    "region" => $this->getRegionProperty($classMetadata, $targetValue),
                 ];
 
                 break;
         }
+    }
+
+    public function payload(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $target, ?string $targetValue = null)
+    {
+        if($targetValue) {
+
+            $cache = $this->getEntityManager()->getCache();
+            if(!$cache) {
+                return;
+            }
+
+            if(!$this->getClassMetadataManipulator()->hasAssociation($target, $targetValue)) {
+                return;
+            }
+
+            if ($this->getClassMetadataManipulator()->isToManySide($target, $targetValue)) {
+                $cache->evictCollection($classMetadata->getName(), $targetValue, $target->getId());
+                return;
+            }
+
+            $cache->evictEntity($classMetadata->getName(), $target->getId());
+            return;
+        }
+
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        foreach ($classMetadata->associationMappings as $property => $associationMapping) {
+
+            $isTargetEntityCached = !empty($this->getAnnotationReader()->getClassAnnotations($associationMapping["targetEntity"], self::class));
+            if (!$isTargetEntityCached) {
+                continue;
+            }
+
+            $value = $propertyAccessor->getValue($target, $property);
+            $this->payload($event, $classMetadata, $target, $property);
+        }
+    }
+
+    public function prePersist(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $target, ?string $targetValue = null)
+    {
+        return $this->payload($event, $classMetadata, $target, $targetValue);
+    }
+
+    public function preUpdate(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $target, ?string $targetValue = null)
+    {
+        return $this->payload($event, $classMetadata, $target, $targetValue);
+    }
+
+    public function preRemove(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $target, ?string $targetValue = null)
+    {
+        return $this->payload($event, $classMetadata, $target, $targetValue);
     }
 }
