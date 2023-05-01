@@ -10,17 +10,17 @@ use Base\Validator\Constraints as AssertBase;
 class UserEditModel
 {
     /**
-     * @var string
+     * @var ?string
      */
-    public $avatar;
+    public ?string $avatar;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $username;
+    public ?string $username;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $email;
+    public ?string $email;
 }

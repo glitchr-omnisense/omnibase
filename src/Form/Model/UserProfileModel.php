@@ -11,17 +11,17 @@ use Base\Validator\Constraints as AssertBase;
 class UserProfileModel extends AbstractModel
 {
     /**
-     * @var string
+     * @var ?string
      */
-    public $email;
+    public ?string $email;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $plainPassword;
+    public ?string $plainPassword;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $avatar;
+    public ?string $avatar;
 }

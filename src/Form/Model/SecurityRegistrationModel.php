@@ -11,14 +11,14 @@ use Base\Validator\Constraints as AssertBase;
 class SecurityRegistrationModel extends AbstractModel
 {
     /**
-     * @var string
+     * @var ?string
      */
-    public string $email;
+    public ?string $email;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $plainPassword;
+    public ?string $plainPassword;
 
     /**
      * @var bool

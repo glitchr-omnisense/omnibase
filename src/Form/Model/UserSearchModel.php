@@ -10,7 +10,7 @@ use Base\Validator\Constraints as AssertBase;
 class UserSearchModel
 {
     /**
-     * @var string
+     * @var ?string
      */
-    public $username;
+    public ?string $username;
 }

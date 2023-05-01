@@ -18,24 +18,24 @@ class ContactModel extends AbstractModel
     }
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $name;
+    public ?string $name;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $email;
+    public ?string $email;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $subject;
+    public ?string $subject;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $message;
+    public ?string $message;
 
     /**
      * @var array

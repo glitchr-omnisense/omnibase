@@ -13,22 +13,22 @@ class ThreadSearchModel extends AbstractModel
     public $parent_id;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $generic;
+    public ?string $generic;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $title;
+    public ?string $title;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $excerpt;
+    public ?string $excerpt;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $content;
+    public ?string $content;
 }

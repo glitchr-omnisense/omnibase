@@ -35,7 +35,7 @@ class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
                 throw new Exception("Timing field for deletion missing, please provide a valid field \"" . $this->deletedAt . "\"");
             }
 
-            if (!$classMetadata->getFieldName($this->deletedAt)) {
+            if (!$object->getFieldName($this->deletedAt)) {
                 throw new Exception("Field \"".$this->deletedAt."\" is missing, did you forget to import \"".TrasheableTrait::class."\" ?");
             }
         }

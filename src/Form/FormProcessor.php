@@ -23,7 +23,7 @@ class FormProcessor implements FormProcessorInterface
     use BaseTrait;
     use FormProcessorTrait;
 
-    protected array $form = [];
+    protected FormInterface $form;
 
     public array $flowSessions = [];
     public array $flowCallbacks = [];
@@ -242,7 +242,7 @@ class FormProcessor implements FormProcessorInterface
             }
         }
 
-        if (!$this->response) {
+        if (!isset($this->response)) {
             $this->response = $this->onDefaultCallback ? call_user_func($this->onDefaultCallback, $this, $request) : null;
         }
 

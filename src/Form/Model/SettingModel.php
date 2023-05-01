@@ -7,5 +7,5 @@ use Base\Validator\Constraints as AssertBase;
 
 class SettingModel extends AbstractModel
 {
-    public $value;
+    public mixed $value;
 }

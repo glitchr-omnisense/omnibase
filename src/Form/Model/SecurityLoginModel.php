@@ -11,12 +11,12 @@ use Base\Validator\Constraints as AssertBase;
 class SecurityLoginModel extends AbstractModel
 {
     /**
-     * @var string
+     * @var ?string
      */
-    public string $identifier;
+    public ?string $identifier;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $password;
+    public ?string $password;
 }
