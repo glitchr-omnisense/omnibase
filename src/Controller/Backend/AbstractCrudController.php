@@ -495,7 +495,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     }
 
     protected ?EntityCollection $entityCollection;
-    protected ?KeyValueStore $responseParameters;
 
     public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore
     {
@@ -509,7 +508,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         $responseParameters->set("entities", $this->entityCollection);
         if ($this->entityCollection) {
-            $this->responseParameters->set("entities", $this->entityCollection);
+            $responseParameters->set("entities", $this->entityCollection);
         }
 
         $this->extension = $this->configureExtensionWithResponseParameters($this->extension, $responseParameters);
