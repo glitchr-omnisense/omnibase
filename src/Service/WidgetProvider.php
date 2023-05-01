@@ -7,6 +7,9 @@ use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ *
+ */
 class WidgetProvider implements WidgetProviderInterface
 {
     protected $widgetRepository;

@@ -5,6 +5,9 @@ namespace Base\Enum\Quadrant;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
+/**
+ *
+ */
 class Quadrant extends EnumType implements IconizeInterface
 {
     public const O = "ORIGIN";
@@ -30,11 +33,17 @@ class Quadrant extends EnumType implements IconizeInterface
         ];
     }
 
+    /**
+     * @return string
+     */
     public static function getDefault()
     {
         return self::O;
     }
 
+    /**
+     * @return float|int
+     */
     public static function getTheta()
     {
         return 2 * pi() / 4;

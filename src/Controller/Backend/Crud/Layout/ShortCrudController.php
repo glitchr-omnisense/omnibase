@@ -10,6 +10,9 @@ use Base\Entity\Layout\Short;
 use Base\Field\SlugField;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
+/**
+ *
+ */
 class ShortCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -17,10 +20,15 @@ class ShortCrudController extends AbstractCrudController
         return null;
     }
 
+    /**
+     * @param string $entityFqcn
+     * @return Short
+     */
     public function createEntity(string $entityFqcn)
     {
         return new Short("");
     }
+
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
@@ -34,7 +42,7 @@ class ShortCrudController extends AbstractCrudController
                     "label" => [],
                     "url" => [
                         "form_type" => UrlType::class,
-                        "attr" => ["placeholder" => $this->getTranslator()->trans("@".AbstractDashboardController::TRANSLATION_DASHBOARD.".crud.short.url.placeholder", [$url["scheme"]."://".$url["host"]])]
+                        "attr" => ["placeholder" => $this->getTranslator()->trans("@" . AbstractDashboardController::TRANSLATION_DASHBOARD . ".crud.short.url.placeholder", [$url["scheme"] . "://" . $url["host"]])]
                     ]
                 ]);
         }, $args);

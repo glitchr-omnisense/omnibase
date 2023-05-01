@@ -2,6 +2,9 @@
 
 namespace Base\Enum\Quadrant;
 
+/**
+ *
+ */
 class Quadrant32 extends Quadrant16
 {
     public const NbW = "NORTH_BY_WEST";
@@ -49,6 +52,9 @@ class Quadrant32 extends Quadrant16
         ];
     }
 
+    /**
+     * @return float|int
+     */
     public static function getTheta()
     {
         return parent::getTheta() / 2;

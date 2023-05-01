@@ -166,6 +166,9 @@ class FormProcessor implements FormProcessorInterface
 
     protected $entity;
 
+    /**
+     * @return mixed
+     */
     public function getEntity()
     {
         return $this->entity;
@@ -260,6 +263,9 @@ class FormProcessor implements FormProcessorInterface
         $this->setStep(0);
     }
 
+    /**
+     * @return string|null
+     */
     public function getToken()
     {
         $options = $this->getConfig()->getOptions();
@@ -278,6 +284,9 @@ class FormProcessor implements FormProcessorInterface
         $this->flowCallbacks[] = $callback;
     }
 
+    /**
+     * @return null
+     */
     public function addConfirmStep()
     {
         $options = $this->getConfig()->getOptions();
@@ -286,17 +295,26 @@ class FormProcessor implements FormProcessorInterface
         });
     }
 
+    /**
+     * @return int
+     */
     public function getPreviousStep()
     {
         $step = $this->getStep();
         return ($step > 0) ? $step - 1 : 0;
     }
 
+    /**
+     * @return int|null
+     */
     public function getStepMax()
     {
         return count($this->flowCallbacks);
     }
 
+    /**
+     * @return int|null
+     */
     public function getNextStep()
     {
         $step = $this->getStep();
@@ -304,6 +322,10 @@ class FormProcessor implements FormProcessorInterface
         return ($step < $stepMax) ? $step + 1 : $stepMax;
     }
 
+    /**
+     * @param $step
+     * @return void
+     */
     public function setStep($step)
     {
         // $token = $this->getToken();
@@ -314,6 +336,9 @@ class FormProcessor implements FormProcessorInterface
         // $_POST[$name] = $token . "#" . $step;
     }
 
+    /**
+     * @return int
+     */
     public function getStep()
     {
         return 1;

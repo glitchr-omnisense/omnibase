@@ -23,12 +23,12 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 class Hierarchify extends AbstractAnnotation
 {
     /**
-     * @var array
+     * @var array|null
      */
     public ?array $hierarchy;
 
     /**
-     * @var string
+     * @var string|null
      */
     public ?string $separator;
 
@@ -38,6 +38,12 @@ class Hierarchify extends AbstractAnnotation
         $this->separator = $data['separator'] ?? null;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return AnnotationReader::TARGET_CLASS == $target;
@@ -54,6 +60,11 @@ class Hierarchify extends AbstractAnnotation
         $classMetadataCompletor->entityHierarchySeparator ??= $this->separator;
     }
 
+    /**
+     * @param $object
+     * @param $method
+     * @return bool
+     */
     public function parent_method_exists($object, $method)
     {
         foreach (class_parents($object) as $parent) {

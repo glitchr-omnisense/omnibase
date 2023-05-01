@@ -5,10 +5,16 @@ namespace Base\Imagine\Filter\Basic;
 use Base\Imagine\FilterInterface;
 use Imagine\Image\ImageInterface;
 
+/**
+ *
+ */
 class InterlaceFilter implements FilterInterface
 {
     private string $mode;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return "interlace:" . $this->mode;

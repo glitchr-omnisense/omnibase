@@ -27,7 +27,7 @@ class AssetPackage implements PackageInterface
     {
         $this->package = new PathPackage(
             '/bundles/base',
-            new JsonManifestVersionStrategy(__DIR__ . '/../Resources/public/manifest.json'),
+            new JsonManifestVersionStrategy(__DIR__.'/../Resources/public/manifest.json'),
             new RequestStackContext($requestStack)
         );
     }

@@ -87,6 +87,13 @@ class DiscriminatorEntry extends AbstractAnnotation
         return $this->value;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     * @throws Exception
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         if ($object === null) {

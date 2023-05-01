@@ -7,6 +7,9 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
+/**
+ *
+ */
 class SpreadsheetCacheWarmer implements CacheWarmerInterface
 {
     protected int $shellVerbosity;
@@ -24,10 +27,14 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
         return true;
     }
 
+    /**
+     * @param $cacheDir
+     * @return array|string[]
+     */
     public function warmUp($cacheDir): array
     {
         if ($this->shellVerbosity > 0 && 'cli' == php_sapi_name()) {
-            echo ' // Warming up cache... PHP Spreadsheet'.PHP_EOL.PHP_EOL;
+            echo ' // Warming up cache... PHP Spreadsheet' . PHP_EOL . PHP_EOL;
         }
 
         // Implement phpspreadsheet cache

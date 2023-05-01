@@ -6,13 +6,21 @@ use Base\Service\Model\LinkableInterface;
 use Base\Service\Model\Sharer\SharerAdapterInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+/**
+ *
+ */
 class Sharer
 {
     protected $adapters = [];
+
+    /**
+     * @return array|mixed
+     */
     public function getAdapters()
     {
         return $this->adapters;
     }
+
     public function getAdapter(string $idOrClass): ?SharerAdapterInterface
     {
         if (class_exists($idOrClass)) {
@@ -40,6 +48,13 @@ class Sharer
         return $this;
     }
 
+    /**
+     * @param string $adapterId
+     * @param LinkableInterface|string $url
+     * @param array $options
+     * @param string|null $template
+     * @return string
+     */
     public function share(string $adapterId, LinkableInterface|string $url, array $options = [], ?string $template = null)
     {
         $adapter = $this->getAdapter($adapterId);

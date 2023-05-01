@@ -9,6 +9,9 @@ use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 use InvalidArgumentException;
 
+/**
+ *
+ */
 class WatermarkFilter implements FilterInterface
 {
     /**
@@ -19,6 +22,9 @@ class WatermarkFilter implements FilterInterface
     private array $options;
     private ImageInterface $watermark;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $md5sum = md5(serialize($this->watermark) . serialize($this->options));

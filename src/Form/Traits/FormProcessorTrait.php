@@ -6,16 +6,21 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
+/**
+ *
+ */
 trait FormProcessorTrait
 {
     protected function getPost(): array
     {
         return $this->getSession()["POST"] ?? [];
     }
+
     protected function getFiles(): array
     {
         return $this->getSession()["FILES"] ?? [];
     }
+
     protected function getUploadedFiles(): array
     {
         $uploadedFiles = [];
@@ -36,6 +41,9 @@ trait FormProcessorTrait
     }
 
 
+    /**
+     * @return true
+     */
     protected function hasSession()
     {
         return true;
@@ -60,6 +68,16 @@ trait FormProcessorTrait
         // return $flowForm[$flowFormId] ?? null;
     }
 
+    /**
+     * @param array $entry
+     * @param SessionInterface|null $session
+     * @return $this
+     */
+    /**
+     * @param array $entry
+     * @param SessionInterface|null $session
+     * @return $this
+     */
     protected function setSession(array $entry, ?SessionInterface $session = null)
     {
         return $this;
@@ -72,6 +90,14 @@ trait FormProcessorTrait
         // $session->set("_form_flow", $flowForm);
     }
 
+    /**
+     * @param Request $request
+     * @return $this
+     */
+    /**
+     * @param Request $request
+     * @return $this
+     */
     protected function appendPost(Request $request)
     {
         return $this;
@@ -85,6 +111,14 @@ trait FormProcessorTrait
         return $this->setSession($formSession);
     }
 
+    /**
+     * @param Request $request
+     * @return $this
+     */
+    /**
+     * @param Request $request
+     * @return $this
+     */
     protected function appendFiles(Request $request)
     {
         return $this;
@@ -103,6 +137,10 @@ trait FormProcessorTrait
         return $this->setSession($formSession);
     }
 
+    /**
+     * @param SessionInterface|null $session
+     * @return true
+     */
     public function killSession(SessionInterface $session = null)
     {
         return true;

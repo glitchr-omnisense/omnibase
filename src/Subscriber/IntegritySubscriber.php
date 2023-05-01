@@ -29,6 +29,9 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use TypeError;
 
+/**
+ *
+ */
 class IntegritySubscriber implements EventSubscriberInterface
 {
     /**
@@ -151,12 +154,18 @@ class IntegritySubscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * @return array|mixed|null
+     */
     protected function getSecret()
     {
         $marshaller = $this->vault->getMarshaller();
         return $this->vault->seal($marshaller, $this->secret);
     }
 
+    /**
+     * @return string
+     */
     protected function getDoctrineChecksum()
     {
         $connection = $this->doctrine->getConnection($this->doctrine->getDefaultConnectionName());
@@ -186,6 +195,9 @@ class IntegritySubscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * @return bool
+     */
     public function checkUserIntegrity()
     {
         $token = $this->tokenStorage->getToken();
@@ -194,7 +206,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         }
 
         /**
-         * @var User
+         * @var User $user
          */
         $user = $token->getUser();
         if ($user === null) {
@@ -223,6 +235,9 @@ class IntegritySubscriber implements EventSubscriberInterface
         return array_intersect_key($persistentCollection, $dirtyCollection) !== $dirtyCollection;
     }
 
+    /**
+     * @return bool
+     */
     public function checkDoctrineIntegrity()
     {
         $token = $this->tokenStorage->getToken();
@@ -243,6 +258,9 @@ class IntegritySubscriber implements EventSubscriberInterface
         return $this->getDoctrineChecksum() == $session->get("_integrity/doctrine");
     }
 
+    /**
+     * @return bool
+     */
     public function checkSecretIntegrity()
     {
         if ($this->secret == null) {

@@ -37,8 +37,16 @@ use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ *
+ */
 abstract class BaseNotifier implements BaseNotifierInterface
 {
+    /**
+     * @param $method
+     * @param $arguments
+     * @return mixed
+     */
     public function __call($method, $arguments): mixed
     {
         $action = str_starts_with($method, "render") ? "render" : null;
@@ -233,6 +241,10 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     protected string $adminRole;
 
+    /**
+     * @param $i
+     * @return RecipientInterface|null
+     */
     public function getAdminRecipient($i = 0): ?RecipientInterface
     {
         $this->initializeAdminRecipients();
@@ -245,6 +257,12 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this->notifier->getAdminRecipients();
     }
 
+    /**
+     * @return $this|array
+     */
+    /**
+     * @return $this|array
+     */
     protected function initializeAdminRecipients()
     {
         if (!$this->adminRole) {
@@ -265,6 +283,9 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this;
     }
 
+    /**
+     * @return array
+     */
     protected function getAdminUsers()
     {
         try {
@@ -324,11 +345,24 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     protected bool $markAsAdmin;
 
+    /**
+     * @return bool
+     */
     public function isMarkAsAdmin()
     {
         return $this->markAsAdmin;
     }
 
+    /**
+     * @param bool $markAsAdmin
+     * @param Notification|null $notification
+     * @return $this
+     */
+    /**
+     * @param bool $markAsAdmin
+     * @param Notification|null $notification
+     * @return $this
+     */
     public function markAsAdmin(bool $markAsAdmin, Notification $notification = null)
     {
         $this->markAsAdmin = $markAsAdmin;
@@ -343,12 +377,24 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     protected bool $enable = true;
 
+    /**
+     * @return $this|mixed
+     */
+    /**
+     * @return $this
+     */
     public function enable()
     {
         $this->enable = true;
         return $this;
     }
 
+    /**
+     * @return $this|mixed
+     */
+    /**
+     * @return $this
+     */
     public function disable()
     {
         $this->enable = false;
@@ -360,6 +406,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this->translator;
     }
 
+    /**
+     * @param TranslatorInterface $translator
+     * @return $this
+     */
+    /**
+     * @param TranslatorInterface $translator
+     * @return $this
+     */
     public function setTranslator(TranslatorInterface $translator)
     {
         $this->translator = $translator;
@@ -371,17 +425,34 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this->router;
     }
 
+    /**
+     * @param RouterInterface $router
+     * @return $this
+     */
+    /**
+     * @param RouterInterface $router
+     * @return $this
+     */
     public function setRouter(RouterInterface $router)
     {
         $this->router = $router;
         return $this;
     }
 
+    /**
+     * @param string $importance
+     * @return string[]
+     */
     public function getDefaultChannels(string $importance)
     {
         return BaseService::getNotifier()->getPolicy()->getChannels($importance);
     }
 
+    /**
+     * @param $importance
+     * @param RecipientInterface $recipient
+     * @return array
+     */
     protected function getUserChannels($importance, RecipientInterface $recipient): array
     {
         $channels = [];
@@ -419,6 +490,11 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return array_unique($channels);
     }
 
+    /**
+     * @param $importance
+     * @param RecipientInterface $recipient
+     * @return array
+     */
     protected function getAdminChannels($importance, RecipientInterface $recipient): array
     {
         $channels = [];
@@ -486,6 +562,18 @@ abstract class BaseNotifier implements BaseNotifierInterface
         date_default_timezone_set($timezoneBak);
     }
 
+    /**
+     * @param Notification $notification
+     * @param RecipientInterface ...$recipients
+     * @return $this|mixed
+     * @throws Exception
+     */
+    /**
+     * @param Notification $notification
+     * @param RecipientInterface ...$recipients
+     * @return $this
+     * @throws Exception
+     */
     public function sendUsers(Notification $notification, RecipientInterface ...$recipients)
     {
         // Set importance of the notification
@@ -529,6 +617,18 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this;
     }
 
+    /**
+     * @param array $channels
+     * @param Notification $notification
+     * @param ...$recipients
+     * @return $this|mixed
+     */
+    /**
+     * @param array $channels
+     * @param Notification $notification
+     * @param ...$recipients
+     * @return $this
+     */
     public function sendUsersBy(array $channels, Notification $notification, ...$recipients)
     {
         // Set importance of the notification
@@ -557,6 +657,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this;
     }
 
+    /**
+     * @param Notification $notification
+     * @return $this|mixed
+     */
+    /**
+     * @param Notification $notification
+     * @return $this
+     */
     public function sendAdmins(Notification $notification)
     {
         // Set importance of the notification

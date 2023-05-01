@@ -18,6 +18,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\Persistence\Mapping\MappingException;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
@@ -41,6 +42,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Traversable;
 
+/**
+ *
+ */
 class SelectType extends AbstractType implements DataMapperInterface
 {
     /** @var ClassMetadataManipulator */
@@ -445,10 +449,21 @@ class SelectType extends AbstractType implements DataMapperInterface
         });
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms)
     { /* done in buildView due to select2 extend */
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     * @throws MappingException
+     */
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $choiceType = current(iterator_to_array($forms));

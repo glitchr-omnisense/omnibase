@@ -16,6 +16,9 @@ use InvalidArgumentException;
 use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
+/**
+ *
+ */
 class SettingBag implements SettingBagInterface, WarmableInterface
 {
     /**
@@ -88,11 +91,23 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this->get(null, $locale);
     }
 
+    /**
+     * @param $useCache
+     * @param $onlyLinkedBag
+     * @return array
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function allRaw($useCache = BaseBundle::USE_CACHE, $onlyLinkedBag = false): array
     {
         return $this->getRaw(null, $useCache, $onlyLinkedBag);
     }
 
+    /**
+     * @param $name
+     * @param $_
+     * @return array
+     * @throws Exception
+     */
     public function __call($name, $_)
     {
         return $this->get("base.settings." . $name);
@@ -103,11 +118,22 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this->environment;
     }
 
+    /**
+     * @param string|array|null $path
+     * @return array|null[]|string[]
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function getPaths(null|string|array $path = null)
     {
         return array_map(fn($s) => $s instanceof Setting ? $s->getPath() : null, array_filter_recursive($this->getRaw($path)) ?? []);
     }
 
+    /**
+     * @param string|null $path
+     * @param array $bag
+     * @return array|mixed
+     * @throws Exception
+     */
     protected function read(?string $path, array $bag)
     {
         if ($path === null) {
@@ -130,6 +156,12 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $bag;
     }
 
+    /**
+     * @param string|null $path
+     * @param array $settings
+     * @return array|mixed|null[]
+     * @throws Exception
+     */
     public function normalize(?string $path, array $settings)
     {
         $values = [];
@@ -165,6 +197,12 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $values;
     }
 
+    /**
+     * @param array $settings
+     * @param string|null $path
+     * @return array
+     * @throws Exception
+     */
     public function denormalize(array $settings, ?string $path = null)
     {
         if ($path) {
@@ -194,6 +232,13 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return array_filter($settings);
     }
 
+    /**
+     * @param string|array|null $path
+     * @param bool $useCache
+     * @param bool $onlyLinkedBag
+     * @return array|mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::USE_CACHE, bool $onlyLinkedBag = false)
     {
         $useSettingBag = $this->parameterBag->get("base.parameter_bag.use_setting_bag") ?? false;
@@ -253,6 +298,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $setting;
     }
 
+    /**
+     * @param string|array|null $path
+     * @param bool $useCache
+     * @return array|mixed|null
+     */
     public function getRawScalar(null|string|array $path = null, bool $useCache = BaseBundle::USE_CACHE)
     {
         if (is_array($paths = $path)) {
@@ -325,6 +375,13 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         $this->clear(null);
     }
 
+    /**
+     * @param string|array|null $path
+     * @param string|null $locale
+     * @param $useCache
+     * @return void
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
         if (is_array($paths = $path)) {
@@ -356,6 +413,22 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
     }
 
+    /**
+     * @param string $path
+     * @param $value
+     * @param string|null $locale
+     * @param $useCache
+     * @return $this|mixed
+     * @throws Exception
+     */
+    /**
+     * @param string $path
+     * @param $value
+     * @param string|null $locale
+     * @param $useCache
+     * @return $this
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function set(string $path, $value, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
     {
         $setting = $this->generateRaw($path, $locale);
@@ -374,6 +447,19 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
+    /**
+     * @param string $path
+     * @param string|null $label
+     * @param string|null $locale
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @param string|null $label
+     * @param string|null $locale
+     * @return $this
+     * @throws Exception
+     */
     public function setLabel(string $path, ?string $label = null, ?string $locale = null)
     {
         $setting = $this->generateRaw($path, $locale);
@@ -386,6 +472,19 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
+    /**
+     * @param string $path
+     * @param string|null $help
+     * @param string|null $locale
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @param string|null $help
+     * @param string|null $locale
+     * @return $this
+     * @throws Exception
+     */
     public function setHelp(string $path, ?string $help = null, ?string $locale = null)
     {
         $setting = $this->generateRaw($path, $locale);
@@ -398,6 +497,16 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
+    /**
+     * @param string $path
+     * @param string|null $parameterName
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @param string|null $parameterName
+     * @return $this
+     */
     public function setBag(string $path, ?string $parameterName = null)
     {
         $setting = $this->generateRaw($path);
@@ -410,11 +519,25 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
+    /**
+     * @param string $path
+     * @param string|null $locale
+     * @return bool
+     * @throws Exception
+     */
     public function has(string $path, ?string $locale = null)
     {
         return $this->get($path, $locale) !== null;
     }
 
+    /**
+     * @param string $path
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @return $this
+     */
     public function remove(string $path)
     {
         $setting = $this->settingRepository->findOneByInsensitivePath($path);
@@ -428,16 +551,42 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
+    /**
+     * @param string $path
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @return $this
+     */
     public function lock(string $path)
     {
         return $this->setLock($path);
     }
 
+    /**
+     * @param string $path
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @return $this
+     */
     public function unlock(string $path)
     {
         return $this->setLock($path, false);
     }
 
+    /**
+     * @param string $path
+     * @param bool $flag
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @param bool $flag
+     * @return $this
+     */
     public function setLock(string $path, bool $flag = true)
     {
         $setting = $this->generateRaw($path);
@@ -447,16 +596,42 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
+    /**
+     * @param string $path
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @return $this
+     */
     public function secure(string $path)
     {
         return $this->setSecure($path);
     }
 
+    /**
+     * @param string $path
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @return $this
+     */
     public function unsecure(string $path)
     {
         return $this->setSecure($path, false);
     }
 
+    /**
+     * @param string $path
+     * @param bool $flag
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @param bool $flag
+     * @return $this
+     */
     public function setSecure(string $path, bool $flag = true)
     {
         $setting = $this->generateRaw($path);

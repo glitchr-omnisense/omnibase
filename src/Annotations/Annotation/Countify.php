@@ -29,16 +29,17 @@ class Countify extends AbstractAnnotation
     protected ?string $referenceColumn;
     protected string $type;
 
-    public const COUNT_CHARS     = "chars";
-    public const COUNT_LETTERS   = "letters";
-    public const COUNT_WORDS     = "words";
+    public const COUNT_CHARS = "chars";
+    public const COUNT_LETTERS = "letters";
+    public const COUNT_WORDS = "words";
     public const COUNT_SENTENCES = "sentences";
-    public const COUNT_BLOCKS    = "blocks";
+    public const COUNT_BLOCKS = "blocks";
+
     public function __construct(array $data)
     {
         $this->referenceColumn = $data['reference'] ?? null;
 
-        switch($data["type"] ?? "") {
+        switch ($data["type"] ?? "") {
             default:
             case self::COUNT_CHARS:
                 $this->type = self::COUNT_CHARS;
@@ -62,16 +63,30 @@ class Countify extends AbstractAnnotation
         }
     }
 
+    /**
+     * @return mixed|string|null
+     */
     public function getReferenceColumn()
     {
         return $this->referenceColumn;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
+    /**
+     * @param $entity
+     * @return string
+     * @throws Exception
+     */
     public function getCount($entity): string
     {
         if (!$this->referenceColumn) {
@@ -81,7 +96,7 @@ class Countify extends AbstractAnnotation
         // Check if field already set.. (it needs to be checked)
         $value = $this->getFieldValue($entity, $this->referenceColumn) ?? "";
 
-        switch($this->type) {
+        switch ($this->type) {
             default:
             case self::COUNT_CHARS:
                 return strlen(strip_tags($value));
@@ -105,6 +120,14 @@ class Countify extends AbstractAnnotation
         return str_word_count(strip_tags($value));
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     * @throws Exception
+     */
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $nWords = $this->getFieldValue($entity, $property);
@@ -116,11 +139,28 @@ class Countify extends AbstractAnnotation
         $this->setFieldValue($entity, $property, $count);
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     * @throws Exception
+     */
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $count = $this->getCount($entity) ?? 0;
         $this->setFieldValue($entity, $property, $count);
     }
+
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     * @throws Exception
+     */
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $count = $this->getCount($entity) ?? 0;

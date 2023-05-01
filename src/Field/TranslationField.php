@@ -7,8 +7,10 @@ use Base\Service\Localizer;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
-use InvalidArgumentException;
 
+/**
+ *
+ */
 class TranslationField implements FieldInterface
 {
     use FieldTrait;
@@ -20,11 +22,11 @@ class TranslationField implements FieldInterface
     public static function new(string $propertyName = null, ?string $label = null): self
     {
         $field = (new self())
-            ->setProperty("translations")
+            ->setProperty('translations')
             ->hideOnIndex()
             ->setTemplateName('crud/field/text')
             ->setTemplatePath('@EasyAdmin/crud/field/translatable.html.twig')
-            ->setCustomOption("required", true)
+            ->setCustomOption('required', true)
             ->setCustomOption(self::OPTION_MAX_LENGTH, 50)
             ->setFormType(TranslationType::class);
 
@@ -40,7 +42,7 @@ class TranslationField implements FieldInterface
     public function setMaxLength(int $length): self
     {
         if ($length < 1) {
-            throw new InvalidArgumentException(sprintf('The argument of the "%s()" method must be 1 or higher (%d given).', __METHOD__, $length));
+            throw new \InvalidArgumentException(sprintf('The argument of the "%s()" method must be 1 or higher (%d given).', __METHOD__, $length));
         }
 
         $this->setCustomOption(self::OPTION_MAX_LENGTH, $length);
@@ -48,9 +50,18 @@ class TranslationField implements FieldInterface
         return $this;
     }
 
+    /**
+     * @param $autoload
+     * @return $this
+     */
+    /**
+     * @param $autoload
+     * @return $this
+     */
     public function autoload($autoload = true): self
     {
-        $this->setFormTypeOption("autoload", $autoload);
+        $this->setFormTypeOption('autoload', $autoload);
+
         return $this;
     }
 
@@ -70,14 +81,15 @@ class TranslationField implements FieldInterface
 
     public function setFields(array $fields): self
     {
-        $this->setFormTypeOption("fields", $fields);
+        $this->setFormTypeOption('fields', $fields);
+
         return $this;
     }
 
     public function showOnIndex(?string $field = null): self
     {
         if ($field) {
-            $this->setCustomOption("show_field", $field);
+            $this->setCustomOption('show_field', $field);
 
             $displayedOn = $this->dto->getDisplayedOn();
             $displayedOn->set(Crud::PAGE_INDEX, Crud::PAGE_INDEX);
@@ -87,37 +99,66 @@ class TranslationField implements FieldInterface
         return $this;
     }
 
+    /**
+     * @param bool $isRequired
+     * @return $this
+     */
+    /**
+     * @param bool $isRequired
+     * @return $this
+     */
     public function setRequired(bool $isRequired = true)
     {
-        $this->setCustomOption("required", $isRequired);
+        $this->setCustomOption('required', $isRequired);
+
         return $this;
     }
 
+    /**
+     * @param $excludedFields
+     * @return $this
+     */
+    /**
+     * @param $excludedFields
+     * @return $this
+     */
     public function setExcludedFields($excludedFields): self
     {
         if (!is_array($excludedFields)) {
             $excludedFields = [$excludedFields];
         }
-        $this->setFormTypeOption("excluded_fields", $excludedFields);
+        $this->setFormTypeOption('excluded_fields', $excludedFields);
+
         return $this;
     }
 
+    /**
+     * @param $translationClass
+     * @return $this
+     */
+    /**
+     * @param $translationClass
+     * @return $this
+     */
     public function setTranslationClass($translationClass): self
     {
-        $this->setFormTypeOption("translation_class", $translationClass);
+        $this->setFormTypeOption('translation_class', $translationClass);
+
         return $this;
     }
 
     public function setDefaultLocale(string $defaultLocale): self
     {
-        $this->setFormTypeOption("default_locale", $defaultLocale);
+        $this->setFormTypeOption('default_locale', $defaultLocale);
+
         return $this;
     }
 
     public function renderSingleLocale(?string $singleLocale = null): self
     {
         $singleLocale = $singleLocale ?? Localizer::getDefaultLocale();
-        $this->setFormTypeOption("single_locale", $singleLocale);
+        $this->setFormTypeOption('single_locale', $singleLocale);
+
         return $this;
     }
 }

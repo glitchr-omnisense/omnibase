@@ -10,6 +10,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 use Symfony\Component\Form\AbstractType;
 
+/**
+ *
+ */
 class SecurityLoginTwoFactorType extends AbstractType
 {
     public function configureOptions(OptionsResolver $resolver)

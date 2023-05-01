@@ -25,6 +25,12 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
         $this->verbosity = $data['verbosity'] ?? null;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_CLASS);

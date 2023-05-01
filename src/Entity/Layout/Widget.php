@@ -22,6 +22,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Base\Database\Annotation\Cache;
 use Base\Annotations\Annotation\Timestamp;
+use League\Flysystem\FilesystemException;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
@@ -56,6 +58,9 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         return ["fa-solid fa-cube"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getTitle() ?? $this->getTranslator()->transEntity(self::class) . " #" . $this->getId();
@@ -72,6 +77,9 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
 
     protected $template = null;
 
+    /**
+     * @return mixed|string|null
+     */
     public function getTemplate()
     {
         if ($this->template) {
@@ -82,6 +90,14 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         return "widget/" . $defaultTemplate . ".html.twig";
     }
 
+    /**
+     * @param string|null $template
+     * @return $this
+     */
+    /**
+     * @param string|null $template
+     * @return $this
+     */
     public function setTemplate(?string $template)
     {
         $this->template = $template;
@@ -107,6 +123,9 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
      */
     protected $uuid;
 
+    /**
+     * @return mixed
+     */
     public function getUuid()
     {
         return $this->uuid;
@@ -119,16 +138,32 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
      */
     protected $thumbnail;
 
+    /**
+     * @return array|mixed|File|null
+     * @throws \Exception
+     */
     public function getThumbnail()
     {
         return Uploader::getPublic($this, "thumbnail");
     }
 
+    /**
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public function getThumbnailFile()
     {
         return Uploader::get($this, "thumbnail");
     }
 
+    /**
+     * @param $thumbnail
+     * @return $this
+     */
+    /**
+     * @param $thumbnail
+     * @return $this
+     */
     public function setThumbnail($thumbnail)
     {
         $this->thumbnail = $thumbnail;

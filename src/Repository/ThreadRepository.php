@@ -14,11 +14,14 @@ use Base\Enum\WorkflowState;
  * @method Thread[]    findAll()
  * @method Thread[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
-
 class ThreadRepository extends ServiceEntityRepository
 {
     use HierarchifyTrait;
 
+    /**
+     * @param $thread
+     * @return array
+     */
     public function countForChildrenIn($thread)
     {
         $nDiscussions = $this->countByParentAndWorkflow($thread, WorkflowState::APPROVED, [], "", null, ["children"]);

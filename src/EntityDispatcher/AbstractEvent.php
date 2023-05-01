@@ -3,9 +3,13 @@
 namespace Base\EntityDispatcher;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
+/**
+ *
+ */
 abstract class AbstractEvent extends Event implements EventInterface
 {
     protected LifecycleEventArgs $eventArgs;
@@ -27,6 +31,9 @@ abstract class AbstractEvent extends Event implements EventInterface
         return $this->request;
     }
 
+    /**
+     * @return ObjectManager
+     */
     public function getObjectManager()
     {
         return $this->eventArgs->getObjectManager();

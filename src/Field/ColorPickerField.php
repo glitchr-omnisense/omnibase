@@ -2,12 +2,14 @@
 
 namespace Base\Field;
 
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-
 use Base\Field\Type\ColorPickerType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 final class ColorPickerField implements FieldInterface
 {
     use FieldTrait;

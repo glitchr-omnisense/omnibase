@@ -7,12 +7,16 @@ use Base\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class RoleType extends AbstractType
 {
     public function getParent(): ?string
     {
         return SelectType::class;
     }
+
     public function getBlockPrefix(): string
     {
         return 'role';
@@ -22,7 +26,7 @@ class RoleType extends AbstractType
     {
         $resolver->setDefaults([
             "capitalize" => true,
-            'class'      => UserRole::class,
+            'class' => UserRole::class,
             'empty_data' => UserRole::USER
         ]);
     }

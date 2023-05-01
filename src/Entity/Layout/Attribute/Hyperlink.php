@@ -41,6 +41,9 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
         return ["fa-solid fa-link"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $value = implode(", ", $this->getValue());
@@ -52,6 +55,7 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
      * @ColumnAlias(column = "adapter")
      */
     protected $hyperpattern;
+
     public function getHyperpattern(): ?HyperpatternAdapter
     {
         return $this->hyperpattern;
@@ -63,6 +67,10 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
         return $this;
     }
 
+    /**
+     * @param string|null $locale
+     * @return mixed
+     */
     public function generate(?string $locale = null)
     {
         return $this->adapter->generate(...$this->getValue($locale));

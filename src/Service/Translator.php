@@ -7,6 +7,9 @@ use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\TranslatableMessage;
 
+/**
+ *
+ */
 class Translator implements TranslatorInterface
 {
     public const PARSE_EXTENDS = "extends";
@@ -65,6 +68,14 @@ class Translator implements TranslatorInterface
         return $this->translator->getLocale();
     }
 
+    /**
+     * @param string $locale
+     * @return $this
+     */
+    /**
+     * @param string $locale
+     * @return $this
+     */
     public function setLocale(string $locale)
     {
         $this->translator->setLocale($locale);
@@ -196,6 +207,11 @@ class Translator implements TranslatorInterface
         return trim($trans ?? "");
     }
 
+    /**
+     * @param $class
+     * @param string $parseBy
+     * @return string
+     */
     public function parseClass($class, string $parseBy = self::PARSE_NAMESPACE): string
     {
         $class = is_object($class) ? get_class($class) : $class;
@@ -242,12 +258,24 @@ class Translator implements TranslatorInterface
         return $catalogue->has($id, $domain ?? self::DOMAIN_DEFAULT);
     }
 
+    /**
+     * @param string $path
+     * @return array|array[]
+     */
     protected function parsePath(string $path)
     {
         $entries = array_starts_with(explode(".", $path), "_");
         return get_permutations(tail($entries, 3));
     }
 
+    /**
+     * @param string $id
+     * @param array|string $options
+     * @param array|null $parameters
+     * @param string|null $domain
+     * @param string|null $locale
+     * @return array|false|string|string[]|null
+     */
     protected function transPerms(string $id, array|string $options = [], ?array $parameters = [], ?string $domain = null, ?string $locale = null)
     {
         if (!is_array($options)) {
@@ -303,6 +331,14 @@ class Translator implements TranslatorInterface
         return $trans ? mb_ucfirst($trans) : mb_strtolower($id . implode("", $in));
     }
 
+    /**
+     * @param string $id
+     * @param array|string $options
+     * @param string|null $domain
+     * @param string|null $locale
+     * @param bool $localeCountry
+     * @return bool
+     */
     protected function transPermExists(string $id, array|string $options = [], ?string $domain = null, ?string $locale = null, bool $localeCountry = true)
     {
         if (!is_array($options)) {

@@ -66,6 +66,12 @@ class Timestamp extends AbstractAnnotation
         return $this->value;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         if (!empty($this->fields) && !in_array($targetValue, $this->fields)) {
@@ -75,6 +81,13 @@ class Timestamp extends AbstractAnnotation
         return in_array($this->getImpersonator() ? "impersonator" : "update", $this->context) || in_array("create", $this->context);
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     */
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if (!in_array("create", $this->context)) {
@@ -84,6 +97,13 @@ class Timestamp extends AbstractAnnotation
         $this->setFieldValue($entity, $property, $this->getValue());
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     */
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if (!in_array($this->getImpersonator() ? "impersonator" : "update", $this->context)) {

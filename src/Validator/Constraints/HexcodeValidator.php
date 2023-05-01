@@ -5,6 +5,9 @@ namespace Base\Validator\Constraints;
 use Base\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;
 
+/**
+ *
+ */
 class HexcodeValidator extends ConstraintValidator
 {
     public function validate(mixed $value, Constraint $constraint)

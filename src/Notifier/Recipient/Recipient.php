@@ -4,15 +4,21 @@ namespace Base\Notifier\Recipient;
 
 use Base\Service\Localizer;
 
+/**
+ *
+ */
 class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implements LocaleRecipientInterface, TimezoneRecipientInterface
 {
     use LocaleRecipientTrait;
     use TimezoneRecipientTrait;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
-        $technicalRecipientStr  = "\"". $this->getEmail() . "\"";
-        $technicalRecipientStr .= $this->getPhone() ? " / (" . $this->getPhone() .")" : "";
+        $technicalRecipientStr = "\"" . $this->getEmail() . "\"";
+        $technicalRecipientStr .= $this->getPhone() ? " / (" . $this->getPhone() . ")" : "";
         $technicalRecipientStr .= $this->getLocale() ? " / " . $this->getLocale() : "";
 
         return $technicalRecipientStr;

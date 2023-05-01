@@ -35,6 +35,9 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $this->generate($referenceType);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getTitle() ?? "";
@@ -80,6 +83,9 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getPath()
     {
         $route = $this->getRouter()->getRouteCollection()->get($this->routeName);
@@ -91,6 +97,9 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $this->getRouter()->getRoute($this->getUrl());
     }
 
+    /**
+     * @return array|mixed|null
+     */
     public function getRouteIcons()
     {
         return $this->getIconProvider()->getRouteIcons($this->routeName);

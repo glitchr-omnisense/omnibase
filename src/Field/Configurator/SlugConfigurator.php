@@ -11,6 +11,9 @@ use Base\Service\Model\LinkableInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ *
+ */
 class SlugConfigurator implements FieldConfiguratorInterface
 {
     /**

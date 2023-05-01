@@ -3,16 +3,18 @@
 namespace Base\Field;
 
 use Base\Field\Type\WysiwygType;
-
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 final class WysiwygField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_SHORTEN_LENGTH    = 'shortenStrLength';
-    public const OPTION_SHORTEN_POSITION  = 'shortenStrPosition';
+    public const OPTION_SHORTEN_LENGTH = 'shortenStrLength';
+    public const OPTION_SHORTEN_POSITION = 'shortenStrPosition';
     public const OPTION_SHORTEN_SEPARATOR = 'shortenStrSeparator';
 
     public const OPTION_STRIP_TAGS = 'stripTags';
@@ -29,6 +31,14 @@ final class WysiwygField implements FieldInterface
             ->setCustomOption(self::OPTION_STRIP_TAGS, true);
     }
 
+    /**
+     * @param bool $asBool
+     * @return $this
+     */
+    /**
+     * @param bool $asBool
+     * @return $this
+     */
     public function renderAsBoolean(bool $asBool = true)
     {
         $this->setCustomOption(self::OPTION_RENDER_AS_BOOLEAN, $asBool);
@@ -36,7 +46,7 @@ final class WysiwygField implements FieldInterface
         return $this;
     }
 
-    public function shorten(int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): self
+    public function shorten(int $length = 100, int $position = SHORTEN_BACK, string $separator = ' [..] '): self
     {
         $this->setCustomOption(self::OPTION_SHORTEN_LENGTH, $length);
         $this->setCustomOption(self::OPTION_SHORTEN_POSITION, $position);
@@ -45,6 +55,14 @@ final class WysiwygField implements FieldInterface
         return $this;
     }
 
+    /**
+     * @param bool $stripTags
+     * @return $this
+     */
+    /**
+     * @param bool $stripTags
+     * @return $this
+     */
     public function stripTags(bool $stripTags = true)
     {
         $this->setCustomOption(self::OPTION_STRIP_TAGS, $stripTags);

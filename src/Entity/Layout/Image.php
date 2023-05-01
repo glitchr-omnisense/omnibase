@@ -12,6 +12,8 @@ use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 
+use League\Flysystem\FilesystemException;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Base\Database\Annotation\Cache;
@@ -83,11 +85,17 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return ["fa-solid fa-images"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->__toLink() ?? "";
     }
 
+    /**
+     * @param $src
+     */
     public function __construct($src = null)
     {
         $this->crops = new ArrayCollection();
@@ -112,16 +120,32 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
      */
     protected $source;
 
+    /**
+     * @return array|mixed|File|null
+     * @throws \Exception
+     */
     public function getSource()
     {
         return Uploader::getPublic($this, "source");
     }
 
+    /**
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public function getSourceFile()
     {
         return Uploader::get($this, "source");
     }
 
+    /**
+     * @param $source
+     * @return $this
+     */
+    /**
+     * @param $source
+     * @return $this
+     */
     public function setSource($source): static
     {
         $this->source = $source;
@@ -164,16 +188,30 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return $this->sourceMeta;
     }
 
+    /**
+     * @return array|mixed|File|null
+     */
     public function get()
     {
         return $this->getSource();
     }
 
+    /**
+     * @return array|mixed|File|null
+     */
     public function getFile()
     {
         return $this->getSourceFile();
     }
 
+    /**
+     * @param $source
+     * @return $this
+     */
+    /**
+     * @param $source
+     * @return $this
+     */
     public function set($source): self
     {
         return $this->setSource($source);

@@ -7,6 +7,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\AbstractTypeExtension;
 
+/**
+ *
+ */
 class FormTypeCsrfExtension extends AbstractTypeExtension
 {
     protected bool $defaultEnabled;

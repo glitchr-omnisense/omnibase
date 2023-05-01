@@ -7,9 +7,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use Base\Field\Type\ImageType;
 
+/**
+ *
+ */
 class ImageField extends FileField implements FieldInterface
 {
-    public const OPTION_RENDER_FORMAT  = "renderFormat";
+    public const OPTION_RENDER_FORMAT = "renderFormat";
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -27,6 +30,14 @@ class ImageField extends FileField implements FieldInterface
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "image");
     }
 
+    /**
+     * @param array|bool|null $cropper
+     * @return $this
+     */
+    /**
+     * @param array|bool|null $cropper
+     * @return $this
+     */
     public function setCropper(null|array|bool $cropper = true)
     {
         if (is_bool($cropper)) {

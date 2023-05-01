@@ -21,6 +21,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SubMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
 use Exception;
 
+/**
+ *
+ */
 class WidgetItem
 {
     public static $adminUrlGenerator;
@@ -37,30 +40,40 @@ class WidgetItem
         self::$adminContextProvider = $adminContextProvider;
     }
 
+    /**
+     * @return SeparatorWidgetItem
+     */
     public static function separator()
     {
         return new SeparatorWidgetItem();
     }
 
+    /**
+     * @param string $entityFqcnOrCrudController
+     * @param string|null $label
+     * @param string|null $icon
+     * @return CrudWidgetItem|EntityWidgetItem
+     * @throws Exception
+     */
     public static function linkToCrud(string $entityFqcnOrCrudController, ?string $label = null, ?string $icon = null)
     {
         if (!is_instanceof($entityFqcnOrCrudController, \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController::class)) {
             $crudController = AbstractCrudController::getCrudControllerFqcn($entityFqcnOrCrudController);
-            $widgetItem     = EntityWidgetItem::class;
+            $widgetItem = EntityWidgetItem::class;
         } else {
             $crudController = $entityFqcnOrCrudController;
-            $widgetItem     = CrudWidgetItem::class;
+            $widgetItem = CrudWidgetItem::class;
         }
 
         if (!class_exists($crudController)) {
-            throw new Exception("CRUD controller for \"".$entityFqcnOrCrudController."\" not found");
+            throw new Exception("CRUD controller for \"" . $entityFqcnOrCrudController . "\" not found");
         }
 
-        $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
+        $crudTranslationPrefix = $crudController::getCrudTranslationPrefix();
         $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 
-        $label   = self::$translator->transQuiet($crudTranslationPrefix.".".Translator::NOUN_PLURAL);
-        $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::NOUN_PLURAL);
+        $label = self::$translator->transQuiet($crudTranslationPrefix . "." . Translator::NOUN_PLURAL);
+        $label ??= self::$translator->transQuiet($entityTranslationPrefix . "." . Translator::NOUN_PLURAL);
         $label ??= camel2snake(class_basename($entityFqcnOrCrudController), " ");
 
         if (!$icon) {
@@ -94,18 +107,18 @@ class WidgetItem
     public static function linkToUrl(string $labelOrEntityFqcn, ?string $icon, string $url): UrlMenuItem
     {
         if (class_exists($labelOrEntityFqcn)) {
-            $crudController          = AbstractCrudController::getCrudControllerFqcn($labelOrEntityFqcn);
+            $crudController = AbstractCrudController::getCrudControllerFqcn($labelOrEntityFqcn);
             if (!class_exists($crudController)) {
                 dump($crudController);
                 exit(1);
-                throw new Exception("CRUD controller for \"".$labelOrEntityFqcn."\" not found");
+                throw new Exception("CRUD controller for \"" . $labelOrEntityFqcn . "\" not found");
             }
 
-            $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
+            $crudTranslationPrefix = $crudController::getCrudTranslationPrefix();
             $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 
-            $label   = self::$translator->transQuiet($crudTranslationPrefix.".".Translator::NOUN_PLURAL);
-            $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::NOUN_PLURAL);
+            $label = self::$translator->transQuiet($crudTranslationPrefix . "." . Translator::NOUN_PLURAL);
+            $label ??= self::$translator->transQuiet($entityTranslationPrefix . "." . Translator::NOUN_PLURAL);
             $label ??= camel2snake(class_basename($labelOrEntityFqcn), " ");
 
             if (!$icon) {
@@ -118,6 +131,7 @@ class WidgetItem
 
         return new UrlMenuItem($label, $icon, $url);
     }
+
     public static function section(?string $label = null, ?string $icon = null, int $width = 1, int $column = null): SectionWidgetItem
     {
         return new SectionWidgetItem($label, $icon, $width, $column);

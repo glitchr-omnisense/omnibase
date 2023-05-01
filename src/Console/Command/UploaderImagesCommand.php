@@ -15,7 +15,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'uploader:images', aliases:[], description:'')]
+/**
+ *
+ */
+#[AsCommand(name: 'uploader:images', aliases: [], description: '')]
 class UploaderImagesCommand extends UploaderEntitiesCommand
 {
     /**
@@ -39,18 +42,20 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
     protected bool $warmup = false;
 
     protected $defaultFormats = [];
+
     public function __construct(
-        LocalizerInterface $localizer,
-        TranslatorInterface $translator,
+        LocalizerInterface     $localizer,
+        TranslatorInterface    $translator,
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        MediaServiceInterface $mediaService,
-        MediaController $mediaController
-    ) {
+        ParameterBagInterface  $parameterBag,
+        MediaServiceInterface  $mediaService,
+        MediaController        $mediaController
+    )
+    {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->mediaController = $mediaController;
 
-        $this->mediaService   = $mediaService;
+        $this->mediaService = $mediaService;
         $this->mediaService->setController($mediaController);
 
         $this->defaultFormats = $parameterBag->get("base.uploader.formats");
@@ -73,21 +78,25 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->entityName  ??= str_strip($input->getOption('entity'), ["App\\Entity\\", "Base\\Entity\\"]);
-        $this->warmup      ??= $input->getOption('warmup');
-        $this->batch       ??= $input->getOption('batch');
-        $this->format      ??= $input->getOption('format');
-        $this->cache       ??= $input->getOption('cache');
+        $this->entityName ??= str_strip($input->getOption('entity'), ["App\\Entity\\", "Base\\Entity\\"]);
+        $this->warmup ??= $input->getOption('warmup');
+        $this->batch ??= $input->getOption('batch');
+        $this->format ??= $input->getOption('format');
+        $this->cache ??= $input->getOption('cache');
 
-        $this->appEntities ??= "App\\Entity\\".$this->entityName;
-        $this->baseEntities ??= "Base\\Entity\\".$this->entityName;
+        $this->appEntities ??= "App\\Entity\\" . $this->entityName;
+        $this->baseEntities ??= "Base\\Entity\\" . $this->entityName;
 
-        $this->input   = $input;
-        $this->output  = $output;
+        $this->input = $input;
+        $this->output = $output;
 
         return parent::execute($this->input, $this->output);
     }
 
+    /**
+     * @param $data
+     * @return bool
+     */
     public function isCached($data)
     {
         $args = $this->mediaService->resolve($data);
@@ -102,18 +111,19 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
 
         $extensions = $this->mediaService->getExtensions($args["path"] ?? $data);
-        $extension  = first($extensions);
+        $extension = first($extensions);
 
-        $output = pathinfo_extension($data."/image", $extension);
+        $output = pathinfo_extension($data . "/image", $extension);
         return $this->mediaService->isCached($args["path"] ?? $data, new WebpFilter(null, $filters, $options), ["webp" => true, "local_cache" => $localCache, "output" => $output]);
     }
 
     protected $ibatch = 0;
+
     public function postProcess(mixed $class, string $field, Uploader $annotation, array $fileList)
     {
         if ($this->warmup) {
             if (!$annotation->isImage()) {
-                $this->output->section()->writeln("             <warning>* Only images (mimetype = \"".implode(",", $annotation->mimeTypes())."\") can be warmed up.. </warning>");
+                $this->output->section()->writeln("             <warning>* Only images (mimetype = \"" . implode(",", $annotation->mimeTypes()) . "\") can be warmed up.. </warning>");
                 return;
             }
 
@@ -125,7 +135,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                     $format = explode("x", $format);
                 }
                 if (count($format) != 2) {
-                    $this->output->section()->writeln("             <warning>* Unexpected format provided ".implode("x", $format)."</warning>");
+                    $this->output->section()->writeln("             <warning>* Unexpected format provided " . implode("x", $format) . "</warning>");
                     continue;
                 }
 
@@ -133,23 +143,23 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                     continue;
                 }
 
-                $formats[] = [(int) $format[0], (int) $format[1]];
+                $formats[] = [(int)$format[0], (int)$format[1]];
             }
 
             foreach ($this->defaultFormats as $format) {
                 if (!array_key_exists("width", $format)) {
-                    $this->output->section()->writeln("             <warning>* Width information missing in default configuration \"".serialize($format)."\"</warning>");
+                    $this->output->section()->writeln("             <warning>* Width information missing in default configuration \"" . serialize($format) . "\"</warning>");
                     continue;
                 }
                 if (!array_key_exists("height", $format)) {
-                    $this->output->section()->writeln("             <warning>* Height information missing in default configuration \"".serialize($format)."\"</warning>");
+                    $this->output->section()->writeln("             <warning>* Height information missing in default configuration \"" . serialize($format) . "\"</warning>");
                     continue;
                 }
 
                 if (array_key_exists("class", $format) && !is_instanceof($class, $format["class"])) {
                     continue;
                 }
-                if (array_key_exists("property", $format) && !preg_match("/^".$format["property"]."$/", $field)) {
+                if (array_key_exists("property", $format) && !preg_match("/^" . $format["property"] . "$/", $field)) {
                     continue;
                 }
 
@@ -169,9 +179,9 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                     }
                     $msg = ' [WARN] Batch limit reached out - Set the `--batch` limit higher, if you wish. ';
                     $this->output->writeln('');
-                    $this->output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
+                    $this->output->writeln('<warning,bkg>' . str_blankspace(strlen($msg)));
                     $this->output->writeln($msg);
-                    $this->output->writeln(str_blankspace(strlen($msg)).'</warning,bkg>');
+                    $this->output->writeln(str_blankspace(strlen($msg)) . '</warning,bkg>');
                     $this->output->writeln('');
 
                     return;
@@ -180,30 +190,30 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 $file = $fileList[$i];
                 $publicDir = $annotation->getFlysystem()->getPublic("", $annotation->storage());
 
-                $formatStr = implode(", ", array_map(fn ($f) => implode("x", $f), $formats));
-                $formatStr = $formatStr ? "Formats: ".$formatStr : "";
+                $formatStr = implode(", ", array_map(fn($f) => implode("x", $f), $formats));
+                $formatStr = $formatStr ? "Formats: " . $formatStr : "";
 
                 $extensions = $this->mediaService->getExtensions($file);
-                $extension  = first($extensions);
+                $extension = first($extensions);
 
                 $data = $this->mediaService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
                 if ($this->isCached($data)) {
-                    $this->output->section()->writeln("             <warning>* Already cached \".".str_lstrip(realpath($file), realpath($publicDir))."\".. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("             <warning>* Already cached \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\".. (" . ($i + 1) . "/" . $N . ")</warning>", OutputInterface::VERBOSITY_VERBOSE);
                 } else {
-                    $this->output->section()->writeln("             <info>* Warming up \".".str_lstrip(realpath($file), realpath($publicDir))."\".. (".($i+1)."/".$N.")</info>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("             <info>* Warming up \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\".. (" . ($i + 1) . "/" . $N . ")</info>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->ibatch++;
 
                     $data = $this->mediaService->imagine($file, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
-                    $data = $this->mediaService->imagine($file, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
+                    $data = $this->mediaService->imagine($file, [], ["webp" => true, "local_cache" => true, "warmup" => ($this->cache != null)]);
 
                     foreach ($formats as $format) {
                         list($width, $height) = $format;
                         $data = $this->mediaService->thumbnail($file, $width, $height, [], ["webp" => false, "local_cache" => true, "warmup" => ($this->cache != null), "extension" => $extension]);
-                        $data = $this->mediaService->thumbnail($file, $width, $height, [], ["webp" => true , "local_cache" => true, "warmup" => ($this->cache != null)]);
+                        $data = $this->mediaService->thumbnail($file, $width, $height, [], ["webp" => true, "local_cache" => true, "warmup" => ($this->cache != null)]);
                     }
                 }
 
-                $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ".$formatStr, OutputInterface::VERBOSITY_VERY_VERBOSE);
+                $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); " . $formatStr, OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
         }
     }

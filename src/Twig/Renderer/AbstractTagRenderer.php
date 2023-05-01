@@ -4,30 +4,24 @@ namespace Base\Twig\Renderer;
 
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
-use Twig\Environment;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Twig\Environment;
 
+/**
+ *
+ */
 abstract class AbstractTagRenderer implements TagRendererInterface
 {
-    /**
-     * @var Environment
-     */
     protected Environment $twig;
 
-    /**
-     * @var LocalizerInterface
-     */
     protected LocalizerInterface $localizer;
 
-    /**
-     * @var SluggerInterface
-     */
     protected SluggerInterface $slugger;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    protected ParameterBagInterface|ParameterBag $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     protected array $defaultScriptAttributes;
     protected array $defaultLinkAttributes;
@@ -39,7 +33,7 @@ abstract class AbstractTagRenderer implements TagRendererInterface
         $this->slugger = $slugger;
 
         $this->parameterBag = $parameterBag;
-        $this->defaultScriptAttributes = $parameterBag->get("base.twig.script_attributes") ?? [];
-        $this->defaultLinkAttributes = $parameterBag->get("base.twig.link_attributes") ?? [];
+        $this->defaultScriptAttributes = $parameterBag->get('base.twig.script_attributes') ?? [];
+        $this->defaultLinkAttributes = $parameterBag->get('base.twig.link_attributes') ?? [];
     }
 }

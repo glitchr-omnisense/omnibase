@@ -28,6 +28,7 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-compress-alt fa-rotate-45"];
@@ -45,10 +46,14 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
         return $this->getRouter()->generate("short_redirect", $routeParameters, $referenceType);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getLabel() ?? $this->getUrl() ?? "";
     }
+
     public function __construct(string $url = "", ?string $label = null)
     {
         $this->setUrl($url);
@@ -61,6 +66,7 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -73,10 +79,20 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
      * @Slugify(separator="-")
      */
     protected $slug;
+
     public function getSlug(): ?string
     {
         return $this->slug;
     }
+
+    /**
+     * @param string|null $slug
+     * @return $this
+     */
+    /**
+     * @param string|null $slug
+     * @return $this
+     */
     public function setSlug(?string $slug)
     {
         $this->slug = $slug;

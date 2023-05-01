@@ -8,6 +8,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Traversable;
 
+/**
+ *
+ */
 class OrderedArrayCollection extends ArrayCollection
 {
     /**  * @var array */
@@ -20,11 +23,20 @@ class OrderedArrayCollection extends ArrayCollection
         $this->ordering = $ordering;
     }
 
+    /**
+     * @return array
+     */
     public function getOrdering()
     {
         return $this->ordering;
     }
 
+    /**
+     * @return $this
+     */
+    /**
+     * @return $this
+     */
     public function applyOrdering()
     {
         if (!is_identity($this->ordering)) {
@@ -89,18 +101,30 @@ class OrderedArrayCollection extends ArrayCollection
         return parent::current();
     }
 
+    /**
+     * @param $key
+     * @return mixed
+     */
     public function remove($key): mixed
     {
         $this->applyOrdering();
         return parent::remove($key);
     }
 
+    /**
+     * @param $element
+     * @return bool
+     */
     public function removeElement($element): bool
     {
         $this->applyOrdering();
         return parent::removeElement($element);
     }
 
+    /**
+     * @param $offset
+     * @return bool
+     */
     public function offsetExists($offset): bool
     {
         $this->applyOrdering();
@@ -113,24 +137,41 @@ class OrderedArrayCollection extends ArrayCollection
         return parent::offsetGet($offset);
     }
 
+    /**
+     * @param $offset
+     * @param $value
+     * @return void
+     */
     public function offsetSet($offset, $value): void
     {
         $this->applyOrdering();
         parent::offsetSet($offset, $value);
     }
 
+    /**
+     * @param $offset
+     * @return void
+     */
     public function offsetUnset($offset): void
     {
         $this->applyOrdering();
         parent::offsetUnset($offset);
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     public function containsKey($key): bool
     {
         $this->applyOrdering();
         return parent::containsKey($key);
     }
 
+    /**
+     * @param $element
+     * @return bool
+     */
     public function contains($element): bool
     {
         $this->applyOrdering();
@@ -143,12 +184,20 @@ class OrderedArrayCollection extends ArrayCollection
         return parent::exists($p);
     }
 
+    /**
+     * @param $element
+     * @return int|string|bool
+     */
     public function indexOf($element): int|string|bool
     {
         $this->applyOrdering();
         return parent::indexOf($element);
     }
 
+    /**
+     * @param $key
+     * @return mixed
+     */
     public function get($key): mixed
     {
         $this->applyOrdering();
@@ -167,6 +216,11 @@ class OrderedArrayCollection extends ArrayCollection
         return parent::getValues();
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return void
+     */
     public function set($key, $value): void
     {
         $this->applyOrdering();
@@ -215,6 +269,9 @@ class OrderedArrayCollection extends ArrayCollection
         return parent::partition($p);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $this->applyOrdering();
@@ -227,6 +284,11 @@ class OrderedArrayCollection extends ArrayCollection
         parent::clear();
     }
 
+    /**
+     * @param $offset
+     * @param $length
+     * @return array|mixed[]
+     */
     public function slice($offset, $length = null): array
     {
         $this->applyOrdering();

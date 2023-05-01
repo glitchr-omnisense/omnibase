@@ -10,6 +10,9 @@ use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
+/**
+ *
+ */
 class FormTypeBootstrapExtension extends AbstractTypeExtension
 {
     /**
@@ -97,6 +100,12 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         }
     }
 
+    /**
+     * @param FormView $view
+     * @param $name
+     * @param $value
+     * @return mixed
+     */
     public static function addAttribute(FormView $view, $name, $value)
     {
         if (!array_key_exists($name, $view->vars["attr"])) {
@@ -112,6 +121,12 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         return $view->vars["attr"][$name];
     }
 
+    /**
+     * @param FormView $view
+     * @param $name
+     * @param $value
+     * @return mixed
+     */
     public static function addRowAttribute(FormView $view, $name, $value)
     {
         if (!array_key_exists($name, $view->vars["row_attr"])) {
@@ -127,6 +142,12 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         return $view->vars["row_attr"][$name];
     }
 
+    /**
+     * @param FormView $view
+     * @param $name
+     * @param $value
+     * @return mixed
+     */
     public static function addLabelAttribute(FormView $view, $name, $value)
     {
         if (!array_key_exists("label_attr", $view->vars)) {

@@ -22,6 +22,9 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+/**
+ *
+ */
 class CropperType extends AbstractType implements DataMapperInterface
 {
     /**
@@ -215,6 +218,11 @@ class CropperType extends AbstractType implements DataMapperInterface
         $view->vars["cropper_actions"] = $options["cropper_actions"];
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms)
     {
         if ($viewData === null) {
@@ -232,6 +240,11 @@ class CropperType extends AbstractType implements DataMapperInterface
         }
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     */
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));

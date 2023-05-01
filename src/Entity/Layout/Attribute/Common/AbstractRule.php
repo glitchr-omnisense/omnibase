@@ -35,11 +35,22 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
      */
     protected $value;
 
+    /**
+     * @return mixed
+     */
     public function getValue()
     {
         return $this->value;
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param $value
+     * @return $this
+     */
     public function setValue($value)
     {
         $this->value = $value;
@@ -56,6 +67,14 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
         return $this->class;
     }
 
+    /**
+     * @param string|null $class
+     * @return $this
+     */
+    /**
+     * @param string|null $class
+     * @return $this
+     */
     public function setClass(?string $class)
     {
         $this->class = $class;

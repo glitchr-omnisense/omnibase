@@ -20,6 +20,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ *
+ */
 #[AsCommand(name: 'autocomplete:entities', aliases: [], description: '')]
 class AutocompleteEntitiesCommand extends Command
 {

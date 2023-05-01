@@ -10,6 +10,9 @@ use Base\Field\BooleanField;
 use Base\Field\SlugField;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
+/**
+ *
+ */
 class SettingCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -17,10 +20,15 @@ class SettingCrudController extends AbstractCrudController
         return null;
     }
 
+    /**
+     * @param string $entityFqcn
+     * @return Setting
+     */
     public function createEntity(string $entityFqcn)
     {
         return new Setting("");
     }
+
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
@@ -33,13 +41,13 @@ class SettingCrudController extends AbstractCrudController
 
             yield TranslationField::new("label")->renderAsHtml();
             yield TranslationField::new("help")->renderAsHtml()->setRequired(false)
-                    ->setFields([
-                        "label" => [],
-                        "class" => [],
-                        "vault" => [],
-                        "help" => ["form_type" => TextareaType::class]
-                    ])
-                    ->setExcludedFields("value");
+                ->setFields([
+                    "label" => [],
+                    "class" => [],
+                    "vault" => [],
+                    "help" => ["form_type" => TextareaType::class]
+                ])
+                ->setExcludedFields("value");
         }, $args);
     }
 }

@@ -2,28 +2,33 @@
 
 namespace Base\Field;
 
-use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 class FileField implements FieldInterface
 {
-    use FieldTrait; // __construct must be redefined because of insane EA exclusion scope &#$@!
+    use FieldTrait;
+
+    // __construct must be redefined because of insane EA exclusion scope &#$@!
+
     public function __construct()
     {
         $this->dto = new FieldDto();
     }
 
-    public const OPTION_RENDER_FORMAT  = "renderFormat";
+    public const OPTION_RENDER_FORMAT = 'renderFormat';
 
-    public const OPTION_SHOWFIRST = "showFirst";
-    public const OPTION_ALLOW_URL = "allow_url";
-    public const OPTION_ALLOW_REUPLOAD = "allow_reupload";
-    public const OPTION_PREFERRED_DOWNLOAD_NAME = "preferredDownloadName";
+    public const OPTION_SHOWFIRST = 'showFirst';
+    public const OPTION_ALLOW_URL = 'allow_url';
+    public const OPTION_ALLOW_REUPLOAD = 'allow_reupload';
+    public const OPTION_PREFERRED_DOWNLOAD_NAME = 'preferredDownloadName';
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -38,79 +43,115 @@ class FileField implements FieldInterface
             ->setTextAlign(TextAlign::CENTER)
             ->setCustomOption(self::OPTION_ALLOW_URL, false)
             ->setCustomOption(self::OPTION_SHOWFIRST, false)
-            ->setFormTypeOptionIfNotSet("data_class", null);
+            ->setFormTypeOptionIfNotSet('data_class', null);
     }
 
+    /**
+     * @param int $filesize
+     * @return $this
+     */
+    /**
+     * @param int $filesize
+     * @return $this
+     */
     public function setMaxSize(int $filesize)
     {
-        $this->setFormTypeOption("max_size", $filesize);
+        $this->setFormTypeOption('max_size', $filesize);
+
         return $this;
     }
 
+    /**
+     * @param int $nFiles
+     * @return $this
+     */
+    /**
+     * @param int $nFiles
+     * @return $this
+     */
     public function setMaxFiles(int $nFiles)
     {
-        $this->setFormTypeOption("max_files", $nFiles);
+        $this->setFormTypeOption('max_files', $nFiles);
+
         return $this;
     }
 
+    /**
+     * @param array $mimeTypes
+     * @return $this
+     */
+    /**
+     * @param array $mimeTypes
+     * @return $this
+     */
     public function setMimeTypes(array $mimeTypes)
     {
-        $this->setFormTypeOption("mime_types", $mimeTypes);
+        $this->setFormTypeOption('mime_types', $mimeTypes);
+
         return $this;
     }
 
     public function allowDelete(bool $allowDelete = true): self
     {
-        $this->setFormTypeOption("allow_delete", $allowDelete);
+        $this->setFormTypeOption('allow_delete', $allowDelete);
+
         return $this;
     }
 
     public function downloadable(bool $allowDownload = true): self
     {
         $this->setFormTypeOption(self::OPTION_ALLOW_URL, $allowDownload);
+
         return $this;
     }
 
     public function noReupload(bool $noReupload = true): self
     {
         $this->setFormTypeOption(self::OPTION_ALLOW_REUPLOAD, !$noReupload);
+
         return $this;
     }
 
     public function setPreferredDownloadName(string $targetName): self
     {
         $this->setCustomOption(self::OPTION_PREFERRED_DOWNLOAD_NAME, $targetName);
+
         return $this;
     }
 
     public function setMultipleFiles(bool $multipleFiles = true): self
     {
-        $this->setFormTypeOption("multiple", $multipleFiles);
+        $this->setFormTypeOption('multiple', $multipleFiles);
+
         return $this;
     }
 
     public function renderAsText(): self
     {
-        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, 'text');
+
         return $this;
     }
 
     public function renderAsCount(): self
     {
-        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, 'count');
+
         return $this;
     }
 
     public function renderAsImage(): self
     {
-        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "image")
-             ->setFormType(ImageType::class);
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, 'image')
+            ->setFormType(ImageType::class);
+
         return $this;
     }
 
     public function showFirst(bool $show = true): self
     {
         $this->setCustomOption(self::OPTION_SHOWFIRST, true);
+
         return $this;
     }
 }

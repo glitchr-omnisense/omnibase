@@ -18,6 +18,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Traversable;
 
+/**
+ *
+ */
 class PasswordType extends AbstractType implements AutovalidateInterface, DataMapperInterface
 {
     /**
@@ -108,6 +111,11 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         }
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms): void
     {
         $plainPasswordType = iterator_to_array($forms)["plain"];
@@ -116,6 +124,11 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         }
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     */
     public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $plainPasswordType = iterator_to_array($forms)["plain"] ?? null;

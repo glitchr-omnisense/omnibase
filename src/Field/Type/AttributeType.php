@@ -4,6 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Form\FormFactory;
 
+use Doctrine\Persistence\Mapping\MappingException;
 use Exception;
 use InvalidArgumentException;
 use Base\Entity\Layout\Attribute;
@@ -40,25 +41,28 @@ use Base\Twig\Environment;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
 
+/**
+ *
+ */
 class AttributeType extends AbstractType implements DataMapperInterface
 {
     /**
-     * @var ClassMetadataManipulator
+     * @var ClassMetadataManipulator|null
      */
     protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     /**
-     * @var FormFactory
+     * @var FormFactory|null
      */
     protected ?FormFactory $formFactory = null;
 
     /**
-     * @var Environment
+     * @var Environment|null
      */
     protected ?Environment $twig = null;
 
     /**
-     * @var PropertyAccessorInterface
+     * @var PropertyAccessorInterface|null
      */
     protected ?PropertyAccessorInterface $propertyAccessor = null;
 
@@ -244,6 +248,11 @@ class AttributeType extends AbstractType implements DataMapperInterface
         });
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms): void
     {
         // there is no data yet, so nothing to prepopulate
@@ -273,6 +282,12 @@ class AttributeType extends AbstractType implements DataMapperInterface
         }
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     * @throws MappingException
+     */
     public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $form = iterator_to_array($forms)["choice"]->getParent();

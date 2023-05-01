@@ -51,11 +51,22 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
      */
     protected $value;
 
+    /**
+     * @return mixed
+     */
     public function getValue()
     {
         return $this->value;
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param $value
+     * @return $this
+     */
     public function setValue($value)
     {
         $this->value = $value;
@@ -72,6 +83,14 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
         return $this->class;
     }
 
+    /**
+     * @param string|null $class
+     * @return $this
+     */
+    /**
+     * @param string|null $class
+     * @return $this
+     */
     public function setClass(?string $class)
     {
         $this->class = $class;

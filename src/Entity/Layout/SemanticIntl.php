@@ -27,6 +27,14 @@ class SemanticIntl implements TranslationInterface
         return $this->label;
     }
 
+    /**
+     * @param string|null $label
+     * @return $this
+     */
+    /**
+     * @param string|null $label
+     * @return $this
+     */
     public function setLabel(?string $label)
     {
         $this->label = $label;
@@ -44,6 +52,14 @@ class SemanticIntl implements TranslationInterface
         return $this->keywords ?? [];
     }
 
+    /**
+     * @param array $keywords
+     * @return $this
+     */
+    /**
+     * @param array $keywords
+     * @return $this
+     */
     public function setKeywords(array $keywords)
     {
         $this->keywords = $keywords;

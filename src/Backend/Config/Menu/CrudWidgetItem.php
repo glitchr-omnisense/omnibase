@@ -19,6 +19,9 @@ use function gettype;
 use function in_array;
 use function is_string;
 
+/**
+ *
+ */
 final class CrudWidgetItem implements MenuItemInterface
 {
     use MenuItemTrait;
@@ -57,6 +60,14 @@ final class CrudWidgetItem implements MenuItemInterface
         return $this;
     }
 
+    /**
+     * @param $entityId
+     * @return $this
+     */
+    /**
+     * @param $entityId
+     * @return $this
+     */
     public function setEntityId($entityId): self
     {
         $this->dto->setRouteParameters(array_merge(
@@ -91,6 +102,10 @@ final class CrudWidgetItem implements MenuItemInterface
         return $this;
     }
 
+    /**
+     * @return null
+     * @throws Exception
+     */
     public function generateUrl()
     {
         if (WidgetItem::$adminUrlGenerator == null) {

@@ -11,6 +11,7 @@ use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\Persistence\Mapping\MappingException;
 use Exception;
 use RuntimeException;
 use Symfony\Component\Form\AbstractType;
@@ -31,17 +32,20 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
 
+/**
+ *
+ */
 class AssociationType extends AbstractType implements DataMapperInterface
 {
     use BaseTrait;
 
     /**
-     * @var ClassMetadataManipulator
+     * @var ClassMetadataManipulator|null
      */
     protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     /**
-     * @var FormFactory
+     * @var FormFactory|null
      */
     protected ?FormFactory $formFactory = null;
 
@@ -256,6 +260,12 @@ class AssociationType extends AbstractType implements DataMapperInterface
         });
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     * @throws Exception
+     */
     public function mapDataToForms($viewData, Traversable $forms): void
     {
         // there is no data yet, so nothing to prepopulate
@@ -321,6 +331,12 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     * @throws MappingException
+     */
     public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $form = current(iterator_to_array($forms));

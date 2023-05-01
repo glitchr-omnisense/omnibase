@@ -6,6 +6,9 @@ use Base\Service\Model\Color\Palette;
 use SplFixedArray;
 use SplPriorityQueue;
 
+/**
+ *
+ */
 class ColorExtractor
 {
     protected Palette $palette;

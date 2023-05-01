@@ -124,7 +124,7 @@ class Penalty implements IconizeInterface
     }
 
     /**
-     * @return Collection|User[]
+     * @return Collection
      */
     public function getUid(): Collection
     {
@@ -151,7 +151,7 @@ class Penalty implements IconizeInterface
     }
 
     /**
-     * @return Collection|Group[]
+     * @return Collection
      */
     public function getGid(): Collection
     {

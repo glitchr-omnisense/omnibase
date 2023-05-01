@@ -8,6 +8,9 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\DateTimeType;
 
+/**
+ *
+ */
 class UTCDateTimeType extends DateTimeType
 {
     /**
@@ -15,6 +18,12 @@ class UTCDateTimeType extends DateTimeType
      */
     private static $utc;
 
+    /**
+     * @param $value
+     * @param AbstractPlatform $platform
+     * @return mixed
+     * @throws ConversionException
+     */
     public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if ($value instanceof DateTime) {
@@ -24,6 +33,12 @@ class UTCDateTimeType extends DateTimeType
         return parent::convertToDatabaseValue($value, $platform);
     }
 
+    /**
+     * @param $value
+     * @param AbstractPlatform $platform
+     * @return mixed
+     * @throws ConversionException
+     */
     public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         if (null === $value || $value instanceof DateTime) {

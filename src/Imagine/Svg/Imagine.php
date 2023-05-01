@@ -14,6 +14,9 @@ use Imagine\Image\Palette\Color\ColorInterface;
 use function in_array;
 use function is_resource;
 
+/**
+ *
+ */
 class Imagine extends AbstractImagine
 {
     public function create(ImageBoxInterface $size, ColorInterface $color = null): Image
@@ -27,12 +30,12 @@ class Imagine extends AbstractImagine
         $svg->setAttribute('version', '1.1');
 
         if (!$size instanceof Box || Box::TYPE_ABSOLUTE === $size->getType()) {
-            $svg->setAttribute('width', (string) $size->getWidth());
-            $svg->setAttribute('height', (string) $size->getHeight());
+            $svg->setAttribute('width', (string)$size->getWidth());
+            $svg->setAttribute('height', (string)$size->getHeight());
         }
 
         if (!$size instanceof Box || Box::TYPE_NONE !== $size->getType()) {
-            $svg->setAttribute('viewBox', '0 0 '.$size->getWidth().' '.$size->getHeight());
+            $svg->setAttribute('viewBox', '0 0 ' . $size->getWidth() . ' ' . $size->getHeight());
         }
 
         $document->appendChild($svg);
@@ -40,6 +43,10 @@ class Imagine extends AbstractImagine
         return new Image($document, new MetadataBag());
     }
 
+    /**
+     * @param $path
+     * @return Image
+     */
     public function open($path): Image
     {
         $path = $this->checkPath($path);
@@ -52,11 +59,19 @@ class Imagine extends AbstractImagine
         return $this->doLoad($data, new MetadataBag(['filepath' => $path]));
     }
 
+    /**
+     * @param $string
+     * @return Image
+     */
     public function load($string): Image
     {
         return $this->doLoad($string, new MetadataBag());
     }
 
+    /**
+     * @param $resource
+     * @return Image
+     */
     public function read($resource): Image
     {
         if (!is_resource($resource)) {
@@ -72,6 +87,12 @@ class Imagine extends AbstractImagine
         return $this->load($content);
     }
 
+    /**
+     * @param $file
+     * @param $size
+     * @param ColorInterface $color
+     * @return FontInterface
+     */
     public function font($file, $size, ColorInterface $color): FontInterface
     {
         throw new NotSupportedException('This method is not implemented');

@@ -8,11 +8,11 @@ use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
+/**
+ *
+ */
 final class BreadgrinderTwigExtension extends AbstractExtension
 {
-    /**
-     * @var BreadgrinderInterface
-     */
     protected BreadgrinderInterface $breadgrinder;
 
     public function __construct(BreadgrinderInterface $breadgrinder)
@@ -20,6 +20,9 @@ final class BreadgrinderTwigExtension extends AbstractExtension
         $this->breadgrinder = $breadgrinder;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'breadcrumb_extension';
@@ -28,7 +31,7 @@ final class BreadgrinderTwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('render_breadcrumb', [$this, 'renderBreadcrumb'], ["needs_environment" => true, 'is_safe' => ['all']]),
+            new TwigFunction('render_breadcrumb', [$this, 'renderBreadcrumb'], ['needs_environment' => true, 'is_safe' => ['all']]),
         ];
     }
 
@@ -37,6 +40,6 @@ final class BreadgrinderTwigExtension extends AbstractExtension
         $breadcrumb = $this->breadgrinder->grind($name, $options);
         $breadcrumb->compute($request);
 
-        return $twig->render($breadcrumb->getTemplate(), ["breadcrumb" => $breadcrumb]);
+        return $twig->render($breadcrumb->getTemplate(), ['breadcrumb' => $breadcrumb]);
     }
 }

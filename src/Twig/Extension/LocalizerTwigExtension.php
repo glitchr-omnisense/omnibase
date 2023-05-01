@@ -9,11 +9,11 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
+/**
+ *
+ */
 final class LocalizerTwigExtension extends AbstractExtension
 {
-    /**
-     * @var LocalizerInterface
-     */
     protected LocalizerInterface $localizer;
 
     public function __construct(LocalizerInterface $localizer)
@@ -21,6 +21,9 @@ final class LocalizerTwigExtension extends AbstractExtension
         $this->localizer = $localizer;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'locale_extension';
@@ -40,41 +43,40 @@ final class LocalizerTwigExtension extends AbstractExtension
     {
         return [
             new TwigFunction('compatible_locale', [Localizer::class, 'compatibleLocale'], ['is_safe' => ['all']]),
-            new TwigFunction('render_locale', [$this, 'renderLocale'], ["needs_environment" => true, 'is_safe' => ['all']]),
-            new TwigFunction('render_timezone', [$this, 'renderTimezone'], ["needs_environment" => true, 'is_safe' => ['all']]),
+            new TwigFunction('render_locale', [$this, 'renderLocale'], ['needs_environment' => true, 'is_safe' => ['all']]),
+            new TwigFunction('render_timezone', [$this, 'renderTimezone'], ['needs_environment' => true, 'is_safe' => ['all']]),
         ];
     }
 
-    public function renderLocale(Environment $twig, array $options = [], string $template = "@Base/localizer/locale_dropdown.html.twig"): ?string
+    public function renderLocale(Environment $twig, array $options = [], string $template = '@Base/localizer/locale_dropdown.html.twig'): ?string
     {
         return $twig->render($template, array_merge($options, [
-            "available_locales" => $this->localizer->getAvailableLocales(),
-            "current_locale" => $this->localizer->getLocale()
+            'available_locales' => $this->localizer->getAvailableLocales(),
+            'current_locale' => $this->localizer->getLocale(),
         ]));
     }
 
-    public function renderCountry(Environment $twig, array $options = [], string $template = "@Base/localizer/country_dropdown.html.twig"): ?string
+    public function renderCountry(Environment $twig, array $options = [], string $template = '@Base/localizer/country_dropdown.html.twig'): ?string
     {
         return $twig->render($template, array_merge($options, [
-            "available_countries" => $this->localizer->getAvailableLocaleCountries(),
-            "country" => $this->localizer->getLocaleCountry()
+            'available_countries' => $this->localizer->getAvailableLocaleCountries(),
+            'country' => $this->localizer->getLocaleCountry(),
         ]));
     }
 
-    public function renderTimezone(Environment $twig, array $options = [], string $template = "@Base/localizer/timezone_dropdown.html.twig"): ?string
+    public function renderTimezone(Environment $twig, array $options = [], string $template = '@Base/localizer/timezone_dropdown.html.twig'): ?string
     {
         return $twig->render($template, array_merge($options, [
-            "available_timezones" => $this->localizer->getAvailableTimezones(),
-            "current_timezone" => $this->localizer->getTimezone()
+            'available_timezones' => $this->localizer->getAvailableTimezones(),
+            'current_timezone' => $this->localizer->getTimezone(),
         ]));
     }
 
-
-    public function renderCurrency(Environment $twig, array $options = [], string $template = "@Base/localizer/currency_dropdown.html.twig"): ?string
+    public function renderCurrency(Environment $twig, array $options = [], string $template = '@Base/localizer/currency_dropdown.html.twig'): ?string
     {
         return $twig->render($template, array_merge($options, [
-            "available_currencies" => $this->localizer->getAvailableCurrencies(),
-            "current_currency" => $this->localizer->getCurrency()
+            'available_currencies' => $this->localizer->getAvailableCurrencies(),
+            'current_currency' => $this->localizer->getCurrency(),
         ]));
     }
 }

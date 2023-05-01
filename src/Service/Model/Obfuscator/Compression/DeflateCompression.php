@@ -4,6 +4,9 @@ namespace Base\Service\Model\Obfuscator\Compression;
 
 use Base\Service\Model\Obfuscator\AbstractCompression;
 
+/**
+ *
+ */
 class DeflateCompression extends AbstractCompression
 {
     public function getName(): string

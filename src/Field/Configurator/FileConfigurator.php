@@ -11,6 +11,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
+/**
+ *
+ */
 class FileConfigurator implements FieldConfiguratorInterface
 {
     /**

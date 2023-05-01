@@ -25,20 +25,25 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-th"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getLabel() ?? $this->getPath();
     }
+
     public function __construct(string $path, ?string $label = null, ?string $help = null)
     {
         parent::__construct();
 
-        $this->path    = $path;
+        $this->path = $path;
         $this->setLabel($label);
         $this->setHelp($help);
     }
@@ -49,10 +54,12 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
      * @Slugify(reference="translations.title", separator=".", keep={"_"})
      */
     protected $path;
+
     public function getPath(): string
     {
         return $this->path;
     }
+
     public function setPath(string $path): self
     {
         $this->path = $path;
@@ -64,10 +71,12 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
      * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $widget;
+
     public function getWidget(): ?Widget
     {
         return $this->widget;
     }
+
     public function setWidget(?Widget $widget): self
     {
         $this->widget = $widget;

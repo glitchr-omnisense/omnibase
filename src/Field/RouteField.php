@@ -7,6 +7,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 class RouteField extends SelectField implements FieldInterface
 {
     use FieldTrait;

@@ -44,6 +44,9 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
         return ["fa-solid fa-share-alt"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getLabel() ?? get_class($this);
@@ -140,7 +143,11 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
         return $this->icon ?? $this->__iconize()[0] ?? $this->__iconizeStatic()[0] ?? null;
     }
 
-    public function setIcon(?string $icon)
+    /**
+     * @param string|null $icon
+     * @return $this
+     */
+    public function setIcon(?string $icon): static
     {
         $this->icon = $icon;
         return $this;

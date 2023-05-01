@@ -8,10 +8,9 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer implements AbstractLocalCacheWarmerInterface
 {
-    /** @var string */
+    /** @var string|null */
     private ?string $cacheFile;
 
-    /** @var int */
     protected int $shellVerbosity = 0;
 
     /** @var ?AbstractLocalCacheInterface */
@@ -19,10 +18,10 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
 
     public function __construct(AbstractLocalCacheInterface $simpleCache, string $cacheDir)
     {
-        $this->shellVerbosity = getenv("SHELL_VERBOSITY");
+        $this->shellVerbosity = getenv('SHELL_VERBOSITY');
 
         $this->simpleCache = $simpleCache;
-        $this->cacheFile = $cacheDir . "/pools/simple/php/" . str_replace(['\\', '/'], ['__', '_'], get_class($simpleCache)) . ".php";
+        $this->cacheFile = $cacheDir . '/pools/simple/php/' . str_replace(['\\', '/'], ['__', '_'], get_class($simpleCache)) . '.php';
 
         parent::__construct($this->cacheFile);
     }
@@ -50,12 +49,13 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
             return false;
         }
 
-        if ($this->shellVerbosity > 0 && php_sapi_name() == "cli") {
-            echo " // Warming up cache... " . ucwords(camel2snake(str_replace("CacheWarmer", "", class_basename(static::class)), " ")) . PHP_EOL . PHP_EOL;
+        if ($this->shellVerbosity > 0 && 'cli' == php_sapi_name()) {
+            echo ' // Warming up cache... ' . ucwords(camel2snake(str_replace('CacheWarmer', '', class_basename(static::class)), ' ')) . PHP_EOL . PHP_EOL;
         }
 
         $this->simpleCache?->setCache($arrayAdapter);
         $this->simpleCache?->warmUp($cacheDir);
+
         return true;
     }
 }

@@ -8,6 +8,9 @@ use Imagine\Image\PointInterface;
 use InvalidArgumentException;
 use function in_array;
 
+/**
+ *
+ */
 class Box implements ImageBoxInterface
 {
     public const TYPE_ABSOLUTE = 0;
@@ -85,6 +88,14 @@ class Box implements ImageBoxInterface
         return $this->box->getHeight();
     }
 
+    /**
+     * @param $ratio
+     * @return $this
+     */
+    /**
+     * @param $ratio
+     * @return $this
+     */
     public function scale($ratio): self
     {
         $box = $this->box->scale($ratio);
@@ -92,6 +103,14 @@ class Box implements ImageBoxInterface
         return new self($box->getWidth(), $box->getHeight(), $this->type);
     }
 
+    /**
+     * @param $size
+     * @return $this
+     */
+    /**
+     * @param $size
+     * @return $this
+     */
     public function increase($size): self
     {
         $box = $this->box->increase($size);
@@ -109,6 +128,14 @@ class Box implements ImageBoxInterface
         return $this->box->square();
     }
 
+    /**
+     * @param $width
+     * @return $this
+     */
+    /**
+     * @param $width
+     * @return $this
+     */
     public function widen($width): self
     {
         $box = $this->box->widen($width);
@@ -116,6 +143,14 @@ class Box implements ImageBoxInterface
         return new self($box->getWidth(), $box->getHeight(), $this->type);
     }
 
+    /**
+     * @param $height
+     * @return $this
+     */
+    /**
+     * @param $height
+     * @return $this
+     */
     public function heighten($height): self
     {
         $box = $this->box->heighten($height);

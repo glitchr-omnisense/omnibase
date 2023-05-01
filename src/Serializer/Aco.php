@@ -10,6 +10,9 @@ use Symfony\Component\CssSelector\Exception\ParseException;
 
 use function is_file;
 
+/**
+ *
+ */
 class Aco
 {
     public const BYTE_SIZE = 8;
@@ -42,6 +45,12 @@ class Aco
         };
     }
 
+    /**
+     * @param $handle
+     * @param int $flags
+     * @return array
+     * @throws Exception
+     */
     public static function parse($handle, int $flags = self::VERSION_V2): array
     {
         if (!is_resource($handle)) {
@@ -62,6 +71,12 @@ class Aco
         return $colors;
     }
 
+    /**
+     * @param $handle
+     * @param int $flags
+     * @return array
+     * @throws Exception
+     */
     protected static function parseBinary($handle, int $flags): array
     {
         $colors = [];
@@ -100,6 +115,12 @@ class Aco
     }
 
     // Format: #FFFFFF Name with space => Array("hexcode" => FFFFFF, name => "Name with space")
+
+    /**
+     * @param $handle
+     * @param int $flags
+     * @return array
+     */
     protected static function parseAscii($handle, int $flags = self::VERSION_V2): array
     {
         $colors = [];
@@ -133,6 +154,11 @@ class Aco
         return $colors;
     }
 
+    /**
+     * @param $input
+     * @param int $flags
+     * @return string
+     */
     public static function dump($input, int $flags = 0): string
     {
         $i = 0;
@@ -238,6 +264,10 @@ class Aco
         return bin2hex($value);
     }
 
+    /**
+     * @param $handle
+     * @return array
+     */
     public static function getHeader($handle)
     {
         $version = hexdec(bin2hex(fread2($handle, 2)));
@@ -246,6 +276,12 @@ class Aco
         return [$version, $ncolors];
     }
 
+    /**
+     * @param $handle
+     * @param int $version
+     * @return array
+     * @throws Exception
+     */
     public static function getBlock($handle, int $version)
     {
         $name = "";
@@ -327,6 +363,10 @@ class Aco
         return [$palette, $array, $hexcode, array_map("trim", explode(",", $name))];
     }
 
+    /**
+     * @param $array
+     * @return void
+     */
     public static function sortByColor($array)
     {
         usort_column($array, 1, function ($a, $b) {
@@ -364,6 +404,11 @@ class Aco
         }
     }
 
+    /**
+     * @param $rgb
+     * @param $colors
+     * @return int|string
+     */
     public function getClosest($rgb, $colors)
     {
         $distance = 0;

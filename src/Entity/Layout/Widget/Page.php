@@ -41,6 +41,9 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
         return $this->getRouter()->generate("widget_page", $routeParameters, $referenceType);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getTitle();

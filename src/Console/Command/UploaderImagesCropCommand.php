@@ -18,6 +18,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
+/**
+ *
+ */
 #[AsCommand(name: 'uploader:images:crop', aliases: [], description: '')]
 class UploaderImagesCropCommand extends UploaderImagesCommand
 {
@@ -146,6 +149,13 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         return parent::execute($input, $output);
     }
 
+    /**
+     * @param mixed $class
+     * @param string $field
+     * @param Uploader $annotation
+     * @param array $fileList
+     * @return int|void
+     */
     public function postProcess(mixed $class, string $field, Uploader $annotation, array $fileList)
     {
         if ($field != "source") {
@@ -224,6 +234,11 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         return Command::SUCCESS;
     }
 
+    /**
+     * @param $data
+     * @param $imageCrop
+     * @return bool
+     */
     public function isCached($data, $imageCrop = null)
     {
         if ($imageCrop == null) {
@@ -272,6 +287,11 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         return $this->mediaService->isCached($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache]);
     }
 
+    /**
+     * @param string|null $namespace
+     * @return array
+     * @throws \Exception
+     */
     protected function getUploaderAnnotations(?string $namespace)
     {
         $classes = array_filter(get_declared_classes(), function ($c) use ($namespace) {

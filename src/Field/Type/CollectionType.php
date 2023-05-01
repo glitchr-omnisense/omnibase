@@ -19,6 +19,9 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
+/**
+ *
+ */
 class CollectionType extends AbstractType
 {
     /**

@@ -2,6 +2,9 @@
 
 namespace Base\Database\Entity;
 
+/**
+ *
+ */
 class EntityExtension
 {
     public const ACTION_CREATE = 'create';

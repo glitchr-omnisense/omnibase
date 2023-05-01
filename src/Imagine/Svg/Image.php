@@ -23,6 +23,9 @@ use Imagine\Image\PointInterface;
 use Imagine\Image\ProfileInterface;
 use function in_array;
 
+/**
+ *
+ */
 class Image extends AbstractImage
 {
     /**
@@ -143,16 +146,41 @@ class Image extends AbstractImage
         return $this;
     }
 
+    /**
+     * @param ImageInterface $image
+     * @param PointInterface $start
+     * @param $alpha
+     * @return $this
+     */
+    /**
+     * @param ImageInterface $image
+     * @param PointInterface $start
+     * @param $alpha
+     * @return $this
+     */
     public function paste(ImageInterface $image, PointInterface $start, $alpha = 100): self
     {
         throw new NotSupportedException('This method is not implemented');
     }
 
+    /**
+     * @return DOMDocument
+     */
     public function sanitize()
     {
         return $this->document;
     }
 
+    /**
+     * @param BoxInterface $size
+     * @param $filter
+     * @return $this
+     */
+    /**
+     * @param BoxInterface $size
+     * @param $filter
+     * @return $this
+     */
     public function resize(BoxInterface $size, $filter = ImageInterface::FILTER_UNDEFINED): self
     {
         if (ImageInterface::FILTER_UNDEFINED !== $filter) {
@@ -196,6 +224,18 @@ class Image extends AbstractImage
         return $this;
     }
 
+    /**
+     * @param BoxInterface $size
+     * @param $settings
+     * @param $filter
+     * @return $this
+     */
+    /**
+     * @param BoxInterface $size
+     * @param $settings
+     * @param $filter
+     * @return $this
+     */
     public function thumbnail(BoxInterface $size, $settings = ImageInterface::THUMBNAIL_INSET, $filter = ImageInterface::FILTER_UNDEFINED): self
     {
         $newSizeType = $size instanceof Box ? $size->getType() : Box::TYPE_ABSOLUTE;
@@ -242,6 +282,16 @@ class Image extends AbstractImage
         return $thumb->resize($size, $filter);
     }
 
+    /**
+     * @param $angle
+     * @param ColorInterface|null $background
+     * @return $this
+     */
+    /**
+     * @param $angle
+     * @param ColorInterface|null $background
+     * @return $this
+     */
     public function rotate($angle, ColorInterface $background = null): self
     {
         throw new NotSupportedException('This method is not implemented');
@@ -428,6 +478,14 @@ class Image extends AbstractImage
         throw new NotSupportedException('This method is not implemented');
     }
 
+    /**
+     * @param $scheme
+     * @return $this
+     */
+    /**
+     * @param $scheme
+     * @return $this
+     */
     public function interlace($scheme): self
     {
         throw new NotSupportedException('This method is not implemented');

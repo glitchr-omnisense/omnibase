@@ -7,12 +7,16 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class VideoType extends FileType
 {
     public function getBlockPrefix(): string
     {
         return 'videoupload';
     }
+
     public function getParent(): ?string
     {
         return FileType::class;
@@ -21,7 +25,7 @@ class VideoType extends FileType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'mime_types'  => ["video/*"],
+            'mime_types' => ["video/*"],
             'multisource' => true
         ]);
 

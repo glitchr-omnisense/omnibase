@@ -6,6 +6,9 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
+/**
+ *
+ */
 abstract class AbstractPass implements CompilerPassInterface
 {
     abstract public function classFqcn(): string;

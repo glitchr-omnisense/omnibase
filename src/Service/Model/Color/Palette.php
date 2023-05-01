@@ -8,17 +8,31 @@ use GdImage;
 use InvalidArgumentException;
 use IteratorAggregate;
 
+/**
+ *
+ */
 class Palette implements Countable, IteratorAggregate
 {
     protected array $colors = [];
 
     protected ?int $colorKey = null;
 
+    /**
+     * @return int|null
+     */
     public function getColorKey()
     {
         return $this->colorKey;
     }
 
+    /**
+     * @param int|null $colorKey
+     * @return $this
+     */
+    /**
+     * @param int|null $colorKey
+     * @return $this
+     */
     public function setColorKey(int|null $colorKey)
     {
         $this->colorKey = $colorKey;
@@ -45,11 +59,25 @@ class Palette implements Countable, IteratorAggregate
         return array_slice($this->colors, 0, $limit, true);
     }
 
+    /**
+     * @param $filename
+     * @param int|null $colorKey
+     */
     protected function __construct($filename, int|null $colorKey = null)
     {
         $this->load($filename, $colorKey);
     }
 
+    /**
+     * @param $filenameOrImage
+     * @param int|null $colorKey
+     * @return $this
+     */
+    /**
+     * @param $filenameOrImage
+     * @param int|null $colorKey
+     * @return $this
+     */
     public function load($filenameOrImage, int|null $colorKey = null): Palette
     {
         if ($filenameOrImage instanceof GdImage) {

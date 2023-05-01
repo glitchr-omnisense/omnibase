@@ -2,14 +2,16 @@
 
 namespace Base\Field;
 
+use Base\Field\Type\VideoType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-use Base\Field\Type\VideoType;
-
+/**
+ *
+ */
 class VideoField extends FileField implements FieldInterface
 {
-    public const OPTION_RENDER_FORMAT  = "renderFormat";
+    public const OPTION_RENDER_FORMAT = 'renderFormat';
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -22,8 +24,8 @@ class VideoField extends FileField implements FieldInterface
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
-            ->setFormTypeOptionIfNotSet("data_class", null)
+            ->setFormTypeOptionIfNotSet('data_class', null)
             ->setCustomOption(self::OPTION_SHOWFIRST, true)
-            ->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
+            ->setCustomOption(self::OPTION_RENDER_FORMAT, 'count');
     }
 }

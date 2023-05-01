@@ -12,7 +12,10 @@ use Base\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'icon:enums', aliases:[], description:'')]
+/**
+ *
+ */
+#[AsCommand(name: 'icon:enums', aliases: [], description: '')]
 class IconEnumsCommand extends Command
 {
     protected function configure(): void
@@ -25,19 +28,19 @@ class IconEnumsCommand extends Command
         $baseLocation = dirname((new ReflectionClass('Base\\BaseBundle'))->getFileName());
         $enumRestriction = $input->getOption('enum') ?? "";
         $enums = array_merge(
-            BaseBundle::getInstance()->getAllClasses($baseLocation."/Enum"),
+            BaseBundle::getInstance()->getAllClasses($baseLocation . "/Enum"),
             BaseBundle::getInstance()->getAllClasses("./src/Enum"),
         );
 
         if ($enums) {
-            $output->section()->writeln("Enum list: ".$enumRestriction);
+            $output->section()->writeln("Enum list: " . $enumRestriction);
         }
         foreach ($enums as $enum) {
             if (!str_starts_with($enum, $enumRestriction)) {
                 continue;
             }
 
-            $output->section()->writeln(" * <info>".$enum."</info>");
+            $output->section()->writeln(" * <info>" . $enum . "</info>");
 
             $iconize = $enum::__iconizeStatic();
             $permittedValues = $enum::getPermittedValues(false);
@@ -48,9 +51,9 @@ class IconEnumsCommand extends Command
             }
 
             foreach ($permittedValues as $value) {
-                $space = str_repeat(" ", max($maxLength-strlen($value), 0));
+                $space = str_repeat(" ", max($maxLength - strlen($value), 0));
                 $icons = is_array($iconize[$value]) ? $iconize[$value] : [$iconize[$value]];
-                $output->section()->writeln("\t<warning>".$value."</warning> ".$space.": [".implode(",", $icons ?? [])."]");
+                $output->section()->writeln("\t<warning>" . $value . "</warning> " . $space . ": [" . implode(",", $icons ?? []) . "]");
             }
         }
 

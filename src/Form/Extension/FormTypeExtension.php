@@ -9,45 +9,30 @@ use Base\Form\FormFactory;
 use Base\Form\FormProxyInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\ParameterBagInterface;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-
 use Symfony\Component\Form\AbstractTypeExtension;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+/**
+ *
+ */
 class FormTypeExtension extends AbstractTypeExtension
 {
-    /**
-     * @var FormFactory
-     */
     protected FormFactory $formFactory;
 
-    /**
-     * @var RouterInterface
-     */
     protected RouterInterface $router;
 
-    /**
-     * @var ParameterBagInterface
-     */
     protected ParameterBagInterface $parameterBag;
 
-    /**
-     * @var FormProxyInterface
-     */
     protected FormProxyInterface $formProxy;
 
-    /**
-     * @var ClassMetadataManipulator
-     */
     protected ClassMetadataManipulator $classMetadataManipulator;
-    /**
-     * @var AuthorizationCheckerInterface
-     */
+
     protected AuthorizationCheckerInterface $authorizationChecker;
 
     public function __construct(RouterInterface $router, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, FormFactory $formFactory, FormProxyInterface $formProxy, ClassMetadataManipulator $classMetadataManipulator)
@@ -72,8 +57,8 @@ class FormTypeExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'form2' => $this->parameterBag->get("base.twig.use_form2"),
-            'easyadmin' => $this->parameterBag->get("base.twig.use_ea"),
+            'form2' => $this->parameterBag->get('base.twig.use_form2'),
+            'easyadmin' => $this->parameterBag->get('base.twig.use_ea'),
             'form_flow' => true,
             'form_flow_id' => '_flow_token',
             'validation_entity' => null,
@@ -83,11 +68,11 @@ class FormTypeExtension extends AbstractTypeExtension
 
         $resolver->setNormalizer('form_flow_id', function (Options $options, $value) {
             $formType = null;
-            if (class_implements_interface($options["data_class"], FormModelInterface::class)) {
-                $formType = camel2snake(str_rstrip(class_basename($options["data_class"]::getTypeClass()), "Type"));
+            if (class_implements_interface($options['data_class'], FormModelInterface::class)) {
+                $formType = camel2snake(str_rstrip(class_basename($options['data_class']::getTypeClass()), 'Type'));
             }
 
-            return $value == "_flow_token" ? $formType : $value;
+            return '_flow_token' == $value ? $formType : $value;
         });
     }
 
@@ -100,10 +85,10 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
-        if ($options["form2"]) {
+        if ($options['form2']) {
             $this->applyForm2($view);
         }
-        if ($options["easyadmin"]) {
+        if ($options['easyadmin']) {
             $this->applyEA($view, $form);
         }
 
@@ -119,8 +104,8 @@ class FormTypeExtension extends AbstractTypeExtension
 
             $childForm = $form->get($field);
             $childOptions = $childForm->getConfig()->getOptions();
-            $childOptions["form2"] = $options["form2"];
-            $childOptions["easyadmin"] = $options["easyadmin"];
+            $childOptions['form2'] = $options['form2'];
+            $childOptions['easyadmin'] = $options['easyadmin'];
 
             $this->browseView($childView, $childForm, $childOptions);
         }
@@ -130,51 +115,51 @@ class FormTypeExtension extends AbstractTypeExtension
     {
         // Add to all form custom base style..
         // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
-        if (in_array("form", $view->vars['block_prefixes']) &&
-            !in_array("form2", $view->vars['block_prefixes'])) {
-            array_splice($view->vars['block_prefixes'], 1, 0, ["form2"]);
+        if (in_array('form', $view->vars['block_prefixes']) &&
+            !in_array('form2', $view->vars['block_prefixes'])) {
+            array_splice($view->vars['block_prefixes'], 1, 0, ['form2']);
         }
     }
 
     public function applyEA(FormView $view, FormInterface $form)
     {
-        if (!empty($view->vars["ea_crud_form"])) {
+        if (!empty($view->vars['ea_crud_form'])) {
             if (!$form->getParent()) {
-                if (!array_key_exists("class", $view->vars["attr"])) {
-                    $view->vars["attr"]["class"] = "";
+                if (!array_key_exists('class', $view->vars['attr'])) {
+                    $view->vars['attr']['class'] = '';
                 }
 
-                $view->vars["attr"]["class"] .= " row ";
+                $view->vars['attr']['class'] .= ' row ';
             }
         }
 
-        $fieldDto = $view->vars["ea_crud_form"]["ea_field"] ?? null;
+        $fieldDto = $view->vars['ea_crud_form']['ea_field'] ?? null;
         if ($fieldDto) {
-            $columns = $fieldDto->getColumns() ?? $fieldDto->getDefaultColumns() ?? "";
-            if (!array_key_exists("class", $view->vars["row_attr"])) {
-                $view->vars["row_attr"]["class"] = "";
+            $columns = $fieldDto->getColumns() ?? $fieldDto->getDefaultColumns() ?? '';
+            if (!array_key_exists('class', $view->vars['row_attr'])) {
+                $view->vars['row_attr']['class'] = '';
             }
 
-            $view->vars["row_attr"]["class"] .= " " . $columns;
+            $view->vars['row_attr']['class'] .= ' ' . $columns;
         }
     }
 
     public function markAsDbColumns(FormView $view, FormInterface $form, array $options)
     {
-        $dataClass = $options["class"] ?? $form->getConfig()->getDataClass();
+        $dataClass = $options['class'] ?? $form->getConfig()->getDataClass();
         if ($this->classMetadataManipulator->isEntity($dataClass)) {
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
             foreach ($classMetadata->getFieldNames() as $fieldName) {
                 $childView = $view->children[$fieldName] ?? null;
                 if ($childView) {
-                    $childView->vars["is_dbcolumn"] = true;
+                    $childView->vars['is_dbcolumn'] = true;
                 }
             }
 
             foreach ($classMetadata->getAssociationNames() as $fieldName) {
                 $childView = $view->children[$fieldName] ?? null;
                 if ($childView) {
-                    $childView->vars["is_dbcolumn"] = true;
+                    $childView->vars['is_dbcolumn'] = true;
                 }
             }
         }
@@ -182,40 +167,40 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function submitOnEnter(FormView $view, FormInterface $form, array $options)
     {
-        $submitOnEnter = $options["submit_on_enter"] ?? null;
+        $submitOnEnter = $options['submit_on_enter'] ?? null;
         if ($submitOnEnter || !$form->isRoot()) {
             return;
         }
 
-        $view->vars["attr"] ??= [];
-        $view->vars["attr"]["disabled"] = "";
+        $view->vars['attr'] ??= [];
+        $view->vars['attr']['disabled'] = '';
     }
 
     public function markDbProperties(FormView $view, FormInterface $form, array $options)
     {
-        $dataClass = $options["class"] ?? $form->getConfig()->getDataClass();
+        $dataClass = $options['class'] ?? $form->getConfig()->getDataClass();
         if ($this->classMetadataManipulator->isEntity($dataClass)) {
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
             foreach ($view->children as $childView) { // Alias is marked by default and remove if field found..
-                $childView->vars["is_alias"] = true;
+                $childView->vars['is_alias'] = true;
             }
 
             foreach ($classMetadata->getFieldNames() as $fieldName) {
                 $childView = $view->children[$fieldName] ?? null;
                 if ($childView) {
-                    $childView->vars["is_dbcolumn"] = true;
+                    $childView->vars['is_dbcolumn'] = true;
                 }
 
-                unset($childView->vars["is_alias"]);
+                unset($childView->vars['is_alias']);
             }
 
             foreach ($classMetadata->getAssociationNames() as $fieldName) {
                 $childView = $view->children[$fieldName] ?? null;
                 if ($childView) {
-                    $childView->vars["is_dbcolumn"] = true;
+                    $childView->vars['is_dbcolumn'] = true;
                 }
 
-                unset($childView->vars["is_alias"]);
+                unset($childView->vars['is_alias']);
             }
         }
     }
@@ -223,13 +208,13 @@ class FormTypeExtension extends AbstractTypeExtension
     public function markOptions(FormView $view, FormInterface $form, array $options)
     {
         if ($this->formFactory->guessSortable($form, $options)) {
-            $view->vars["is_sortable"] = true;
+            $view->vars['is_sortable'] = true;
         }
         if ($this->formFactory->guessMultiple($form, $options)) {
-            $view->vars["is_multiple"] = true;
+            $view->vars['is_multiple'] = true;
         }
-        if ($this->classMetadataManipulator->isCollectionOwner($form) === false) {
-            $view->vars["is_inherited"] = true;
+        if (false === $this->classMetadataManipulator->isCollectionOwner($form)) {
+            $view->vars['is_inherited'] = true;
         }
     }
 

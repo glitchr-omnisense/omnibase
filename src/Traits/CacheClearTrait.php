@@ -7,6 +7,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
+/**
+ *
+ */
 trait CacheClearTrait
 {
     protected function checkCache(SymfonyStyle $io): void

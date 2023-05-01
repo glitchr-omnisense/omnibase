@@ -17,6 +17,9 @@ use Symfony\Contracts\Translation\TranslatableInterface;
 use function in_array;
 use function Symfony\Component\Translation\t;
 
+/**
+ *
+ */
 class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator
 {
     /**
@@ -42,7 +45,12 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
     }
 
     /**
+     * @param FieldDto $field
+     * @param string $translationDomain
+     * @param string|null $currentPage
+     * @param EntityDto|null $entityDto
      * @return TranslatableInterface|string|false|null
+     * @throws \Exception
      */
     protected function buildLabelOption(FieldDto $field, string $translationDomain, ?string $currentPage, ?EntityDto $entityDto = null)
     {

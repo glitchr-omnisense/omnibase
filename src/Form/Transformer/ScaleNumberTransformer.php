@@ -25,9 +25,6 @@ use Symfony\Component\Form\Exception\TransformationFailedException;
  */
 class ScaleNumberTransformer implements DataTransformerInterface
 {
-    /**
-     * @var float
-     */
     protected float $divisor;
 
     public function __construct(float $divisor)
@@ -66,7 +63,7 @@ class ScaleNumberTransformer implements DataTransformerInterface
     public function reverseTransform(mixed $value): int|float|null
     {
         if (null !== $value && 1 !== $this->divisor) {
-            $value = (float)(string)($value * $this->divisor);
+            $value = (float) (string) ($value * $this->divisor);
         }
 
         return $value;

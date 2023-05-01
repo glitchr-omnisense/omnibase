@@ -4,6 +4,9 @@ namespace Base\Controller\Backend\Crud\Layout\Widget\Set;
 
 use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
 
+/**
+ *
+ */
 class BookCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string

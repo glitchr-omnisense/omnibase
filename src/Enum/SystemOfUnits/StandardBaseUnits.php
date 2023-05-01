@@ -6,30 +6,34 @@ use Base\Database\Type\EnumType;
 use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\IconizeInterface;
 
+/**
+ *
+ */
 class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeInterface
 {
-    public const SECOND   = "s";
-    public const METER    = "m";
+    public const SECOND = "s";
+    public const METER = "m";
     public const KILOGRAM = "kg";
-    public const AMPERE   = "A";
-    public const KELVIN   = "K";
-    public const MOLE     = "mol";
-    public const CANDELA  = "cd";
+    public const AMPERE = "A";
+    public const KELVIN = "K";
+    public const MOLE = "mol";
+    public const CANDELA = "cd";
 
     public function __iconize(): ?array
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::SECOND   => ["fa-solid fa-question-circle"],
-            self::METER    => ["fa-solid fa-question-circle"],
+            self::SECOND => ["fa-solid fa-question-circle"],
+            self::METER => ["fa-solid fa-question-circle"],
             self::KILOGRAM => ["fa-solid fa-question-circle"],
-            self::AMPERE   => ["fa-solid fa-question-circle"],
-            self::KELVIN   => ["fa-solid fa-question-circle"],
-            self::MOLE     => ["fa-solid fa-question-circle"],
-            self::CANDELA  => ["fa-solid fa-question-circle"],
+            self::AMPERE => ["fa-solid fa-question-circle"],
+            self::KELVIN => ["fa-solid fa-question-circle"],
+            self::MOLE => ["fa-solid fa-question-circle"],
+            self::CANDELA => ["fa-solid fa-question-circle"],
         ];
     }
 
@@ -37,16 +41,17 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     {
         return null;
     }
+
     public static function __colorizeStatic(): ?array
     {
         return [
-            self::SECOND   => "#f5a801",
-            self::METER    => "#ff671c",
+            self::SECOND => "#f5a801",
+            self::METER => "#ff671c",
             self::KILOGRAM => "#ce0d2d",
-            self::AMPERE   => "#61a60e",
-            self::KELVIN   => "#005db9",
-            self::MOLE     => "#c017a2",
-            self::CANDELA  => "#410099"
+            self::AMPERE => "#61a60e",
+            self::KELVIN => "#005db9",
+            self::MOLE => "#c017a2",
+            self::CANDELA => "#410099"
         ];
     }
 
@@ -54,6 +59,7 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     {
         return self::getBaseUnits()[$name] ?? null;
     }
+
     public static function getBaseUnits(): ?array
     {
         return parent::getPermittedValues();
@@ -63,16 +69,17 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     {
         return self::getBaseUnitNames()[$name] ?? null;
     }
+
     public static function getBaseUnitNames(): ?array
     {
         return [
-            self::SECOND   => "time",
-            self::METER    => "length",
+            self::SECOND => "time",
+            self::METER => "length",
             self::KILOGRAM => "mass",
-            self::AMPERE   => "electric current",
-            self::KELVIN   => "kelvin",
-            self::MOLE     => "amount of substance",
-            self::CANDELA  => "luminous intensity",
+            self::AMPERE => "electric current",
+            self::KELVIN => "kelvin",
+            self::MOLE => "amount of substance",
+            self::CANDELA => "luminous intensity",
         ];
     }
 
@@ -80,16 +87,17 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     {
         return self::getConstants()[$name] ?? null;
     }
+
     public static function getConstants(): ?array
     {
         return [
-            self::SECOND   => 9192631770,
-            self::METER    => 299792458,
+            self::SECOND => 9192631770,
+            self::METER => 299792458,
             self::KILOGRAM => 6.62607015e-34,
-            self::AMPERE   => 1.602176634e-19,
-            self::KELVIN   => 1.380649e-23,
-            self::MOLE     => 6.02214076e+23,
-            self::CANDELA  => 683
+            self::AMPERE => 1.602176634e-19,
+            self::KELVIN => 1.380649e-23,
+            self::MOLE => 6.02214076e+23,
+            self::CANDELA => 683
         ];
     }
 
@@ -97,16 +105,17 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     {
         return self::getConstantSymbols()[$name] ?? null;
     }
+
     public static function getConstantSymbols(): ?array
     {
         return [
-            self::SECOND   => '$\Delta\nu_{Cs}$',
-            self::METER    => "c",
+            self::SECOND => '$\Delta\nu_{Cs}$',
+            self::METER => "c",
             self::KILOGRAM => "h",
-            self::AMPERE   => "e",
-            self::KELVIN   => "k",
-            self::MOLE     => "N_A",
-            self::CANDELA  => '$K_{cd}$'
+            self::AMPERE => "e",
+            self::KELVIN => "k",
+            self::MOLE => "N_A",
+            self::CANDELA => '$K_{cd}$'
         ];
     }
 
@@ -114,16 +123,17 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     {
         return self::getConstantUnits()[$name] ?? null;
     }
+
     public static function getConstantUnits(): ?array
     {
         return [
-            self::SECOND   => "Hz",
-            self::METER    => "m/s",
+            self::SECOND => "Hz",
+            self::METER => "m/s",
             self::KILOGRAM => "J.s",
-            self::AMPERE   => "C",
-            self::KELVIN   => "J/K",
-            self::MOLE     => "mol^-1",
-            self::CANDELA  => "lm/W",
+            self::AMPERE => "C",
+            self::KELVIN => "J/K",
+            self::MOLE => "mol^-1",
+            self::CANDELA => "lm/W",
         ];
     }
 
@@ -131,16 +141,17 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     {
         return self::getConstantNames()[$name] ?? null;
     }
+
     public static function getConstantNames(): ?array
     {
         return [
-            self::SECOND   => "hyperfine transition frequency of Cs",
-            self::METER    => "speed of light",
+            self::SECOND => "hyperfine transition frequency of Cs",
+            self::METER => "speed of light",
             self::KILOGRAM => "Planck constant",
-            self::AMPERE   => "elementary charge",
-            self::KELVIN   => "Boltzmann constant",
-            self::MOLE     => "Avogadro constant",
-            self::CANDELA  => "luminous efficacy of 540 THz radiation",
+            self::AMPERE => "elementary charge",
+            self::KELVIN => "Boltzmann constant",
+            self::MOLE => "Avogadro constant",
+            self::CANDELA => "luminous efficacy of 540 THz radiation",
         ];
     }
 }

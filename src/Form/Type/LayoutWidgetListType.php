@@ -18,6 +18,9 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Util\StringUtil;
 use Traversable;
 
+/**
+ *
+ */
 class LayoutWidgetListType extends AbstractType implements DataMapperInterface
 {
     /**
@@ -48,6 +51,13 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
         ]);
     }
 
+    /**
+     * @param $data
+     * @param $from
+     * @param $to
+     * @return array
+     * @throws Exception
+     */
     public function getFormattedData($data, $from = ".", $to = "-")
     {
         $newData = [];
@@ -119,10 +129,21 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
         });
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms): void
     {
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     * @throws Exception
+     */
     public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);

@@ -6,6 +6,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use Twig\Environment;
 
+/**
+ *
+ */
 class Extension
 {
     public const PAGE_DEFAULT = "default";
@@ -24,6 +27,11 @@ class Extension
         $this->twig->addGlobal("ea_extra", $this);
     }
 
+    /**
+     * @param string $varname
+     * @param string|null $pageName
+     * @return mixed|null
+     */
     protected function getFallback(string $varname, ?string $pageName = null)
     {
         $pageName = $pageName ?? self::PAGE_DEFAULT;
@@ -37,6 +45,16 @@ class Extension
         return $this->getFallback("title", $pageName);
     }
 
+    /**
+     * @param $title
+     * @param string|null $pageName
+     * @return $this
+     */
+    /**
+     * @param $title
+     * @param string|null $pageName
+     * @return $this
+     */
     public function setPageTitle($title, ?string $pageName = null)
     {
         return $this->setTitle($title, $pageName);
@@ -47,6 +65,16 @@ class Extension
         return $this->getFallback("title", $pageName);
     }
 
+    /**
+     * @param $title
+     * @param string|null $pageName
+     * @return $this
+     */
+    /**
+     * @param $title
+     * @param string|null $pageName
+     * @return $this
+     */
     public function setTitle($title, ?string $pageName = null)
     {
         $this->title[$pageName ?? self::PAGE_DEFAULT] = $title;
@@ -60,6 +88,16 @@ class Extension
         return $this->getFallback("logo", $pageName);
     }
 
+    /**
+     * @param string $logo
+     * @param string|null $pageName
+     * @return $this
+     */
+    /**
+     * @param string $logo
+     * @param string|null $pageName
+     * @return $this
+     */
     public function setLogo(string $logo, ?string $pageName = null)
     {
         $this->logo[$pageName ?? self::PAGE_DEFAULT] = $logo;
@@ -73,6 +111,16 @@ class Extension
         return $this->getFallback("help", $pageName);
     }
 
+    /**
+     * @param string $help
+     * @param string|null $pageName
+     * @return $this
+     */
+    /**
+     * @param string $help
+     * @param string|null $pageName
+     * @return $this
+     */
     public function setHelp(string $help, ?string $pageName = null)
     {
         $this->help[$pageName ?? self::PAGE_DEFAULT] = $help;
@@ -86,6 +134,16 @@ class Extension
         return $this->getFallback("text", $pageName);
     }
 
+    /**
+     * @param string $text
+     * @param string|null $pageName
+     * @return $this
+     */
+    /**
+     * @param string $text
+     * @param string|null $pageName
+     * @return $this
+     */
     public function setText(string $text, ?string $pageName = null)
     {
         $this->text[$pageName ?? self::PAGE_DEFAULT] = $text;
@@ -99,6 +157,16 @@ class Extension
         return $this->getFallback("icon", $pageName);
     }
 
+    /**
+     * @param string $icon
+     * @param string|null $pageName
+     * @return $this
+     */
+    /**
+     * @param string $icon
+     * @param string|null $pageName
+     * @return $this
+     */
     public function setIcon(string $icon, ?string $pageName = null)
     {
         $this->icon[$pageName ?? self::PAGE_DEFAULT] = $icon;
@@ -118,6 +186,18 @@ class Extension
         return $this->getFallback("imageAttributes", $pageName);
     }
 
+    /**
+     * @param string|null $image
+     * @param array $attrs
+     * @param string|null $pageName
+     * @return $this
+     */
+    /**
+     * @param string|null $image
+     * @param array $attrs
+     * @param string|null $pageName
+     * @return $this
+     */
     public function setImage(?string $image, array $attrs = [], ?string $pageName = null)
     {
         $this->image[$pageName ?? self::PAGE_DEFAULT] = $image;
@@ -132,17 +212,35 @@ class Extension
         return $this->getFallback("widgets", $pageName);
     }
 
+    /**
+     * @param array $widgets
+     * @param string|null $pageName
+     * @return $this
+     */
+    /**
+     * @param array $widgets
+     * @param string|null $pageName
+     * @return $this
+     */
     public function setWidgets(array $widgets, ?string $pageName = null)
     {
         $this->widgets[$pageName ?? self::PAGE_DEFAULT] = $widgets;
         return $this;
     }
 
+    /**
+     * @param Dashboard $dashboard
+     * @return Dashboard
+     */
     public function configureDashboard(Dashboard $dashboard)
     {
         return $dashboard;
     }
 
+    /**
+     * @param Crud $crud
+     * @return Crud
+     */
     public function configureCrud(Crud $crud)
     {
         $actions = [self::PAGE_NEW, self::PAGE_EDIT, self::PAGE_INDEX];

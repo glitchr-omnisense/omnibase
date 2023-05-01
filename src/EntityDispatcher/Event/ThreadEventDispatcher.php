@@ -7,6 +7,9 @@ use Base\EntityDispatcher\AbstractEventDispatcher;
 use DateTime;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
+/**
+ *
+ */
 class ThreadEventDispatcher extends AbstractEventDispatcher
 {
     public function supports(mixed $subject): bool
@@ -32,7 +35,7 @@ class ThreadEventDispatcher extends AbstractEventDispatcher
     public function onUpdate(LifecycleEventArgs $event)
     {
         /**
-         * @var Thread
+         * @var Thread $event
          */
         $thread = $event->getObject();
 

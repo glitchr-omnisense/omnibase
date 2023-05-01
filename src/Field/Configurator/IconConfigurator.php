@@ -8,6 +8,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+/**
+ *
+ */
 class IconConfigurator extends SelectConfigurator
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool

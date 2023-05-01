@@ -7,8 +7,17 @@ use Base\Database\Annotation\Trasheable;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 
+/**
+ *
+ */
 class TrashFilter extends SQLFilter
 {
+    /**
+     * @param ClassMetaData $targetEntity
+     * @param $targetTableAlias
+     * @return string
+     * @throws \Exception
+     */
     public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string
     {
         $trasheableAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Trasheable::class);

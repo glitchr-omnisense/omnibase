@@ -17,12 +17,17 @@ use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToWriteFile;
 use League\FlysystemBundle\Lazy\LazyFactory;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionProperty;
 use Symfony\Component\Finder\Finder;
 use InvalidArgumentException;
 use League\Flysystem\UnableToCreateDirectory;
 use ReflectionException;
 
+/**
+ *
+ */
 class Flysystem extends LazyFactory implements FlysystemInterface
 {
     /**
@@ -32,6 +37,9 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
     protected static string $projectDir;
 
+    /**
+     * @return string
+     */
     public static function getProjectDir()
     {
         return self::$projectDir;
@@ -39,6 +47,9 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
     protected static string $publicDir;
 
+    /**
+     * @return string
+     */
     public static function getPublicDir()
     {
         return self::$publicDir;
@@ -58,6 +69,13 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         $this->setDefaultStorage("local.storage");
     }
 
+    /**
+     * @param string $source
+     * @param string|null $storageName
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function createStorage(string $source, ?string $storageName = null)
     {
         if ($storageName === null) {
@@ -94,6 +112,14 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return $this->operator;
     }
 
+    /**
+     * @param FilesystemOperator|string $operator
+     * @return $this
+     */
+    /**
+     * @param FilesystemOperator|string $operator
+     * @return $this
+     */
     public function setDefaultStorage(FilesystemOperator|string $operator)
     {
         $this->operator = $this->getOperator($operator);
@@ -160,12 +186,22 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return $reflProperty->isInitialized($adapter) ? to_array($reflProperty->getValue($adapter)) : null;
     }
 
+    /**
+     * @param string $path
+     * @param FilesystemOperator|string|null $operator
+     * @return string
+     */
     public function prefixPath(string $path, FilesystemOperator|string|null $operator = null)
     {
         $prefixPath = $this->getPathPrefixer($operator)?->prefixPath("") ?? "";
         return $prefixPath . str_lstrip($path, $prefixPath);
     }
 
+    /**
+     * @param string $path
+     * @param FilesystemOperator|string|null $operator
+     * @return string|null
+     */
     public function stripPrefix(string $path, FilesystemOperator|string|null $operator = null)
     {
         $prefixPath = $this->getPathPrefixer($operator)?->prefixPath("") ?? "";
@@ -268,6 +304,11 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return null;
     }
 
+    /**
+     * @param mixed $path
+     * @param FilesystemOperator|string|null $operator
+     * @return string|null
+     */
     public function get(mixed $path, FilesystemOperator|string|null $operator = null)
     {
         $operator = $this->getOperator($operator);
@@ -303,12 +344,21 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return $publicPath;
     }
 
+    /**
+     * @param FilesystemOperator|string|null $operator
+     * @return bool
+     */
     public function isRemote(FilesystemOperator|string|null $operator = null)
     {
         $adapter = $this->getAdapter($operator);
         return property_exists($adapter, "connectionOptions") || property_exists($adapter, "connectionProvider");
     }
 
+    /**
+     * @param mixed $path
+     * @param FilesystemOperator|string|null $operator
+     * @return string|null
+     */
     public function getPublic(mixed $path, FilesystemOperator|string|null $operator = null)
     {
         if ($path === null) {

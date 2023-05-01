@@ -25,7 +25,7 @@ class Timezone extends AbstractAnnotation
     private array $context;
 
     /**
-     * @var DateTime
+     * @var string
      */
     private string $value;
 
@@ -50,11 +50,24 @@ class Timezone extends AbstractAnnotation
         return $value;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return in_array("update", $this->context) || in_array("create", $this->context);
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     */
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if (!in_array("create", $this->context)) {
@@ -63,6 +76,13 @@ class Timezone extends AbstractAnnotation
         $this->setFieldValue($entity, $property, $this->getValue());
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     */
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if (!in_array("update", $this->context)) {

@@ -19,6 +19,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+/**
+ *
+ */
 class UserCrudController extends UserActionCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -31,31 +34,31 @@ class UserCrudController extends UserActionCrudController
         if ($entity = $this->getEntity()) {
             $extension->setImage($entity->getAvatar());
 
-            $userClass = "user.".mb_strtolower(camel2snake(class_basename($entity)));
-            $entityLabel = $this->translator->transQuiet($userClass.".".Translator::NOUN_SINGULAR, [], Translator::DOMAIN_ENTITY);
+            $userClass = "user." . mb_strtolower(camel2snake(class_basename($entity)));
+            $entityLabel = $this->translator->transQuiet($userClass . "." . Translator::NOUN_SINGULAR, [], Translator::DOMAIN_ENTITY);
             if ($entityLabel) {
                 $extension->setTitle(mb_ucwords($entityLabel));
             }
 
             $entityLabel ??= $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
-            $entityLabel   = $entityLabel ? mb_ucwords($entityLabel) : "";
+            $entityLabel = $entityLabel ? mb_ucwords($entityLabel) : "";
 
-            $switchRole      = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
+            $switchRole = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
             $impersonate = null;
-            if ($switchRole && $this->isGranted($switchRole) && !is_instanceof($this->getEntityFqcn(), LoginRestrictionInterface::class)  && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
-                $propertyAccessor =  PropertyAccess::createPropertyAccessor();
+            if ($switchRole && $this->isGranted($switchRole) && !is_instanceof($this->getEntityFqcn(), LoginRestrictionInterface::class) && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
+                $propertyAccessor = PropertyAccess::createPropertyAccessor();
                 if ($propertyAccessor->isReadable($entity, User::__DEFAULT_IDENTIFIER__)) {
-                    $impersonate = '<a class="impersonate" href="?'.$switchParameter.'='.$propertyAccessor->getValue($entity, User::__DEFAULT_IDENTIFIER__).'"><i class="fa-solid fa-fw fa-user-secret"></i></a>';
+                    $impersonate = '<a class="impersonate" href="?' . $switchParameter . '=' . $propertyAccessor->getValue($entity, User::__DEFAULT_IDENTIFIER__) . '"><i class="fa-solid fa-fw fa-user-secret"></i></a>';
                 }
             }
 
             if ($this->getCrud()->getAsDto()->getCurrentAction() == "new") {
                 $extension->setTitle($entityLabel);
             } else {
-                $extension->setTitle($entity.$impersonate);
-                $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("crud.user.since", [$entity->getCreatedAt()->format("Y")], Translator::DOMAIN_BACKEND));
+                $extension->setTitle($entity . $impersonate);
+                $extension->setText($entityLabel . " #" . $entity->getId() . " | " . $this->translator->trans("crud.user.since", [$entity->getCreatedAt()->format("Y")], Translator::DOMAIN_BACKEND));
             }
         }
 

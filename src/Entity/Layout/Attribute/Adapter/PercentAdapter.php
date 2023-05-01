@@ -54,6 +54,14 @@ class PercentAdapter extends AbstractAdapter
         return $this->epsilon;
     }
 
+    /**
+     * @param int $epsilon
+     * @return $this
+     */
+    /**
+     * @param int $epsilon
+     * @return $this
+     */
     public function setPrecision(int $epsilon)
     {
         $this->epsilon = $epsilon;
@@ -70,6 +78,14 @@ class PercentAdapter extends AbstractAdapter
         return $this->scale;
     }
 
+    /**
+     * @param int $scale
+     * @return $this
+     */
+    /**
+     * @param int $scale
+     * @return $this
+     */
     public function setScale(int $scale)
     {
         $this->scale = $scale;

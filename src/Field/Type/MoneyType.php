@@ -13,6 +13,9 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\Intl\Currencies;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
 {
     public const CODE_ONLY = 0;

@@ -13,6 +13,12 @@ use Base\Entity\Extension\Revision;
  */
 class Versionable extends AbstractAnnotation implements EntityExtensionInterface
 {
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);

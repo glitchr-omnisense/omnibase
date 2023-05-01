@@ -7,6 +7,9 @@ use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
 use Base\Field\ArrayField;
 use Base\Field\RouteField;
 
+/**
+ *
+ */
 class RouteCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -20,7 +23,7 @@ class RouteCrudController extends WidgetCrudController
             $pageName,
             ["id" => function () {
                 yield RouteField::new('routeName')->setColumns(6)->hideOnIndex();
-                yield ArrayField::new('routeParameters')->setColumns(6)/*->setPatternFieldName("routeName")*/->useAssociativeKeys()->setLabel("Route")->hideOnIndex();
+                yield ArrayField::new('routeParameters')->setColumns(6)/*->setPatternFieldName("routeName")*/ ->useAssociativeKeys()->setLabel("Route")->hideOnIndex();
             }]
         );
     }

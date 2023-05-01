@@ -8,11 +8,15 @@ use Base\Annotations\AnnotationReader;
 use League\Flysystem\FileAttributes;
 use Base\Console\Command;
 
+use League\Flysystem\FilesystemException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ *
+ */
 #[AsCommand(name: 'uploader:entities', aliases: [], description: '')]
 class UploaderEntitiesCommand extends Command
 {
@@ -153,6 +157,11 @@ class UploaderEntitiesCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @param string|null $namespace
+     * @return array
+     * @throws \Exception
+     */
     protected function getUploaderAnnotations(?string $namespace)
     {
         $classes = array_filter(get_declared_classes(), function ($c) use ($namespace) {
@@ -178,6 +187,10 @@ class UploaderEntitiesCommand extends Command
 
     private $allEntries = [];
 
+    /**
+     * @param $class
+     * @return array|mixed|object[]
+     */
     public function getEntries($class)
     {
         $repository = $this->entityManager->getRepository($class);
@@ -188,6 +201,13 @@ class UploaderEntitiesCommand extends Command
 
     private $fileList = [];
 
+    /**
+     * @param string $class
+     * @param string $field
+     * @param Uploader $annotation
+     * @return array|mixed
+     * @throws FilesystemException
+     */
     protected function getFileList(string $class, string $field, Uploader $annotation)
     {
         $classPath = dirname($annotation->getPath($class, $field));
@@ -210,6 +230,13 @@ class UploaderEntitiesCommand extends Command
         return $this->fileList[$propertyFqcn];
     }
 
+    /**
+     * @param string $class
+     * @param string $field
+     * @param Uploader $annotation
+     * @return array
+     * @throws \Exception
+     */
     public function getOrphanFiles(string $class, string $field, Uploader $annotation)
     {
         if ($annotation->getMissable()) {
@@ -228,6 +255,11 @@ class UploaderEntitiesCommand extends Command
         return array_filter(array_unique(array_merge($injection, $surjection)));
     }
 
+    /**
+     * @param Uploader $annotation
+     * @param array $fileList
+     * @return true
+     */
     public function deleteOrphanFiles(Uploader $annotation, array $fileList)
     {
         $publicPath = $annotation->getFlysystem()->getPublic("", $annotation->getStorage());

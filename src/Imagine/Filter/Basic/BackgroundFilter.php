@@ -10,6 +10,9 @@ use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 use InvalidArgumentException;
 
+/**
+ *
+ */
 class BackgroundFilter implements FilterInterface
 {
     /**
@@ -20,6 +23,9 @@ class BackgroundFilter implements FilterInterface
     /** @var array */
     protected array $options;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return "bkg:" . $this->getRGBA(false) . ":" . $this->getPosition() . ":" . ($this->getSize() ? implode("x", $this->getSize()) : "");
@@ -31,6 +37,10 @@ class BackgroundFilter implements FilterInterface
         $this->options = $options;
     }
 
+    /**
+     * @param $hashtag
+     * @return string
+     */
     public function getRGB($hashtag = true): string
     {
         return ($hashtag ? "#" : "") . ltrim($this->options['transparency'] ?? "FFF", "#");
@@ -41,6 +51,10 @@ class BackgroundFilter implements FilterInterface
         return $this->options['transparency'] ?? 1;
     }
 
+    /**
+     * @param $hashtag
+     * @return string
+     */
     public function getRGBA($hashtag = true): string
     {
         return $this->getRGB($hashtag) . ($this->options['transparency'] ?? "F");

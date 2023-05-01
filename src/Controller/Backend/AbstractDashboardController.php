@@ -39,6 +39,7 @@ use Base\Form\Type\LayoutWidgetListType;
 use Base\Repository\Layout\SettingRepository;
 use Base\Repository\Layout\Widget\SlotRepository;
 use Base\Repository\Layout\WidgetRepository;
+use Base\Service\Translator;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -49,7 +50,7 @@ use Base\Backend\Config\Extension;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Widget\Link;
 use Base\Entity\Layout\Widget\Slot;
-use Base\Service\Translator;
+use Base\Service\TranslatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -82,7 +83,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice")
@@ -112,9 +112,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     protected Extension $extension;
 
     /**
-     * @var Translator
+     * @var TranslatorInterface
      */
-    protected TranslatorInterface|Translator $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var Environment
@@ -199,12 +199,23 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->slotRepository = $entityManager->getRepository(Slot::class);
     }
 
-    public function getExtension()
+    /**
+     * @return Extension
+     */
+    public function getExtension(): Extension
     {
         return $this->extension;
     }
 
-    public function setExtension(Extension $extension)
+    /**
+     * @param Extension $extension
+     * @return $this
+     */
+    /**
+     * @param Extension $extension
+     * @return $this
+     */
+    public function setExtension(Extension $extension): static
     {
         $this->extension = $extension;
         return $this;
@@ -456,7 +467,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->setTitle($title);
     }
 
-    public function addRoles(array &$menu, string $class)
+    /**
+     * @param array $menu
+     * @param string $class
+     * @return array
+     */
+    public function addRoles(array &$menu, string $class): array
     {
         foreach ($class::getPermittedValuesByGroup(false) as $values) {
 

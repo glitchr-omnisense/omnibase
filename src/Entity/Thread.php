@@ -76,6 +76,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return ["fa-solid fa-box"];
     }
 
+    /**
+     * @return string|null
+     */
     public function __toString()
     {
         return $this->getTitle() ?? $this->getSlug() ?? $this->getTranslator()->transEntity(static::class);
@@ -121,6 +124,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      */
     protected $uuid;
 
+    /**
+     * @return mixed
+     */
     public function getUuid()
     {
         return $this->uuid;
@@ -190,6 +196,14 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->connexes;
     }
 
+    /**
+     * @param $connex
+     * @return $this
+     */
+    /**
+     * @param $connex
+     * @return $this
+     */
     public function addConnex($connex): self
     {
         if (!$this->connexes->contains($connex)) {
@@ -199,6 +213,14 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
+    /**
+     * @param $connex
+     * @return $this
+     */
+    /**
+     * @param $connex
+     * @return $this
+     */
     public function removeConnex($connex): self
     {
         $this->connexes->removeElement($connex);
@@ -228,11 +250,22 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      */
     protected $state;
 
+    /**
+     * @return mixed
+     */
     public function getState()
     {
         return $this->state;
     }
 
+    /**
+     * @param $state
+     * @return $this
+     */
+    /**
+     * @param $state
+     * @return $this
+     */
     public function setState($state): self
     {
         $this->state = $state;
@@ -306,16 +339,30 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      */
     protected $workflow;
 
+    /**
+     * @return bool
+     */
     public function isApproved()
     {
         return $this->workflow == WorkflowState::APPROVED;
     }
 
+    /**
+     * @return mixed
+     */
     public function getWorkflow()
     {
         return $this->workflow;
     }
 
+    /**
+     * @param $workflow
+     * @return $this
+     */
+    /**
+     * @param $workflow
+     * @return $this
+     */
     public function setWorkflow($workflow): self
     {
         $this->workflow = $workflow;
@@ -328,6 +375,10 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      */
     protected $owners;
 
+    /**
+     * @param int $i
+     * @return mixed|null
+     */
     public function getOwner(int $i = 0)
     {
         return $this->getOwners()->get($i);
@@ -389,6 +440,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      */
     protected $tags;
 
+    /**
+     * @return false|mixed|null
+     */
     public function getPrimaryTag()
     {
         $first = $this->tags->first();
@@ -437,6 +491,14 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->getTaxa();
     }
 
+    /**
+     * @param $taxon
+     * @return $this
+     */
+    /**
+     * @param $taxon
+     * @return $this
+     */
     public function addTaxon($taxon): self
     {
         if (!$this->taxa->contains($taxon)) {
@@ -446,6 +508,14 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
+    /**
+     * @param $taxon
+     * @return $this
+     */
+    /**
+     * @param $taxon
+     * @return $this
+     */
     public function removeTaxon($taxon): self
     {
         $this->taxa->removeElement($taxon);
@@ -613,6 +683,13 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $keywords ?? [];
     }
 
+    /**
+     * @param array $keywords
+     * @param string|null $locale
+     * @param int $inheritanceDepthIfNotSet
+     * @return mixed
+     * @throws \Exception
+     */
     public function setKeywords(array $keywords, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
         if ($inheritanceDepthIfNotSet > 0) {
@@ -632,6 +709,13 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $headline;
     }
 
+    /**
+     * @param string|null $headline
+     * @param string|null $locale
+     * @param int $inheritanceDepthIfNotSet
+     * @return mixed
+     * @throws \Exception
+     */
     public function setHeadline(?string $headline, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
         if ($inheritanceDepthIfNotSet > 0) {
@@ -651,6 +735,13 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $title;
     }
 
+    /**
+     * @param string|null $title
+     * @param string|null $locale
+     * @param int $inheritanceDepthIfNotSet
+     * @return mixed
+     * @throws \Exception
+     */
     public function setTitle(?string $title, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
         if ($inheritanceDepthIfNotSet > 0) {
@@ -669,6 +760,13 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $excerpt;
     }
 
+    /**
+     * @param string|null $excerpt
+     * @param string|null $locale
+     * @param int $inheritanceDepthIfNotSet
+     * @return mixed
+     * @throws \Exception
+     */
     public function setExcerpt(?string $excerpt, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
         if ($inheritanceDepthIfNotSet > 0) {
@@ -688,6 +786,13 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $content;
     }
 
+    /**
+     * @param string|null $content
+     * @param string|null $locale
+     * @param int $inheritanceDepthIfNotSet
+     * @return mixed
+     * @throws \Exception
+     */
     public function setContent(?string $content, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
         if ($inheritanceDepthIfNotSet > 0) {

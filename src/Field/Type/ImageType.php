@@ -8,12 +8,16 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class ImageType extends FileType
 {
     public function getBlockPrefix(): string
     {
         return 'imageupload';
     }
+
     public function getParent(): ?string
     {
         return FileType::class;
@@ -22,17 +26,17 @@ class ImageType extends FileType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'    => "bundles/base/images/image.svg",
-            'clipboard'    => true,
+            'thumbnail' => "bundles/base/images/image.svg",
+            'clipboard' => true,
 
-            'modal'        => [
+            'modal' => [
                 "keyboard" => false,
                 "backdrop" => "static"
             ],
 
-            'cropper'     => null,
+            'cropper' => null,
 
-            'mime_types'  => ["image/*"],
+            'mime_types' => ["image/*"],
             "inline" => false
         ]);
 
@@ -57,34 +61,34 @@ class ImageType extends FileType
         }
 
         $view->vars["thumbnail"] = $this->twig->getAsset($options["thumbnail"]);
-        $view->vars["modal"]     = json_encode($options["modal"]);
+        $view->vars["modal"] = json_encode($options["modal"]);
 
         $view->vars["cropper"] = null;
         if (is_array($options["cropper"])) {
-            $token  = $this->csrfTokenManager->getToken("dropzone")->getValue();
+            $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $data = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
-            $view->vars["ajax"]     = $this->router->generate("ux_dropzone", ["data" => $data]);
+            $view->vars["ajax"] = $this->router->generate("ux_dropzone", ["data" => $data]);
 
             if (!array_key_exists('viewMode', $options["cropper"])) {
-                $options["cropper"]['viewMode']         = 2;
+                $options["cropper"]['viewMode'] = 2;
             }
             if (!array_key_exists('autoCropArea', $options["cropper"])) {
                 $options["cropper"]['autoCropArea'] = true;
             }
             if (!array_key_exists('movable', $options["cropper"])) {
-                $options["cropper"]['movable']       = false;
+                $options["cropper"]['movable'] = false;
             }
             if (!array_key_exists('zoomable', $options["cropper"])) {
-                $options["cropper"]['zoomable']      = false;
+                $options["cropper"]['zoomable'] = false;
             }
             if (!array_key_exists('rotatable', $options["cropper"])) {
-                $options["cropper"]['rotatable']     = false;
+                $options["cropper"]['rotatable'] = false;
             }
             if (!array_key_exists('scalable', $options["cropper"])) {
-                $options["cropper"]['scalable']      = false;
+                $options["cropper"]['scalable'] = false;
             }
 
-            $view->vars["cropper"]  = json_encode($options["cropper"]);
+            $view->vars["cropper"] = json_encode($options["cropper"]);
         }
     }
 }

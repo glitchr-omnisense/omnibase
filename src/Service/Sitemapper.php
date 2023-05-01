@@ -14,6 +14,9 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
 use Twig\Environment;
 
+/**
+ *
+ */
 class Sitemapper implements SitemapperInterface
 {
     /**
@@ -197,6 +200,10 @@ class Sitemapper implements SitemapperInterface
         return $ret;
     }
 
+    /**
+     * @param SitemapEntry|string|null $sitemapOrRouteName
+     * @return array|null
+     */
     public function getAlternates(SitemapEntry|string|null $sitemapOrRouteName = null)
     {
         $alternates = [];
@@ -237,6 +244,9 @@ class Sitemapper implements SitemapperInterface
         return array_unique($alternates);
     }
 
+    /**
+     * @return array
+     */
     protected function doCompute()
     {
         if ($this->computeFlag === false) {

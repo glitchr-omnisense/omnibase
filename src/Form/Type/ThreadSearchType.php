@@ -10,6 +10,9 @@ use Symfony\Component\Form\AbstractType;
 use Base\Form\Model\ThreadSearchModel;
 use Symfony\Component\Form\Extension\Core\Type\SearchType;
 
+/**
+ *
+ */
 class ThreadSearchType extends AbstractType
 {
     public function configureOptions(OptionsResolver $resolver)

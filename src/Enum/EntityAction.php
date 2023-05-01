@@ -5,6 +5,9 @@ namespace Base\Enum;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
+/**
+ *
+ */
 class EntityAction extends EnumType implements IconizeInterface
 {
     public const INSERT = "ACTION_INSERT";
@@ -15,6 +18,7 @@ class EntityAction extends EnumType implements IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return [

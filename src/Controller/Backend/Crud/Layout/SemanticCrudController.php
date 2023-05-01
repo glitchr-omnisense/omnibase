@@ -11,6 +11,9 @@ use Base\Field\ArrayField;
 use Base\Field\RouteField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 
+/**
+ *
+ */
 class SemanticCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -22,10 +25,16 @@ class SemanticCrudController extends AbstractCrudController
     {
         return $extension;
     }
+
+    /**
+     * @param string $entityFqcn
+     * @return Semantic
+     */
     public function createEntity(string $entityFqcn)
     {
         return new Semantic("");
     }
+
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {

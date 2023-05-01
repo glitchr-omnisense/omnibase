@@ -12,6 +12,9 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
 use Symfony\Component\Routing\RequestContext;
 
+/**
+ *
+ */
 class AdvancedUrlGenerator extends CompiledUrlGenerator
 {
     public static $router = null;

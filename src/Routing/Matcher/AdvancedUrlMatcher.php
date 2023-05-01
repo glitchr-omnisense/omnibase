@@ -10,6 +10,9 @@ use Symfony\Component\Routing\Matcher\RedirectableUrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 
+/**
+ *
+ */
 class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMatcherInterface
 {
     public static $router = null;

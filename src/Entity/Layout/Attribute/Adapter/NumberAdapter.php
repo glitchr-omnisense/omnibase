@@ -57,6 +57,14 @@ class NumberAdapter extends AbstractAdapter
         return $this->minimum;
     }
 
+    /**
+     * @param int|null $minimum
+     * @return $this
+     */
+    /**
+     * @param int|null $minimum
+     * @return $this
+     */
     public function setMinimum(?int $minimum)
     {
         $this->minimum = $minimum;
@@ -73,6 +81,14 @@ class NumberAdapter extends AbstractAdapter
         return $this->maximum;
     }
 
+    /**
+     * @param int|null $maximum
+     * @return $this
+     */
+    /**
+     * @param int|null $maximum
+     * @return $this
+     */
     public function setMaximum(?int $maximum)
     {
         $this->maximum = $maximum;

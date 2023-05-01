@@ -7,6 +7,9 @@ use Doctrine\ORM\Query;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ *
+ */
 class Paginator implements PaginatorInterface
 {
     /**

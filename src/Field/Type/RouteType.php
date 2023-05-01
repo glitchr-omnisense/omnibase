@@ -10,6 +10,9 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ *
+ */
 class RouteType extends AbstractType
 {
     /** @var RouterInterface */

@@ -11,6 +11,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ *
+ */
 class HotParameterBagSubscriber implements EventSubscriberInterface
 {
     /**
@@ -22,6 +25,10 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
      */
     protected SettingBagInterface $settingBag;
 
+    /**
+     * @param $parameterBag
+     * @param SettingBagInterface $settingBag
+     */
     public function __construct($parameterBag, SettingBagInterface $settingBag)
     {
         $this->parameterBag = $parameterBag;
@@ -36,6 +43,10 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * @param $event
+     * @return void
+     */
     public function onRequest($event)
     {
         if ($event instanceof RequestEvent && !$event->isMainRequest()) {

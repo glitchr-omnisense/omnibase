@@ -41,6 +41,13 @@ class Vault extends AbstractAnnotation
         $this->unique = $data["unique"] ?? [];
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     * @throws Exception
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         if ($object instanceof ClassMetadata) {
@@ -91,6 +98,11 @@ class Vault extends AbstractAnnotation
         return new SodiumMarshaller($keys);
     }
 
+    /**
+     * @param MarshallerInterface|null $marshaller
+     * @param string|null $value
+     * @return array|mixed|null
+     */
     public function seal(?MarshallerInterface $marshaller, ?string $value)
     {
         try {
@@ -106,6 +118,11 @@ class Vault extends AbstractAnnotation
         }
     }
 
+    /**
+     * @param MarshallerInterface|null $marshaller
+     * @param string|null $value
+     * @return mixed|null
+     */
     public function reveal(?MarshallerInterface $marshaller, ?string $value)
     {
         if ($value === null) {
@@ -189,6 +206,13 @@ class Vault extends AbstractAnnotation
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
     }
 
+    /**
+     * @param $event
+     * @param ClassMetadata $classMetadata
+     * @param mixed $entity
+     * @param string|null $property
+     * @return void
+     */
     public function preLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();
@@ -226,6 +250,13 @@ class Vault extends AbstractAnnotation
         $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
 
+    /**
+     * @param $event
+     * @param ClassMetadata $classMetadata
+     * @param mixed $entity
+     * @param string|null $property
+     * @return void
+     */
     public function postLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();

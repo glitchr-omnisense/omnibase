@@ -11,6 +11,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
 
+/**
+ *
+ */
 class HyperlinkCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -23,7 +26,7 @@ class HyperlinkCrudController extends AbstractCrudController
         return parent::configureFields($pageName, function () {
             yield TextField::new('label');
             yield SelectField::new('hyperpattern')->setTextAlign(TextAlign::RIGHT)
-                                                  ->setFilter(HyperpatternAdapter::class);
+                ->setFilter(HyperpatternAdapter::class);
 
             yield ArrayField::new('value')->setPatternFieldName("hyperpattern.pattern")->onlyOnForms();
             yield UrlField::new('generate');

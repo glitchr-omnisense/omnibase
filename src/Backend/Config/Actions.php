@@ -13,6 +13,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
 use function Symfony\Component\Translation\t;
 
+/**
+ *
+ */
 class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
 {
     protected AdminUrlGenerator $adminUrlGenerator;
@@ -135,6 +138,20 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
         return parent::createBuiltInAction($pageName, $actionName);
     }
 
+    /**
+     * @param string $pageName
+     * @param EaAction|string $actionNameOrObject
+     * @param string|null $actionIcon
+     * @param callable|null $callable
+     * @return $this|Actions
+     */
+    /**
+     * @param string $pageName
+     * @param EaAction|string $actionNameOrObject
+     * @param string|null $actionIcon
+     * @param callable|null $callable
+     * @return $this
+     */
     public function add(string $pageName, EaAction|string $actionNameOrObject, ?string $actionIcon = null, callable $callable = null)
     {
         parent::add($pageName, $actionNameOrObject);

@@ -9,6 +9,9 @@ use Base\Field\SelectField;
 use Base\Field\SlugField;
 use Base\Field\TranslationField;
 
+/**
+ *
+ */
 class TaxonCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

@@ -42,6 +42,9 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $id;
 
+    /**
+     * @return mixed
+     */
     public function getId()
     {
         return $this->id;
@@ -76,11 +79,22 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $entityId;
 
+    /**
+     * @return mixed
+     */
     public function getEntityId()
     {
         return $this->entityId;
     }
 
+    /**
+     * @param mixed $entityOrId
+     * @return $this
+     */
+    /**
+     * @param mixed $entityOrId
+     * @return $this
+     */
     public function setEntityId(mixed $entityOrId)
     {
         if ($this->getService()->isEntity($entityOrId)) {
@@ -97,11 +111,22 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $entityClass;
 
+    /**
+     * @return mixed
+     */
     public function getEntityClass()
     {
         return $this->entityClass;
     }
 
+    /**
+     * @param object|string $entity
+     * @return $this
+     */
+    /**
+     * @param object|string $entity
+     * @return $this
+     */
     public function setEntityClass(object|string $entity)
     {
         $this->entityClass = is_object($entity) ? get_class($entity) : $entity;
@@ -113,11 +138,22 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $action;
 
+    /**
+     * @return mixed
+     */
     public function getAction()
     {
         return $this->action;
     }
 
+    /**
+     * @param string $action
+     * @return $this
+     */
+    /**
+     * @param string $action
+     * @return $this
+     */
     public function setAction(string $action)
     {
         $this->action = $action;
@@ -129,6 +165,9 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $entityData = [];
 
+    /**
+     * @return bool
+     */
     public function isEmpty()
     {
         return empty($this->getEntityData());
@@ -139,6 +178,14 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
         return $this->entityData;
     }
 
+    /**
+     * @param array $entityData
+     * @return $this
+     */
+    /**
+     * @param array $entityData
+     * @return $this
+     */
     public function setEntityData(array $entityData)
     {
         $this->entityData = $entityData;

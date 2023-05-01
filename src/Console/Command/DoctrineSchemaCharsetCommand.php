@@ -9,6 +9,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ *
+ */
 #[AsCommand(name: 'doctrine:schema:charset', aliases: [], description: 'This command allows to update database and table charset and collation.')]
 class DoctrineSchemaCharsetCommand extends Command
 {

@@ -8,6 +8,9 @@ use Symfony\Component\Form\FormView;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
+/**
+ *
+ */
 final class FormTwigExtension extends AbstractExtension
 {
     private FormProxyInterface $formProxy;
@@ -17,6 +20,9 @@ final class FormTwigExtension extends AbstractExtension
         $this->formProxy = $formProxy;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'form_extension';

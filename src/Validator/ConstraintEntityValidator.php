@@ -24,6 +24,10 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
      */
     protected EntityManagerInterface $em;
 
+    /**
+     * @param $entity
+     * @return mixed
+     */
     public function getOriginalEntity($entity)
     {
         $class = get_class($entity);
@@ -45,6 +49,10 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         return $originalEntity;
     }
 
+    /**
+     * @param $entity
+     * @return array|null
+     */
     public function getEntityChangeSet($entity): ?array
     {
         $classMetadata = $this->getClassMetadata($entity);
@@ -55,6 +63,10 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         return $uow->getEntityChangeSet($entity);
     }
 
+    /**
+     * @param $entityName
+     * @return ClassMetadata
+     */
     public function getClassMetadata($entityName): ClassMetadata
     {
         if (is_object($entityName)) {
@@ -66,6 +78,11 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         return $this->em->getClassMetadata($class);
     }
 
+    /**
+     * @param Constraint $constraint
+     * @param $value
+     * @return ConstraintViolationBuilderInterface
+     */
     public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface
     {
         $buildViolation = parent::buildViolation($constraint, $value);
@@ -93,6 +110,12 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         return $buildViolation;
     }
 
+    /**
+     * @param $value
+     * @param Constraint $constraint
+     * @return void
+     * @throws \Exception
+     */
     public function validate($value, Constraint $constraint)
     {
         $entity = $value;
@@ -119,6 +142,10 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $this->em = $this->getDoctrine()->getManagerForClass(get_class($entity));
     }
 
+    /**
+     * @param Constraint $constraint
+     * @return mixed|string
+     */
     protected function formatIdentifier(Constraint $constraint)
     {
         $class = get_class($constraint->entity);

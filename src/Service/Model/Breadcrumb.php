@@ -14,6 +14,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ *
+ */
 class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAccess
 {
     protected bool $computed = false;
@@ -86,7 +89,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     protected TranslatorInterface $translator;
 
     /**
-     * @var AnnotationReader
+     * @var AnnotationReader|null
      */
     protected ?AnnotationReader $annotationReader;
 
@@ -113,6 +116,16 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         return $this;
     }
 
+    /**
+     * @param Request|null $request
+     * @return $this
+     * @throws Exception
+     */
+    /**
+     * @param Request|null $request
+     * @return $this
+     * @throws Exception
+     */
     public function compute(?Request $request = null)
     {
         if ($this->computed) {
@@ -206,6 +219,11 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         return $this;
     }
 
+    /**
+     * @param string|null $url
+     * @param string|null $urlPattern
+     * @return array|null
+     */
     public function getRouteParameters(?string $url = null, ?string $urlPattern = null)
     {
         if (!$urlPattern) {
@@ -283,6 +301,14 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         return $this->router;
     }
 
+    /**
+     * @param RouterInterface $router
+     * @return $this
+     */
+    /**
+     * @param RouterInterface $router
+     * @return $this
+     */
     public function setRouter(RouterInterface $router)
     {
         $this->router = $router;
@@ -294,6 +320,14 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         return $this->translator;
     }
 
+    /**
+     * @param TranslatorInterface $translator
+     * @return $this
+     */
+    /**
+     * @param TranslatorInterface $translator
+     * @return $this
+     */
     public function setTranslator(TranslatorInterface $translator)
     {
         $this->translator = $translator;
@@ -305,6 +339,14 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         return $this->template;
     }
 
+    /**
+     * @param string $template
+     * @return $this
+     */
+    /**
+     * @param string $template
+     * @return $this
+     */
     public function setTemplate(string $template)
     {
         $this->template = $template;
@@ -323,23 +365,53 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         }
     }
 
+    /**
+     * @param array $options
+     * @return $this
+     */
+    /**
+     * @param array $options
+     * @return $this
+     */
     public function setOptions(array $options)
     {
         $this->options = $options;
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @return mixed|null
+     */
     public function getOption(string $name)
     {
         return $this->options[$name] ?? null;
     }
 
+    /**
+     * @param string $name
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param string $name
+     * @param $value
+     * @return $this
+     */
     public function addOption(string $name, $value)
     {
         $this->options[$name] = $value;
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @return $this
+     */
+    /**
+     * @param string $name
+     * @return $this
+     */
     public function removeOption(string $name)
     {
         if (array_key_exists($name, $this->options)) {
@@ -348,6 +420,12 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         return $this;
     }
 
+    /**
+     * @param string $label
+     * @param string|null $route
+     * @param array $routeParameters
+     * @return array
+     */
     protected function getFormattedItem(string $label, ?string $route = null, array $routeParameters = [])
     {
         $url = null;
@@ -368,12 +446,36 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         unset($this->items[$offset]);
     }
 
+    /**
+     * @param string $label
+     * @param string|null $route
+     * @param array $routeParameters
+     * @return $this
+     */
+    /**
+     * @param string $label
+     * @param string|null $route
+     * @param array $routeParameters
+     * @return $this
+     */
     public function prependItem(string $label, ?string $route = null, array $routeParameters = [])
     {
         array_unshift($this->items, $this->getFormattedItem($label, $route, $routeParameters));
         return $this;
     }
 
+    /**
+     * @param string $label
+     * @param string|null $route
+     * @param array $routeParameters
+     * @return $this
+     */
+    /**
+     * @param string $label
+     * @param string|null $route
+     * @param array $routeParameters
+     * @return $this
+     */
     public function appendItem(string $label, ?string $route = null, array $routeParameters = [])
     {
         $this->items[] = $this->getFormattedItem($label, $route, $routeParameters);
@@ -385,26 +487,42 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         $this->items = [];
     }
 
+    /**
+     * @return int|null
+     */
     public function getLength()
     {
         return count($this->items);
     }
 
+    /**
+     * @return array
+     */
     public function getItems()
     {
         return $this->items;
     }
 
+    /**
+     * @return mixed|null
+     */
     public function getFirstItem()
     {
         return $this->getItem(0);
     }
 
+    /**
+     * @return mixed|null
+     */
     public function getLastItem()
     {
         return $this->getItem($this->getLength() - 1);
     }
 
+    /**
+     * @param int $index
+     * @return mixed|null
+     */
     public function getItem(int $index)
     {
         return $this->items[$index] ?? null;

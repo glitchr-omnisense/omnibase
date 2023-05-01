@@ -5,10 +5,19 @@ namespace Base\Service;
 use Base\Enum\SpamApi;
 use Base\Enum\SpamScore;
 use Base\Service\Model\SpamProtectionInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ *
+ */
 class SpamChecker implements SpamCheckerInterface
 {
     /**
@@ -50,6 +59,11 @@ class SpamChecker implements SpamCheckerInterface
         $this->debug = $debug;
     }
 
+    /**
+     * @return array|bool|float|int|string|\UnitEnum|null
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function getLang()
     {
         $defaultLocale = $this->parameterBag->get("kernel.default_locale");
@@ -59,6 +73,9 @@ class SpamChecker implements SpamCheckerInterface
         return (in_array($locale, $fallbacks) ? $locale : $defaultLocale);
     }
 
+    /**
+     * @return string
+     */
     public function getUrl()
     {
         return sprintf(
@@ -69,6 +86,10 @@ class SpamChecker implements SpamCheckerInterface
         );
     }
 
+    /**
+     * @param $api
+     * @return string|null
+     */
     public function getKey($api): ?string
     {
         return match ($api) {
@@ -77,6 +98,10 @@ class SpamChecker implements SpamCheckerInterface
         };
     }
 
+    /**
+     * @param $api
+     * @return string|null
+     */
     public function getEndpoint($api): ?string
     {
         $key = $this->getKey($api);
@@ -89,6 +114,16 @@ class SpamChecker implements SpamCheckerInterface
         };
     }
 
+    /**
+     * @param SpamProtectionInterface $candidate
+     * @param array $context
+     * @param $api
+     * @return int
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
     public function check(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
     {
         $score = $this->score($candidate, $context, $api);
@@ -98,9 +133,15 @@ class SpamChecker implements SpamCheckerInterface
     }
 
     /**
+     * @param SpamProtectionInterface $candidate
+     * @param array $context
+     * @param string $api
      * @return int Spam score: 0: not spam, 1: maybe spam, 2: blatant spam
      *
-     * @throws RuntimeException if the call did not work
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function score(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
     {

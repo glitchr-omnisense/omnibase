@@ -2,6 +2,9 @@
 
 namespace Base\Enum\Quadrant;
 
+/**
+ *
+ */
 class Quadrant16 extends Quadrant8
 {
     public const NNE = "NORTH_NORTHEAST";
@@ -32,6 +35,9 @@ class Quadrant16 extends Quadrant8
         ];
     }
 
+    /**
+     * @return float|int
+     */
     public static function getTheta()
     {
         return parent::getTheta() / 2;

@@ -14,6 +14,9 @@ use Exception;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ *
+ */
 #[AsCommand(name: 'entity:discriminator', aliases: [], description: '')]
 class EntityDiscriminatorCommand extends Command
 {

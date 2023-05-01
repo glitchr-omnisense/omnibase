@@ -17,6 +17,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ *
+ */
 class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
 {
     protected ?Extension $extension = null;
@@ -41,11 +44,17 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
         $this->extension = $extension;
     }
 
+    /**
+     * @return Extension|null
+     */
     public function getExtension()
     {
         return $this->extension;
     }
 
+    /**
+     * @return string
+     */
     public function getTranslationDomain()
     {
         return $this->dashboardDto->getTranslationDomain();
@@ -55,11 +64,17 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
     {
         return $this->getImpersonatorPermission();
     }
+
     public function getImpersonatorPermission(): string
     {
         return class_exists(AuthenticatedVoter::class) ? AuthenticatedVoter::IS_IMPERSONATOR : 'ROLE_PREVIOUS_ADMIN';
     }
 
+    /**
+     * @param string $referenceUrl
+     * @param array $ignoredKeys
+     * @return bool
+     */
     public function isActive(string $referenceUrl, array $ignoredKeys = ["menuIndex", "submenuIndex", "filters[", "page", "sort[", "entityId", "referrer"])
     {
         $referenceUrl = parse_url($referenceUrl);
@@ -67,21 +82,21 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
         $referenceUrl["query"] = explode_attributes("&", $referenceUrl["query"]);
         $referenceUrl["query"] = array_key_removes_startsWith($referenceUrl["query"], true, ...$ignoredKeys);
         $referenceUrl["query"] = array_key_exists("crudAction", $referenceUrl["query"]) && in_array($referenceUrl["query"]["crudAction"], ["index", "edit"]) ? array_key_removes($referenceUrl["query"], "crudAction") : $referenceUrl["query"];
-        $referenceUrl["query"] = array_map(fn ($u) => urldecode($u), $referenceUrl["query"]);
+        $referenceUrl["query"] = array_map(fn($u) => urldecode($u), $referenceUrl["query"]);
         ksort($referenceUrl["query"]);
 
         $referenceUrl["query"] = str_replace("\"", "", implode_attributes("&", $referenceUrl["query"]));
         $referenceUrl = compose_url(
-            $referenceUrl["scheme"]  ?? null,
-            $referenceUrl["user"]      ?? null,
+            $referenceUrl["scheme"] ?? null,
+            $referenceUrl["user"] ?? null,
             $referenceUrl["password"] ?? null,
             $referenceUrl["machine"] ?? null,
             $referenceUrl["subdomain"] ?? null,
-            $referenceUrl["domain"]   ?? null,
+            $referenceUrl["domain"] ?? null,
             $referenceUrl["port"] ?? null,
-            $referenceUrl["path"]    ?? null,
-            $referenceUrl["query"]     ?? null,
-            $referenceUrl["fragment"]     ?? null
+            $referenceUrl["path"] ?? null,
+            $referenceUrl["query"] ?? null,
+            $referenceUrl["fragment"] ?? null
         );
 
         $url = parse_url($this->request->getRequestUri());
@@ -90,21 +105,21 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
         $url["query"] = explode_attributes("&", $url["query"]);
         $url["query"] = array_key_removes_startsWith($url["query"], ...$ignoredKeys);
         $url["query"] = array_key_exists("crudAction", $url["query"]) && in_array($url["query"]["crudAction"], ["index", "edit"]) ? array_key_removes($url["query"], "crudAction") : $url["query"];
-        $url["query"] = array_map(fn ($u) => urldecode($u), $url["query"]);
+        $url["query"] = array_map(fn($u) => urldecode($u), $url["query"]);
         ksort($url["query"]);
 
         $url["query"] = str_replace("\"", "", implode_attributes("&", $url["query"]));
         $url = compose_url(
-            $url["scheme"]    ?? null,
-            $url["user"]      ?? null,
-            $url["password"]  ?? null,
-            $url["machine"]   ?? null,
+            $url["scheme"] ?? null,
+            $url["user"] ?? null,
+            $url["password"] ?? null,
+            $url["machine"] ?? null,
             $url["subdomain"] ?? null,
-            $url["domain"]    ?? null,
-            $url["port"]      ?? null,
+            $url["domain"] ?? null,
+            $url["port"] ?? null,
             $url["path"] ?? null,
-            $url["query"]     ?? null,
-            $url["fragment"]  ?? null
+            $url["query"] ?? null,
+            $url["fragment"] ?? null
         );
 
         return $url == $referenceUrl;

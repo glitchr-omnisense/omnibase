@@ -2,9 +2,24 @@
 
 namespace Base\Database\Traits;
 
+use App\Entity\Marketplace\Product;
+use App\Entity\Marketplace\Product\Variant;
+use App\Entity\Marketplace\Store;
+use App\Entity\User\Artist;
+use App\Entity\User\Merchant;
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslationInterface;
 
+use Base\Entity\Layout\Attribute;
+use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Hyperlink;
+use Base\Entity\Layout\Semantic;
+use Base\Entity\Layout\Setting;
+use Base\Entity\Layout\Short;
+use Base\Entity\Layout\Widget;
+use Base\Entity\Thread;
+use Base\Entity\Thread\Tag;
+use Base\Entity\Thread\Taxon;
 use Base\Service\BaseService;
 use Base\Service\Localizer;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,6 +29,9 @@ use Exception;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 
+/**
+ *
+ */
 trait TranslatableTrait
 {
     private static $translationClass;
@@ -62,6 +80,9 @@ trait TranslatableTrait
      */
     protected $translations;
 
+    /**
+     * @return TranslationInterface|ArrayCollection|Collection
+     */
     public function getTranslations()
     {
         if ($this->translations === null) {
@@ -71,6 +92,14 @@ trait TranslatableTrait
         return $this->translations;
     }
 
+    /**
+     * @param TranslationInterface $translation
+     * @return $this
+     */
+    /**
+     * @param TranslationInterface $translation
+     * @return $this
+     */
     public function removeTranslation(TranslationInterface $translation)
     {
         if ($this->getTranslations()->contains($translation)) {
@@ -80,6 +109,12 @@ trait TranslatableTrait
         return $this;
     }
 
+    /**
+     * @return $this
+     */
+    /**
+     * @return $this
+     */
     public function clearTranslations()
     {
         foreach ($this->translations as $translation) {
@@ -90,6 +125,14 @@ trait TranslatableTrait
     }
 
 
+    /**
+     * @param TranslationInterface $translation
+     * @return $this
+     */
+    /**
+     * @param TranslationInterface $translation
+     * @return $this
+     */
     public function addTranslation(TranslationInterface $translation)
     {
         $this->getTranslations()->set(Localizer::normalizeLocale($translation->getLocale()), $translation);
@@ -98,6 +141,11 @@ trait TranslatableTrait
         return $this;
     }
 
+    /**
+     * @param string|null $locale
+     * @return TranslationInterface|mixed|null
+     * @throws Exception
+     */
     public function translate(?string $locale = null)
     {
         $localizer = BaseService::getLocalizer();
@@ -153,6 +201,12 @@ trait TranslatableTrait
         return $translation;
     }
 
+    /**
+     * @param string $method
+     * @param array $arguments
+     * @return Product|Variant|Store|Artist|Merchant|Attribute|AbstractAdapter|Hyperlink|Semantic|Setting|Short|Widget|Thread|Tag|Taxon|mixed|null
+     * @throws Exception
+     */
     public function __call(string $method, array $arguments)
     {
         $className = get_class($this);
@@ -223,6 +277,18 @@ trait TranslatableTrait
         return null;
     }
 
+    /**
+     * @param $property
+     * @param $value
+     * @return $this
+     * @throws Exception
+     */
+    /**
+     * @param $property
+     * @param $value
+     * @return $this
+     * @throws Exception
+     */
     public function __set($property, $value)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
@@ -264,6 +330,11 @@ trait TranslatableTrait
         throw new AccessException("Can't get a way to write property \"$property\" in class \"" . get_class($this) . "\" or its corresponding translation class \"" . $this->getTranslationEntityClass() . "\".");
     }
 
+    /**
+     * @param $property
+     * @return mixed|null
+     * @throws Exception
+     */
     public function __get($property)
     {
         $accessor = PropertyAccess::createPropertyAccessor();

@@ -8,15 +8,18 @@ use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use InvalidArgumentException;
 
+/**
+ *
+ */
 class ScaleFilter implements FilterInterface
 {
     /**
-     * @var string
+     * @var string|null
      */
     protected ?string $dimensionKey;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected ?string $ratioKey;
 
@@ -27,12 +30,21 @@ class ScaleFilter implements FilterInterface
 
     protected array $options;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $scale = $this->options[$this->ratioKey] ?? implode("x", $this->options[$this->dimensionKey] ?? []);
         return "scale:" . $scale;
     }
 
+    /**
+     * @param array $options
+     * @param $dimensionKey
+     * @param $ratioKey
+     * @param $absoluteRatio
+     */
     public function __construct(array $options = [], $dimensionKey = 'dim', $ratioKey = 'to', $absoluteRatio = true)
     {
         $this->options = $options;
@@ -78,11 +90,19 @@ class ScaleFilter implements FilterInterface
         return $image;
     }
 
+    /**
+     * @param $ratio
+     * @return mixed
+     */
     protected function calcAbsoluteRatio($ratio)
     {
         return $ratio;
     }
 
+    /**
+     * @param $ratio
+     * @return true
+     */
     protected function isImageProcessable($ratio)
     {
         return true;

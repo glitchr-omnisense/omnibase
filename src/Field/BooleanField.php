@@ -7,6 +7,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 final class BooleanField implements FieldInterface
 {
     use FieldTrait;
@@ -46,7 +49,7 @@ final class BooleanField implements FieldInterface
 
     public function showInline(bool $inline = true): self
     {
-        $this->setFormTypeOption("inline", $inline);
+        $this->setFormTypeOption('inline', $inline);
 
         return $this;
     }

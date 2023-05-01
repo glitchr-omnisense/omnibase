@@ -2,7 +2,6 @@
 
 namespace Base\Cache\Abstract;
 
-use DateInterval;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
 
@@ -12,11 +11,33 @@ interface AbstractLocalCacheInterface extends WarmableInterface
 
     public function deleteCache(?string $key = null): bool;
 
-    public function getCache(?string $key = null, mixed $fallback = null, int|DateInterval|null $ttl = null, $deferred = false): mixed;
+    /**
+     * @param string|null $key
+     * @param mixed|null $fallback
+     * @param int|\DateInterval|null $ttl
+     * @param $deferred
+     * @return mixed
+     */
+    public function getCache(?string $key = null, mixed $fallback = null, int|\DateInterval|null $ttl = null, $deferred = false): mixed;
 
-    public function setCache(CacheItemPoolInterface|string $cacheOrKey, mixed $value = null, int|DateInterval|null $ttl = null, bool $deferred = false);
+    /**
+     * @param CacheItemPoolInterface|string $cacheOrKey
+     * @param mixed|null $value
+     * @param int|\DateInterval|null $ttl
+     * @param bool $deferred
+     * @return mixed
+     */
+    public function setCache(CacheItemPoolInterface|string $cacheOrKey, mixed $value = null, int|\DateInterval|null $ttl = null, bool $deferred = false);
 
-    public function executeOnce(callable $fn, int|DateInterval|null $ttl = null);
+    /**
+     * @param callable $fn
+     * @param int|\DateInterval|null $ttl
+     * @return mixed
+     */
+    public function executeOnce(callable $fn, int|\DateInterval|null $ttl = null);
 
+    /**
+     * @return mixed
+     */
     public function commitCache();
 }

@@ -15,6 +15,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+/**
+ *
+ */
 class TwigSubscriber implements EventSubscriberInterface
 {
     /**
@@ -49,16 +52,16 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function __construct(HtmlTagRenderer $htmlTagRenderer, EncoreTagRenderer $encoreTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
     {
-        $this->encoreTagRenderer    = $encoreTagRenderer;
+        $this->encoreTagRenderer = $encoreTagRenderer;
 
-        $this->htmlTagRenderer      = $htmlTagRenderer;
+        $this->htmlTagRenderer = $htmlTagRenderer;
 
-        $this->parameterBag         = $parameterBag;
-        $this->router               = $router;
+        $this->parameterBag = $parameterBag;
+        $this->router = $router;
         $this->authorizationChecker = $authorizationChecker;
 
-        $this->publicDir            = $publicDir;
-        $this->autoAppend           = $this->parameterBag->get("base.twig.autoappend");
+        $this->publicDir = $publicDir;
+        $this->autoAppend = $this->parameterBag->get("base.twig.autoappend");
     }
 
     public static function getSubscribedEvents(): array
@@ -71,6 +74,10 @@ class TwigSubscriber implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * @param ResponseEvent $event
+     * @return bool
+     */
     private function allowRender(ResponseEvent $event)
     {
         if (!$this->autoAppend) {
@@ -98,6 +105,7 @@ class TwigSubscriber implements EventSubscriberInterface
     }
 
     protected $exceptionTriggered = false;
+
     public function onKernelException(RequestEvent $event)
     {
         $this->exceptionTriggered = true;
@@ -108,7 +116,7 @@ class TwigSubscriber implements EventSubscriberInterface
         //
         // Permission based entries
         foreach (UserRole::getPermittedValues() as $role) {
-            $tag = "security-".strtolower(str_lstrip($role, "ROLE_"));
+            $tag = "security-" . strtolower(str_lstrip($role, "ROLE_"));
             if (!$this->encoreTagRenderer->hasEntry($tag)) {
                 continue;
             }
@@ -130,6 +138,11 @@ class TwigSubscriber implements EventSubscriberInterface
         $this->encoreTagRenderer->addAlternative("defer");
     }
 
+    /**
+     * @param ResponseEvent $event
+     * @return bool
+     * @throws \Exception
+     */
     public function onKernelResponse(ResponseEvent $event)
     {
         $allowRender = $this->allowRender($event);

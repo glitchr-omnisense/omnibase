@@ -8,6 +8,9 @@ use Base\Service\Localizer;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ *
+ */
 trait TranslationTrait
 {
     /**
@@ -48,6 +51,14 @@ trait TranslationTrait
         return $this->translatable;
     }
 
+    /**
+     * @param TranslatableInterface|null $translatable
+     * @return $this
+     */
+    /**
+     * @param TranslatableInterface|null $translatable
+     * @return $this
+     */
     public function setTranslatable(?TranslatableInterface $translatable)
     {
         $this->translatable = $translatable;
@@ -70,6 +81,14 @@ trait TranslationTrait
 
     }
 
+    /**
+     * @param string $locale
+     * @return $this
+     */
+    /**
+     * @param string $locale
+     * @return $this
+     */
     public function setLocale(string $locale)
     {
         $this->locale = Localizer::normalizeLocale($locale);

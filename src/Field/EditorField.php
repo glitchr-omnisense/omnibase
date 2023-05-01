@@ -7,6 +7,9 @@ use Base\Field\Type\EditorType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
+/**
+ *
+ */
 final class EditorField implements FieldInterface
 {
     use FieldTrait;

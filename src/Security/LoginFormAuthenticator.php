@@ -26,6 +26,9 @@ use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
+/**
+ *
+ */
 class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
@@ -65,6 +68,10 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $this->router = $router;
     }
 
+    /**
+     * @param Request|string $routeNameOrRequest
+     * @return bool
+     */
     public static function isSecurityRoute(Request|string $routeNameOrRequest)
     {
         return in_array(is_string($routeNameOrRequest) ? $routeNameOrRequest : $routeNameOrRequest->attributes->get('_route'), [

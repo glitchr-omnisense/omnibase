@@ -8,14 +8,20 @@ use Exception;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
 
+/**
+ *
+ */
 class SvgFilter implements SvgFilterInterface
 {
     protected array $filters;
     protected array $options;
 
+    /**
+     * @return array|string|null
+     */
     public function __toString()
     {
-        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
+        $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
         return path_suffix("", $pathSuffixes);
     }
 
@@ -28,17 +34,29 @@ class SvgFilter implements SvgFilterInterface
             unlink_tmpfile($path);
         }
 
-        $this->path    = $path;
+        $this->path = $path;
         $this->filters = $filters;
-        $this->options  = $options;
+        $this->options = $options;
 
         $this->mimeTypes = new MimeTypes();
     }
 
+    /**
+     * @return array|mixed
+     */
     public function getFilters()
     {
         return $this->filters;
     }
+
+    /**
+     * @param FilterInterface $filter
+     * @return $this
+     */
+    /**
+     * @param FilterInterface $filter
+     * @return $this
+     */
     public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;
@@ -46,16 +64,29 @@ class SvgFilter implements SvgFilterInterface
     }
 
     protected ?string $path;
+
     public function getPath(): ?string
     {
         return $this->path;
     }
+
+    /**
+     * @param string|null $path
+     * @return $this|mixed
+     */
+    /**
+     * @param string|null $path
+     * @return $this
+     */
     public function setPath(?string $path)
     {
         $this->path = $path;
         return $this;
     }
 
+    /**
+     * @return bool|mixed|null
+     */
     public function getExtension()
     {
         if ($this->path === null) {

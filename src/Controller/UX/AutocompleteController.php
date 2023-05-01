@@ -56,7 +56,7 @@ class AutocompleteController extends AbstractController
     protected TradingMarketInterface $tradingMarket;
 
     /**
-     * @var Profiler
+     * @var Profiler|null
      */
     protected ?Profiler $profiler;
     private RequestStack $requestStack;

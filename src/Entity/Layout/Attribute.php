@@ -17,7 +17,6 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
-
 class Attribute extends AbstractAttribute implements TranslatableInterface
 {
     use TranslatableTrait;
@@ -28,21 +27,26 @@ class Attribute extends AbstractAttribute implements TranslatableInterface
         $this->setValue($value);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $value = $this->resolve();
         $value = (is_array($value) ? implode(", ", $value) : $value);
-        return parent::__toString(). ($value ? " : ".$value : "");
+        return parent::__toString() . ($value ? " : " . $value : "");
     }
 
     public function get(?string $locale = null): mixed
     {
         return $this->getValue($locale);
     }
+
     public function set(...$args): self
     {
         return array_key_exists("value", $args) ? $this->setValue($args["value"]) : $this;
     }
+
     public function resolve(?string $locale = null): mixed
     {
         return $this->adapter ? $this->adapter->resolve($this->translate($locale)->getValue()) : null;

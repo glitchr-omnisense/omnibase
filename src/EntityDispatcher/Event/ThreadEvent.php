@@ -5,6 +5,9 @@ namespace Base\EntityDispatcher\Event;
 use Base\Entity\Thread;
 use Base\EntityDispatcher\AbstractEvent;
 
+/**
+ *
+ */
 class ThreadEvent extends AbstractEvent
 {
     public const SCHEDULED = 'thread.scheduled';

@@ -10,10 +10,16 @@ use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class FlipFilter implements FilterInterface
 {
     private array $options;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return "flip:" . ($this->options['axis'] ?? "y");

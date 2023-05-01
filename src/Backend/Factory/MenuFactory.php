@@ -10,6 +10,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Http\Logout\LogoutUrlGenerator;
 
+/**
+ *
+ */
 class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
 {
     /**

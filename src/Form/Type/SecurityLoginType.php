@@ -12,11 +12,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Util\StringUtil;
 
+/**
+ *
+ */
 class SecurityLoginType extends AbstractType
 {
     public function getBlockPrefix(): string
     {
-        return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+        return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -44,20 +47,20 @@ class SecurityLoginType extends AbstractType
 
         $builder
             ->add('identifier', TextType::class, [
-                'attr'  => [
+                'attr' => [
                     'id' => "inputUsername",  // used in Symfony kernel
                     'value' => $options["identifier"] ?? ""
                 ]
             ])
             ->add('password', PasswordType::class, [
-                'attr'  => [
+                'attr' => [
                     'id' => "inputPassword"  // used in Symfony kernel
                 ]
             ])
             ->add("_remember_me", CheckboxType::class, [
-                    'mapped' => false,
-                    'required' => false,
-                    'attr' => ["checked" => "checked"]
+                'mapped' => false,
+                'required' => false,
+                'attr' => ["checked" => "checked"]
             ]);
     }
 }

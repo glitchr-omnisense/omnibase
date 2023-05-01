@@ -13,6 +13,9 @@ use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
+/**
+ *
+ */
 class FormTypeCollectionExtension extends AbstractTypeExtension
 {
     /**

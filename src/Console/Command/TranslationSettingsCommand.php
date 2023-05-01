@@ -15,7 +15,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'translation:settings', aliases:[], description:'')]
+/**
+ *
+ */
+#[AsCommand(name: 'translation:settings', aliases: [], description: '')]
 class TranslationSettingsCommand extends Command
 {
     /**
@@ -24,12 +27,13 @@ class TranslationSettingsCommand extends Command
     protected $settingBag;
 
     public function __construct(
-        LocalizerInterface $localizer,
-        TranslatorInterface $translator,
+        LocalizerInterface     $localizer,
+        TranslatorInterface    $translator,
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        SettingBagInterface $settingBag
-    ) {
+        ParameterBagInterface  $parameterBag,
+        SettingBagInterface    $settingBag
+    )
+    {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->settingBag = $settingBag;
     }
@@ -50,11 +54,11 @@ class TranslationSettingsCommand extends Command
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
         if ($locale && !in_array($locale, $availableLocales)) {
-            throw new Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
+            throw new Exception("Locale not found in the list of available locale: [" . implode(",", $availableLocales) . "]");
         }
 
-        $rawSettings    = array_transforms(
-            fn ($k, $v): array => $path ? [$k ? $path.".".$k : $path, $v] : [$k,$v],
+        $rawSettings = array_transforms(
+            fn($k, $v): array => $path ? [$k ? $path . "." . $k : $path, $v] : [$k, $v],
             $this->settingBag->denormalize($this->settingBag->getRaw($path))
         );
 
@@ -62,8 +66,8 @@ class TranslationSettingsCommand extends Command
             throw new Exception("No settings found for \"$path\"");
         }
         $settings = array_map_recursive(
-            fn ($s) => array_transforms(
-                fn ($i, $k): array => [$k, null],
+            fn($s) => array_transforms(
+                fn($i, $k): array => [$k, null],
                 $s->getTranslations()->getKeys()
             ),
             $rawSettings
@@ -85,11 +89,11 @@ class TranslationSettingsCommand extends Command
             } else {
                 $additionalLength = strlen((count($setting) == 1) ? "[single,]" : "");
             }
-            $maxLength = max(strlen($path ?? 0)+$additionalLength+1, $maxLength ?? 0);
+            $maxLength = max(strlen($path ?? 0) + $additionalLength + 1, $maxLength ?? 0);
         }
 
         if ($settings) {
-            $output->section()->writeln("Setting list: ".$path);
+            $output->section()->writeln("Setting list: " . $path);
         }
 
         foreach ($settings as $path => $setting) {
@@ -100,19 +104,19 @@ class TranslationSettingsCommand extends Command
                 $additionalLength = strlen((count($setting) == 1) ? "[single,]" : "");
             }
 
-            $space = str_repeat(" ", max($maxLength-strlen($path)-$additionalLength, 0));
+            $space = str_repeat(" ", max($maxLength - strlen($path) - $additionalLength, 0));
 
             $singleLocale = (count($setting) == 1);
             if ($raw) {
                 $rawSetting = $rawSettings[$path];
                 foreach ($availableLocales as $currentLocale) {
                     $value = $rawSetting->translate($currentLocale)->getLabel() ?? "<red>* no entry found *</red>";
-                    $output->section()->writeln(" * <info>".trim($path).".label".$space."<magenta>[$currentLocale]</magenta></info> : $value");
+                    $output->section()->writeln(" * <info>" . trim($path) . ".label" . $space . "<magenta>[$currentLocale]</magenta></info> : $value");
                 }
 
                 foreach ($availableLocales as $currentLocale) {
                     $value = $rawSetting->translate($currentLocale)->getHelp() ?? "<red>* no entry found *</red>";
-                    $output->section()->writeln(" * <info>".trim($path).".help".$space." <magenta>[$currentLocale]</magenta></info> : $value");
+                    $output->section()->writeln(" * <info>" . trim($path) . ".help" . $space . " <magenta>[$currentLocale]</magenta></info> : $value");
                 }
                 $output->section()->writeln("");
             } else {
@@ -123,13 +127,13 @@ class TranslationSettingsCommand extends Command
 
                     $value = $setting[$currentLocale] ?? "<red>* no entry found *</red>";
                     if (is_array($value)) {
-                        $value = "\n   {\n\t".implode(",\n\t", $value)."\n   }";
+                        $value = "\n   {\n\t" . implode(",\n\t", $value) . "\n   }";
                     }
                     if (!is_stringeable($value)) {
-                        $value = get_class($value)."([...])";
+                        $value = get_class($value) . "([...])";
                     }
 
-                    $output->section()->writeln(" * <info>".trim($path).$space."<magenta>[".($singleLocale ? "single," : "")."$currentLocale]</magenta></info> : <warning>$value</warning>");
+                    $output->section()->writeln(" * <info>" . trim($path) . $space . "<magenta>[" . ($singleLocale ? "single," : "") . "$currentLocale]</magenta></info> : <warning>$value</warning>");
                 }
             }
         }

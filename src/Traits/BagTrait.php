@@ -4,8 +4,17 @@ namespace Base\Traits;
 
 use Exception;
 
+/**
+ *
+ */
 trait BagTrait
 {
+    /**
+     * @param string|null $path
+     * @param array $bag
+     * @return array|mixed|null
+     * @throws Exception
+     */
     public static function read(?string $path, array $bag = [])
     {
         if ($path) {
@@ -34,6 +43,12 @@ trait BagTrait
         }, $bag);
     }
 
+    /**
+     * @param $path
+     * @param $value
+     * @param array $bag
+     * @return void
+     */
     public static function write($path, $value, array &$bag = [])
     {
         foreach (explode(".", $path) as $key) {

@@ -29,6 +29,9 @@ use Traversable;
 use UnexpectedValueException;
 use function count;
 
+/**
+ *
+ */
 class TranslationType extends AbstractType implements DataMapperInterface
 {
     /**
@@ -61,6 +64,9 @@ class TranslationType extends AbstractType implements DataMapperInterface
         return 'translatable';
     }
 
+    /**
+     * @return string|null
+     */
     public function getDefaultLocale()
     {
         return $this->localizer->getDefaultLocale();
@@ -332,6 +338,10 @@ class TranslationType extends AbstractType implements DataMapperInterface
         return $translatableClass::getTranslationEntityClass(); //, false);
     }
 
+    /**
+     * @param FormInterface $form
+     * @return TranslatableInterface|mixed|string|null
+     */
     private function getTranslatableClass(FormInterface $form)
     {
         // Looking at translatable interface using data_class
@@ -355,6 +365,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
         return null;
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms)
     {
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");
@@ -372,6 +387,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
         }
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     */
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");

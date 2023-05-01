@@ -5,6 +5,9 @@ namespace Base\Service\Model\IconProvider\Adapter;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 
+/**
+ *
+ */
 class BootstrapTwitterAdapter extends AbstractIconAdapter
 {
     public const STYLE_REGULAR = "regular";
@@ -89,11 +92,20 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         return $choices;
     }
 
+    /**
+     * @param string $name
+     * @return string|null
+     */
     public function getStyle(string $name)
     {
         return array_filter(explode(" ", $name), fn($n) => $n == self::STYLE_FILL)[0] ?? null;
     }
 
+    /**
+     * @param string $name
+     * @return mixed
+     * @throws \Exception
+     */
     public function getIdentifier(string $name)
     {
         return array_transforms(
@@ -102,11 +114,18 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         )[0];
     }
 
+    /**
+     * @return int[]|string[]
+     */
     public function getValues()
     {
         return array_keys($this->contents);
     }
 
+    /**
+     * @param string $name
+     * @return mixed|string
+     */
     public function getValue(string $name)
     {
         $identifier = $this->getIdentifier($name);
@@ -116,6 +135,9 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         return $identifier;
     }
 
+    /**
+     * @return array
+     */
     public function getLabels()
     {
         return array_map(function ($icon) {
@@ -123,6 +145,10 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         }, $this->contents);
     }
 
+    /**
+     * @param string $name
+     * @return mixed|string
+     */
     public function getLabel(string $name)
     {
         $identifier = $this->getIdentifier($name);

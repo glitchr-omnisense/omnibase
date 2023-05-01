@@ -53,16 +53,25 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
 
     protected array $contents = [];
 
+    /**
+     * @return array
+     */
     public function getContents()
     {
         return $this->contents;
     }
 
+    /**
+     * @return string
+     */
     public function getMetadata()
     {
         return $this->metadata;
     }
 
+    /**
+     * @return array
+     */
     public function getEntries()
     {
         return $this->contents ?? [];

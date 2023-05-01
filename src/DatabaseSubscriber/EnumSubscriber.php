@@ -8,6 +8,9 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
 
+/**
+ *
+ */
 class EnumSubscriber implements EventSubscriberInterface
 {
     public function getSubscribedEvents(): array
@@ -30,7 +33,7 @@ class EnumSubscriber implements EventSubscriberInterface
         /** @var Column $column */
         foreach ($columns as $column) {
             /**
-             * @var EnumType
+             * @var EnumType $column
              */
             $enum = $column->getType();
             $column->setComment(trim(sprintf('%s (%s)', $column->getComment(), implode(',', $enum::getPermittedValues()))));

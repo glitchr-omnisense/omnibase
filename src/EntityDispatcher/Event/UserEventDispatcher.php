@@ -6,6 +6,9 @@ use App\Entity\User;
 use Base\EntityDispatcher\AbstractEventDispatcher;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
+/**
+ *
+ */
 class UserEventDispatcher extends AbstractEventDispatcher
 {
     public function supports(mixed $subject): bool

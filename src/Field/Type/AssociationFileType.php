@@ -14,6 +14,7 @@ use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\Persistence\Mapping\MappingException;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use Exception;
 use Symfony\Component\Form\AbstractType;
@@ -31,17 +32,20 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Traversable;
 
+/**
+ *
+ */
 class AssociationFileType extends AbstractType implements DataMapperInterface
 {
     use BaseTrait;
 
     /**
-     * @var ClassMetadataManipulator
+     * @var ClassMetadataManipulator|null
      */
     protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     /**
-     * @var FormFactory
+     * @var FormFactory|null
      */
     protected ?FormFactory $formFactory = null;
 
@@ -52,22 +56,22 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     protected mixed $fileService = null;
 
     /**
-     * @var EntityHydrator
+     * @var EntityHydrator|null
      */
     protected ?EntityHydrator $entityHydrator = null;
 
     /**
-     * @var MediaService
+     * @var MediaService|null
      */
     protected ?MediaService $mediaService = null;
 
     /**
-     * @var PropertyAccessor
+     * @var PropertyAccessor|null
      */
     protected ?PropertyAccessor $propertyAccessor = null;
 
     /**
-     * @var AdminUrlGenerator
+     * @var AdminUrlGenerator|null
      */
     protected ?AdminUrlGenerator $adminUrlGenerator = null;
 
@@ -229,10 +233,21 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         });
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms): void
     {
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     * @throws MappingException
+     */
     public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $parentForm = current(iterator_to_array($forms))->getParent();

@@ -11,6 +11,9 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
 
+/**
+ *
+ */
 class FileService implements FileServiceInterface
 {
     protected const CACHE_SUBDIVISION = 3;
@@ -48,7 +51,7 @@ class FileService implements FileServiceInterface
     protected string $publicDir;
 
     /**
-     * @var MediaController
+     * @var MediaController|null
      */
     protected ?MediaController $mediaController = null;
 
@@ -64,17 +67,31 @@ class FileService implements FileServiceInterface
         $this->mimeTypes = new MimeTypes();
     }
 
+    /**
+     * @param MediaController $mediaController
+     * @return $this
+     */
+    /**
+     * @param MediaController $mediaController
+     * @return $this
+     */
     public function setController(MediaController $mediaController)
     {
         $this->mediaController = $mediaController;
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getProjectDir()
     {
         return $this->projectDir;
     }
 
+    /**
+     * @return string
+     */
     public function getPublicDir()
     {
         return $this->publicDir;
@@ -171,21 +188,38 @@ class FileService implements FileServiceInterface
         return $this->router->getAssetUrl($path, $packageName);
     }
 
+    /**
+     * @param string|null $file
+     * @return bool
+     */
     public function isEmpty(?string $file)
     {
         return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file));
     }
 
+    /**
+     * @param string|null $file
+     * @return false|int
+     */
     public function isImage(?string $file)
     {
         return $file ? preg_match("/image\//", $this->getMimeType($file)) : false;
     }
 
+    /**
+     * @param string|null $file
+     * @return bool
+     */
     public function isSvg(?string $file)
     {
         return $this->getMimeType($file) == "image/svg+xml";
     }
 
+    /**
+     * @param $size
+     * @param array $unitPrefix
+     * @return string
+     */
     public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string
     {
         return byte2str($size, $unitPrefix);

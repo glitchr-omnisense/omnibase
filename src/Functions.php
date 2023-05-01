@@ -42,6 +42,10 @@ namespace {
         return ($n < 0) ? "-" : "+";
     }
 
+    /**
+     * @param mixed $stringOrObject
+     * @return bool
+     */
     function is_json(mixed $stringOrObject)
     {
         if (is_string($stringOrObject)) {
@@ -57,6 +61,12 @@ namespace {
     }
 
     const MAX_DIRSIZE = 255;
+    /**
+     * @param $path
+     * @param int $subdivision
+     * @param int|array $length
+     * @return string|null
+     */
     function path_subdivide($path, int $subdivision, int|array $length = 1)
     {
         $dirname = dirname($path);
@@ -83,21 +93,37 @@ namespace {
         return str_strip($subPath, "./", "/");
     }
 
+    /**
+     * @param string $str
+     * @return array|string|string[]|null
+     */
     function str_strip_nonprintable(string $str)
     {
         return preg_replace("/[^[:print:]]/", "", $str);
     }
 
+    /**
+     * @param string $str
+     * @return array|string|string[]|null
+     */
     function str_strip_chars(string $str)
     {
         return preg_replace("/[a-zA-Z]/", "", $str);
     }
 
+    /**
+     * @param string $str
+     * @return array|string|string[]|null
+     */
     function str_strip_numbers(string $str)
     {
         return preg_replace("/[^a-zA-Z]/", "", $str);
     }
 
+    /**
+     * @param string $str
+     * @return array|string|string[]|null
+     */
     function str_strip_specials(string $str)
     {
         return preg_replace("/[^a-zA-Z0-9]/", "", $str);
@@ -123,6 +149,10 @@ namespace {
         return gettype($input);
     }
 
+    /**
+     * @param $input
+     * @return array|string|string[]|null
+     */
     function interpret_link($input)
     {
         return preg_replace_callback(
@@ -167,6 +197,11 @@ namespace {
         return getimageorientation($fname) > 4;
     }
 
+    /**
+     * @param $image
+     * @param $fname
+     * @return void
+     */
     function image_fix_orientation(&$image, $fname)
     {
         $exif = exif_read_data($fname);
@@ -193,6 +228,9 @@ namespace {
         $_SERVER["APP_TIMER"] = microtime(true);
     }
 
+    /**
+     * @return float|int
+     */
     function get_lap() // ms
     {
         if (!array_key_exists("APP_TIMER", $_SERVER)) {
@@ -216,6 +254,10 @@ namespace {
         return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
 
+    /**
+     * @param string $dir
+     * @return bool
+     */
     function delete_directory(string $dir)
     {
         if (!file_exists($dir)) {
@@ -242,6 +284,11 @@ namespace {
     const SANITIZE_URL_NOMACHINE = 1;
     const SANITIZE_URL_NOSUBDOMAIN = 2;
     const SANITIZE_URL_KEEPSLASH = 4;
+    /**
+     * @param string $url
+     * @param int $format
+     * @return string|null
+     */
     function sanitize_url(string $url, int $format = SANITIZE_URL_STANDARD)
     {
         return format_url($url, $format);
@@ -523,16 +570,31 @@ namespace {
         return filter_var($url, FILTER_VALIDATE_URL);
     }
 
+    /**
+     * @param string $input
+     * @param string $separator
+     * @return array|false|string|string[]|null
+     */
     function camel2snake(string $input, string $separator = "_")
     {
         return mb_strtolower(str_replace($separator . $separator, $separator, str_replace('.' . $separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator . '$0', str_replace(" ", $separator, $input)))));
     }
 
+    /**
+     * @param string $input
+     * @param string $separator
+     * @return string
+     */
     function snake2camel(string $input, string $separator = "_")
     {
         return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input))));
     }
 
+    /**
+     * @param string $pattern
+     * @param array $subject
+     * @return array
+     */
     function preg_match_array(string $pattern, array $subject)
     {
         $search = [];
@@ -548,6 +610,11 @@ namespace {
     }
 
 
+    /**
+     * @param object|null $object
+     * @return bool
+     * @throws Exception
+     */
     function is_null_object(?object $object)
     {
         if ($object === null) {
@@ -562,6 +629,13 @@ namespace {
         return array_filter($array, fn($k) => in_array($k, $unique), ARRAY_FILTER_USE_KEY);
     }
 
+    /**
+     * @param string $url
+     * @param int $status
+     * @param $follow_redirects
+     * @param $redirect_limitation
+     * @return bool
+     */
     function valid_response(string $url, int $status = 200, $follow_redirects = true, $redirect_limitation = 10): bool
     {
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -594,6 +668,10 @@ namespace {
         return 'data:image/' . $type . ';base64,' . base64_encode($data);
     }
 
+    /**
+     * @param $s
+     * @return bool
+     */
     function is_base64($s)
     {
         // Check if there are valid base64 characters
@@ -615,6 +693,10 @@ namespace {
         return true;
     }
 
+    /**
+     * @param $s
+     * @return bool
+     */
     function is_data($s): bool
     {
         return str_starts_with($s, "data:");
@@ -642,6 +724,12 @@ namespace {
         return $tmpfname;
     }
 
+    /**
+     * @param string $url
+     * @param bool $follow_location
+     * @param bool $verify_ssl
+     * @return bool|string
+     */
     function curl_get_contents(string $url, bool $follow_location = true, bool $verify_ssl = false)
     {
         $curl = curl_init();
@@ -692,6 +780,11 @@ namespace {
         return $pairs;
     }
 
+    /**
+     * @param array $array
+     * @param int $index
+     * @return mixed|null
+     */
     function at(array $array, int $index)
     {
         return $array[$index] ?? null;
@@ -713,6 +806,11 @@ namespace {
         return $fname !== false && strncmp($fname, $base, strlen($base)) === 0;
     }
 
+    /**
+     * @param object $class
+     * @return array
+     * @throws Exception
+     */
     function to_array(object $class)
     {
         return array_transforms(
@@ -721,12 +819,21 @@ namespace {
         );
     }
 
+    /**
+     * @param object $class
+     * @param mixed $needle
+     * @return bool
+     */
     function in_class(object $class, mixed $needle)
     {
         $haystack = array_filter((array)$class);
         return in_array($needle, $haystack, true);
     }
 
+    /**
+     * @param string|null $uuid
+     * @return bool
+     */
     function is_uuidv4(?string $uuid)
     {
         return is_string($uuid) && !(preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $uuid) !== 1);
@@ -814,6 +921,12 @@ namespace {
         ));
     }
 
+    /**
+     * @param string|null $file
+     * @param string|null $class
+     * @param string|null $func
+     * @return array
+     */
     function debug_backtrace_short(?string $file = null, ?string $class = null, ?string $func = null)
     {
         $backtrace = [];
@@ -900,6 +1013,10 @@ namespace {
         return $haystack;
     }
 
+    /**
+     * @param int $digits
+     * @return int
+     */
     function rand_int(int $digits)
     {
         return rand(pow(10, $digits - 1), pow(10, $digits) - 1);
@@ -926,6 +1043,11 @@ namespace {
         return $randomString;
     }
 
+    /**
+     * @param string $str
+     * @param int $n
+     * @return string
+     */
     function rotate_str(string $str, int $n = 1)
     {
         return substr($str, -$n) . substr($str, 0, -$n);
@@ -990,16 +1112,29 @@ namespace {
         return strval($factor > 0 ? $quotient . @mb_ucfirst($unitPrefix[$factor] ?? end($unitPrefix)) : $num);
     }
 
+    /**
+     * @param string $str
+     * @return array|string|string[]|null
+     */
     function only_alphachars(string $str)
     {
         return preg_replace("/[^a-zA-Z]+/", "", $str);
     }
 
+    /**
+     * @param string $str
+     * @return array|string|string[]|null
+     */
     function only_alphanumerics(string $str)
     {
         return preg_replace("/[^a-zA-Z0-9]+/", "", $str);
     }
 
+    /**
+     * @param string $str
+     * @param $brackets
+     * @return string
+     */
     function trim_brackets(string $str, $brackets = "()")
     {
         $leftBracket = preg_quote($brackets[0] ?? "");
@@ -1046,6 +1181,10 @@ namespace {
         return intval($val);
     }
 
+    /**
+     * @param $object_or_class
+     * @return int
+     */
     function get_depth_class($object_or_class): int
     {
         if (!get_parent_class($object_or_class)) {
@@ -1054,6 +1193,10 @@ namespace {
         return get_depth_class(get_parent_class($object_or_class)) + 1;
     }
 
+    /**
+     * @param $object_or_class
+     * @return array
+     */
     function get_family_class($object_or_class): array
     {
         $family = [is_object($object_or_class) ? get_class($object_or_class) : $object_or_class];
@@ -1064,6 +1207,12 @@ namespace {
         return $family;
     }
 
+    /**
+     * @param $object_or_class
+     * @param string $property
+     * @return string|null
+     * @throws ReflectionException
+     */
     function property_declarer($object_or_class, string $property): ?string
     {
         $class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
@@ -1072,6 +1221,12 @@ namespace {
         return $reflProperty->getDeclaringClass()->getName();
     }
 
+    /**
+     * @param $object_or_class
+     * @param string $method
+     * @return string|null
+     * @throws ReflectionException
+     */
     function method_declarer($object_or_class, string $method): ?string
     {
         $class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
@@ -1080,6 +1235,10 @@ namespace {
         return $reflMethod->getDeclaringClass()->getName();
     }
 
+    /**
+     * @param string $builtin
+     * @return array|Closure|float|int|string|null
+     */
     function builtin_default(string $builtin)
     {
         return match ($builtin) {
@@ -1124,6 +1283,12 @@ namespace {
         return $reflProperty->getValue($object);
     }
 
+    /**
+     * @param string|array|null $path
+     * @param $suffix
+     * @param $separator
+     * @return string|array|null
+     */
     function path_suffix(string|array|null $path, $suffix, $separator = "_"): string|array|null
     {
         if ($path === null) {
@@ -1154,6 +1319,12 @@ namespace {
         return $path["dirname"] . $path["filename"] . $suffix . $path["extension"];
     }
 
+    /**
+     * @param string|array|null $path
+     * @param $prefix
+     * @param $separator
+     * @return string|array|null
+     */
     function path_prefix(string|array|null $path, $prefix, $separator = "_"): string|array|null
     {
         if ($path === null) {
@@ -1185,6 +1356,13 @@ namespace {
         return $path["dirname"] . $prefix . $path["filename"] . $path["extension"];
     }
 
+    /**
+     * @param array|string $separator
+     * @param string $str
+     * @param $keepDelimiters
+     * @param int $limit
+     * @return []|string[]
+     */
     function explodeByArray(array|string $separator, string $str, $keepDelimiters = false, int $limit = PHP_INT_MAX)
     {
         if ($limit == 0) {
@@ -1202,6 +1380,11 @@ namespace {
         return [$str];
     }
 
+    /**
+     * @param array|string $separator
+     * @param array|null $array
+     * @return mixed|string
+     */
     function implodeByArray(array|string $separator, ?array $array)
     {
         if (!$array) {
@@ -1299,6 +1482,10 @@ namespace {
         return false;
     }
 
+    /**
+     * @param object|array $array
+     * @return mixed|null
+     */
     function begin(object|array $array)
     {
         return array_values(array_slice($array, 0, 1))[0] ?? null;
@@ -1309,6 +1496,10 @@ namespace {
         return begin($array);
     }
 
+    /**
+     * @param object|array $array
+     * @return false|mixed|null
+     */
     function last(object|array &$array)
     {
         return end($array) ?? null;
@@ -1319,31 +1510,56 @@ namespace {
         return array_slice($array, -min(count($array) - 1, $length), null, $preserve_keys);
     }
 
+    /**
+     * @param object|array|null $array
+     * @return mixed|null
+     */
     function first(object|array|null $array)
     {
         return $array ? begin($array) : null;
     }
 
+    /**
+     * @param object|array|null $array
+     * @return mixed|null
+     */
     function second(object|array|null $array)
     {
         return first(tail($array));
     }
 
+    /**
+     * @param object|array|null $array
+     * @return mixed|null
+     */
     function third(object|array|null $array)
     {
         return second(tail($array));
     }
 
+    /**
+     * @param object|array|null $array
+     * @return mixed|null
+     */
     function fourth(object|array|null $array)
     {
         return third(tail($array));
     }
 
+    /**
+     * @param object|array|null $array
+     * @return mixed|null
+     */
     function fifth(object|array|null $array)
     {
         return fourth(tail($array));
     }
 
+    /**
+     * @param array $arr1
+     * @param array $arr2
+     * @return float
+     */
     function distance(array $arr1, array $arr2)
     {
         $min = min(count($arr1), count($arr2));
@@ -1357,6 +1573,12 @@ namespace {
         return sqrt(array_sum(array_map(fn($d1, $d2) => (intval($d1) - intval($d2)) * (intval($d1) - intval($d2)), $arr1, $arr2)));
     }
 
+    /**
+     * @param $handle
+     * @param int $bytes
+     * @param int $rollback
+     * @return string|null
+     */
     function fread2($handle, int $bytes = 1, int $rollback = 0): ?string
     {
         if (!$handle) {
@@ -1382,21 +1604,40 @@ namespace {
         return $str;
     }
 
+    /**
+     * @param array $array
+     * @param $position
+     * @return false|mixed
+     */
     function closest(array $array, $position = -1)
     {
         return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array));
     }
 
+    /**
+     * @param string|null $str
+     * @return bool
+     */
     function is_html(?string $str)
     {
         return $str !== null && $str != strip_tags($str);
     }
 
+    /**
+     * @param $value
+     * @return bool
+     */
     function is_stringeable($value)
     {
         return (!is_object($value) && !is_array($value)) || ((is_object($value)) && method_exists($value, '__toString'));
     }
 
+    /**
+     * @param string $extension
+     * @param string $suffix
+     * @param string $prefix
+     * @return false|resource
+     */
     function tmpfile2(string $extension = "", string $suffix = "", string $prefix = "")
     {
         $extension = $extension ? '.' . $extension : "";
@@ -1407,6 +1648,15 @@ namespace {
     }
 
     const HEADER_FOLLOW_REDIRECT = 1;
+    /**
+     * @param string $filename
+     * @param int $mode
+     * @param bool $use_include_path
+     * @param $context
+     * @param int $offset
+     * @param int|null $length
+     * @return false|string
+     */
     function file_get_contents2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null)
     {
         if ($mode == HEADER_FOLLOW_REDIRECT) {
@@ -1415,6 +1665,12 @@ namespace {
         return file_get_contents($filename, $use_include_path, $context, $offset, $length);
     }
 
+    /**
+     * @param string $url
+     * @param $redirect
+     * @param int $mode
+     * @return array|false
+     */
     function get_headers2(string $url, &$redirect = null, int $mode = HEADER_FOLLOW_REDIRECT)
     {
         if (filter_var($url, FILTER_VALIDATE_URL) === false) {
@@ -1450,6 +1706,11 @@ namespace {
         return !file_exists($dir) || (is_dir($dir) && !(new FilesystemIterator($dir))->valid());
     }
 
+    /**
+     * @param string $filename
+     * @param int $mode
+     * @return false|string|null
+     */
     function mime_content_type2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT)
     {
         // Search by looking at the header if url format
@@ -1471,6 +1732,10 @@ namespace {
         }
     }
 
+    /**
+     * @param $str
+     * @return string
+     */
     function str2bin($str)
     {
         $characters = str_split($str);
@@ -1484,6 +1749,10 @@ namespace {
         return implode(' ', $binary);
     }
 
+    /**
+     * @param $binary
+     * @return string|null
+     */
     function bin2str($binary)
     {
         $binaries = explode(' ', $binary);
@@ -1496,6 +1765,11 @@ namespace {
         return $str;
     }
 
+    /**
+     * @param mixed $objectOrClass
+     * @param $interface
+     * @return bool
+     */
     function class_implements_interface(mixed $objectOrClass, $interface)
     {
         if (!is_object($objectOrClass) && !is_string($objectOrClass)) {
@@ -1511,11 +1785,19 @@ namespace {
         return array_key_exists($interface, $classImplements);
     }
 
+    /**
+     * @param array|object|string|null $arrayOrObjectOrClass
+     * @return array|array[]|null[]|object|object[]|string|string[]|string[][]|null
+     */
     function class_name(array|object|string|null $arrayOrObjectOrClass)
     {
         return class_basename($arrayOrObjectOrClass);
     }
 
+    /**
+     * @param array|object|string|null $arrayOrObjectOrClass
+     * @return array|array[]|null[]|object|object[]|string|string[]|string[][]|null
+     */
     function class_basename(array|object|string|null $arrayOrObjectOrClass)
     {
         if (!$arrayOrObjectOrClass) {
@@ -1537,11 +1819,19 @@ namespace {
         return basename($path, $ext ? "." . $ext : "");
     }
 
+    /**
+     * @param array|object|string|null $arrayOrObjectOrClass
+     * @return array|array[]|null[]|object|object[]|string|string[]|string[][]|null
+     */
     function class_namespace(array|object|string|null $arrayOrObjectOrClass)
     {
         return class_dirname($arrayOrObjectOrClass);
     }
 
+    /**
+     * @param array|object|string|null $arrayOrObjectOrClass
+     * @return array|array[]|null[]|object|object[]|string|string[]|string[][]|null
+     */
     function class_dirname(array|object|string|null $arrayOrObjectOrClass)
     {
         if (!$arrayOrObjectOrClass) {
@@ -1623,6 +1913,11 @@ namespace {
         }, explodeByArray(is_array($separators) ? $separators : str_split($separators), $str, true)));
     }
 
+    /**
+     * @param string $separator
+     * @param array ...$attributes
+     * @return string
+     */
     function implode_attributes(string $separator, array ...$attributes)
     {
         $attributes = array_merge(...$attributes);
@@ -1643,6 +1938,10 @@ namespace {
         return $list;
     }
 
+    /**
+     * @param array ...$attributes
+     * @return string
+     */
     function html_attributes(array ...$attributes)
     {
         return implode_attributes(" ", ...$attributes);
@@ -1663,6 +1962,10 @@ namespace {
         return get_browser2()["version"] ?? null;
     }
 
+    /**
+     * @param string|null $userAgent
+     * @return array
+     */
     function get_browser2(?string $userAgent = null)
     {
         $userAgent = $userAgent ?? $_SERVER['HTTP_USER_AGENT'] ?? null;
@@ -1737,6 +2040,11 @@ namespace {
         ];
     }
 
+    /**
+     * @param array $array
+     * @param $limit
+     * @return array
+     */
     function array_limit(array &$array, $limit = -1)
     {
         if ($limit < 0) {
@@ -1773,6 +2081,9 @@ namespace {
         return array_push($array, ...$value);
     }
 
+    /**
+     * @return array|mixed
+     */
     function array_append_recursive()
     {
         $arrays = func_get_args();
@@ -1855,6 +2166,11 @@ namespace {
         return $array;
     }
 
+    /**
+     * @param array $array
+     * @param $key
+     * @return mixed
+     */
     function next_key(array $array, $key): mixed
     {
         $keys = array_keys($array);
@@ -1867,6 +2183,10 @@ namespace {
         return false;
     }
 
+    /**
+     * @param array $array
+     * @return bool
+     */
     function is_multidimensional(array $array)
     {
         return count($array) !== count($array, COUNT_RECURSIVE);
@@ -1920,6 +2240,12 @@ namespace {
     }
 
 
+    /**
+     * @param array $data
+     * @param bool $duplicates
+     * @param int|null $limit
+     * @return array|array[]
+     */
     function get_permutations(array $data = [], bool $duplicates = true, ?int $limit = null)
     {
         $permutations = [[]];
@@ -1949,6 +2275,10 @@ namespace {
         echo "</pre>";
     }
 
+    /**
+     * @param $text
+     * @return array|string|string[]|null
+     */
     function str_accent($text)
     {
         $utf8 = array(
@@ -1980,6 +2310,11 @@ namespace {
         return strstr($str, PHP_EOL);
     }
 
+    /**
+     * @param string $path
+     * @param string|null $extension
+     * @return string
+     */
     function pathinfo_extension(string $path, ?string $extension = null)
     {
         $info = pathinfo($path);
@@ -2024,6 +2359,10 @@ namespace {
         return $keys !== range(0, count($arr) - 1);
     }
 
+    /**
+     * @param $a
+     * @return bool
+     */
     function array_is_nested($a)
     {
         $rv = array_filter($a, 'is_array');
@@ -2033,6 +2372,13 @@ namespace {
         return false;
     }
 
+    /**
+     * @param $array
+     * @param array|string|int $old
+     * @param array|string|int $new
+     * @return array|mixed
+     * @throws Exception
+     */
     function array_replace_keys($array, array|string|int $old, array|string|int $new)
     {
         if (gettype($old) == "array" && gettype($new) == "array") {
@@ -2063,6 +2409,10 @@ namespace {
         return array_map($func, $array);
     }
 
+    /**
+     * @param array $array
+     * @return int
+     */
     function count_leaves(array $array)
     {
         $counter = 0;
@@ -2091,6 +2441,10 @@ namespace {
             array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
     }
 
+    /**
+     * @param string $path
+     * @return bool
+     */
     function is_rgb(string $path)
     {
         if (!$path || !file_exists($path)) {
@@ -2101,6 +2455,12 @@ namespace {
         return array_key_exists('channels', $imagesize) && 3 == $imagesize['channels'];
     }
 
+    /**
+     * @param string $path
+     * @param string $name
+     * @return mixed|null
+     * @throws ImagickException
+     */
     function cmyk_profile(string $path, string $name)
     {
         $image = new Imagick($path); // load image
@@ -2118,6 +2478,13 @@ namespace {
         $image->writeImage($path);
     }
 
+    /**
+     * @param string $path
+     * @param string $name
+     * @param $data
+     * @return void
+     * @throws ImagickException
+     */
     function write_cmyk_profile(string $path, string $name, $data)
     {
         $image = new Imagick($path); // load image
@@ -2126,12 +2493,22 @@ namespace {
         $image->writeImage($path);
     }
 
+    /**
+     * @param string $path
+     * @return array
+     * @throws ImagickException
+     */
     function cmyk_profiles(string $path)
     {
         $image = new Imagick($path); // load image
         return $image->getImageProfiles(); // get profiles
     }
 
+    /**
+     * @param string $path
+     * @return mixed|null
+     * @throws ImagickException
+     */
     function cmyk_icc_profile(string $path)
     {
         $image = new Imagick($path); // load image
@@ -2156,6 +2533,11 @@ namespace {
         return $path;
     }
 
+    /**
+     * @param $path
+     * @return string
+     * @throws ImagickException
+     */
     function rgb2cmyk($path): string
     {
         if (is_cmyk($path)) {
@@ -2173,6 +2555,10 @@ namespace {
         return $path;
     }
 
+    /**
+     * @param $dir
+     * @return bool
+     */
     function is_emptydir($dir): bool
     {
         $handle = opendir($dir);
@@ -2189,16 +2575,34 @@ namespace {
 
     const ARRAY_USE_KEYS = 0;
     const ARRAY_USE_VALUES = 1;
+    /**
+     * @param array $haystack
+     * @param string $needle
+     * @param int $mode
+     * @return array
+     */
     function array_contains(array $haystack, string $needle, int $mode = ARRAY_USE_KEYS)
     {
         return array_filter($haystack, fn($k, $v) => str_contains($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
     }
 
+    /**
+     * @param array $haystack
+     * @param string $needle
+     * @param int $mode
+     * @return array
+     */
     function array_starts_with(array $haystack, string $needle, int $mode = ARRAY_USE_KEYS)
     {
         return array_filter($haystack, fn($k, $v) => str_starts_with($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
     }
 
+    /**
+     * @param array $haystack
+     * @param string $needle
+     * @param int $mode
+     * @return array
+     */
     function array_ends_with(array $haystack, string $needle, int $mode = ARRAY_USE_KEYS)
     {
         return array_filter($haystack, fn($k, $v) => str_ends_with($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
@@ -2210,6 +2614,11 @@ namespace {
     const FORMAT_LOWERCASE = 3; // lorem ipsum dolor sit amet
     const FORMAT_UPPERCASE = 4; // LOREM IPSUM DOLOR SIT AMET
 
+    /**
+     * @param $array
+     * @param ...$values
+     * @return bool
+     */
     function array_any($array, ...$values)
     {
         if (empty($values)) {
@@ -2224,6 +2633,11 @@ namespace {
         return false;
     }
 
+    /**
+     * @param $array
+     * @param ...$values
+     * @return bool
+     */
     function array_every($array, ...$values)
     {
         foreach ($values as $value) {
@@ -2345,6 +2759,12 @@ namespace {
         return $tArray;
     }
 
+    /**
+     * @param $url
+     * @param int $start
+     * @param int $end
+     * @return string|bool
+     */
     function curlranger($url, int $start = 0, int $end = 32768): string|bool
     {
         $headers = ["Range: bytes=" . $start . "-" . $end];
@@ -2375,6 +2795,13 @@ namespace {
         return [imagesx($im), imagesy($im)];
     }
 
+    /**
+     * @param array $array
+     * @param callable|null $callback
+     * @param int $mode
+     * @return array
+     * @throws Exception
+     */
     function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0)
     {
         return array_transforms(function ($k, $v, $fn) use ($callback, $mode): ?array {
@@ -2383,11 +2810,21 @@ namespace {
         }, $array);
     }
 
+    /**
+     * @param $a
+     * @param $b
+     * @return float|int
+     */
     function mod($a, $b)
     {
         return $a - floor($a / $b) * $b;
     }
 
+    /**
+     * @param $a
+     * @param $b
+     * @return mixed
+     */
     function gcd($a, $b)
     {
         return ($a % $b) ? gcd($b, $a % $b) : $b;
@@ -2416,11 +2853,27 @@ namespace {
 
     const ARRAY_FLATTEN_PRESERVE_KEYS = 1;
     const ARRAY_FLATTEN_PRESERVE_DUPLICATES = 2;
+    /**
+     * @param string $separator
+     * @param array|null $array
+     * @param int $limit
+     * @return array|null
+     * @throws ReflectionException
+     */
     function array_key_flattens(string $separator, ?array $array, int $limit = PHP_INT_MAX)
     {
         return array_flatten($separator, $array, $limit, ARRAY_FLATTEN_PRESERVE_KEYS);
     }
 
+    /**
+     * @param string $separator
+     * @param array|null $array
+     * @param int $limit
+     * @param int $mode
+     * @param callable|null $fn
+     * @return array|null
+     * @throws ReflectionException
+     */
     function array_flatten(string $separator, ?array $array, int $limit = PHP_INT_MAX, int $mode = 0, ?callable $fn = null)
     {
         if ($fn === null) {
@@ -2475,6 +2928,13 @@ namespace {
     }
 
     const ARRAY_INFLATE_INCREMENT_INTKEYS = 1;
+    /**
+     * @param string $separator
+     * @param array|null $array
+     * @param int $mode
+     * @param int $limit
+     * @return array|null
+     */
     function array_inflate(string $separator, ?array $array, int $mode = 0, int $limit = PHP_INT_MAX)
     {
         if (!is_array($array)) {
@@ -2507,6 +2967,10 @@ namespace {
         return $ret;
     }
 
+    /**
+     * @param array ...$arrays
+     * @return array|mixed
+     */
     function array_merge_recursive2(array ...$arrays)
     {
         $ret = head($arrays);
@@ -2536,6 +3000,11 @@ namespace {
         return $ret;
     }
 
+    /**
+     * @param $objectOrClass
+     * @param array $haystack
+     * @return string|int|false
+     */
     function array_class($objectOrClass, array $haystack): string|int|false
     {
         $className = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
@@ -2548,6 +3017,11 @@ namespace {
         return false;
     }
 
+    /**
+     * @param $objectOrClass
+     * @param array $haystack
+     * @return string|int|false
+     */
     function array_class_last($objectOrClass, array $haystack): string|int|false
     {
         $haystack = array_reverse($haystack);
@@ -2629,6 +3103,12 @@ namespace {
         return $keys;
     }
 
+    /**
+     * @param array $array
+     * @param $value
+     * @param int $limit
+     * @return void
+     */
     function array_occurrence_removes(array $array, $value, int $limit = 1)
     {
         while ($limit-- > 0 && ($pos = array_search($value, $array)) !== false) {
@@ -2636,6 +3116,11 @@ namespace {
         }
     }
 
+    /**
+     * @param $array
+     * @param $fn
+     * @return false|int|string
+     */
     function array_search_user($array, $fn)
     {
         foreach ($array as $key => $entry) {
@@ -2657,6 +3142,11 @@ namespace {
         return $array;
     }
 
+    /**
+     * @param mixed $needle
+     * @param array $haystack
+     * @return bool
+     */
     function in_array_object(mixed $needle, array $haystack)
     {
         if (!is_object($needle)) {
@@ -2672,6 +3162,11 @@ namespace {
         return false;
     }
 
+    /**
+     * @param array $array
+     * @param ...$rest
+     * @return array
+     */
     function array_diff_object(array $array, ...$rest)
     {
         $rest[] = fn($a, $b) => strcmp(spl_object_hash($a), spl_object_hash($b));
@@ -2687,6 +3182,11 @@ namespace {
         return $array;
     }
 
+    /**
+     * @param array $array
+     * @param bool $recursive
+     * @return array
+     */
     function array_key_removes_numerics(array $array, bool $recursive = true)
     {
         $arrayOut = [];
@@ -2703,6 +3203,11 @@ namespace {
         return $arrayOut;
     }
 
+    /**
+     * @param array $array
+     * @param bool $recursive
+     * @return array
+     */
     function array_key_removes_string(array $array, bool $recursive = true)
     {
         $arrayOut = [];
@@ -2719,6 +3224,12 @@ namespace {
         return $arrayOut;
     }
 
+    /**
+     * @param array $array
+     * @param bool $recursive
+     * @param ...$needles
+     * @return array
+     */
     function array_key_removes_startsWith(array $array, bool $recursive = true, ...$needles)
     {
         $arrayOut = [];
@@ -2735,6 +3246,12 @@ namespace {
         return $arrayOut;
     }
 
+    /**
+     * @param array $array
+     * @param bool $recursive
+     * @param ...$needles
+     * @return array
+     */
     function array_key_removes_endsWith(array $array, bool $recursive = true, ...$needles)
     {
         $arrayOut = [];
@@ -2751,6 +3268,13 @@ namespace {
         return $arrayOut;
     }
 
+    /**
+     * @param array|string $separator
+     * @param array $array
+     * @param int $limit
+     * @return array
+     * @throws Exception
+     */
     function array_key_explodes(array|string $separator, array $array, int $limit = PHP_INT_MAX)
     {
         return array_transforms(function ($k, $v, $callback, $_, $depth) use ($separator, $limit): array {
@@ -2853,6 +3377,11 @@ namespace {
         return strrev(str_replace(strrev($search), strrev($replace), strrev($subject), $count));
     }
 
+    /**
+     * @param $array
+     * @return array
+     * @throws Exception
+     */
     function array_unique_end($array)
     {
         $len = count($array);
@@ -2865,6 +3394,12 @@ namespace {
         return array_intersect_key($array, $arrayMask);
     }
 
+    /**
+     * @param object $object
+     * @param array|object|null $vars
+     * @return object
+     * @throws Exception
+     */
     function object_hydrate(object $object, array|object|null $vars = null)
     {
         if ($vars === null) {
@@ -2891,21 +3426,42 @@ namespace {
         return $object;
     }
 
+    /**
+     * @param object $object
+     * @return array
+     * @throws Exception
+     */
     function cast_to_array(object $object)
     {
         return array_transforms(fn($k, $v): array => [str_lstrip($k, ["\x00", "+", "*"]), $v], (array)$object);
     }
 
+    /**
+     * @param array $array
+     * @param string $newClass
+     * @return mixed
+     */
     function cast_from_array(array $array, string $newClass)
     {
         return unserialize(str_replace('O:8:"stdClass"', 'O:' . strlen($newClass) . ':"' . $newClass . '"', serialize((object)$array)));
     }
 
+    /**
+     * @param string $newClass
+     * @return mixed
+     */
     function cast_empty(string $newClass)
     {
         return unserialize(str_replace('O:8:"stdClass"', 'O:' . strlen($newClass) . ':"' . $newClass . '"', serialize((object)[])));
     }
 
+    /**
+     * @param $object
+     * @param $newClass
+     * @param ...$args
+     * @return mixed|object|null
+     * @throws ReflectionException
+     */
     function cast($object, $newClass, ...$args)
     {
         if ($object == null) {
@@ -2942,6 +3498,10 @@ namespace {
         return $newObject;
     }
 
+    /**
+     * @param $str
+     * @return bool
+     */
     function is_serialized($str): bool
     {
         if (!is_string($str)) {
@@ -2963,6 +3523,10 @@ namespace {
         return ($str == 'b:0;' || $ret !== false);
     }
 
+    /**
+     * @param $object
+     * @return bool
+     */
     function is_serializable($object): bool
     {
         try {
@@ -2974,6 +3538,10 @@ namespace {
         return true;
     }
 
+    /**
+     * @param $str
+     * @return string
+     */
     function str_strip_accents($str)
     {
         return strtr($str, 'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ', 'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
@@ -3003,11 +3571,19 @@ namespace {
         return $abc;
     }
 
+    /**
+     * @param string $s
+     * @return string
+     */
     function hexv2abc(string $s)
     {
         return strtr(strtoupper(base_convert($s, 10, 26)), "0123456789ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
+    /**
+     * @param string $s
+     * @return string
+     */
     function abc2hexv(string $s)
     {
         return base_convert(strtr(strtoupper($s), "0123456789ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 10, 26);
@@ -3058,6 +3634,10 @@ namespace {
         return [$float >> 24 & 0xFF, $float >> 16 & 0xFF, $float >> 8 & 0xFF, $float & 0xFF];
     }
 
+    /**
+     * @param array $rgb
+     * @return float|int|mixed
+     */
     function rgb2int(array $rgb)
     {
         return ($rgb[0] * 65536) + ($rgb[1] * 256) + ($rgb[2]);
@@ -3078,6 +3658,10 @@ namespace {
         return sprintf("#%02X%02X%02X%02X", ...array_pad($rgba, 4, 0));
     }
 
+    /**
+     * @param int $length
+     * @return string
+     */
     function str_blankspace(int $length)
     {
         return $length < 1 ? "" : str_repeat(" ", $length);
@@ -3096,6 +3680,11 @@ namespace {
         return array_replace(array_flip($ordering), $array);
     }
 
+    /**
+     * @param array $array
+     * @param string|array $startingWith
+     * @return true
+     */
     function usort_startsWith(array &$array, string|array $startingWith)
     {
         if (!is_array($startingWith)) {
@@ -3119,6 +3708,11 @@ namespace {
         });
     }
 
+    /**
+     * @param array $array
+     * @param string|array $startingWith
+     * @return true
+     */
     function usort_endsWith(array $array, string|array $startingWith)
     {
         if (!is_array($startingWith)) {
@@ -3142,6 +3736,12 @@ namespace {
         });
     }
 
+    /**
+     * @param array $array
+     * @param $a
+     * @param $b
+     * @return void
+     */
     function array_swap(array &$array, $a, $b)
     {
         if (array_key_exists($a, $array) && array_key_exists($b, $array)) {
@@ -3149,6 +3749,11 @@ namespace {
         }
     }
 
+    /**
+     * @param array $array
+     * @param array $mask
+     * @return array
+     */
     function array_reverseByMask(array $array, array $mask)
     {
         $mask = array_pad($mask, count($array), false);
@@ -3163,6 +3768,11 @@ namespace {
         return array_reverseByKey($array, $keys);
     }
 
+    /**
+     * @param array $array
+     * @param array $keys
+     * @return array
+     */
     function array_reverseByKey(array $array, array $keys)
     {
         if (count($keys) == 1) {
@@ -3228,6 +3838,12 @@ namespace {
         ];
     }
 
+    /**
+     * @param $m1
+     * @param $m2
+     * @param $h
+     * @return float|int|mixed
+     */
     function hue2rgb($m1, $m2, $h)
     {
         $h = ($h < 0) ? $h + 1 : (($h > 1) ? $h - 1 : $h);
@@ -3244,6 +3860,11 @@ namespace {
         return $m1;
     }
 
+    /**
+     * @param callable $callback
+     * @param $value
+     * @return array
+     */
     function apply_callback(callable $callback, $value)
     {
         if (is_array($value)) {
@@ -3258,6 +3879,12 @@ namespace {
         return $callback($value);
     }
 
+    /**
+     * @param array $array
+     * @param array $reference
+     * @return array
+     * @throws Exception
+     */
     function array_order(array $array, array $reference)
     {
         if (!array_every($array, ...$reference) || count($array) != count($reference)) {
@@ -3273,6 +3900,10 @@ namespace {
         return array_merge(array_values($array), $order);
     }
 
+    /**
+     * @param array|null $array
+     * @return bool
+     */
     function is_identity(?array $array)
     {
         foreach ($array ?? [] as $key => $value) {
@@ -3286,6 +3917,11 @@ namespace {
         return true;
     }
 
+    /**
+     * @param Closure $c
+     * @return string
+     * @throws ReflectionException
+     */
     function dump_closure(Closure $c)
     {
         $str = 'function (';
@@ -3317,6 +3953,10 @@ namespace {
         return $str;
     }
 
+    /**
+     * @param string|int|DateTime|null $datetime
+     * @return DateTime|false|int|null
+     */
     function cast_datetime(null|string|int|DateTime $datetime)
     {
         if ($datetime === null) {
@@ -3368,6 +4008,13 @@ namespace {
         return strlen($directory) <= $maxPathLength;
     }
 
+    /**
+     * @param string $directory
+     * @param int $permissions
+     * @param bool $recursive
+     * @param $context
+     * @return bool
+     */
     function mkdir_length_safe(string $directory, int $permissions = 0777, bool $recursive = true, $context = null): bool
     {
         if (is_length_safe($directory)) {
@@ -3416,6 +4063,12 @@ namespace {
         return $datetime->setTimestamp($timestamp - $delta + ($delta < $modulo / 2 ? 0 : $modulo));
     }
 
+    /**
+     * @param string|int|DateTime|null $datetime
+     * @param string|int|DateTime|null $dt1
+     * @param string|int|DateTime|null $dt2
+     * @return bool
+     */
     function datetime_is_between(null|string|int|DateTime $datetime, null|string|int|DateTime $dt1 = null, null|string|int|DateTime $dt2 = null)
     {
         $datetime = cast_datetime($datetime);
@@ -3436,6 +4089,12 @@ namespace {
         return $datetime1 != null || $datetime2 != null;
     }
 
+    /**
+     * @param string|DateTime|null $datetime
+     * @param string|int|DateTime|null $d1
+     * @param string|int|DateTime|null $d2
+     * @return bool
+     */
     function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null)
     {
         $datetime = cast_datetime($datetime);
@@ -3452,6 +4111,12 @@ namespace {
         return datetime_is_between($datetime, $datetime1, $datetime2);
     }
 
+    /**
+     * @param string $str_starts_with
+     * @param string $str_ends_with
+     * @param array|null $debug_backtrace
+     * @return bool
+     */
     function check_backtrace(string $str_starts_with = "", string $str_ends_with = "", array $debug_backtrace = null)
     {
         $debug_backtrace ??= debug_backtrace();
@@ -3471,6 +4136,12 @@ namespace {
     }
 
 
+    /**
+     * @param string|DateTime|null $datetime
+     * @param string|int|DateTime|null $t1
+     * @param string|int|DateTime|null $t2
+     * @return bool
+     */
     function time_is_between(null|string|DateTime $datetime, null|string|int|DateTime $t1 = null, null|string|int|DateTime $t2 = null)
     {
         $datetime = cast_datetime($datetime);
@@ -3487,6 +4158,10 @@ namespace {
         return datetime_is_between($datetime, $datetime1, $datetime2);
     }
 
+    /**
+     * @param $query
+     * @return array
+     */
     function http_parse_query($query)
     {
         $parameters = [];
@@ -3498,6 +4173,10 @@ namespace {
         return $parameters;
     }
 
+    /**
+     * @param array $parts
+     * @return string
+     */
     function build_url(array $parts)
     {
         return (isset($parts['scheme']) ? "{$parts['scheme']}:" : '') .

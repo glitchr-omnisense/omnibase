@@ -7,6 +7,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
 
+/**
+ *
+ */
 final class SectionWidgetItem implements MenuItemInterface
 {
     use MenuItemTrait {
@@ -17,6 +20,9 @@ final class SectionWidgetItem implements MenuItemInterface
     protected int $width;
     protected ?int $column;
 
+    /**
+     * @return int
+     */
     public function getWidth()
     {
         return $this->width;
@@ -28,6 +34,9 @@ final class SectionWidgetItem implements MenuItemInterface
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getColumn()
     {
         return $this->column ?? $this->width;

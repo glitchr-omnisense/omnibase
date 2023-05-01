@@ -7,8 +7,17 @@ use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 
 use Base\Validator\ConstraintEntityValidator;
 
+/**
+ *
+ */
 class StringCaseEntityValidator extends ConstraintEntityValidator
 {
+    /**
+     * @param $value
+     * @param Constraint $constraint
+     * @return void
+     * @throws \Exception
+     */
     public function validate($value, Constraint $constraint)
     {
         parent::validate($value, $constraint);

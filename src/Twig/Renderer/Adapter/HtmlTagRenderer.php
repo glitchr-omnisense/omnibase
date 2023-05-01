@@ -5,24 +5,20 @@ namespace Base\Twig\Renderer\Adapter;
 use Base\Routing\RouterInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
-use Twig\Environment;
 use Base\Twig\Renderer\AbstractTagRenderer;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Twig\Environment;
 use Twig\Error\LoaderError;
 
+/**
+ *
+ */
 class HtmlTagRenderer extends AbstractTagRenderer
 {
-    /**
-     * @var RequestStack
-     */
     protected RequestStack $requestStack;
 
-    /**
-     * @var RouterInterface
-     */
     protected RouterInterface $router;
 
     public function __construct(Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, RouterInterface $router)
@@ -36,17 +32,17 @@ class HtmlTagRenderer extends AbstractTagRenderer
     {
         $url = trim($url);
         $parse = parse_url($url);
-        if ($parse["scheme"] ?? false) {
+        if ($parse['scheme'] ?? false) {
             return $url;
         }
 
         $request = $this->requestStack->getCurrentRequest();
         $baseDir = $request ? $request->getBasePath() : $this->router->getBaseDir();
-        $baseDir = $baseDir . "/";
-        $path = trim($parse["path"]);
-        if ($path == "/") {
-            return $baseDir ?: "/";
-        } elseif (!str_starts_with($path, "/")) {
+        $baseDir = $baseDir . '/';
+        $path = trim($parse['path']);
+        if ('/' == $path) {
+            return $baseDir ?: '/';
+        } elseif (!str_starts_with($path, '/')) {
             $path = $baseDir . $path;
         }
 
@@ -55,6 +51,10 @@ class HtmlTagRenderer extends AbstractTagRenderer
 
     protected array $htmlContent = [];
 
+    /**
+     * @param string $location
+     * @return string
+     */
     public function renderHtmlContent(string $location)
     {
         $htmlContent = $this->getHtmlContent($location);
@@ -65,11 +65,23 @@ class HtmlTagRenderer extends AbstractTagRenderer
         return $htmlContent;
     }
 
+    /**
+     * @param string $location
+     * @return string
+     */
     public function getHtmlContent(string $location)
     {
         return trim(implode(PHP_EOL, array_unique($this->htmlContent[$location] ?? [])));
     }
 
+    /**
+     * @param string $location
+     * @return $this
+     */
+    /**
+     * @param string $location
+     * @return $this
+     */
     public function removeHtmlContent(string $location)
     {
         if (array_key_exists($location, $this->htmlContent)) {
@@ -79,6 +91,18 @@ class HtmlTagRenderer extends AbstractTagRenderer
         return $this;
     }
 
+    /**
+     * @param string $location
+     * @param $contentOrArrayOrFile
+     * @param array $options
+     * @return $this
+     */
+    /**
+     * @param string $location
+     * @param $contentOrArrayOrFile
+     * @param array $options
+     * @return $this
+     */
     public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = [])
     {
         if (empty($contentOrArrayOrFile)) {
@@ -98,15 +122,15 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $content = $contentOrArrayOrFile;
         } else {
             // Compute options
-            $relationship = $options["rel"] ?? $relationship;
-            array_values_remove($options, "rel");
+            $relationship = $options['rel'] ?? $relationship;
+            array_values_remove($options, 'rel');
 
             $attributes = html_attributes($options);
 
             // Convert into html tag
             $content = match ($relationship) {
-                "javascript" => "<script src='" . $this->getAsset($contentOrArrayOrFile) . "' " . $attributes . "></script>",
-                default => "<link rel='" . $relationship . "' href='" . $this->getAsset($contentOrArrayOrFile) . "' " . $attributes . ">",
+                'javascript' => "<script src='" . $this->getAsset($contentOrArrayOrFile) . "' " . $attributes . '></script>',
+                default => "<link rel='" . $relationship . "' href='" . $this->getAsset($contentOrArrayOrFile) . "' " . $attributes . '>',
             };
         }
 
@@ -115,6 +139,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
         }
 
         $this->htmlContent[$location][] = $content;
+
         return $this;
     }
 
@@ -122,77 +147,77 @@ class HtmlTagRenderer extends AbstractTagRenderer
     {
         //
         // Load breakpoint stylesheets
-        $breakpoints = $this->parameterBag->get("base.twig.breakpoints") ?? [];
-        $breakpointStylesheet = $this->twig->load("breakpoints.css.twig")->render([
-            "breakpoints" => $breakpoints
+        $breakpoints = $this->parameterBag->get('base.twig.breakpoints') ?? [];
+        $breakpointStylesheet = $this->twig->load('breakpoints.css.twig')->render([
+            'breakpoints' => $breakpoints,
         ]);
 
         if ($breakpointStylesheet) {
-            $this->addHtmlContent("stylesheets:before", "<style>" . $breakpointStylesheet . "</style>");
+            $this->addHtmlContent('stylesheets:before', '<style>' . $breakpointStylesheet . '</style>');
         }
 
         //
         // Make sure to load localized twig template, if available.
-        if (str_ends_with($name, ".twig")) {
-            $basename = explode(".", $name);
+        if (str_ends_with($name, '.twig')) {
+            $basename = explode('.', $name);
 
             $extension = [];
             $extension[] = array_pop($basename);
             $extension[] = array_pop($basename);
-            $extension = implode(".", array_reverse($extension));
-            $basename = implode(".", $basename);
+            $extension = implode('.', array_reverse($extension));
+            $basename = implode('.', $basename);
 
             $lang = $this->localizer->getLocaleLang();
             $defaultLang = $this->localizer->getDefaultLocaleLang();
-            $locale = str_replace("-", "_", $this->localizer->getLocale());
-            $defaultLocale = str_replace("-", "_", $this->localizer->getDefaultLocale());
+            $locale = str_replace('-', '_', $this->localizer->getLocale());
+            $defaultLocale = str_replace('-', '_', $this->localizer->getDefaultLocale());
 
-            if ($this->twig->getLoader()->exists($basename . "." . $locale . "." . $extension)) {
-                $name = $basename . "." . $locale . "." . $extension;
+            if ($this->twig->getLoader()->exists($basename . '.' . $locale . '.' . $extension)) {
+                $name = $basename . '.' . $locale . '.' . $extension;
             }
-            if ($this->twig->getLoader()->exists($basename . "." . $lang . "." . $extension)) {
-                $name = $basename . "." . $lang . "." . $extension;
+            if ($this->twig->getLoader()->exists($basename . '.' . $lang . '.' . $extension)) {
+                $name = $basename . '.' . $lang . '.' . $extension;
             }
-            if ($this->twig->getLoader()->exists($basename . "." . $defaultLocale . "." . $extension)) {
-                $name = $basename . "." . $locale . "." . $extension;
+            if ($this->twig->getLoader()->exists($basename . '.' . $defaultLocale . '.' . $extension)) {
+                $name = $basename . '.' . $locale . '.' . $extension;
             }
-            if ($this->twig->getLoader()->exists($basename . "." . $defaultLang . "." . $extension)) {
-                $name = $basename . "." . $lang . "." . $extension;
+            if ($this->twig->getLoader()->exists($basename . '.' . $defaultLang . '.' . $extension)) {
+                $name = $basename . '.' . $lang . '.' . $extension;
             }
         }
 
         //
         // Load resources: additional stylesheets & javascripts
-        if (str_ends_with($name, ".html.twig")) {
-            $stylesheet = str_rstrip($name, ".html.twig") . ".css.twig";
+        if (str_ends_with($name, '.html.twig')) {
+            $stylesheet = str_rstrip($name, '.html.twig') . '.css.twig';
             if ($this->twig->getLoader()->exists($stylesheet)) {
                 $stylesheet = $this->twig->load($stylesheet)->render($context);
                 if ($stylesheet) {
-                    $this->addHtmlContent("stylesheets:after", "<style>" . $stylesheet . "</style>");
+                    $this->addHtmlContent('stylesheets:after', '<style>' . $stylesheet . '</style>');
                 }
             }
 
             $formats = [];
-            $breakpoints = $this->parameterBag->get("base.twig.breakpoints") ?? [];
+            $breakpoints = $this->parameterBag->get('base.twig.breakpoints') ?? [];
             foreach ($breakpoints as $breakpoint) {
-                $formats[$breakpoint["name"]] = $breakpoint["media"] ?? "all";
+                $formats[$breakpoint['name']] = $breakpoint['media'] ?? 'all';
             }
 
             foreach ($formats as $format => $media) {
-                $stylesheet = str_rstrip($name, ".html.twig") . "." . $format . ".css.twig";
+                $stylesheet = str_rstrip($name, '.html.twig') . '.' . $format . '.css.twig';
                 if ($this->twig->getLoader()->exists($stylesheet)) {
                     $stylesheet = $this->twig->load($stylesheet)->render($context);
                     if ($stylesheet) {
-                        $this->addHtmlContent("stylesheets:after", "<style media='" . $media . "'>" . $stylesheet . "</style>");
+                        $this->addHtmlContent('stylesheets:after', "<style media='" . $media . "'>" . $stylesheet . '</style>');
                     }
                 }
             }
 
-            $javascript = str_rstrip($name, ".html.twig") . ".js.twig";
+            $javascript = str_rstrip($name, '.html.twig') . '.js.twig';
             if ($this->twig->getLoader()->exists($javascript)) {
                 $javascript = $this->twig->load($javascript)->render($context);
                 if ($javascript) {
-                    $this->addHtmlContent("javascripts:body", "<script>" . $javascript . "</script>");
+                    $this->addHtmlContent('javascripts:body', '<script>' . $javascript . '</script>');
                 }
             }
         }
@@ -200,7 +225,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
         try {
             return $this->twig->load($name)->render($context);
         } catch (LoaderError $e) {
-            throw new RuntimeException("Failed to render `" . $name . "`", $e->getCode(), $e);
+            throw new \RuntimeException('Failed to render `' . $name . '`', $e->getCode(), $e);
         }
     }
 
@@ -208,22 +233,22 @@ class HtmlTagRenderer extends AbstractTagRenderer
     {
         $content = $response->getContent();
 
-        $noscripts = $this->getHtmlContent("noscripts");
-        $content = preg_replace('/<body\b[^>]*>/', "$0" . $noscripts, $content, 1);
+        $noscripts = $this->getHtmlContent('noscripts');
+        $content = preg_replace('/<body\b[^>]*>/', '$0' . $noscripts, $content, 1);
 
-        $stylesheetsHead = $this->getHtmlContent("stylesheets:before");
-        $content = preg_replace('/(head\b[^>]*>)(.*?)(<link|<style)/s', "$1$2" . $stylesheetsHead . "$3", $content, 1);
-        $stylesheets = $this->getHtmlContent("stylesheets");
-        $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets . "$0", $content, 1);
-        $stylesheets = $this->getHtmlContent("stylesheets:after");
-        $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets . "$0", $content, 1);
+        $stylesheetsHead = $this->getHtmlContent('stylesheets:before');
+        $content = preg_replace('/(head\b[^>]*>)(.*?)(<link|<style)/s', '$1$2' . $stylesheetsHead . '$3', $content, 1);
+        $stylesheets = $this->getHtmlContent('stylesheets');
+        $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets . '$0', $content, 1);
+        $stylesheets = $this->getHtmlContent('stylesheets:after');
+        $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets . '$0', $content, 1);
 
-        $javascriptsHead = $this->getHtmlContent("javascripts:head");
-        $content = preg_replace('/(head\b[^>]*>)(.*?)(<script)/s', "$1$2" . $javascriptsHead . "$3", $content, 1);
-        $javascripts = $this->getHtmlContent("javascripts");
-        $content = preg_replace('/<\/head\b[^>]*>/', $javascripts . "$0", $content, 1);
-        $javascriptsBody = $this->getHtmlContent("javascripts:body");
-        $content = preg_replace('/<\/body\b[^>]*>/', "$0" . $javascriptsBody, $content, 1);
+        $javascriptsHead = $this->getHtmlContent('javascripts:head');
+        $content = preg_replace('/(head\b[^>]*>)(.*?)(<script)/s', '$1$2' . $javascriptsHead . '$3', $content, 1);
+        $javascripts = $this->getHtmlContent('javascripts');
+        $content = preg_replace('/<\/head\b[^>]*>/', $javascripts . '$0', $content, 1);
+        $javascriptsBody = $this->getHtmlContent('javascripts:body');
+        $content = preg_replace('/<\/body\b[^>]*>/', '$0' . $javascriptsBody, $content, 1);
 
         $response->setContent($content);
 

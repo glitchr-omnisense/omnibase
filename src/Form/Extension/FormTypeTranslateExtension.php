@@ -7,6 +7,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\AbstractTypeExtension;
 
+/**
+ *
+ */
 class FormTypeTranslateExtension extends AbstractTypeExtension
 {
     protected bool $defaultEnabled;

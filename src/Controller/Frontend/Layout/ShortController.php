@@ -9,6 +9,9 @@ use Base\Annotations\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Http\Discovery\Exception\NotFoundException;
 
+/**
+ *
+ */
 class ShortController extends AbstractController
 {
     /**
@@ -30,7 +33,7 @@ class ShortController extends AbstractController
     public function Main(string $slug): Response
     {
         /**
-         * @var Short
+         * @var Short $this
          */
         $short = $this->shortRepository->findOneBySlug($slug);
         if ($short === null) {

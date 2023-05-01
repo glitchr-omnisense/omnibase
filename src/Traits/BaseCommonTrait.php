@@ -26,40 +26,57 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 
+/**
+ *
+ */
 trait BaseCommonTrait
 {
     /**
-     * @var BaseService
+     * @var BaseService|null
      */
     protected static ?BaseService $instance = null;
 
+    /**
+     * @return bool
+     */
     public function hasInstance()
     {
         return self::$instance !== null;
     }
 
+    /**
+     * @return BaseService|null
+     */
     public function getInstance()
     {
         return self::$instance;
     }
 
+    /**
+     * @param $instance
+     * @return void
+     */
     public function setInstance($instance)
     {
         self::$instance = $instance;
     }
 
     /**
-     * @var string
+     * @var string|null
      */
     protected static ?string $projectDir = null;
 
+    /**
+     * @param $projectDir
+     * @return void
+     */
     public static function setProjectDir($projectDir)
     {
         self::$projectDir = $projectDir;
     }
 
     /**
-     * @var string
+     * @var string|null
      */
     protected static ?string $environment = null;
 
@@ -69,7 +86,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var TranslatorInterface
+     * @var TranslatorInterface|null
      */
     protected static ?TranslatorInterface $translator = null;
 
@@ -79,7 +96,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var RequestStack
+     * @var RequestStack|null
      */
     protected static ?RequestStack $requestStack = null;
 
@@ -89,7 +106,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var Obfuscator
+     * @var Obfuscator|null
      */
     protected static ?Obfuscator $obfuscator = null;
 
@@ -99,7 +116,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var EntityManagerInterface
+     * @var EntityManagerInterface|null
      */
     protected static ?EntityManagerInterface $entityManager = null;
 
@@ -109,7 +126,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var ManagerRegistry
+     * @var ManagerRegistry|null
      */
     protected static ?ManagerRegistry $doctrine = null;
 
@@ -119,7 +136,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var EntityHydratorInterface
+     * @var EntityHydratorInterface|null
      */
     protected static ?EntityHydratorInterface $entityHydrator = null;
 
@@ -129,7 +146,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var LocalizerInterface
+     * @var LocalizerInterface|null
      */
     protected static ?LocalizerInterface $localizer = null;
 
@@ -139,7 +156,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var TradingMarketInterface
+     * @var TradingMarketInterface|null
      */
     protected static ?TradingMarketInterface $tradingMarket = null;
 
@@ -149,7 +166,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var TokenStorageInterface
+     * @var TokenStorageInterface|null
      */
     protected static ?TokenStorageInterface $tokenStorage = null;
 
@@ -159,7 +176,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var SluggerInterface
+     * @var SluggerInterface|null
      */
     protected static ?SluggerInterface $slugger = null;
 
@@ -169,7 +186,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var IconProvider
+     * @var IconProvider|null
      */
     protected static ?IconProvider $iconProvider = null;
 
@@ -179,7 +196,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var ClassMetadataManipulator
+     * @var ClassMetadataManipulator|null
      */
     protected static ?ClassMetadataManipulator $classMetadataManipulator = null;
 
@@ -189,7 +206,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var MediaServiceInterface
+     * @var MediaServiceInterface|null
      */
     protected static ?MediaServiceInterface $mediaService = null;
 
@@ -199,7 +216,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var FirewallMapInterface
+     * @var FirewallMapInterface|null
      */
     protected static ?FirewallMapInterface $firewallMap = null;
 
@@ -209,7 +226,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var RouterInterface
+     * @var RouterInterface|null
      */
     protected static ?RouterInterface $router = null;
 
@@ -229,7 +246,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var BaseTwigExtension
+     * @var BaseTwigExtension|null
      */
     protected static ?BaseTwigExtension $twigExtension = null;
 
@@ -259,7 +276,7 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var NotifierInterface
+     * @var NotifierInterface|null
      */
     protected static ?NotifierInterface $notifier = null;
 

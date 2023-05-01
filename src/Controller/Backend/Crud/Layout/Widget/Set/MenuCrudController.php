@@ -13,6 +13,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
+/**
+ *
+ */
 class MenuCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -23,9 +26,9 @@ class MenuCrudController extends WidgetCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         yield DiscriminatorField::new()->setTextAlign(TextAlign::RIGHT);
-        yield SelectField::new('items')->setClass(Widget::class)->showVertical()->setColumns(6)->setFilter("^".Menu::class, "^".Slot::class);
+        yield SelectField::new('items')->setClass(Widget::class)->showVertical()->setColumns(6)->setFilter("^" . Menu::class, "^" . Slot::class);
         yield TranslationField::new('title')->setExcludedFields("content")->setFields([
-            "title"   => ["form_type" => TextType::class],
+            "title" => ["form_type" => TextType::class],
             "excerpt" => ["form_type" => TextareaType::class]
         ]);
     }

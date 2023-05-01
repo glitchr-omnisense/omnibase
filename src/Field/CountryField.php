@@ -6,6 +6,9 @@ use Base\Field\Type\CountryType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 class CountryField extends SelectField implements FieldInterface
 {
     use FieldTrait;

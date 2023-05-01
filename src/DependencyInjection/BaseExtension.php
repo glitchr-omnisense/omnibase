@@ -18,6 +18,9 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Workflow\WorkflowInterface;
 
+/**
+ *
+ */
 class BaseExtension extends Extension
 {
     /**
@@ -63,6 +66,12 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
     }
 
+    /**
+     * @param ContainerBuilder $container
+     * @param array $config
+     * @param $globalKey
+     * @return void
+     */
     public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = '')
     {
         foreach ($config as $key => $value) {

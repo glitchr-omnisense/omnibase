@@ -2,18 +2,20 @@
 
 namespace Base\Field;
 
+use Base\Field\Type\ImageType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-
-use Base\Field\Type\ImageType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 class CropperField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_SHOWFIRST = "showFirst";
-    public const OPTION_RENDER_FORMAT  = "renderFormat";
+    public const OPTION_SHOWFIRST = 'showFirst';
+    public const OPTION_RENDER_FORMAT = 'renderFormat';
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -26,9 +28,9 @@ class CropperField implements FieldInterface
             ->addCssClass('cropper-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/cropper.html.twig')
             ->setTextAlign(TextAlign::CENTER)
-            ->setFormTypeOptionIfNotSet("data_class", null)
+            ->setFormTypeOptionIfNotSet('data_class', null)
             ->setCustomOption(self::OPTION_SHOWFIRST, true)
-            ->setFormTypeOption("cropper", [])
-            ->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
+            ->setFormTypeOption('cropper', [])
+            ->setCustomOption(self::OPTION_RENDER_FORMAT, 'count');
     }
 }

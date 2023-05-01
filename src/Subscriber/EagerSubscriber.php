@@ -9,6 +9,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 
+/**
+ *
+ */
 class EagerSubscriber implements EventSubscriberInterface
 {
     /**

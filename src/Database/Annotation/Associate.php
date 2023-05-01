@@ -26,6 +26,12 @@ class Associate extends AbstractAnnotation
         $this->metadata = $data["metadata"] ?? [];
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);

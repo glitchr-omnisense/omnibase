@@ -11,7 +11,6 @@ use Base\Database\Traits\TranslationTrait;
 /**
  * @ORM\Entity()
  */
-
 class TaxonIntl implements TranslationInterface
 {
     use TranslationTrait;
@@ -20,10 +19,12 @@ class TaxonIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $label;
+
     public function getLabel(): ?string
     {
         return $this->label;
     }
+
     public function setLabel(?string $label): self
     {
         $this->label = $label;
@@ -35,10 +36,12 @@ class TaxonIntl implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $description;
+
     public function getDescription(): ?string
     {
         return $this->description;
     }
+
     public function setDescription(?string $description): self
     {
         $this->description = $description;
@@ -51,10 +54,20 @@ class TaxonIntl implements TranslationInterface
      * @OrderColumn
      */
     protected $keywords = [];
+
     public function getKeywords(): array
     {
         return $this->keywords ?? [];
     }
+
+    /**
+     * @param array $keywords
+     * @return $this
+     */
+    /**
+     * @param array $keywords
+     * @return $this
+     */
     public function setKeywords(array $keywords)
     {
         $this->keywords = $keywords;

@@ -10,6 +10,8 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
+use League\Flysystem\FilesystemException;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -42,6 +44,9 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
         return $this->getRouter()->generate("widget_attachment", $routeParameters, $referenceType);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getTitle();
@@ -72,16 +77,32 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
      */
     protected $download;
 
+    /**
+     * @return array|mixed|File|null
+     * @throws \Exception
+     */
     public function getDownload()
     {
         return Uploader::getPublic($this, "download");
     }
 
+    /**
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public function getDownloadFile()
     {
         return Uploader::get($this, "download");
     }
 
+    /**
+     * @param $file
+     * @return $this
+     */
+    /**
+     * @param $file
+     * @return $this
+     */
     public function setDownload($file)
     {
         $this->file = $file;

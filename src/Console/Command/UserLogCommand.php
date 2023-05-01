@@ -12,6 +12,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Base\Console\Command;
 
+/**
+ *
+ */
 #[AsCommand(name: 'user:log', aliases: [], description: '')]
 class UserLogCommand extends Command
 {
@@ -119,6 +122,11 @@ class UserLogCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @param $logs
+     * @param $filter
+     * @return array
+     */
     public function applyFilter($logs, $filter)
     {
         return array_filter($logs, function ($log) use ($filter) {

@@ -8,6 +8,9 @@ use Base\Field\TranslationField;
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
+/**
+ *
+ */
 class TagCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

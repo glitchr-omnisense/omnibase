@@ -13,6 +13,9 @@ use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
+/**
+ *
+ */
 class SlotCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -20,19 +23,24 @@ class SlotCrudController extends WidgetCrudController
         return null;
     }
 
+    /**
+     * @param string $entityFqcn
+     * @return mixed
+     */
     public function createEntity(string $entityFqcn)
     {
         return new $entityFqcn("");
     }
+
     public function configureFields(string $pageName, ...$args): iterable
     {
         yield DiscriminatorField::new()->setTextAlign(TextAlign::RIGHT);
         yield SlugField::new('path')->setColumns(6)->setTargetFieldName("translations.label")->setSeparator("-")->keep(",");
-        yield SelectField::new("widget")->setColumns(6)->setClass(Widget::class)->setFilter("^".Slot::class);
+        yield SelectField::new("widget")->setColumns(6)->setClass(Widget::class)->setFilter("^" . Slot::class);
 
         yield TranslationField::new('label')->autoload(false)->setFields([
             "label" => TextType::class,
-            "help"  => WysiwygType::class,
+            "help" => WysiwygType::class,
         ]);
     }
 }

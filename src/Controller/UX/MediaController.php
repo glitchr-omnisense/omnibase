@@ -47,7 +47,7 @@ class MediaController extends AbstractController
     protected ImageCropRepository $imageCropRepository;
 
     /**
-     * @var Profiler
+     * @var Profiler|null
      */
     protected ?Profiler $profiler;
 

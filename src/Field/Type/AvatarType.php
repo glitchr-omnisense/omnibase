@@ -9,12 +9,16 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class AvatarType extends ImageType
 {
     public function getBlockPrefix(): string
     {
         return 'avatar';
     }
+
     public function getParent(): ?string
     {
         return ImageType::class;
@@ -24,10 +28,10 @@ class AvatarType extends ImageType
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'thumbnail'   => "bundles/base/images/user.svg",
-            "lightbox"    => null,
-            'clipboard'   => false,
-            'cropper'     => null,
+            'thumbnail' => "bundles/base/images/user.svg",
+            "lightbox" => null,
+            'clipboard' => false,
+            'cropper' => null,
             "inline" => true
         ]);
 
@@ -51,6 +55,6 @@ class AvatarType extends ImageType
         parent::buildView($view, $form, $options);
 
         $view->vars['avatar'] = $view->vars['files'][0] ?? null;
-        $view->vars['files']  = [];
+        $view->vars['files'] = [];
     }
 }

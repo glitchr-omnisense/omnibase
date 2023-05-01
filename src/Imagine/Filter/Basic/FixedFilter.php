@@ -10,10 +10,16 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\Point;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class FixedFilter implements FilterInterface
 {
     private array $options;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return ($this->options["width"] ?? "auto") . "x" . ($this->options["height"] ?? "auto");

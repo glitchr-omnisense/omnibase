@@ -5,6 +5,9 @@ namespace Base\Service;
 use Exception;
 use RuntimeException;
 
+/**
+ *
+ */
 class HotParameterBag extends ParameterBag implements HotParameterBagInterface
 {
     public const HOT_N_READY = false; // Debugging
@@ -13,6 +16,14 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
     #[SentitiveParameter]
     protected array $hotBag = [];
 
+    /**
+     * @param array $parameters
+     * @return $this|void
+     */
+    /**
+     * @param array $parameters
+     * @return $this
+     */
     public function add(array $parameters)
     {
         try {
@@ -46,6 +57,14 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
         return $this->isReady;
     }
 
+    /**
+     * @param bool $ready
+     * @return $this
+     */
+    /**
+     * @param bool $ready
+     * @return $this
+     */
     public function markAsReady(bool $ready = true)
     {
         $this->isReady = $ready;

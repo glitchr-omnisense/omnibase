@@ -4,15 +4,19 @@ namespace Base\Database\Walker;
 
 use Doctrine\ORM\Query\SqlWalker;
 
+/**
+ *
+ */
 class MysqlWalker extends SqlWalker
 {
     public const HINT_NO_CACHE = "mysql.no_cache";
+
     /**
-    * Walks down a SelectClause AST node, thereby generating the appropriate SQL.
-    *
-    * @param $selectClause
-    * @return string The SQL.
-    */
+     * Walks down a SelectClause AST node, thereby generating the appropriate SQL.
+     *
+     * @param $selectClause
+     * @return string The SQL.
+     */
     public function walkSelectClause($selectClause)
     {
         $sql = parent::walkSelectClause($selectClause);

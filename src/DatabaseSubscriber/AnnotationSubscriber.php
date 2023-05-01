@@ -15,6 +15,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
+/**
+ *
+ */
 class AnnotationSubscriber implements EventSubscriberInterface
 {
     /**
@@ -325,6 +328,12 @@ class AnnotationSubscriber implements EventSubscriberInterface
         $this->entityCandidateBuffer = [];
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param $eventName
+     * @return void
+     * @throws \Exception
+     */
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)
     {
         $entity = $event->getObject();

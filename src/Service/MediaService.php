@@ -25,6 +25,9 @@ use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ *
+ */
 class MediaService extends FileService implements MediaServiceInterface
 {
     /**
@@ -33,7 +36,7 @@ class MediaService extends FileService implements MediaServiceInterface
     protected ImagineInterface $imagine;
 
     /**
-     * @var Profiler
+     * @var Profiler|null
      */
     protected ?Profiler $profiler;
 
@@ -51,7 +54,7 @@ class MediaService extends FileService implements MediaServiceInterface
 
     /** @var ?int */
     protected ?int $timeout;
-    /** @var ?string */
+    /** @var ?int */
     protected ?int $fallback;
     /** @var string */
     protected string $maxResolution;
@@ -97,11 +100,17 @@ class MediaService extends FileService implements MediaServiceInterface
         $this->localCache = "local.cache";
     }
 
+    /**
+     * @return array|bool|float|int|string|\UnitEnum|null
+     */
     public function getMaximumQuality()
     {
         return $this->maxQuality;
     }
 
+    /**
+     * @return array|bool|float|int|string|\UnitEnum|null
+     */
     public function isWebpEnabled()
     {
         return $this->enableWebp;
@@ -679,6 +688,11 @@ class MediaService extends FileService implements MediaServiceInterface
         return $formatter->getPath();
     }
 
+    /**
+     * @param string|FormatFilterInterface|null $extensionOrFormatter
+     * @return mixed
+     * @throws Exception
+     */
     public function getNoImage(null|string|FormatFilterInterface $extensionOrFormatter = null)
     {
         if (is_string($extensionOrFormatter)) {

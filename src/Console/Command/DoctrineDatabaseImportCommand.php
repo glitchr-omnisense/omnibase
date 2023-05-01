@@ -42,6 +42,9 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 //   his issue: Either explicitly call EntityManager#persist() on this unknown entity or configure cascade persist this association in the mapping for example @ManyTo
 //   One(..,cascade={"persist"}).
 
+/**
+ *
+ */
 #[AsCommand(name: 'doctrine:database:import', aliases: [], description: 'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
 {
@@ -102,6 +105,12 @@ class DoctrineDatabaseImportCommand extends Command
         ]);
     }
 
+    /**
+     * @param $entityName
+     * @param $entityData
+     * @return array|null
+     * @throws Exception
+     */
     public function normalize($entityName, $entityData)
     {
         return array_inflate(".", array_transforms(function ($propertyPath, $entry, $fn, $i) use ($entityName): ?array {

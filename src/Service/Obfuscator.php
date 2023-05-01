@@ -10,6 +10,9 @@ use LogicException;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV5;
 
+/**
+ *
+ */
 class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 {
     protected string $uuid;
@@ -84,6 +87,9 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return $compression;
     }
 
+    /**
+     * @return true
+     */
     public function isShort()
     {
         return true;

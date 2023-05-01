@@ -18,6 +18,8 @@ use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Thread\TagRepository;
+use League\Flysystem\FilesystemException;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * @ORM\Entity(repositoryClass=TagRepository::class)
@@ -26,7 +28,7 @@ use Base\Repository\Thread\TagRepository;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ * @DiscriminatorEntry( value = "abstract" )
  */
 class Tag implements TranslatableInterface, IconizeInterface
 {
@@ -36,11 +38,15 @@ class Tag implements TranslatableInterface, IconizeInterface
     {
         return $this->getIcon() ? [$this->getIcon()] : null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-tags"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getLabel() ?? $this->getSlug() ?? get_class($this);
@@ -60,6 +66,7 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -70,10 +77,12 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @Slugify(reference="translations.label")
      */
     protected $slug;
+
     public function getSlug(): ?string
     {
         return $this->slug;
     }
+
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
@@ -84,10 +93,12 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="string", length=9, nullable=true)
      */
     protected $color;
+
     public function getColor(): ?string
     {
         return $this->color;
     }
+
     public function setColor(?string $color): self
     {
         $this->color = $color;
@@ -100,14 +111,33 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @AssertBase\File(max_size="2MB", mime_types={"image/*"}, groups={"new", "edit"})
      */
     protected $icon;
+
+    /**
+     * @return array|mixed|File|null
+     * @throws \Exception
+     */
     public function getIcon()
     {
         return Uploader::getPublic($this, "icon");
     }
+
+    /**
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public function getIconFile()
     {
         return Uploader::get($this, "icon");
     }
+
+    /**
+     * @param $icon
+     * @return $this
+     */
+    /**
+     * @param $icon
+     * @return $this
+     */
     public function setIcon($icon)
     {
         $this->icon = $icon;
@@ -118,10 +148,12 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="tags")
      */
     protected $threads;
+
     public function getThreads(): Collection
     {
         return $this->threads;
     }
+
     public function addThread(Thread $thread): self
     {
         if (!$this->threads->contains($thread)) {

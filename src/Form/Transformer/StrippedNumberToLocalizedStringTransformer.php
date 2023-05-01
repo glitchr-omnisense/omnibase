@@ -29,6 +29,11 @@ class StrippedNumberToLocalizedStringTransformer extends NumberToLocalizedString
     protected $prefix;
     protected $suffix;
 
+    /**
+     * @param $prefix
+     * @param $suffix
+     * @param ...$args
+     */
     public function __construct($prefix, $suffix, ...$args)
     {
         parent::__construct(...$args);

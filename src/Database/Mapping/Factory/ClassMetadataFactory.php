@@ -86,6 +86,10 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         $this->initialized = true;
     }
 
+    /**
+     * @param $className
+     * @return ClassMetadataInterface|null
+     */
     protected function onNotFoundMetadata($className): null|ClassMetadataInterface
     {
         if (!$this->evm->hasListeners(Events::onClassMetadataNotFound)) {
@@ -99,6 +103,9 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         return $eventArgs->getFoundMetadata();
     }
 
+    /**
+     * @return string[]
+     */
     public function getAllClassNames()
     {
         if (!$this->initialized) {
@@ -254,6 +261,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      * @return void
      *
      * @throws MappingException
+     * @throws ReflectionException
      */
     protected function validateRuntimeMetadata(ClassMetadata $class, ?ClassMetadataInterface $parent)
     {
@@ -432,6 +440,9 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      * @param ClassMetadata $subClass Sub embedded class metadata to add nested embedded classes metadata from.
      * @param ClassMetadata $parentClass Parent class to add nested embedded classes metadata to.
      * @param string $prefix Embedded classes' prefix to use for nested embedded classes field names.
+     * @throws MappingException
+     * @throws ReflectionException
+     * @throws \Doctrine\Persistence\Mapping\MappingException
      */
     private function addNestedEmbeddedClasses(
         ClassMetadata $subClass,
@@ -551,7 +562,12 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      * Completes the ID generator mapping. If "auto" is specified we choose the generator
      * most appropriate for the targeted database platform.
      *
-     * @throws ORMException
+     * @param ClassMetadataInfo $classMetadata
+     * @throws CannotGenerateIds
+     * @throws InvalidCustomGenerator
+     * @throws MappingException
+     * @throws UnknownGeneratorType
+     * @throws \Doctrine\DBAL\Exception
      */
     private function completeIdGeneratorMapping(ClassMetadataInfo $classMetadata): void
     {
@@ -729,7 +745,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     }
 
     /**
-     * {@inheritDoc}
+     * {}
      */
     protected function getFqcnFromAlias($namespaceAlias, $simpleClassName): string
     {
@@ -760,7 +776,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     }
 
     /**
-     * @return Platforms\AbstractPlatform
+     * @return AbstractPlatform
+     * @throws \Doctrine\DBAL\Exception
      */
     private function getTargetPlatform()
     {
@@ -795,9 +812,14 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      * Populates the discriminator value of the given metadata (if not set) by iterating over discriminator
      * map classes and looking for a fitting one.
      *
-     * @return void
+     * @param ClassMetadata $classMetadata
+     * @return ClassMetadata
      *
      * @throws MappingException
+     * @throws MissingDiscriminatorMapException
+     * @throws MissingDiscriminatorValueException
+     * @throws ReflectionException
+     * @throws \Doctrine\Persistence\Mapping\MappingException
      */
 
     private function resolveDiscriminatorValue(ClassMetadata $classMetadata): ClassMetadata

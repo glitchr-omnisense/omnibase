@@ -5,6 +5,9 @@ namespace Base\Traits;
 use Exception;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+/**
+ *
+ */
 trait ProxyTrait
 {
     private ?object $_proxy = null;
@@ -24,6 +27,12 @@ trait ProxyTrait
         $this->_proxy = $proxy;
     }
 
+    /**
+     * @param string $methodOrProperty
+     * @param array $arguments
+     * @return mixed|null
+     * @throws Exception
+     */
     public function __call(string $methodOrProperty, array $arguments)
     {
         if (!$this->hasProxy()) {

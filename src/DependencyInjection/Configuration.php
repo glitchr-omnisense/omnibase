@@ -9,6 +9,9 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ *
+ */
 class Configuration implements ConfigurationInterface
 {
     private TreeBuilder $treeBuilder;

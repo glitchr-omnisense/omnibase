@@ -14,7 +14,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
@@ -36,6 +38,9 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use function count;
 use function in_array;
 
+/**
+ *
+ */
 class ClassMetadataManipulator extends AbstractLocalCache
 {
     /**
@@ -72,6 +77,11 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->entityManager;
     }
 
+    /**
+     * @param $entityOrClassOrMetadata
+     * @return bool
+     * @throws \Doctrine\Persistence\Mapping\MappingException
+     */
     public function isEntity($entityOrClassOrMetadata): bool
     {
         if (is_object($entityOrClassOrMetadata)) {
@@ -85,6 +95,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return !$this->getEntityManager()->getMetadataFactory()->isTransient($entityOrClassOrMetadata) || is_instanceof($entityOrClassOrMetadata, Proxy::class);
     }
 
+    /**
+     * @param $entityOrClassOrMetadata
+     * @return bool
+     */
     public function isEnumType($entityOrClassOrMetadata): bool
     {
         if ($entityOrClassOrMetadata instanceof ClassMetadata) {
@@ -100,11 +114,24 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     protected int $globalTrackingPolicy = self::DEFAULT_TRACKING;
 
+    /**
+     * @return int
+     */
     public function getGlobalTrackingPolicy()
     {
         return $this->globalTrackingPolicy;
     }
 
+    /**
+     * @param int $policy
+     * @return $this
+     * @throws Exception
+     */
+    /**
+     * @param int $policy
+     * @return $this
+     * @throws Exception
+     */
     public function setGlobalTrackingPolicy(int $policy)
     {
         $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
@@ -118,11 +145,27 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     protected array $trackingPolicy = [];
 
+    /**
+     * @param $className
+     * @return int|mixed
+     */
     public function getTrackingPolicy($className)
     {
         return $this->trackingPolicy[$className] ?? $this->globalTrackingPolicy;
     }
 
+    /**
+     * @param $className
+     * @param int $policy
+     * @return $this
+     * @throws Exception
+     */
+    /**
+     * @param $className
+     * @param int $policy
+     * @return $this
+     * @throws Exception
+     */
     public function setTrackingPolicy($className, int $policy)
     {
         $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
@@ -134,6 +177,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this;
     }
 
+    /**
+     * @param $entityOrClassOrMetadata
+     * @return bool
+     */
     public function isSetType($entityOrClassOrMetadata): bool
     {
         if ($entityOrClassOrMetadata instanceof ClassMetadata) {
@@ -145,6 +192,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return is_subclass_of($entityOrClassOrMetadata, SetType::class);
     }
 
+    /**
+     * @param string|null $type
+     * @return Type|string|null
+     */
     public function getDoctrineType(?string $type)
     {
         if (!$type) {
@@ -160,37 +211,66 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $doctrineType;
     }
 
+    /**
+     * @param $entity
+     * @return string
+     * @throws MappingException
+     */
     public function getPrimaryKey($entity)
     {
         return $this->getClassMetadata($entity)->getSingleIdentifierFieldName();
     }
 
+    /**
+     * @param $entity
+     * @return string|null
+     */
     public function getDiscriminatorColumn($entity): ?string
     {
         return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorColumn["fieldName"] : null;
     }
 
+    /**
+     * @param $entity
+     * @return string|null
+     */
     public function getDiscriminatorValue($entity): ?string
     {
         return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorValue : null;
     }
 
+    /**
+     * @param $entity
+     * @return array
+     */
     public function getDiscriminatorMap($entity): array
     {
         return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorMap : [];
     }
 
+    /**
+     * @param $entity
+     * @return string|null
+     */
     public function getRootEntityName($entity): ?string
     {
         return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->rootEntityName : null;
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @return EntityRepository|null
+     */
     public function getRepository(null|string|object $entityOrClassOrMetadata)
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         return $classMetadata ? $this->getEntityManager()->getRepository($classMetadata->name) : null;
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @return \Doctrine\ORM\Mapping\ClassMetadata|ClassMetadataInfo|ClassMetadata|null
+     */
     public function getClassMetadata(null|string|object $entityOrClassOrMetadata)
     {
         if ($entityOrClassOrMetadata === null) {
@@ -399,6 +479,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $fields;
     }
 
+    /**
+     * @param $entity
+     * @param string|array $fieldPath
+     * @return mixed
+     * @throws Exception
+     */
     public function getFieldValue($entity, string|array $fieldPath): mixed
     {
         if ($fieldPath == "") {
@@ -486,6 +572,18 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $fieldValue;
     }
 
+    /**
+     * @param $entity
+     * @param string|array $fieldPath
+     * @param $value
+     * @return $this|false
+     */
+    /**
+     * @param $entity
+     * @param string|array $fieldPath
+     * @param $value
+     * @return $this|false
+     */
     public function setFieldValue($entity, string|array $fieldPath, $value)
     {
         $classMetadata = $this->getClassMetadata($entity);
@@ -515,6 +613,11 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return property_exists($entityOrClassOrMetadata, $fieldName);
     }
 
+    /**
+     * @param $entity
+     * @param string $property
+     * @return mixed|null
+     */
     public function getPropertyValue($entity, string $property)
     {
         if (!$entity) {
@@ -528,6 +631,18 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->hasProperty($entity, $fieldName) ? $propertyAccessor->getValue($entity, $fieldName) : null;
     }
 
+    /**
+     * @param $entity
+     * @param string $property
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param $entity
+     * @param string $property
+     * @param $value
+     * @return $this
+     */
     public function setPropertyValue($entity, string $property, $value)
     {
         $classMetadata = $this->getClassMetadata($entity);
@@ -539,6 +654,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this;
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @param string $property
+     * @return false|mixed|string|null
+     * @throws MappingException
+     */
     public function getType(null|string|object $entityOrClassOrMetadata, string $property)
     {
         return $this->hasAssociation($entityOrClassOrMetadata, $property)
@@ -546,6 +667,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
             : $this->getTypeOfField($entityOrClassOrMetadata, $property);
     }
 
+    /**
+     * @param FormInterface|FormEvent $form
+     * @return mixed|null
+     */
     public function getClosestEntity(FormInterface|FormEvent $form)
     {
         if ($form instanceof FormEvent) {
@@ -562,6 +687,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $form->getData();
     }
 
+    /**
+     * @param FormInterface|FormEvent $form
+     * @return mixed|null
+     */
     public function getClosestEntityCollection(FormInterface|FormEvent $form)
     {
         if ($form instanceof FormEvent) {
@@ -606,6 +735,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return in_class($entity, $collection) || $collection instanceof ArrayCollection;
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @param $fieldPath
+     * @return mixed|string|null
+     * @throws Exception
+     */
     public function getDeclaringEntity(null|string|object $entityOrClassOrMetadata, $fieldPath)
     {
         $fieldMapping = $this->getFieldMapping($entityOrClassOrMetadata, $fieldPath);
@@ -623,6 +758,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->getClassMetadata($entityOrClassOrMetadata)?->getName();
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @param $fieldName
+     * @return string|null
+     * @throws Exception
+     */
     public function getTargetClass(null|string|object $entityOrClassOrMetadata, $fieldName)
     {
         // Associations can help to guess the expected returned values
@@ -642,6 +783,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return null;
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @param string $property
+     * @return false|string|null
+     * @throws Exception
+     */
     public function getTypeOfField(null|string|object $entityOrClassOrMetadata, string $property)
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
@@ -672,6 +819,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return ($classMetadata->hasField($property) ? $classMetadata->getTypeOfField($property) : null);
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @param string $property
+     * @return false|mixed|null
+     * @throws MappingException
+     */
     public function getTypeOfAssociation(null|string|object $entityOrClassOrMetadata, string $property)
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
@@ -851,6 +1004,11 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $classMetadata->getAssociationTargetClass($fieldName);
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @param string|null $fieldName
+     * @return bool
+     */
     public function hasAssociation(null|string|object $entityOrClassOrMetadata, ?string $fieldName)
     {
         if ($fieldName === null) {
@@ -866,6 +1024,11 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $classMetadata->hasAssociation($fieldName);
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @param string|null $fieldName
+     * @return bool
+     */
     public function hasRecursiveAssociation(null|string|object $entityOrClassOrMetadata, ?string $fieldName)
     {
         if ($fieldName === null) {
@@ -1025,6 +1188,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::ONE_TO_ONE;
     }
 
+    /**
+     * @param string|object|null $entityOrClassOrMetadata
+     * @param string $fieldName
+     * @return false|int|mixed
+     * @throws MappingException
+     */
     public function getAssociationType(null|string|object $entityOrClassOrMetadata, string $fieldName)
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
@@ -1040,6 +1209,9 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $classMetadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }
 
+    /**
+     * @return array|string[]
+     */
     public function getAllClassNames()
     {
         $classMetadataFactory = $this->entityManager->getMetadataFactory();
@@ -1052,6 +1224,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     protected static array $completors = [];
 
+    /**
+     * @param object|string $className
+     * @return ClassMetadataCompletor|mixed
+     */
     protected function getCompletorFor(object|string $className)
     {
         $className = is_object($className) ? get_class($className) : $className;

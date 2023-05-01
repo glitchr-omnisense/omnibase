@@ -13,6 +13,9 @@ use Imagine\Utils\Matrix;
 use function in_array;
 use function is_string;
 
+/**
+ *
+ */
 class Effects implements EffectsInterface
 {
     private const SVG_FILTER_ID_PREFIX = 'svgImagineFilterV1_';
@@ -27,6 +30,14 @@ class Effects implements EffectsInterface
         $this->document = $document;
     }
 
+    /**
+     * @param $correction
+     * @return $this
+     */
+    /**
+     * @param $correction
+     * @return $this
+     */
     public function gamma($correction): self
     {
         $gamma = (float)$correction;
@@ -107,6 +118,14 @@ class Effects implements EffectsInterface
         return $this;
     }
 
+    /**
+     * @param $sigma
+     * @return $this
+     */
+    /**
+     * @param $sigma
+     * @return $this
+     */
     public function blur($sigma = 1): self
     {
         $deviation = (float)$sigma;
@@ -122,6 +141,14 @@ class Effects implements EffectsInterface
         return $this;
     }
 
+    /**
+     * @param $brightness
+     * @return $this
+     */
+    /**
+     * @param $brightness
+     * @return $this
+     */
     public function brightness($brightness): self
     {
         $intercept = ((int)$brightness) / 100;
@@ -238,7 +265,10 @@ class Effects implements EffectsInterface
     /**
      * Create element with the specified attributes.
      *
+     * @param string $name
      * @param array<string|int,string|array<string|array<string>>> $attributes
+     * @return DOMElement
+     * @throws \DOMException
      */
     private function createElement(string $name, array $attributes): DOMElement
     {
@@ -257,6 +287,7 @@ class Effects implements EffectsInterface
 
     /**
      * @param float|int $number
+     * @return string
      */
     private function numberToString(float|int $number): string
     {

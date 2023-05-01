@@ -30,11 +30,20 @@ class Setting implements TranslatableInterface, IconizeInterface
         return ["fa-solid fa-tools"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getLabel() ?? "";
     }
 
+    /**
+     * @param string $path
+     * @param $value
+     * @param $locale
+     * @throws \Exception
+     */
     public function __construct(string $path, $value = null, $locale = null)
     {
         $this->setLocked(false);
@@ -68,6 +77,14 @@ class Setting implements TranslatableInterface, IconizeInterface
         return $this->path;
     }
 
+    /**
+     * @param string $path
+     * @return $this
+     */
+    /**
+     * @param string $path
+     * @return $this
+     */
     public function setPath(string $path)
     {
         $this->path = $path;
@@ -99,6 +116,14 @@ class Setting implements TranslatableInterface, IconizeInterface
         return $this->setLocked(false);
     }
 
+    /**
+     * @param bool $locked
+     * @return $this
+     */
+    /**
+     * @param bool $locked
+     * @return $this
+     */
     public function setLocked(bool $locked)
     {
         $this->locked = $locked;
@@ -115,6 +140,14 @@ class Setting implements TranslatableInterface, IconizeInterface
         return $this->bag;
     }
 
+    /**
+     * @param string|null $bag
+     * @return $this
+     */
+    /**
+     * @param string|null $bag
+     * @return $this
+     */
     public function setBag(?string $bag)
     {
         $this->bag = $bag;

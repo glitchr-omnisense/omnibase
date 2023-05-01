@@ -3,11 +3,15 @@
 namespace Base\Service;
 
 use Backup\Manager\Compressors\CompressorProvider;
+use Backup\Manager\Compressors\CompressorTypeNotSupported;
 use Backup\Manager\Compressors\GzipCompressor;
 use Backup\Manager\Compressors\NullCompressor;
 use Backup\Manager\Config\Config;
+use Backup\Manager\Config\ConfigFieldNotFound;
+use Backup\Manager\Config\ConfigNotFoundForConnection;
 use Backup\Manager\Databases\Database;
 use Backup\Manager\Databases\DatabaseProvider;
+use Backup\Manager\Databases\DatabaseTypeNotSupported;
 use Backup\Manager\Databases\MysqlDatabase;
 use Backup\Manager\Databases\PostgresqlDatabase;
 
@@ -15,6 +19,7 @@ use Backup\Manager\Filesystems\Awss3Filesystem;
 use Backup\Manager\Filesystems\Destination;
 use Backup\Manager\Filesystems\DropboxFilesystem;
 use Backup\Manager\Filesystems\FilesystemProvider;
+use Backup\Manager\Filesystems\FilesystemTypeNotSupported;
 use Backup\Manager\Filesystems\FtpFilesystem;
 use Backup\Manager\Filesystems\GcsFilesystem;
 use Backup\Manager\Filesystems\LocalFilesystem;
@@ -24,6 +29,7 @@ use Backup\Manager\Filesystems\WebdavFilesystem;
 use Backup\Manager\Manager as BackupManager;
 
 use DateTime;
+use League\Flysystem\FilesystemException;
 use LogicException;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
@@ -33,6 +39,9 @@ use League\Flysystem\Filesystem;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+/**
+ *
+ */
 class TimeMachine extends BackupManager implements TimeMachineInterface
 {
     /** @var CompressorProvider */
@@ -57,12 +66,23 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     protected string $cacheDir;
     protected int $snapshotLimit;
 
+    /**
+     * @param OutputInterface $output
+     * @return $this
+     */
+    /**
+     * @param OutputInterface $output
+     * @return $this
+     */
     public function setCommandOutput(OutputInterface $output)
     {
         $this->output = $output;
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getCacheDir()
     {
         return $this->cacheDir . "/timemachine";
@@ -73,6 +93,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         ignore_user_abort(true);
         pcntl_signal(SIGINT, "signal_handler");
 
+        /**
+         * @param $signal
+         * @return void
+         */
+        /**
+         * @param $signal
+         * @return void
+         */
         function signal_handler($signal)
         {
             switch ($signal) {
@@ -174,6 +202,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $this->maxCycle;
     }
 
+    /**
+     * @param string|null $maxCycle
+     * @return $this
+     */
+    /**
+     * @param string|null $maxCycle
+     * @return $this
+     */
     public function setMaxCycle(?string $maxCycle)
     {
         $this->maxCycle = $maxCycle;
@@ -187,6 +223,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $this->timeLimit;
     }
 
+    /**
+     * @param string|null $timeLimit
+     * @return $this
+     */
+    /**
+     * @param string|null $timeLimit
+     * @return $this
+     */
     public function setTimeLimit(?string $timeLimit)
     {
         $this->timeLimit = $timeLimit;
@@ -200,6 +244,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $this->compression;
     }
 
+    /**
+     * @param string|null $compression
+     * @return $this
+     */
+    /**
+     * @param string|null $compression
+     * @return $this
+     */
     public function setCompression(?string $compression)
     {
         $this->compression = $compression;
@@ -241,6 +293,13 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $list;
     }
 
+    /**
+     * @param int $id
+     * @param int|array $storageNames
+     * @param string|null $prefix
+     * @param int $cycle
+     * @return array|null
+     */
     public function getSnapshot(int $id, int|array $storageNames, ?string $prefix = null, int $cycle = -1)
     {
         $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
@@ -267,6 +326,12 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return null;
     }
 
+    /**
+     * @param int|array $storageNames
+     * @param string|null $prefix
+     * @param $cycle
+     * @return array
+     */
     public function getSnapshots(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
     {
         $snapshots = [];
@@ -318,6 +383,19 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $lastCycle;
     }
 
+    /**
+     * @param string|array|null $databases
+     * @param int|array $storageNames
+     * @param string|null $prefix
+     * @param int $cycle
+     * @return true
+     * @throws CompressorTypeNotSupported
+     * @throws ConfigFieldNotFound
+     * @throws ConfigNotFoundForConnection
+     * @throws DatabaseTypeNotSupported
+     * @throws FilesystemException
+     * @throws FilesystemTypeNotSupported
+     */
     public function backup(null|string|array $databases, int|array $storageNames = [], ?string $prefix = null, int $cycle = -1)
     {
         $prefix = $prefix ?? "backup";
@@ -412,6 +490,21 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return true;
     }
 
+    /**
+     * @param int $id
+     * @param bool $restoreDatabase
+     * @param bool $restoreApplication
+     * @param int|array $storageNames
+     * @param string|null $prefix
+     * @param int $cycle
+     * @return true
+     * @throws CompressorTypeNotSupported
+     * @throws ConfigFieldNotFound
+     * @throws ConfigNotFoundForConnection
+     * @throws DatabaseTypeNotSupported
+     * @throws FilesystemTypeNotSupported
+     * @throws FilesystemException
+     */
     public function restore(int $id, bool $restoreDatabase, bool $restoreApplication, int|array $storageNames = [], ?string $prefix = null, int $cycle = -1)
     {
         $prefix = $prefix ?? "backup";

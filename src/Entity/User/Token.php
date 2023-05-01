@@ -52,11 +52,17 @@ class Token implements IconizeInterface
         $this->generate($expiry, $throttle);
     }
 
+    /**
+     * @return int[]|string[]
+     */
     public function __sleep()
     {
         return array_keys(get_object_vars($this));
     }
 
+    /**
+     * @return string
+     */
     public function encode()
     {
         $hex = bin2hex(serialize([
@@ -71,6 +77,14 @@ class Token implements IconizeInterface
         return $this->hashIds->encodeHex($hex);
     }
 
+    /**
+     * @param string $hash
+     * @return $this
+     */
+    /**
+     * @param string $hash
+     * @return $this
+     */
     public function decode(string $hash)
     {
         $hex = $this->hashIds->decodeHex($hash);

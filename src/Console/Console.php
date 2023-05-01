@@ -9,6 +9,9 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\HttpKernel\KernelInterface;
 
+/**
+ *
+ */
 class Console implements ConsoleInterface
 {
     protected Application $application;
@@ -23,6 +26,14 @@ class Console implements ConsoleInterface
 
     protected int $verbosity;
 
+    /**
+     * @param int $verbosity
+     * @return $this
+     */
+    /**
+     * @param int $verbosity
+     * @return $this
+     */
     public function verbosity(int $verbosity)
     {
         $this->verbosity = $verbosity;

@@ -19,7 +19,7 @@ html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
 }
 .accordion-collapse.show {
     border-radius: 0px !important;
-    border-bottom: var(--bs-accordion-border-width) solid var(--content-top-border-color);
+    border-bottom: var(--bs-accordion-border-width) solid var(--content-top-border-color) !important;
 }
 
 

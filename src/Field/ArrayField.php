@@ -2,11 +2,13 @@
 
 namespace Base\Field;
 
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-
 use Base\Field\Type\ArrayType;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 class ArrayField extends CollectionField implements FieldInterface
 {
     use FieldTrait;
@@ -38,18 +40,21 @@ class ArrayField extends CollectionField implements FieldInterface
     public function useAssociativeKeys(bool $use_associative = true): self
     {
         $this->setFormTypeOption(self::OPTION_ASSOCIATIVE, $use_associative);
+
         return $this;
     }
 
     public function setPlaceholder(array $placeholder): self
     {
         $this->setFormTypeOption(self::OPTION_PLACEHOLDER, $placeholder);
+
         return $this;
     }
 
     public function setPatternFieldName(string $fieldName): self
     {
         $this->setFormTypeOption(self::OPTION_PATTERN_FIELD_NAME, $fieldName);
+
         return $this;
     }
 
@@ -102,6 +107,7 @@ class ArrayField extends CollectionField implements FieldInterface
     public function setLength(string|int $length): self
     {
         $this->setFormTypeOption(self::OPTION_LENGTH, is_string($length) ? $length : max(0, $length));
+
         return $this;
     }
 }

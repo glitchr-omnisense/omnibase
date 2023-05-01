@@ -44,8 +44,10 @@ class IsGranted extends AbstractAnnotation
     protected ?int $statusCode;
 
     /**
-     * @param mixed|null $subject
      * @param array|string $data
+     * @param mixed|null $subject
+     * @param string|null $message
+     * @param int|null $statusCode
      */
     public function __construct(
         array|string $data = [],
@@ -71,61 +73,105 @@ class IsGranted extends AbstractAnnotation
         $this->setAttributes($values['value'] ?? null);
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return true;
     }
 
+    /**
+     * @param $attributes
+     * @return void
+     */
     public function setAttributes($attributes)
     {
         $this->attributes = $attributes;
     }
 
+    /**
+     * @return mixed
+     */
     public function getAttributes()
     {
         return $this->attributes;
     }
 
+    /**
+     * @param $subject
+     * @return void
+     */
     public function setSubject($subject)
     {
         $this->subject = $subject;
     }
 
+    /**
+     * @return mixed
+     */
     public function getSubject()
     {
         return $this->subject;
     }
 
+    /**
+     * @return string|null
+     */
     public function getMessage()
     {
         return $this->message;
     }
 
+    /**
+     * @param $message
+     * @return void
+     */
     public function setMessage($message)
     {
         $this->message = $message;
     }
 
+    /**
+     * @return int|null
+     */
     public function getStatusCode()
     {
         return $this->statusCode;
     }
 
+    /**
+     * @param $statusCode
+     * @return void
+     */
     public function setStatusCode($statusCode)
     {
         $this->statusCode = $statusCode;
     }
 
+    /**
+     * @param $value
+     * @return void
+     */
     public function setValue($value)
     {
         $this->setAttributes($value);
     }
 
+    /**
+     * @return string
+     */
     public function getAliasName()
     {
         return 'is_granted';
     }
 
+    /**
+     * @return true
+     */
     public function allowArray()
     {
         return true;

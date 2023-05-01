@@ -7,8 +7,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 use Exception;
 use const ARRAY_FILTER_USE_BOTH;
 
+/**
+ *
+ */
 trait WidgetTrait
 {
+    /**
+     * @param array $widgets
+     * @param $positionOrLabel
+     * @return SectionWidgetItem|null
+     */
     public function getSectionWidgetItem(array $widgets = [], $positionOrLabel = null): null|SectionWidgetItem
     {
         if (!$positionOrLabel) {
@@ -35,6 +43,11 @@ trait WidgetTrait
         return null;
     }
 
+    /**
+     * @param array $widgets
+     * @param $sectionOrPositionOrLabel
+     * @return array
+     */
     public function getSectionWidgetItemOffsetAndLength(array $widgets = [], $sectionOrPositionOrLabel = null): array
     {
         $sectionOffsetAndLength = [count($widgets), null];
@@ -69,6 +82,13 @@ trait WidgetTrait
         return $sectionOffsetAndLength;
     }
 
+    /**
+     * @param array $widgets
+     * @param int $offset
+     * @param int|null $length
+     * @return array
+     * @throws Exception
+     */
     public function extractSectionWidgetItem(array $widgets, int $offset, ?int $length)
     {
         $previousWidgets = array_slice($widgets, 0, $offset, true);
@@ -90,6 +110,13 @@ trait WidgetTrait
         return [$previousWidgets, $sectionWidgetItem, $widgetItems, $nextWidgets];
     }
 
+    /**
+     * @param array $widgets
+     * @param $sectionOrArray
+     * @param int $position
+     * @return array
+     * @throws Exception
+     */
     public function addSectionWidgetItem(array $widgets = [], $sectionOrArray = null, int $position = -1): array
     {
         if (!$sectionOrArray) {
@@ -112,6 +139,12 @@ trait WidgetTrait
         return $widgets;
     }
 
+    /**
+     * @param array $widgets
+     * @param $sectionOrPositionOrLabel
+     * @return array
+     * @throws Exception
+     */
     public function removeSectionWidgetItem(array $widgets = [], $sectionOrPositionOrLabel = null): array
     {
         if (!$sectionOrPositionOrLabel) {
@@ -124,6 +157,12 @@ trait WidgetTrait
         return array_values($previousWidgets + $nextWidgets);
     }
 
+    /**
+     * @param array $widgets
+     * @param $sectionOrPositionOrLabel
+     * @return array
+     * @throws Exception
+     */
     public function emptySectionWidgetItem(array $widgets, $sectionOrPositionOrLabel): array
     {
         if (!$sectionOrPositionOrLabel) {
@@ -136,6 +175,14 @@ trait WidgetTrait
         return array_values($previousWidgets + $sectionWidgetItem + $nextWidgets);
     }
 
+    /**
+     * @param array $widgets
+     * @param $sectionOrPositionOrLabel
+     * @param $itemOrArray
+     * @param int $position
+     * @return array
+     * @throws Exception
+     */
     public function addWidgetItem(array $widgets, $sectionOrPositionOrLabel, $itemOrArray, int $position = -1): array
     {
         if (!$sectionOrPositionOrLabel) {
@@ -170,6 +217,13 @@ trait WidgetTrait
         return $widgets;
     }
 
+    /**
+     * @param array $widgets
+     * @param $sectionOrPositionOrLabel
+     * @param $widgetItemOrPositionOrLabel
+     * @return array
+     * @throws Exception
+     */
     public function removeWidgetItem(array $widgets, $sectionOrPositionOrLabel, $widgetItemOrPositionOrLabel): array
     {
         if (!$sectionOrPositionOrLabel) {

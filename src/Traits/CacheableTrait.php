@@ -2,6 +2,9 @@
 
 namespace Base\Traits;
 
+/**
+ *
+ */
 trait CacheableTrait
 {
     public function __toKey(?string ...$variadic): string
@@ -18,8 +21,9 @@ trait CacheableTrait
 
     public function __toKeyTTL(): ?int
     {
-        return 3600*24*7;
+        return 3600 * 24 * 7;
     }
+
     public function __toKeyTags(): array
     {
         return [];

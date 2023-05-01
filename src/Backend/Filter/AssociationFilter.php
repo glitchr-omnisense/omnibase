@@ -11,6 +11,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FilterDataDto;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\FilterTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Form\Filter\Type\TextFilterType;
 
+/**
+ *
+ */
 class AssociationFilter implements FilterInterface
 {
     use FilterTrait;
@@ -31,6 +34,14 @@ class AssociationFilter implements FilterInterface
             ->setFormTypeOption('translation_domain', 'EasyAdminBundle');
     }
 
+    /**
+     * @param $alias
+     * @return $this
+     */
+    /**
+     * @param $alias
+     * @return $this
+     */
     public function setAlias($alias)
     {
         $this->alias = $alias;

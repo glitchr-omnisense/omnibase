@@ -22,6 +22,9 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Throwable;
 
+/**
+ *
+ */
 class LogSubscriber implements EventSubscriberInterface
 {
     /**

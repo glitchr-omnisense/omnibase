@@ -850,7 +850,7 @@
         {% set href = href ?? (form.vars.value == "" ? null : app.ea.crudify(form.vars.value)) %}
         {% if href is iterable %}
             {% set href = form.vars.value ? (href[get_class(form.vars.value)] ?? null) : null %}
-            {% set href = href|url_decode %}
+            {% set href = href ? href|url_encode : null %}
         {% endif %}
         {% set href = href ? href|url_encode : null %}
         {% endif %}

@@ -8,6 +8,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\RouteMenuItem as EaRouteMenuItem
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 use Exception;
 
+/**
+ *
+ */
 class RouteMenuItem extends EaRouteMenuItem
 {
     public function __construct(string $routeName, array $routeParameters, ?string $label = null, ?string $icon = null)

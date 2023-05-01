@@ -6,6 +6,9 @@ use Base\Serializer\Excel;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
+/**
+ *
+ */
 class ExcelEncoder implements EncoderInterface, DecoderInterface
 {
     /**
@@ -28,8 +31,9 @@ class ExcelEncoder implements EncoderInterface, DecoderInterface
 
     public function supportsEncoding(string $format, array $context = []): bool
     {
-        return self::XLS === $format || self::XLSX === $format|| self::XLSM === $format;
+        return self::XLS === $format || self::XLSX === $format || self::XLSM === $format;
     }
+
     public function encode(mixed $data, string $format, array $context = []): string
     {
         $context = array_merge($this->defaultContext, $context);
@@ -41,6 +45,7 @@ class ExcelEncoder implements EncoderInterface, DecoderInterface
     {
         return self::XLS === $format || self::XLSX === $format || self::XLSM === $format;
     }
+
     public function decode(string $data, string $format, array $context = []): mixed
     {
         $context = array_merge($this->defaultContext, $context);

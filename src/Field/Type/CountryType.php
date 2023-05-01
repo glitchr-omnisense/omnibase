@@ -9,6 +9,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 
+/**
+ *
+ */
 class CountryType extends SelectType implements SelectInterface
 {
     private static array $additionalList = [];
@@ -22,11 +25,21 @@ class CountryType extends SelectType implements SelectInterface
     ];
 
     // A way to add countries to the list.. (Another way is shown below using options)
+
+    /**
+     * @param $code
+     * @param $country
+     * @return void
+     */
     public static function addCountry($code, $country)
     {
         self::addCountries([$code => $country]);
     }
 
+    /**
+     * @param $array
+     * @return void
+     */
     public static function addCountries($array)
     {
         $countryList = Countries::getNames();
@@ -42,6 +55,10 @@ class CountryType extends SelectType implements SelectInterface
         }
     }
 
+    /**
+     * @param string $code
+     * @return mixed|string
+     */
     public static function getName(string $code)
     {
         if (array_key_exists($code, self::$additionalList)) {
@@ -50,11 +67,18 @@ class CountryType extends SelectType implements SelectInterface
         return Countries::getName($code);
     }
 
+    /**
+     * @return array|string[]
+     */
     public static function getNamesWithoutAddons()
     {
         return self::getNames(true);
     }
 
+    /**
+     * @param $addons
+     * @return array|string[]
+     */
     public static function getNames($addons = false)
     {
         $countryList = Countries::getNames() + ($addons ? self::$additionalList : []);

@@ -3,6 +3,8 @@
 namespace Base\Service;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\Routing\Route;
 use App\Entity\User;
 use Base\Controller\Backend\AbstractCrudController;
@@ -15,6 +17,7 @@ use Symfony\Component\Form\FormInterface;
 
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\BaseCommonTrait;
@@ -57,6 +60,9 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use function is_object;
 
+/**
+ *
+ */
 class BaseService implements RuntimeExtensionInterface
 {
     use BaseTrait;
@@ -97,6 +103,10 @@ class BaseService implements RuntimeExtensionInterface
      */
     protected ContainerInterface $container;
 
+    /**
+     * @param $name
+     * @return object|ContainerInterface|null
+     */
     public function getContainer($name)
     {
         return ($name ? $this->container->get($name) : $this->container);
@@ -181,6 +191,9 @@ class BaseService implements RuntimeExtensionInterface
         return $this->getRouter()->getRouteIndex();
     }
 
+    /**
+     * @return array
+     */
     public function getSite()
     {
         return [
@@ -190,6 +203,9 @@ class BaseService implements RuntimeExtensionInterface
         ];
     }
 
+    /**
+     * @return array
+     */
     public function getBackoffice()
     {
         return [
@@ -199,6 +215,9 @@ class BaseService implements RuntimeExtensionInterface
         ];
     }
 
+    /**
+     * @return array
+     */
     public function getEmail()
     {
         return [
@@ -215,6 +234,12 @@ class BaseService implements RuntimeExtensionInterface
     }
 
 
+    /**
+     * @param string $command
+     * @param array $arguments
+     * @return Response
+     * @throws Exception
+     */
     public function exec(string $command, array $arguments = [])
     {
         $application = new Application($this->kernel);
@@ -231,12 +256,20 @@ class BaseService implements RuntimeExtensionInterface
     /*
      * Stylesheet and javascripts blocks
      */
+    /**
+     * @return SettingBag|null
+     */
     public function settings()
     {
         return $this->getSettingBag();
     }
 
     // Used in twig environment
+
+    /**
+     * @param $entity
+     * @return string
+     */
     public function crudify($entity): string
     {
         return $this->adminUrlGenerator->unsetAll()
@@ -267,31 +300,53 @@ class BaseService implements RuntimeExtensionInterface
         }
     }
 
+    /**
+     * @return bool
+     */
     public function hasGet()
     {
         return isset($_GET);
     }
 
+    /**
+     * @return bool
+     */
     public function hasPost()
     {
         return isset($_POST);
     }
 
+    /**
+     * @return bool
+     */
     public function hasSession()
     {
         return isset($_SESSION);
     }
 
+    /**
+     * @param $name
+     * @param $value
+     * @return void
+     */
     public function addSession($name, $value)
     {
         $this->getSession()->set($name, $value);
     }
 
+    /**
+     * @param $name
+     * @return mixed|null
+     */
     public function removeSession($name)
     {
         return ($this->getRequestStack() && $this->getRequestStack()->getSession()->has($name)) ? $this->getRequestStack()->getSession()->remove($name) : null;
     }
 
+    /**
+     * @param $name
+     * @return mixed|SessionInterface|null
+     */
     public function getSession($name = null)
     {
         if (!$name) {
@@ -300,21 +355,37 @@ class BaseService implements RuntimeExtensionInterface
         return ($this->getRequestStack() && $this->getRequestStack()->getSession()->has($name)) ? $this->getRequestStack()->getSession()->get($name) : null;
     }
 
+    /**
+     * @param $type
+     * @param $data
+     * @param array $options
+     * @return FormInterface
+     */
     public function createForm($type, $data = null, array $options = []): FormInterface
     {
         return $this->formFactory->create($type, $data, $options);
     }
 
+    /**
+     * @param string|null $locale
+     * @return string
+     */
     public function getLocale(?string $locale = null)
     {
         return self::getLocalizer()->getLocale($locale);
     }
 
+    /**
+     * @return array|ParameterBagInterface|bool|float|int|string|\UnitEnum|null
+     */
     public function getSalt()
     {
         return $this->getSecret();
     }
 
+    /**
+     * @return array|ParameterBagInterface|bool|float|int|string|\UnitEnum|null
+     */
     public function getSecret()
     {
         return $this->getParameterBag("kernel.secret");
@@ -325,6 +396,10 @@ class BaseService implements RuntimeExtensionInterface
         return $this->kernel->getContainer()->get('profiler');
     }
 
+    /**
+     * @param $response
+     * @return Profile|null
+     */
     public function getProfile($response = null)
     {
         if (!$response) {
@@ -459,6 +534,9 @@ class BaseService implements RuntimeExtensionInterface
         return $this->redirect($request->get('_route'));
     }
 
+    /**
+     * @return bool
+     */
     public function isDevelopment()
     {
         return $this->isDebug() ||
@@ -466,26 +544,41 @@ class BaseService implements RuntimeExtensionInterface
             $this->kernel->getEnvironment() == "local" || str_starts_with($this->kernel->getEnvironment(), "local_");
     }
 
+    /**
+     * @return bool
+     */
     public function isProduction()
     {
         return !$this->isDevelopment();
     }
 
+    /**
+     * @return bool
+     */
     public function isCli()
     {
         return is_cli();
     }
 
+    /**
+     * @return bool
+     */
     public function isDebug()
     {
         return $this->kernel->isDebug();
     }
 
+    /**
+     * @return bool
+     */
     public function isEasyAdmin()
     {
         return $this->getRouter()->isEasyAdmin();
     }
 
+    /**
+     * @return bool
+     */
     public function isProfiler()
     {
         return $this->getRouter()->isProfiler();
@@ -511,6 +604,14 @@ class BaseService implements RuntimeExtensionInterface
         return $this;
     }
 
+    /**
+     * @param string $id
+     * @param $tokenOrForm
+     * @param Request|null $request
+     * @param string $csrfFieldId
+     * @return bool
+     * @throws Exception
+     */
     public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null, string $csrfFieldId = "_csrf_token"): bool
     {
         if (!isset($this->csrfTokenManager)) {
@@ -543,6 +644,10 @@ class BaseService implements RuntimeExtensionInterface
         return $this->csrfTokenManager->isTokenValid(new CsrfToken($id, $token));
     }
 
+    /**
+     * @return TokenInterface|null
+     * @throws Exception
+     */
     public function getToken()
     {
         if ($this->getTokenStorage() === null) {
@@ -552,6 +657,10 @@ class BaseService implements RuntimeExtensionInterface
         return $this->getTokenStorage()->getToken();
     }
 
+    /**
+     * @return UserInterface|null
+     * @throws Exception
+     */
     public function getUser()
     {
         if (!$token = $this->getToken()) {
@@ -570,6 +679,12 @@ class BaseService implements RuntimeExtensionInterface
         return $user;
     }
 
+    /**
+     * @param $attribute
+     * @param $subject
+     * @return bool
+     * @throws Exception
+     */
     public function isGranted($attribute, $subject = null): bool
     {
         if (!isset($this->authorizationChecker)) {
@@ -594,6 +709,9 @@ class BaseService implements RuntimeExtensionInterface
         return $this->entityManager->contains($entity);
     }
 
+    /**
+     * @return bool
+     */
     public function inDoctrineStack()
     {
         $debug_backtrace = debug_backtrace();
@@ -606,6 +724,13 @@ class BaseService implements RuntimeExtensionInterface
         return false;
     }
 
+    /**
+     * @param $eventOrEntity
+     * @param bool $inDoctrineStack
+     * @param bool $reopen
+     * @return mixed[]
+     * @throws Exception
+     */
     public function getOriginalEntityData($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
         $entity = $eventOrEntity->getObject();
@@ -626,6 +751,13 @@ class BaseService implements RuntimeExtensionInterface
 
     protected static $entitySerializer = null;
 
+    /**
+     * @param $eventOrEntity
+     * @param bool $inDoctrineStack
+     * @param bool $reopen
+     * @return mixed
+     * @throws Exception
+     */
     public function getOriginalEntity($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
         if (!self::$entitySerializer) {

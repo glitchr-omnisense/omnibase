@@ -9,6 +9,9 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class BooleanType extends AbstractType
 {
     /** @var Environment */

@@ -29,6 +29,9 @@ class Address implements IconizeInterface, HtmlizeInterface
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->streetAddress . ", " . ucfirst($this->city) . ", " . $this->country;
@@ -60,6 +63,9 @@ class Address implements IconizeInterface, HtmlizeInterface
      */
     protected $id;
 
+    /**
+     * @return mixed
+     */
     public function getId()
     {
         return $this->id;

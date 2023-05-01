@@ -14,6 +14,9 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
+/**
+ *
+ */
 class EditorType extends AbstractType
 {
     /** @var Environment */
@@ -54,6 +57,10 @@ class EditorType extends AbstractType
         ]);
     }
 
+    /**
+     * @param $view
+     * @return string|null
+     */
     public function getFormID($view): ?string
     {
         $parent = $view->parent;

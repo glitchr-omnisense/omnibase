@@ -14,7 +14,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'icon:crud', aliases:[], description:'')]
+/**
+ *
+ */
+#[AsCommand(name: 'icon:crud', aliases: [], description: '')]
 class IconCrudCommand extends Command
 {
     protected function configure(): void
@@ -28,14 +31,14 @@ class IconCrudCommand extends Command
         $crudRestriction = $input->getOption('crud') ?? "";
         $cruds = array_filter(
             array_merge(
-                BaseBundle::getInstance()->getAllClasses($baseLocation."/Controller/Backend/Crud"),
+                BaseBundle::getInstance()->getAllClasses($baseLocation . "/Controller/Backend/Crud"),
                 BaseBundle::getInstance()->getAllClasses("./src/Controller/Backend/Crud"),
             ),
-            fn ($c) => !($c instanceof EaCrudController)
+            fn($c) => !($c instanceof EaCrudController)
         );
 
         if ($cruds) {
-            $output->section()->writeln("CRUD controller list: ".$crudRestriction);
+            $output->section()->writeln("CRUD controller list: " . $crudRestriction);
         }
         foreach ($cruds as $crud) {
             if (!str_starts_with($crud, $crudRestriction)) {
@@ -43,8 +46,8 @@ class IconCrudCommand extends Command
             }
 
             $icon = $crud instanceof AbstractCrudController ? $crud::getPreferredIcon() : null;
-            $iconize = $icon ? "<warning>(implements ".Iconize::class.")</warning>: \"$icon\"" : "<red>(no icon found)</red>";
-            $output->section()->writeln(" * <info>".trim($crud)."</info> ".$iconize);
+            $iconize = $icon ? "<warning>(implements " . Iconize::class . ")</warning>: \"$icon\"" : "<red>(no icon found)</red>";
+            $output->section()->writeln(" * <info>" . trim($crud) . "</info> " . $iconize);
         }
 
         return Command::SUCCESS;

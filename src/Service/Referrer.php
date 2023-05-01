@@ -8,6 +8,9 @@ use  Base\Security\LoginFormAuthenticator;
 use  Base\Security\RescueFormAuthenticator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
+/**
+ *
+ */
 class Referrer implements ReferrerInterface
 {
     /** @var RequestStack */
@@ -32,6 +35,10 @@ class Referrer implements ReferrerInterface
         return $this->router->redirect($this->getUrl() ?? $this->router->getBaseDir(), [], 302, $headers);
     }
 
+    /**
+     * @param string|null $routeName
+     * @return bool
+     */
     public function isVetoed(?string $routeName)
     {
         if (!$routeName) {
@@ -60,6 +67,14 @@ class Referrer implements ReferrerInterface
         $this->requestStack->getMainRequest()->getSession()->set('_target_path', null);
     }
 
+    /**
+     * @param string|null $url
+     * @return $this
+     */
+    /**
+     * @param string|null $url
+     * @return $this
+     */
     public function setUrl(?string $url)
     {
         if ($this->isVetoed($this->router->getRouteName($url))) {

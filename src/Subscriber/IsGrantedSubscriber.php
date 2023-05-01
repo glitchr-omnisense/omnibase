@@ -16,10 +16,13 @@ use function array_key_exists;
 use function count;
 use function is_array;
 
+/**
+ *
+ */
 class IsGrantedSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var AuthorizationCheckerInterface
+     * @var AuthorizationCheckerInterface|null
      */
     private ?AuthorizationCheckerInterface $authorizationChecker;
 
@@ -97,11 +100,19 @@ class IsGrantedSubscriber implements EventSubscriberInterface
         }
     }
 
+    /**
+     * @param string $subject
+     * @return RuntimeException
+     */
     private function createMissingSubjectException(string $subject)
     {
         return new RuntimeException(sprintf('Could not find the subject "%s" for the @IsGranted annotation. Try adding a "$%s" argument to your controller method.', $subject, $subject));
     }
 
+    /**
+     * @param IsGranted $isGranted
+     * @return false|mixed|string
+     */
     private function getIsGrantedString(IsGranted $isGranted)
     {
         $attributes = array_map(function ($attribute) {

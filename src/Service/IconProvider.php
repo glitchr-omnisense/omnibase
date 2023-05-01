@@ -12,6 +12,9 @@ use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\RouterInterface;
 use ErrorException;
 
+/**
+ *
+ */
 class IconProvider extends AbstractLocalCache
 {
     /**
@@ -73,6 +76,10 @@ class IconProvider extends AbstractLocalCache
 
     protected ?array $routeIcons = null;
 
+    /**
+     * @param string|null $route
+     * @return array|mixed|null
+     */
     public function getRouteIcons(?string $route = null)
     {
         if ($this->routeIcons && $route === null) {
@@ -92,6 +99,9 @@ class IconProvider extends AbstractLocalCache
 
     protected array $adapters = [];
 
+    /**
+     * @return array
+     */
     public function getAdapters()
     {
         return $this->adapters;

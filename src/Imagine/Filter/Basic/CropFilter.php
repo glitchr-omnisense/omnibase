@@ -10,6 +10,9 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\Point;
 use InvalidArgumentException;
 
+/**
+ *
+ */
 class CropFilter implements FilterInterface
 {
     /** @var string */
@@ -23,6 +26,9 @@ class CropFilter implements FilterInterface
     /** @var float */
     protected float $height;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return "crop:" . $this->getPosition() . ":" . implode("x", $this->getXY()) . ":" . implode("x", $this->getSize());

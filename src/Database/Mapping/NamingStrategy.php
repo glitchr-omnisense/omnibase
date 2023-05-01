@@ -7,17 +7,25 @@ use Doctrine\ORM\Mapping\Table;
 use Exception;
 use ReflectionClass;
 
+/**
+ *
+ */
 class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 {
     public const TABLE_NAME_SIZE = 64;
     public const TABLE_I18N_SUFFIX = "Intl";
 
     /**
-     * {@inheritdoc}
+     * {}
      */
 
     private array $uniqueTableName = [];
 
+    /**
+     * @param $className
+     * @return string
+     * @throws Exception
+     */
     public function classToTableName($className): string
     {
         $className = !is_string($className) ? get_class($className) : $className;

@@ -37,6 +37,9 @@ use Base\Service\SettingBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
+/**
+ *
+ */
 class SecuritySubscriber implements EventSubscriberInterface
 {
     /**
@@ -268,7 +271,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
 
         /**
-         * @var User
+         * @var User $user
          */
         $user = $token?->getUser();
         if (!$user instanceof BaseUser) {
@@ -350,7 +353,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         /**
-         * @var User
+         * @var User $user
          */
         if (!($user = $token->getUser())) {
             return;
@@ -385,7 +388,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onLoginSuccess(LoginSuccessEvent $event)
     {
         /**
-         * @var User
+         * @var User $event
          */
         $user = $event->getUser();
         if ($user instanceof BaseUser) {

@@ -23,13 +23,15 @@ use function count;
 use function get_class;
 use function is_array;
 
+/**
+ *
+ */
 class UniqueEntityValidator extends ConstraintEntityValidator
 {
     /**
-     * @param object $entity
-     *
-     * @throws UnexpectedTypeException
-     * @throws ConstraintDefinitionException
+     * @param $value
+     * @param Constraint $constraint
+     * @throws \Exception
      */
     public function validate($value, Constraint $constraint)
     {

@@ -37,12 +37,19 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
      */
     protected $value;
 
+    /**
+     * @return mixed
+     */
     public function getValue()
     {
         return $this->value;
     }
 
-    public function setValue($value)
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function setValue($value): static
     {
         $this->value = $value;
         return $this;
@@ -58,7 +65,11 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
         return $this->class;
     }
 
-    public function setClass(?string $class)
+    /**
+     * @param string|null $class
+     * @return $this
+     */
+    public function setClass(?string $class): static
     {
         $this->class = $class;
         return $this;

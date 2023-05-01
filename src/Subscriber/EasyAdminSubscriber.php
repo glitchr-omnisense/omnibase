@@ -21,6 +21,9 @@ use Base\Routing\RouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use TypeError;
 
+/**
+ *
+ */
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
     /**
@@ -53,12 +56,20 @@ class EasyAdminSubscriber implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * @param $entity
+     * @return void
+     */
     public function postEntityUpdate($entity)
     {
         $notification = new Notification("backoffice.update");
         $notification->send("success");
     }
 
+    /**
+     * @param Request $request
+     * @return string
+     */
     protected function getUrl(Request $request)
     {
         $request->overrideGlobals();

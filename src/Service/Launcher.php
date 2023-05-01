@@ -10,6 +10,9 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+/**
+ *
+ */
 class Launcher implements LauncherInterface
 {
     /** @var RouterInterface */

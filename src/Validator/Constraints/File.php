@@ -15,6 +15,9 @@ class File extends Constraint
 
     protected array $mimeTypes;
 
+    /**
+     * @return array|mixed
+     */
     public function getAllowedMimeTypes()
     {
         return $this->mimeTypes;

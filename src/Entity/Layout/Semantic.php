@@ -90,6 +90,9 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getPath()
     {
         $route = $this->getRouter()->getRouteCollection()->get($this->routeName);
@@ -101,6 +104,9 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return $this->getRouter()->getRoute($this->getUrl());
     }
 
+    /**
+     * @return array|mixed|null
+     */
     public function getRouteIcons()
     {
         return $this->getIconProvider()->getRouteIcons($this->routeName);
@@ -126,6 +132,12 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return null;
     }
 
+    /**
+     * @param string $text
+     * @param array $keywords
+     * @param array $attributes
+     * @return string
+     */
     protected function doHighlight(string $text, array $keywords, array $attributes = [])
     {
         $keywords = array_filter($keywords);
@@ -152,11 +164,22 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return html_entity_decode(trim(implode(array_map([$node->ownerDocument, "saveHTML"], iterator_to_array($node->childNodes)))));
     }
 
+    /**
+     * @param string $text
+     * @param array $attributes
+     * @return string
+     */
     public function highlight(string $text, array $attributes = [])
     {
         return $this->doHighlight($text, $this->getKeywords(), $attributes);
     }
 
+    /**
+     * @param string $text
+     * @param array|string $keywords
+     * @param array $attributes
+     * @return string
+     */
     public function highlightBy(string $text, array|string $keywords, array $attributes)
     {
         $keywords = array_filter(is_array($keywords) ? $keywords : [$keywords], fn($k) => $this->match($k));

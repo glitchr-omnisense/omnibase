@@ -14,6 +14,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController as EaCrudController;
 use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ *
+ */
 #[AsCommand(name: 'translation:crud', aliases: [], description: '')]
 class TranslationCrudCommand extends Command
 {

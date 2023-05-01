@@ -24,6 +24,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
      */
     protected ServiceEntityParser $serviceParser;
 
+    /**
+     * @return array|string|string[]|null
+     */
     public static function getFqcnEntityName()
     {
         return preg_replace(
@@ -45,16 +48,30 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $this->serviceParser = new ServiceEntityParser($this, $entityManager, $classMetadataManipulator, $entityHydrator);
     }
 
+    /**
+     * @return ClassMetadataCompletor|null
+     */
     public function getClassMetadataCompletor()
     {
         return $this->classMetadataCompletor;
     }
 
+    /**
+     * @param $method
+     * @param $arguments
+     * @return mixed
+     */
     public function __call($method, $arguments): mixed
     {
         return $this->serviceParser->parse($method, $arguments);
     }
 
+    /**
+     * @param $id
+     * @param $lockMode
+     * @param $lockVersion
+     * @return object|null
+     */
     public function find($id, $lockMode = null, $lockVersion = null): ?object
     {
         return $this->findOneById($id, $lockMode, $lockVersion);
@@ -65,6 +82,13 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [])->getResult();
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param $limit
+     * @param $offset
+     * @return array|object[]
+     */
     public function findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null): array
     {
         return $this->__call(__METHOD__, [$criteria, $orderBy, $limit, $offset])->getResult();
@@ -80,6 +104,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [$criteria]);
     }
 
+    /**
+     * @param $entity
+     * @return void
+     */
     public function flush($entity = null)
     {
         $entityFqcn = self::getFqcnEntityName();
@@ -90,6 +118,11 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         }
     }
 
+    /**
+     * @param $entity
+     * @return void
+     * @throws Exception
+     */
     public function persist($entity)
     {
         if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {

@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\HttpFoundation\File\File;
@@ -82,46 +83,76 @@ class Uploader extends AbstractAnnotation
         return $this->config;
     }
 
+    /**
+     * @return mixed|string|null
+     */
     public function getStorage()
     {
         return $this->storage;
     }
 
+    /**
+     * @return array|mixed
+     */
     public function getFormats()
     {
         return $this->formats;
     }
 
+    /**
+     * @return mixed|string|null
+     */
     public function storage()
     {
         return $this->storage;
     }
 
+    /**
+     * @return array|mixed
+     */
     public function formats()
     {
         return $this->formats;
     }
 
+    /**
+     * @return array|mixed
+     */
     public function mimeTypes()
     {
         return $this->mimeTypes;
     }
 
+    /**
+     * @return bool
+     */
     public function isImage()
     {
         return !empty(array_filter($this->mimeTypes, fn($type) => str_starts_with($type, "image/")));
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getPool()
     {
         return $this->pool;
     }
 
+    /**
+     * @return bool|mixed
+     */
     public function getMissable()
     {
         return $this->missable;
     }
 
+    /**
+     * @param mixed $entity
+     * @param string $fieldName
+     * @return mixed|string|null
+     * @throws Exception
+     */
     public function getDeclaringEntity(mixed $entity, string $fieldName)
     {
         return $this->getClassMetadataManipulator()->getDeclaringEntity($entity, $fieldName);
@@ -160,6 +191,12 @@ class Uploader extends AbstractAnnotation
         return rtrim($pool . $namespaceDir . "/_" . camel2snake($fieldName) . "/" . $uuid, ".");
     }
 
+    /**
+     * @param $entity
+     * @param $fieldName
+     * @return array|mixed|File|null
+     * @throws Exception
+     */
     public static function getPublic($entity, $fieldName)
     {
         if (!self::hasAnnotation($entity, $fieldName, self::class)) {
@@ -167,7 +204,7 @@ class Uploader extends AbstractAnnotation
         }
 
         /**
-         * @var Uploader
+         * @var Uploader $that
          */
         $that = self::getAnnotation($entity, $fieldName, self::class);
         if (!$that) {
@@ -220,6 +257,11 @@ class Uploader extends AbstractAnnotation
         }
     }
 
+    /**
+     * @param $entity
+     * @param $fieldName
+     * @return array
+     */
     public static function getMimeTypes($entity, $fieldName): array
     {
         if (!self::hasAnnotation($entity, $fieldName, self::class)) {
@@ -234,6 +276,11 @@ class Uploader extends AbstractAnnotation
         return $that->mimeTypes;
     }
 
+    /**
+     * @param $entity
+     * @param $fieldName
+     * @return int
+     */
     public static function getMaxFilesize($entity, $fieldName): int
     {
         $maxSize = UploadedFile::getMaxFilesize();
@@ -252,6 +299,12 @@ class Uploader extends AbstractAnnotation
 
     protected static $tmpHashTable = [];
 
+    /**
+     * @param $entity
+     * @param string $fieldName
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public static function get($entity, string $fieldName)
     {
         if ($entity === null) {
@@ -263,7 +316,7 @@ class Uploader extends AbstractAnnotation
         }
 
         /**
-         * @var Uploader
+         * @var Uploader $that
          */
         $that = self::getAnnotation($entity, $fieldName, self::class);
         if (!$that) {
@@ -322,6 +375,14 @@ class Uploader extends AbstractAnnotation
         return $fileList;
     }
 
+    /**
+     * @param $entity
+     * @param $oldEntity
+     * @param string|null $fieldName
+     * @return bool
+     * @throws InvalidMimeTypeException
+     * @throws InvalidSizeException
+     */
     protected function uploadFiles($entity, $oldEntity, ?string $fieldName = null)
     {
         $new = self::getFieldValue($entity, $fieldName);
@@ -422,6 +483,13 @@ class Uploader extends AbstractAnnotation
         return true;
     }
 
+    /**
+     * @param $entity
+     * @param $oldEntity
+     * @param string $fieldName
+     * @return bool
+     * @throws Exception
+     */
     protected function deleteFiles($entity, $oldEntity, string $fieldName)
     {
         $new = self::getFieldValue($entity, $fieldName);
@@ -467,11 +535,26 @@ class Uploader extends AbstractAnnotation
         return true;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     * @throws InvalidMimeTypeException
+     * @throws InvalidSizeException
+     */
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         try {
@@ -484,6 +567,14 @@ class Uploader extends AbstractAnnotation
         }
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     * @throws Exception
+     */
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $oldEntity = $this->getOldEntity($entity);
@@ -502,6 +593,13 @@ class Uploader extends AbstractAnnotation
         $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     */
     public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $this->deleteFiles(null, $entity, $property);

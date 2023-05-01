@@ -18,6 +18,8 @@ use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Thread\TaxonRepository;
+use League\Flysystem\FilesystemException;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * @ORM\Entity(repositoryClass=TaxonRepository::class)
@@ -42,6 +44,9 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         return ["fa-solid fa-sitemap"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getLabel() ?? $this->getSlug() ?? get_class($this);
@@ -92,16 +97,32 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $icon;
 
+    /**
+     * @return array|mixed|File|null
+     * @throws \Exception
+     */
     public function getIcon()
     {
         return Uploader::getPublic($this, "icon");
     }
 
+    /**
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public function getIconFile()
     {
         return Uploader::get($this, "icon");
     }
 
+    /**
+     * @param $icon
+     * @return $this
+     */
+    /**
+     * @param $icon
+     * @return $this
+     */
     public function setIcon($icon)
     {
         $this->icon = $icon;
@@ -238,11 +259,27 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this->isVisible;
     }
 
+    /**
+     * @param bool $isVisible
+     * @return $this
+     */
+    /**
+     * @param bool $isVisible
+     * @return $this
+     */
     public function markAsVisible(bool $isVisible)
     {
         return $this->setIsVisible($isVisible);
     }
 
+    /**
+     * @param bool $isVisible
+     * @return $this
+     */
+    /**
+     * @param bool $isVisible
+     * @return $this
+     */
     public function setIsVisible(bool $isVisible)
     {
         $this->isVisible = $isVisible;

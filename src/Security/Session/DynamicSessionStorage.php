@@ -4,13 +4,16 @@ namespace Base\Security\Session;
 
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
+/**
+ *
+ */
 class DynamicSessionStorage extends NativeSessionStorage
 {
     /**
-    * setOptions.
-    *
-    * {@inheritDoc}
-    */
+     * setOptions.
+     *
+     * {@inheritDoc}
+     */
     public function setOptions(array $options)
     {
         if (isset($_SERVER['HTTP_HOST'])) {

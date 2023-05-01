@@ -12,6 +12,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ *
+ */
 #[AsCommand(name: 'user:notifications', aliases: [], description: '')]
 class UserNotificationCommand extends Command
 {

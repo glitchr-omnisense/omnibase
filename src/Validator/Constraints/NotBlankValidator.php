@@ -8,6 +8,9 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use function is_string;
 
+/**
+ *
+ */
 class NotBlankValidator extends ConstraintValidator
 {
     /**

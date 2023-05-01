@@ -26,6 +26,9 @@ use Endroid\QrCode\Writer\PngWriter;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface as TotpTwoFactorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 
+/**
+ *
+ */
 class SettingsController extends AbstractController
 {
     private $baseService;

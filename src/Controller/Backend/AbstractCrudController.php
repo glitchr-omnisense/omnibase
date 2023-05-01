@@ -30,6 +30,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use ErrorException;
 use Exception;
 use LogicException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController
@@ -105,7 +106,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->crud = null;
     }
 
-    public function getTranslator()
+    /**
+     * @return TranslatorInterface
+     */
+    public function getTranslator(): TranslatorInterface
     {
         return $this->translator;
     }
@@ -157,6 +161,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     protected static array $crudController = [];
 
+    /**
+     * @param $entity
+     * @param bool $inheritance
+     * @return string|null
+     */
     public static function getCrudControllerFqcn($entity, bool $inheritance = false): ?string
     {
         $entityFqcn = is_object($entity) ? get_class($entity) : ($entity !== null && class_exists($entity) ? $entity : null);
@@ -195,17 +204,27 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return $inheritance ? self::getCrudControllerFqcn(get_parent_class($entity)) : null;
     }
 
-    public static function getCrudTranslationPrefix()
+    /**
+     * @return string
+     */
+    public static function getCrudTranslationPrefix(): string
     {
         return "@" . AbstractDashboardController::TRANSLATION_DASHBOARD . "." . self::getTranslationPrefix("Crud\\");
     }
 
-    public static function getEntityTranslationPrefix()
+    /**
+     * @return string
+     */
+    public static function getEntityTranslationPrefix(): string
     {
         return "@" . AbstractDashboardController::TRANSLATION_ENTITY . "." . self::getTranslationPrefix();
     }
 
-    public static function getTranslationPrefix(?string $prefix = "")
+    /**
+     * @param string|null $prefix
+     * @return array|false|string|string[]|null
+     */
+    public static function getTranslationPrefix(?string $prefix = ""): array|false|string|null
     {
         $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", get_called_class()::getEntityFqcn());
         return camel2snake(implode(".", array_unique(explode("\\", $entityFqcn))));
@@ -218,24 +237,44 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     protected static array $instantiationMap = [];
 
+    /**
+     * @return mixed|true
+     */
     public static function isInstantiable()
     {
         return static::$instantiationMap[self::class] ?? true;
     }
 
-    public function allowInstantiation()
+    /**
+     * @return $this
+     */
+    /**
+     * @return $this
+     */
+    public function allowInstantiation(): static
     {
         self::$instantiationMap[static::class] = true;
         return $this;
     }
 
-    public function disallowInstantiation()
+    /**
+     * @return $this
+     */
+    /**
+     * @return $this
+     */
+    public function disallowInstantiation(): static
     {
         self::$instantiationMap[static::class] = false;
         return $this;
     }
 
-    public function setDiscriminatorMapAttribute(Action $action)
+    /**
+     * @param Action $action
+     * @return Action
+     * @throws Exception
+     */
+    public function setDiscriminatorMapAttribute(Action $action): Action
     {
         $entity = $this->getEntityFqcn();
         $rootEntity = BaseBundle::getInstance()->getAlias($this->classMetadataManipulator->getRootEntityName($entity));
@@ -299,7 +338,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN');
     }
 
-    public function batchActionDelete(BatchActionDto $batchActionDto)
+    /**
+     * @param BatchActionDto $batchActionDto
+     * @return RedirectResponse
+     */
+    public function batchActionDelete(BatchActionDto $batchActionDto): RedirectResponse
     {
         foreach ($batchActionDto->getEntityIds() as $id) {
             $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
@@ -330,6 +373,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     protected ?EntityDto $entityDto = null;
 
+    /**
+     * @return mixed|null
+     */
     public function getEntity()
     {
         return $this->entityDto?->getInstance();
@@ -345,16 +391,25 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return $this->entityCollection;
     }
 
-    public static function getEntityLabelInSingular()
+    /**
+     * @return string
+     */
+    public static function getEntityLabelInSingular(): string
     {
         return self::getEntityTranslationPrefix() . "." . Translator::NOUN_SINGULAR;
     }
 
-    public static function getEntityLabelInPlural()
+    /**
+     * @return string
+     */
+    public static function getEntityLabelInPlural(): string
     {
         return self::getEntityTranslationPrefix() . "." . Translator::NOUN_PLURAL;
     }
 
+    /**
+     * @return mixed|null
+     */
     public static function getEntityIcon()
     {
         $icon = get_called_class()::getPreferredIcon() ?? null;

@@ -7,6 +7,9 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 
+/**
+ *
+ */
 class PasteFilter implements FilterInterface
 {
     /**
@@ -17,6 +20,9 @@ class PasteFilter implements FilterInterface
     private int $x;
     private ImageInterface $destination;
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return "paste:" . $this->x . "x" . $this->y;

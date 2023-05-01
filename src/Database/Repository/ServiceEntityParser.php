@@ -15,7 +15,13 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Query\Expr\Andx;
+use Doctrine\ORM\Query\Expr\Comparison;
+use Doctrine\ORM\Query\Expr\Func;
+use Doctrine\ORM\Query\Expr\Orx;
 use Doctrine\Persistence\Proxy;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
@@ -24,6 +30,9 @@ use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 
+/**
+ *
+ */
 class ServiceEntityParser
 {
     protected $method;
@@ -131,7 +140,7 @@ class ServiceEntityParser
     protected mixed $classMetadata = null;
 
     /**
-     * @var ClassMetadataManipulator
+     * @var ClassMetadataManipulator|null
      */
     protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
@@ -177,11 +186,30 @@ class ServiceEntityParser
         }
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param $limit
+     * @param $offset
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return Query|null
+     * @throws Exception
+     */
     protected function __findBy(array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
         return $this->getQuery($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs);
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param $limit
+     * @param $offset
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return Query|null
+     */
     protected function __findRandomlyBy(array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
         return $this->__findBy($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs);
@@ -192,12 +220,27 @@ class ServiceEntityParser
         return $this->__findBy([], $orderBy, null, null, $groupBy, $selectAs);
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return float|int|mixed|string|null
+     * @throws NonUniqueResultException
+     */
     protected function __findOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         $results = $this->__findBy($criteria, $orderBy, 1, null, $groupBy, $selectAs);
         return $results->getOneOrNullResult();
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return float|int|mixed|string|null
+     */
     protected function __findLastOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         return $this->__findOneBy($criteria, array_merge($orderBy, ['id' => 'DESC']), $groupBy, $selectAs) ?? null;
@@ -228,17 +271,41 @@ class ServiceEntityParser
         return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return float|int|mixed|string|null
+     */
     protected function __findPreviousOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         $orderBy["id"] = "DESC";
         return $this->__findOneBy($criteria, $orderBy, $groupBy, $selectAs);
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return float|int|mixed|string|null
+     */
     protected function __findNextOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         return $this->__findOneBy($criteria, $orderBy, $groupBy, $selectAs);
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param array|null $groupBy
+     * @param $limit
+     * @param $offset
+     * @param array|null $selectAs
+     * @return float|int|mixed|string
+     * @throws Exception
+     */
     protected function __lengthOfBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, $limit = null, $offset = null, ?array $selectAs = null)
     {
         return $this->getQueryWithLength($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs)->getResult();
@@ -249,6 +316,15 @@ class ServiceEntityParser
         return $this->__countBy($criteria, self::COUNT_DISTINCT, $groupBy, $selectAs);
     }
 
+    /**
+     * @param array $criteria
+     * @param string|null $mode
+     * @param array|null $orderBy
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return float|int|mixed|string|null
+     * @throws Exception
+     */
     protected function __countBy(array $criteria = [], ?string $mode = null, ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         $mode ??= self::COUNT_ALL;
@@ -258,6 +334,12 @@ class ServiceEntityParser
     }
 
 
+    /**
+     * @param $method
+     * @param $arguments
+     * @return mixed
+     * @throws MappingException
+     */
     public function parse($method, $arguments): mixed
     {
         // Parse method and call it
@@ -278,11 +360,21 @@ class ServiceEntityParser
         return $ret;
     }
 
+    /**
+     * @param $alias
+     * @return string
+     */
     protected function getAlias($alias)
     {
         return $this->classMetadataManipulator->getFieldName($this->classMetadata->name, $alias) ?? $alias;
     }
 
+    /**
+     * @param string|null $by
+     * @param $value
+     * @return string
+     * @throws Exception
+     */
     protected function addCriteria(?string $by, $value)
     {
         if ($by != null && empty($by)) {
@@ -298,28 +390,56 @@ class ServiceEntityParser
         return $by . self::SEPARATOR . $index;
     }
 
+    /**
+     * @return mixed|null
+     */
     protected function getColumn()
     {
         return $this->column;
     }
 
+    /**
+     * @param string $column
+     * @return $this
+     */
+    /**
+     * @param string $column
+     * @return $this
+     */
     protected function setColumn(string $column)
     {
         $this->column = $column;
         return $this;
     }
 
+    /**
+     * @return mixed|null
+     */
     protected function getSeparator()
     {
         return $this->operator;
     }
 
+    /**
+     * @param $operator
+     * @return $this
+     */
+    /**
+     * @param $operator
+     * @return $this
+     */
     protected function setSeparator($operator)
     {
         $this->operator = $operator;
         return $this;
     }
 
+    /**
+     * @param $method
+     * @param $by
+     * @param $option
+     * @return array
+     */
     protected function stripByFront($method, $by, $option)
     {
         $method = str_starts_with($method, $option) ? substr($method, strlen($option), strlen($method)) : $method;
@@ -328,6 +448,12 @@ class ServiceEntityParser
         return [$method, $by];
     }
 
+    /**
+     * @param $method
+     * @param $by
+     * @param $option
+     * @return array
+     */
     protected function stripByEnd($method, $by, $option)
     {
         $method = str_ends_with($method, $option) ? substr($method, 0, strpos($method, $option)) : $method;
@@ -336,17 +462,32 @@ class ServiceEntityParser
         return [$method, $by];
     }
 
+    /**
+     * @param $date
+     * @param $format
+     * @return bool
+     * @throws Exception
+     */
     protected function validateDate($date, $format = 'Y-m-d H:i:s')
     {
         $d = DateTime::createFromFormat($format, $date);
         return $d && IntlDateTime::createFromDateTime($d)->format($format) == $date;
     }
 
+    /**
+     * @param string $id
+     * @return array|mixed
+     */
     public function getCustomOption(string $id)
     {
         return $this->options[$id] ?? [];
     }
 
+    /**
+     * @param string $id
+     * @param string $option
+     * @return bool
+     */
     public function findCustomOption(string $id, string $option)
     {
         return in_array($option, $this->getCustomOption($id));
@@ -365,6 +506,12 @@ class ServiceEntityParser
         $this->options[$id][] = $option;
     }
 
+    /**
+     * @param $method
+     * @param $arguments
+     * @return array
+     * @throws MappingException
+     */
     protected function __parse($method, $arguments)
     {
         $method = str_strip($method, "__");
@@ -996,6 +1143,11 @@ class ServiceEntityParser
         return [$magicFn, $magicArgs];
     }
 
+    /**
+     * @param $className
+     * @return string|null
+     * @throws Exception
+     */
     protected function getRealClassName($className): ?string
     {
         if (!class_exists($className)) {
@@ -1009,6 +1161,13 @@ class ServiceEntityParser
         return get_parent_class($className);
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param $field
+     * @param $fieldValue
+     * @return Andx|Comparison|Func|Orx|string
+     * @throws EntityNotFoundException
+     */
     protected function buildQueryExpr(QueryBuilder $queryBuilder, $field, $fieldValue)
     {
         $fieldID = str_replace(".", "_", implode("_", $field));
@@ -1521,6 +1680,16 @@ class ServiceEntityParser
 
     protected static int $i = 0;
 
+    /**
+     * @param array $criteria
+     * @param array $orderBy
+     * @param $limit
+     * @param $offset
+     * @param array $groupBy
+     * @param array $selectAs
+     * @return QueryBuilder|null
+     * @throws EntityNotFoundException
+     */
     protected function getQueryBuilder(array $criteria = [], array $orderBy = [], $limit = null, $offset = null, array $groupBy = [], array $selectAs = []): ?QueryBuilder
     {
         /**
@@ -1705,6 +1874,16 @@ class ServiceEntityParser
         return $queryBuilder->getQuery();
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param $limit
+     * @param $offset
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return Query|null
+     * @throws Exception
+     */
     protected function getQuery(array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
         $queryBuilder = $this->getQueryBuilder($criteria, $orderBy ?? [], $limit, $offset, $groupBy ?? [], $selectAs ?? []);
@@ -1745,6 +1924,15 @@ class ServiceEntityParser
         return $query;
     }
 
+    /**
+     * @param array $criteria
+     * @param string|null $mode
+     * @param array|null $orderBy
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return Query
+     * @throws Exception
+     */
     protected function getQueryWithCount(array $criteria = [], ?string $mode = self::COUNT_ALL, ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         if ($mode == self::COUNT_ALL) {
@@ -1777,6 +1965,16 @@ class ServiceEntityParser
         return $queryBuilder->getQuery();
     }
 
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param $limit
+     * @param $offset
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return Query
+     * @throws Exception
+     */
     protected function getQueryWithLength(array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         $column = $this->getAlias($this->getColumn());
@@ -1799,6 +1997,11 @@ class ServiceEntityParser
         return $queryBuilder->getQuery();
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param $selectAs
+     * @return QueryBuilder
+     */
     protected function selectAs(QueryBuilder $queryBuilder, $selectAs)
     {
         if (!$selectAs) {
@@ -1812,6 +2015,12 @@ class ServiceEntityParser
         return $queryBuilder;
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param $groupBy
+     * @return QueryBuilder
+     * @throws Exception
+     */
     protected function groupBy(QueryBuilder $queryBuilder, $groupBy)
     {
         if (!$groupBy) {
@@ -1853,6 +2062,15 @@ class ServiceEntityParser
 
     protected array $joinList = [];
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param $join
+     * @param $alias
+     * @param $conditionType
+     * @param $condition
+     * @param $indexBy
+     * @return bool
+     */
     protected function innerJoin(QueryBuilder $queryBuilder, $join, $alias = null, $conditionType = null, $condition = null, $indexBy = null): bool
     {
         if (in_array($join, $this->joinList[spl_object_hash($queryBuilder)] ?? [])) {
@@ -1865,6 +2083,15 @@ class ServiceEntityParser
         return true;
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param $join
+     * @param $alias
+     * @param $conditionType
+     * @param $condition
+     * @param $indexBy
+     * @return bool
+     */
     protected function leftJoin(QueryBuilder $queryBuilder, $join, $alias = null, $conditionType = null, $condition = null, $indexBy = null): bool
     {
         if (in_array($join, $this->joinList[spl_object_hash($queryBuilder)] ?? [])) {
@@ -1876,6 +2103,12 @@ class ServiceEntityParser
         return true;
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string|array|null $orderBy
+     * @return QueryBuilder
+     * @throws Exception
+     */
     protected function orderBy(QueryBuilder $queryBuilder, string|array|null $orderBy)
     {
         if (!$orderBy) {

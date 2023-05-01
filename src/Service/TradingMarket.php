@@ -17,6 +17,9 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ *
+ */
 class TradingMarket implements TradingMarketInterface
 {
     /**
@@ -46,6 +49,9 @@ class TradingMarket implements TradingMarketInterface
 
     protected $providers = [];
 
+    /**
+     * @return array|mixed
+     */
     public function getProviders()
     {
         return array_filter($this->providers, fn($p) => $p->getKey() !== null);
@@ -73,6 +79,14 @@ class TradingMarket implements TradingMarketInterface
         return $this->renderedCurrency;
     }
 
+    /**
+     * @param string|null $renderedCurrency
+     * @return $this
+     */
+    /**
+     * @param string|null $renderedCurrency
+     * @return $this
+     */
     public function setRenderedCurrency(?string $renderedCurrency)
     {
         $this->renderedCurrency = $renderedCurrency;

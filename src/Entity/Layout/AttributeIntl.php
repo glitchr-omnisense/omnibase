@@ -10,6 +10,8 @@ use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 
 use Base\Validator\Constraints as AssertBase;
+use League\Flysystem\FilesystemException;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * @ORM\Entity()
@@ -33,16 +35,32 @@ class AttributeIntl implements TranslationInterface
      */
     protected $value;
 
+    /**
+     * @return array|mixed|File
+     * @throws \Exception
+     */
     public function getValue()
     {
         return Uploader::getPublic($this, "value") ?? $this->value;
     }
 
+    /**
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public function getValueFile()
     {
         return Uploader::get($this, "value");
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param $value
+     * @return $this
+     */
     public function setValue($value)
     {
         $this->value = $value;
@@ -59,6 +77,14 @@ class AttributeIntl implements TranslationInterface
         return $this->class;
     }
 
+    /**
+     * @param string|null $class
+     * @return $this
+     */
+    /**
+     * @param string|null $class
+     * @return $this
+     */
     public function setClass(?string $class)
     {
         $this->class = $class;

@@ -2,86 +2,52 @@
 
 namespace Base\Twig\Extension;
 
+use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Type\EnumType;
-use Base\Service\Model\Color\Intl\Colors;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
+use Base\Service\Model\Color\Intl\Colors;
 use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\HtmlizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Base\Service\TranslatorInterface;
-use Closure;
-use DateInterval;
-use DateTime;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Type;
-use Exception;
-use ReflectionFunction;
-use RuntimeException;
-use Symfony\Bridge\Twig\Extension\AssetExtension;
-use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Base\Controller\Backend\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
+use Twig\Extension\AbstractExtension;
 use Twig\Extra\Intl\IntlExtension;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
-use function count;
-use function is_array;
-use function is_bool;
-use function is_object;
-use function is_string;
 
+/**
+ *
+ */
 final class FunctionTwigExtension extends AbstractExtension
 {
-    /**
-     * @var TranslatorInterface
-     */
     protected TranslatorInterface $translator;
 
-    /**
-     * @var MediaService
-     */
     protected MediaService $mediaService;
 
-    /**
-     * @var IconProvider
-     */
     protected IconProvider $iconProvider;
 
-    /**
-     * @var IntlExtension
-     */
     protected IntlExtension $intlExtension;
 
-    /**
-     * @var MimeTypes
-     */
     protected MimeTypes $mimeTypes;
 
-    /**
-     * @var AssetExtension
-     */
     protected AssetExtension $assetExtension;
 
-    /**
-     * @var string
-     */
     protected string $projectDir;
 
-    /**
-     * @var AdminUrlGenerator
-     */
     protected AdminUrlGenerator $adminUrlGenerator;
 
-    /**
-     * @var Environment
-     */
     protected Environment $twig;
 
     public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGenerator $adminUrlGenerator, string $projectDir)
@@ -99,7 +65,6 @@ final class FunctionTwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-
             new TwigFunction('exit', 'exit'),
             new TwigFunction('count_leaves', 'count_leaves'),
 
@@ -112,26 +77,26 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('is_countable', [$this, 'is_countable']),
             new TwigFunction('is_callable', [$this, 'is_callable']),
             new TwigFunction('call_user_func_with_defaults', [$this, 'call_user_func_with_defaults']),
-            new TwigFunction('call_user_func_if_exists', [$this, 'call_user_func_if_exists'], ["needs_environment" => true]),
+            new TwigFunction('call_user_func_if_exists', [$this, 'call_user_func_if_exists'], ['needs_environment' => true]),
             new TwigFunction('method_exists', [$this, 'method_exists']),
             new TwigFunction('static_call', [$this, 'static_call']),
             new TwigFunction('static_property', [$this, 'static_property']),
 
-            new TwigFunction('html_attributes', 'html_attributes', ["is_safe" => ['all']]),
-            new TwigFunction('render_stylesheet', [$this, 'render_stylesheet'], ["is_safe" => ["all"]]),
-            new TwigFunction('render_javascript', [$this, 'render_javascript'], ["is_safe" => ["all"]]),
+            new TwigFunction('html_attributes', 'html_attributes', ['is_safe' => ['all']]),
+            new TwigFunction('render_stylesheet', [$this, 'render_stylesheet'], ['is_safe' => ['all']]),
+            new TwigFunction('render_javascript', [$this, 'render_javascript'], ['is_safe' => ['all']]),
 
-            new TwigFunction('str_starts_with', "str_starts_with"),
-            new TwigFunction('str_ends_with', "str_ends_with"),
-            new TwigFunction('empty', "empty"),
-            new TwigFunction('property_accessor', [$this, "property_accessor"]),
-            new TwigFunction('cast', "cast"),
+            new TwigFunction('str_starts_with', 'str_starts_with'),
+            new TwigFunction('str_ends_with', 'str_ends_with'),
+            new TwigFunction('empty', 'empty'),
+            new TwigFunction('property_accessor', [$this, 'property_accessor']),
+            new TwigFunction('cast', 'cast'),
 
-            new TwigFunction('mailto', [$this, 'mailto'], ["is_safe" => ['all']]),
+            new TwigFunction('mailto', [$this, 'mailto'], ['is_safe' => ['all']]),
 
             new TwigFunction('addslashes', 'addslashes'),
             new TwigFunction('enum', [$this, 'enum']),
-            new TwigFunction('email_preview', [$this, 'email'], ['needs_context' => true])
+            new TwigFunction('email_preview', [$this, 'email'], ['needs_context' => true]),
         ];
     }
 
@@ -159,10 +124,10 @@ final class FunctionTwigExtension extends AbstractExtension
 
                 new TwigFilter('sign', 'sign'),
 
-                new TwigFilter('mailto', [$this, 'mailto'], ["is_safe" => ['all']]),
+                new TwigFilter('mailto', [$this, 'mailto'], ['is_safe' => ['all']]),
                 new TwigFilter('datetime', [$this, 'datetime'], ['needs_environment' => true]),
-                new TwigFilter('countdown', [$this, 'countdown'], ['needs_environment' => true, "is_safe" => ["all"]]),
-                new TwigFilter('progress', [$this, 'progress'], ['needs_environment' => true, "is_safe" => ["all"]]),
+                new TwigFilter('countdown', [$this, 'countdown'], ['needs_environment' => true, 'is_safe' => ['all']]),
+                new TwigFilter('progress', [$this, 'progress'], ['needs_environment' => true, 'is_safe' => ['all']]),
 
                 new TwigFilter('pickup', [$this, 'pickup']),
                 new TwigFilter('preg_split', [$this, 'preg_split']),
@@ -179,48 +144,56 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('pad', [$this, 'pad']),
                 new TwigFilter('mb_ucfirst', 'mb_ucfirst'),
                 new TwigFilter('mb_ucwords', 'mb_ucwords'),
-                new TwigFilter('second', "second"),
-                new TwigFilter('third', "third"),
-                new TwigFilter('fourth', "fourth"),
-                new TwigFilter('fifth', "fifth"),
-                new TwigFilter('empty', "empty"),
+                new TwigFilter('second', 'second'),
+                new TwigFilter('third', 'third'),
+                new TwigFilter('fourth', 'fourth'),
+                new TwigFilter('fifth', 'fifth'),
+                new TwigFilter('empty', 'empty'),
 
                 new TwigFilter('colorify', [$this, 'colorify']),
-                new TwigFilter('crudify', [$this, 'crudify'], ["is_safe" => ['all']]),
-                new TwigFilter('htmlify', [$this, 'htmlify'], ["is_safe" => ['all']])
+                new TwigFilter('crudify', [$this, 'crudify'], ['is_safe' => ['all']]),
+                new TwigFilter('htmlify', [$this, 'htmlify'], ['is_safe' => ['all']]),
             ];
     }
 
     // Used in twig environment
+
+    /**
+     * @param $entity
+     * @return string
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
     public function crudify($entity): string
     {
-        return $this->twig->render("@Base/easyadmin/crudify.html.twig", [
-            "path" => $this->adminUrlGenerator->unsetAll()
+        return $this->twig->render('@Base/easyadmin/crudify.html.twig', [
+            'path' => $this->adminUrlGenerator->unsetAll()
                 ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
                 ->setEntityId($entity->getId())
                 ->setAction(Crud::PAGE_EDIT)
                 ->includeReferrer()
-                ->generateUrl()
+                ->generateUrl(),
         ]);
     }
 
     public function htmlify(?HtmlizeInterface $object, array $options = [], ...$args): ?string
     {
-        if ($object === null) {
+        if (null === $object) {
             return null;
         }
 
         $html = $object->__toHtml($options, ...$args);
-        if ($html !== null) {
+        if (null !== $html) {
             return $html;
         }
 
         $className = get_class($object);
         while ($className) {
-            $path = str_replace("\\_", "/", camel2snake(str_lstrip($className, ["Proxies\\__CG__\\", "App\\", "Base\\"])));
+            $path = str_replace('\\_', '/', camel2snake(str_lstrip($className, ['Proxies\\__CG__\\', 'App\\', 'Base\\'])));
             try {
-                return $this->twig->render($path . ".html.twig", ["options" => $options, "entity" => $object]);
-            } catch (RuntimeException|LoaderError $e) {
+                return $this->twig->render($path . '.html.twig', ['options' => $options, 'entity' => $object]);
+            } catch (\RuntimeException|LoaderError $e) {
             }
 
             $className = get_parent_class($className);
@@ -229,9 +202,13 @@ final class FunctionTwigExtension extends AbstractExtension
         return null;
     }
 
+    /**
+     * @param array $context
+     * @return bool
+     */
     public function email(array $context)
     {
-        return !array_key_exists("email", $context);
+        return !array_key_exists('email', $context);
     }
 
     public function is_linkable(mixed $value): bool
@@ -239,6 +216,12 @@ final class FunctionTwigExtension extends AbstractExtension
         return $value instanceof LinkableInterface;
     }
 
+    /**
+     * @param mixed $value
+     * @param bool $syntax_only
+     * @param $callable_name
+     * @return bool
+     */
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool
     {
         return is_callable($value, $syntax_only, $callable_name);
@@ -246,19 +229,31 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function nargs(callable $fn): int
     {
-        return (new ReflectionFunction($fn))->getNumberOfParameters();
+        return (new \ReflectionFunction($fn))->getNumberOfParameters();
     }
 
+    /**
+     * @param callable $fn
+     * @param ...$args
+     * @return mixed
+     */
     public function call_user_func_with_defaults(callable $fn, ...$args)
     {
         return call_user_func_with_defaults($fn, ...$args);
     }
 
+    /**
+     * @param Environment $environment
+     * @param string $fn
+     * @param array $args
+     * @return string
+     */
     public function call_user_func_if_exists(Environment $environment, string $fn, array $args)
     {
         if (false === $func = $environment->getFunction($fn)) {
             return '';
         }
+
         return $func->getCallable()(...array_values($args));
     }
 
@@ -267,23 +262,28 @@ final class FunctionTwigExtension extends AbstractExtension
         return array_pad($array, $length, $value);
     }
 
+    /**
+     * @param array $array
+     * @param $arrow
+     * @return array|mixed
+     */
     public function transforms(array $array = [], $arrow = null)
     {
-        return $arrow instanceof Closure ? $arrow($array) : $array;
+        return $arrow instanceof \Closure ? $arrow($array) : $array;
     }
 
     public function enum(null|string|array $class): null|Type|array
     {
-        if (is_array($class)) {
+        if (\is_array($class)) {
             return array_map(fn($c) => $this->enum($c), $class);
         }
 
         if (class_exists($class) && is_instanceof($class, EnumType::class)) {
             return new $class();
         }
+
         return Type::hasType($class) ? Type::getType($class) : null;
     }
-
 
     public function colorify(null|string|array|ColorizeInterface $color): null|string|array
     {
@@ -298,7 +298,7 @@ final class FunctionTwigExtension extends AbstractExtension
             $color = $color->__colorize() ?? $color->__colorizeStatic();
         }
 
-        if (is_array($color)) {
+        if (\is_array($color)) {
             $color = array_filter(array_map(fn($i) => $this->colorify($i), $color));
             if ($color) {
                 return array_merge(...$color);
@@ -308,27 +308,40 @@ final class FunctionTwigExtension extends AbstractExtension
         return null;
     }
 
+    /**
+     * @param Environment $env
+     * @param $array
+     * @param $arrow
+     * @return array|\CallbackFilterIterator
+     * @throws RuntimeError
+     */
     public function filter(Environment $env, $array = [], $arrow = null)
     {
-        if ($arrow === null) {
+        if (null === $arrow) {
             $arrow = function ($el) {
-                return $el !== null && $el !== false && $el !== "";
+                return null !== $el && false !== $el && '' !== $el;
             };
         }
 
         return twig_array_filter($env, $array, $arrow);
     }
 
+    /**
+     * @param $class
+     * @param $propertyName
+     * @return mixed
+     * @throws \Exception
+     */
     public function static_property($class, $propertyName)
     {
-        if (is_object($class)) {
+        if (\is_object($class)) {
             $class = get_class($class);
         }
         if (!class_exists($class)) {
-            throw new Exception("Cannot call static property $propertyName on \"$class\": invalid class");
+            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid class");
         }
         if (!property_exists($class, $propertyName)) {
-            throw new Exception("Cannot call static property $propertyName on \"$class\": invalid property");
+            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid property");
         }
 
         return $class::$$propertyName;
@@ -336,19 +349,21 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function property_accessor(mixed $object, array|string $propertyName, bool $enableMagicCall = false): mixed
     {
-        if ($object == null) {
+        if (null == $object) {
             return null;
         }
 
         // Shape property path
-        $propertyPath = is_string($propertyName) ? explode(".", $propertyName) : $propertyName;
+        $propertyPath = \is_string($propertyName) ? explode('.', $propertyName) : $propertyName;
         if (!$propertyPath) {
             return $object;
         }
 
         // Special case for array
-        if ($object instanceof Collection) $object = $object->toArray();
-        if (is_array($object)) {
+        if ($object instanceof Collection) {
+            $object = $object->toArray();
+        }
+        if (\is_array($object)) {
             $id = array_unshift($object);
             $object = $object[$id] ?? null;
         }
@@ -366,9 +381,15 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         $object = $propertyAccessor->getValue($object, $propertyName);
+
         return $this->property_accessor($object, tail($propertyPath)); // Recursive processing
     }
 
+    /**
+     * @param string $hex
+     * @return mixed|null
+     * @throws \Exception
+     */
     public function color_name(string $hex)
     {
         $color = hex2rgb($hex);
@@ -381,24 +402,46 @@ final class FunctionTwigExtension extends AbstractExtension
         asort($closestNames);
 
         $closestNames = array_keys($closestNames);
+
         return begin($closestNames);
     }
 
+    /**
+     * @param $object
+     * @return bool
+     */
     public function is_countable($object)
     {
         return is_countable($object);
     }
 
+    /**
+     * @param $object
+     * @param $method
+     * @return string|null
+     */
     public function get_class($object, $method)
     {
         return class_exists($object) ? get_class($object) : null;
     }
 
+    /**
+     * @param $object
+     * @param $method
+     * @return bool
+     */
     public function method_exists($object, $method)
     {
         return $object && method_exists($object, $method);
     }
 
+    /**
+     * @param string $subject
+     * @param string $pattern
+     * @param int $limit
+     * @param int $flags
+     * @return array|false|string[]
+     */
     public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0)
     {
         return preg_split($pattern, $subject, $limit, $flags);
@@ -409,24 +452,37 @@ final class FunctionTwigExtension extends AbstractExtension
         return is_instanceof($object, $class);
     }
 
+    /**
+     * @param array|null $array
+     * @param string $separator
+     * @return string|null
+     */
     public function joinIfExists(?array $array, string $separator)
     {
-        if ($array === null) {
+        if (null === $array) {
             return null;
         }
+
         return implode($separator, array_filter($array));
     }
 
+    /**
+     * @param $class
+     * @param $method
+     * @param ...$args
+     * @return mixed
+     * @throws \Exception
+     */
     public function static_call($class, $method, ...$args)
     {
-        if (is_object($class)) {
+        if (\is_object($class)) {
             $class = get_class($class);
         }
         if (!class_exists($class)) {
-            throw new Exception("Cannot call static method $method on \"$class\": invalid class");
+            throw new \Exception("Cannot call static method $method on \"$class\": invalid class");
         }
         if (!method_exists($class, $method)) {
-            throw new Exception("Cannot call static method $method on \"$class\": invalid method");
+            throw new \Exception("Cannot call static method $method on \"$class\": invalid method");
         }
 
         return forward_static_call_array([$class, $method], $args);
@@ -434,37 +490,49 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function render_stylesheet(string $href, array $attributes = [], bool $keepIfNotFound = true): string
     {
-        $attributes["rel"] = 'stylesheet';
-        $attributes["type"] = 'text/css';
+        $attributes['rel'] = 'stylesheet';
+        $attributes['type'] = 'text/css';
 
         $href = $this->assetExtension->getAssetUrl($href);
-        $isUrl = filter_var($this->projectDir . "/public" . $href, FILTER_VALIDATE_URL) === true;
-        $isEmpty = !file_exists($this->projectDir . "/public" . $href) || filesize($this->projectDir . "/public" . $href) == 0;
+        $isUrl = true === filter_var($this->projectDir . '/public' . $href, FILTER_VALIDATE_URL);
+        $isEmpty = !file_exists($this->projectDir . '/public' . $href) || 0 == filesize($this->projectDir . '/public' . $href);
         if (!$isUrl && $isEmpty && !$keepIfNotFound) {
-            return "";
+            return '';
         }
 
-        return "<link href='" . $href . "' " . html_attributes($attributes) . ">";
+        return "<link href='" . $href . "' " . html_attributes($attributes) . '>';
     }
 
     public function render_javascript(string $src, array $attributes = [], bool $keepIfNotFound = true): string
     {
         $src = $this->assetExtension->getAssetUrl($src);
-        $isUrl = filter_var($this->projectDir . "/public" . $src, FILTER_VALIDATE_URL) === true;
-        $isEmpty = !file_exists($this->projectDir . "/public" . $src) || filesize($this->projectDir . "/public" . $src) == 0;
+        $isUrl = true === filter_var($this->projectDir . '/public' . $src, FILTER_VALIDATE_URL);
+        $isEmpty = !file_exists($this->projectDir . '/public' . $src) || 0 == filesize($this->projectDir . '/public' . $src);
         if (!$isUrl && $isEmpty && !$keepIfNotFound) {
-            return "";
+            return '';
         }
 
-        return "<script src='" . $src . "' " . html_attributes($attributes) . "></script>";
+        return "<script src='" . $src . "' " . html_attributes($attributes) . '></script>';
     }
 
-    public function datetime(Environment $env, DateTime|DateInterval|int|string|null $datetime, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
+    /**
+     * @param Environment $env
+     * @param \DateTime|\DateInterval|int|string|null $datetime
+     * @param array|string $pattern
+     * @param string|null $dateFormat
+     * @param string|null $timeFormat
+     * @param $timezone
+     * @param string $calendar
+     * @param string|null $locale
+     * @return array|string
+     * @throws RuntimeError
+     */
+    public function datetime(Environment $env, \DateTime|\DateInterval|int|string|null $datetime, array|string $pattern = 'YYYY-MM-dd HH:mm:ss', ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
     {
-        if ($locale === null) {
+        if (null === $locale) {
             $locale = $this->translator->getLocale();
         }
-        if (is_array($pattern)) {
+        if (\is_array($pattern)) {
             $array = [];
             foreach ($pattern as $p) {
                 $array[] = $this->datetime($env, $datetime, $p, $dateFormat, $timeFormat, $timezone, $calendar, $locale);
@@ -474,111 +542,139 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         $now = time();
-        if ($datetime == null) {
+        if (null == $datetime) {
             return $pattern;
         }
-        if ($datetime instanceof DateTime) {
+        if ($datetime instanceof \DateTime) {
             $datetime = $datetime->getTimestamp();
         }
-        if ($datetime instanceof DateInterval) {
-            $datetime = $now + (int)$datetime->format("s");
+        if ($datetime instanceof \DateInterval) {
+            $datetime = $now + (int)$datetime->format('s');
         }
-        if (is_string($datetime)) {
+        if (\is_string($datetime)) {
             return mb_strtolower($datetime);
         }
 
         return mb_strtolower($this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale));
     }
 
+    /**
+     * @param array|null $array
+     * @param int $i
+     * @return array|null
+     */
     public function pickup(?array $array, int $i)
     {
-        if ($array === null) {
+        if (null === $array) {
             return null;
         }
 
-        $keys = array_rand($array, min(count($array), $i)) ?? [];
-        if (!is_array($keys)) {
+        $keys = array_rand($array, min(\count($array), $i)) ?? [];
+        if (!\is_array($keys)) {
             $keys = [$keys];
         }
 
         return array_filter($array, fn($k) => in_array($k, $keys), ARRAY_FILTER_USE_KEY);
     }
 
-    public function countdown(Environment $env, DateTime|DateInterval|int|string|null $datetime, array $parameters = []): string
+    public function countdown(Environment $env, \DateTime|\DateInterval|int|string|null $datetime, array $parameters = []): string
     {
         $now = time();
-        if ($datetime instanceof DateTime) {
+        if ($datetime instanceof \DateTime) {
             $timestamp = $datetime->getTimestamp();
-        } elseif ($datetime instanceof DateInterval) {
-            $timestamp = $now + (int)$datetime->format("s");
+        } elseif ($datetime instanceof \DateInterval) {
+            $timestamp = $now + (int)$datetime->format('s');
         } else {
             $timestamp = $datetime;
         }
 
-        return $env->render("@Base/progress/countdown.html.twig", array_merge($parameters, [
-            "id" => rand(),
-            "datetime" => $datetime,
-            "countdown" => $timestamp - $now,
-            "timestamp" => $timestamp,
+        return $env->render('@Base/progress/countdown.html.twig', array_merge($parameters, [
+            'id' => rand(),
+            'datetime' => $datetime,
+            'countdown' => $timestamp - $now,
+            'timestamp' => $timestamp,
         ]));
     }
 
-    public function progress(Environment $env, DateTime $start, DateTime $end, array $parameters = []): string
+    public function progress(Environment $env, \DateTime $start, \DateTime $end, array $parameters = []): string
     {
-        return $env->render("@Base/progress/progressbar.html.twig", array_merge($parameters, [
-            "id" => rand(),
-            "progress-start" => $start->getTimestamp(),
-            "progress-end" => $end->getTimestamp()
+        return $env->render('@Base/progress/progressbar.html.twig', array_merge($parameters, [
+            'id' => rand(),
+            'progress-start' => $start->getTimestamp(),
+            'progress-end' => $end->getTimestamp(),
         ]));
     }
 
-    public function title(string $name, array $parameters = array(), ?string $domain = "controllers", ?string $locale = null): string
+    public function title(string $name, array $parameters = [], ?string $domain = 'controllers', ?string $locale = null): string
     {
-        $ret = $this->translator->trans($name . ".title", $parameters, $domain, $locale);
-        return $ret == $name . ".title" ? "@" . $domain . "." . $ret : $ret;
+        $ret = $this->translator->trans($name . '.title', $parameters, $domain, $locale);
+
+        return $ret == $name . '.title' ? '@' . $domain . '.' . $ret : $ret;
     }
 
-    public function excerpt(string $name, array $parameters = array(), ?string $domain = "controllers", ?string $locale = null): string
+    public function excerpt(string $name, array $parameters = [], ?string $domain = 'controllers', ?string $locale = null): string
     {
-        $ret = $this->translator->trans($name . ".excerpt", $parameters, $domain, $locale);
-        return $ret == $name . ".excerpt" ? "@" . $domain . "." . $ret : $ret;
+        $ret = $this->translator->trans($name . '.excerpt', $parameters, $domain, $locale);
+
+        return $ret == $name . '.excerpt' ? '@' . $domain . '.' . $ret : $ret;
     }
 
+    /**
+     * @param $date
+     * @param $diff
+     * @return bool
+     * @throws \Exception
+     */
     public function less_than($date, $diff): bool
     {
-        if (is_string($date)) {
-            $date = new DateTime($date);
+        if (\is_string($date)) {
+            $date = new \DateTime($date);
         }
-        if ($date instanceof DateTime) {
+        if ($date instanceof \DateTime) {
             $date = $date->getTimestamp();
         }
-        if (is_string($diff)) {
-            $diff = new DateTime($diff);
+        if (\is_string($diff)) {
+            $diff = new \DateTime($diff);
         }
-        if ($diff instanceof DateTime) {
+        if ($diff instanceof \DateTime) {
             $diff = $diff->getTimestamp() - time();
         }
 
         $deltaTime = time() - $date;
+
         return $deltaTime < $diff;
     }
 
+    /**
+     * @param $date
+     * @param int $diff
+     * @return bool
+     * @throws \Exception
+     */
     public function greater_than($date, int $diff): bool
     {
-        if (is_string($date)) {
-            $date = new DateTime($date);
+        if (\is_string($date)) {
+            $date = new \DateTime($date);
         }
-        if ($date instanceof DateTime) {
+        if ($date instanceof \DateTime) {
             $date = $date->getTimestamp();
         }
-        if ($diff instanceof DateTime) {
+        if ($diff instanceof \DateTime) {
             $diff = $diff->getTimestamp() - time();
         }
 
         $deltaTime = time() - $date;
+
         return $deltaTime > $diff;
     }
 
+    /**
+     * @param $string
+     * @param $maxLength
+     * @param $replacement
+     * @param $truncAtSpace
+     * @return string
+     */
     public function truncate($string, $maxLength = 30, $replacement = '', $truncAtSpace = false): string
     {
         $maxLength -= strlen($replacement);
@@ -592,20 +688,26 @@ final class FunctionTwigExtension extends AbstractExtension
             $maxLength = $space_position;
         }
 
-        return substr_replace($string, $replacement, $maxLength) . "..";
+        return substr_replace($string, $replacement, $maxLength) . '..';
     }
 
+    /**
+     * @param string|null $content
+     * @param $pattern
+     * @param $gate
+     * @return array|string|string[]|null
+     */
     public function highlight(?string $content, $pattern, $gate = 5)
     {
         // Empty entry
-        if ($content == null) {
+        if (null == $content) {
             return null;
         }
-        if ($pattern == null) {
+        if (null == $pattern) {
             return null;
         }
 
-        $highlightContent = "";
+        $highlightContent = '';
         if ($gate < 0) {
             $highlightContent = preg_replace_callback(
                 '/([^ ]*)(' . $pattern . ')([^ ]*)/im',
@@ -623,16 +725,16 @@ final class FunctionTwigExtension extends AbstractExtension
                 $content
             );
         } elseif (preg_match_all('/((?:[^ ]+ ){0,' . $gate . '})([^ ]*)(' . $pattern . ')([^ ]*)((?: [^ ]+){0,' . $gate . '})/im', $content, $matches)) {
-            $priorPatternGate = $matches[1][0] ?? "";
-            $priorPattern = $matches[2][0] ?? "";
-            $pattern = $matches[3][0] ?? ""; //(Case insensitive)
-            $afterPattern = $matches[4][0] ?? "";
-            $afterPatternGate = $matches[5][0] ?? "";
+            $priorPatternGate = $matches[1][0] ?? '';
+            $priorPattern = $matches[2][0] ?? '';
+            $pattern = $matches[3][0] ?? ''; // (Case insensitive)
+            $afterPattern = $matches[4][0] ?? '';
+            $afterPatternGate = $matches[5][0] ?? '';
 
             $sentence = $priorPatternGate . $priorPattern . $pattern . $afterPattern . $afterPatternGate;
 
             if (!str_starts_with($content, $sentence)) {
-                $highlightContent .= "[..] ";
+                $highlightContent .= '[..] ';
             }
 
             $highlightContent .= "<span class='highlightGate'>";
@@ -641,27 +743,31 @@ final class FunctionTwigExtension extends AbstractExtension
             $highlightContent .= $priorPattern;
             $highlightContent .= "<span class='highlightPattern'>";
             $highlightContent .= $pattern;
-            $highlightContent .= "</span>";
+            $highlightContent .= '</span>';
             $highlightContent .= $afterPattern;
-            $highlightContent .= "</span>";
+            $highlightContent .= '</span>';
             $highlightContent .= $afterPatternGate;
-            $highlightContent .= "</span>";
+            $highlightContent .= '</span>';
 
             if (!str_ends_with($content, $sentence)) {
-                $highlightContent .= " [..]";
+                $highlightContent .= ' [..]';
             }
         }
 
-        return (empty($highlightContent) ? null : $highlightContent);
+        return empty($highlightContent) ? null : $highlightContent;
     }
 
+    /**
+     * @param $value
+     * @return string
+     */
     public function stringify($value): string
     {
         if (null === $value) {
             return '';
         }
 
-        if (is_string($value)) {
+        if (\is_string($value)) {
             return $value;
         }
 
@@ -669,15 +775,15 @@ final class FunctionTwigExtension extends AbstractExtension
             return (string)$value;
         }
 
-        if (is_bool($value)) {
+        if (\is_bool($value)) {
             return $value ? 'true' : 'false';
         }
 
-        if (is_array($value)) {
-            return sprintf('Array (%d items)', count($value));
+        if (\is_array($value)) {
+            return sprintf('Array (%d items)', \count($value));
         }
 
-        if (is_object($value)) {
+        if (\is_object($value)) {
             if (is_stringeable($value)) {
                 return (string)$value;
             }
@@ -694,8 +800,13 @@ final class FunctionTwigExtension extends AbstractExtension
         return '';
     }
 
+    /**
+     * @param string $address
+     * @param string $label
+     * @return string
+     */
     public function mailto(string $address, string $label)
     {
-        return "<a href='mailto:" . $address . "'>" . $label . "</a>";
+        return "<a href='mailto:" . $address . "'>" . $label . '</a>';
     }
 }

@@ -4,12 +4,11 @@ namespace Base\Twig\Loader;
 
 use Base\Routing\RouterInterface;
 use Base\Traits\BaseTrait;
-use Twig\Loader\ChainLoader;
-use Twig\Environment;
-
 use Base\Twig\AppVariable;
 use Base\Twig\Variable\RandomVariable;
-use Exception;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Loader\ChainLoader;
 
 /**
  * Loads template from the filesystem.
@@ -20,19 +19,17 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 {
     use BaseTrait;
 
-    /**
-     * @var Environment
-     */
     protected Environment $twig;
 
-    /**
-     * @var RouterInterface
-     */
     protected RouterInterface $router;
 
     /**
-     * @param string|array $paths A path or an array of paths where to look for templates
-     * @param string|null $bundlePath The root path common to all relative paths (null for getcwd())
+     * @param \Twig\Loader\FilesystemLoader $defaultLoader
+     * @param RouterInterface $router
+     * @param Environment $twig
+     * @param AppVariable $appVariable
+     * @param RandomVariable $randomVariable
+     * @throws LoaderError
      */
     public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, RouterInterface $router, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable)
     {
@@ -42,19 +39,19 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $baseService = $this->getService();
 
         // Add base service to the default variables
-        $this->twig->addGlobal("server", $_SERVER);
+        $this->twig->addGlobal('server', $_SERVER);
 
-        $this->twig->addGlobal("random", $randomVariable);
-        $this->twig->addGlobal("base", $baseService);
-        $this->twig->addGlobal("app", $appVariable);
+        $this->twig->addGlobal('random', $randomVariable);
+        $this->twig->addGlobal('base', $baseService);
+        $this->twig->addGlobal('app', $appVariable);
 
         // Setup custom loader, to prevent the known issues of the default symfony TwigLoader
         // 1/ Cannot override <form_div_layout class="html twig">
         // 2/ Infinite loop when using {%use%}
         $projectDir = $baseService->getProjectDir();
-        $useCustomLoader = $baseService->getParameterBag("base.twig.use_custom");
+        $useCustomLoader = $baseService->getParameterBag('base.twig.use_custom');
 
-        $bundlePath = $baseService->getParameterBag("base.twig.default_path");
+        $bundlePath = $baseService->getParameterBag('base.twig.default_path');
         parent::__construct([], $bundlePath);
 
         $loaders = $this->twig->getLoader();
@@ -78,27 +75,27 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
         // Add @Twig, @Assets and @Layout variables
         if (!$this->router->isProfiler()) {
-            $this->prependPath($bundlePath . "/inspector", "WebProfiler");
+            $this->prependPath($bundlePath . '/inspector', 'WebProfiler');
         }
 
-        $this->prependPath($bundlePath . "/easyadmin", "EasyAdmin");
-        $this->prependPath($bundlePath . "/notifier");
+        $this->prependPath($bundlePath . '/easyadmin', 'EasyAdmin');
+        $this->prependPath($bundlePath . '/notifier');
         $this->prependPath($bundlePath);
 
-        $this->prependPath($projectDir . "/src", "App");
-        $this->prependPath($projectDir . "/src/Controller", "Controller");
-        $this->prependPath($projectDir . "/public", "Public");
-        $this->prependPath($projectDir . "/vendor/symfony/twig-bridge/Resources/views", "Twig");
-        $this->prependPath($projectDir . "/templates");
+        $this->prependPath($projectDir . '/src', 'App');
+        $this->prependPath($projectDir . '/src/Controller', 'Controller');
+        $this->prependPath($projectDir . '/public', 'Public');
+        $this->prependPath($projectDir . '/vendor/symfony/twig-bridge/Resources/views', 'Twig');
+        $this->prependPath($projectDir . '/templates');
 
         // Add additional @Namespace variables
-        $paths = $baseService->getParameterBag("base.twig.paths") ?? [];
+        $paths = $baseService->getParameterBag('base.twig.paths') ?? [];
         foreach ($paths as $entry) {
-            $namespace = $entry["namespace"] ?? self::MAIN_NAMESPACE;
+            $namespace = $entry['namespace'] ?? self::MAIN_NAMESPACE;
 
-            $path = $entry["path"] ?? null;
+            $path = $entry['path'] ?? null;
             if (empty($path)) {
-                throw new Exception("Missing path variable for @" . $namespace . " in \"base.twig.paths\"");
+                throw new \Exception('Missing path variable for @' . $namespace . ' in "base.twig.paths"');
             }
 
             $this->prependPath($path, $namespace);

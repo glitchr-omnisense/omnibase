@@ -7,6 +7,9 @@ use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 
+/**
+ *
+ */
 class TrackingPolicySubscriber implements EventSubscriberInterface
 {
     /**
@@ -27,7 +30,7 @@ class TrackingPolicySubscriber implements EventSubscriberInterface
     public function loadClassMetadata(LoadClassMetadataEventArgs $args)
     {
         /**
-         * @var ClassMetadata
+         * @var ClassMetadata $args
          */
         $classMetadata = $args->getClassMetadata();
 

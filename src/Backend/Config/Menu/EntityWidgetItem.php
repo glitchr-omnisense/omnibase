@@ -19,6 +19,9 @@ use function gettype;
 use function in_array;
 use function is_string;
 
+/**
+ *
+ */
 final class EntityWidgetItem implements MenuItemInterface
 {
     use MenuItemTrait;
@@ -58,6 +61,14 @@ final class EntityWidgetItem implements MenuItemInterface
         return $this;
     }
 
+    /**
+     * @param $entityId
+     * @return $this
+     */
+    /**
+     * @param $entityId
+     * @return $this
+     */
     public function setEntityId($entityId): self
     {
         $this->dto->setRouteParameters(array_merge(
@@ -92,6 +103,10 @@ final class EntityWidgetItem implements MenuItemInterface
         return $this;
     }
 
+    /**
+     * @return null
+     * @throws Exception
+     */
     public function generateUrl()
     {
         if (WidgetItem::$adminUrlGenerator == null) {
@@ -114,7 +129,7 @@ final class EntityWidgetItem implements MenuItemInterface
             // 1. if CRUD controller is defined, use it...
             if (null !== $crudControllerFqcn) {
                 WidgetItem::$adminUrlGenerator->setController($crudControllerFqcn);
-            // 2. ...otherwise, find the CRUD controller from the entityFqcn
+                // 2. ...otherwise, find the CRUD controller from the entityFqcn
             } else {
                 $crudControllers = WidgetItem::$adminContextProvider->getContext()->getCrudControllers();
                 if (null === $controllerFqcn = AbstractCrudController::getCrudControllerFqcn($entityFqcn)) {

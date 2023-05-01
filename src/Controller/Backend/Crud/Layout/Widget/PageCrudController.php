@@ -9,6 +9,9 @@ use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
 use Base\Entity\Layout\Widget\Page;
 use Base\Field\SelectField;
 
+/**
+ *
+ */
 class PageCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string

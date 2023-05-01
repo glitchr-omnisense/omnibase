@@ -10,6 +10,9 @@ use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ *
+ */
 class SitemapController extends AbstractController
 {
     use BaseTrait;
@@ -24,6 +27,6 @@ class SitemapController extends AbstractController
         return $sitemap
             ->setHostname($hostname)
             ->registerAnnotations()
-            ->serve('sitemap.'.$extension.'.twig');
+            ->serve('sitemap.' . $extension . '.twig');
     }
 }

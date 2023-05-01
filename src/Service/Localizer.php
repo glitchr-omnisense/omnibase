@@ -14,6 +14,9 @@ use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 use Symfony\Component\Intl\Timezones;
 
+/**
+ *
+ */
 class Localizer extends AbstractLocalCache implements LocalizerInterface
 {
     public const LOCALE_FORMAT = "xx-XX";
@@ -36,11 +39,20 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
     protected bool $localeHasChanged = false;
 
+    /**
+     * @return bool
+     */
     public function localeHasChanged()
     {
         return $this->localeHasChanged;
     }
 
+    /**
+     * @return $this
+     */
+    /**
+     * @return $this
+     */
     public function markAsChanged()
     {
         $this->localeHasChanged = true;
@@ -68,7 +80,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     }
 
     /**
-     * @var TranslatorInterface
+     * @var TranslatorInterface|null
      */
     protected ?TranslatorInterface $translator = null;
 
@@ -107,6 +119,9 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
     private static ?array $locales = null;
 
+    /**
+     * @return array|null
+     */
     public static function getLocales()
     {
         if (self::$locales === null) {
@@ -156,6 +171,18 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         return self::normalizeLocale($locale ?? $this->translator->getLocale());
     }
 
+    /**
+     * @param string $locale
+     * @param Request|null $request
+     * @return $this
+     * @throws Exception
+     */
+    /**
+     * @param string $locale
+     * @param Request|null $request
+     * @return $this
+     * @throws Exception
+     */
     public function setLocale(string $locale, ?Request $request = null)
     {
         $currentLocale = $this->getLocale();
@@ -329,6 +356,10 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         return Timezones::getGmtOffset($timezone);
     }
 
+    /**
+     * @param string $countryCode
+     * @return array
+     */
     public static function __toTimezone(string $countryCode)
     {
         $alpha2country = Countries::getAlpha2Code($countryCode);
@@ -345,6 +376,11 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         return $this->country ?? $this->getLocaleCountry();
     }
 
+    /**
+     * @param string $countryCode
+     * @param string|null $displayLocale
+     * @return false|string
+     */
     public function getCountryName(string $countryCode, ?string $displayLocale = null)
     {
         return Locale::getDisplayRegion($countryCode, $displayLocale);
@@ -361,6 +397,10 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
      */
     protected string $currency;
 
+    /**
+     * @param string $currency
+     * @return string
+     */
     public static function __toSymbol(string $currency)
     {
         return Currencies::getSymbol($currency);

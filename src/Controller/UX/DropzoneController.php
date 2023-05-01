@@ -60,6 +60,9 @@ class DropzoneController extends AbstractController
         $this->filesystem = new Filesystem();
     }
 
+    /**
+     * @return string
+     */
     public function getCacheDir()
     {
         return $this->cacheDir;

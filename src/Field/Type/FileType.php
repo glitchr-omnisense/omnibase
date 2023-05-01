@@ -33,6 +33,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Traversable;
 
+/**
+ *
+ */
 class FileType extends AbstractType implements DataMapperInterface
 {
     /**
@@ -406,6 +409,11 @@ class FileType extends AbstractType implements DataMapperInterface
         }
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms): void
     {
         // there is no data yet, so nothing to prepopulate
@@ -436,6 +444,11 @@ class FileType extends AbstractType implements DataMapperInterface
         $fileForm->setData($viewData);
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     */
     public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $childForms = iterator_to_array($forms);

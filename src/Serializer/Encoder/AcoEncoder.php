@@ -6,6 +6,9 @@ use Base\Serializer\Aco;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
+/**
+ *
+ */
 class AcoEncoder implements EncoderInterface, DecoderInterface
 {
     public const FORMAT = 'aco';
@@ -14,6 +17,7 @@ class AcoEncoder implements EncoderInterface, DecoderInterface
     {
         return self::FORMAT === $format;
     }
+
     public function encode(mixed $data, string $format, array $context = []): string
     {
         return Aco::dump($data, $context["flags"] ?? 0);
@@ -23,6 +27,7 @@ class AcoEncoder implements EncoderInterface, DecoderInterface
     {
         return self::FORMAT === $format;
     }
+
     public function decode(string $data, string $format, array $context = []): mixed
     {
         return Aco::parse($data, $context["flags"] ?? 0);

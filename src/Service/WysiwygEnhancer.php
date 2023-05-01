@@ -6,6 +6,9 @@ use Base\Twig\Environment;
 use DOMDocument;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
+/**
+ *
+ */
 class WysiwygEnhancer implements WysiwygEnhancerInterface
 {
     protected $twig;

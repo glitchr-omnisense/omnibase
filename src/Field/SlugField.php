@@ -2,11 +2,13 @@
 
 namespace Base\Field;
 
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Base\Field\Type\SlugType;
-
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 final class SlugField implements FieldInterface
 {
     use FieldTrait;
@@ -26,31 +28,34 @@ final class SlugField implements FieldInterface
             ->showLeadingHash()
             ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)
             ->setCustomOption(self::OPTION_UNLOCK_CONFIRMATION_MESSAGE, null)
-            ->addCssClass('field-text')
-        ;
+            ->addCssClass('field-text');
     }
 
     public function setTargetFieldName(string $fieldName): self
     {
         $this->setCustomOption(self::OPTION_TARGET_FIELD_NAME, $fieldName);
+
         return $this;
     }
 
     public function setSeparator(string $separator): self
     {
-        $this->setFormTypeOption("separator", $separator);
+        $this->setFormTypeOption('separator', $separator);
+
         return $this;
     }
 
     public function keep(string $keep): self
     {
-        $this->setFormTypeOption("keep", $keep);
+        $this->setFormTypeOption('keep', $keep);
+
         return $this;
     }
 
     public function uppercase(bool $upper = true): self
     {
-        $this->setFormTypeOption("upper", $upper);
+        $this->setFormTypeOption('upper', $upper);
+
         return $this;
     }
 
@@ -64,6 +69,7 @@ final class SlugField implements FieldInterface
     public function showLeadingHash(bool $show = true): self
     {
         $this->setCustomOption(self::OPTION_LEADING_HASH, $show);
+
         return $this;
     }
 }

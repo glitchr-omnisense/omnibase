@@ -6,6 +6,9 @@ use App\Enum\UserRole;
 use Base\Field\Type\RoleType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
+/**
+ *
+ */
 class RoleField extends SelectField
 {
     public static function new(string $propertyName, ?string $label = null): self

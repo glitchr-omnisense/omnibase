@@ -6,6 +6,9 @@ use Dompdf\Dompdf;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+/**
+ *
+ */
 class PdfResponse extends Response
 {
     public function __construct(string|Response $data = null, int $status = 200, array $headers = [])
@@ -44,7 +47,7 @@ class PdfResponse extends Response
      *     return JsonResponse::fromJsonString('{"key": "value"}')
      *         ->setSharedMaxAge(300);
      *
-     * @param string $data The JSON response string
+     * @param string $source
      * @param int $status The response status code
      * @param array $headers An array of response headers
      *

@@ -8,21 +8,38 @@ use Imagine\Filter\Basic\Autorotate;
 use Imagine\Filter\Basic\WebOptimization;
 use Imagine\Image\ImageInterface;
 
+/**
+ *
+ */
 class WebpFilter extends WebOptimization implements BitmapFilterInterface
 {
     protected array $filters;
 
+    /**
+     * @return array|string|null
+     */
     public function __toString()
     {
         $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
         return path_suffix("", $pathSuffixes);
     }
 
+    /**
+     * @return array|mixed
+     */
     public function getFilters()
     {
         return $this->filters;
     }
 
+    /**
+     * @param FilterInterface $filter
+     * @return $this
+     */
+    /**
+     * @param FilterInterface $filter
+     * @return $this
+     */
     public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;
@@ -57,6 +74,14 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
         return $this->path;
     }
 
+    /**
+     * @param string|null $path
+     * @return $this|mixed
+     */
+    /**
+     * @param string|null $path
+     * @return $this
+     */
     public function setPath(?string $path)
     {
         $this->path = $path;

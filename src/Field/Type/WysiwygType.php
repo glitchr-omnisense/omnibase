@@ -11,6 +11,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
+/**
+ *
+ */
 class WysiwygType extends AbstractType
 {
     /** @var Environment */
@@ -72,6 +75,10 @@ class WysiwygType extends AbstractType
         ]);
     }
 
+    /**
+     * @param $view
+     * @return string|null
+     */
     public function getFormID($view): ?string
     {
         $parent = $view->parent;

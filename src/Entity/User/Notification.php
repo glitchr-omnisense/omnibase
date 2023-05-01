@@ -259,6 +259,14 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
+    /**
+     * @param bool $isRead
+     * @return $this
+     */
+    /**
+     * @param bool $isRead
+     * @return $this
+     */
     public function markAsRead(bool $isRead)
     {
         return $this->setIsRead($isRead);
@@ -309,11 +317,22 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      */
     protected $markAsAdmin = false;
 
+    /**
+     * @return bool|mixed
+     */
     public function isMarkAsAdmin()
     {
         return $this->markAsAdmin;
     }
 
+    /**
+     * @param bool $markAsAdmin
+     * @return $this
+     */
+    /**
+     * @param bool $markAsAdmin
+     * @return $this
+     */
     public function markAsAdmin(bool $markAsAdmin = true)
     {
         $this->markAsAdmin = $markAsAdmin;
@@ -325,6 +344,10 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      */
     protected $context = [];
 
+    /**
+     * @param array $additionalContext
+     * @return array
+     */
     public function getContext(array $additionalContext = [])
     {
         if ($additionalContext) {
@@ -333,6 +356,16 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this->context;
     }
 
+    /**
+     * @param string $key
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param string $key
+     * @param $value
+     * @return $this
+     */
     public function addContextKey(string $key, $value = null): self
     {
         return $this->addContext([$key => $value]);
@@ -375,11 +408,24 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     /* Handle custom emails */
     protected $htmlTemplate = "";
 
+    /**
+     * @return mixed|string
+     */
     public function getHtmlTemplate()
     {
         return $this->htmlTemplate;
     }
 
+    /**
+     * @param string|null $htmlTemplate
+     * @param array $htmlParameters
+     * @return $this
+     */
+    /**
+     * @param string|null $htmlTemplate
+     * @param array $htmlParameters
+     * @return $this
+     */
     public function setHtmlTemplate(?string $htmlTemplate, array $htmlParameters = [])
     {
         $this->htmlTemplate = $htmlTemplate;
@@ -397,18 +443,44 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this->htmlParameters;
     }
 
+    /**
+     * @param array $htmlParameters
+     * @return $this
+     */
+    /**
+     * @param array $htmlParameters
+     * @return $this
+     */
     public function setHtmlParameters(array $htmlParameters)
     {
         $this->htmlParameters = $htmlParameters;
         return $this;
     }
 
+    /**
+     * @param string $key
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param string $key
+     * @param $value
+     * @return $this
+     */
     public function addHtmlParameter(string $key, $value)
     {
         $this->htmlParameters[$key] = $value;
         return $this;
     }
 
+    /**
+     * @param string $key
+     * @return $this
+     */
+    /**
+     * @param string $key
+     * @return $this
+     */
     public function removeHtmlParameter(string $key)
     {
         array_remove($this->htmlParameters, $key);
@@ -416,28 +488,57 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     }
 
 
+    /**
+     * @return mixed|string
+     */
     public function getExcerpt()
     {
         return $this->context["excerpt"] ?? "";
     }
 
+    /**
+     * @param string $excerpt
+     * @return $this
+     */
+    /**
+     * @param string $excerpt
+     * @return $this
+     */
     public function setExcerpt(string $excerpt)
     {
         $this->context["excerpt"] = $excerpt;
         return $this;
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getFooter()
     {
         return $this->context["footer_text"] ?? "";
     }
 
+    /**
+     * @param string $footer
+     * @return $this
+     */
+    /**
+     * @param string $footer
+     * @return $this
+     */
     public function setFooter(string $footer)
     {
         $this->context["footer_text"] = $footer;
         return $this;
     }
 
+    /**
+     * @param $content
+     * @param array $parameters
+     * @param string $domain
+     * @param string|null $locale
+     * @throws Exception
+     */
     public function __construct($content = null, array $parameters = array(), string $domain = "@notifications", ?string $locale = null)
     {
         $backtrace = debug_backtrace()[0];
@@ -495,6 +596,16 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return new Response($this->getContent());
     }
 
+    /**
+     * @param string|null $importance
+     * @param RecipientInterface ...$recipients
+     * @return $this
+     */
+    /**
+     * @param string|null $importance
+     * @param RecipientInterface ...$recipients
+     * @return $this
+     */
     public function send(string $importance = null, RecipientInterface ...$recipients)
     {
         $this->setImportance($importance ?? self::IMPORTANCE_DEFAULT);
@@ -514,6 +625,16 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
+    /**
+     * @param array $channels
+     * @param RecipientInterface ...$recipients
+     * @return $this
+     */
+    /**
+     * @param array $channels
+     * @param RecipientInterface ...$recipients
+     * @return $this
+     */
     public function sendBy(array $channels, RecipientInterface ...$recipients)
     {
         if (!$this->getImportance()) {
@@ -535,6 +656,14 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
+    /**
+     * @param string $importance
+     * @return $this
+     */
+    /**
+     * @param string $importance
+     * @return $this
+     */
     public function sendAdmins(string $importance)
     {
         $this->setImportance($importance);
@@ -555,7 +684,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         $notification = EmailMessage::fromNotification($this, $recipient);
 
         /**
-         * @var EmailRecipientInterface
+         * @var EmailRecipientInterface $notifier
          */
 
         $technicalRecipient = $notifier->getTechnicalRecipient();
@@ -592,7 +721,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
 
         /**
-         * @var TemplatedEmail
+         * @var TemplatedEmail $notification
          */
         $email = $notification->getMessage(); // Embed image inside email (cid:/)
         $context = array_merge([

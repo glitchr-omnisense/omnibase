@@ -6,6 +6,9 @@ use Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
 
+/**
+ *
+ */
 class FormProxy implements FormProxyInterface
 {
     /**
@@ -26,6 +29,9 @@ class FormProxy implements FormProxyInterface
     /** @var array */
     protected array $forms = [];
 
+    /**
+     * @return array
+     */
     public function all()
     {
         return $this->forms;

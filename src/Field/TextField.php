@@ -8,6 +8,9 @@ use InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
+/**
+ *
+ */
 class TextField implements FieldInterface
 {
     use FieldTrait;
@@ -50,12 +53,29 @@ class TextField implements FieldInterface
         return $this;
     }
 
+    /**
+     * @param bool $asHtml
+     * @return $this
+     */
+    /**
+     * @param bool $asHtml
+     * @return $this
+     */
     public function renderAsHtml(bool $asHtml = true)
     {
         $this->setCustomOption(self::OPTION_RENDER_AS_HTML, $asHtml);
 
         return $this;
     }
+
+    /**
+     * @param bool $asBool
+     * @return $this
+     */
+    /**
+     * @param bool $asBool
+     * @return $this
+     */
     public function renderAsBoolean(bool $asBool = true)
     {
         $this->setCustomOption(self::OPTION_RENDER_AS_BOOLEAN, $asBool);
@@ -63,6 +83,14 @@ class TextField implements FieldInterface
         return $this;
     }
 
+    /**
+     * @param bool $stripTags
+     * @return $this
+     */
+    /**
+     * @param bool $stripTags
+     * @return $this
+     */
     public function stripTags(bool $stripTags = true)
     {
         $this->setCustomOption(self::OPTION_STRIP_TAGS, $stripTags);

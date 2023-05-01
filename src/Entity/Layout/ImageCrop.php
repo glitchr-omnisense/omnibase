@@ -46,16 +46,25 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this->getMediaService()->generate($routeName, $routeParameters, $this->getImage()->getSource(), $config);
     }
 
+    /**
+     * @return string|null
+     */
     public function __toString()
     {
         return $this->__toLink();
     }
 
+    /**
+     * @return float|int
+     */
     public function getRatio()
     {
         return $this->getWidth0() / $this->getHeight0();
     }
 
+    /**
+     * @return bool
+     */
     public function isNormalized() // New coordinate system is using normalized values
     {
         if ($this->x0 > 1) {
@@ -216,6 +225,10 @@ class ImageCrop implements LinkableInterface, SaltInterface
      */
     protected $xP;
 
+    /**
+     * @param int|null $width
+     * @return float|int
+     */
     public function getPivotX(?int $width = null)
     {
         return $this->isNormalized() ? $this->xP * ($width ?? $this->getNaturalWidth()) : $this->xP;
@@ -237,6 +250,10 @@ class ImageCrop implements LinkableInterface, SaltInterface
      */
     protected $yP;
 
+    /**
+     * @param int|null $height
+     * @return float|int
+     */
     public function getPivotY(?int $height = null)
     {
         return $this->isNormalized() ? $this->yP * ($height ?? $this->getNaturalHeight()) : $this->xP;

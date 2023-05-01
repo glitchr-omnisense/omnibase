@@ -20,6 +20,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
+/**
+ *
+ */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
     /**

@@ -6,11 +6,11 @@ use Base\Controller\Backend\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
+/**
+ *
+ */
 class EasyAdminVariable
 {
-    /**
-     * @var AdminUrlGenerator
-     */
     protected AdminUrlGenerator $adminUrlGenerator;
 
     public function __construct(AdminUrlGenerator $adminUrlGenerator)
@@ -18,14 +18,18 @@ class EasyAdminVariable
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
+    /**
+     * @param mixed $entity
+     * @return string|null
+     */
     public function crudify(mixed $entity)
     {
-        if ($entity == null) {
+        if (null == $entity) {
             return null;
         }
 
         $entityCrudController = AbstractCrudController::getCrudControllerFqcn($entity);
-        if ($entityCrudController == null) {
+        if (null == $entityCrudController) {
             return null;
         }
 

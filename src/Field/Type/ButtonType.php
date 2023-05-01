@@ -8,6 +8,9 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\SubmitButtonTypeInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class ButtonType extends BaseType implements SubmitButtonTypeInterface // NB: A button is also a submit...
 {                                                                      //     If you change type attribute..
     public function getParent(): ?string

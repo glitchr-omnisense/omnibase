@@ -8,6 +8,9 @@ use IntlCalendar;
 use IntlDateFormatter;
 use IntlTimeZone;
 
+/**
+ *
+ */
 class IntlDateTime extends DateTime
 {
     /**
@@ -41,6 +44,16 @@ class IntlDateTime extends DateTime
         return $this->intlDateFormatter->format($this);
     }
 
+    /**
+     * @param DateTime $datetime
+     * @param string|null $locale
+     * @param int $dateType
+     * @param int $timeType
+     * @param DateTimeZone|string|null $timezone
+     * @param int|null $calendar
+     * @return IntlDateTime
+     * @throws \Exception
+     */
     public static function createFromDateTime(
         DateTime                 $datetime,
         ?string                  $locale = null,

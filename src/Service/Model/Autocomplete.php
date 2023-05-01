@@ -6,6 +6,9 @@ use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+/**
+ *
+ */
 class Autocomplete
 {
     /** @var TranslatorInterface */
@@ -16,6 +19,12 @@ class Autocomplete
         $this->translator = $translator;
     }
 
+    /**
+     * @param $entry
+     * @param $class
+     * @param array $entryOptions
+     * @return array|null
+     */
     public function resolve($entry, $class = null, array $entryOptions = [])
     {
         $entryOptions["format"] ??= FORMAT_IDENTITY;
@@ -101,6 +110,12 @@ class Autocomplete
             ];
     }
 
+    /**
+     * @param $entry
+     * @param array $entryOptions
+     * @return array
+     * @throws \Exception
+     */
     public function resolveArray($entry, array $entryOptions = [])
     {
         $entryOptions["format"] ??= FORMAT_IDENTITY;

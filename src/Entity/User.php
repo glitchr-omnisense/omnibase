@@ -22,6 +22,8 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
+use League\Flysystem\FilesystemException;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Intl\Timezones;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -79,6 +81,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public const __COOKIE_IDENTIFIER__ = "USER/INFO";
     public const __DEFAULT_IDENTIFIER__ = "email";
 
+    /**
+     * @param $role
+     * @return bool
+     * @throws Exception
+     */
     public function isGranted($role): bool
     {
         return $this->getService()->isGranted($role, $this);
@@ -111,11 +118,19 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $identifier;
     }
 
+    /**
+     * @param $other
+     * @return bool
+     */
     public function equals($other): bool
     {
         return ($other->getId() == $this->getId());
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     */
     public function __toString()
     {
         return $this->getUserIdentifier();
@@ -169,6 +184,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         }
     }
 
+    /**
+     * @param string|null $key
+     * @return array|mixed|string|null
+     */
     public static function getCookie(string $key = null)
     {
         $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
@@ -190,6 +209,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $cookie[$key] ?? null;
     }
 
+    /**
+     * @param string $key
+     * @param $value
+     * @param int $lifetime
+     * @return void
+     */
     public static function setCookie(string $key, $value, int $lifetime = 0)
     {
         $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
@@ -226,6 +251,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->id;
     }
 
+    /**
+     * @param $id
+     * @return $this
+     */
+    /**
+     * @param $id
+     * @return $this
+     */
     public function setId($id): self
     {
         $this->id = $id;
@@ -240,6 +273,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public const TOTP_LENGTH = 6;
     public const TOTP_TIMEOUT = 30;
 
+    /**
+     * @return mixed
+     */
     public function getSecret()
     {
         return $this->secret;
@@ -263,6 +299,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, User::TOTP_TIMEOUT, User::TOTP_LENGTH);
     }
 
+    /**
+     * @param $secret
+     * @return $this
+     */
+    /**
+     * @param $secret
+     * @return $this
+     */
     public function setSecret($secret): self
     {
         $this->secret = $secret;
@@ -310,16 +354,32 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $avatar;
 
+    /**
+     * @return array|mixed|File|null
+     * @throws Exception
+     */
     public function getAvatar()
     {
         return Uploader::getPublic($this, "avatar");
     }
 
+    /**
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public function getAvatarFile()
     {
         return Uploader::get($this, "avatar");
     }
 
+    /**
+     * @param $avatar
+     * @return $this
+     */
+    /**
+     * @param $avatar
+     * @return $this
+     */
     public function setAvatar($avatar)
     {
         $this->avatar = $avatar;
@@ -402,6 +462,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->plainPassword = null;
     }
 
+    /**
+     * @return $this
+     */
+    /**
+     * @return $this
+     */
     public function erasePlainPassword()
     {
         $this->plainPassword = null;
@@ -579,6 +645,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $notifications;
 
+    /**
+     * @return ArrayCollection
+     */
     public function getNotifications()
     {
         return $this->notifications;
@@ -605,6 +674,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
+    /**
+     * @return bool
+     */
     public function isTester()
     {
         if (!$this->getService()->isDebug()) {
@@ -635,6 +707,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->getTokens(Token::VALID);
     }
 
+    /**
+     * @param $type
+     * @return Collection
+     */
     public function getTokens($type = Token::ALL): Collection
     {
         return $this->tokens->filter(function ($token) use ($type) {
@@ -667,6 +743,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->getToken($name, Token::VALID);
     }
 
+    /**
+     * @param string $name
+     * @param $type
+     * @return Token|null
+     */
     public function getToken(string $name, $type = Token::ALL): ?Token
     {
         $tokens = $this->getTokens($type);
@@ -916,6 +997,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return in_array(UserState::VERIFIED, $this->states);
     }
 
+    /**
+     * @param bool $newState
+     * @return $this
+     */
+    /**
+     * @param bool $newState
+     * @return $this
+     */
     public function setIsVerified(bool $newState)
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::VERIFIED) : array_values_remove($this->states, UserState::VERIFIED);

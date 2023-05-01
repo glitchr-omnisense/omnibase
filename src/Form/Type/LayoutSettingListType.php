@@ -12,39 +12,29 @@ use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
 use Base\Field\Type\TranslationType;
 use Base\Form\Common\AbstractType;
+use Base\Service\Localizer;
 use Base\Service\LocalizerInterface;
 use Base\Service\SettingBag;
-use Base\Service\Localizer;
 use Base\Service\SettingBagInterface;
-use DateTime;
-use Exception;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\FormBuilderInterface;
-
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Util\StringUtil;
-use Traversable;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class LayoutSettingListType extends AbstractType implements DataMapperInterface
 {
-    /**
-     * @var SettingBagInterface
-     */
     protected SettingBagInterface $settingBag;
 
-    /**
-     * @var LocalizerInterface
-     */
     protected LocalizerInterface $localizer;
 
-    /**
-     * @var ClassMetadataManipulator
-     */
     protected ClassMetadataManipulator $classMetadataManipulator;
 
     public function __construct(SettingBag $settingBag, Localizer $localizer, ClassMetadataManipulator $classMetadataManipulator)
@@ -56,7 +46,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
     public function getBlockPrefix(): string
     {
-        return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+        return '_base_' . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -66,13 +56,20 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
             'fields[single_locale]' => [],
             'excluded_fields' => [],
             'locale' => null,
-            'attr' => array(
-                'class' => 'needs-validation'
-            )
+            'attr' => [
+                'class' => 'needs-validation',
+            ],
         ]);
     }
 
-    public function getFormattedData($data, $from = ".", $to = "-")
+    /**
+     * @param $data
+     * @param $from
+     * @param $to
+     * @return array
+     * @throws \Exception
+     */
+    public function getFormattedData($data, $from = '.', $to = '-')
     {
         $newData = [];
         if (!$data) {
@@ -88,7 +85,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
         } elseif (is_subclass_of($data, Setting::class)) {
             $newData[str_replace($from, $to, $data->getPath())] = $data->getValue();
         } else {
-            throw new Exception("Unexpected data provided (expecting either associative array, Setting or BaseSetting)");
+            throw new \Exception('Unexpected data provided (expecting either associative array, Setting or BaseSetting)');
         }
 
         return $newData;
@@ -100,71 +97,71 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $settingBag = [];
 
-            $formattedFields = $this->getFormattedData($options["fields"]);
+            $formattedFields = $this->getFormattedData($options['fields']);
             foreach ($formattedFields as $formattedField => $fieldOptions) {
-                $field = str_replace("-", ".", $formattedField);
+                $field = str_replace('-', '.', $formattedField);
 
                 $settingBag[$formattedField] = $this->settingBag->getRawScalar($field, false) ?? new Setting($field);
             }
 
-            $fields = ["value" => null];
+            $fields = ['value' => null];
 
             $unvData = [];
             $intlData = [];
 
             foreach ($settingBag as $formattedField => $setting) {
                 // Exclude requested fields
-                $field = str_replace("-", ".", $formattedField);
-                if (in_array($field, $options["excluded_fields"])) {
+                $field = str_replace('-', '.', $formattedField);
+                if (in_array($field, $options['excluded_fields'])) {
                     continue;
                 }
 
                 // Set field options
-                $fieldOptions = $options["fields"][$field];
-                $fieldOptions["attr"] = $opts["attr"] ?? [];
-                $fieldOptions["form_type"] = $fieldOptions["form_type"] ?? TextType::class;
+                $fieldOptions = $options['fields'][$field];
+                $fieldOptions['attr'] = $opts['attr'] ?? [];
+                $fieldOptions['form_type'] = $fieldOptions['form_type'] ?? TextType::class;
 
                 // Set default label
-                if (!array_key_exists("label", $fieldOptions)) {
-                    $label = explode("-", trim(str_lstrip($formattedField, ["app-settings", "base-settings"]), " -"));
-                    $fieldOptions["label"] = $setting->getLabel() ?? mb_ucwords(str_replace("_", " ", implode(" - ", $label)));
+                if (!array_key_exists('label', $fieldOptions)) {
+                    $label = explode('-', trim(str_lstrip($formattedField, ['app-settings', 'base-settings']), ' -'));
+                    $fieldOptions['label'] = $setting->getLabel() ?? mb_ucwords(str_replace('_', ' ', implode(' - ', $label)));
                 }
 
-                if ($fieldOptions["form_type"] == FileType::class || $fieldOptions["form_type"] == ImageType::class || $fieldOptions["form_type"] == AvatarType::class) {
-                    $fieldOptions["max_size"] = $fieldOptions["max_size"] ?? Uploader::getMaxFilesize(SettingIntl::class, "value");
-                    $fieldOptions["mime_types"] = $fieldOptions["mime_types"] ?? Uploader::getMimeTypes(SettingIntl::class, "value");
-                    $fieldOptions["empty_data"] = $settingValue ?? "";
+                if (FileType::class == $fieldOptions['form_type'] || ImageType::class == $fieldOptions['form_type'] || AvatarType::class == $fieldOptions['form_type']) {
+                    $fieldOptions['max_size'] = $fieldOptions['max_size'] ?? Uploader::getMaxFilesize(SettingIntl::class, 'value');
+                    $fieldOptions['mime_types'] = $fieldOptions['mime_types'] ?? Uploader::getMimeTypes(SettingIntl::class, 'value');
+                    $fieldOptions['empty_data'] = $settingValue ?? '';
                 }
 
-                if (!array_key_exists("help", $fieldOptions)) {
-                    $fieldOptions["help"] = $setting->getHelp() ?? "";
+                if (!array_key_exists('help', $fieldOptions)) {
+                    $fieldOptions['help'] = $setting->getHelp() ?? '';
                 }
-                if (!array_key_exists("disabled", $fieldOptions)) {
-                    $fieldOptions["disabled"] = $setting->isLocked() ?? false;
+                if (!array_key_exists('disabled', $fieldOptions)) {
+                    $fieldOptions['disabled'] = $setting->isLocked() ?? false;
                 }
 
                 //
                 // Check if expected to be translatable
-                $isTranslatable = $fieldOptions["translatable"] ?? false;
-                $fieldOptions = array_key_removes($fieldOptions, "translatable");
+                $isTranslatable = $fieldOptions['translatable'] ?? false;
+                $fieldOptions = array_key_removes($fieldOptions, 'translatable');
 
-                $fields["value"][$formattedField] = $fieldOptions;
+                $fields['value'][$formattedField] = $fieldOptions;
 
                 $translations = $setting->getTranslations();
                 foreach ($translations as $locale => $settingTranslation) {
                     $settingValue = $settingTranslation->getValue();
 
-                    switch ($fieldOptions["form_type"]) {
+                    switch ($fieldOptions['form_type']) {
                         case DateTimePickerType::class:
-                            $datetime = $settingValue instanceof DateTime ? $settingValue : null;
+                            $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
                             if (!$datetime) {
-                                $datetime = $settingValue ? new DateTime($settingValue) : null;
+                                $datetime = $settingValue ? new \DateTime($settingValue) : null;
                             }
                             $settingTranslation->setValue($datetime);
                             break;
 
                         case CheckboxType::class:
-                            $bool = !empty($settingValue) && $settingValue != "0";
+                            $bool = !empty($settingValue) && '0' != $settingValue;
                             $settingTranslation->setValue($bool);
                             break;
                     }
@@ -179,74 +176,85 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             if ($intlData) {
-                $form->add("intl", TranslationType::class, [
-                    "fields" => $fields,
-                    "autoload" => false,
-                    "multiple" => true,
-                    "required_locales" => [$this->localizer->getDefaultLocale()],
-                    "translation_class" => SettingIntl::class,
+                $form->add('intl', TranslationType::class, [
+                    'fields' => $fields,
+                    'autoload' => false,
+                    'multiple' => true,
+                    'required_locales' => [$this->localizer->getDefaultLocale()],
+                    'translation_class' => SettingIntl::class,
                 ]);
 
-                $form->get("intl")->setData($intlData);
+                $form->get('intl')->setData($intlData);
             }
 
             if ($unvData) {
-                $form->add("unv", TranslationType::class, [
-                    "fields" => $fields,
-                    "autoload" => false,
-                    "multiple" => true,
-                    "locale" => $this->localizer->getDefaultLocale(),
-                    "single_locale" => true,
-                    "translation_class" => SettingIntl::class,
+                $form->add('unv', TranslationType::class, [
+                    'fields' => $fields,
+                    'autoload' => false,
+                    'multiple' => true,
+                    'locale' => $this->localizer->getDefaultLocale(),
+                    'single_locale' => true,
+                    'translation_class' => SettingIntl::class,
                 ]);
 
-                $form->get("unv")->setData($unvData);
+                $form->get('unv')->setData($unvData);
             }
 
             if (count($fields) > 0) {
-                $form->add('valid', SubmitType::class, ["attr" => ["class" => "btn btn-primary"], "translation_domain" => "controllers", "label_format" => "backoffice_settings.valid"]);
+                $form->add('valid', SubmitType::class, ['attr' => ['class' => 'btn btn-primary'], 'translation_domain' => 'controllers', 'label_format' => 'backoffice_settings.valid']);
             }
         });
     }
 
-    public function mapDataToForms($viewData, Traversable $forms): void
+    /**
+     * @param $viewData
+     * @param \Traversable $forms
+     * @return void
+     */
+    public function mapDataToForms($viewData, \Traversable $forms): void
     {
     }
 
-    public function mapFormsToData(Traversable $forms, &$viewData): void
+    /**
+     * @param \Traversable $forms
+     * @param $viewData
+     * @return void
+     * @throws \Exception
+     */
+    public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         foreach (iterator_to_array($forms) as $formName => $form) {
-            if ($formName == "valid") {
+            if ('valid' == $formName) {
                 continue;
-            } elseif ($formName == "intl" || $formName == "unv") {
+            } elseif ('intl' == $formName || 'unv' == $formName) {
                 foreach ($form->getData() as $formattedField => $translations) {
-                    $field = str_replace("-", ".", $formattedField);
+                    $field = str_replace('-', '.', $formattedField);
                     foreach ($translations as $locale => $translation) {
                         $viewData[$field] = $viewData[$field] ?? $this->settingBag->getRawScalar($field) ?? new Setting($field);
                         if ($viewData[$field]->isLocked()) {
-                            throw new Exception("Setting \"" . $viewData[$field]->getPath() . "\" is locked, you cannot edit this variable.");
+                            throw new \Exception('Setting "' . $viewData[$field]->getPath() . '" is locked, you cannot edit this variable.');
                         }
 
-                        if ($translation->getValue() == []) {
+                        if ([] == $translation->getValue()) {
                             $translation->setValue(null);
                         }
                         $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
                     }
                 }
             } else {
-                $field = str_replace("-", ".", $formName);
+                $field = str_replace('-', '.', $formName);
                 if (!$viewData[$formName] instanceof Setting) {
                     $viewData[$formName] = $viewData[$formName] ?? new Setting($formName);
                 }
 
                 if ($viewData[$formName]->isLocked()) {
-                    throw new Exception("Setting \"" . $viewData[$formName]->getPath() . "\" is currently locked.");
+                    throw new \Exception('Setting "' . $viewData[$formName]->getPath() . '" is currently locked.');
                 }
 
                 $translation = $form->getViewData();
                 $locale = $translation->getLocale();
 
-                if ($translation->getValue() == []) {
+                if ([] == $translation->getValue()) {
                     $translation->setValue(null);
                 }
                 $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);

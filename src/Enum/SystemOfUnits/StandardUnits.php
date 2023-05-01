@@ -4,6 +4,9 @@ namespace Base\Enum\SystemOfUnits;
 
 use Base\Service\Model\IconizeInterface;
 
+/**
+ *
+ */
 class StandardUnits extends StandardBaseUnits implements IconizeInterface
 {
     // const ...   = "";
@@ -12,6 +15,7 @@ class StandardUnits extends StandardBaseUnits implements IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return [];

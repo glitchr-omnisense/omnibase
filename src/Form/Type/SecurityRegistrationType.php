@@ -14,6 +14,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Util\StringUtil;
 
+/**
+ *
+ */
 class SecurityRegistrationType extends AbstractType
 {
     public function configureOptions(OptionsResolver $resolver)
@@ -25,7 +28,7 @@ class SecurityRegistrationType extends AbstractType
 
     public function getBlockPrefix(): string
     {
-        return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+        return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -39,7 +42,7 @@ class SecurityRegistrationType extends AbstractType
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'required' => true,
-                'first_options'  => [
+                'first_options' => [
                     'validation_groups' => ["new"],
                     'attr' => [
                         "autocomplete" => "new-password"

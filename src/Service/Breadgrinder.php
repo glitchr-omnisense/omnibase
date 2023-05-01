@@ -5,6 +5,9 @@ namespace Base\Service;
 use Base\Service\Model\Breadcrumb;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ *
+ */
 class Breadgrinder implements BreadgrinderInterface
 {
     protected array $breadcrumbs = [];

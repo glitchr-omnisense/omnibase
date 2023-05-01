@@ -2,6 +2,9 @@
 
 namespace Base\Service;
 
+/**
+ *
+ */
 class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
 {
     public function supports(mixed $json): bool
@@ -33,7 +36,7 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
                 $text = $block->data->text;
                 $id = $this->slugger->slug(str_strip_nonprintable(strip_tags($text)));
 
-                $block->data->text = "<a id='".$id."' ".html_attributes($attrs). " href='#".$id."'>".strip_tags($text)."</a>";
+                $block->data->text = "<a id='" . $id . "' " . html_attributes($attrs) . " href='#" . $id . "'>" . strip_tags($text) . "</a>";
             }
         }
 
@@ -74,9 +77,9 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
                 $id = $this->slugger->slug(str_strip_nonprintable(strip_tags($text)));
 
                 $headlines[] = [
-                        "tag" => "h".$block->data->level,
-                        "slug"  => $id,
-                        "title" => str_strip_nonprintable(strip_tags($text))
+                    "tag" => "h" . $block->data->level,
+                    "slug" => $id,
+                    "title" => str_strip_nonprintable(strip_tags($text))
                 ];
             }
         }

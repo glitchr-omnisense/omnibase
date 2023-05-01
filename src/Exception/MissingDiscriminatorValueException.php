@@ -4,10 +4,13 @@ namespace Base\Exception;
 
 use Exception;
 
+/**
+ *
+ */
 class MissingDiscriminatorValueException extends Exception
 {
     /**
-     * {@inheritdoc}
+     * {}
      */
     public function getMessageKey()
     {

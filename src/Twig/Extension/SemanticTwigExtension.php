@@ -7,6 +7,9 @@ use Base\Service\SemanticEnhancerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
+/**
+ *
+ */
 final class SemanticTwigExtension extends AbstractExtension
 {
     /**
@@ -19,6 +22,9 @@ final class SemanticTwigExtension extends AbstractExtension
         $this->semanticEnhancer = $semanticEnhancer;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'semantic_extension';

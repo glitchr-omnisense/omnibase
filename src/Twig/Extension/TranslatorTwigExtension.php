@@ -8,6 +8,9 @@ use Base\Service\Translator;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
+/**
+ *
+ */
 final class TranslatorTwigExtension extends AbstractExtension
 {
     /**
@@ -20,6 +23,9 @@ final class TranslatorTwigExtension extends AbstractExtension
         $this->localizer = $localizer;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'lang_extension';

@@ -28,6 +28,13 @@ class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
         $this->deletedAt = $data["field"] ?? "deletedAt";
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     * @throws Exception
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         if ($object instanceof ClassMetadata) {
@@ -36,7 +43,7 @@ class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
             }
 
             if (!$object->getFieldName($this->deletedAt)) {
-                throw new Exception("Field \"".$this->deletedAt."\" is missing, did you forget to import \"".TrasheableTrait::class."\" ?");
+                throw new Exception("Field \"" . $this->deletedAt . "\" is missing, did you forget to import \"" . TrasheableTrait::class . "\" ?");
             }
         }
 

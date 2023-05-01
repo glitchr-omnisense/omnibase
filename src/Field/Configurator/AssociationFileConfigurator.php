@@ -19,6 +19,9 @@ use RuntimeException;
 use Traversable;
 use function count;
 
+/**
+ *
+ */
 class AssociationFileConfigurator implements FieldConfiguratorInterface
 {
     /**
@@ -82,6 +85,10 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
         }
     }
 
+    /**
+     * @param $collection
+     * @return int
+     */
     private function countNumElements($collection): int
     {
         if (null === $collection) {
@@ -99,6 +106,11 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
         return 0;
     }
 
+    /**
+     * @param $entityInstance
+     * @param EntityDto $entityDto
+     * @return string|null
+     */
     private function formatAsString($entityInstance, EntityDto $entityDto): ?string
     {
         if (null === $entityInstance) {

@@ -4,6 +4,9 @@ namespace Base\Service;
 
 use Base\Repository\Layout\SemanticRepository;
 
+/**
+ *
+ */
 class SemanticEnhancer implements SemanticEnhancerInterface
 {
     protected SemanticRepository $semanticRepository;

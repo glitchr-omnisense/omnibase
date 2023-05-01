@@ -51,6 +51,9 @@ class Log extends AbstractExtension
         }
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return __CLASS__ . " #" . $this->getId() . ": " . $this->event . "/" . $this->level . "/" . $this->createdAt;
@@ -87,6 +90,9 @@ class Log extends AbstractExtension
      */
     protected $event;
 
+    /**
+     * @return mixed
+     */
     public function getEvent()
     {
         return $this->event;
@@ -97,6 +103,9 @@ class Log extends AbstractExtension
      */
     protected $priority;
 
+    /**
+     * @return mixed
+     */
     public function getPriority()
     {
         return $this->priority;
@@ -107,6 +116,9 @@ class Log extends AbstractExtension
      */
     protected $pretty;
 
+    /**
+     * @return mixed
+     */
     public function getPretty()
     {
         return $this->pretty;
@@ -117,6 +129,9 @@ class Log extends AbstractExtension
      */
     protected $ip;
 
+    /**
+     * @return string|null
+     */
     public function getIp()
     {
         return $this->ip;
@@ -127,6 +142,9 @@ class Log extends AbstractExtension
      */
     protected $locale;
 
+    /**
+     * @return mixed
+     */
     public function getLocale()
     {
         return $this->locale;
@@ -137,6 +155,9 @@ class Log extends AbstractExtension
      */
     protected $method;
 
+    /**
+     * @return mixed
+     */
     public function getMethod()
     {
         return $this->method;
@@ -147,6 +168,9 @@ class Log extends AbstractExtension
      */
     protected $requestUri;
 
+    /**
+     * @return mixed
+     */
     public function getRequestUri()
     {
         return $this->requestUri;
@@ -157,6 +181,9 @@ class Log extends AbstractExtension
      */
     protected $statusCode;
 
+    /**
+     * @return mixed
+     */
     public function getStatusCode()
     {
         return $this->statusCode;
@@ -167,6 +194,9 @@ class Log extends AbstractExtension
      */
     protected $browser;
 
+    /**
+     * @return string|null
+     */
     public function getBrowser()
     {
         return $this->browser;
@@ -177,6 +207,9 @@ class Log extends AbstractExtension
      */
     protected $extra;
 
+    /**
+     * @return mixed
+     */
     public function getExtra()
     {
         return $this->extra;
@@ -187,6 +220,9 @@ class Log extends AbstractExtension
      */
     protected $level;
 
+    /**
+     * @return string
+     */
     public function getLevel()
     {
         return $this->level;

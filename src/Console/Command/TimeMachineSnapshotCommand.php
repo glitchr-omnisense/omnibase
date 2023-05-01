@@ -16,6 +16,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ *
+ */
 #[AsCommand(name: 'timemachine:snapshot', aliases: [], description: '')]
 class TimeMachineSnapshotCommand extends Command
 {

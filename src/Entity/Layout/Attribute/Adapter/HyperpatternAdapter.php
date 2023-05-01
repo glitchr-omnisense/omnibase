@@ -57,6 +57,14 @@ class HyperpatternAdapter extends AbstractAdapter
         return $this->pattern;
     }
 
+    /**
+     * @param string $pattern
+     * @return $this
+     */
+    /**
+     * @param string $pattern
+     * @return $this
+     */
     public function setPattern(string $pattern = "https://{0}")
     {
         $this->pattern = $pattern;

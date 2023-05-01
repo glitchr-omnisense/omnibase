@@ -15,6 +15,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use function constant;
 use function defined;
 
+/**
+ *
+ */
 class ResampleFilter implements FilterInterface
 {
     /**
@@ -24,6 +27,9 @@ class ResampleFilter implements FilterInterface
     private array $options;
 
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $md5sum = md5(serialize($this->options));

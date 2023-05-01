@@ -7,8 +7,16 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
+/**
+ *
+ */
 class AlphanumericValidator extends ConstraintValidator
 {
+    /**
+     * @param $value
+     * @param Constraint $constraint
+     * @return void
+     */
     public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof Alphanumeric) {

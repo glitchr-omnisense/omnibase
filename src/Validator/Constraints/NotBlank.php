@@ -24,6 +24,14 @@ class NotBlank extends Constraint
         return [self::CLASS_CONSTRAINT, self::PROPERTY_CONSTRAINT];
     }
 
+    /**
+     * @param array|null $options
+     * @param string|null $message
+     * @param bool|null $allowNull
+     * @param callable|null $normalizer
+     * @param array|null $groups
+     * @param $payload
+     */
     public function __construct(array $options = null, string $message = null, bool $allowNull = null, callable $normalizer = null, array $groups = null, $payload = null)
     {
         parent::__construct($options ?? [], $groups, $payload);

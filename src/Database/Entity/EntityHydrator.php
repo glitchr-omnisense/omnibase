@@ -14,6 +14,7 @@ use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\ArrayType;
 
 use Base\Service\Localizer;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Exception;
 use InvalidArgumentException;
@@ -28,6 +29,9 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
+/**
+ *
+ */
 class EntityHydrator implements EntityHydratorInterface
 {
     /**
@@ -171,6 +175,10 @@ class EntityHydrator implements EntityHydratorInterface
         return array_key_removes($data, ...$fieldExceptions);
     }
 
+    /**
+     * @param Proxy $proxy
+     * @return \#g#F\Base\Database\Entity\str_strip|\#π(#g#F\Base\Database\Entity\str_strip)(#g#F\Base\Database\Entity\get_class)("Proxies\\__CG__\\")|object|null
+     */
     public function fromProxy(Proxy $proxy)
     {
         $entity = str_strip(get_class($proxy), "Proxies\\__CG__\\");
@@ -217,6 +225,14 @@ class EntityHydrator implements EntityHydratorInterface
         return $this->hydrate(get_class($entity), $entity, [], $aggregateModel);
     }
 
+    /**
+     * @param bool $hydrateAssociationReferences
+     * @return $this
+     */
+    /**
+     * @param bool $hydrateAssociationReferences
+     * @return $this
+     */
     public function setHydrateAssociationReferences(bool $hydrateAssociationReferences)
     {
         $this->hydrateAssociationReferences = $hydrateAssociationReferences;
@@ -399,17 +415,38 @@ class EntityHydrator implements EntityHydratorInterface
         return $this;
     }
 
+    /**
+     * @return $this
+     */
+    /**
+     * @return $this
+     */
     protected function resetHydratationMapping()
     {
         $this->hydratationMapping = [];
         return $this;
     }
 
+    /**
+     * @param mixed $entity
+     * @param string $propertyName
+     * @return bool
+     */
     protected function isHydrated(mixed $entity, string $propertyName)
     {
         return in_array(spl_object_hash($entity) . "::" . $propertyName, $this->hydratationMapping);
     }
 
+    /**
+     * @param mixed $entity
+     * @param string $propertyName
+     * @return $this
+     */
+    /**
+     * @param mixed $entity
+     * @param string $propertyName
+     * @return $this
+     */
     protected function markAsHydrated(mixed $entity, string $propertyName)
     {
         $this->hydratationMapping[] = spl_object_hash($entity) . "::" . $propertyName;
@@ -615,6 +652,13 @@ class EntityHydrator implements EntityHydratorInterface
         return $this->getPropertyValues($entity, $reflEntity)[$propertyName] ?? null;
     }
 
+    /**
+     * @param mixed $entity
+     * @param string $propertyName
+     * @param $value
+     * @param ReflectionObject|null $reflEntity
+     * @return mixed
+     */
     protected function setPropertyValue(mixed $entity, string $propertyName, $value, ?ReflectionObject $reflEntity = null): mixed
     {
         $reflEntity = $reflEntity === null ? new ReflectionObject($entity) : $reflEntity;
@@ -627,6 +671,12 @@ class EntityHydrator implements EntityHydratorInterface
         return $this;
     }
 
+    /**
+     * @param $entityName
+     * @param $identifier
+     * @return mixed
+     * @throws ORMException
+     */
     protected function findAssociation($entityName, $identifier): mixed
     {
         if (is_object($identifier)) {
@@ -644,6 +694,12 @@ class EntityHydrator implements EntityHydratorInterface
     }
 
 
+    /**
+     * @param $className
+     * @param $data
+     * @return object|null
+     * @throws Exception
+     */
     public function getEntityFromData($className, $data): ?object
     {
         if ($data === null) {
@@ -660,6 +716,11 @@ class EntityHydrator implements EntityHydratorInterface
 
     protected static $entitySerializer = null;
 
+    /**
+     * @param $eventOrEntity
+     * @return mixed
+     * @throws Exception
+     */
     public function getOriginalEntity($eventOrEntity)
     {
         if (!self::$entitySerializer) {
@@ -677,6 +738,10 @@ class EntityHydrator implements EntityHydratorInterface
         return $this->hydrate($className, $data);
     }
 
+    /**
+     * @param $eventOrEntity
+     * @return mixed[]
+     */
     public function getOriginalEntityData($eventOrEntity)
     {
         $entity = $this->classMetadataManipulator->isEntity($eventOrEntity) ? $eventOrEntity : $eventOrEntity->getObject();

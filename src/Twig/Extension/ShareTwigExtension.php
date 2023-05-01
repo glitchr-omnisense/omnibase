@@ -7,6 +7,9 @@ use Base\Service\Sharer;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
+/**
+ *
+ */
 final class ShareTwigExtension extends AbstractExtension
 {
     /**
@@ -19,16 +22,21 @@ final class ShareTwigExtension extends AbstractExtension
         $this->sharer = $sharer;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'share_extension';
     }
+
     public function getFilters(): array
     {
         return [
             new TwigFilter('share', [$this, 'share'], ['is_safe' => ['all']]),
         ];
     }
+
     public function getFunctions(): array
     {
         return [

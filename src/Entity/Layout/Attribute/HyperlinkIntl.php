@@ -42,6 +42,14 @@ class HyperlinkIntl implements TranslationInterface
         return $this->value !== null && !is_array($this->value) ? [$this->value] : $this->value ?? [];
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param $value
+     * @return $this
+     */
     public function setValue($value)
     {
         if ($value !== null && !is_array($value)) {

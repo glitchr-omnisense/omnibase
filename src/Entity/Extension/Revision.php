@@ -28,10 +28,18 @@ class Revision extends AbstractExtension
      * @Hashify(random=true)
      */
     protected $hash;
+
+    /**
+     * @return mixed
+     */
     public function getHash()
     {
         return $this->hash;
     }
+
+    /**
+     * @return string
+     */
     public function getHashShort()
     {
         return substr($this->hash, 0, 7);

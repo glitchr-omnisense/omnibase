@@ -27,6 +27,9 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
+/**
+ *
+ */
 class AdvancedRouter extends Router implements RouterInterface
 {
     /**
@@ -134,6 +137,9 @@ class AdvancedRouter extends Router implements RouterInterface
         return $this->cacheName;
     }
 
+    /**
+     * @return mixed|CacheItemInterface
+     */
     public function getCacheRoutes()
     {
         return $this->cacheRoutes;

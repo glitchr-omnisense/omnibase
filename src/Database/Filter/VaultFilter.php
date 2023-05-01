@@ -8,21 +8,41 @@ use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 use InvalidArgumentException;
 
+/**
+ *
+ */
 class VaultFilter extends SQLFilter
 {
     protected $environment;
 
+    /**
+     * @return mixed
+     */
     public function getEnvironment()
     {
         return $this->environment;
     }
 
+    /**
+     * @param string $environment
+     * @return $this
+     */
+    /**
+     * @param string $environment
+     * @return $this
+     */
     public function setEnvironment(string $environment)
     {
         $this->environment = $environment;
         return $this;
     }
 
+    /**
+     * @param ClassMetaData $targetEntity
+     * @param $targetTableAlias
+     * @return string
+     * @throws \Exception
+     */
     public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string
     {
         $vaultAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Vault::class);

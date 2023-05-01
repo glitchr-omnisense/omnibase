@@ -7,11 +7,15 @@ use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;
 use Base\Service\Localizer;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST;
 use RuntimeException;
 use Doctrine\ORM\Events;
 
+/**
+ *
+ */
 class TranslatableWalker extends SqlWalker
 {
     /**
@@ -27,12 +31,21 @@ class TranslatableWalker extends SqlWalker
     public const COLUMN_NAME = 'translations';
     public const SALT = "unique_translation";
 
+    /**
+     * @param $query
+     * @param $parserResult
+     * @param array $queryComponents
+     */
     public function __construct($query, $parserResult, array $queryComponents)
     {
         parent::__construct($query, $parserResult, $queryComponents);
         $this->localizer = $this->getLocalizer();
     }
 
+    /**
+     * @param $fromClause
+     * @return string
+     */
     public function walkFromClause($fromClause): string
     {
         $sql = parent::walkFromClause($fromClause);
@@ -108,6 +121,13 @@ class TranslatableWalker extends SqlWalker
         throw new RuntimeException('Locale provider not found.');
     }
 
+    /**
+     * @param $joinAssociationDeclaration
+     * @param $joinType
+     * @param $condExpr
+     * @return string
+     * @throws QueryException
+     */
     public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null): string
     {
         $sql = parent::walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType, $condExpr);

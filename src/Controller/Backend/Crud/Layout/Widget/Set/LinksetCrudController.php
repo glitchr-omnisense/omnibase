@@ -6,6 +6,9 @@ use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
 use Base\Entity\Layout\Attribute\Adapter\HyperpatternAdapter;
 use Base\Field\AttributeField;
 
+/**
+ *
+ */
 class LinksetCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -18,8 +21,8 @@ class LinksetCrudController extends WidgetCrudController
         return parent::configureFields(
             $pageName,
             [
-            "id" => fn () => yield AttributeField::new('hyperlinks')->setFilter(HyperpatternAdapter::class)->hideOnIndex()],
-            fn () => yield AttributeField::new('hyperlinks')->setFilter(HyperpatternAdapter::class)->onlyOnIndex(),
+                "id" => fn() => yield AttributeField::new('hyperlinks')->setFilter(HyperpatternAdapter::class)->hideOnIndex()],
+            fn() => yield AttributeField::new('hyperlinks')->setFilter(HyperpatternAdapter::class)->onlyOnIndex(),
             $args
         );
     }

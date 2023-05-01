@@ -16,7 +16,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
     use BaseTrait;
 
     /**
-     * @var string|array|string[]|null
+     * @var string
      */
     public string $constraintClass;
 
@@ -31,6 +31,16 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
         $this->constraintClass = preg_replace('/Validator$/', '', get_called_class());
     }
 
+    /**
+     * @param string $parameterName
+     * @param string|null $parameterValue
+     * @return $this
+     */
+    /**
+     * @param string $parameterName
+     * @param string|null $parameterValue
+     * @return $this
+     */
     public function setParameter(string $parameterName, ?string $parameterValue = null)
     {
         if ($this->buildViolation == null) {
@@ -44,16 +54,26 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getPropertyName()
     {
         return str_lstrip($this->context->getPropertyPath(), "data.");
     }
 
+    /**
+     * @return string
+     */
     public function getConstraintType()
     {
         return empty($this->getPropertyName()) ? "class" : "property";
     }
 
+    /**
+     * @param Constraint $constraint
+     * @return mixed
+     */
     protected function formatIdentifier(Constraint $constraint)
     {
         return $constraint->message;
@@ -61,6 +81,11 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 
     protected $buildViolation = null;
 
+    /**
+     * @param Constraint $constraint
+     * @param $value
+     * @return ConstraintViolationBuilderInterface
+     */
     public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface
     {
         $this->buildViolation = $this->context->buildViolation($this->formatIdentifier($constraint));

@@ -8,7 +8,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
+/**
+ *
+ */
 class UserActionCrudController extends AbstractCrudController
 {
     /**
@@ -28,7 +32,7 @@ class UserActionCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        $batchActionApprove = Action::new('batchActionApprove', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_approve', 'fa-solid fa-user-check')
+        $batchActionApprove = Action::new('batchActionApprove', '@' . AbstractDashboardController::TRANSLATION_DASHBOARD . '.action.batch_approve', 'fa-solid fa-user-check')
             ->linkToCrudAction('batchActionApprove')
             ->addCssClass('btn btn-primary text-success');
 
@@ -37,6 +41,10 @@ class UserActionCrudController extends AbstractCrudController
             ->setPermission($batchActionApprove, 'ROLE_EDITOR');
     }
 
+    /**
+     * @param BatchActionDto $batchActionDto
+     * @return RedirectResponse
+     */
     public function batchActionApprove(BatchActionDto $batchActionDto)
     {
         foreach ($batchActionDto->getEntityIds() as $id) {

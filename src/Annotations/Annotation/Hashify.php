@@ -4,6 +4,7 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -11,6 +12,7 @@ use Exception;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 
 use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 
 /**
  * Class Hashify
@@ -53,6 +55,12 @@ class Hashify extends AbstractAnnotation
         $this->referenceColumn = $data["reference"] ?? null;
     }
 
+    /**
+     * @param $className
+     * @param $property
+     * @return mixed|null
+     * @throws Exception
+     */
     public static function getHashify($className, $property)
     {
         $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($className, Hashify::class);
@@ -62,6 +70,10 @@ class Hashify extends AbstractAnnotation
         return ($that ?: null);
     }
 
+    /**
+     * @param $entity
+     * @return PasswordHasherInterface|null
+     */
     public function getMessageHasher($entity)
     {
         $hasherFactory = new PasswordHasherFactory([ClassUtils::getClass($entity) => [
@@ -80,6 +92,12 @@ class Hashify extends AbstractAnnotation
         return $hasherFactory->getPasswordHasher(ClassUtils::getClass($entity)) ?? null;
     }
 
+    /**
+     * @param $entity
+     * @param string|null $property
+     * @return string|null
+     * @throws Exception
+     */
     private function getHashedMessage($entity, ?string $property = null): ?string
     {
         $plainMessage = $this->getPlainMessage($entity) ?? null;
@@ -90,11 +108,23 @@ class Hashify extends AbstractAnnotation
         return ($property ? $this->getFieldValue($entity, $property) : null);
     }
 
+    /**
+     * @param $entity
+     * @param string $hashedMessage
+     * @return bool
+     */
     public function needsRehash($entity, string $hashedMessage): bool
     {
         return $this->getMessageHasher($entity)->needsRehash($hashedMessage);
     }
 
+    /**
+     * @param $entity
+     * @param $property
+     * @param $hashedMessage
+     * @return bool
+     * @throws Exception
+     */
     public static function isValid($entity, $property, $hashedMessage): bool
     {
         $className = ClassUtils::getClass($entity);
@@ -115,6 +145,11 @@ class Hashify extends AbstractAnnotation
         );
     }
 
+    /**
+     * @param $entity
+     * @return string|null
+     * @throws Exception
+     */
     private function getPlainMessage($entity): ?string
     {
         if ($this->random) {
@@ -128,6 +163,11 @@ class Hashify extends AbstractAnnotation
         return $this->getPropertyValue($entity, $this->referenceColumn);
     }
 
+    /**
+     * @param $entity
+     * @return ClassMetadataManipulator
+     * @throws Exception
+     */
     private function erasePlainMessage($entity)
     {
         if (!$this->referenceColumn) {
@@ -137,11 +177,24 @@ class Hashify extends AbstractAnnotation
         return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     */
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
@@ -150,6 +203,13 @@ class Hashify extends AbstractAnnotation
         }
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     */
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
@@ -158,11 +218,27 @@ class Hashify extends AbstractAnnotation
         }
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     * @throws Exception
+     */
     public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $this->erasePlainMessage($entity);
     }
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     * @throws Exception
+     */
     public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $this->erasePlainMessage($entity);

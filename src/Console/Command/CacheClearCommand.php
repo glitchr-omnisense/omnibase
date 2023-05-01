@@ -19,6 +19,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 use Base\Routing\RouterInterface;
 
+/**
+ *
+ */
 #[AsCommand(name: 'cache:clear', aliases: [], description: '')]
 class CacheClearCommand extends Command
 {

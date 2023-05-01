@@ -6,6 +6,9 @@ use Base\Console\CommandExecutorInterface;
 use Base\Console\ConsoleInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
+/**
+ *
+ */
 class ImageCacheWarmer implements CacheWarmerInterface
 {
     protected int $shellVerbosity;
@@ -22,6 +25,10 @@ class ImageCacheWarmer implements CacheWarmerInterface
         return true;
     }
 
+    /**
+     * @param $cacheDir
+     * @return array|string[]
+     */
     public function warmUp($cacheDir): array
     {
         if ($this->shellVerbosity > 0 && php_sapi_name() == "cli") {

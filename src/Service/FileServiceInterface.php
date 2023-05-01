@@ -4,6 +4,9 @@ namespace Base\Service;
 
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ *
+ */
 interface FileServiceInterface
 {
     public function getExtension(null|string|array $fileOrMimetypeOrArray): ?string;

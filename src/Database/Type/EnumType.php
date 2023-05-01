@@ -16,6 +16,9 @@ use InvalidArgumentException;
 use ReflectionClass;
 use UnexpectedValueException;
 
+/**
+ *
+ */
 abstract class EnumType extends Type implements SelectInterface
 {
     protected static array $icons = [];
@@ -84,22 +87,43 @@ abstract class EnumType extends Type implements SelectInterface
         return self::getStaticName();
     }
 
+    /**
+     * @return array|false|string|string[]|null
+     */
     public static function getStaticName()
     {
         $array = explode('\\', get_called_class());
         return camel2snake(end($array));
     }
 
+    /**
+     * @param string $key
+     * @param bool $inheritance
+     * @return bool
+     * @throws Exception
+     */
     public static function hasKey(string $key, bool $inheritance = true)
     {
         return array_key_exists($key, self::getPermittedValues($inheritance, true));
     }
 
+    /**
+     * @param string $key
+     * @param bool $inheritance
+     * @return mixed|null
+     * @throws Exception
+     */
     public static function getValue(string $key, bool $inheritance = true)
     {
         return self::getPermittedValues($inheritance, true)[$key] ?? null;
     }
 
+    /**
+     * @param string $value
+     * @param bool $inheritance
+     * @return bool
+     * @throws Exception
+     */
     public static function hasValue(string $value, bool $inheritance = true)
     {
         return in_array($value, self::getPermittedValues($inheritance, true));
@@ -224,11 +248,22 @@ abstract class EnumType extends Type implements SelectInterface
         return "ENUM(" . implode(", ", $values) . ")";
     }
 
+    /**
+     * @param $value
+     * @param AbstractPlatform $platform
+     * @return mixed
+     */
     public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         return $value;
     }
 
+    /**
+     * @param $value
+     * @param AbstractPlatform $platform
+     * @return mixed
+     * @throws Exception
+     */
     public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if (is_array($value)) {

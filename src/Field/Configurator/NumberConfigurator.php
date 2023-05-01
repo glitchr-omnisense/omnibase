@@ -10,6 +10,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
 use NumberFormatter;
 
+/**
+ *
+ */
 final class NumberConfigurator implements FieldConfiguratorInterface
 {
     private IntlFormatter $intlFormatter;

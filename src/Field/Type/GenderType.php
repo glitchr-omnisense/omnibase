@@ -6,12 +6,16 @@ use Base\Enum\UserGender as Gender;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class GenderType extends AbstractType
 {
     public function getParent(): ?string
     {
         return SelectType::class;
     }
+
     public function getBlockPrefix(): string
     {
         return 'gender';
@@ -20,7 +24,7 @@ class GenderType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'class'      => Gender::class,
+            'class' => Gender::class,
             'empty_data' => Gender::GENDERLESS
         ]);
     }

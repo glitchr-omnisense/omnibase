@@ -5,6 +5,9 @@ namespace Base\DependencyInjection\Compiler\Pass;
 use Base\Database\Entity\EntityExtension;
 use Base\DependencyInjection\Compiler\AbstractPass;
 
+/**
+ *
+ */
 class EntityExtensionPass extends AbstractPass
 {
     public function taggedServiceIds(): string

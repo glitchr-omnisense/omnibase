@@ -19,6 +19,9 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
+/**
+ *
+ */
 class ArrayType extends CollectionType
 {
     /**
@@ -157,6 +160,10 @@ class ArrayType extends CollectionType
         }
     }
 
+    /**
+     * @param $pattern
+     * @return int
+     */
     public function getNumberOfArguments($pattern): int
     {
         return preg_match_all('/\{[0-9]*\}/i', $pattern);

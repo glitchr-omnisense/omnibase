@@ -9,6 +9,9 @@ use Base\Field\SelectField;
 use Base\Field\Type\ArrayType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
+/**
+ *
+ */
 class OrderingCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

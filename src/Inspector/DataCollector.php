@@ -23,6 +23,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ *
+ */
 class DataCollector extends AbstractDataCollector
 {
     /** @var AdminContextProvider */
@@ -75,11 +78,19 @@ class DataCollector extends AbstractDataCollector
         return $this->dataBundles[$bundle] ?? null;
     }
 
+    /**
+     * @return mixed
+     */
     public function getMethod()
     {
         return $this->data['method'];
     }
 
+    /**
+     * @param string $bundle
+     * @param string|null $bundleSuffix
+     * @return bool
+     */
     public function collectDataBundle(string $bundle, ?string $bundleSuffix = null)
     {
         $bundleIdentifier = $this->getBundleIdentifier($bundle);
@@ -105,6 +116,12 @@ class DataCollector extends AbstractDataCollector
         return true;
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param $exception
+     * @return void
+     */
     public function collect(Request $request, Response $response, $exception = null)
     {
         $context = $this->adminContextProvider->getContext();
@@ -121,6 +138,10 @@ class DataCollector extends AbstractDataCollector
         $this->data["_bundles"] = $this->dataBundles;
     }
 
+    /**
+     * @param string $bundle
+     * @return mixed|string|null
+     */
     protected function getBundleIdentifier(string $bundle)
     {
         if (!class_exists($bundle)) {
@@ -146,6 +167,10 @@ class DataCollector extends AbstractDataCollector
         return null;
     }
 
+    /**
+     * @param Connection $connection
+     * @return string
+     */
     protected function getFormattedConnection(Connection $connection)
     {
         $params = $connection->getParams();
@@ -173,6 +198,9 @@ class DataCollector extends AbstractDataCollector
         return $driver . $user . $host . $port . $dbname . $charset;
     }
 
+    /**
+     * @return array
+     */
     private function getDoctrineConnections()
     {
         $defaultConnectionName = $this->doctrine->getDefaultConnectionName();
@@ -190,6 +218,10 @@ class DataCollector extends AbstractDataCollector
         return $connections;
     }
 
+    /**
+     * @param string $bundle
+     * @return string
+     */
     private function getBundleFormattedName(string $bundle)
     {
         $bundleName = $this->getDataBundle($bundle)["name"] ?? null;

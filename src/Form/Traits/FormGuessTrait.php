@@ -7,11 +7,15 @@ use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\Persistence\Mapping\MappingException;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 
+/**
+ *
+ */
 trait FormGuessTrait
 {
     public function guessClass(FormInterface|FormEvent $form, ?array $options = null): ?string
@@ -26,18 +30,17 @@ trait FormGuessTrait
         $options = $options ?? $form->getConfig()->getOptions();
 
         $class = null;
-        $options["guess_priority"] = $options["guess_priority"] ?? [
+        $options['guess_priority'] = $options['guess_priority'] ?? [
             FormGuessInterface::GUESS_FROM_FORM,
             FormGuessInterface::GUESS_FROM_PHPDOC,
             FormGuessInterface::GUESS_FROM_DATA,
-            FormGuessInterface::GUESS_FROM_VIEW
+            FormGuessInterface::GUESS_FROM_VIEW,
         ];
 
-        foreach ($options["guess_priority"] as $priority) {
+        foreach ($options['guess_priority'] as $priority) {
             switch ($priority) {
                 case FormGuessInterface::GUESS_FROM_FORM:
-
-                    $class = $options["class"] ?? null;
+                    $class = $options['class'] ?? null;
                     if ($class) {
                         break;
                     }
@@ -46,10 +49,10 @@ trait FormGuessTrait
                     $formParent = $form->getParent();
 
                     // Simple case, data view from current form (handle ORM Proxy management)
-                    $dataClass = $form->getConfig()->getOption("data_class");
+                    $dataClass = $form->getConfig()->getOption('data_class');
 
                     while (null !== $formParent) {
-                        $parentDataClass = $formParent->getConfig()->getOption("data_class")
+                        $parentDataClass = $formParent->getConfig()->getOption('data_class')
                             ?? get_class($formParent->getConfig()->getType()->getInnerType())
                             ?? null;
 
@@ -67,7 +70,6 @@ trait FormGuessTrait
                     break;
 
                 case FormGuessInterface::GUESS_FROM_DATA:
-
                     if ($data instanceof PersistentCollection) {
                         $class = $data->getTypeClass()->getName();
                     } elseif ($data instanceof ArrayCollection || is_array($data)) {
@@ -79,7 +81,6 @@ trait FormGuessTrait
                     break;
 
                 case FormGuessInterface::GUESS_FROM_VIEW:
-
                     // Simple case, data view from current form (handle ORM Proxy management)
                     if (null !== $dataClass = $form->getConfig()->getDataClass()) {
                         if (false === $pos = strrpos($dataClass, '\\__CG__\\')) {
@@ -123,32 +124,36 @@ trait FormGuessTrait
             }
         }
 
-        return $class ?? $options["class"] ?? null;
+        return $class ?? $options['class'] ?? null;
     }
 
+    /**
+     * @param FormInterface|FormEvent|FormBuilderInterface $form
+     * @param array|null $options
+     * @return bool|mixed
+     * @throws MappingException
+     */
     public function guessMultiple(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
     {
         if ($form instanceof FormEvent) {
             $form = $form->getForm();
         }
 
-        if (!array_key_exists("multiple", $options)) {
-            $options["multiple"] = false;
+        if (!array_key_exists('multiple', $options)) {
+            $options['multiple'] = false;
         }
 
-        if ($options["multiple"] === null) {
-
+        if (null === $options['multiple']) {
             $target = null;
             $parentForm = $form->getParent();
             if ($parentForm) {
-
                 $options = $parentForm->getConfig()->getOptions();
-                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+                $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
-            if ($target == null) {
+            if (null == $target) {
                 $options = $options ?? $form->getConfig()->getOptions();
-                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+                $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
             if ($this->classMetadataManipulator->isEntity($target)) {
@@ -164,7 +169,7 @@ trait FormGuessTrait
                     } elseif ($this->classMetadataManipulator->isEnumType($doctrineType)) {
                         return false;
                     } else {
-                        return $typeOfField == "array" || $typeOfField == "json";
+                        return 'array' == $typeOfField || 'json' == $typeOfField;
                     }
                 }
             } elseif ($this->classMetadataManipulator->isSetType($target)) {
@@ -174,42 +179,53 @@ trait FormGuessTrait
             }
         }
 
-        return $options["multiple"] ?? false;
+        return $options['multiple'] ?? false;
     }
 
+    /**
+     * @param FormInterface|FormEvent|FormBuilderInterface $form
+     * @param array|null $options
+     * @return false|mixed
+     * @throws MappingException
+     */
     public function guessNullable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
     {
         if ($form instanceof FormEvent) {
             $form = $form->getForm();
         }
 
-        if (!array_key_exists("nullable", $options)) {
-            $options["allow_null"] = false;
+        if (!array_key_exists('nullable', $options)) {
+            $options['allow_null'] = false;
         }
 
-        if ($options["allow_null"] === null) {
-
+        if (null === $options['allow_null']) {
             $target = null;
             $parentForm = $form->getParent();
             if ($parentForm) {
                 $options = $parentForm->getConfig()->getOptions();
-                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+                $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
-            if ($target == null) {
+            if (null == $target) {
                 $options = $options ?? $form->getConfig()->getOptions();
-                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+                $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
             if ($this->classMetadataManipulator->isEntity($target)) {
                 $targetField = $form->getName();
-                    $this->classMetadataManipulator->getMapping($target, $targetField)["allow_null"] ?? false;
+                    $this->classMetadataManipulator->getMapping($target, $targetField)['allow_null'] ?? false;
             }
         }
 
-        return $options["allow_null"] ?? false;
+        return $options['allow_null'] ?? false;
     }
 
+    /**
+     * @param FormInterface|FormEvent|FormBuilderInterface $form
+     * @param array|null $options
+     * @return bool|mixed
+     * @throws \Exception
+     */
     public function guessSortable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
     {
         if ($form instanceof FormEvent) {
@@ -217,80 +233,91 @@ trait FormGuessTrait
         }
 
         $options = $options ?? $form->getConfig()->getOptions();
-        if (!array_key_exists("sortable", $options)) {
-            $options["sortable"] = false;
+        if (!array_key_exists('sortable', $options)) {
+            $options['sortable'] = false;
         }
-        if (!array_key_exists("multivalue", $options)) {
-            $options["multivalue"] = false;
+        if (!array_key_exists('multivalue', $options)) {
+            $options['multivalue'] = false;
         }
 
-        if ($options["multivalue"]) {
+        if ($options['multivalue']) {
             return false;
         }
-        if ($options["sortable"] === null) {
-
+        if (null === $options['sortable']) {
             $target = null;
             $parentForm = $form->getParent();
             if ($parentForm) {
                 $options = $parentForm->getConfig()->getOptions();
-                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+                $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
-            if ($target == null) {
+            if (null == $target) {
                 $options = $options ?? $form->getConfig()->getOptions();
-                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+                $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
             $annotations = AnnotationReader::getInstance()->getAnnotations($target, OrderColumn::class, [AnnotationReader::TARGET_PROPERTY]);
-            $options["sortable"] = !empty(array_filter_recursive($annotations["property"][$target][$form->getName()] ?? []));
+            $options['sortable'] = !empty(array_filter_recursive($annotations['property'][$target][$form->getName()] ?? []));
         }
 
-        return $options["sortable"] ?? false;
+        return $options['sortable'] ?? false;
     }
 
+    /**
+     * @param FormInterface|FormBuilderInterface $form
+     * @param array|null $options
+     * @return mixed|string[]|null
+     */
     public function guessChoices(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
-        if (!array_key_exists("choices", $options)) {
-            $options["choices"] = null;
+        if (!array_key_exists('choices', $options)) {
+            $options['choices'] = null;
         }
 
-        if (!$options["choices"]) {
-            $class = $options["class"];
+        if (!$options['choices']) {
+            $class = $options['class'];
 
             $permittedValues = null;
             if ($this->classMetadataManipulator->isEnumType($class)) {
                 $permittedValues = $class::getPermittedValuesByClass();
             } elseif ($this->classMetadataManipulator->isSetType($class)) {
                 $permittedValues = $class::getPermittedValuesByClass();
-            } elseif (array_key_exists("choice_loader", $options) && $options["choice_loader"] instanceof ChoiceLoaderInterface) {
-                $permittedValues = $options["choice_loader"]->loadChoiceList()->getStructuredValues();
+            } elseif (array_key_exists('choice_loader', $options) && $options['choice_loader'] instanceof ChoiceLoaderInterface) {
+                $permittedValues = $options['choice_loader']->loadChoiceList()->getStructuredValues();
             }
 
-            if ($permittedValues === null) {
+            if (null === $permittedValues) {
                 return null;
             }
-            return count($permittedValues) == 1 ? begin($permittedValues) : $permittedValues;
+
+            return 1 == count($permittedValues) ? begin($permittedValues) : $permittedValues;
         }
 
-        return $options["choices"];
+        return $options['choices'];
     }
 
+    /**
+     * @param FormInterface|FormBuilderInterface $form
+     * @param array|null $options
+     * @return bool|mixed
+     * @throws MappingException
+     */
     public function guessChoiceAutocomplete(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
-        if (!array_key_exists("choices", $options)) {
-            $options["choices"] = [];
+        if (!array_key_exists('choices', $options)) {
+            $options['choices'] = [];
         }
-        if (!array_key_exists("autocomplete", $options)) {
-            $options["autocomplete"] = null;
+        if (!array_key_exists('autocomplete', $options)) {
+            $options['autocomplete'] = null;
         }
 
-        if ($options["choices"]) {
+        if ($options['choices']) {
             return false;
         }
-        if ($options["autocomplete"] === null && $options["class"]) {
-            $target = $options["class"];
+        if (null === $options['autocomplete'] && $options['class']) {
+            $target = $options['class'];
             if ($this->classMetadataManipulator->isEntity($target)) {
                 return true;
             }
@@ -302,38 +329,44 @@ trait FormGuessTrait
             }
         }
 
-        return $options["autocomplete"] ?? false;
+        return $options['autocomplete'] ?? false;
     }
 
+    /**
+     * @param FormInterface|FormBuilderInterface $form
+     * @param array|null $options
+     * @param $data
+     * @return array|mixed
+     */
     public function guessChoiceFilter(FormInterface|FormBuilderInterface $form, ?array $options = null, $data = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
-        if (!array_key_exists("choices_filter", $options)) {
-            $options["choices_filter"] = false;
+        if (!array_key_exists('choices_filter', $options)) {
+            $options['choices_filter'] = false;
         }
 
-        if ($options["choice_filter"] === false) {
+        if (false === $options['choice_filter']) {
             return [];
         }
-        if ($options["choice_filter"] === null) {
-            $options["choice_filter"] = [];
+        if (null === $options['choice_filter']) {
+            $options['choice_filter'] = [];
             if ($data) {
                 if ($data instanceof Collection || is_array($data)) {
                     foreach ($data as $entry) {
                         if (is_object($entry)) {
-                            $options["choice_filter"][] = get_class($entry);
+                            $options['choice_filter'][] = get_class($entry);
                         }
                     }
                 } elseif (is_object($data)) {
-                    $options["choice_filter"][] = get_class($data);
+                    $options['choice_filter'][] = get_class($data);
                 }
             }
 
-            if (!$options["choice_filter"] && $options["class"]) {
-                $options["choice_filter"][] = $options["class"];
+            if (!$options['choice_filter'] && $options['class']) {
+                $options['choice_filter'][] = $options['class'];
             }
         }
 
-        return $options["choice_filter"] ?? [];
+        return $options['choice_filter'] ?? [];
     }
 }

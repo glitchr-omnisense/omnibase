@@ -4,10 +4,13 @@ namespace Base\Exception;
 
 use Exception;
 
+/**
+ *
+ */
 class UploaderAmbiguityException extends Exception
 {
     /**
-     * {@inheritdoc}
+     * {}
      */
     public function getMessageKey()
     {

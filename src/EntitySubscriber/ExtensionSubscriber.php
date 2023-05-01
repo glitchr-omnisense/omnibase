@@ -16,6 +16,9 @@ use LogicException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
+/**
+ *
+ */
 class ExtensionSubscriber implements EventSubscriberInterface
 {
     /**
@@ -138,6 +141,12 @@ class ExtensionSubscriber implements EventSubscriberInterface
         }
     }
 
+    /**
+     * @param string $action
+     * @param array $entities
+     * @return array
+     * @throws \Exception
+     */
     public function payload(string $action, array $entities)
     {
         $uow = $this->entityManager->getUnitOfWork();

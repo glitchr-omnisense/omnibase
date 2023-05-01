@@ -20,6 +20,9 @@ use Symfony\Component\Yaml\Exception\ParseException;
 
 use function is_file;
 
+/**
+ *
+ */
 class Excel
 {
     private array $context;
@@ -165,6 +168,10 @@ class Excel
         return $content;
     }
 
+    /**
+     * @param string $path
+     * @return array|string|null
+     */
     public static function extension(string $path)
     {
         try {

@@ -7,63 +7,91 @@ use Imagine\Image\Box;
 use Imagine\Image\BoxInterface;
 use Imagine\Image\ImageInterface;
 
+/**
+ *
+ */
 class ThumbnailFilter implements FilterInterface
 {
-    /** * @var int */
+    /** * @var int|null */
     protected ?int $width;
-    /** * @var int */
+    /** * @var int|null */
     protected ?int $height;
     /** * @var int */
     protected $mode;
     /** * @var string */
     protected $filter;
 
+    /**
+     * @param int|null $width
+     * @param int|null $height
+     * @param $mode
+     * @param $filter
+     */
     public function __construct(?int $width = null, ?int $height = null, $mode = ImageInterface::THUMBNAIL_INSET, $filter = ImageInterface::FILTER_UNDEFINED)
     {
-        $this->width  = $width;
+        $this->width = $width;
         $this->height = $height;
-        $this->mode   = $mode;
+        $this->mode = $mode;
         $this->filter = $filter;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
-        return ($this->width ?? "auto")."x".($this->height ?? "auto");
+        return ($this->width ?? "auto") . "x" . ($this->height ?? "auto");
     }
+
     public function apply(ImageInterface $image): ImageInterface
     {
-        $width  = $image->getSize()->getWidth();
+        $width = $image->getSize()->getWidth();
         $height = $image->getSize()->getHeight();
 
-        $ratio  = $width/$height;
+        $ratio = $width / $height;
         if ($this->height === null) {
-            $this->height = $ratio*($this->width  ?? $width);
+            $this->height = $ratio * ($this->width ?? $width);
         }
-        if ($this->width  === null) {
-            $this->width  = $ratio*($this->height ?? $height);
+        if ($this->width === null) {
+            $this->width = $ratio * ($this->height ?? $height);
         }
 
         return $image->thumbnail(new Box($this->width, $this->height), $this->mode, $this->filter);
     }
 
+    /**
+     * @return int|null
+     */
     public function getWidth()
     {
         return $this->width;
     }
+
+    /**
+     * @return int|null
+     */
     public function getHeight()
     {
         return $this->height;
     }
+
+    /**
+     * @return int|mixed
+     */
     public function getMode()
     {
         return $this->mode;
     }
 
+    /**
+     * @param BoxInterface $imageSize
+     * @return Box|BoxInterface
+     */
     public function resize(BoxInterface $imageSize)
     {
         $mode = $this->mode & 0xffff;
 
-        $allowUpscale = (bool) ($mode & ImageInterface::THUMBNAIL_FLAG_UPSCALE);
+        $allowUpscale = (bool)($mode & ImageInterface::THUMBNAIL_FLAG_UPSCALE);
         $size = new Box($this->width, $this->height);
 
         if ($size->getWidth() === $imageSize->getWidth() && $size->getHeight() === $imageSize->getHeight()) {

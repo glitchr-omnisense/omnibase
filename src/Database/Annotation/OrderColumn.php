@@ -40,6 +40,13 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $this->order = $data['order'] ?? self::ASC;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     * @throws Exception
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         if ($object instanceof ClassMetadata) {
@@ -77,6 +84,11 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
     protected array $ordering = [];
 
+    /**
+     * @param mixed $entity
+     * @return array
+     * @throws Exception
+     */
     public function getOrderedColumns(mixed $entity)
     {
         $orderedColumns = [];

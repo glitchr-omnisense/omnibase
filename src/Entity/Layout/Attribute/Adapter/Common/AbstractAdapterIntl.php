@@ -24,7 +24,11 @@ class AbstractAdapterIntl implements TranslationInterface
         return $this->label;
     }
 
-    public function setLabel(?string $label)
+    /**
+     * @param string|null $label
+     * @return $this
+     */
+    public function setLabel(?string $label): static
     {
         $this->label = $label;
         return $this;
@@ -40,7 +44,11 @@ class AbstractAdapterIntl implements TranslationInterface
         return $this->help;
     }
 
-    public function setHelp(?string $help)
+    /**
+     * @param string|null $help
+     * @return $this
+     */
+    public function setHelp(?string $help): static
     {
         $this->help = $help;
         return $this;

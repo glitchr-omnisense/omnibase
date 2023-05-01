@@ -16,6 +16,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Throwable;
 
+/**
+ *
+ */
 class ErrorController extends AbstractController
 {
     private BaseService $baseService;
@@ -31,6 +34,11 @@ class ErrorController extends AbstractController
         $this->profiler = $profiler;
     }
 
+    /**
+     * @param Throwable $exception
+     * @return Response
+     * @throws Exception
+     */
     public function Main(Throwable $exception)
     {
         try {

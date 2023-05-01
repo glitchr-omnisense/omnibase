@@ -36,6 +36,9 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
         return $this->getHyperlink()->generate();
     }
 
+    /**
+     * @return array|string|null
+     */
     public function __toString()
     {
         return $this->getTitle() ?? $this->getHyperlink()->getLabel() ?? $this->__iconize();
@@ -61,6 +64,14 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
         return $this->hyperlink;
     }
 
+    /**
+     * @param Hyperlink $hyperlink
+     * @return $this
+     */
+    /**
+     * @param Hyperlink $hyperlink
+     * @return $this
+     */
     public function setHyperlink(Hyperlink $hyperlink)
     {
         $this->hyperlink = $hyperlink;

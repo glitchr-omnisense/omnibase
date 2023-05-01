@@ -5,6 +5,9 @@ namespace Base\Form;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
 
+/**
+ *
+ */
 interface FormProxyInterface
 {
     public function all();
@@ -16,7 +19,7 @@ interface FormProxyInterface
     public function has(string $name): bool;
 
     public function get(string $name): ?FormInterface;
-    
+
     public function getProcessor(string $name): ?FormProcessorInterface;
 
     public function setData(string $name, mixed $data): self;

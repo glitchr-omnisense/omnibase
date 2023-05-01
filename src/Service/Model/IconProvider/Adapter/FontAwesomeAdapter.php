@@ -5,6 +5,9 @@ namespace Base\Service\Model\IconProvider\Adapter;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 
+/**
+ *
+ */
 class FontAwesomeAdapter extends AbstractIconAdapter
 {
     public const STYLE_SOLID = "solid";
@@ -125,12 +128,21 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         return $choices;
     }
 
+    /**
+     * @param string $name
+     * @return string|null
+     */
     public function getStyle(string $name)
     {
         $styles = [self::STYLE_BRANDS, self::STYLE_DUOTONE, self::STYLE_LIGHT, self::STYLE_REGULAR, self::STYLE_SOLID, self::STYLE_THIN, self::STYLE_KIT];
         return array_filter(explode(" ", $name), fn($n) => in_array($n, $styles))[0] ?? null;
     }
 
+    /**
+     * @param string $name
+     * @return mixed
+     * @throws \Exception
+     */
     public function getIdentifier(string $name)
     {
         return array_transforms(
@@ -139,6 +151,10 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         )[0];
     }
 
+    /**
+     * @param string|null $name
+     * @return array|string
+     */
     public function getStyles(?string $name = null)
     {
         if ($name === null) {
@@ -154,11 +170,18 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         return self::$contents[$this->metadata][$identifier]["styles"] . " ";
     }
 
+    /**
+     * @return int[]|string[]
+     */
     public function getValues()
     {
         return array_keys(self::$contents[$this->metadata]);
     }
 
+    /**
+     * @param string $name
+     * @return mixed|string
+     */
     public function getValue(string $name)
     {
         $identifier = $this->getIdentifier($name);
@@ -168,6 +191,9 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         return $identifier;
     }
 
+    /**
+     * @return array
+     */
     public function getLabels()
     {
         return array_map(function ($icon) {
@@ -175,6 +201,10 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         }, self::$contents[$this->metadata]);
     }
 
+    /**
+     * @param string $name
+     * @return mixed|string
+     */
     public function getLabel(string $name)
     {
         $identifier = $this->getIdentifier($name);
@@ -184,6 +214,9 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         return self::$contents[$this->metadata][$identifier]["label"];
     }
 
+    /**
+     * @return array
+     */
     public function getUnicodes()
     {
         return array_map(function ($icon) {
@@ -191,6 +224,10 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         }, self::$contents[$this->metadata]);
     }
 
+    /**
+     * @param string $name
+     * @return array|mixed
+     */
     public function getUnicode(string $name)
     {
         $identifier = $this->getIdentifier($name);

@@ -20,6 +20,9 @@ use function count;
 use function in_array;
 use function Symfony\Component\String\u;
 
+/**
+ *
+ */
 class ArrayConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -84,11 +87,20 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         return rtrim(preg_match('/\{[0-9]*\}/', $url) ? null : $url, "/");
     }
 
+    /**
+     * @param FieldDto $field
+     * @param AdminContext $context
+     * @return int
+     */
     private function formatCollection(FieldDto $field, AdminContext $context)
     {
         return $this->countNumElements($field->getValue());
     }
 
+    /**
+     * @param $collection
+     * @return int
+     */
     private function countNumElements($collection): int
     {
         if (null === $collection) {

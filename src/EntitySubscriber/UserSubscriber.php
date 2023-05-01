@@ -15,6 +15,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ *
+ */
 class UserSubscriber implements EventSubscriberInterface
 {
     /**
@@ -112,7 +115,7 @@ class UserSubscriber implements EventSubscriberInterface
             $notification->send("success");
         } else {
             /**
-             * @var User\Token
+             * @var User\Token $verifyEmailToken
              */
             $verifyEmailToken = new Token('verify-email', 3600);
             $user->addToken($verifyEmailToken);

@@ -38,6 +38,9 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 use Symfony\Component\Finder\Finder;
 
+/**
+ *
+ */
 class BaseBundle extends Bundle
 {
     use SingletonTrait;
@@ -53,26 +56,41 @@ class BaseBundle extends Bundle
     public const VERSION = '1.0.0';
     public const USE_CACHE = true;
 
+    /**
+     * @return array|bool|float|int|string|\UnitEnum|null
+     */
     public function getProjectDir()
     {
         return $this->container->getParameter('kernel.project_dir');
     }
 
+    /**
+     * @return string
+     */
     public function getPublicDir()
     {
         return $this->container->getParameter('kernel.project_dir') . "/public/";
     }
 
+    /**
+     * @return string
+     */
     public function getSourceDir()
     {
         return $this->container->getParameter('kernel.project_dir') . "/src/";
     }
 
+    /**
+     * @return array|bool|float|int|string|\UnitEnum|null
+     */
     public function getCacheDir()
     {
         return $this->container->getParameter('kernel.cache_dir');
     }
 
+    /**
+     * @return array|bool|float|int|string|\UnitEnum|null
+     */
     public function getEnvironment()
     {
         return $this->container->getParameter('kernel.environment');
@@ -80,6 +98,9 @@ class BaseBundle extends Bundle
 
     protected bool $boot = false;
 
+    /**
+     * @return bool
+     */
     public function hasBooted()
     {
         return $this->boot;
@@ -97,6 +118,9 @@ class BaseBundle extends Bundle
     // The purpose of this broken cache feature is to prevent running without these subscribers
     protected bool $brokenCache = true; // Turn off in subscriber if everything fine.
 
+    /**
+     * @return bool
+     */
     public function isBroken()
     {
         return $this->brokenCache;
@@ -179,6 +203,11 @@ class BaseBundle extends Bundle
         self::$dumpEnabled[$scope] = false;
     }
 
+    /**
+     * @param $scope
+     * @param ...$variadic
+     * @return void
+     */
     public static function dump($scope, ...$variadic)
     {
         if (self::$dumpEnabled[$scope] ?? false) {
@@ -209,7 +238,7 @@ class BaseBundle extends Bundle
         Type::overrideType('datetimetz', UTCDateTimeType::class);
 
         /**
-         * @var EntityManagerInterface
+         * @var EntityManagerInterface $this
          */
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
         $entityManagerConfig = $entityManager->getConfiguration();
@@ -327,6 +356,9 @@ class BaseBundle extends Bundle
         }
     }
 
+    /**
+     * @return string
+     */
     public function getBundleLocation()
     {
         return dirname((new ReflectionClass(self::class))->getFileName()) . "/";
@@ -347,6 +379,10 @@ class BaseBundle extends Bundle
     protected static ?array $aliasList = null;
     protected static ?array $aliasRepositoryList = null;
 
+    /**
+     * @param $arrayOrObjectOrClass
+     * @return array|array[]|false|false[]|mixed|string|string[]
+     */
     public function getAlias($arrayOrObjectOrClass)
     {
         if (!$arrayOrObjectOrClass) {
@@ -378,6 +414,10 @@ class BaseBundle extends Bundle
         return $this->getAlias($class) != $class;
     }
 
+    /**
+     * @param $aliasRepository
+     * @return mixed
+     */
     public function getAliasRepository($aliasRepository)
     {
         return self::$aliasRepositoryList[$aliasRepository] ?? $aliasRepository;
@@ -411,6 +451,10 @@ class BaseBundle extends Bundle
         }
     }
 
+    /**
+     * @param $class
+     * @return void
+     */
     public function setAliasEntity($class)
     {
         if (is_array($class)) {
@@ -433,6 +477,11 @@ class BaseBundle extends Bundle
 
     protected static ?array $classes = null;
 
+    /**
+     * @param $path
+     * @param $prefix
+     * @return array
+     */
     public function getAllClasses($path, $prefix = ""): array
     {
         $fullpath = realpath($path) . " << " . $prefix;
@@ -456,6 +505,11 @@ class BaseBundle extends Bundle
         return self::$classes[$fullpath];
     }
 
+    /**
+     * @param $path
+     * @param $prefix
+     * @return array
+     */
     public function getAllNamespaces($path, $prefix = ""): array
     {
         $namespaces = [];
@@ -472,6 +526,11 @@ class BaseBundle extends Bundle
         return array_unique($namespaces);
     }
 
+    /**
+     * @param $path
+     * @param $prefix
+     * @return array
+     */
     public function getAllNamespacesAndClasses($path, $prefix = ""): array
     {
         $namespacesAndClasses = [];
@@ -495,6 +554,10 @@ class BaseBundle extends Bundle
         return array_unique($namespacesAndClasses);
     }
 
+    /**
+     * @param $filename
+     * @return string|null
+     */
     public function getClassname($filename)
     {
         $directoriesAndFilename = explode('/', $filename);
@@ -503,6 +566,11 @@ class BaseBundle extends Bundle
         return array_shift($nameAndExtension);
     }
 
+    /**
+     * @param $filename
+     * @param $prefix
+     * @return string
+     */
     public function getFullNamespace($filename, $prefix = "")
     {
         $lines = file($filename);
@@ -523,6 +591,10 @@ class BaseBundle extends Bundle
     protected static $cache = null;
     protected static ?array $filePaths = null;
 
+    /**
+     * @param $path
+     * @return array|mixed
+     */
     public function getFilePaths($path)
     {
         $path = realpath($path);

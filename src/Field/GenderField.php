@@ -7,6 +7,9 @@ use Base\Field\Type\GenderType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
+/**
+ *
+ */
 class GenderField extends SelectField implements FieldInterface
 {
     use FieldTrait;

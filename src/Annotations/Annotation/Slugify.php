@@ -59,11 +59,21 @@ class Slugify extends AbstractAnnotation
         );
     }
 
+    /**
+     * @return mixed|string|null
+     */
     public function getReferenceColumn()
     {
         return $this->referenceColumn;
     }
 
+    /**
+     * @param $event
+     * @param $entity
+     * @param $property
+     * @return array
+     * @throws \Exception
+     */
     public function getInvalidSlugs($event, $entity, $property)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
@@ -97,12 +107,19 @@ class Slugify extends AbstractAnnotation
         $firstEntity = begin($candidateEntities);
         if ($firstEntity === $entity) {
             $firstSlug = $this->getFieldValue($entity, $property);
-            $invalidSlugs = array_filter($invalidSlugs, fn ($s) => $s !== $firstSlug);
+            $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
         }
 
         return $invalidSlugs;
     }
 
+    /**
+     * @param $entity
+     * @param string|null $input
+     * @param string $suffix
+     * @return string|null
+     * @throws \Exception
+     */
     public function slug($entity, ?string $input = null, string $suffix = ''): ?string
     {
         // Check if field already set.. get field value or by default class name
@@ -130,17 +147,24 @@ class Slugify extends AbstractAnnotation
             }
 
             $slug = explodeByArray($this->keep, $input);
-            $slug = array_map(fn ($i) => $this->slugger->slug($i, $this->separator), $slug);
+            $slug = array_map(fn($i) => $this->slugger->slug($i, $this->separator), $slug);
             $slug = implodeByArray($posList, $slug);
         }
 
         return $this->lowercase ? strtolower($slug) : $slug;
     }
 
+    /**
+     * @param $entity
+     * @param string $property
+     * @param string|null $defaultInput
+     * @param array $invalidSlugs
+     * @return string|null
+     */
     public function getSlug($entity, string $property, ?string $defaultInput = null, array $invalidSlugs = []): ?string
     {
         /**
-         * @var ServiceRepositoryInterface
+         * @var ServiceRepositoryInterface $this
          */
         $repository = $this->getPropertyOwnerRepository($entity, $property);
         $defaultSlug = $this->slug($entity, $defaultInput);
@@ -159,11 +183,25 @@ class Slugify extends AbstractAnnotation
         return $slug;
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return AnnotationReader::TARGET_PROPERTY == $target;
     }
 
+    /**
+     * @param OnFlushEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     * @throws \Exception
+     */
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $propertyDeclarer = property_declarer($entity, $property);

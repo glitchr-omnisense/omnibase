@@ -9,6 +9,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 //https://codepen.io/peiche/pen/mRBGmR
 //https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.yml
 
+/**
+ *
+ */
 class IconType extends SelectType implements SelectInterface
 {
     public static mixed $iconProvider = null;

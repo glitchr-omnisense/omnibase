@@ -9,6 +9,9 @@ use Base\Field\NumberField;
 use Base\Field\SelectField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
+/**
+ *
+ */
 class TrashBallCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

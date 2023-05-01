@@ -2,6 +2,9 @@
 
 namespace Base\Notifier\Recipient;
 
+/**
+ *
+ */
 trait TimezoneRecipientTrait
 {
     private string $timezone;

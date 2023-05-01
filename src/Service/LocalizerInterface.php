@@ -2,6 +2,9 @@
 
 namespace Base\Service;
 
+/**
+ *
+ */
 interface LocalizerInterface
 {
     //

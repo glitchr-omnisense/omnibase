@@ -10,6 +10,9 @@ use Base\Notifier\Abstract\BaseNotifier;
 use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Routing\Router;
 
+/**
+ *
+ */
 class Notifier extends BaseNotifier implements NotifierInterface
 {
     public function testEmail(?User $user): Notification
@@ -57,6 +60,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
+    /**
+     * @param ContactModel $contactModel
+     * @return Notification
+     */
     public function contactEmail(ContactModel $contactModel)
     {
         $notification = new Notification("contact.adminNotification");
@@ -80,6 +87,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
+    /**
+     * @param ContactModel $contactModel
+     * @return Notification
+     */
     public function contactEmailConfirmation(ContactModel $contactModel)
     {
         $notification = new Notification("contact.userConfirmation");
@@ -95,6 +106,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
+    /**
+     * @param User $user
+     * @return Notification
+     */
     public function userAccountGoodbye(User $user)
     {
         $notification = new Notification("accountGoodbye.success");
@@ -111,6 +126,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
+    /**
+     * @param User $user
+     * @return Notification
+     */
     public function userApprovalRequest(User $user)
     {
         $notification = new Notification("adminApproval.required");
@@ -127,6 +146,10 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
+    /**
+     * @param User $user
+     * @return Notification
+     */
     public function userApprovalConfirmation(User $user)
     {
         $notification = new Notification("adminApproval.approval");
@@ -143,6 +166,11 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
+    /**
+     * @param User $user
+     * @param Token $token
+     * @return Notification
+     */
     public function resetPasswordRequest(User $user, Token $token)
     {
         $notification = new Notification("resetPassword.success");
@@ -168,6 +196,11 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
+    /**
+     * @param User $user
+     * @param Token $token
+     * @return Notification
+     */
     public function verificationEmail(User $user, Token $token)
     {
         $notification = new Notification("verifyEmail.check");
@@ -193,6 +226,11 @@ class Notifier extends BaseNotifier implements NotifierInterface
         return $notification;
     }
 
+    /**
+     * @param User $user
+     * @param Token $token
+     * @return Notification
+     */
     public function userWelcomeBack(User $user, Token $token)
     {
         $notification = new Notification("accountWelcomeBack.success");

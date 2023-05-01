@@ -6,6 +6,9 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\ORM\EntityManager;
 
 use Base\Database\Entity\EntityHydrator;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\Persistence\ObjectRepository;
 use Exception;
 
 use App\Entity\User;
@@ -25,6 +28,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ *
+ */
 class AnnotationReader extends AbstractLocalCache
 {
     use SingletonTrait;
@@ -42,6 +48,14 @@ class AnnotationReader extends AbstractLocalCache
     // Annotation pass..
     protected array $annotations = [];
 
+    /**
+     * @param $annotations
+     * @return $this
+     */
+    /**
+     * @param $annotations
+     * @return $this
+     */
     public function addAnnotation($annotations): self
     {
         $this->annotations[get_class($annotations)] = $annotations;
@@ -49,15 +63,23 @@ class AnnotationReader extends AbstractLocalCache
     }
 
     /**
-     * @var EntityManager
+     * @var EntityManager|null
      */
     protected ?EntityManager $entityManager = null;
 
+    /**
+     * @return EntityManager|null
+     */
     public function getEntityManager()
     {
         return $this->entityManager;
     }
 
+    /**
+     * @param $entity
+     * @return EntityRepository|ObjectRepository
+     * @throws NotSupported
+     */
     public function getRepository($entity)
     {
         return $this->entityManager->getRepository($entity);
@@ -69,7 +91,7 @@ class AnnotationReader extends AbstractLocalCache
     }
 
     /**
-     * @var EntityHydrator
+     * @var EntityHydrator|null
      */
     protected ?EntityHydrator $entityHydrator = null;
 
@@ -79,7 +101,7 @@ class AnnotationReader extends AbstractLocalCache
     }
 
     /**
-     * @var ClassMetadataManipulator
+     * @var ClassMetadataManipulator|null
      */
     protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
@@ -89,7 +111,7 @@ class AnnotationReader extends AbstractLocalCache
     }
 
     /**
-     * @var FlysystemInterface
+     * @var FlysystemInterface|null
      */
     protected ?FlysystemInterface $flysystem = null;
 
@@ -109,7 +131,7 @@ class AnnotationReader extends AbstractLocalCache
     }
 
     /**
-     * @var DoctrineAnnotationReader
+     * @var DoctrineAnnotationReader|null
      */
     protected ?DoctrineAnnotationReader $reader = null;
 
@@ -212,11 +234,17 @@ class AnnotationReader extends AbstractLocalCache
         parent::__construct($cacheDir);
     }
 
+    /**
+     * @return string
+     */
     public function getEnvironment()
     {
         return $this->environment;
     }
 
+    /**
+     * @return string
+     */
     public function getProjectDir()
     {
         return $this->projectDir;
@@ -300,6 +328,14 @@ class AnnotationReader extends AbstractLocalCache
         return $this->annotationNames;
     }
 
+    /**
+     * @param string $annotationName
+     * @return $this
+     */
+    /**
+     * @param string $annotationName
+     * @return $this
+     */
     public function addAnnotationName(string $annotationName)
     {
         if (!is_subclass_of($annotationName, AbstractAnnotation::class)) {
@@ -313,6 +349,14 @@ class AnnotationReader extends AbstractLocalCache
         return $this;
     }
 
+    /**
+     * @param string $annotationName
+     * @return $this
+     */
+    /**
+     * @param string $annotationName
+     * @return $this
+     */
     public function removeAnnotationName(string $annotationName)
     {
         if (($pos = array_search($annotationName, $this->annotationNames))) {
@@ -369,13 +413,18 @@ class AnnotationReader extends AbstractLocalCache
     /**
      * Everything related to hierarchy
      *
-     * @var array
+     * @return string|null
+     * @var string
      */
-    public function getParent($className): ?string
+    public function getParent(string $className): ?string
     {
         return $this->classHierarchies[$className] ?? null;
     }
 
+    /**
+     * @param $className
+     * @return string|null
+     */
     public function getAncestor($className): ?string
     {
         if (!array_key_exists($className, $this->classAncestors)) {
@@ -391,18 +440,36 @@ class AnnotationReader extends AbstractLocalCache
         return $this->classAncestors[$className];
     }
 
+    /**
+     * @param $className
+     * @param $annotationNames
+     * @param $annotationTargets
+     * @return array[]
+     * @throws Exception
+     */
     public function getAncestorAnnotations($className, $annotationNames = null, $annotationTargets = [])
     {
         $classAncestor = $this->getAncestor($className);
         return $this->getAnnotations($classAncestor, $annotationNames, $annotationTargets);
     }
 
+    /**
+     * @param $className
+     * @param $annotationNames
+     * @param $annotationTargets
+     * @return array[]
+     * @throws Exception
+     */
     public function getParentAnnotations($className, $annotationNames = null, $annotationTargets = [])
     {
         $parent = $this->getParent($className);
         return $this->getAnnotations($parent, $annotationNames, $annotationTargets);
     }
 
+    /**
+     * @param $className
+     * @return array
+     */
     public function getChildren($className)
     {
         $children = [];
@@ -416,6 +483,13 @@ class AnnotationReader extends AbstractLocalCache
         return $children;
     }
 
+    /**
+     * @param $className
+     * @param $annotationNames
+     * @param $annotationTargets
+     * @return array|mixed
+     * @throws Exception
+     */
     public function getChildrenAnnotations($className, $annotationNames = null, $annotationTargets = [])
     {
         $annotations = [];
@@ -433,6 +507,11 @@ class AnnotationReader extends AbstractLocalCache
         return $annotations;
     }
 
+    /**
+     * @param $classNameOrMetadataOrRefl
+     * @param $annotationNames
+     * @return array
+     */
     public function getDefaultClassAnnotations($classNameOrMetadataOrRefl, $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
@@ -469,6 +548,12 @@ class AnnotationReader extends AbstractLocalCache
         return $this->filterClassAnnotations($reflClass->name, $annotationNames);
     }
 
+    /**
+     * @param string $className
+     * @param mixed $annotationNames
+     * @param array|null $classAnnotations
+     * @return array|mixed
+     */
     protected function filterClassAnnotations(string $className, mixed $annotationNames, ?array $classAnnotations = null)
     {
         $classAnnotations ??= $this->classAnnotations;
@@ -489,6 +574,11 @@ class AnnotationReader extends AbstractLocalCache
         return $filteredAnnotations;
     }
 
+    /**
+     * @param mixed $classNameOrMetadataOrRefl
+     * @param mixed|null $annotationNames
+     * @return array
+     */
     public function getDefaultMethodAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
@@ -535,6 +625,12 @@ class AnnotationReader extends AbstractLocalCache
         return $this->filterMethodAnnotations($reflClass->name, $annotationNames);
     }
 
+    /**
+     * @param string $className
+     * @param mixed $annotationNames
+     * @param array|null $methodAnnotations
+     * @return array|mixed
+     */
     protected function filterMethodAnnotations(string $className, mixed $annotationNames, ?array $methodAnnotations = null)
     {
         $methodAnnotations ??= $this->methodAnnotations;
@@ -557,6 +653,11 @@ class AnnotationReader extends AbstractLocalCache
         return $filteredAnnotations;
     }
 
+    /**
+     * @param mixed $classNameOrMetadataOrRefl
+     * @param mixed|null $annotationNames
+     * @return array
+     */
     public function getDefaultPropertyAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
@@ -603,6 +704,12 @@ class AnnotationReader extends AbstractLocalCache
         return $this->filterPropertyAnnotations($reflClass->name, $annotationNames);
     }
 
+    /**
+     * @param string $className
+     * @param mixed $annotationNames
+     * @param array|null $propertyAnnotations
+     * @return array|mixed
+     */
     protected function filterPropertyAnnotations(string $className, mixed $annotationNames, ?array $propertyAnnotations = null)
     {
         $propertyAnnotations ??= $this->propertyAnnotations;
@@ -625,6 +732,10 @@ class AnnotationReader extends AbstractLocalCache
         return $filteredAnnotations;
     }
 
+    /**
+     * @param $classNameOrMetadataOrRefl
+     * @return ReflectionClass|null
+     */
     public function getReflClass($classNameOrMetadataOrRefl)
     {
         if ($classNameOrMetadataOrRefl instanceof ReflectionClass) {
@@ -636,6 +747,13 @@ class AnnotationReader extends AbstractLocalCache
         }
     }
 
+    /**
+     * @param $classNameOrMetadataOrRefl
+     * @param $annotationNames
+     * @param array $annotationTargets
+     * @return array|array[]
+     * @throws Exception
+     */
     public function getDefaultAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $annotationTargets = []): array
     {
         if ($classNameOrMetadataOrRefl == null) {
@@ -683,6 +801,12 @@ class AnnotationReader extends AbstractLocalCache
         return $annotationNames;
     }
 
+    /**
+     * @param $annotationTargets
+     * @param $annotationNames
+     * @return mixed|string[]
+     * @throws Exception
+     */
     public function normalizeTargets($annotationTargets, $annotationNames)
     {
         if (empty($annotationTargets)) {
@@ -710,9 +834,7 @@ class AnnotationReader extends AbstractLocalCache
         $this->propertyAnnotations = $this->getCache("/PropertyAnnotations") ?? [];
 
         $this->executeOnce(function () {
-            /**
-             * @var ClassMetadataFactory
-             */
+
             foreach ($this->classMetadataManipulator->getAllClassNames() as $className) {
                 $this->getAncestor($className);
                 $this->getAnnotations($className);
@@ -735,6 +857,13 @@ class AnnotationReader extends AbstractLocalCache
         return true;
     }
 
+    /**
+     * @param $classNameOrMetadataOrRefl
+     * @param $annotationNames
+     * @param array $annotationTargets
+     * @return array|array[]
+     * @throws Exception
+     */
     public function getAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $annotationTargets = []): array
     {
         // Termination

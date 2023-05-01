@@ -38,6 +38,14 @@ class LocaleField implements FieldInterface
             ->setCustomOption(self::OPTION_LOCALE_CODES_TO_REMOVE, null);
     }
 
+    /**
+     * @param bool $isShown
+     * @return $this
+     */
+    /**
+     * @param bool $isShown
+     * @return $this
+     */
     public function showCode(bool $isShown = true)
     {
         $this->setCustomOption(self::OPTION_SHOW_CODE, $isShown);
@@ -45,6 +53,14 @@ class LocaleField implements FieldInterface
         return $this;
     }
 
+    /**
+     * @param bool $isShown
+     * @return $this
+     */
+    /**
+     * @param bool $isShown
+     * @return $this
+     */
     public function showName(bool $isShown = true)
     {
         $this->setCustomOption(self::OPTION_SHOW_NAME, $isShown);

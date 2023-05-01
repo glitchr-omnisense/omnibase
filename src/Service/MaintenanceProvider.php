@@ -8,6 +8,9 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+/**
+ *
+ */
 class MaintenanceProvider implements MaintenanceProviderInterface
 {
     /** @var RouterInterface */

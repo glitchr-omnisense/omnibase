@@ -7,6 +7,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 use Symfony\Component\Form\AbstractType;
 
+/**
+ *
+ */
 class TranslatableType extends AbstractType
 {
     public function configureOptions(OptionsResolver $resolver)

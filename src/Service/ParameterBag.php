@@ -5,6 +5,9 @@ namespace Base\Service;
 use Base\Traits\BagTrait;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 
+/**
+ *
+ */
 class ParameterBag extends ContainerBag implements ParameterBagInterface
 {
     use BagTrait;
@@ -24,6 +27,12 @@ class ParameterBag extends ContainerBag implements ParameterBagInterface
         return $this->read($path, $bag);
     }
 
+    /**
+     * @param $path
+     * @param $value
+     * @param array|null $bag
+     * @return mixed|void
+     */
     public function set($path, $value, array &$bag = null)
     {
         $this->write($path, $value, $bag);

@@ -31,6 +31,9 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
         return ["fa-solid fa-share-alt"];
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getId() ? "<b>" . ($this->getAdapter() ?? "Attribute") . " #" . $this->getId() . "</b>" : get_class($this);

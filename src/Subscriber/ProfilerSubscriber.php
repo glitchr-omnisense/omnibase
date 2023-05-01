@@ -10,6 +10,9 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ *
+ */
 class ProfilerSubscriber implements EventSubscriberInterface
 {
     /**
@@ -37,6 +40,10 @@ class ProfilerSubscriber implements EventSubscriberInterface
         }
     }
 
+    /**
+     * @param ResponseEvent $event
+     * @return bool
+     */
     public function onKernelResponse(ResponseEvent $event)
     {
         if (!$this->router->isDebug()) {

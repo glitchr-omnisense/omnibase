@@ -13,6 +13,9 @@ use Countable;
 use Iterator;
 use UnexpectedValueException;
 
+/**
+ *
+ */
 class Pagination implements PaginationInterface, Iterator, Countable
 {
     protected RouterInterface $router;
@@ -118,6 +121,9 @@ class Pagination implements PaginationInterface, Iterator, Countable
         return $this->pageIter % $this->getPageSize();
     }
 
+    /**
+     * @return array|Query|DoctrinePaginator|mixed|null
+     */
     public function get()
     {
         return $this->paginator;
@@ -128,21 +134,33 @@ class Pagination implements PaginationInterface, Iterator, Countable
         return $this->isQuery() ? $this->paginator->getQuery()->setFirstResult($this->pageSize * ($this->page - 1))->setMaxResults($this->pageSize) : null;
     }
 
+    /**
+     * @return bool
+     */
     public function isQuery()
     {
         return $this->paginator instanceof DoctrinePaginator;
     }
 
+    /**
+     * @return float|int|mixed|string
+     */
     public function getTotalCount()
     {
         return $this->totalCount;
     }
 
+    /**
+     * @return float|int
+     */
     public function getLastPage()
     {
         return $this->getTotalPages();
     }
 
+    /**
+     * @return float|int
+     */
     public function getTotalPages()
     {
         $pageSize = $this->getPageSize();
@@ -156,44 +174,88 @@ class Pagination implements PaginationInterface, Iterator, Countable
         return ceil(max(1, $this->getTotalCount() / $pageSize));
     }
 
+    /**
+     * @return string
+     */
     public function getTemplate()
     {
         return $this->template;
     }
 
+    /**
+     * @param string $template
+     * @return $this
+     */
+    /**
+     * @param string $template
+     * @return $this
+     */
     public function setTemplate(string $template)
     {
         $this->template = $template;
         return $this;
     }
 
+    /**
+     * @param $parameterName
+     * @return $this
+     */
+    /**
+     * @param $parameterName
+     * @return $this
+     */
     public function setParameterName($parameterName)
     {
         $this->parameterName = $parameterName;
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getParameterName()
     {
         return $this->parameterName;
     }
 
+    /**
+     * @return int
+     */
     public function getPageRange()
     {
         return $this->pageRange;
     }
 
+    /**
+     * @param int $pageRange
+     * @return $this
+     */
+    /**
+     * @param int $pageRange
+     * @return $this
+     */
     public function setPageRange(int $pageRange)
     {
         $this->pageRange = $pageRange;
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getPageSize()
     {
         return $this->pageSize;
     }
 
+    /**
+     * @param $pageSize
+     * @return $this
+     */
+    /**
+     * @param $pageSize
+     * @return $this
+     */
     public function setPageSize($pageSize)
     {
         $pageSize = ($pageSize < 1 ? $this->getTotalCount() : $pageSize);
@@ -205,11 +267,22 @@ class Pagination implements PaginationInterface, Iterator, Countable
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getPage()
     {
         return $this->page;
     }
 
+    /**
+     * @param $page
+     * @return $this
+     */
+    /**
+     * @param $page
+     * @return $this
+     */
     public function setPage($page)
     {
         $page = min(max(1, $page), $this->getTotalPages());
@@ -221,6 +294,12 @@ class Pagination implements PaginationInterface, Iterator, Countable
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @param int $page
+     * @param array $parameters
+     * @return string
+     */
     public function getPath(string $name, int $page = 0, array $parameters = [])
     {
         if ($page < 1) {
@@ -232,11 +311,19 @@ class Pagination implements PaginationInterface, Iterator, Countable
 
     protected array $lastResult = [];
 
+    /**
+     * @return array|float|int|mixed|string
+     * @throws InvalidPageException
+     */
     public function getResult()
     {
         return $this->build();
     }
 
+    /**
+     * @return array|float|int|mixed|string
+     * @throws InvalidPageException
+     */
     protected function build()
     {
         if (!$this->build) {

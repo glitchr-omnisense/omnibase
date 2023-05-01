@@ -7,6 +7,9 @@ use Base\Service\Model\IconProvider\IconAdapterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
+/**
+ *
+ */
 class IconField extends SelectField implements FieldInterface
 {
     public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';
@@ -22,12 +25,28 @@ class IconField extends SelectField implements FieldInterface
             ->setTextAlign(TextAlign::CENTER);
     }
 
+    /**
+     * @param string $fieldName
+     * @return $this
+     */
+    /**
+     * @param string $fieldName
+     * @return $this
+     */
     public function setTargetColor(string $fieldName)
     {
         $this->setCustomOption(self::OPTION_TARGET_FIELD_NAME, $fieldName);
         return $this;
     }
 
+    /**
+     * @param IconAdapterInterface|string $objectOrClass
+     * @return $this
+     */
+    /**
+     * @param IconAdapterInterface|string $objectOrClass
+     * @return $this
+     */
     public function setAdapter(IconAdapterInterface|string $objectOrClass)
     {
         $this->setFormTypeOption("adapter", is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);

@@ -11,6 +11,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
+/**
+ *
+ */
 class WidgetCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -23,8 +26,8 @@ class WidgetCrudController extends AbstractCrudController
         return parent::configureFields($pageName, function () {
             yield DiscriminatorField::new("type")->setTextAlign(TextAlign::RIGHT);
             yield TranslationField::new('title')->setFields([
-                "title"   => TextType::class,
-                "headline"   => TextType::class,
+                "title" => TextType::class,
+                "headline" => TextType::class,
                 "excerpt" => TextareaType::class,
                 "content" => WysiwygType::class,
             ]);

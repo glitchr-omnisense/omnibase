@@ -10,7 +10,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
+/**
+ *
+ */
 class ThreadActionCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -18,6 +22,10 @@ class ThreadActionCrudController extends AbstractCrudController
         return null;
     }
 
+    /**
+     * @param BatchActionDto $batchActionDto
+     * @return RedirectResponse
+     */
     public function batchActionPublish(BatchActionDto $batchActionDto)
     {
         foreach ($batchActionDto->getEntityIds() as $id) {
@@ -34,13 +42,14 @@ class ThreadActionCrudController extends AbstractCrudController
     {
         return $filters->add(DiscriminatorFilter::new('class', null, self::getEntityFqcn()));
     }
+
     public function configureActions(Actions $actions): Actions
     {
-        $batchActionPublish = Action::new('batchActionPublish', '@'.AbstractDashboardController::TRANSLATION_DASHBOARD.'.action.batch_publish', 'fa-solid fa-check')
+        $batchActionPublish = Action::new('batchActionPublish', '@' . AbstractDashboardController::TRANSLATION_DASHBOARD . '.action.batch_publish', 'fa-solid fa-check')
             ->linkToCrudAction('batchActionPublish')
             ->addCssClass('btn btn-primary text-success');
 
         return parent::configureActions($actions)
-        ->addBatchAction($batchActionPublish)->setPermission($batchActionPublish, 'ROLE_SUPERADMIN');
+            ->addBatchAction($batchActionPublish)->setPermission($batchActionPublish, 'ROLE_SUPERADMIN');
     }
 }

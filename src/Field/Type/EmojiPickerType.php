@@ -10,16 +10,20 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\FormBuilderInterface;
 
+/**
+ *
+ */
 final class EmojiPickerType extends AbstractType
 {
     public function getBlockPrefix(): string
     {
         return 'emojipickr';
     }
+
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'renderer'     => "native", // native, twemoji, (custom?)
+            'renderer' => "native", // native, twemoji, (custom?)
             'is_nullable' => true,
             'webpack_entry' => "form.emoji"
         ]);

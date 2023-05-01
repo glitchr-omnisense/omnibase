@@ -15,6 +15,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
+/**
+ *
+ */
 class LocalizerSubscriber implements EventSubscriberInterface
 {
     public const __LANG_IDENTIFIER__ = "LANG";

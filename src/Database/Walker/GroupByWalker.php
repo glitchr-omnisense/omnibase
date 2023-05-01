@@ -8,6 +8,9 @@ use Doctrine\ORM\Query\AST\SelectStatement;
 use Doctrine\ORM\Query\TreeWalkerAdapter;
 use InvalidArgumentException;
 
+/**
+ *
+ */
 class GroupByWalker extends TreeWalkerAdapter
 {
     public const HINT_GROUP_ARRAY = "group_by.array";

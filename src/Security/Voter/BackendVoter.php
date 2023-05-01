@@ -6,6 +6,9 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
+/**
+ *
+ */
 class BackendVoter extends Voter
 {
     public const BACKEND = "BACKEND";

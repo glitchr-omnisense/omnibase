@@ -15,7 +15,6 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "text" )
  */
-
 class TextAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -27,10 +26,12 @@ class TextAdapter extends AbstractAdapter
     {
         return TextType::class;
     }
+
     public function getOptions(): array
     {
         return [];
     }
+
     public function resolve(mixed $value): mixed
     {
         return $value;
@@ -45,6 +46,15 @@ class TextAdapter extends AbstractAdapter
     {
         return $this->length;
     }
+
+    /**
+     * @param int|null $length
+     * @return $this
+     */
+    /**
+     * @param int|null $length
+     * @return $this
+     */
     public function setLength(?int $length)
     {
         $this->length = $length;

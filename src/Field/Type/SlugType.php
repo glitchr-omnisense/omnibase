@@ -14,6 +14,9 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 final class SlugType extends AbstractType implements AutovalidateInterface
 {
     /**

@@ -10,6 +10,9 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Workflow\Registry;
 use Symfony\Component\Workflow\SupportStrategy\InstanceOfSupportStrategy;
 
+/**
+ *
+ */
 class WorkflowPass extends AbstractPass
 {
     public function taggedServiceIds(): string
@@ -49,7 +52,7 @@ class WorkflowPass extends AbstractPass
             if ($supportedClassNames) {
                 foreach ($supportedClassNames as $supportedClassName) {
                     if (!class_exists($supportedClassName)) {
-                        throw new \LogicException('Non-existing class "'.$supportedClassName.'" requesting support for "'.$className.'" workflow.');
+                        throw new \LogicException('Non-existing class "' . $supportedClassName . '" requesting support for "' . $className . '" workflow.');
                     }
 
                     $strategyDefinition = new Definition(InstanceOfSupportStrategy::class, [$supportedClassName]);

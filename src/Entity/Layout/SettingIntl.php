@@ -10,6 +10,8 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 use Base\Database\Traits\VaultTrait;
+use League\Flysystem\FilesystemException;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * @ORM\Entity()
@@ -37,6 +39,14 @@ class SettingIntl implements TranslationInterface
         return $this->label;
     }
 
+    /**
+     * @param string|null $label
+     * @return $this
+     */
+    /**
+     * @param string|null $label
+     * @return $this
+     */
     public function setLabel(?string $label)
     {
         $this->label = $label;
@@ -53,6 +63,14 @@ class SettingIntl implements TranslationInterface
         return $this->help;
     }
 
+    /**
+     * @param string|null $help
+     * @return $this
+     */
+    /**
+     * @param string|null $help
+     * @return $this
+     */
     public function setHelp(?string $help)
     {
         $this->help = $help;
@@ -66,16 +84,32 @@ class SettingIntl implements TranslationInterface
      */
     protected $value = null;
 
+    /**
+     * @return array|mixed|File|null
+     * @throws \Exception
+     */
     public function getValue()
     {
         return Uploader::getPublic($this, "value") ?? $this->value;
     }
 
+    /**
+     * @return array|mixed|File|null
+     * @throws FilesystemException
+     */
     public function getValueFile()
     {
         return Uploader::get($this, "value");
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
+    /**
+     * @param $value
+     * @return $this
+     */
     public function setValue($value)
     {
         $this->value = $value;
@@ -92,6 +126,14 @@ class SettingIntl implements TranslationInterface
         return $this->class;
     }
 
+    /**
+     * @param string|null $class
+     * @return $this
+     */
+    /**
+     * @param string|null $class
+     * @return $this
+     */
     public function setClass(?string $class)
     {
         $this->class = $class;

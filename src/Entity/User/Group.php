@@ -117,7 +117,7 @@ class Group implements IconizeInterface
     }
 
     /**
-     * @return Collection|User[]
+     * @return Collection
      */
     public function getMembers(): Collection
     {
@@ -156,7 +156,7 @@ class Group implements IconizeInterface
     }
 
     /**
-     * @return Collection|Permission[]
+     * @return Collection
      */
     public function getPermissions(): Collection
     {
@@ -180,7 +180,7 @@ class Group implements IconizeInterface
     }
 
     /**
-     * @return Collection|Penalty[]
+     * @return Collection
      */
     public function getPenalties(): Collection
     {

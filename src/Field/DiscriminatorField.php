@@ -6,12 +6,15 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
+/**
+ *
+ */
 class DiscriminatorField extends SelectField implements FieldInterface
 {
     public const OPTION_DISCRIMINATOR_AUTOLOAD = 'discriminatorAutoload';
-    public const OPTION_SHOW_COLUMN            = 'discriminatorColumn';
-    public const OPTION_SHOW_INLINE            = 'discriminatorInline';
-    public const OPTION_SHOW_LEAF              = 'discriminatorLeaf';
+    public const OPTION_SHOW_COLUMN = 'discriminatorColumn';
+    public const OPTION_SHOW_INLINE = 'discriminatorInline';
+    public const OPTION_SHOW_LEAF = 'discriminatorLeaf';
 
     public static function new(string $propertyName = "id", ?string $label = null): self
     {
@@ -37,11 +40,13 @@ class DiscriminatorField extends SelectField implements FieldInterface
         $this->setCustomOption(self::OPTION_SHOW_COLUMN, $show);
         return $this;
     }
+
     public function showInline(bool $inline = true): self
     {
         $this->setCustomOption(self::OPTION_SHOW_INLINE, $inline);
         return $this;
     }
+
     public function showLeaf(bool $show = true): self
     {
         $this->setCustomOption(self::OPTION_SHOW_LEAF, $show);

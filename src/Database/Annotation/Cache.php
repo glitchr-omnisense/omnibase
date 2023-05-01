@@ -82,16 +82,31 @@ final class Cache extends AbstractAnnotation
         }
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_CLASS || $object == AnnotationReader::TARGET_PROPERTY);
     }
 
+    /**
+     * @param ClassMetadata $classMetadata
+     * @return string
+     */
     public function getRegion(ClassMetadata $classMetadata)
     {
         return $this->region ?? $this->getEntityManager()->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName);
     }
 
+    /**
+     * @param ClassMetadata $classMetadata
+     * @param string $property
+     * @return string
+     */
     public function getRegionProperty(ClassMetadata $classMetadata, string $property)
     {
         return $this->getRegion($classMetadata) . "__" . $property;

@@ -30,6 +30,12 @@ class ColumnAlias extends AbstractAnnotation
         $this->column = $data["column"] ?? "";
     }
 
+    /**
+     * @param string $target
+     * @param string|null $targetValue
+     * @param $object
+     * @return bool
+     */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
@@ -58,6 +64,12 @@ class ColumnAlias extends AbstractAnnotation
         $classMetadataCompletor->aliasNames[$alias] = $this->column;
     }
 
+    /**
+     * @param $entity
+     * @param $column
+     * @param $alias
+     * @return void
+     */
     public function bind($entity, $column, $alias)
     {
         if ($alias == $column) {
@@ -92,6 +104,13 @@ class ColumnAlias extends AbstractAnnotation
 
     protected static int $i = 0;
 
+    /**
+     * @param LifecycleEventArgs $event
+     * @param ClassMetadata $classMetadata
+     * @param $entity
+     * @param string|null $property
+     * @return void
+     */
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $column = $this->column;

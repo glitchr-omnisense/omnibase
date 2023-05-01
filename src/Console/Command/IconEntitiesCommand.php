@@ -19,6 +19,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ *
+ */
 #[AsCommand(name: 'icon:entities', aliases: [], description: '')]
 class IconEntitiesCommand extends Command
 {

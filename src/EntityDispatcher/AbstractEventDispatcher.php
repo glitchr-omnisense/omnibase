@@ -11,6 +11,9 @@ use Exception;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 
+/**
+ *
+ */
 abstract class AbstractEventDispatcher implements EventDispatcherInterface
 {
     protected array $events;
@@ -62,6 +65,10 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
             ];
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     */
     public static function getEventClass()
     {
         $class = static::class;
@@ -116,6 +123,9 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         }
     }
 
+    /**
+     * @return EntityManagerInterface
+     */
     public function getEntityManager()
     {
         return $this->entityManager;
@@ -163,17 +173,17 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     {
     }
 
-    public function postPersist(LifecycleEventArgs $event): void
+    public function postPersist(LifecycleEventArgs $event)
     {
         $this->dispatchEvents($event);
     }
 
-    public function postUpdate(LifecycleEventArgs $event): void
+    public function postUpdate(LifecycleEventArgs $event)
     {
         $this->dispatchEvents($event);
     }
 
-    public function postRemove(LifecycleEventArgs $event): void
+    public function postRemove(LifecycleEventArgs $event)
     {
         $this->dispatchEvents($event);
     }

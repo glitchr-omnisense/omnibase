@@ -5,6 +5,9 @@ namespace Base\DependencyInjection\Compiler\Pass;
 use Base\DependencyInjection\Compiler\AbstractPass;
 use Base\Service\TradingMarket;
 
+/**
+ *
+ */
 class TradingMarketPass extends AbstractPass
 {
     public function taggedServiceIds(): string

@@ -13,6 +13,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ *
+ */
 class ContactController extends AbstractController
 {
     /**
@@ -49,7 +52,7 @@ class ContactController extends AbstractController
             })
             ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($user) {
                 /**
-                 * @var ContactModel
+                 * @var ContactModel $contactModel
                  */
                 $contactModel = $formProcessor->getData();
                 $this->notifier->sendContactEmail($contactModel);

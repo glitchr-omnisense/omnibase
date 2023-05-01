@@ -14,6 +14,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ *
+ */
 class AttachmentCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string
@@ -21,6 +24,10 @@ class AttachmentCrudController extends WidgetCrudController
         return null;
     }
 
+    /**
+     * @param AdminContext $context
+     * @return Response
+     */
     public function downloadAttachment(AdminContext $context)
     {
         $attachment = $context->getEntity()->getInstance();
@@ -30,7 +37,7 @@ class AttachmentCrudController extends WidgetCrudController
 
         $preferredDownloadName = $attachment->getSlug();
         if (($extension = $attachment->getFile()->guessExtension())) {
-            $preferredDownloadName .= ".".$extension;
+            $preferredDownloadName .= "." . $extension;
         }
 
         $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $preferredDownloadName);

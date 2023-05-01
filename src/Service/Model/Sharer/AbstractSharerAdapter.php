@@ -5,6 +5,9 @@ namespace Base\Service\Model\Sharer;
 use Base\Service\Model\IconizeInterface;
 use Twig\Environment;
 
+/**
+ *
+ */
 abstract class AbstractSharerAdapter implements SharerAdapterInterface, IconizeInterface
 {
     /**

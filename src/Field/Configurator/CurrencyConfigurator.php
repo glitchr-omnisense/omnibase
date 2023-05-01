@@ -9,6 +9,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use Symfony\Component\Intl\Currencies;
 
+/**
+ *
+ */
 final class CurrencyConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -22,6 +25,6 @@ final class CurrencyConfigurator implements FieldConfiguratorInterface
             return;
         }
 
-        $field->setFormattedValue($field->getValue()." ".Currencies::getSymbol($field->getValue()));
+        $field->setFormattedValue($field->getValue() . " " . Currencies::getSymbol($field->getValue()));
     }
 }

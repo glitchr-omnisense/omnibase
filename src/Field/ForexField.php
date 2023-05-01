@@ -6,6 +6,9 @@ use Base\Field\Type\ForexType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
+/**
+ *
+ */
 class ForexField extends SelectField implements FieldInterface
 {
     public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';

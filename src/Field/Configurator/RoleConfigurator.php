@@ -10,6 +10,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
+/**
+ *
+ */
 class RoleConfigurator extends SelectConfigurator
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -32,12 +35,12 @@ class RoleConfigurator extends SelectConfigurator
 
             $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn(get_class($entityDto->getInstance()));
             $url = $this->adminUrlGenerator
-                        ->unsetAll()
-                        ->setController($dataClassCrudController ?? UserCrudController::class)
-                        ->setAction(Action::INDEX)
-                        ->set("filters[roles][comparison]", "like")
-                        ->set("filters[roles][value]", $role)
-                        ->generateUrl();
+                ->unsetAll()
+                ->setController($dataClassCrudController ?? UserCrudController::class)
+                ->setAction(Action::INDEX)
+                ->set("filters[roles][comparison]", "like")
+                ->set("filters[roles][value]", $role)
+                ->generateUrl();
 
             $formattedValues[$key] = $formattedValue;
             $formattedValues[$key]["url"] = $url;

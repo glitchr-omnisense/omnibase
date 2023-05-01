@@ -15,6 +15,9 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Traversable;
 
+/**
+ *
+ */
 class QuadrantType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string
@@ -55,10 +58,20 @@ class QuadrantType extends AbstractType implements DataMapperInterface
         $view->vars['default'] = $options["class"]::getDefault();
     }
 
+    /**
+     * @param $viewData
+     * @param Traversable $forms
+     * @return void
+     */
     public function mapDataToForms($viewData, Traversable $forms)
     {
     }
 
+    /**
+     * @param Traversable $forms
+     * @param $viewData
+     * @return void
+     */
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $windType = current(iterator_to_array($forms));

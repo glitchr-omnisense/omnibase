@@ -8,6 +8,9 @@ use Base\Enum\ThreadState;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ *
+ */
 class ThreadSubscriber implements EventSubscriberInterface
 {
     protected array $events;
@@ -22,11 +25,11 @@ class ThreadSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return
-        [
-            ThreadEvent::SCHEDULED   => ['onSchedule'],
-            ThreadEvent::PUBLISHABLE => ['onPublishable'],
-            ThreadEvent::PUBLISHED   => ['onPublished'],
-        ];
+            [
+                ThreadEvent::SCHEDULED => ['onSchedule'],
+                ThreadEvent::PUBLISHABLE => ['onPublishable'],
+                ThreadEvent::PUBLISHED => ['onPublished'],
+            ];
     }
 
     public function onSchedule(ThreadEvent $event)

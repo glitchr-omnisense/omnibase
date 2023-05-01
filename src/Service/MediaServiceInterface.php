@@ -4,6 +4,9 @@ namespace Base\Service;
 
 use Base\Imagine\FilterInterface;
 
+/**
+ *
+ */
 interface MediaServiceInterface extends FileServiceInterface
 {
     public function isCached(?string $path, FilterInterface|array $filters = [], array $config = []): bool;

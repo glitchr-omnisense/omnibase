@@ -18,15 +18,18 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ *
+ */
 class DiscriminatorType extends AbstractType
 {
     /**
-     * @var ClassMetadataManipulator
+     * @var ClassMetadataManipulator|null
      */
     protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     /**
-     * @var FormFactory
+     * @var FormFactory|null
      */
     protected ?FormFactory $formFactory = null;
 
@@ -69,6 +72,13 @@ class DiscriminatorType extends AbstractType
         });
     }
 
+    /**
+     * @param $entry
+     * @param $class
+     * @param TranslatorInterface|null $translator
+     * @param $format
+     * @return array
+     */
     public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = FORMAT_TITLECASE)
     {
         $entry = implode(".", array_unique(explode(".", $entry)));

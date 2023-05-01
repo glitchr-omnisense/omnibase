@@ -60,6 +60,14 @@ class ScalarAdapter extends AbstractAdapter
         return $this->unit;
     }
 
+    /**
+     * @param int|null $unit
+     * @return $this
+     */
+    /**
+     * @param int|null $unit
+     * @return $this
+     */
     public function setUnit(?int $unit)
     {
         $this->unit = $unit;
@@ -76,6 +84,14 @@ class ScalarAdapter extends AbstractAdapter
         return $this->minimum;
     }
 
+    /**
+     * @param int|null $minimum
+     * @return $this
+     */
+    /**
+     * @param int|null $minimum
+     * @return $this
+     */
     public function setMinimum(?int $minimum)
     {
         $this->minimum = $minimum;
@@ -92,6 +108,14 @@ class ScalarAdapter extends AbstractAdapter
         return $this->maximum;
     }
 
+    /**
+     * @param int|null $maximum
+     * @return $this
+     */
+    /**
+     * @param int|null $maximum
+     * @return $this
+     */
     public function setMaximum(?int $maximum)
     {
         $this->maximum = $maximum;

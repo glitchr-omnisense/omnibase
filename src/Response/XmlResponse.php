@@ -5,8 +5,16 @@ namespace Base\Response;
 use DOMDocument;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ *
+ */
 class XmlResponse extends Response
 {
+    /**
+     * @param $data
+     * @param int $status
+     * @param array $headers
+     */
     public function __construct($data = null, int $status = 200, array $headers = [])
     {
         parent::__construct($data, $status, array_merge($headers, ['Content-Type' => 'text/xml']));
@@ -20,7 +28,8 @@ class XmlResponse extends Response
      *     return JsonResponse::fromJsonString('{"key": "value"}')
      *         ->setSharedMaxAge(300);
      *
-     * @param string $data The JSON response string
+     * @param string $source
+     * @param int|null $options
      * @param int $status The response status code
      * @param array $headers An array of response headers
      *

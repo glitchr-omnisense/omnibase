@@ -9,8 +9,16 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
+/**
+ *
+ */
 class FileValidator extends ConstraintValidator
 {
+    /**
+     * @param $value
+     * @param Constraint $constraint
+     * @return void
+     */
     public function validate($value, Constraint $constraint)
     {
         if (null === $value || '' === $value) {

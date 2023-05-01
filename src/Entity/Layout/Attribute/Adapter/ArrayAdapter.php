@@ -38,6 +38,14 @@ class ArrayAdapter extends AbstractAdapter
         return $this->length;
     }
 
+    /**
+     * @param int|null $length
+     * @return $this
+     */
+    /**
+     * @param int|null $length
+     * @return $this
+     */
     public function setLength(?int $length)
     {
         $this->length = $length;

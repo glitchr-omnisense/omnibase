@@ -11,6 +11,9 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 use Base\Service\ParameterBagInterface;
 
+/**
+ *
+ */
 class ReferrerSubscriber implements EventSubscriberInterface
 {
     /**
@@ -44,11 +47,19 @@ class ReferrerSubscriber implements EventSubscriberInterface
         return [RequestEvent::class => [['onKernelRequest', 4]]];
     }
 
+    /**
+     * @param $event
+     * @return mixed
+     */
     public function getCurrentRouteName($event)
     {
         return $event->getRequest()->get('_route');
     }
 
+    /**
+     * @param $route
+     * @return bool
+     */
     public function isException($route)
     {
         $exceptions = $this->parameterBag->get("base.access_restrictions.route_exceptions") ?? [];

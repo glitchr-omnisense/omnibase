@@ -7,13 +7,17 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 //@TODO not ready..
+
+/**
+ *
+ */
 class ForexType extends SelectType implements SelectInterface
 {
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            "class"   => null,
+            "class" => null,
 
             "autocomplete" => true,
             "autocomplete_pagesize" => 200,
@@ -27,12 +31,12 @@ class ForexType extends SelectType implements SelectInterface
 
         $resolver->setNormalizer('autocomplete_endpoint_parameters', function (Options $options, $value) {
             return $value ?? [
-                    //"provider" => $options["adapter"]::getName(),
-                    "source" => "EUR",
-                    "target" => "USD",
+                //"provider" => $options["adapter"]::getName(),
+                "source" => "EUR",
+                "target" => "USD",
 
-                    "pageSize" => $options["autocomplete_pagesize"]
-                ];
+                "pageSize" => $options["autocomplete_pagesize"]
+            ];
         });
     }
 
@@ -55,6 +59,7 @@ class ForexType extends SelectType implements SelectInterface
     {
         return null;
     }
+
     public static function getData(string $id): ?array
     {
         return [];
