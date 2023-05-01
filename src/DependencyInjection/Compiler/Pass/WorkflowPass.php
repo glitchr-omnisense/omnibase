@@ -2,11 +2,8 @@
 
 namespace Base\DependencyInjection\Compiler\Pass;
 
-use Base\Annotations\AnnotationReader;
 use Base\DependencyInjection\Compiler\AbstractPass;
 use Base\Service\Model\WorkflowInterface;
-use LogicException;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -17,16 +14,17 @@ class WorkflowPass extends AbstractPass
 {
     public function taggedServiceIds(): string
     {
-        return "workflow";
+        return 'workflow';
     }
 
     public function classFqcn(): string
     {
         return Registry::class;
     }
+
     public function addMethod(): string
     {
-        return "addWorkflow";
+        return 'addWorkflow';
     }
 
     public function process(ContainerBuilder $container): void
@@ -44,14 +42,14 @@ class WorkflowPass extends AbstractPass
             }
 
             $reference = new Reference($className);
-            //$container->setAlias($className::getWorkflowName(), $className); ?
+            // $container->setAlias($className::getWorkflowName(), $className); ?
 
             $supportedClassNames = $className::supports();
             $supportStrategy = $className::supportStrategy();
             if ($supportedClassNames) {
                 foreach ($supportedClassNames as $supportedClassName) {
                     if (!class_exists($supportedClassName)) {
-                        throw new LogicException("Non-existing class \"" . $supportedClassName . "\" requesting support for \"" . $className . "\" workflow.");
+                        throw new \LogicException('Non-existing class "'.$supportedClassName.'" requesting support for "'.$className.'" workflow.');
                     }
 
                     $strategyDefinition = new Definition(InstanceOfSupportStrategy::class, [$supportedClassName]);

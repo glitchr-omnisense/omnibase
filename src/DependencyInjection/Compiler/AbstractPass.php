@@ -2,17 +2,18 @@
 
 namespace Base\DependencyInjection\Compiler;
 
-use Base\Annotations\AnnotationReader;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\Workflow\Registry;
 
 abstract class AbstractPass implements CompilerPassInterface
 {
     abstract public function classFqcn(): string;
+
     abstract public function taggedServiceIds(): string;
+
     abstract public function addMethod(): string;
+
     public function addArguments(string $className): array
     {
         return [];
@@ -25,7 +26,7 @@ abstract class AbstractPass implements CompilerPassInterface
             return;
         }
 
-        $definition     = $container->findDefinition($this->classFqcn());
+        $definition = $container->findDefinition($this->classFqcn());
         $taggedServices = $container->findTaggedServiceIds($this->taggedServiceIds());
         foreach ($taggedServices as $className => $tags) {
             $reference = new Reference($className);

@@ -12,7 +12,7 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
 {
     public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
     {
-        if (!$parameterBag->get("base.twig.use_custom")) {
+        if (!$parameterBag->get('base.twig.use_custom')) {
             return;
         }
         if (!$entrypointLookup) {
@@ -20,31 +20,31 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
         }
 
         // Extract [app] tags
-        $appJsonPath = array_filter((array) $entrypointLookup, fn ($k) => str_ends_with($k, "entrypointJsonPath"), ARRAY_FILTER_USE_KEY);
+        $appJsonPath = array_filter((array) $entrypointLookup, fn ($k) => str_ends_with($k, 'entrypointJsonPath'), ARRAY_FILTER_USE_KEY);
         $appJsonPath = first($appJsonPath);
         if (file_exists($appJsonPath)) {
-            $encoreTagRenderer->addEntrypoint("_default", $appJsonPath);
-            $entrypoints = json_decode(file_get_contents($appJsonPath), true)["entrypoints"];
+            $encoreTagRenderer->addEntrypoint('_default', $appJsonPath);
+            $entrypoints = json_decode(file_get_contents($appJsonPath), true)['entrypoints'];
 
-            $tags = array_unique(array_map(fn ($t) => str_rstrip($t, ["-async", "-defer"]), array_keys($entrypoints)));
+            $tags = array_unique(array_map(fn ($t) => str_rstrip($t, ['-async', '-defer']), array_keys($entrypoints)));
             foreach ($tags as $tag) {
                 $encoreTagRenderer->addTag($tag);
-                if (str_contains($tag, ".")) {
+                if (str_contains($tag, '.')) {
                     $encoreTagRenderer->markAsOptional($tag);
                 }
             }
         }
 
         // Extract [base] tags
-        $baseJsonPath = str_rstrip($publicDir, "/")."/bundles/base/entrypoints.json";
+        $baseJsonPath = str_rstrip($publicDir, '/').'/bundles/base/entrypoints.json';
         if (file_exists($baseJsonPath)) {
-            $encoreTagRenderer->addEntrypoint("_base", $baseJsonPath);
-            $entrypoints = json_decode(file_get_contents($baseJsonPath), true)["entrypoints"];
+            $encoreTagRenderer->addEntrypoint('_base', $baseJsonPath);
+            $entrypoints = json_decode(file_get_contents($baseJsonPath), true)['entrypoints'];
 
-            $tags = array_unique(array_map(fn ($t) => str_rstrip($t, ["-async", "-defer"]), array_keys($entrypoints)));
+            $tags = array_unique(array_map(fn ($t) => str_rstrip($t, ['-async', '-defer']), array_keys($entrypoints)));
             foreach ($tags as $tag) {
-                $encoreTagRenderer->addTag($tag, "_base");
-                if (str_contains($tag, ".")) {
+                $encoreTagRenderer->addTag($tag, '_base');
+                if (str_contains($tag, '.')) {
                     $encoreTagRenderer->markAsOptional($tag);
                 }
             }
@@ -52,14 +52,14 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
 
         //
         // Breakpoint based entries
-        foreach ($parameterBag->get("base.twig.breakpoints") ?? [] as $breakpoint) {
-            $encoreTagRenderer->addBreakpoint($breakpoint["name"], $breakpoint["media"] ?? "all");
+        foreach ($parameterBag->get('base.twig.breakpoints') ?? [] as $breakpoint) {
+            $encoreTagRenderer->addBreakpoint($breakpoint['name'], $breakpoint['media'] ?? 'all');
         }
 
         //
         // Alternative entries
-        $encoreTagRenderer->addAlternative("async");
-        $encoreTagRenderer->addAlternative("defer");
+        $encoreTagRenderer->addAlternative('async');
+        $encoreTagRenderer->addAlternative('defer');
 
         // Encore rest rendering
         $encoreTagRenderer->renderFallback(new Response());

@@ -2,9 +2,6 @@
 
 namespace Base\DependencyInjection;
 
-use App\Notifier\Notifier as AppNotifier;
-use Base\Notifier\Abstract\BaseNotifier;
-use Base\Notifier\Notifier;
 use Base\Annotations\AnnotationInterface;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
@@ -14,17 +11,12 @@ use Base\Service\Model\IconProvider\AbstractIconAdapter;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Service\Model\Obfuscator\CompressionInterface;
 use Base\Twig\TagRendererInterface;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-
-use Symfony\Component\Config\Definition\Processor;
-use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
-use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorageFactory;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Workflow\WorkflowInterface;
-use function dirname;
 
 class BaseExtension extends Extension
 {
@@ -37,7 +29,7 @@ class BaseExtension extends Extension
         // Load service declaration (includes services, controllers,..)
 
         // Format XML
-        $loader = new XmlFileLoader($container, new FileLocator(dirname(__DIR__, 2) . '/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(\dirname(__DIR__, 2).'/config'));
         $loader->load('services.xml');
         $loader->load('services-public.xml');
         $loader->load('services-fix.xml');
@@ -52,10 +44,9 @@ class BaseExtension extends Extension
 
         // Override and merge form_themes.. to add some features..
         $container->setParameter('twig.form.resources', array_merge(
-            $config["twig"]["form_themes"],
+            $config['twig']['form_themes'],
             $container->getParameter('twig.form.resources')
         ));
-
 
         $container->registerForAutoconfiguration(AbstractIconAdapter::class)->addTag('base.service.icon');
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_subscriber');
@@ -72,11 +63,11 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
     }
 
-    public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = "")
+    public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = '')
     {
         foreach ($config as $key => $value) {
             if (!empty($globalKey)) {
-                $key = $globalKey . "." . $key;
+                $key = $globalKey.'.'.$key;
             }
 
             if (is_array($value)) {

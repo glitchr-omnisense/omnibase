@@ -4,19 +4,20 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
-
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
  * Class Slugify
- * package Base\Annotations\Annotation\Slugify
+ * package Base\Annotations\Annotation\Slugify.
  *
  * @Annotation
+ *
  * @Target({"PROPERTY"})
+ *
  * @Attributes({
+ *
  *   @Attribute("reference", type = "string"),
  *   @Attribute("sync",      type = "bool"),
  *   @Attribute("unique",    type = "bool"),
@@ -47,14 +48,14 @@ class Slugify extends AbstractAnnotation
 
         $this->unique = $data['unique'] ?? true;
         $this->sync = $data['sync'] ?? false;
-        $this->nullable = $data["nullable"] ?? false;
+        $this->nullable = $data['nullable'] ?? false;
 
         $this->separator = $data['separator'] ?? '-';
         $this->keep = $data['keep'] ?? null;
         $this->lowercase = $data['lowercase'] ?? true;
         $this->slugger = new AsciiSlugger(
-            $data["locale"] ?? null,
-            $data["map"] ?? null
+            $data['locale'] ?? null,
+            $data['map'] ?? null
         );
     }
 
@@ -96,13 +97,13 @@ class Slugify extends AbstractAnnotation
         $firstEntity = begin($candidateEntities);
         if ($firstEntity === $entity) {
             $firstSlug = $this->getFieldValue($entity, $property);
-            $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
+            $invalidSlugs = array_filter($invalidSlugs, fn ($s) => $s !== $firstSlug);
         }
 
         return $invalidSlugs;
     }
 
-    public function slug($entity, ?string $input = null, string $suffix = ""): ?string
+    public function slug($entity, ?string $input = null, string $suffix = ''): ?string
     {
         // Check if field already set.. get field value or by default class name
         if (!$input && $this->referenceColumn) {
@@ -113,9 +114,9 @@ class Slugify extends AbstractAnnotation
         }
 
         if (!$input) {
-            $input = camel2snake(class_basename($entity), "-");
+            $input = camel2snake(class_basename($entity), '-');
         }
-        $input .= !empty($suffix) ? $this->separator . $suffix : "";
+        $input .= !empty($suffix) ? $this->separator.$suffix : '';
 
         if (!$this->keep) {
             $slug = $this->slugger->slug($input, $this->separator);
@@ -124,16 +125,16 @@ class Slugify extends AbstractAnnotation
             $posList = [];
 
             $pos = -1;
-            while (($pos = strmultipos($input, $this->keep, $pos + 1))) {
+            while ($pos = strmultipos($input, $this->keep, $pos + 1)) {
                 $posList[] = $input[$pos];
             }
 
             $slug = explodeByArray($this->keep, $input);
-            $slug = array_map(fn($i) => $this->slugger->slug($i, $this->separator), $slug);
+            $slug = array_map(fn ($i) => $this->slugger->slug($i, $this->separator), $slug);
             $slug = implodeByArray($posList, $slug);
         }
 
-        return ($this->lowercase ? strtolower($slug) : $slug);
+        return $this->lowercase ? strtolower($slug) : $slug;
     }
 
     public function getSlug($entity, string $property, ?string $defaultInput = null, array $invalidSlugs = []): ?string
@@ -151,8 +152,8 @@ class Slugify extends AbstractAnnotation
         if (!$this->unique) {
             return $slug;
         }
-        for ($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++) {
-            $slug = $defaultSlug . $this->separator . $i;
+        for ($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); ++$i) {
+            $slug = $defaultSlug.$this->separator.$i;
         }
 
         return $slug;
@@ -160,7 +161,7 @@ class Slugify extends AbstractAnnotation
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return AnnotationReader::TARGET_PROPERTY == $target;
     }
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)

@@ -5,20 +5,21 @@ namespace Base\Annotations\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Exception;
 
 /**
  * Class Hierarchify
- * package Base\Annotations\Annotation\Hierarchify
+ * package Base\Annotations\Annotation\Hierarchify.
  *
  * @Annotation
+ *
  * @Target({"CLASS"})
+ *
  * @Attributes({
+ *
  *   @Attribute("hierarchy", type = "array"),
  *   @Attribute("separator", type = "string")
  * })
  */
-
 class Hierarchify extends AbstractAnnotation
 {
     /**
@@ -33,19 +34,19 @@ class Hierarchify extends AbstractAnnotation
 
     public function __construct(array $data)
     {
-        $this->hierarchy = $data["hierarchy"] ?? null;
-        $this->separator = $data["separator"]  ?? null;
+        $this->hierarchy = $data['hierarchy'] ?? null;
+        $this->separator = $data['separator'] ?? null;
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_CLASS);
+        return AnnotationReader::TARGET_CLASS == $target;
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
     {
-        if (!method_exists($classMetadata->customRepositoryClassName, "getHierarchyTree") && !$this->parent_method_exists($classMetadata->customRepositoryClassName, "getHierarchyTree")) {
-            throw new Exception("Did you forgot to use \"Base\Annotations\Traits\HierarchifyTrait\" in $classMetadata->customRepositoryClassName ?");
+        if (!method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree') && !$this->parent_method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree')) {
+            throw new \Exception("Did you forgot to use \"Base\Annotations\Traits\HierarchifyTrait\" in $classMetadata->customRepositoryClassName ?");
         }
 
         $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);
