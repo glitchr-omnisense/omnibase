@@ -14,10 +14,12 @@ class HyperpatternAdapterIntl extends AbstractAdapterIntl
      * @ORM\Column(type="array")
      */
     protected $placeholder;
+
     public function getPlaceholder(): ?array
     {
         return $this->placeholder;
     }
+
     public function setPlaceholder(?array $placeholder): self
     {
         $this->placeholder = $placeholder;

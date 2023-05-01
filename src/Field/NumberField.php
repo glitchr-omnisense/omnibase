@@ -5,6 +5,9 @@ namespace Base\Field;
 use Base\Field\Type\NumberType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use InvalidArgumentException;
+use NumberFormatter;
+use function in_array;
 
 final class NumberField implements FieldInterface
 {
@@ -34,7 +37,7 @@ final class NumberField implements FieldInterface
             ->addCssClass('field-number')
             ->setDefaultColumns(3)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, null)
-            ->setCustomOption(self::OPTION_ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP)
+            ->setCustomOption(self::OPTION_ROUNDING_MODE, NumberFormatter::ROUND_HALFUP)
             ->setCustomOption(self::OPTION_STORED_AS_STRING, false);
     }
 
@@ -58,7 +61,7 @@ final class NumberField implements FieldInterface
     public function setNumDecimals(int $num): self
     {
         if ($num < 0) {
-            throw new \InvalidArgumentException(sprintf('The argument of the "%s()" method must be 0 or higher (%d given).', __METHOD__, $num));
+            throw new InvalidArgumentException(sprintf('The argument of the "%s()" method must be 0 or higher (%d given).', __METHOD__, $num));
         }
 
         $this->setCustomOption(self::OPTION_NUM_DECIMALS, $num);
@@ -119,17 +122,17 @@ final class NumberField implements FieldInterface
     public function setRoundingMode(int $mode): self
     {
         $validModes = [
-            'ROUND_DOWN' => \NumberFormatter::ROUND_DOWN,
-            'ROUND_FLOOR' => \NumberFormatter::ROUND_FLOOR,
-            'ROUND_UP' => \NumberFormatter::ROUND_UP,
-            'ROUND_CEILING' => \NumberFormatter::ROUND_CEILING,
-            'ROUND_HALF_DOWN' => \NumberFormatter::ROUND_HALFDOWN,
-            'ROUND_HALF_EVEN' => \NumberFormatter::ROUND_HALFEVEN,
-            'ROUND_HALF_UP' => \NumberFormatter::ROUND_HALFUP,
+            'ROUND_DOWN' => NumberFormatter::ROUND_DOWN,
+            'ROUND_FLOOR' => NumberFormatter::ROUND_FLOOR,
+            'ROUND_UP' => NumberFormatter::ROUND_UP,
+            'ROUND_CEILING' => NumberFormatter::ROUND_CEILING,
+            'ROUND_HALF_DOWN' => NumberFormatter::ROUND_HALFDOWN,
+            'ROUND_HALF_EVEN' => NumberFormatter::ROUND_HALFEVEN,
+            'ROUND_HALF_UP' => NumberFormatter::ROUND_HALFUP,
         ];
 
-        if (!\in_array($mode, $validModes, true)) {
-            throw new \InvalidArgumentException(sprintf('The argument of the "%s()" method must be the value of any of the following constants from the %s class: %s.', __METHOD__, \NumberFormatter::class, implode(', ', array_keys($validModes))));
+        if (!in_array($mode, $validModes, true)) {
+            throw new InvalidArgumentException(sprintf('The argument of the "%s()" method must be the value of any of the following constants from the %s class: %s.', __METHOD__, NumberFormatter::class, implode(', ', array_keys($validModes))));
         }
 
         $this->setCustomOption(self::OPTION_ROUNDING_MODE, $mode);

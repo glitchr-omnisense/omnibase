@@ -16,29 +16,30 @@ class ContactModel extends AbstractModel
     {
         return new Recipient(mailformat([], $this->name, $this->email));
     }
-    /**
-     * @var string
-     */
-    public $name;
 
     /**
      * @var string
      */
-    public $email;
+    public string $name;
 
     /**
      * @var string
      */
-    public $subject;
+    public string $email;
 
     /**
      * @var string
      */
-    public $message;
+    public string $subject;
+
+    /**
+     * @var string
+     */
+    public string $message;
 
     /**
      * @var array
      * @Uploader(storage="local.storage", max_size="5MB", mime_types={"image/*"})
      */
-    public $attachments;
+    public array $attachments;
 }

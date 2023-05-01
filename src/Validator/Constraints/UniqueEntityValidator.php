@@ -11,10 +11,17 @@
 
 namespace Base\Validator\Constraints;
 
+use Base\Validator\ConstraintEntity;
+use Countable;
+use Iterator;
+use IteratorAggregate;
 use Symfony\Component\Validator\Constraint;
 use Base\Validator\ConstraintEntityValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use function count;
+use function get_class;
+use function is_array;
 
 class UniqueEntityValidator extends ConstraintEntityValidator
 {
@@ -24,11 +31,12 @@ class UniqueEntityValidator extends ConstraintEntityValidator
      * @throws UnexpectedTypeException
      * @throws ConstraintDefinitionException
      */
-    public function validate($entity, Constraint $constraint)
+    public function validate($value, Constraint $constraint)
     {
+        $entity = $value;
         parent::validate($entity, $constraint);
 
-        $em = $constraint->em ?? $this->getEntityManager(\get_class($entity));
+        $em = $constraint->em ?? $this->getEntityManager(get_class($entity));
         if (!$em) {
             throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
         }
@@ -38,7 +46,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         $criteria = [];
         $hasNullValue = false;
 
-        $fields = array_map(fn ($f) => $classMetadata->getFieldName($f), $constraint->fields);
+        $fields = array_map(fn($f) => $classMetadata->getFieldName($f), $constraint->fields);
         foreach ($fields as $key => $fieldName) {
             //
             // Property path
@@ -54,9 +62,9 @@ class UniqueEntityValidator extends ConstraintEntityValidator
                     $classname = explode("\\", get_class($constraint));
                     $classname = array_pop($classname);
 
-                    $defaultMessage = "@validators.".camel2snake($classname);
+                    $defaultMessage = "@validators." . camel2snake($classname);
                     if ($constraint->message == $defaultMessage) {
-                        $constraint->message = "@validators.".$this->translator->parseClass($association).".".implode(".", tail($fieldPath)).".unique";
+                        $constraint->message = "@validators." . $this->translator->parseClass($association) . "." . implode(".", tail($fieldPath)) . ".unique";
                         if (!$this->translator->transExists($constraint->message)) {
                             $constraint->message = "@validators.unique_entity";
                         }
@@ -74,7 +82,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             //
             // Default check
             if (!$classMetadata->hasField($fieldName) && !$classMetadata->hasAssociation($fieldName)) {
-                throw new ConstraintDefinitionException(sprintf('The field "%s" in "'.get_class($entity).'" is not mapped by Doctrine, so it cannot be validated for uniqueness.', $fieldName));
+                throw new ConstraintDefinitionException(sprintf('The field "%s" in "' . get_class($entity) . '" is not mapped by Doctrine, so it cannot be validated for uniqueness.', $fieldName));
             }
 
             $fieldValue = $classMetadata->reflFields[$fieldName]->getValue($entity);
@@ -120,14 +128,14 @@ class UniqueEntityValidator extends ConstraintEntityValidator
                 throw new ConstraintDefinitionException(sprintf('The "%s" entity repository does not support the "%s" entity. The entity should be an instance of or extend "%s".', $constraint->entityClass, $classMetadata->getName(), $supportedClass));
             }
         } else {
-            $repository = $em->getRepository(\get_class($entity));
+            $repository = $em->getRepository(get_class($entity));
         }
 
         // Find duplicates among the submitted entities
         $identityMap = $this->em->getUnitOfWork()->getIdentityMap()[get_root_class($entity)] ?? [];
         $siblingEntities = array_filter(
             $identityMap ?? null,
-            fn ($k) => ($k != $entity->getId()) && $identityMap[$k] instanceof $entity,
+            fn($k) => ($k != $entity->getId()) && $identityMap[$k] instanceof $entity,
             ARRAY_FILTER_USE_KEY
         );
 
@@ -144,7 +152,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         if (!$result) {
             $result = $repository->{$constraint->repositoryMethod}($criteria);
         }
-        if ($result instanceof \IteratorAggregate) {
+        if ($result instanceof IteratorAggregate) {
             $result = $result->getIterator();
         }
 
@@ -152,14 +160,14 @@ class UniqueEntityValidator extends ConstraintEntityValidator
          * element. Rewinding should have no ill effect if $result is another
          * iterator implementation.
          */
-        if ($result instanceof \Iterator) {
+        if ($result instanceof Iterator) {
             $result->rewind();
-            if ($result instanceof \Countable && 1 < \count($result)) {
+            if ($result instanceof Countable && 1 < count($result)) {
                 $result = [$result->current(), $result->current()];
             } else {
                 $result = $result->valid() && null !== $result->current() ? [$result->current()] : [];
             }
-        } elseif (\is_array($result)) {
+        } elseif (is_array($result)) {
             reset($result);
         } else {
             $result = null === $result ? [] : [$result];
@@ -170,12 +178,12 @@ class UniqueEntityValidator extends ConstraintEntityValidator
          * unique.
          */
 
-        if (!$result || (1 === \count($result) && current($result) === $entity)) {
+        if (!$result || (1 === count($result) && current($result) === $entity)) {
             return;
         }
 
-        if ($constraint instanceof \Base\Validator\ConstraintEntity) {
-            $constraint->entity  = $entity;
+        if ($constraint instanceof ConstraintEntity) {
+            $constraint->entity = $entity;
         }
 
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];

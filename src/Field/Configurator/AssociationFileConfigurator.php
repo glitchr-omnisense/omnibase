@@ -15,29 +15,32 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use RuntimeException;
+use Traversable;
+use function count;
 
 class AssociationFileConfigurator implements FieldConfiguratorInterface
 {
     /**
      * @var EntityFactory
      */
-    private $entityFactory;
+    private EntityFactory $entityFactory;
 
     /**
      * @var AdminUrlGenerator
      */
-    private $adminUrlGenerator;
+    private AdminUrlGenerator $adminUrlGenerator;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, EntityFactory $entityFactory, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->entityFactory            = $entityFactory;
-        $this->adminUrlGenerator        = $adminUrlGenerator;
+        $this->entityFactory = $entityFactory;
+        $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -50,7 +53,7 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
         $propertyName = $field->getProperty();
 
         if (!$this->classMetadataManipulator->hasAssociation($entityDto->getFqcn(), $propertyName)) {
-            throw new \RuntimeException(sprintf('The "%s" field is not a Doctrine association, so it cannot be used as an association field.', $propertyName));
+            throw new RuntimeException(sprintf('The "%s" field is not a Doctrine association, so it cannot be used as an association field.', $propertyName));
         }
 
         $targetEntity = $this->classMetadataManipulator->getAssociationMapping($entityDto->getFqcn(), $propertyName)["targetEntity"] ?? null;
@@ -63,11 +66,11 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
         $crudController = AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"));
         if ($crudController) {
             $field->setFormTypeOption("href", $this->adminUrlGenerator
-                    ->unsetAll()
-                    ->setController($crudController)
-                    ->setAction(Action::EDIT)
-                    ->setEntityId("{0}")
-                    ->generateUrl());
+                ->unsetAll()
+                ->setController($crudController)
+                ->setAction(Action::EDIT)
+                ->setEntityId("{0}")
+                ->generateUrl());
         }
 
         if ($this->classMetadataManipulator->isToOneSide($entityDto->getFqcn(), $propertyName)) {
@@ -86,10 +89,10 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
         }
 
         if (is_countable($collection)) {
-            return \count($collection);
+            return count($collection);
         }
 
-        if ($collection instanceof \Traversable) {
+        if ($collection instanceof Traversable) {
             return iterator_count($collection);
         }
 
@@ -103,7 +106,7 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
         }
 
         if (method_exists($entityInstance, '__toString')) {
-            return (string) $entityInstance;
+            return (string)$entityInstance;
         }
 
         if (null !== $primaryKeyValue = $entityDto->getPrimaryKeyValue()) {
@@ -170,12 +173,10 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
                 return is_instanceof($value, $classFilter) || is_subclass_of($value, $classFilter);
             })->toArray();
 
-            $first  = ($showFirst) ? array_shift($others) : $others[0] ?? null;
+            $first = ($showFirst) ? array_shift($others) : $others[0] ?? null;
             if ($first) {
                 $targetEntityFqcn = $field->getDoctrineMetadata()->get('targetEntity');
-                $targetEntityDto = null === $first
-                    ? $this->entityFactory->create($targetEntityFqcn)
-                    : $this->entityFactory->createForEntityInstance($first);
+                $targetEntityDto = $this->entityFactory->createForEntityInstance($first);
 
                 $targetEntityDto = $this->entityFactory->createForEntityInstance($first);
                 $targetCrudControllerFqcn = $field->getCustomOption(AssociationFileField::OPTION_CRUD_CONTROLLER) ?? AbstractCrudController::getCrudControllerFqcn($targetEntityDto->getFqcn());

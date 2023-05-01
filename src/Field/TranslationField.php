@@ -7,6 +7,7 @@ use Base\Service\Localizer;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use InvalidArgumentException;
 
 class TranslationField implements FieldInterface
 {
@@ -39,7 +40,7 @@ class TranslationField implements FieldInterface
     public function setMaxLength(int $length): self
     {
         if ($length < 1) {
-            throw new \InvalidArgumentException(sprintf('The argument of the "%s()" method must be 1 or higher (%d given).', __METHOD__, $length));
+            throw new InvalidArgumentException(sprintf('The argument of the "%s()" method must be 1 or higher (%d given).', __METHOD__, $length));
         }
 
         $this->setCustomOption(self::OPTION_MAX_LENGTH, $length);
@@ -86,9 +87,9 @@ class TranslationField implements FieldInterface
         return $this;
     }
 
-    public function setRequired(bool $required = true)
+    public function setRequired(bool $isRequired = true)
     {
-        $this->setCustomOption("required", $required);
+        $this->setCustomOption("required", $isRequired);
         return $this;
     }
 
@@ -100,6 +101,7 @@ class TranslationField implements FieldInterface
         $this->setFormTypeOption("excluded_fields", $excludedFields);
         return $this;
     }
+
     public function setTranslationClass($translationClass): self
     {
         $this->setFormTypeOption("translation_class", $translationClass);
@@ -111,6 +113,7 @@ class TranslationField implements FieldInterface
         $this->setFormTypeOption("default_locale", $defaultLocale);
         return $this;
     }
+
     public function renderSingleLocale(?string $singleLocale = null): self
     {
         $singleLocale = $singleLocale ?? Localizer::getDefaultLocale();

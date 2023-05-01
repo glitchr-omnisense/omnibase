@@ -31,7 +31,7 @@ trait TranslatableTrait
         $class = ($selfClass ? self::class : static::class);
 
         $prefix = "Proxies\__CG__\\";
-        if (strpos($class, $prefix) === 0) {
+        if (str_starts_with($class, $prefix)) {
             $class = substr($class, strlen($prefix));
         }
 
@@ -92,10 +92,8 @@ trait TranslatableTrait
 
     public function addTranslation(TranslationInterface $translation)
     {
-        if ($translation !== null) {
-            $this->getTranslations()->set(Localizer::normalizeLocale($translation->getLocale()), $translation);
-            $translation->setTranslatable($this);
-        }
+        $this->getTranslations()->set(Localizer::normalizeLocale($translation->getLocale()), $translation);
+        $translation->setTranslatable($this);
 
         return $this;
     }

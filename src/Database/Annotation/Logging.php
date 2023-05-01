@@ -25,7 +25,7 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
         $this->verbosity = $data['verbosity'] ?? null;
     }
 
-    public function supports(string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_CLASS);
     }
@@ -33,14 +33,16 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
     /**
      * Adds mapping to the translatable and translations.
      */
-    public static $trackedEntities   = [];
+    public static array $trackedEntities = [];
+
     public static function get(): array
     {
         return self::$trackedEntities;
     }
-    public static function has(string $className, ?string $property = null): bool
+
+    public static function has(string $entity, ?string $property = null): bool
     {
-        return array_key_exists($className, self::$trackedEntities);
+        return array_key_exists($entity, self::$trackedEntities);
     }
 
     public function payload(string $action, string $className, array $properties, object $entity): array

@@ -30,7 +30,7 @@ class Excel
         $this->context = $context;
     }
 
-    protected $filesystem;
+    protected Filesystem $filesystem;
 
     public const AS_COLLECTION_KEY = CsvEncoder::AS_COLLECTION_KEY;
     public const HEADERS_IN_BOLD_KEY = 'headers_in_bold';
@@ -73,21 +73,11 @@ class Excel
 
         $spreadsheet = new Spreadsheet();
 
-        switch ($this->format) {
-            // Excel 2003
-            case ExcelEncoder::XLS:
-                $writer = new Writers\Xls($spreadsheet);
-                break;
-
-            // Excel 2007
-            case ExcelEncoder::XLSM:
-            case ExcelEncoder::XLSX:
-                $writer = new Writers\Xlsx($spreadsheet);
-                break;
-
-            default:
-                throw new InvalidArgumentException(sprintf('The format "%s" is not supported', $this->format));
-        }
+        $writer = match ($this->format) {
+            ExcelEncoder::XLS => new Writers\Xls($spreadsheet),
+            ExcelEncoder::XLSM, ExcelEncoder::XLSX => new Writers\Xlsx($spreadsheet),
+            default => throw new InvalidArgumentException(sprintf('The format "%s" is not supported', $this->format)),
+        };
 
         $sheetIndex = 0;
 
@@ -127,22 +117,13 @@ class Excel
             $headerLineStyle = $worksheet->getStyle('A1:' . $worksheet->getHighestDataColumn() . '1');
 
             if ($this->context[self::HEADERS_HORIZONTAL_ALIGNMENT_KEY]) {
-                switch ($this->context[self::HEADERS_HORIZONTAL_ALIGNMENT_KEY]) {
-                    case 'left':
-                        $alignment = Alignment::HORIZONTAL_LEFT;
-                        break;
-                    case 'center':
-                        $alignment = Alignment::HORIZONTAL_CENTER;
-                        break;
-                    case 'right':
-                        $alignment = Alignment::HORIZONTAL_RIGHT;
-                        break;
-                    case 'fill':
-                        $alignment = Alignment::HORIZONTAL_FILL;
-                        break;
-                    default:
-                        throw new InvalidArgumentException(sprintf('The value of context key "%s" is not valid (possible values: "left", "center" or "right")', self::HEADERS_HORIZONTAL_ALIGNMENT_KEY));
-                }
+                $alignment = match ($this->context[self::HEADERS_HORIZONTAL_ALIGNMENT_KEY]) {
+                    'left' => Alignment::HORIZONTAL_LEFT,
+                    'center' => Alignment::HORIZONTAL_CENTER,
+                    'right' => Alignment::HORIZONTAL_RIGHT,
+                    'fill' => Alignment::HORIZONTAL_FILL,
+                    default => throw new InvalidArgumentException(sprintf('The value of context key "%s" is not valid (possible values: "left", "center" or "right")', self::HEADERS_HORIZONTAL_ALIGNMENT_KEY)),
+                };
 
                 $headerLineStyle
                     ->getAlignment()
@@ -207,30 +188,17 @@ class Excel
 
     public static function parse(string $data, string $format, array $context = []): mixed
     {
-        if (!is_scalar($data)) {
-            throw new NotEncodableValueException(sprintf('Expected data of type scalar, %s given', gettype($data)));
-        }
 
         $tmpFile = (string)tempnam(sys_get_temp_dir(), $format);
 
         $filesystem = new Filesystem();
         $filesystem->dumpFile($tmpFile, $data);
 
-        switch ($format) {
-            // Excel 2003
-            case ExcelEncoder::XLS:
-                $reader = new Readers\Xls();
-                break;
-
-            // Excel 2007
-            case ExcelEncoder::XLSM:
-            case ExcelEncoder::XLSX:
-                $reader = new Readers\Xlsx();
-                break;
-
-            default:
-                throw new InvalidArgumentException(sprintf('The format "%s" is not supported', $format));
-        }
+        $reader = match ($format) {
+            ExcelEncoder::XLS => new Readers\Xls(),
+            ExcelEncoder::XLSM, ExcelEncoder::XLSX => new Readers\Xlsx(),
+            default => throw new InvalidArgumentException(sprintf('The format "%s" is not supported', $format)),
+        };
 
         try {
             $spreadsheet = $reader->load($tmpFile);

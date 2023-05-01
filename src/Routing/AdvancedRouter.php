@@ -9,6 +9,7 @@ use Generator;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use InvalidArgumentException;
+use Psr\Cache\CacheItemInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -37,49 +38,37 @@ class AdvancedRouter extends Router implements RouterInterface
     /**
      * @var Router
      */
-    protected $router;
+    protected Router $router;
 
     /**
      * @var RequestStack
      */
-    protected $requestStack;
+    protected RequestStack $requestStack;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
-     * @var Localizer
+     * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     /**
      * @var AssetExtension
      */
-    protected $assetTwigExtension;
+    protected AssetExtension $assetTwigExtension;
 
     /**
      * @var CacheInterface
      */
-    protected $cache;
+    protected CacheInterface $cache;
+    protected CacheItemInterface $cacheRoutes;
+    protected CacheItemInterface $cacheRouteMatches;
+    protected CacheItemInterface $cacheRouteGroups;
 
-    /**
-     * @var ?array
-     */
-    protected $cacheRoutes;
-
-    /**
-     * @var ?array
-     */
-    protected $cacheRouteMatches;
-
-    /**
-     * @var ?array
-     */
-    protected $cacheRouteGroups;
-
-    protected $firewallMap;
+    protected FirewallMapInterface $firewallMap;
 
     protected string $environment;
 
@@ -118,9 +107,9 @@ class AdvancedRouter extends Router implements RouterInterface
 
         $this->cache = $cache;
         $this->cacheName = "router." . hash('md5', self::class);
-        $this->cacheRoutes = $this->cache ? $this->cache->getItem($this->cacheName . ".routes") : null;
-        $this->cacheRouteMatches = $this->cache ? $this->cache->getItem($this->cacheName . ".route_matches") : null;
-        $this->cacheRouteGroups = $this->cache ? $this->cache->getItem($this->cacheName . ".route_groups") : null;
+        $this->cacheRoutes = $this->cache->getItem($this->cacheName . ".routes");
+        $this->cacheRouteMatches = $this->cache->getItem($this->cacheName . ".route_matches");
+        $this->cacheRouteGroups = $this->cache->getItem($this->cacheName . ".route_groups");
 
         $this->useAdvancedFeatures = $parameterBag->get("base.router.use_custom") ?? false;
         $this->useFallbacks = $parameterBag->get("base.router.use_fallbacks") ?? false;
@@ -345,8 +334,7 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function getGenerator(): UrlGeneratorInterface
     {
-        $generator = $this->router->getGenerator();
-        return $generator;
+        return $this->router->getGenerator();
     }
 
     public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
@@ -366,8 +354,7 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function getMatcher(): UrlMatcherInterface
     {
-        $matcher = $this->router->getMatcher();
-        return $matcher;
+        return $this->router->getMatcher();
     }
 
     public function getLocalizer(): LocalizerInterface
@@ -387,12 +374,12 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function getRequest(): ?Request
     {
-        return $this->requestStack ? $this->requestStack->getCurrentRequest() : null;
+        return $this->requestStack->getCurrentRequest();
     }
 
     public function getMainRequest(): ?Request
     {
-        return $this->requestStack ? $this->requestStack->getMainRequest() : null;
+        return $this->requestStack->getMainRequest();
     }
 
     //
@@ -476,9 +463,7 @@ class AdvancedRouter extends Router implements RouterInterface
         }
 
         $fallback = first($fallbacks);
-        $fallback = array_map(fn($h) => is_array($h) || $h === null ? $h : [$h], $fallback);
-
-        return $fallback;
+        return array_map(fn($h) => is_array($h) || $h === null ? $h : [$h], $fallback);
     }
 
     public function getScheme(?string $locale = null, ?string $environment = null): string
@@ -749,9 +734,9 @@ class AdvancedRouter extends Router implements RouterInterface
         return $response;
     }
 
-    public function redirectEvent(Event $request, string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): bool
+    public function redirectEvent(Event $event, string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): bool
     {
-        if (!method_exists($request, "setResponse")) {
+        if (!method_exists($event, "setResponse")) {
             return false;
         }
 
@@ -792,7 +777,7 @@ class AdvancedRouter extends Router implements RouterInterface
         }
 
         $response = new RedirectResponse($url, $state, $headers);
-        $request->setResponse($response);
+        $event->setResponse($response);
 
         // Callable action if redirection happens
         if (is_callable($callback)) {

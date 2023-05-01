@@ -8,16 +8,17 @@ use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
+use InvalidArgumentException;
 
 class BackgroundFilter implements FilterInterface
 {
     /**
      * @var ImagineInterface
      */
-    protected $imagine;
+    protected ImagineInterface $imagine;
 
     /** @var array */
-    protected $options;
+    protected array $options;
 
     public function __toString()
     {
@@ -42,7 +43,7 @@ class BackgroundFilter implements FilterInterface
 
     public function getRGBA($hashtag = true): string
     {
-        return $this->getRGB($hashtag) . hex2rgba($this->options['transparency'] ?? 1);
+        return $this->getRGB($hashtag) . ($this->options['transparency'] ?? "F");
     }
 
     public function getPosition(): string
@@ -72,10 +73,7 @@ class BackgroundFilter implements FilterInterface
                 $x = $width - $image->getSize()->getWidth();
                 $y = 0;
                 break;
-            case 'left':
-                $x = 0;
-                $y = ($height - $image->getSize()->getHeight()) / 2;
-                break;
+            case 'right':
             case 'centerright':
                 $x = $width - $image->getSize()->getWidth();
                 $y = ($height - $image->getSize()->getHeight()) / 2;
@@ -84,12 +82,9 @@ class BackgroundFilter implements FilterInterface
                 $x = ($width - $image->getSize()->getWidth()) / 2;
                 $y = ($height - $image->getSize()->getHeight()) / 2;
                 break;
+            case 'left':
             case 'centerleft':
                 $x = 0;
-                $y = ($height - $image->getSize()->getHeight()) / 2;
-                break;
-            case 'right':
-                $x = $width - $image->getSize()->getWidth();
                 $y = ($height - $image->getSize()->getHeight()) / 2;
                 break;
             case 'bottomleft':
@@ -105,8 +100,7 @@ class BackgroundFilter implements FilterInterface
                 $y = $height - $image->getSize()->getHeight();
                 break;
             default:
-                throw new \InvalidArgumentException("Unexpected position '{$position}'");
-                break;
+                throw new InvalidArgumentException("Unexpected position '" . $position . "'");
         }
 
         return [$x, $y];

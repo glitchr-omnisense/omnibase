@@ -14,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AvatarField as EaAvatarField;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
+use function in_array;
 use function Symfony\Component\Translation\t;
 
 class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator
@@ -21,7 +22,7 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     public function __construct(PropertyAccessor $propertyAccessor, EntityFactory $entityFactory, TranslatorInterface $translator)
     {
@@ -74,7 +75,7 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
 
         // don't translate labels in form-related pages because Symfony Forms translates
         // labels automatically and that causes false "translation is missing" errors
-        if (\in_array($currentPage, [Crud::PAGE_EDIT, Crud::PAGE_NEW], true)) {
+        if (in_array($currentPage, [Crud::PAGE_EDIT, Crud::PAGE_NEW], true)) {
             return $label;
         }
 

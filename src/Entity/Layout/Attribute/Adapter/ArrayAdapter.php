@@ -15,7 +15,6 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "array" )
  */
-
 class ArrayAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -33,10 +32,12 @@ class ArrayAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $length;
+
     public function getLength(): ?int
     {
         return $this->length;
     }
+
     public function setLength(?int $length)
     {
         $this->length = $length;
@@ -47,10 +48,12 @@ class ArrayAdapter extends AbstractAdapter
     {
         return ArrayType::class;
     }
+
     public function getOptions(): array
     {
         return ["length" => $this->getLength()];
     }
+
     public function resolve(mixed $value): mixed
     {
         return $value;

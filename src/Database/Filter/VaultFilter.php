@@ -11,17 +11,19 @@ use InvalidArgumentException;
 class VaultFilter extends SQLFilter
 {
     protected $environment;
+
     public function getEnvironment()
     {
         return $this->environment;
     }
+
     public function setEnvironment(string $environment)
     {
         $this->environment = $environment;
         return $this;
     }
 
-    public function addFilterConstraint(ClassMetadata $targetEntity, $alias): string
+    public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string
     {
         $vaultAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Vault::class);
         if (count($vaultAnnotation) < 1) {
@@ -29,13 +31,13 @@ class VaultFilter extends SQLFilter
         }
 
         if (!$this->environment) {
-            throw new InvalidArgumentException("No environment defined in \"".self::class."\" while setting up ".$targetEntity->getName());
+            throw new InvalidArgumentException("No environment defined in \"" . self::class . "\" while setting up " . $targetEntity->getName());
         }
 
         $vaultFieldName = end($vaultAnnotation)->vault;
         $operator = str_contains($this->environment, "%") ? "LIKE" : "=";
         if ($targetEntity->hasField($vaultFieldName)) {
-            return $alias.".".$vaultFieldName." IS NULL OR ".$alias.".".$vaultFieldName." $operator '".$this->environment."'";
+            return $targetTableAlias . "." . $vaultFieldName . " IS NULL OR " . $targetTableAlias . "." . $vaultFieldName . " $operator '" . $this->environment . "'";
         }
 
         return "";

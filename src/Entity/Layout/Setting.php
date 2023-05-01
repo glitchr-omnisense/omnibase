@@ -24,6 +24,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-tools"];
@@ -33,6 +34,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     {
         return $this->getLabel() ?? "";
     }
+
     public function __construct(string $path, $value = null, $locale = null)
     {
         $this->setLocked(false);
@@ -48,6 +50,7 @@ class Setting implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -64,6 +67,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     {
         return $this->path;
     }
+
     public function setPath(string $path)
     {
         $this->path = $path;
@@ -74,10 +78,12 @@ class Setting implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="boolean")
      */
     protected $locked;
+
     public function isLocked(): bool
     {
         return $this->locked;
     }
+
     public function getLocked(): bool
     {
         return $this->isLocked();
@@ -87,10 +93,12 @@ class Setting implements TranslatableInterface, IconizeInterface
     {
         return $this->setLocked(true);
     }
+
     public function unlock(): self
     {
         return $this->setLocked(false);
     }
+
     public function setLocked(bool $locked)
     {
         $this->locked = $locked;
@@ -106,6 +114,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     {
         return $this->bag;
     }
+
     public function setBag(?string $bag)
     {
         $this->bag = $bag;

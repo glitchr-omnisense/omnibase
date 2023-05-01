@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class TranslationAmbiguityException extends \Exception
+use Exception;
+
+class TranslationAmbiguityException extends Exception
 {
     /**
      * {@inheritdoc}

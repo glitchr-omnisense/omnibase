@@ -19,19 +19,20 @@ use Exception;
 class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 {
     use BaseTrait;
+
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
-     * @param string|array $paths    A path or an array of paths where to look for templates
-     * @param string|null  $bundlePath The root path common to all relative paths (null for getcwd())
+     * @param string|array $paths A path or an array of paths where to look for templates
+     * @param string|null $bundlePath The root path common to all relative paths (null for getcwd())
      */
     public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, RouterInterface $router, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable)
     {
@@ -77,11 +78,11 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
         // Add @Twig, @Assets and @Layout variables
         if (!$this->router->isProfiler()) {
-            $this->prependPath($bundlePath."/inspector", "WebProfiler");
+            $this->prependPath($bundlePath . "/inspector", "WebProfiler");
         }
 
-        $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
-        $this->prependPath($bundlePath."/notifier");
+        $this->prependPath($bundlePath . "/easyadmin", "EasyAdmin");
+        $this->prependPath($bundlePath . "/notifier");
         $this->prependPath($bundlePath);
 
         $this->prependPath($projectDir . "/src", "App");
@@ -97,7 +98,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
             $path = $entry["path"] ?? null;
             if (empty($path)) {
-                throw new Exception("Missing path variable for @".$namespace." in \"base.twig.paths\"");
+                throw new Exception("Missing path variable for @" . $namespace . " in \"base.twig.paths\"");
             }
 
             $this->prependPath($path, $namespace);

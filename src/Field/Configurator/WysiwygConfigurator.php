@@ -8,6 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
+use const ENT_NOQUOTES;
 
 class WysiwygConfigurator implements FieldConfiguratorInterface
 {
@@ -31,7 +32,7 @@ class WysiwygConfigurator implements FieldConfiguratorInterface
         if ($stripTags) {
             $formattedValue = strip_tags((string) $field->getValue());
         } else {
-            $formattedValue = htmlspecialchars((string) $field->getValue(), \ENT_NOQUOTES, null, false);
+            $formattedValue = htmlspecialchars((string) $field->getValue(), ENT_NOQUOTES, null, false);
         }
 
         $field->setFormattedValue(str_shorten($formattedValue, $length, $position, $separator));

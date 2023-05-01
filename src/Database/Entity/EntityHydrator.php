@@ -7,22 +7,24 @@ use Base\Database\Entity\AggregateHydrator\SerializableInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslationInterface;
 use Base\Database\Type\SetType;
+use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\ArrayType;
 
 use Base\Service\Localizer;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionObject;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use ErrorException;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
@@ -33,17 +35,17 @@ class EntityHydrator implements EntityHydratorInterface
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     /**
      * @var array
      */
-    protected $reflProperties = [];
+    protected array $reflProperties = [];
 
     public const HYDRATE_BY_FIELD = 1; // The keys in the data array are entity field names
     public const HYDRATE_BY_COLUMN = 2; // The keys in the data array are database column names
@@ -56,12 +58,12 @@ class EntityHydrator implements EntityHydratorInterface
      *
      * @var bool
      */
-    protected $hydrateAssociationReferences = true;
+    protected bool $hydrateAssociationReferences = true;
 
     /*
      * Make sure the property has been hydrated (to avoid double hydratation between properties and associations)
      */
-    protected $hydratationMapping = [];
+    protected array $hydratationMapping = [];
 
     /**
      * Aggregate methods: by default, it is "object properties" by "deep copy" method without fallback, but initializing properties
@@ -80,9 +82,9 @@ class EntityHydrator implements EntityHydratorInterface
     public const FETCH_ASSOCIATIONS = 0b10000000000;
 
     /**
-     * PropertyAccessorInterface
+     * @var PropertyAccessorInterface
      */
-    protected $propertyAccessor;
+    protected PropertyAccessorInterface $propertyAccessor;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -151,7 +153,7 @@ class EntityHydrator implements EntityHydratorInterface
         if (is_object($data)) {
             $data = array_transforms(
                 function ($k, $e) use ($aggregateModel, $data): ?array {
-                    
+
                     $varName = explode("\x00", $k);
                     $varName = last($varName);
                     if ($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isReadable($data, $varName)) {
@@ -195,7 +197,7 @@ class EntityHydrator implements EntityHydratorInterface
                 }
             }
         } elseif (is_object($objectOrArray)) {
-            $reflectionClass = new \ReflectionClass(get_class($objectOrArray));
+            $reflectionClass = new ReflectionClass(get_class($objectOrArray));
             foreach ($reflectionClass->getProperties() as $reflProperty) {
                 $reflProperty->setAccessible(true);
 
@@ -285,7 +287,7 @@ class EntityHydrator implements EntityHydratorInterface
                 return $this;
             };
 
-            $fnClosure = \Closure::bind($fn, $entity, get_class($entity));
+            $fnClosure = Closure::bind($fn, $entity, get_class($entity));
             $fnClosure();
         }
 
@@ -328,28 +330,13 @@ class EntityHydrator implements EntityHydratorInterface
                     $type = $reflProperty->getType();
                 }
 
-                switch ($type) {
-                    case "array":
-                        $value = [];
-                        break;
-
-                    case "bool":
-                        $value = false;
-                        break;
-
-                    case "string":
-                        $value = "";
-                        break;
-
-                    case "number":
-                    case "integer":
-                    case "float":
-                        $value = 0;
-                        break;
-
-                    default:
-                        $value = null;
-                }
+                $value = match ($type) {
+                    "array" => [],
+                    "bool" => false,
+                    "string" => "",
+                    "number", "integer", "float" => 0,
+                    default => null,
+                };
 
                 $this->setPropertyValue($entity, $fieldName, $value, $reflEntity);
             }
@@ -465,10 +452,6 @@ class EntityHydrator implements EntityHydratorInterface
 
         foreach ($data as $propertyName => $value) {
             if (!$this->classMetadataManipulator->hasAssociation($entity, $propertyName)) {
-                continue;
-            }
-
-            if ($data === null && $aggregateModel & self::IGNORE_NULLS) {
                 continue;
             }
 
@@ -655,7 +638,7 @@ class EntityHydrator implements EntityHydratorInterface
             return null;
         }
 
-        if ($this->hydrateAssociationReferences && $identifier !== null) {
+        if ($this->hydrateAssociationReferences) {
             return $this->entityManager->getReference($entityName, $identifier);
         }
 
@@ -673,8 +656,7 @@ class EntityHydrator implements EntityHydratorInterface
         $fields = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
-        $entity = $this->hydrate($className, array_merge($fields, $associations));
-        return $entity;
+        return $this->hydrate($className, array_merge($fields, $associations));
     }
 
 

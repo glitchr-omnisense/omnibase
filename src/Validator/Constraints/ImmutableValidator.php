@@ -11,10 +11,12 @@
 
 namespace Base\Validator\Constraints;
 
+use Base\Validator\ConstraintEntity;
 use Symfony\Component\Validator\Constraint;
 use Base\Validator\ConstraintEntityValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use function get_class;
 
 class ImmutableValidator extends ConstraintEntityValidator
 {
@@ -24,16 +26,16 @@ class ImmutableValidator extends ConstraintEntityValidator
      * @throws UnexpectedTypeException
      * @throws ConstraintDefinitionException
      */
-    public function validate($entity, Constraint $constraint)
+    public function validate($value, Constraint $constraint)
     {
-        parent::validate($entity, $constraint);
+        parent::validate($value, $constraint);
 
-        $em = $constraint->em ?? $this->getEntityManager(\get_class($entity));
+        $em = $constraint->em ?? $this->getEntityManager(get_class($value));
         if (!$em) {
-            throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
+            throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($value)));
         }
 
-        $classMetadata = $this->getClassMetadata($entity);
+        $classMetadata = $this->getClassMetadata($value);
 
         $criteria = [];
         $hasNullValue = false;
@@ -49,7 +51,7 @@ class ImmutableValidator extends ConstraintEntityValidator
                     throw new ConstraintDefinitionException(sprintf('The field "%s" is expected to be an association.', $fieldName));
                 }
 
-                foreach ($classMetadata->getFieldValue($entity, $fieldName) as $association) {
+                foreach ($classMetadata->getFieldValue($value, $fieldName) as $association) {
                     $constraint->fields[$key] = implode(".", tail($fieldPath));
                     $constraint->message = implode(".", tail($fieldPath));
 
@@ -60,13 +62,13 @@ class ImmutableValidator extends ConstraintEntityValidator
             }
         }
 
-        $oldEntity = $this->getOriginalEntity($entity);
-        if (!$oldEntity || $classMetadata->getFieldValue($oldEntity, $fieldName) == $classMetadata->getFieldValue($entity, $fieldName)) {
+        $oldEntity = $this->getOriginalEntity($value);
+        if (!$oldEntity || $classMetadata->getFieldValue($oldEntity, $fieldName) == $classMetadata->getFieldValue($value, $fieldName)) {
             return;
         }
 
-        if ($constraint instanceof \Base\Validator\ConstraintEntity) {
-            $constraint->entity = $entity;
+        if ($constraint instanceof ConstraintEntity) {
+            $constraint->entity = $value;
         }
 
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];

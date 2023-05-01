@@ -5,6 +5,7 @@ namespace Base\Entity\User;
 use App\Entity\User;
 use App\Entity\User\Group;
 use Base\Service\Model\IconizeInterface;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -20,6 +21,7 @@ class Penalty implements IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-exclamation-triangle"];
@@ -85,12 +87,12 @@ class Penalty implements IconizeInterface
         return $this;
     }
 
-    public function getDuration(): ?\DateTimeInterface
+    public function getDuration(): ?DateTimeInterface
     {
         return $this->duration;
     }
 
-    public function setDuration(?\DateTimeInterface $duration): self
+    public function setDuration(?DateTimeInterface $duration): self
     {
         $this->duration = $duration;
 
@@ -109,12 +111,12 @@ class Penalty implements IconizeInterface
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
 

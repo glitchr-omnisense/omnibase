@@ -14,15 +14,15 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
     /** @var int */
     protected int $shellVerbosity = 0;
 
-    /** @var AbstractLocalCacheInterface */
-    protected $simpleCache;
+    /** @var ?AbstractLocalCacheInterface */
+    protected ?AbstractLocalCacheInterface $simpleCache;
 
     public function __construct(AbstractLocalCacheInterface $simpleCache, string $cacheDir)
     {
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");
 
         $this->simpleCache = $simpleCache;
-        $this->cacheFile = $cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], get_class($simpleCache)).".php";
+        $this->cacheFile = $cacheDir . "/pools/simple/php/" . str_replace(['\\', '/'], ['__', '_'], get_class($simpleCache)) . ".php";
 
         parent::__construct($this->cacheFile);
     }
@@ -31,6 +31,7 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
     {
         return $this->arrayAdapter;
     }
+
     public function isOptional(): bool
     {
         return false;
@@ -50,10 +51,11 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
         }
 
         if ($this->shellVerbosity > 0 && php_sapi_name() == "cli") {
-            echo " // Warming up cache... " . ucwords(camel2snake(str_replace("CacheWarmer", "", class_basename(static::class)), " ")) . PHP_EOL.PHP_EOL;
+            echo " // Warming up cache... " . ucwords(camel2snake(str_replace("CacheWarmer", "", class_basename(static::class)), " ")) . PHP_EOL . PHP_EOL;
         }
 
         $this->simpleCache?->setCache($arrayAdapter);
-        return $this->simpleCache?->warmUp($cacheDir) ?? false;
+        $this->simpleCache?->warmUp($cacheDir);
+        return true;
     }
 }

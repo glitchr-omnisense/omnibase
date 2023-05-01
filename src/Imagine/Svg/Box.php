@@ -5,6 +5,8 @@ namespace Base\Imagine\Svg;
 use Imagine\Image\Box as ImageBox;
 use Imagine\Image\BoxInterface as ImageBoxInterface;
 use Imagine\Image\PointInterface;
+use InvalidArgumentException;
+use function in_array;
 
 class Box implements ImageBoxInterface
 {
@@ -15,17 +17,17 @@ class Box implements ImageBoxInterface
     /**
      * @var int
      */
-    private $type;
+    private int $type;
 
     /**
      * @var ImageBox
      */
-    private $box;
+    private ImageBox $box;
 
     public function __construct(int $width, int $height, int $type = self::TYPE_ABSOLUTE)
     {
-        if (!\in_array($type, [self::TYPE_ABSOLUTE, self::TYPE_ASPECT_RATIO, self::TYPE_NONE], true)) {
-            throw new \InvalidArgumentException(sprintf('Invalid SvgImageBox type "%s", must be one of the %s::TYPE_* constants.', $type, self::class));
+        if (!in_array($type, [self::TYPE_ABSOLUTE, self::TYPE_ASPECT_RATIO, self::TYPE_NONE], true)) {
+            throw new InvalidArgumentException(sprintf('Invalid SvgImageBox type "%s", must be one of the %s::TYPE_* constants.', $type, self::class));
         }
 
         $this->type = $type;
@@ -47,7 +49,7 @@ class Box implements ImageBoxInterface
             return sprintf('%dx%d', $this->box->getWidth(), $this->box->getHeight());
         }
 
-        return (string) $this->box;
+        return (string)$this->box;
     }
 
     public static function createTypeAbsolute(int $width, int $height): self

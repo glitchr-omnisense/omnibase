@@ -36,10 +36,10 @@ class Timestamp extends AbstractAnnotation
 
     public function __construct(array $data)
     {
-        $this->context   = array_map("mb_strtolower", $data['on']);
+        $this->context = array_map("mb_strtolower", $data['on']);
         $this->immutable = $data['immutable'] ?? false;
-        $this->fields    = $data['fields'] ?? [];
-        $this->value     = $data['value'] ?? "";
+        $this->fields = $data['fields'] ?? [];
+        $this->value = $data['value'] ?? "";
     }
 
     public function getContext(): array
@@ -57,7 +57,7 @@ class Timestamp extends AbstractAnnotation
         return $this->immutable;
     }
 
-    public function getValue(): \DateTime
+    public function getValue(): DateTime
     {
         if (!$this->value) {
             $this->value = $this->isImmutable() ? new DateTimeImmutable("now") : new DateTime("now");

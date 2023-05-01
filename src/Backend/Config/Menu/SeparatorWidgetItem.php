@@ -13,12 +13,13 @@ final class SeparatorWidgetItem implements MenuItemInterface
         setLinkRel as private;
         setLinkTarget as private;
     }
-    protected $width;
-    protected $column;
+
+    protected int $width;
+    protected ?int $column;
 
     public function __construct()
     {
-        $this->dto   = new MenuItemDto();
+        $this->dto = new MenuItemDto();
         $this->dto->setType("separator");
     }
 }

@@ -4,6 +4,7 @@ namespace Base\Field;
 
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -41,7 +42,7 @@ class TextField implements FieldInterface
     public function setMaxLength(int $length)
     {
         if ($length < 1) {
-            throw new \InvalidArgumentException(sprintf('The argument of the "%s()" method must be 1 or higher (%d given).', __METHOD__, $length));
+            throw new InvalidArgumentException(sprintf('The argument of the "%s()" method must be 1 or higher (%d given).', __METHOD__, $length));
         }
 
         $this->setCustomOption(self::OPTION_MAX_LENGTH, $length);

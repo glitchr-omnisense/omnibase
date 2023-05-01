@@ -12,7 +12,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class IconType extends SelectType implements SelectInterface
 {
-    public static $iconProvider = null;
+    public static mixed $iconProvider = null;
+
     public function __construct(...$args)
     {
         self::$iconProvider = array_pop($args);
@@ -23,8 +24,8 @@ class IconType extends SelectType implements SelectInterface
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            "class"   => null,
-            "adapter"   => $this->parameterBag->get("base.icon_provider.default_adapter"),
+            "class" => null,
+            "adapter" => $this->parameterBag->get("base.icon_provider.default_adapter"),
 
             "autocomplete" => true,
             "autocomplete_pagesize" => 200,
@@ -38,9 +39,9 @@ class IconType extends SelectType implements SelectInterface
 
         $resolver->setNormalizer('autocomplete_endpoint_parameters', function (Options $options, $value) {
             return $value ?? [
-                    "provider" => $options["adapter"]::getName(),
-                    "pageSize" => $options["autocomplete_pagesize"]
-                ];
+                "provider" => $options["adapter"]::getName(),
+                "pageSize" => $options["autocomplete_pagesize"]
+            ];
         });
     }
 
@@ -56,7 +57,7 @@ class IconType extends SelectType implements SelectInterface
         if ($adapter) {
             $choices = $adapter->getChoices();
             if (($choicePath = array_search_recursive($id, $choices))) {
-                return $choicePath[count($choicePath)-1];
+                return $choicePath[count($choicePath) - 1];
             } // Last but one is expected to contain "text" information
         }
 
@@ -67,6 +68,7 @@ class IconType extends SelectType implements SelectInterface
     {
         return null;
     }
+
     public static function getData(string $id): ?array
     {
         return [];

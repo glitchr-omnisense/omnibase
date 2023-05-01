@@ -21,10 +21,10 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
-
 class Hyperlink extends AbstractAttribute implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
+
     public function __construct(AbstractAdapter $adapter, mixed $value = null)
     {
         parent::__construct($adapter);
@@ -35,6 +35,7 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
     {
         return $this->adapter ? [$this->adapter->getIcon()] : null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-link"];
@@ -43,19 +44,20 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
     public function __toString()
     {
         $value = implode(", ", $this->getValue());
-        $value = $value ? ": ".$value : "";
-        return "<b>".($this->adapter ?? "Hyperlink")." #".$this->getId()."</b> ".$value;
+        $value = $value ? ": " . $value : "";
+        return "<b>" . ($this->adapter ?? "Hyperlink") . " #" . $this->getId() . "</b> " . $value;
     }
 
     /**
-      * @ColumnAlias(column = "adapter")
-      */
+     * @ColumnAlias(column = "adapter")
+     */
     protected $hyperpattern;
-    public function getHyperpattern(): HyperpatternAdapter
+    public function getHyperpattern(): ?HyperpatternAdapter
     {
         return $this->hyperpattern;
     }
-    public function setHyperpattern(HyperpatternAdapter $hyperpattern): self
+
+    public function setHyperpattern(?HyperpatternAdapter $hyperpattern): self
     {
         $this->hyperpattern = $hyperpattern;
         return $this;
@@ -65,6 +67,7 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
     {
         return $this->adapter->generate(...$this->getValue($locale));
     }
+
     public function getLabel(): string
     {
         return $this->adapter->getLabel();
@@ -74,10 +77,12 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
     {
         return $this->getValue($locale);
     }
+
     public function set(...$args): self
     {
         return array_key_exists("value", $args) ? $this->setValue($args["value"]) : $this;
     }
+
     public function resolve(?string $locale = null): mixed
     {
         return $this->adapter ? $this->adapter->resolve($this->getValue($locale)) : null;

@@ -2,12 +2,14 @@
 
 namespace Base\Service\Model\Obfuscator;
 
+use ErrorException;
+
 abstract class AbstractCompression implements CompressionInterface
 {
     /**
      * @var CompressionInterface
      */
-    protected $compression;
+    protected CompressionInterface $compression;
 
     protected int $level = -1;
     protected ?string $encoding = null;
@@ -76,10 +78,10 @@ abstract class AbstractCompression implements CompressionInterface
             if ($bin === false) {
                 return null;
             }
-        } catch (\ErrorException $e) {
+        } catch (ErrorException $e) {
             return null;
         }
 
-        return $bin === false ? null : $bin;
+        return $bin ?: null;
     }
 }

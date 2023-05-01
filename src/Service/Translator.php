@@ -379,7 +379,7 @@ class Translator implements TranslatorInterface
 
         while ((count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0)) {
             $declaringClass = get_parent_class($declaringClass);
-            if ($declaringClass === Type::class || $declaringClass === null) {
+            if ($declaringClass === Type::class) {
                 $declaringClass = $class;
                 break;
             }
@@ -398,7 +398,7 @@ class Translator implements TranslatorInterface
         $declaringClass = $class;
         while ((count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0)) {
             $declaringClass = get_parent_class($declaringClass);
-            if ($declaringClass === Type::class || $declaringClass === null) {
+            if ($declaringClass === Type::class) {
                 $declaringClass = $class;
                 break;
             }

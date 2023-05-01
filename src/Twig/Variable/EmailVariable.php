@@ -8,19 +8,20 @@ use Base\Service\LauncherInterface;
 class EmailVariable
 {
     /**
-     * @var Launcher
+     * @var LauncherInterface
      */
-    protected $launcher;
+    protected LauncherInterface $launcher;
 
     /**
      * @var BaseService
      */
-    protected $baseService;
+    protected BaseService $baseService;
 
     public function __construct(
-        BaseService $baseService,
+        BaseService       $baseService,
         LauncherInterface $launcher
-    ) {
+    )
+    {
         $this->baseService = $baseService;
         $this->launcher = $launcher;
     }
@@ -32,16 +33,19 @@ class EmailVariable
 
     public function title(): ?string
     {
-        return $this->baseService->getEmail()["title"]  ?? null;
+        return $this->baseService->getEmail()["title"] ?? null;
     }
+
     public function slogan(): ?string
     {
         return $this->baseService->getEmail()["slogan"] ?? null;
     }
+
     public function logo(): ?string
     {
-        return $this->baseService->getEmail()["logo"]   ?? null;
+        return $this->baseService->getEmail()["logo"] ?? null;
     }
+
     public function address(?string $locale = null): ?string
     {
         return $this->baseService->getEmail()["address"] ?? null;

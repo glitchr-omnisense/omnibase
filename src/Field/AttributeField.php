@@ -6,27 +6,31 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Base\Field\Type\AttributeType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use InvalidArgumentException;
+use function gettype;
+use function is_array;
+use function is_callable;
 
 final class AttributeField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_CLASS   = 'class';
+    public const OPTION_CLASS = 'class';
     public const OPTION_CHOICES = 'choices';
-    public const OPTION_ICONS   = 'icons';
-    public const OPTION_FILTER  = 'filter';
+    public const OPTION_ICONS = 'icons';
+    public const OPTION_FILTER = 'filter';
 
     public const OPTION_DISPLAY_LIMIT = 'displayLimit';
-    public const OPTION_ICON_ALIGN    = 'iconAlign';
+    public const OPTION_ICON_ALIGN = 'iconAlign';
 
-    public const OPTION_RENDER_FORMAT   = "renderFormat";
-    public const OPTION_SHOW_FIRST      = 'showFirst';
-    public const OPTION_SHOW            = 'show';
+    public const OPTION_RENDER_FORMAT = "renderFormat";
+    public const OPTION_SHOW_FIRST = 'showFirst';
+    public const OPTION_SHOW = 'show';
 
-    public const NO_SHOW        = 0;
+    public const NO_SHOW = 0;
     public const SHOW_NAME_ONLY = 1;
     public const SHOW_ICON_ONLY = 2;
-    public const SHOW_ALL       = 3;
+    public const SHOW_ALL = 3;
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -41,7 +45,8 @@ final class AttributeField implements FieldInterface
             ->addCssClass('field-text');
     }
 
-    public const OPTION_FILTER_CODE  = 'filter_code';
+    public const OPTION_FILTER_CODE = 'filter_code';
+
     public function setFilterCode(?string $filter = null): self
     {
         $this->setFormTypeOption(self::OPTION_FILTER_CODE, $filter);
@@ -90,6 +95,7 @@ final class AttributeField implements FieldInterface
         $this->setFormTypeOption("multiple", $allow);
         return $this;
     }
+
     public function allowMultiValues(bool $allow = true)
     {
         $this->setFormTypeOption("multivalue", $allow);
@@ -98,8 +104,8 @@ final class AttributeField implements FieldInterface
 
     public function setChoices($choiceGenerator)
     {
-        if (!\is_array($choiceGenerator) && !\is_callable($choiceGenerator)) {
-            throw new \InvalidArgumentException(sprintf('The argument of the "%s" method must be an array or a closure ("%s" given).', __METHOD__, \gettype($choiceGenerator)));
+        if (!is_array($choiceGenerator) && !is_callable($choiceGenerator)) {
+            throw new InvalidArgumentException(sprintf('The argument of the "%s" method must be an array or a closure ("%s" given).', __METHOD__, gettype($choiceGenerator)));
         }
 
         $this->setCustomOption(self::OPTION_CHOICES, $choiceGenerator);

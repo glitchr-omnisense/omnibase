@@ -19,38 +19,39 @@ use Twig\Environment;
 class AnalyticsSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var TokenStorage
+     * @var TokenStorageInterface
      */
-    protected $tokenStorage;
+    protected TokenStorageInterface $tokenStorage;
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
     /**
-     * @var Translator
+     * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
     /**
      * @var UserRepository
      */
-    protected $userRepository;
+    protected UserRepository $userRepository;
     /**
-     * @var GaService
+     * @var ?GaService
      */
-    protected $gaService;
+    protected ?GaService $gaService;
 
     public function __construct(
         TokenStorageInterface $tokenStorage,
-        RouterInterface $router,
-        TranslatorInterface $translator,
-        Environment $twig,
-        UserRepository $userRepository,
-        ?GaService $googleAnalyticsService = null
-    ) {
+        RouterInterface       $router,
+        TranslatorInterface   $translator,
+        Environment           $twig,
+        UserRepository        $userRepository,
+        ?GaService            $googleAnalyticsService = null
+    )
+    {
         $this->tokenStorage = $tokenStorage;
         $this->router = $router;
 
@@ -64,7 +65,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-        return [ KernelEvents::REQUEST  => [['onUserRequest', 8], ['onGoogleAnalyticsRequest', 7]] ];
+        return [KernelEvents::REQUEST => [['onUserRequest', 8], ['onGoogleAnalyticsRequest', 7]]];
     }
 
     public function onUserRequest(RequestEvent $event)
@@ -84,7 +85,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         }
 
         $token = $this->tokenStorage->getToken();
-        $user = $token ? $token->getUser() : null;
+        $user = $token?->getUser();
 
         // This request has variable datetime this will nto be cached
         // @TODO Round within absolute timegate; 15:00; 15:05, 15:10 etc..
@@ -93,7 +94,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
             $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay());
 
         $onlineUsers = $onlineUsers->getResult();
-        $activeUsers = array_filter($onlineUsers, fn ($u) => $u ? $u->isActive() : false);
+        $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
 
         $this->twig->addGlobal("user_analytics", array_merge($this->twig->getGlobals()["user_analytics"] ?? [], [
             "label" => $this->translator->trans("@messages.user_analytics.label", [count($activeUsers)]),
@@ -116,7 +117,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
                         "label" => $this->translator->trans("@messages.user_analytics.online_users", [count($onlineUsers)]),
                         "icon" => "fa-solid  fa-user-clock"
                     ],
-            ]]));
+                ]]));
         }
     }
 
@@ -128,40 +129,40 @@ class AnalyticsSubscriber implements EventSubscriberInterface
             $entries = [];
             if ($googleAnalytics["users"]) {
                 $entries = array_merge($entries, [
-                    "users"        => [
+                    "users" => [
                         "label" => $this->translator->trans("@google_users", [$googleAnalytics["users"]]),
-                        "icon"  => 'fa-solid  fa-user'
-                ]]);
+                        "icon" => 'fa-solid  fa-user'
+                    ]]);
             }
             if ($googleAnalytics["users_1day"]) {
                 $entries = array_merge($entries, [
-                    "users_1day"   => [
+                    "users_1day" => [
                         "label" => $this->translator->trans("@google_users_1day", [$googleAnalytics["users_1day"]]),
-                        "icon"  => 'fa-solid  fa-user-clock'
+                        "icon" => 'fa-solid  fa-user-clock'
                     ]
                 ]);
             }
             if ($googleAnalytics["views"]) {
                 $entries = array_merge($entries, [
-                    "views"        => [
+                    "views" => [
                         "label" => $this->translator->trans("@google_analytics.views", [$googleAnalytics["views"]]),
-                        "icon"  => 'fa-regular  fa-eye'
+                        "icon" => 'fa-regular  fa-eye'
                     ]
                 ]);
             }
             if ($googleAnalytics["views_1day"]) {
                 $entries = array_merge($entries, [
-                    "views_1day"   => [
-                        "label" => $this->translator->trans("@google_analytics.views_1day", [$googleAnalytics["views_1day"]]) ,
-                        "icon"  => 'fa-solid  fa-eye'
+                    "views_1day" => [
+                        "label" => $this->translator->trans("@google_analytics.views_1day", [$googleAnalytics["views_1day"]]),
+                        "icon" => 'fa-solid  fa-eye'
                     ]
                 ]);
             }
             if ($googleAnalytics["sessions"]) {
                 $entries = array_merge($entries, [
-                    "sessions"     => [
+                    "sessions" => [
                         "label" => $this->translator->trans("@google_analytics.sessions", [$googleAnalytics["sessions"]]),
-                        "icon"  => 'fa-solid  fa-stopwatch'
+                        "icon" => 'fa-solid  fa-stopwatch'
                     ]
                 ]);
             }
@@ -169,7 +170,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
                 $entries = array_merge($entries, [
                     "bounces_1day" => [
                         "label" => $this->translator->trans("@google_analytics.bounces_1day", [$googleAnalytics["bounces_1day"]]),
-                        "icon"  => 'fa-solid  fa-meteor'
+                        "icon" => 'fa-solid  fa-meteor'
                     ]
                 ]);
             }

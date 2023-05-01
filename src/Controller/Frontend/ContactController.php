@@ -11,6 +11,7 @@ use Base\Form\FormProxy;
 use Base\Form\Model\ContactModel;
 use Base\Form\Type\ContactType;
 use Base\Notifier\Notifier;
+use Base\Notifier\NotifierInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -26,14 +27,14 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 class ContactController extends AbstractController
 {
     /**
-     * @var Notifier
+     * @var NotifierInterface
      */
-    protected $notifier;
+    protected NotifierInterface $notifier;
 
     /**
      * @var FormProxy
      */
-    protected $formProxy;
+    protected FormProxy $formProxy;
 
     public function __construct(FormProxy $formProxy, Notifier $notifier)
     {

@@ -25,6 +25,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class AnnotationReader extends AbstractLocalCache
 {
@@ -41,7 +42,7 @@ class AnnotationReader extends AbstractLocalCache
     ];
 
     // Annotation pass..
-    protected $annotations = [];
+    protected array $annotations = [];
 
     public function addAnnotation($annotations): self
     {
@@ -52,7 +53,7 @@ class AnnotationReader extends AbstractLocalCache
     /**
      * @var EntityManager
      */
-    protected $entityManager = null;
+    protected ?EntityManager $entityManager = null;
 
     public function getEntityManager()
     {
@@ -72,7 +73,7 @@ class AnnotationReader extends AbstractLocalCache
     /**
      * @var EntityHydrator
      */
-    protected $entityHydrator = null;
+    protected ?EntityHydrator $entityHydrator = null;
 
     public function getEntityHydrator(): EntityHydratorInterface
     {
@@ -82,7 +83,7 @@ class AnnotationReader extends AbstractLocalCache
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator = null;
+    protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     public function getClassMetadataManipulator(): ClassMetadataManipulator
     {
@@ -92,7 +93,7 @@ class AnnotationReader extends AbstractLocalCache
     /**
      * @var FlysystemInterface
      */
-    protected $flysystem = null;
+    protected ?FlysystemInterface $flysystem = null;
 
     public function getFlysystem(): FlysystemInterface
     {
@@ -102,7 +103,7 @@ class AnnotationReader extends AbstractLocalCache
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     public function getParameterBag(): ParameterBagInterface
     {
@@ -112,7 +113,7 @@ class AnnotationReader extends AbstractLocalCache
     /**
      * @var DoctrineAnnotationReader
      */
-    protected $reader = null;
+    protected ?DoctrineAnnotationReader $reader = null;
 
     public function getDefaultReader(): DoctrineAnnotationReader
     {
@@ -142,22 +143,22 @@ class AnnotationReader extends AbstractLocalCache
     /**
      * @var RequestStack
      */
-    protected $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var TokenStorageInterface
      */
-    protected $tokenStorage;
+    protected TokenStorageInterface $tokenStorage;
 
     /**
      * @var EventDispatcherInterface
      */
-    protected $eventDispatcher;
+    protected EventDispatcherInterface $eventDispatcher;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
@@ -224,7 +225,7 @@ class AnnotationReader extends AbstractLocalCache
     }
 
     protected $cache = null;
-    protected $cachePool = [];
+    protected array $cachePool = [];
 
     protected array $annotationTargets = [];
 
@@ -283,9 +284,9 @@ class AnnotationReader extends AbstractLocalCache
         return $path;
     }
 
-    public function getUser(): ?User
+    public function getUser(): ?UserInterface
     {
-        return $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
+        return $this->tokenStorage->getToken()?->getUser();
     }
 
     public function getImpersonator(): ?User
@@ -331,7 +332,7 @@ class AnnotationReader extends AbstractLocalCache
             return $this->annotationTargets[$className];
         }
 
-        $reflClass = new \ReflectionClass($className);
+        $reflClass = new ReflectionClass($className);
 
         $annotationTargets = [];
         if (preg_match_all('/@Target\(\{(.*)\}\)/', $reflClass->getDocComment(), $matches, PREG_SET_ORDER)) {
@@ -633,7 +634,7 @@ class AnnotationReader extends AbstractLocalCache
         } elseif ($classNameOrMetadataOrRefl instanceof ClassMetadata) {
             return $classNameOrMetadataOrRefl->getReflectionClass();
         } else {
-            return new \ReflectionClass($classNameOrMetadataOrRefl);
+            return new ReflectionClass($classNameOrMetadataOrRefl);
         }
     }
 

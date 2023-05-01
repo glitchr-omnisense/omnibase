@@ -11,12 +11,15 @@ use Base\Service\TranslatorInterface;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
+use Exception;
 use Generator;
+use InvalidArgumentException;
+use ReflectionClass;
 use UnexpectedValueException;
 
 abstract class EnumType extends Type implements SelectInterface
 {
-    protected static $icons = [];
+    protected static array $icons = [];
 
     public static function getIcons(): array
     {
@@ -118,7 +121,7 @@ abstract class EnumType extends Type implements SelectInterface
 
     public static function getPermittedValues(bool $inheritance = true, bool $preserve_keys = false): array
     {
-        $refl = new \ReflectionClass(get_called_class());
+        $refl = new ReflectionClass(get_called_class());
         if ($inheritance) {
             $values = $refl->getConstants();
         } else {
@@ -133,7 +136,7 @@ abstract class EnumType extends Type implements SelectInterface
         }
 
         if (!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values) {
-            throw new \Exception("\"" . get_called_class() . "\" is empty");
+            throw new Exception("\"" . get_called_class() . "\" is empty");
         }
 
         return $values;
@@ -165,7 +168,8 @@ abstract class EnumType extends Type implements SelectInterface
         }
 
         $bubbleUp = count($valuesByGroup) == 1;
-        $valuesByGroup = array_transforms(function ($k, $v, $callback) use ($bubbleUp): Generator {
+        return array_transforms(function ($k, $v, $callback) use (&$bubbleUp): Generator {
+
             if ($bubbleUp && is_array($v)) {
                 $bubbleUp = count($v) == 1;
                 foreach ($v as $kk => $vv) {
@@ -186,13 +190,11 @@ abstract class EnumType extends Type implements SelectInterface
 
             return [$k, is_array($v) ? array_transforms($callback, $v) : $v];
         }, $valuesByGroup);
-
-        return $valuesByGroup;
     }
 
     public static function getPermittedValuesByClass(bool $preserve_groups = true, bool $preserve_keys = false): array
     {
-        $refl = new \ReflectionClass(get_called_class());
+        $refl = new ReflectionClass(get_called_class());
         if (in_array($refl->getName(), [EnumType::class, SetType::class])) {
             return [];
         }
@@ -212,7 +214,7 @@ abstract class EnumType extends Type implements SelectInterface
         return true;
     }
 
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         if ($platform instanceof SqlitePlatform) {
             return "TEXT";
@@ -231,10 +233,10 @@ abstract class EnumType extends Type implements SelectInterface
     public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if (is_array($value)) {
-            throw new \InvalidArgumentException("Enum type \"" . get_class($this) . "\" is not expecting an array \"['" . (is_array($value) ? implode("', '", $value) : $value) . "'] received.");
+            throw new InvalidArgumentException("Enum type \"" . get_class($this) . "\" is not expecting an array \"['" . (implode("', '", $value)) . "'] received.");
         }
         if ($value !== null && !in_array($value, $this->getPermittedValues())) {
-            throw new \InvalidArgumentException("Invalid '" . (is_array($value) ? implode(", ", $value) : $value) . "' value. (Expected values are: " . implode(", ", $this->getPermittedValues()) . ")");
+            throw new InvalidArgumentException("Invalid '" . (is_array($value) ? implode(", ", $value) : $value) . "' value. (Expected values are: " . implode(", ", $this->getPermittedValues()) . ")");
         }
 
         return $value;

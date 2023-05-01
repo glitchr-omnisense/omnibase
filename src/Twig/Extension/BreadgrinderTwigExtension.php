@@ -3,6 +3,8 @@
 namespace Base\Twig\Extension;
 
 use Base\Service\Breadgrinder;
+use Base\Service\BreadgrinderInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
@@ -11,11 +13,11 @@ use Twig\TwigFunction;
 final class BreadgrinderTwigExtension extends AbstractExtension
 {
     /**
-     * @var Breadgrinder
+     * @var BreadgrinderInterface
      */
-    protected $breadgrinder;
+    protected BreadgrinderInterface $breadgrinder;
 
-    public function __construct(Breadgrinder $breadgrinder)
+    public function __construct(BreadgrinderInterface $breadgrinder)
     {
         $this->breadgrinder = $breadgrinder;
     }
@@ -24,6 +26,7 @@ final class BreadgrinderTwigExtension extends AbstractExtension
     {
         return 'breadcrumb_extension';
     }
+
     public function getFunctions(): array
     {
         return [
@@ -35,10 +38,6 @@ final class BreadgrinderTwigExtension extends AbstractExtension
     {
         $breadcrumb = $this->breadgrinder->grind($name, $options);
         $breadcrumb->compute($request);
-
-        if ($breadcrumb === null) {
-            throw new \Exception("Breadcrumb \"$name\" not found in the grinder machine.");
-        }
 
         return $twig->render($breadcrumb->getTemplate(), ["breadcrumb" => $breadcrumb]);
     }

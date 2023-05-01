@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class NotDeletableException extends \Exception
+use Exception;
+
+class NotDeletableException extends Exception
 {
     /**
      * {@inheritdoc}

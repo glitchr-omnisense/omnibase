@@ -15,7 +15,6 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "hyperpattern" )
  */
-
 class HyperpatternAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -27,10 +26,12 @@ class HyperpatternAdapter extends AbstractAdapter
     {
         return ArrayType::class;
     }
+
     public function resolve(mixed $value): mixed
     {
         return !is_array($value) ? unserialize($value) : $value;
     }
+
     public function getOptions(): array
     {
         return [
@@ -50,10 +51,12 @@ class HyperpatternAdapter extends AbstractAdapter
      * @ORM\Column(type="text")
      */
     protected $pattern;
+
     public function getPattern(): string
     {
         return $this->pattern;
     }
+
     public function setPattern(string $pattern = "https://{0}")
     {
         $this->pattern = $pattern;
@@ -64,11 +67,12 @@ class HyperpatternAdapter extends AbstractAdapter
     {
         return preg_match_all('/\{[0-9]*\}/i', $this->getPattern());
     }
+
     public function generate(...$replace): ?string
     {
         $search = [];
         foreach ($replace as $index => $_) {
-            $search[] = "{".$index."}";
+            $search[] = "{" . $index . "}";
         }
 
         $subject = $this->getPattern();

@@ -5,6 +5,7 @@ namespace Base\Console\Command;
 use Base\Console\Command;
 use App\Notifier\Notifier;
 use Base\Notifier\Abstract\BaseNotifier;
+use ReflectionClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -16,7 +17,7 @@ class NotifierCommand extends Command
 {
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $reflClass = new \ReflectionClass(Notifier::class);
+        $reflClass = new ReflectionClass(Notifier::class);
 
         $output->section()->writeln("Available templated notifications:");
         foreach ($reflClass->getMethods() as $method) {

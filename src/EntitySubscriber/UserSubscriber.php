@@ -63,7 +63,7 @@ class UserSubscriber implements EventSubscriberInterface
     public function onEnabling(UserEvent $event)
     {
         $user = $event->getUser();
-        if ($this->tokenStorage->getToken()->getUser() != $user) {
+        if ($this->tokenStorage->getToken()->getUser() !== $user) {
             return;
         } // Only notify when user requests itself
 
@@ -72,7 +72,7 @@ class UserSubscriber implements EventSubscriberInterface
         }
 
         $notification = $this->notifier->sendUserWelcomeBack($user);
-        if ($this->tokenStorage->getToken()->getUser() == $user) {
+        if ($this->tokenStorage->getToken()->getUser() === $user) {
             $notification->send("success");
         }
     }
@@ -80,7 +80,7 @@ class UserSubscriber implements EventSubscriberInterface
     public function onDisabling(UserEvent $event)
     {
         $user = $event->getUser();
-        if ($this->tokenStorage->getToken()->getUser() != $user) {
+        if ($this->tokenStorage->getToken()->getUser() !== $user) {
             return;
         } // Only notify when user requests itself
 
@@ -101,7 +101,7 @@ class UserSubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
 
         $user = $event->getUser();
-        if ($token && $token->getUser() != $user) {
+        if ($token && $token->getUser() !== $user) {
             return;
         } // Only notify when user requests itself
 
@@ -114,7 +114,7 @@ class UserSubscriber implements EventSubscriberInterface
             $notification->send("success");
         } else {
             /**
-             * @var \App\Entity\User\Token
+             * @var User\Token
              */
             $verifyEmailToken = new Token('verify-email', 3600);
             $user->addToken($verifyEmailToken);

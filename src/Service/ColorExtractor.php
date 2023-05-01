@@ -3,10 +3,12 @@
 namespace Base\Service;
 
 use Base\Service\Model\Color\Palette;
+use SplFixedArray;
+use SplPriorityQueue;
 
 class ColorExtractor
 {
-    protected $palette;
+    protected Palette $palette;
 
     protected $sortedColors;
 
@@ -34,8 +36,8 @@ class ColorExtractor
 
     protected function initialize()
     {
-        $queue = new \SplPriorityQueue();
-        $this->sortedColors = new \SplFixedArray(count($this->palette));
+        $queue = new SplPriorityQueue();
+        $this->sortedColors = new SplFixedArray(count($this->palette));
 
         $i = 0;
         foreach ($this->palette as $color => $count) {
@@ -57,13 +59,13 @@ class ColorExtractor
         }
     }
 
-    protected static function mergeColors(\SplFixedArray $colors, int $limit, int $maxDelta): array
+    protected static function mergeColors(SplFixedArray $colors, int $limit, int $maxDelta): array
     {
         $limit = min(count($colors), $limit);
         if ($limit === 1) {
             return [$colors[0]];
         }
-        $labCache = new \SplFixedArray($limit - 1);
+        $labCache = new SplFixedArray($limit - 1);
         $mergedColors = [];
 
         foreach ($colors as $color) {
@@ -210,6 +212,7 @@ class ColorExtractor
     {
         return $value > 216 / 24389 ? pow($value, 1 / 3) : 841 * $value / 108 + 4 / 29;
     }
+
     protected static function xyz2lab(array $xyz): array
     {
         //http://en.wikipedia.org/wiki/Illuminant_D65#Definition

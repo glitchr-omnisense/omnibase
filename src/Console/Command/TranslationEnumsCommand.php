@@ -6,6 +6,8 @@ use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Service\Localizer;
 use Base\Service\Translator;
+use Exception;
+use ReflectionClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,7 +25,7 @@ class TranslationEnumsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
+        $baseLocation = dirname((new ReflectionClass('Base\\BaseBundle'))->getFileName());
         $enumRestriction = $input->getOption('enum') ?? "";
         $enums = array_merge(
             BaseBundle::getInstance()->getAllClasses("./src/Enum"),
@@ -41,7 +43,7 @@ class TranslationEnumsCommand extends Command
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
         if ($locale && !in_array($locale, $availableLocales)) {
-            throw new \Exception("Locale not found in the list of available locale: [" . implode(",", $availableLocales) . "]");
+            throw new Exception("Locale not found in the list of available locale: [" . implode(",", $availableLocales) . "]");
         }
 
         $suffix = $input->getOption('suffix');

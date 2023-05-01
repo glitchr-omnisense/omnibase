@@ -4,6 +4,7 @@ namespace Base\EntityDispatcher;
 
 use Base\Database\Entity\EntityHydrator;
 
+use Base\Database\Entity\EntityHydratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
@@ -19,7 +20,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     /**
      * @var SymfonyEventDispatcherInterface
      */
-    protected $dispatcher;
+    protected SymfonyEventDispatcherInterface $dispatcher;
 
     /**
      * @var EntityHydratorInterface
@@ -29,37 +30,38 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var RequestStack
      */
-    protected $requestStack;
+    protected RequestStack $requestStack;
 
-    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydrator $entityHydrator, EntityManagerInterface $entityManager, RequestStack $requestStack)
+    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydratorInterface $entityHydrator, EntityManagerInterface $entityManager, RequestStack $requestStack)
     {
-        $this->dispatcher    = $dispatcher;
+        $this->dispatcher = $dispatcher;
         $this->entityManager = $entityManager;
         $this->entityHydrator = $entityHydrator;
 
         $this->requestStack = $requestStack;
-        $this->events        = [];
+        $this->events = [];
     }
 
     public const DISPATCHER_SUFFIX = "Dispatcher";
+
     public function getSubscribedEvents(): array
     {
         return
-        [
-            Events::preUpdate,
-            Events::postUpdate,
+            [
+                Events::preUpdate,
+                Events::postUpdate,
 
-            Events::prePersist,
-            Events::postPersist,
+                Events::prePersist,
+                Events::postPersist,
 
-            Events::preRemove,
-            Events::postRemove,
-        ];
+                Events::preRemove,
+                Events::postRemove,
+            ];
     }
 
     public static function getEventClass()
@@ -67,7 +69,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         $class = static::class;
 
         if (!str_ends_with(static::class, self::DISPATCHER_SUFFIX)) {
-            throw new Exception("Unexpected dispatcher name. \"".$class."\" must ends with \"". self::DISPATCHER_SUFFIX."\"");
+            throw new Exception("Unexpected dispatcher name. \"" . $class . "\" must ends with \"" . self::DISPATCHER_SUFFIX . "\"");
         }
 
         return substr($class, 0, -strlen(self::DISPATCHER_SUFFIX));
@@ -154,9 +156,11 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function onPersist(LifecycleEventArgs $event)
     {
     }
+
     public function onUpdate(LifecycleEventArgs $event)
     {
     }
+
     public function onRemove(LifecycleEventArgs $event)
     {
     }
@@ -165,10 +169,12 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     {
         $this->dispatchEvents($event);
     }
+
     public function postUpdate(LifecycleEventArgs $event): void
     {
         $this->dispatchEvents($event);
     }
+
     public function postRemove(LifecycleEventArgs $event): void
     {
         $this->dispatchEvents($event);

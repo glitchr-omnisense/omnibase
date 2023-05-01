@@ -2,6 +2,8 @@
 
 namespace Base\Form\Type;
 
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SearchType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 
@@ -20,7 +22,7 @@ class ThreadSearchbarType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('parent_id', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class);
-        $builder->add('generic', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
+        $builder->add('parent_id', HiddenType::class);
+        $builder->add('generic', SearchType::class);
     }
 }

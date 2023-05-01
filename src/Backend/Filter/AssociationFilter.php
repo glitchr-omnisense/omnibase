@@ -16,7 +16,6 @@ class AssociationFilter implements FilterInterface
     use FilterTrait;
 
     protected $alias;
-    protected $joinClass;
 
     public static function new(string $propertyName, $label = null): self
     {

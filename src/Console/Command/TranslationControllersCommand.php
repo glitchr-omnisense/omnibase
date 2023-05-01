@@ -4,6 +4,7 @@ namespace Base\Console\Command;
 
 use Base\Console\Command;
 use Base\Service\Localizer;
+use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,7 +45,7 @@ class TranslationControllersCommand extends Command
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
         if ($locale && !in_array($locale, $availableLocales)) {
-            throw new \Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
+            throw new Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
         }
 
         $suffix = $input->getOption('suffix');

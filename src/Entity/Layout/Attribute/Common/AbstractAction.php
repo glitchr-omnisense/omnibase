@@ -2,7 +2,6 @@
 
 namespace Base\Entity\Layout\Attribute\Common;
 
-use Base\Annotations\Annotation\Uploader;
 use Base\Database\Annotation\Associate;
 use Base\Database\Annotation\DiscriminatorEntry;
 
@@ -18,7 +17,7 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- *     @DiscriminatorEntry(value="abstract_action")
+ * @DiscriminatorEntry(value="abstract_action")
  */
 abstract class AbstractAction extends AbstractAttribute implements ActionInterface
 {
@@ -26,6 +25,7 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
     {
         return ["fa-solid fa-directions"];
     }
+
     public function apply(mixed $subject): mixed
     {
         return $this->adapter?->apply($this->getValue(), $subject) ?? $subject;
@@ -36,10 +36,12 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
      * @Associate(metadata="class")
      */
     protected $value;
+
     public function getValue()
     {
         return $this->value;
     }
+
     public function setValue($value)
     {
         $this->value = $value;
@@ -55,6 +57,7 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
     {
         return $this->class;
     }
+
     public function setClass(?string $class)
     {
         $this->class = $class;

@@ -30,37 +30,37 @@ class MediaController extends AbstractController
     /**
      * @var MediaService
      */
-    protected $mediaService;
+    protected MediaService $mediaService;
 
     /**
      * @var FileService
      */
-    protected $fileService;
+    protected mixed $fileService = null;
 
     /**
      * @var Flysystem
      */
-    protected $flysystem;
+    protected Flysystem $flysystem;
 
     /**
      * @var ImageCropRepository
      */
-    protected $imageCropRepository;
+    protected ImageCropRepository $imageCropRepository;
 
     /**
      * @var Profiler
      */
-    protected $profiler;
+    protected ?Profiler $profiler;
 
     /**
      * @var RequestStack
      */
-    protected $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var ?bool
      */
-    protected $localCache;
+    protected ?bool $localCache;
 
     public function __construct(RequestStack $requestStack, Flysystem $flysystem, MediaService $mediaService, ImageCropRepository $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
     {

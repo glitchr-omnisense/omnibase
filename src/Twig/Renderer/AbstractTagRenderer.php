@@ -12,22 +12,22 @@ abstract class AbstractTagRenderer implements TagRendererInterface
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /**
      * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     /**
      * @var SluggerInterface
      */
-    protected $slugger;
+    protected SluggerInterface $slugger;
 
     /**
      * @var ParameterBag
      */
-    protected $parameterBag;
+    protected ParameterBagInterface|ParameterBag $parameterBag;
 
     protected array $defaultScriptAttributes;
     protected array $defaultLinkAttributes;
@@ -40,6 +40,6 @@ abstract class AbstractTagRenderer implements TagRendererInterface
 
         $this->parameterBag = $parameterBag;
         $this->defaultScriptAttributes = $parameterBag->get("base.twig.script_attributes") ?? [];
-        $this->defaultLinkAttributes   = $parameterBag->get("base.twig.link_attributes") ?? [];
+        $this->defaultLinkAttributes = $parameterBag->get("base.twig.link_attributes") ?? [];
     }
 }

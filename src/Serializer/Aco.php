@@ -17,12 +17,12 @@ class Aco
     public const VERSION_V1 = 1;
     public const VERSION_V2 = 2;
 
-    public const RGB       = 0;
-    public const HSB       = 1;
-    public const CMYK      = 2;
-    public const LAB       = 7;
+    public const RGB = 0;
+    public const HSB = 1;
+    public const CMYK = 2;
+    public const LAB = 7;
     public const GRAYSCALE = 8;
-    public const WideCMYK  = 9;
+    public const WideCMYK = 9;
 
     public static function parseFile(string $filename, int $flags = self::VERSION_V2): array
     {
@@ -36,23 +36,25 @@ class Aco
 
         $mimetype = mime_content_type($filename);
 
-        switch($mimetype) {
-            case "text/plain": return self::parse(fopen($filename, "r"), $flags);
-            default: return self::parse(fopen($filename, "rb"), $flags);
-        }
+        return match ($mimetype) {
+            "text/plain" => self::parse(fopen($filename, "r"), $flags),
+            default => self::parse(fopen($filename, "rb"), $flags),
+        };
     }
 
     public static function parse($handle, int $flags = self::VERSION_V2): array
     {
         if (!is_resource($handle)) {
-            throw new Exception("resource input expected, please use ".__CLASS__."::parseFile() to read a file.");
+            throw new Exception("resource input expected, please use " . __CLASS__ . "::parseFile() to read a file.");
         }
 
         $mimetype = mime_content_type($handle);
-        switch($mimetype) {
-            case "text/plain": $colors = self::parseAscii($handle, $flags);
-                // no break
-            default: $colors = self::parseBinary($handle, $flags);
+        switch ($mimetype) {
+            case "text/plain":
+                $colors = self::parseAscii($handle, $flags);
+            // no break
+            default:
+                $colors = self::parseBinary($handle, $flags);
         }
 
         self::sortByColor($handle);
@@ -62,7 +64,7 @@ class Aco
 
     protected static function parseBinary($handle, int $flags): array
     {
-        $colors  = [];
+        $colors = [];
         $version = 0;
         $ncolors = 0;
 
@@ -76,7 +78,7 @@ class Aco
             }
 
             list($palette, $array, $hexcode, $name) = self::getBlock($handle, $version);
-            switch($version) {
+            switch ($version) {
                 case self::VERSION_V1:
                     $colors[] = [$palette, $array, $hexcode];
                     break;
@@ -85,10 +87,10 @@ class Aco
                     break;
             }
 
-            if ($flags == self::VERSION_V1 && $i == $ncolors-1) {
+            if ($flags == self::VERSION_V1 && $i == $ncolors - 1) {
                 break;
             }
-            if ($flags == self::VERSION_V2 && $i == 2*$ncolors-1) {
+            if ($flags == self::VERSION_V2 && $i == 2 * $ncolors - 1) {
                 break;
             }
         }
@@ -109,16 +111,16 @@ class Aco
             $words = explode(" ", $line);
 
             $hexcode = trim(array_shift($words), "# ");
-            $hexcode = strlen($hexcode) === 3 ? $hexcode[0].$hexcode[0].$hexcode[1].$hexcode[1].$hexcode[2].$hexcode[2] : $hexcode;
+            $hexcode = strlen($hexcode) === 3 ? $hexcode[0] . $hexcode[0] . $hexcode[1] . $hexcode[1] . $hexcode[2] . $hexcode[2] : $hexcode;
 
             $array = [
-                 hexdec(substr($hexcode, 0, 2)),
-                 hexdec(substr($hexcode, 2, 2)),
-                 hexdec(substr($hexcode, 4, 2))
+                hexdec(substr($hexcode, 0, 2)),
+                hexdec(substr($hexcode, 2, 2)),
+                hexdec(substr($hexcode, 4, 2))
             ];
 
             $name = trim(implode(" ", $words));
-            $name = utf8_encode($name);
+            $name = mb_convert_encoding($name, 'UTF-8');
             $name = str_replace("\0", "", $name);
 
             $names = explode(",", $name);
@@ -151,9 +153,9 @@ class Aco
             $y = strlen($hexcode) >= 4 ? str_pad(substr($hexcode, 4, 2), 2, "0") : "00";
             $z = strlen($hexcode) >= 6 ? str_pad(substr($hexcode, 6, 2), 2, "0") : "00";
 
-            $names    = $color[3] ?? "";
+            $names = $color[3] ?? "";
 
-            switch($palette) {
+            switch ($palette) {
                 case "RGB":
                     $palette = self::RGB;
                     break;
@@ -176,7 +178,7 @@ class Aco
 
             $palette = str_pad(dechex($palette), 4, "0");
             fwrite($handle, hex2bin($palette));
-            fwrite($handle, hex2bin($w.$w.$x.$x.$y.$y.$z.$z));
+            fwrite($handle, hex2bin($w . $w . $x . $x . $y . $y . $z . $z));
         }
 
         fwrite($handle, hex2bin(str_pad(dechex(self::VERSION_V2), 4, "0")), 2);
@@ -193,7 +195,7 @@ class Aco
             $t = "00";
 
             $names = $color[3] ?? "";
-            switch($palette) {
+            switch ($palette) {
                 case "RGB":
                     $palette = self::RGB;
                     break;
@@ -216,12 +218,12 @@ class Aco
 
             $palette = str_pad(dechex($palette), 4, "0");
             fwrite($handle, hex2bin($palette), 2);
-            fwrite($handle, hex2bin($w.$w.$x.$x.$y.$y.$z.$z.$t.$t), 10);
+            fwrite($handle, hex2bin($w . $w . $x . $x . $y . $y . $z . $z . $t . $t), 10);
 
             $name = implode(", ", $names);
             $length = strlen($name);
 
-            fwrite($handle, hex2bin(str_pad(dechex($length+1), 4, "0")), 2);
+            fwrite($handle, hex2bin(str_pad(dechex($length + 1), 4, "0")), 2);
             for ($i = 0; $i < $length; $i++) {
                 fwrite($handle, hex2bin(str_pad(bin2hex($name[$i]), 4, "0")), 2);
             }
@@ -249,58 +251,58 @@ class Aco
         $name = "";
         $palette = 0;
         $hexcode = 0;
-        $array   = [];
+        $array = [];
 
-        switch($version) {
+        switch ($version) {
             case self::VERSION_V1:
 
                 $palette = hexdec(bin2hex(fread2($handle, 2)));
 
                 $hexcode = 0;
-                $array   = [];
+                $array = [];
 
                 $w = str_pad(dechex((hexdec(bin2hex(fread2($handle, 2))) & 0xFF00) >> self::BYTE_SIZE), 2, "0");
                 $x = str_pad(dechex((hexdec(bin2hex(fread2($handle, 2))) & 0xFF00) >> self::BYTE_SIZE), 2, "0");
                 $y = str_pad(dechex((hexdec(bin2hex(fread2($handle, 2))) & 0xFF00) >> self::BYTE_SIZE), 2, "0");
                 $z = str_pad(dechex((hexdec(bin2hex(fread2($handle, 2))) & 0xFF00) >> self::BYTE_SIZE), 2, "0");
 
-                switch($palette) {
+                switch ($palette) {
                     case self::RGB:
                         $palette = "RGB";
-                        $hexcode = $w.$x.$y;
-                        $array = [hexdec($w)/256, hexdec($x)/256, hexdec($y)/256];
+                        $hexcode = $w . $x . $y;
+                        $array = [hexdec($w) / 256, hexdec($x) / 256, hexdec($y) / 256];
                         break;
 
                     case self::HSB:
                         $palette = "HSB";
-                        $hexcode = $w.$x.$y;
-                        $array = [hexdec($w)/182.04, hexdec($x)/655.35, hexdec($y)/655.35];
+                        $hexcode = $w . $x . $y;
+                        $array = [hexdec($w) / 182.04, hexdec($x) / 655.35, hexdec($y) / 655.35];
 
                         break;
 
                     case self::CMYK:
                         $palette = "CMYK";
-                        $hexcode = $w.$x.$y.$z;
-                        $array = [100 - hexdec($w)/655.35, 100 - hexdec($x)/655.35, 100 - hexdec($y)/655.35, 100 - hexdec($z)/655.35];
+                        $hexcode = $w . $x . $y . $z;
+                        $array = [100 - hexdec($w) / 655.35, 100 - hexdec($x) / 655.35, 100 - hexdec($y) / 655.35, 100 - hexdec($z) / 655.35];
                         break;
 
                     case self::LAB:
                         $palette = "LAB";
-                        $hexcode = $w.$x.$y;
+                        $hexcode = $w . $x . $y;
                         $array = [];
                         throw new Exception("LAB COLOR SPACE NOT IMPLEMENTED");
                         break;
 
                     case self::WideCMYK:
                         $palette = "WideCMYK";
-                        $hexcode = $w.$x.$y.$z;
-                        $array = [hexdec($w)/100, hexdec($x)/100, hexdec($y)/100, hexdec($z)/100];
+                        $hexcode = $w . $x . $y . $z;
+                        $array = [hexdec($w) / 100, hexdec($x) / 100, hexdec($y) / 100, hexdec($z) / 100];
                         break;
 
                     case self::GRAYSCALE:
                         $palette = "GRAYSCALE";
                         $hexcode = $w;
-                        $array = hexdec($w)/39.0625;
+                        $array = hexdec($w) / 39.0625;
                         break;
                 }
 
@@ -309,10 +311,10 @@ class Aco
             case self::VERSION_V2:
 
                 list($palette, $array, $hexcode) = self::getBlock($handle, self::VERSION_V1);
-                $teal   = (hexdec(bin2hex(fread2($handle, 2))) & 0xFF00) >> self::BYTE_SIZE;
-                $length =  hexdec(bin2hex(fread2($handle, 2)));
+                $teal = (hexdec(bin2hex(fread2($handle, 2))) & 0xFF00) >> self::BYTE_SIZE;
+                $length = hexdec(bin2hex(fread2($handle, 2)));
 
-                $name = utf8_encode(fread2($handle, 2*$length));
+                $name = mb_convert_encoding(fread2($handle, 2 * $length), 'UTF-8');
                 $name = preg_replace('~\(.*\)~', "", $name);
                 $name = str_replace("\0", "", $name);
 

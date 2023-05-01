@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 class ImageCacheWarmer implements CacheWarmerInterface
 {
     protected int $shellVerbosity;
-    protected $console;
+    protected ConsoleInterface $console;
 
     public function __construct(ConsoleInterface $console)
     {
@@ -27,10 +27,11 @@ class ImageCacheWarmer implements CacheWarmerInterface
     {
         return true;
     }
+
     public function warmUp($cacheDir): array
     {
         if ($this->shellVerbosity > 0 && php_sapi_name() == "cli") {
-            echo " // Warming up cache... Prepare database image".PHP_EOL.PHP_EOL;
+            echo " // Warming up cache... Prepare database image" . PHP_EOL . PHP_EOL;
         }
 
         $this->console->verbosity($this->shellVerbosity);

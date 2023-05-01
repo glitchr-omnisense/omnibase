@@ -5,6 +5,7 @@ namespace Base\Service;
 use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
 use Base\Repository\Layout\SettingRepository;
+use Psr\Cache\CacheItemInterface;
 use Symfony\Component\Asset\Packages;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
@@ -21,34 +22,34 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     /**
      * @var Packages
      */
-    protected $packages;
+    protected Packages $packages;
 
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
-     * @var CacheInterface
+     * @var CacheItemInterface
      */
-    protected $cacheSettingBag;
+    protected CacheItemInterface $cacheSettingBag;
 
     /**
-     * @var LocalProvider
+     * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     /**
-     * @var SettingRepository
+     * @var ?SettingRepository
      */
-    protected $settingRepository = null;
+    protected ?SettingRepository $settingRepository = null;
 
     protected ?string $environment;
 
     /**
      * @var CacheInterface
      */
-    protected $cache;
+    protected CacheInterface $cache;
 
     /**
      * @var string
@@ -58,7 +59,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     public function warmUp(string $cacheDir): array
     {
@@ -117,11 +118,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         $pathArray = explode(".", $path);
         foreach ($pathArray as $index => $key) {
             if ($key == "_self" && $index != count($pathArray) - 1) {
-                throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
+                throw new Exception("Failed to read \"$path\": _self can only be used as tail parameter");
             }
 
             if (!array_key_exists($key, $bag)) {
-                throw new \Exception("Failed to read \"$path\": key not found");
+                throw new Exception("Failed to read \"$path\": key not found");
             }
 
             $bag = &$bag[$key];
@@ -142,7 +143,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             $last = count($el) - 1;
             foreach ($el as $index => $key) {
                 if ($key == "_self" && $index != $last) {
-                    throw new \Exception("Failed to normalize \"$path\": \"_self\" key can only be used as tail parameter");
+                    throw new Exception("Failed to normalize \"$path\": \"_self\" key can only be used as tail parameter");
                 }
 
                 if (!array_key_exists($key, $array)) {
@@ -235,9 +236,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         } // Cache fallback
 
         $values = $this->normalize($path, $settings);
-        $values = $this->read($path, $values); // get formatted values
+        // get formatted values
 
-        return $values;
+        return $this->read($path, $values);
     }
 
     public function generateRaw(string $path, ?string $locale = null, bool $useCache = false): Setting
@@ -294,7 +295,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return $settings;
         }
 
-        $this->settingBag ??= $useCache && $this->cacheSettingBag !== null ? $this->cacheSettingBag->get() ?? [] : [];
+        $this->settingBag ??= $useCache ? $this->cacheSettingBag->get() ?? [] : [];
         if (array_key_exists($path . ":" . ($locale ?? Localizer::LOCALE_FORMAT), $this->settingBag)) {
             return $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)];
         }
@@ -322,7 +323,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function clearAll()
     {
-        return $this->clear(null);
+        $this->clear(null);
     }
 
     public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
@@ -360,7 +361,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $setting = $this->generateRaw($path, $locale);
         if ($setting->isLocked()) {
-            throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
+            throw new Exception("Setting \"$path\" is locked and cannot be modified.");
         }
 
         $setting->translate($locale)->setValue($value);

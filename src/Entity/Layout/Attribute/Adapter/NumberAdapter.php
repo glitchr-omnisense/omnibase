@@ -15,7 +15,6 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "number" )
  */
-
 class NumberAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -27,6 +26,7 @@ class NumberAdapter extends AbstractAdapter
     {
         return NumberType::class;
     }
+
     public function getOptions(): array
     {
         return [
@@ -51,10 +51,12 @@ class NumberAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $minimum;
+
     public function getMinimum(): ?int
     {
         return $this->minimum;
     }
+
     public function setMinimum(?int $minimum)
     {
         $this->minimum = $minimum;
@@ -65,10 +67,12 @@ class NumberAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $maximum;
+
     public function getMaximum(): ?int
     {
         return $this->maximum;
     }
+
     public function setMaximum(?int $maximum)
     {
         $this->maximum = $maximum;

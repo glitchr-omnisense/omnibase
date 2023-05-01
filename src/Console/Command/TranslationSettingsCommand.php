@@ -10,6 +10,7 @@ use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -50,7 +51,7 @@ class TranslationSettingsCommand extends Command
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
         if ($locale && !in_array($locale, $availableLocales)) {
-            throw new \Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
+            throw new Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
         }
 
         $rawSettings    = array_transforms(
@@ -59,7 +60,7 @@ class TranslationSettingsCommand extends Command
         );
 
         if (!$rawSettings) {
-            throw new \Exception("No settings found for \"$path\"");
+            throw new Exception("No settings found for \"$path\"");
         }
         $settings = array_map_recursive(
             fn ($s) => array_transforms(

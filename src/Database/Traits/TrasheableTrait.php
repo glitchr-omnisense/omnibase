@@ -3,6 +3,7 @@
 namespace Base\Database\Traits;
 
 use Base\Annotations\Annotation\Timestamp;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 trait TrasheableTrait
@@ -16,11 +17,11 @@ trait TrasheableTrait
     {
         return null !== $this->deletedAt;
     }
-    public function getDeletedAt(): ?\DateTimeInterface
+    public function getDeletedAt(): ?DateTimeInterface
     {
         return $this->deletedAt;
     }
-    public function setDeletedAt(\DateTimeInterface $deletedAt): self
+    public function setDeletedAt(DateTimeInterface $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
         return $this;

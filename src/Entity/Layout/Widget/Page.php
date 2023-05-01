@@ -23,13 +23,13 @@ use Base\Database\Annotation\Cache;
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
-
 class Page extends Widget implements IconizeInterface, LinkableInterface
 {
     public function __iconize(): ?array
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-file-alt"];
@@ -59,10 +59,12 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $slug;
+
     public function getSlug(): ?string
     {
         return $this->slug;
     }
+
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;

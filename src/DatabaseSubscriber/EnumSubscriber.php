@@ -4,6 +4,7 @@ namespace Base\DatabaseSubscriber;
 
 use Base\Database\Type\EnumType;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
 
@@ -26,7 +27,7 @@ class EnumSubscriber implements EventSubscriberInterface
             }
         }
 
-        /** @var \Doctrine\DBAL\Schema\Column $column */
+        /** @var Column $column */
         foreach ($columns as $column) {
             /**
              * @var EnumType

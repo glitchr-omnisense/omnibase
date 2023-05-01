@@ -4,11 +4,8 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Exception;
-use Symfony\Component\Uid\Uuid;
 
 /**
  * Class Randomize
@@ -29,7 +26,7 @@ class Randomize extends AbstractAnnotation
     public function __construct(array $data)
     {
         $this->length = $data["length"] ?? null;
-        $this->chars  = $data['chars']  ?? null;
+        $this->chars = $data['chars'] ?? null;
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
@@ -37,7 +34,7 @@ class Randomize extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if ($this->getFieldValue($entity, $property) === null) {
             $this->setFieldValue($entity, $property, rand_str($this->length, $this->chars));

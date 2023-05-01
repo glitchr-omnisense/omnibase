@@ -8,10 +8,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
+use NumberFormatter;
 
 final class NumberConfigurator implements FieldConfiguratorInterface
 {
-    private $intlFormatter;
+    private IntlFormatter $intlFormatter;
 
     public function __construct(IntlFormatter $intlFormatter)
     {
@@ -44,20 +45,20 @@ final class NumberConfigurator implements FieldConfiguratorInterface
         }
 
         $divisor = $field->getFormTypeOption(NumberField::OPTION_DIVISOR);
-        $factor = $divisor ? 1./$divisor : 1;
-        $field->setFormattedValue($field->getFormTypeOption("prefix").$this->intlFormatter->formatNumber($value*$factor, $formatterAttributes).$field->getFormTypeOption("suffix"));
+        $factor = $divisor ? 1. / $divisor : 1;
+        $field->setFormattedValue($field->getFormTypeOption("prefix") . $this->intlFormatter->formatNumber($value * $factor, $formatterAttributes) . $field->getFormTypeOption("suffix"));
     }
 
     private function getRoundingModeAsString(int $mode): string
     {
         return [
-            \NumberFormatter::ROUND_DOWN => 'down',
-            \NumberFormatter::ROUND_FLOOR => 'floor',
-            \NumberFormatter::ROUND_UP => 'up',
-            \NumberFormatter::ROUND_CEILING => 'ceiling',
-            \NumberFormatter::ROUND_HALFDOWN => 'halfdown',
-            \NumberFormatter::ROUND_HALFEVEN => 'halfeven',
-            \NumberFormatter::ROUND_HALFUP => 'halfup',
+            NumberFormatter::ROUND_DOWN => 'down',
+            NumberFormatter::ROUND_FLOOR => 'floor',
+            NumberFormatter::ROUND_UP => 'up',
+            NumberFormatter::ROUND_CEILING => 'ceiling',
+            NumberFormatter::ROUND_HALFDOWN => 'halfdown',
+            NumberFormatter::ROUND_HALFEVEN => 'halfeven',
+            NumberFormatter::ROUND_HALFUP => 'halfup',
         ][$mode];
     }
 }

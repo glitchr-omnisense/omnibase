@@ -7,6 +7,7 @@ use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
 use Base\Service\TranslatorInterface;
 use Countable;
+use Exception;
 use Iterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,27 +17,30 @@ use Symfony\Component\Routing\RouterInterface;
 class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAccess
 {
     protected bool $computed = false;
-    protected array $items   = [];
+    protected array $items = [];
     protected array $options = [];
-    protected $request = null;
+    protected ?Request $request = null;
 
-    protected $router = null;
-    protected $template = "@Base/breadcrumb/default.html.twig";
+    protected ?RouterInterface $router = null;
+    protected string $template = "@Base/breadcrumb/default.html.twig";
 
-    protected $iterator  = 0;
+    protected int $iterator = 0;
 
     public function offsetExists(mixed $offset): bool
     {
         return isset($this->items[$offset]);
     }
+
     public function offsetUnset(mixed $offset): void
     {
         $this->removeItem($offset);
     }
+
     public function offsetGet(mixed $offset): mixed
     {
         return $this->getItem($offset);
     }
+
     public function offsetSet(mixed $offset, mixed $value = []): void
     {
         if (is_null($offset)) {
@@ -50,22 +54,27 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         return $this->getLength();
     }
+
     public function rewind(): void
     {
         $this->iterator = 0;
     }
+
     public function next(): void
     {
         $this->iterator++;
     }
+
     public function key(): mixed
     {
         return $this->iterator;
     }
+
     public function valid(): bool
     {
         return $this->getLength() > $this->iterator;
     }
+
     public function current(): mixed
     {
         return $this->getItem($this->iterator);
@@ -74,12 +83,12 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var AnnotationReader
      */
-    protected $annotationReader;
+    protected ?AnnotationReader $annotationReader;
 
     public function __construct(RouterInterface $router, TranslatorInterface $translator, array $options = [], ?string $template = null)
     {
@@ -97,6 +106,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         return $this->request;
     }
+
     public function setRequest(Request $request): self
     {
         $this->request = $request;
@@ -135,31 +145,31 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             }
 
             // Get icon from controller annotation
-            $reflClass   = $this->annotationReader->getReflClass($class);
+            $reflClass = $this->annotationReader->getReflClass($class);
             $annotations = $this->annotationReader->getDefaultMethodAnnotations($reflClass)[$method] ?? [];
 
             $position = array_class_last(Iconize::class, $annotations);
-            $iconize  = $position !== false ? $annotations[$position] : null;
-            $icon     = $iconize ? $iconize->getIcons()[0] ?? null : null;
+            $iconize = $position !== false ? $annotations[$position] : null;
+            $icon = $iconize ? $iconize->getIcons()[0] ?? null : null;
 
             // Get route name from controller annotation
             $position = array_class_last(Route::class, $annotations);
 
-            $route  = $position !== false ? $annotations[$position] : null;
-            $routeName          = $route ? $this->getRouteName($path) : null;
-            $routeParameters    = $route ? array_filter($this->getRouteParameters($path, $route->getPath() !== null ? rtrim($route->getPath(), "/") : null) ?? []) : [];
+            $route = $position !== false ? $annotations[$position] : null;
+            $routeName = $route ? $this->getRouteName($path) : null;
+            $routeParameters = $route ? array_filter($this->getRouteParameters($path, $route->getPath() !== null ? rtrim($route->getPath(), "/") : null) ?? []) : [];
             $routeParameterKeys = array_keys($routeParameters);
 
             $transPath = implode(".", array_merge([$routeName], $routeParameterKeys));
-            $transParameters = array_transforms(fn ($k, $v): array => [$k,
-                $k == "id" ? "#".$v : (
-                    $k == "slug" ? ucwords(str_replace(["-","_"], " ", $v)) : $v
+            $transParameters = array_transforms(fn($k, $v): array => [$k,
+                $k == "id" ? "#" . $v : (
+                $k == "slug" ? ucwords(str_replace(["-", "_"], " ", $v)) : $v
                 )], $routeParameters);
 
-            $label = $routeName ? $this->translator->trans("@controllers.".$transPath.".title", $transParameters) : null;
+            $label = $routeName ? $this->translator->trans("@controllers." . $transPath . ".title", $transParameters) : null;
             $label = preg_replace("/\{\w\}/", "", $label);
             $label = str_rstrip($label, "#");
-            if ($label == "@controllers.".$transPath.".title") {
+            if ($label == "@controllers." . $transPath . ".title") {
                 $label = "";
             }
 
@@ -234,7 +244,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
         $baseDir = $this->getRouter()->getContext()->getBaseUrl();
         $path = parse_url($url, PHP_URL_PATH);
-        if ($baseDir && strpos($path, $baseDir) === 0) {
+        if ($baseDir && str_starts_with($path, $baseDir)) {
             $path = substr($path, strlen($baseDir));
         }
 
@@ -244,8 +254,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             return '';
         }
 
-        $route = $routeMatch['_route'] ?? "";
-        return $route;
+        return $routeMatch['_route'] ?? "";
     }
 
     public function getController(?string $url = null): string
@@ -256,7 +265,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
         $baseDir = $this->getRouter()->getContext()->getBaseUrl();
         $path = parse_url($url, PHP_URL_PATH);
-        if ($baseDir && strpos($path, $baseDir) === 0) {
+        if ($baseDir && str_starts_with($path, $baseDir)) {
             $path = substr($path, strlen($baseDir));
         }
 
@@ -266,14 +275,14 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             return '';
         }
 
-        $route = $routeMatch['_controller'] ?? "";
-        return $route;
+        return $routeMatch['_controller'] ?? "";
     }
 
     public function getRouter(): RouterInterface
     {
         return $this->router;
     }
+
     public function setRouter(RouterInterface $router)
     {
         $this->router = $router;
@@ -284,6 +293,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         return $this->translator;
     }
+
     public function setTranslator(TranslatorInterface $translator)
     {
         $this->translator = $translator;
@@ -294,6 +304,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         return $this->template;
     }
+
     public function setTemplate(string $template)
     {
         $this->template = $template;
@@ -304,6 +315,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         return $this->options;
     }
+
     public function addOptions(array $options)
     {
         foreach ($options as $key => $option) {
@@ -321,6 +333,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         return $this->options[$name] ?? null;
     }
+
     public function addOption(string $name, $value)
     {
         $this->options[$name] = $value;
@@ -340,12 +353,12 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         $url = null;
         try {
             $url = $route ? $this->router->generate($route, $routeParameters) : null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         return [
             "label" => $label,
-            "url"   => ($route ? $url : null),
+            "url" => ($route ? $url : null),
             "route" => $route
         ];
     }
@@ -354,6 +367,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         unset($this->items[$offset]);
     }
+
     public function prependItem(string $label, ?string $route = null, array $routeParameters = [])
     {
         array_unshift($this->items, $this->getFormattedItem($label, $route, $routeParameters));
@@ -375,6 +389,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         return count($this->items);
     }
+
     public function getItems()
     {
         return $this->items;
@@ -384,10 +399,12 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     {
         return $this->getItem(0);
     }
+
     public function getLastItem()
     {
-        return $this->getItem($this->getLength()-1);
+        return $this->getItem($this->getLength() - 1);
     }
+
     public function getItem(int $index)
     {
         return $this->items[$index] ?? null;

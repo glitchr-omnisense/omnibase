@@ -9,6 +9,7 @@ use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\RouteRepository;
+use Exception;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 
@@ -17,13 +18,13 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
-
 class Route extends Widget implements IconizeInterface, LinkableInterface
 {
     public function __iconize(): ?array
     {
         return $this->getRouteIcons();
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-road"];
@@ -52,10 +53,12 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
      * @ORM\Column(type="text")
      */
     protected $routeName;
+
     public function getRouteName(): ?string
     {
         return $this->routeName;
     }
+
     public function setRouteName(?string $routeName): self
     {
         $this->routeName = $routeName;
@@ -66,10 +69,12 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
      * @ORM\Column(type="array", nullable=true)
      */
     protected $routeParameters;
+
     public function getRouteParameters(): ?array
     {
         return $this->routeParameters;
     }
+
     public function setRouteParameters(?array $routeParameters): self
     {
         $this->routeParameters = $routeParameters;
@@ -79,17 +84,19 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
     public function getPath()
     {
         $route = $this->getRouter()->getRouteCollection()->get($this->routeName);
-        return $route ? $route->getPath() : null;
+        return $route?->getPath();
     }
 
     public function getRoute(): ?string
     {
         return $this->getRouter()->getRoute($this->getUrl());
     }
+
     public function getRouteIcons()
     {
         return $this->getIconProvider()->getRouteIcons($this->routeName);
     }
+
     public function getUrl(): ?string
     {
         return $this->generate();
@@ -99,7 +106,7 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
     {
         try {
             return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         return null;

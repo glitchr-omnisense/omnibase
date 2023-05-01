@@ -9,7 +9,8 @@ use Symfony\Component\Form\AbstractTypeExtension;
 
 class FormTypeTranslateExtension extends AbstractTypeExtension
 {
-    protected $defaultEnabled;
+    protected bool $defaultEnabled;
+
     public function __construct(bool $defaultEnabled = false)
     {
         $this->defaultEnabled = $defaultEnabled;

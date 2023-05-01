@@ -5,6 +5,7 @@ namespace Base\Controller;
 use App\Entity\User;
 
 use Base\Entity\User\Notification;
+use Base\Form\FormProxyInterface;
 use Base\Notifier\NotifierInterface;
 use Base\Routing\RouterInterface;
 use Base\Security\LoginFormAuthenticator;
@@ -45,49 +46,49 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge
 class SecurityController extends AbstractController
 {
     /**
-     * @var Translator
+     * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
-     * @var TokenStorage
+     * @var TokenStorageInterface
      */
-    protected $tokenStorage;
+    protected TokenStorageInterface $tokenStorage;
 
     /**
-     * @var FormProxy
+     * @var FormProxyInterface
      */
-    protected $formProxy;
+    protected FormProxyInterface $formProxy;
 
     /**
-     * @var Notifier
+     * @var NotifierInterface
      */
-    protected $notifier;
+    protected NotifierInterface $notifier;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var UserRepository
      */
-    protected $userRepository;
+    protected UserRepository $userRepository;
 
     /**
      * @var TokenRepository
      */
-    protected $tokenRepository;
+    protected TokenRepository $tokenRepository;
 
     public function __construct(
         NotifierInterface      $notifier,

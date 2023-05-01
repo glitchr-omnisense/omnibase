@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class NotWritableException extends \Exception
+use Exception;
+
+class NotWritableException extends Exception
 {
     /**
      * {@inheritdoc}

@@ -5,6 +5,7 @@ namespace Base\Inspector;
 use Base\BaseBundle;
 use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
+use Composer\InstalledVersions;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\DBAL\Connection;
 
@@ -14,6 +15,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\EasyAdminBundle;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 
+use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -24,19 +26,19 @@ use Symfony\Component\Routing\RouterInterface;
 class DataCollector extends AbstractDataCollector
 {
     /** @var AdminContextProvider */
-    private $adminContextProvider;
+    private AdminContextProvider $adminContextProvider;
 
-    /** @var Doctrine */
-    private $doctrine;
+    /** @var ManagerRegistry */
+    private ManagerRegistry $doctrine;
 
-    /** @var Router */
-    private $router;
+    /** @var RouterInterface */
+    private RouterInterface $router;
 
-    /** @var ParameterBag */
-    private $parameterBag;
+    /** @var ParameterBagInterface */
+    private ParameterBagInterface $parameterBag;
 
     /** @var BaseService */
-    private $baseService;
+    private BaseService $baseService;
 
     public array $dataBundles = [];
 
@@ -85,11 +87,11 @@ class DataCollector extends AbstractDataCollector
             return false;
         }
 
-        $bundleLocation = \Composer\InstalledVersions::getRootPackage()["install_path"];
+        $bundleLocation = InstalledVersions::getRootPackage()["install_path"];
         $bundleLocation = realpath($bundleLocation . "vendor/" . $bundleIdentifier);
 
-        $bundleVersion = \Composer\InstalledVersions::getPrettyVersion($bundleIdentifier);
-        $bundleDevRequirements = !\Composer\InstalledVersions::isInstalled($bundleIdentifier, false);
+        $bundleVersion = InstalledVersions::getPrettyVersion($bundleIdentifier);
+        $bundleDevRequirements = !InstalledVersions::isInstalled($bundleIdentifier, false);
         $bundleSuffix = $bundleSuffix ? "@" . $bundleSuffix : "";
 
         $this->dataBundles[$bundle] = [
@@ -129,11 +131,11 @@ class DataCollector extends AbstractDataCollector
             return $this->dataBundles[$bundle]["identifier"];
         }
 
-        $reflector = new \ReflectionClass($bundle);
+        $reflector = new ReflectionClass($bundle);
         $bundleRoot = dirname($reflector->getFileName());
 
-        foreach (\Composer\InstalledVersions::getInstalledPackages() as $bundleIdentifier) {
-            $bundleLocation = \Composer\InstalledVersions::getRootPackage()["install_path"];
+        foreach (InstalledVersions::getInstalledPackages() as $bundleIdentifier) {
+            $bundleLocation = InstalledVersions::getRootPackage()["install_path"];
             $bundleLocation = realpath($bundleLocation . "vendor/" . $bundleIdentifier);
 
             if ($bundleLocation && str_starts_with($bundleRoot, $bundleLocation)) {
@@ -200,7 +202,6 @@ class DataCollector extends AbstractDataCollector
         if (class_exists(BaseBundle::class)) {
             $data[$this->getBundleFormattedName(BaseBundle::class)] = [
                 'Environment name' => $this->baseService->getEnvironment(),
-                'Environment name' => $this->baseService->getEnvironment(),
                 'Development mode' => $this->baseService->isDevelopment(),
                 'Technical support' => $this->parameterBag->get("base.notifier.technical_support"),
                 'Router Class' => get_class($this->router),
@@ -214,7 +215,7 @@ class DataCollector extends AbstractDataCollector
 
         if (class_exists(EasyAdminBundle::class)) {
             $data[$this->getBundleFormattedName(EasyAdminBundle::class)] = $context ? [
-                'CRUD Controller FQCN' => null === $context->getCrud() ? null : $context->getCrud()->getControllerFqcn(),
+                'CRUD Controller FQCN' => $context->getCrud()?->getControllerFqcn(),
                 'CRUD Action' => $context->getRequest()->get(EA::CRUD_ACTION),
                 'Entity ID' => $context->getRequest()->get(EA::ENTITY_ID),
                 'Sort' => $context->getRequest()->get(EA::SORT),

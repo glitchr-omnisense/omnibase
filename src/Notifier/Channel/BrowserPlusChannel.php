@@ -9,7 +9,7 @@ use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
 final class BrowserPlusChannel implements ChannelInterface
 {
-    private $requestStack;
+    private RequestStack $requestStack;
 
     public function __construct(RequestStack $requestStack)
     {
@@ -31,7 +31,7 @@ final class BrowserPlusChannel implements ChannelInterface
         }
 
         // Prepare variables
-        $type    = $notification->getImportance();
+        $type = $notification->getImportance();
         $message = $notification->getContent();
 
         // Avoid double flash messages

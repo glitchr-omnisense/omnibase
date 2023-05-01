@@ -24,14 +24,14 @@ use Twig\TwigTest;
 final class MediaTwigExtension extends AbstractExtension
 {
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var MediaController
      */
-    protected $mediaController;
+    protected MediaController $mediaController;
 
     /**
      * @var MediaService
@@ -39,7 +39,7 @@ final class MediaTwigExtension extends AbstractExtension
     protected $mediaService;
 
     /** @var string */
-    protected $projectDir;
+    protected string $projectDir;
 
     public function __construct(RouterInterface $router, MediaService $mediaService, MediaController $mediaController, string $projectDir)
     {
@@ -127,7 +127,7 @@ final class MediaTwigExtension extends AbstractExtension
         $email = $context["email"] ?? null;
         if ($email instanceof WrappedTemplatedEmail) {
             $config["warmup"] = true;
-            $config["webp"]   = false;
+            $config["webp"] = false;
         }
 
         return $this->mediaService->image($path, $config, $filters);
@@ -143,7 +143,7 @@ final class MediaTwigExtension extends AbstractExtension
         $email = $context["email"] ?? null;
         if ($email instanceof WrappedTemplatedEmail) {
             $config["warmup"] = true;
-            $config["webp"]   = false;
+            $config["webp"] = false;
         }
 
         return $this->mediaService->crop($path, $x, $y, $width, $height, $position, $config, $filters);
@@ -153,18 +153,22 @@ final class MediaTwigExtension extends AbstractExtension
     {
         return $this->thumbnail($context, $path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]), $filters);
     }
+
     public function thumbnailOutbound(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($context, $path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]), $filters);
     }
+
     public function thumbnailNoclone(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($context, $path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]), $filters);
     }
+
     public function thumbnailUpscale(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($context, $path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]), $filters);
     }
+
     public function thumbnail(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         if (array_key_exists("warmup", $context)) {
@@ -174,7 +178,7 @@ final class MediaTwigExtension extends AbstractExtension
         $email = $context["email"] ?? null;
         if ($email instanceof WrappedTemplatedEmail) {
             $config["warmup"] = true;
-            $config["webp"]   = false;
+            $config["webp"] = false;
         }
 
         return $this->mediaService->thumbnail($path, $width, $height, $config, $filters);
@@ -182,29 +186,29 @@ final class MediaTwigExtension extends AbstractExtension
 
     public function urlify(LinkableInterface|string|null $urlOrPath, ?string $label = null, array $attributes = [])
     {
-        $url   = $urlOrPath;
+        $url = $urlOrPath;
         $label = $label ?? $urlOrPath;
         if ($urlOrPath instanceof LinkableInterface) {
-            $url   = $urlOrPath->__toLink();
+            $url = $urlOrPath->__toLink();
             $label = $label ?? $urlOrPath->__toString();
         }
 
         if ($this->router->getUrl() == $this->router->getAssetUrl($urlOrPath)) {
-            $attributes["class"] = trim(($attributes["class"] ?? "")." highlight");
+            $attributes["class"] = trim(($attributes["class"] ?? "") . " highlight");
         }
 
         if (!$url) {
             return "";
         }
 
-        return "<a href='".$url."' ".html_attributes($attributes).">".$label."</a>";
+        return "<a href='" . $url . "' " . html_attributes($attributes) . ">" . $label . "</a>";
     }
 
     public function linkify(mixed $urlOrPath)
     {
-        $url   = $urlOrPath;
+        $url = $urlOrPath;
         if ($urlOrPath instanceof LinkableInterface) {
-            $url   = $urlOrPath->__toLink();
+            $url = $urlOrPath->__toLink();
         }
 
         return is_object($url) ? null : (is_string($url) ? $url : null);
@@ -240,11 +244,11 @@ final class MediaTwigExtension extends AbstractExtension
         }
 
         if (!str_starts_with($src, "@")) {
-            $src = "@Public/".str_lstrip($src, [$this->projectDir."/public", "/"]);
+            $src = "@Public/" . str_lstrip($src, [$this->projectDir . "/public", "/"]);
         }
 
         $path = $src;
-        $url  = explode("/", $src);
+        $url = explode("/", $src);
         try {
 
             $path = $twig->getLoader()->getSourceContext($src)->getPath();
@@ -262,7 +266,7 @@ final class MediaTwigExtension extends AbstractExtension
 
         return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : str_lstrip($path, [
             $prefix,
-            $this->projectDir."/public",
+            $this->projectDir . "/public",
             $this->projectDir
         ]);
     }

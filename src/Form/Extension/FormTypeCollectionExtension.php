@@ -19,17 +19,18 @@ class FormTypeCollectionExtension extends AbstractTypeExtension
     /**
      * @var BaseService
      */
-    protected $baseService;
+    protected BaseService $baseService;
 
     /**
      * @var FormFactory
      */
-    protected $formFactory;
+    protected FormFactory $formFactory;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
+
     public function __construct(BaseService $baseService, FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->baseService = $baseService;

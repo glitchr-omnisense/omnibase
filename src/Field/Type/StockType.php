@@ -4,6 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
@@ -72,7 +73,7 @@ class StockType extends NumberType
         $targetPath = $targetPath ? explode(".", $targetPath) : null;
         foreach ($targetPath ?? [] as $path) {
             if (!$target->has($path)) {
-                throw new \Exception("Child form \"$path\" related to view data \"".get_class($target->getViewData())."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
+                throw new Exception("Child form \"$path\" related to view data \"".get_class($target->getViewData())."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
             }
 
             $target = $target->get($path);

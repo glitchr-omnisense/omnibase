@@ -26,14 +26,14 @@ use function is_file;
  */
 class Associate extends AbstractAnnotation
 {
-    public $metadata;
+    public mixed $metadata;
 
     public function __construct(array $data = [])
     {
         $this->metadata = $data["metadata"] ?? [];
     }
 
-    public function supports(string $target, ?string $targetValue = null, $classMetadata = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
@@ -42,10 +42,12 @@ class Associate extends AbstractAnnotation
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
     }
+
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
     }
+
     public function preLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -64,10 +66,10 @@ class Associate extends AbstractAnnotation
         }
 
         if ($metadata) {
-            $reference = class_exists($this->metadata) ? $this->metadata : $metadata?->name;
+            $reference = class_exists($this->metadata) ? $this->metadata : $metadata->name;
             if ($metadata->name == $reference) {
                 if (is_array($value)) {
-                    $value = array_map(fn ($v) => is_object($v) ? $v->getId() : $v, $value);
+                    $value = array_map(fn($v) => is_object($v) ? $v->getId() : $v, $value);
                 } else {
                     $value = is_object($value) ? $value->getId() : $value;
                 }
@@ -84,14 +86,17 @@ class Associate extends AbstractAnnotation
     {
         $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
+
     public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
+
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
+
     public function postLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -113,7 +118,7 @@ class Associate extends AbstractAnnotation
 
         try {
             $value = is_array($value) ? $repository->cacheBy(["id" => $value])->getResult() : $repository->cacheOneBy(["id" => $value]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         $propertyAccessor->setValue($entity, $property, $value);

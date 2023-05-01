@@ -13,6 +13,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\SortOrder;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
+use InvalidArgumentException;
+use RuntimeException;
+use function gettype;
+use function in_array;
+use function is_string;
 
 final class CrudWidgetItem implements MenuItemInterface
 {
@@ -69,12 +74,12 @@ final class CrudWidgetItem implements MenuItemInterface
     {
         $sortFieldsAndOrder = array_map('mb_strtoupper', $sortFieldsAndOrder);
         foreach ($sortFieldsAndOrder as $sortField => $sortOrder) {
-            if (!\in_array($sortOrder, [SortOrder::ASC, SortOrder::DESC])) {
-                throw new \InvalidArgumentException(sprintf('The sort order can be only "ASC" or "DESC", "%s" given.', $sortOrder));
+            if (!in_array($sortOrder, [SortOrder::ASC, SortOrder::DESC])) {
+                throw new InvalidArgumentException(sprintf('The sort order can be only "ASC" or "DESC", "%s" given.', $sortOrder));
             }
 
-            if (!\is_string($sortField)) {
-                throw new \InvalidArgumentException(sprintf('The keys of the array that defines the default sort must be strings with the field names, but the given "%s" value is a "%s".', $sortField, \gettype($sortField)));
+            if (!is_string($sortField)) {
+                throw new InvalidArgumentException(sprintf('The keys of the array that defines the default sort must be strings with the field names, but the given "%s" value is a "%s".', $sortField, gettype($sortField)));
             }
         }
 
@@ -102,17 +107,17 @@ final class CrudWidgetItem implements MenuItemInterface
             $entityFqcn = $routeParameters[EA::ENTITY_FQCN] ?? null;
             $crudControllerFqcn = $routeParameters[EA::CRUD_CONTROLLER_FQCN] ?? null;
             if (null === $entityFqcn && null === $crudControllerFqcn) {
-                throw new \RuntimeException(sprintf('The CRUD menuitem with label "%s" must define either the entity FQCN (using the third constructor argument) or the CRUD Controller FQCN (using the "setController()" method).', $itemDto->getLabel()));
+                throw new RuntimeException(sprintf('The CRUD menuitem with label "%s" must define either the entity FQCN (using the third constructor argument) or the CRUD Controller FQCN (using the "setController()" method).', $itemDto->getLabel()));
             }
 
             // 1. if CRUD controller is defined, use it...
             if (null !== $crudControllerFqcn) {
                 WidgetItem::$adminUrlGenerator->setController($crudControllerFqcn);
-            // 2. ...otherwise, find the CRUD controller from the entityFqcn
+                // 2. ...otherwise, find the CRUD controller from the entityFqcn
             } else {
                 $crudControllers = WidgetItem::$adminContextProvider->getContext()->getCrudControllers();
                 if (null === $controllerFqcn = AbstractCrudController::getCrudControllerFqcn($entityFqcn)) {
-                    throw new \RuntimeException(sprintf('Unable to find the controller related to the "%s" Entity; did you forget to extend "%s"?', $entityFqcn, AbstractCrudController::class));
+                    throw new RuntimeException(sprintf('Unable to find the controller related to the "%s" Entity; did you forget to extend "%s"?', $entityFqcn, AbstractCrudController::class));
                 }
 
                 WidgetItem::$adminUrlGenerator->setController($controllerFqcn);

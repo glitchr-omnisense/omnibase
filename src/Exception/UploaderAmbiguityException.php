@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class UploaderAmbiguityException extends \Exception
+use Exception;
+
+class UploaderAmbiguityException extends Exception
 {
     /**
      * {@inheritdoc}

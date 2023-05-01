@@ -7,6 +7,7 @@ use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\Annotation\IsGranted;
 use Base\Annotations\Annotation\Sitemap;
 use Base\Entity\User\Notification;
+use Base\Notifier\NotifierInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,11 +24,11 @@ use Symfony\Component\HttpFoundation\Request;
 class ProfilerController extends AbstractController
 {
     /**
-     * @var Notifier
+     * @var NotifierInterface
      * */
-    protected $notifier;
+    protected NotifierInterface $notifier;
 
-    public function __construct(Notifier $notifier)
+    public function __construct(NotifierInterface $notifier)
     {
         $this->notifier = $notifier;
     }

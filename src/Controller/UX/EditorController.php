@@ -6,6 +6,7 @@ use Base\Service\FlysystemInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,46 +21,46 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * */
 class EditorController extends AbstractController
 {
-    public const STATUS_OK      = 1;
-    public const STATUS_BAD     = 0;
+    public const STATUS_OK = 1;
+    public const STATUS_BAD = 0;
     public const STATUS_NOTOKEN = -1;
 
     /**
      * @var ObfuscatorInterface
      */
-    protected $obfuscator;
+    protected ObfuscatorInterface $obfuscator;
 
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
-     * @var \Symfony\Component\Filesystem\Filesystem
+     * @var Filesystem
      */
-    protected $filesystem;
+    protected Filesystem $filesystem;
 
     /**
      * @var FlysystemInterface
      */
-    protected $flysystem;
+    protected FlysystemInterface $flysystem;
 
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var MimeTypes
      */
-    protected $mimeTypes;
+    protected MimeTypes $mimeTypes;
 
     public function __construct(ParameterBagInterface $parameterBag, FlysystemInterface $flysystem, TranslatorInterface $translator, ObfuscatorInterface $obfuscator)
     {
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;
 
-        $this->flysystem  = $flysystem;
+        $this->flysystem = $flysystem;
         $this->parameterBag = $parameterBag;
 
         $this->mimeTypes = new MimeTypes();
@@ -81,8 +82,9 @@ class EditorController extends AbstractController
             return new Response($this->translator->trans("fileupload.error.no_file", [], "fields"), 500);
         }
 
-        switch($file->getError()) {
-            case UPLOAD_ERR_OK: break;
+        switch ($file->getError()) {
+            case UPLOAD_ERR_OK:
+                break;
             case UPLOAD_ERR_INI_SIZE:
             case UPLOAD_ERR_FORM_SIZE:
                 return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
@@ -100,7 +102,7 @@ class EditorController extends AbstractController
                 return new Response("Unknown error during upload.", 500);
         }
 
-        if (array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6*$config["maxFilesize"]) {
+        if (array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6 * $config["maxFilesize"]) {
             return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
         }
 
@@ -108,7 +110,7 @@ class EditorController extends AbstractController
         $mimeType = mime_content_type2($file->getPathname());
 
         $fileExtension = $mimeType ? $this->mimeTypes->getExtensions($mimeType)[0] ?? null : null;
-        $filePath = "/".$fileUuid.($fileExtension ? ".".$fileExtension : "");
+        $filePath = "/" . $fileUuid . ($fileExtension ? "." . $fileExtension : "");
 
         $operator = $this->parameterBag->get("base.twig.editor.operator");
         if (!file_exists($file->getPathname())) {
@@ -151,8 +153,9 @@ class EditorController extends AbstractController
             return new Response($this->translator->trans("fileupload.error.no_file", [], "fields"), 500);
         }
 
-        switch($file->getError()) {
-            case UPLOAD_ERR_OK: break;
+        switch ($file->getError()) {
+            case UPLOAD_ERR_OK:
+                break;
             case UPLOAD_ERR_INI_SIZE:
             case UPLOAD_ERR_FORM_SIZE:
                 return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
@@ -170,7 +173,7 @@ class EditorController extends AbstractController
                 return new Response("Unknown error during upload.", 500);
         }
 
-        if (array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6*$config["maxFilesize"]) {
+        if (array_key_exists("maxFilesize", $config) && $file->getSize() > 1e6 * $config["maxFilesize"]) {
             return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
         }
 
@@ -178,7 +181,7 @@ class EditorController extends AbstractController
         $mimeType = mime_content_type2($file->getPathname());
 
         $fileExtension = $mimeType ? $this->mimeTypes->getExtensions($mimeType)[0] ?? null : null;
-        $filePath = "/".$fileUuid.($fileExtension ? ".".$fileExtension : "");
+        $filePath = "/" . $fileUuid . ($fileExtension ? "." . $fileExtension : "");
 
         $operator = $this->parameterBag->get("base.twig.editor.operator");
         if (!file_exists($file->getPathname())) {

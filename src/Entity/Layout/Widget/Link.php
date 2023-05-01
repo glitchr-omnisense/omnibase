@@ -18,13 +18,13 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
-
 class Link extends Widget implements IconizeInterface, LinkableInterface
 {
     public function __iconize(): ?array
     {
         return $this->getHyperlink()->__iconize();
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-share-square"];
@@ -55,10 +55,12 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $hyperlink;
+
     public function getHyperlink(): ?Hyperlink
     {
         return $this->hyperlink;
     }
+
     public function setHyperlink(Hyperlink $hyperlink)
     {
         $this->hyperlink = $hyperlink;

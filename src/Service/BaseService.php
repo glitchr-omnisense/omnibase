@@ -2,6 +2,8 @@
 
 namespace Base\Service;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Routing\Route;
 use App\Entity\User;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
@@ -9,7 +11,6 @@ use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\RouterInterface;
 use Base\Traits\BaseTrait;
 
-use Base\Service\ParameterBagInterface;
 use Symfony\Component\Form\FormInterface;
 
 use Symfony\Component\Form\FormFactoryInterface;
@@ -28,7 +29,9 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-use Twig\Environment; //https://symfony.com/doc/current/templating/twig_extension.html
+use Twig\Environment;
+
+//https://symfony.com/doc/current/templating/twig_extension.html
 use Twig\Extension\RuntimeExtensionInterface;
 
 use Symfony\Component\Notifier\NotifierInterface;
@@ -52,6 +55,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
+use function is_object;
 
 class BaseService implements RuntimeExtensionInterface
 {
@@ -61,87 +65,90 @@ class BaseService implements RuntimeExtensionInterface
     /**
      * @var KernelInterface
      */
-    private $kernel;
+    private KernelInterface $kernel;
 
     /**
      * @var AdminContextProvider
      */
-    protected $adminContextProvider;
+    protected AdminContextProvider $adminContextProvider;
 
     /**
      * @var AuthorizationCheckerInterface
      */
-    protected $authorizationChecker;
+    protected AuthorizationCheckerInterface $authorizationChecker;
 
     /**
      * @var CsrfTokenManagerInterface
      */
-    protected $csrfTokenManager;
+    protected CsrfTokenManagerInterface $csrfTokenManager;
 
     /**
      * @var AdminUrlGenerator
      */
-    protected $adminUrlGenerator;
+    protected AdminUrlGenerator $adminUrlGenerator;
 
     /**
-     * @var FormFactory
+     * @var FormFactoryInterface
      */
     protected $formFactory;
 
     /**
-     * @var Container
+     * @var ContainerInterface
      */
-    protected $container;
+    protected ContainerInterface $container;
+
     public function getContainer($name)
     {
         return ($name ? $this->container->get($name) : $this->container);
     }
+
     public function getAvailableServices(): array
     {
         if (!isset($this->container)) {
-            throw new \Exception("Symfony container not found in BaseService. Did you overloaded self::__construct ?");
+            throw new Exception("Symfony container not found in BaseService. Did you overloaded self::__construct ?");
         }
 
         return $this->container->getServiceIds();
     }
 
     public function __construct(
-        KernelInterface $kernel,
-        RequestStack $requestStack,
-        FirewallMapInterface $firewallMap,
-        Environment $twig,
-        SluggerInterface $slugger,
-        ManagerRegistry $doctrine,
+        KernelInterface               $kernel,
+        RequestStack                  $requestStack,
+        FirewallMapInterface          $firewallMap,
+        Environment                   $twig,
+        SluggerInterface              $slugger,
+        ManagerRegistry               $doctrine,
         AuthorizationCheckerInterface $authorizationChecker,
-        TokenStorageInterface $tokenStorage,
-        CsrfTokenManagerInterface $csrfTokenManager,
-        ParameterBagInterface $parameterBag,
-        NotifierInterface $notifier,
-        FormFactoryInterface $formFactory,
-        LocalizerInterface $localizer,
-        TradingMarketInterface $tradingMarket,
-        Obfuscator $obfuscator,
-        SettingBag $settingBag,
-        MediaService $mediaService,
-        IconProvider $iconProvider,
-        TranslatorInterface $translator,
-        RouterInterface $router,
-        EntityHydratorInterface $entityHydrator,
-        ClassMetadataManipulator $classMetadataManipulator,
-        AdminUrlGenerator $adminUrlGenerator
-    ) {
+        TokenStorageInterface         $tokenStorage,
+        CsrfTokenManagerInterface     $csrfTokenManager,
+        ParameterBagInterface         $parameterBag,
+        NotifierInterface             $notifier,
+        FormFactoryInterface          $formFactory,
+        LocalizerInterface            $localizer,
+        TradingMarketInterface        $tradingMarket,
+        Obfuscator                    $obfuscator,
+        SettingBag                    $settingBag,
+        MediaService                  $mediaService,
+        IconProvider                  $iconProvider,
+        TranslatorInterface           $translator,
+        RouterInterface               $router,
+        EntityHydratorInterface       $entityHydrator,
+        ClassMetadataManipulator      $classMetadataManipulator,
+        AdminUrlGenerator             $adminUrlGenerator
+    )
+    {
         $this->setInstance($this);
         $this->startTime($kernel->getStartTime());
 
         // Kernel and additional stopwatch
-        $this->kernel       = $kernel;
-        $this->container    = $kernel->getContainer();
+        $this->kernel = $kernel;
+        $this->container = $kernel->getContainer();
         $this->setProjectDir($kernel->getProjectDir());
         $this->setEnvironment($kernel->getEnvironment());
 
         $this->authorizationChecker = $authorizationChecker;
-        $this->csrfTokenManager     = $csrfTokenManager;
-        $this->formFactory          = $formFactory;
+        $this->csrfTokenManager = $csrfTokenManager;
+        $this->formFactory = $formFactory;
 
         // Additional common containers
         $this->setClassMetadataManipulator($classMetadataManipulator);
@@ -173,28 +180,31 @@ class BaseService implements RuntimeExtensionInterface
     {
         return $this->getRouter()->getRouteIndex();
     }
+
     public function getSite()
     {
         return [
-            "title"  => $this->getSettingBag()->getScalar("base.settings.title"),
+            "title" => $this->getSettingBag()->getScalar("base.settings.title"),
             "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan"),
-            "logo"   => $this->getSettingBag()->getScalar("base.settings.logo")
+            "logo" => $this->getSettingBag()->getScalar("base.settings.logo")
         ];
     }
+
     public function getBackoffice()
     {
         return [
-            "title"  => $this->getSettingBag()->getScalar("base.settings.title.backoffice"),
+            "title" => $this->getSettingBag()->getScalar("base.settings.title.backoffice"),
             "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.backoffice"),
-            "logo"   => $this->getSettingBag()->getScalar("base.settings.logo.backoffice")
+            "logo" => $this->getSettingBag()->getScalar("base.settings.logo.backoffice")
         ];
     }
+
     public function getEmail()
     {
         return [
-            "title"   => $this->getSettingBag()->getScalar("base.settings.title.email") ?? $this->getSettingBag()->getScalar("base.settings.title"),
-            "slogan"  => $this->getSettingBag()->getScalar("base.settings.slogan.email") ?? $this->getSettingBag()->getScalar("base.settings.slogan"),
-            "logo"    => $this->getSettingBag()->getScalar("base.settings.logo.email") ?? $this->getSettingBag()->getScalar("base.settings.logo"),
+            "title" => $this->getSettingBag()->getScalar("base.settings.title.email") ?? $this->getSettingBag()->getScalar("base.settings.title"),
+            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.email") ?? $this->getSettingBag()->getScalar("base.settings.slogan"),
+            "logo" => $this->getSettingBag()->getScalar("base.settings.logo.email") ?? $this->getSettingBag()->getScalar("base.settings.logo"),
             "address" => $this->getSettingBag()->getScalar("base.settings.mail.contact")
         ];
     }
@@ -242,12 +252,14 @@ class BaseService implements RuntimeExtensionInterface
      * Symfony kernel container related methods
      *
      */
-    protected $startTime = 0;
+    protected float $startTime = 0;
+
     public function getExecutionTime(): float
     {
         return round(microtime(true) - $this->startTime, 2);
     }
-    public function startTime($startTime = null)
+
+    public function startTime(?float $startTime = null)
     {
         $this->startTime = $startTime;
         if (!$this->startTime || is_infinite($this->startTime)) {
@@ -259,22 +271,27 @@ class BaseService implements RuntimeExtensionInterface
     {
         return isset($_GET);
     }
+
     public function hasPost()
     {
         return isset($_POST);
     }
+
     public function hasSession()
     {
         return isset($_SESSION);
     }
+
     public function addSession($name, $value)
     {
         $this->getSession()->set($name, $value);
     }
+
     public function removeSession($name)
     {
         return ($this->getRequestStack() && $this->getRequestStack()->getSession()->has($name)) ? $this->getRequestStack()->getSession()->remove($name) : null;
     }
+
     public function getSession($name = null)
     {
         if (!$name) {
@@ -297,14 +314,17 @@ class BaseService implements RuntimeExtensionInterface
     {
         return $this->getSecret();
     }
+
     public function getSecret()
     {
         return $this->getParameterBag("kernel.secret");
     }
+
     public function getProfiler(): ?Profiler
     {
         return $this->kernel->getContainer()->get('profiler');
     }
+
     public function getProfile($response = null)
     {
         if (!$response) {
@@ -317,13 +337,15 @@ class BaseService implements RuntimeExtensionInterface
     {
         return $this->kernel->getContainer()->getParameter($name);
     }
+
     public function hasParameter(string $name): bool
     {
         return $this->kernel->getContainer()->hasParameter($name);
     }
+
     public function setParameter(string $name, array|bool|string|int|float|null $value)
     {
-        return $this->kernel->getContainer()->setParameter($name, $value);
+        $this->kernel->getContainer()->setParameter($name, $value);
     }
 
     public function getAsset(string $url): string
@@ -335,23 +357,27 @@ class BaseService implements RuntimeExtensionInterface
     {
         return $this->getRouter()->getRequest();
     }
+
     public function getCurrentRequest(): ?Request
     {
         return $this->getRequest();
     }
 
-    public function getRoute(?string $url): ?string
+    public function getRoute(?string $url): ?Route
     {
         return $this->getRouter()->getRoute($url);
     }
-    public function getCurrentRoute(): ?string
+
+    public function getCurrentRoute(): ?Route
     {
         return $this->getRouter()->getRoute();
     }
+
     public function getRouteName(?string $url): ?string
     {
         return $this->getRouter()->getRouteName($url);
     }
+
     public function getCurrentRouteName(): ?string
     {
         return $this->getRouter()->getRouteName();
@@ -377,8 +403,8 @@ class BaseService implements RuntimeExtensionInterface
         $event = null;
         if (array_key_exists("event", $headers)) {
             $event = $headers["event"];
-            if (! ($event instanceof Event)) {
-                throw new InvalidArgumentException("header variable \"event\" must be ".Event::class.", currently: ".(is_object($event) ? get_class($event) : gettype($event)));
+            if (!($event instanceof Event)) {
+                throw new InvalidArgumentException("header variable \"event\" must be " . Event::class . ", currently: " . (is_object($event) ? get_class($event) : gettype($event)));
             }
             unset($headers["event"]);
         }
@@ -387,7 +413,7 @@ class BaseService implements RuntimeExtensionInterface
         if (array_key_exists("exceptions", $headers)) {
             $exceptions = $headers["exceptions"];
             if (!is_string($exceptions) && !is_array($exceptions)) {
-                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", currently: ".(is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
+                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", currently: " . (is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
             }
             unset($headers["exceptions"]);
         }
@@ -396,13 +422,13 @@ class BaseService implements RuntimeExtensionInterface
         if (array_key_exists("callback", $headers)) {
             $callback = $headers["callback"];
             if (!is_callable($callback)) {
-                throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
+                throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: " . (is_object($callback) ? get_class($callback) : gettype($callback)));
             }
 
             unset($headers["callback"]);
         }
 
-        $url   = $this->getRouter()->generate($routeName, $routeParameters) ?? $routeName;
+        $url = $this->getRouter()->generate($routeName, $routeParameters) ?? $routeName;
         $routeName = $this->getRouteName($url);
         if (!$routeName) {
             throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
@@ -435,9 +461,9 @@ class BaseService implements RuntimeExtensionInterface
 
     public function isDevelopment()
     {
-        return  $this->isDebug() ||
-        $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_") ||
-        $this->kernel->getEnvironment() == "local" || str_starts_with($this->kernel->getEnvironment(), "local_");
+        return $this->isDebug() ||
+            $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_") ||
+            $this->kernel->getEnvironment() == "local" || str_starts_with($this->kernel->getEnvironment(), "local_");
     }
 
     public function isProduction()
@@ -449,19 +475,23 @@ class BaseService implements RuntimeExtensionInterface
     {
         return is_cli();
     }
+
     public function isDebug()
     {
         return $this->kernel->isDebug();
     }
+
     public function isEasyAdmin()
     {
         return $this->getRouter()->isEasyAdmin();
     }
+
     public function isProfiler()
     {
         return $this->getRouter()->isProfiler();
     }
-    public function isEntity($entityOrClassOrMetadata): bool
+
+    public function isEntity(mixed $entityOrClassOrMetadata): bool
     {
         return $this->getClassMetadataManipulator()->isEntity($entityOrClassOrMetadata);
     }
@@ -529,7 +559,7 @@ class BaseService implements RuntimeExtensionInterface
         }
 
         $user = $token->getUser();
-        if (!\is_object($user)) {
+        if (!is_object($user)) {
             return null;
         }
 
@@ -548,17 +578,6 @@ class BaseService implements RuntimeExtensionInterface
 
         return $this->authorizationChecker->isGranted($attribute, $subject);
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
     /**
@@ -598,14 +617,15 @@ class BaseService implements RuntimeExtensionInterface
                 $originalEntityData[$field] = $data[0];
             }
         } elseif ($inDoctrineStack === true && $this->inDoctrineStack()) {
-            throw new \Exception("Achtung ! You are trying to access data object within a Doctrine method..".
-                                "Original entity might have already been updated.");
+            throw new Exception("Achtung ! You are trying to access data object within a Doctrine method.." .
+                "Original entity might have already been updated.");
         }
 
         return $originalEntityData;
     }
 
     protected static $entitySerializer = null;
+
     public function getOriginalEntity($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
         if (!self::$entitySerializer) {
@@ -620,8 +640,6 @@ class BaseService implements RuntimeExtensionInterface
             $entity = $eventOrEntity->getObject();
         }
 
-        $oldEntity = $this->entityHydrator->hydrate($entity, $data);
-
-        return $oldEntity;
+        return $this->entityHydrator->hydrate($entity, $data);
     }
 }

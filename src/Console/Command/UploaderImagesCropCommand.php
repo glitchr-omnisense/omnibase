@@ -19,12 +19,13 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
-#[AsCommand(name:'uploader:images:crop', aliases:[], description:'')]
+#[AsCommand(name: 'uploader:images:crop', aliases: [], description: '')]
 class UploaderImagesCropCommand extends UploaderImagesCommand
 {
     protected $input;
     protected $output;
     protected $maxDefinition;
+
     protected function configure(): void
     {
         $this->addOption('normalize', false, InputOption::VALUE_NONE, 'Do you want to update coordinate system ?');
@@ -34,13 +35,13 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->normalize     ??= $input->getOption('normalize');
+        $this->normalize ??= $input->getOption('normalize');
 
         $this->maxDefinition ??= $input->getOption('max-definition');
         if ($this->normalize) {
             if ($this->maxDefinition == null) {
                 $helper = $this->getHelper('question');
-                $definitions = BaseBundle::getInstance()->getAllClasses(BaseBundle::getInstance()->getBundleLocation()."/Imagine/Filter/Basic/Definition");
+                $definitions = BaseBundle::getInstance()->getAllClasses(BaseBundle::getInstance()->getBundleLocation() . "/Imagine/Filter/Basic/Definition");
                 $question = new ChoiceQuestion('Please select a resolution class to be used for renormalization.', $definitions, false);
 
                 $definition = $helper->ask($input, $output, $question);
@@ -52,22 +53,22 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             }
         }
 
-        $this->entityName  ??= str_strip($input->getOption('entity') ?? Image::class, ["App\\Entity\\", "Base\\Entity\\"]);
-        $this->appEntities ??= "App\\Entity\\".$this->entityName;
+        $this->entityName ??= str_strip($input->getOption('entity') ?? Image::class, ["App\\Entity\\", "Base\\Entity\\"]);
+        $this->appEntities ??= "App\\Entity\\" . $this->entityName;
         if (!is_instanceof($this->appEntities, Image::class)) {
             $this->appEntities = null;
 
-            $msg = ' [ERR] Entity must inherit from "'.Image::class.'"';
+            $msg = ' [ERR] Entity must inherit from "' . Image::class . '"';
             $output->writeln('');
-            $output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
+            $output->writeln('<warning,bkg>' . str_blankspace(strlen($msg)));
             $output->writeln($msg);
-            $output->writeln(str_blankspace(strlen($msg)).'</warning,bkg>');
+            $output->writeln(str_blankspace(strlen($msg)) . '</warning,bkg>');
             $output->writeln('');
 
             return Command::FAILURE;
         }
 
-        $this->baseEntities ??= "Base\\Entity\\".$this->entityName;
+        $this->baseEntities ??= "Base\\Entity\\" . $this->entityName;
         if (!is_instanceof($this->baseEntities, Image::class)) {
             $this->baseEntities = null;
         }
@@ -76,7 +77,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         $this->imageCropRepository = $this->entityManager->getRepository(ImageCrop::class);
 
         if ($this->normalize) {
-            $output->section()->writeln("\n <info>Looking for \"".ImageCrop::class."\"</info> to normalize..");
+            $output->section()->writeln("\n <info>Looking for \"" . ImageCrop::class . "\"</info> to normalize..");
 
             $imageCrops = $this->imageCropRepository->findAll();
             $nNormalizable = 0;
@@ -91,16 +92,16 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             $nTotalCrops = count($imageCrops);
 
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion(' You are about to normalize '.$nNormalizable.' element(s) using '.class_basename(get_class($this->maxDefinition)).', do you want to continue? [y/n] ', false);
+            $question = new ConfirmationQuestion(' You are about to normalize ' . $nNormalizable . ' element(s) using ' . class_basename(get_class($this->maxDefinition)) . ', do you want to continue? [y/n] ', false);
             if (!$helper->ask($input, $output, $question)) {
                 return Command::FAILURE;
             }
 
             foreach ($imageCrops as $imageCrop) {
-                $output->section()->writeln("             <warning>* Image #".$imageCrop->getImage()->getId()." \"".$imageCrop->getLabel()."\" .. (".($iProcess+1)."/".$nTotalCrops.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
+                $output->section()->writeln("             <warning>* Image #" . $imageCrop->getImage()->getId() . " \"" . $imageCrop->getLabel() . "\" .. (" . ($iProcess + 1) . "/" . $nTotalCrops . ")</warning>", OutputInterface::VERBOSITY_VERBOSE);
 
                 if (!$imageCrop->isNormalized()) {
-                    $naturalWidth  = $imageCrop->getNaturalWidth();
+                    $naturalWidth = $imageCrop->getNaturalWidth();
                     $naturalHeight = $imageCrop->getNaturalHeight();
 
                     $box = new Box($imageCrop->getNaturalWidth(), $imageCrop->getNaturalHeight());
@@ -110,13 +111,13 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                     $naturalHeight = $box->getHeight();
 
                     $x = $imageCrop->getX();
-                    $imageCrop->setX0($x/$naturalWidth);
+                    $imageCrop->setX0($x / $naturalWidth);
                     $y = $imageCrop->getY();
-                    $imageCrop->setY0($y/$naturalHeight);
-                    $width  = $imageCrop->getWidth();
-                    $imageCrop->setWidth0($width/$naturalWidth);
+                    $imageCrop->setY0($y / $naturalHeight);
+                    $width = $imageCrop->getWidth();
+                    $imageCrop->setWidth0($width / $naturalWidth);
                     $height = $imageCrop->getHeight();
-                    $imageCrop->setHeight0($height/$naturalHeight);
+                    $imageCrop->setHeight0($height / $naturalHeight);
 
                     $this->entityManager->flush($imageCrop);
                     $iProcessAndNormalized++;
@@ -127,16 +128,16 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             if ($iProcessAndNormalized) {
                 $output->section()->writeln("");
                 $msg = ' [OK] Nothing to update - image crops are already in sync & normalized. ';
-                $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+                $output->writeln('<info,bkg>' . str_blankspace(strlen($msg)));
                 $output->writeln($msg);
-                $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+                $output->writeln(str_blankspace(strlen($msg)) . '</info,bkg>');
                 $output->section()->writeln("");
             } else {
-                $msg = ' [OK] '.$nTotalCrops.' image crops found: '.$iProcess.' crop(s) processed ; '.$iProcessAndNormalized.' crop(s) renormalized !';
+                $msg = ' [OK] ' . $nTotalCrops . ' image crops found: ' . $iProcess . ' crop(s) processed ; ' . $iProcessAndNormalized . ' crop(s) renormalized !';
                 $output->writeln('');
-                $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+                $output->writeln('<info,bkg>' . str_blankspace(strlen($msg)));
                 $output->writeln($msg);
-                $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+                $output->writeln(str_blankspace(strlen($msg)) . '</info,bkg>');
                 $output->writeln('');
             }
         }
@@ -161,32 +162,32 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 if ($this->ibatch >= $this->batch && $this->batch > 0) {
                     $msg = ' [WARN] Batch limit reached out - Set the `--batch` limit higher, if you wish. ';
                     $this->output->writeln('');
-                    $this->output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
+                    $this->output->writeln('<warning,bkg>' . str_blankspace(strlen($msg)));
                     $this->output->writeln($msg);
-                    $this->output->writeln(str_blankspace(strlen($msg)).'</warning,bkg>');
+                    $this->output->writeln(str_blankspace(strlen($msg)) . '</warning,bkg>');
                     $this->output->writeln('');
 
                     return Command::FAILURE;
                 }
 
-                $publicDir  = $annotation->getFlysystem()->getPublic("", $annotation->storage());
+                $publicDir = $annotation->getFlysystem()->getPublic("", $annotation->storage());
 
                 $file = $image->getSource();
                 if ($file === null) {
-                    $this->output->section()->writeln("\t           <warning>* Image #".$image->getId()." missing.</warning>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("\t           <warning>* Image #" . $image->getId() . " missing.</warning>", OutputInterface::VERBOSITY_VERBOSE);
                     continue;
                 }
 
                 $extensions = $this->mediaService->getExtensions($file);
-                $extension  = first($extensions);
+                $extension = first($extensions);
 
                 $dataWebp = $this->mediaService->imagine($file, [], ["webp" => true, "local_cache" => true]);
-                $data     = $this->mediaService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
+                $data = $this->mediaService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
                 if ($this->isCached($data)) {
-                    $this->output->section()->writeln("             <warning>* Already cached main image \".".str_lstrip(realpath($file), realpath($publicDir))."\" .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("             <warning>* Already cached main image \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\" .. (" . ($i + 1) . "/" . $N . ")</warning>", OutputInterface::VERBOSITY_VERBOSE);
                 } else {
-                    $this->output->section()->writeln("             <ln>* Warming up main image \".".str_lstrip(realpath($file), realpath($publicDir))."\" .. (".($i+1)."/".$N.")</ln>", OutputInterface::VERBOSITY_VERBOSE);
-                    $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
+                    $this->output->section()->writeln("             <ln>* Warming up main image \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\" .. (" . ($i + 1) . "/" . $N . ")</ln>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
 
                     if ($this->cache) {
                         $this->mediaController->ImageWebp($dataWebp);
@@ -199,11 +200,11 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 }
 
                 foreach ($imageCrops as $imageCrop) {
-                    $identifier = $imageCrop->getSlug() ?? $imageCrop->getWidth()."x".$imageCrop->getHeight();
+                    $identifier = $imageCrop->getSlug() ?? $imageCrop->getWidth() . "x" . $imageCrop->getHeight();
                     if ($this->isCached($data, $imageCrop)) {
-                        $this->output->section()->writeln("             <warning>  Already cached \"".str_lstrip($file, $publicDir)."\" (".$identifier.") .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
+                        $this->output->section()->writeln("             <warning>  Already cached \"" . str_lstrip($file, $publicDir) . "\" (" . $identifier . ") .. (" . ($i + 1) . "/" . $N . ")</warning>", OutputInterface::VERBOSITY_VERBOSE);
                     } else {
-                        $this->output->section()->writeln("             <ln>  Warming up \"".str_lstrip($file, $publicDir)."\" (".$identifier.") .. (".($i+1)."/".$N.")</ln>", OutputInterface::VERBOSITY_VERBOSE);
+                        $this->output->section()->writeln("             <ln>  Warming up \"" . str_lstrip($file, $publicDir) . "\" (" . $identifier . ") .. (" . ($i + 1) . "/" . $N . ")</ln>", OutputInterface::VERBOSITY_VERBOSE);
                         $this->ibatch++;
 
                         if ($this->cache) {
@@ -214,7 +215,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                         }
                     }
 
-                    $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ".$identifier, OutputInterface::VERBOSITY_DEBUG);
+                    $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); " . $identifier, OutputInterface::VERBOSITY_DEBUG);
                 }
             }
         }
@@ -237,7 +238,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
         $filters = $args["filters"] ?? [];
         $options = $args["options"] ?? [];
-        $path    = $args["path"] ?? null;
+        $path = $args["path"] ?? null;
         if ($path == null) {
             return false;
         }
@@ -257,14 +258,12 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         // Apply filter
         // NB: Only applying cropping if ImageCrop is found ..
         //     .. otherwise some naughty users might be generating infinite amount of image
-        if ($imageCrop) {
-            array_prepend($filters, new CropFilter(
-                $imageCrop->getX0(),
-                $imageCrop->getY0(),
-                $imageCrop->getWidth0(),
-                $imageCrop->getHeight0()
-            ));
-        }
+        array_prepend($filters, new CropFilter(
+            $imageCrop->getX0(),
+            $imageCrop->getY0(),
+            $imageCrop->getWidth0(),
+            $imageCrop->getHeight0()
+        ));
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;

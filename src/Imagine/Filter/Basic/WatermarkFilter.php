@@ -7,6 +7,7 @@ use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
+use InvalidArgumentException;
 
 class WatermarkFilter implements FilterInterface
 {
@@ -17,8 +18,8 @@ class WatermarkFilter implements FilterInterface
 
     public function __toString()
     {
-        $md5sum = md5(serialize($this->watermark).serialize($this->options));
-        return mod($this->angle, 360) ? "wmk:".$md5sum : "";
+        $md5sum = md5(serialize($this->watermark) . serialize($this->options));
+        return mod($this->angle, 360) ? "wmk:" . $md5sum : "";
     }
 
     public function __construct(ImagineInterface $imagine, ImageInterface $watermark, array $options = [])
@@ -26,7 +27,7 @@ class WatermarkFilter implements FilterInterface
         $this->imagine = $imagine;
 
         $this->watermark = $watermark;
-        $this->options   = $options;
+        $this->options = $options;
     }
 
     public function apply(ImageInterface $image): ImageInterface
@@ -36,7 +37,7 @@ class WatermarkFilter implements FilterInterface
             'position' => 'center',
         ];
 
-        if ($this->options['size'] === null || '%' === substr($this->options['size'], -1)) {
+        if ($this->options['size'] === null || str_ends_with($this->options['size'], '%')) {
             $this->options['size'] = substr($this->options['size'], 0, -1) / 100;
         }
 
@@ -108,7 +109,7 @@ class WatermarkFilter implements FilterInterface
                 $y = $size->getHeight() - $this->watermarkSize->getHeight();
                 break;
             default:
-                throw new \InvalidArgumentException("Unexpected position '{$this->options['position']}'");
+                throw new InvalidArgumentException("Unexpected position '{$this->options['position']}'");
                 break;
         }
 

@@ -26,7 +26,7 @@ use Base\Repository\Thread\TaxonRepository;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ * @DiscriminatorEntry( value = "abstract" )
  */
 class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
 {
@@ -36,6 +36,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     {
         return $this->getIcon() ? [$this->getIcon()] : null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-sitemap"];
@@ -45,14 +46,15 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     {
         return $this->getLabel() ?? $this->getSlug() ?? get_class($this);
     }
+
     public function __construct(?string $label = null, ?string $slug = null)
     {
         $this->setLabel($label);
         $this->slug = $slug;
 
-        $this->threads  = new ArrayCollection();
+        $this->threads = new ArrayCollection();
         $this->children = new ArrayCollection();
-        $this->isVisible  = true;
+        $this->isVisible = true;
     }
 
     /**
@@ -61,6 +63,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -71,10 +74,12 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @Slugify(reference="translations.label")
      */
     protected $slug;
+
     public function getSlug(): ?string
     {
         return $this->slug;
     }
+
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
@@ -86,14 +91,17 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @Uploader(storage="local.storage", max_size="2MB", mime_types={"image/*"})
      */
     protected $icon;
+
     public function getIcon()
     {
         return Uploader::getPublic($this, "icon");
     }
+
     public function getIconFile()
     {
         return Uploader::get($this, "icon");
     }
+
     public function setIcon($icon)
     {
         $this->icon = $icon;
@@ -105,10 +113,12 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $parent;
+
     public function getParent(): ?self
     {
         return $this->parent;
     }
+
     public function setParent(?self $parent): self
     {
         $this->parent = $parent;
@@ -124,7 +134,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     {
         if ($this->parent->removeElement($parent)) {
             // set the owning side to null (unless already changed)
-            if ($parent->getChildren() === $this) {
+            if ($parent->getChildren() == $this) {
                 $parent->setChildren(null);
             }
         }
@@ -136,10 +146,12 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @ORM\OneToMany(targetEntity=Taxon::class, mappedBy="parent", orphanRemoval=true, cascade={"persist"}))
      */
     protected $children;
+
     public function getChildren(): Collection
     {
         return $this->children;
     }
+
     public function addChild(self $child): self
     {
         if (!$this->children->contains($child)) {
@@ -166,10 +178,12 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="taxa")
      */
     protected $threads;
+
     public function getThreads(): Collection
     {
         return $this->threads;
     }
+
     public function addThread(Thread $thread): self
     {
         if (!$this->threads->contains($thread)) {
@@ -193,10 +207,12 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @ORM\ManyToMany(targetEntity=Taxon::class)
      */
     protected $connexes;
+
     public function getConnexes(): Collection
     {
         return $this->connexes;
     }
+
     public function addConnex(self $connex): self
     {
         if (!$this->connexes->contains($connex)) {
@@ -216,14 +232,17 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @ORM\Column(type="boolean")
      */
     protected $isVisible;
+
     public function isVisible(): bool
     {
         return $this->isVisible;
     }
+
     public function markAsVisible(bool $isVisible)
     {
         return $this->setIsVisible($isVisible);
     }
+
     public function setIsVisible(bool $isVisible)
     {
         $this->isVisible = $isVisible;

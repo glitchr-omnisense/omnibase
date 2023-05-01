@@ -7,6 +7,7 @@ use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use LogicException;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,17 +15,18 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class Command extends SymfonyCommand
 {
     /**
      * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
     /**
      * @var EntityManagerInterface
      */
@@ -32,18 +34,18 @@ class Command extends SymfonyCommand
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
     /**
      * @var PropertyAccessor
      */
-    protected $propertyAccessor;
+    protected PropertyAccessor $propertyAccessor;
 
     public function __construct(LocalizerInterface $localizer, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
     {
         $this->localizer = $localizer;
-        $this->translator     = $translator;
-        $this->entityManager  = $entityManager;
-        $this->parameterBag   = $parameterBag;
+        $this->translator = $translator;
+        $this->entityManager = $entityManager;
+        $this->parameterBag = $parameterBag;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
         parent::__construct();
@@ -53,14 +55,17 @@ class Command extends SymfonyCommand
     {
         return $this->translator;
     }
+
     protected function getParameterBag(): ParameterBagInterface
     {
         return $this->parameterBag;
     }
+
     protected function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
     }
+
     protected function getLocalizer(): LocalizerInterface
     {
         return $this->localizer;
@@ -74,7 +79,7 @@ class Command extends SymfonyCommand
     public function run(InputInterface $input, OutputInterface $output): int
     {
         if (!$output instanceof ConsoleOutputInterface) {
-            throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');
+            throw new LogicException('This command accepts only an instance of "ConsoleOutputInterface".');
         }
 
         $output->getFormatter()->setStyle('info', new OutputFormatterStyle('green', null, []));
@@ -111,7 +116,7 @@ class Command extends SymfonyCommand
         if ($defaultDescription && $input->hasArgument("purpose")) {
             $output->section()->writeln("\n // Command purpose :");
             foreach (explode("\n", $defaultDescription) as $line) {
-                $output->section()->writeln(" // \t".trim($line));
+                $output->section()->writeln(" // \t" . trim($line));
             }
 
             $output->section()->writeln(" // \n");

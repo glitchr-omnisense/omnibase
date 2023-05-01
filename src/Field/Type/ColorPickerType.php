@@ -18,49 +18,50 @@ use Symfony\Component\Form\FormEvents;
 
 final class ColorPickerType extends AbstractType
 {
-    public const THEME_CLASSIC  = 'classic';
+    public const THEME_CLASSIC = 'classic';
     public const THEME_MONOLITH = 'monolith';
-    public const THEME_NANO     = 'nano';
+    public const THEME_NANO = 'nano';
 
-    public const POSITION_TOP    = 'top';
-    public const POSITION_LEFT   = 'left';
+    public const POSITION_TOP = 'top';
+    public const POSITION_LEFT = 'left';
     public const POSITION_BOTTOM = 'bottom';
-    public const POSITION_RIGHT  = 'right';
-    public const POSITION_START  = 'start';
+    public const POSITION_RIGHT = 'right';
+    public const POSITION_START = 'start';
     public const POSITION_MIDDLE = 'middle';
-    public const POSITION_END    = 'end';
+    public const POSITION_END = 'end';
 
-    public const COLOR_NAVY    = '#001F3F';
-    public const COLOR_BLUE    = '#0074d9';
-    public const COLOR_AQUA    = '#7fdbff';
-    public const COLOR_TEAL    = '#39cccc';
-    public const COLOR_OLIVE   = '#3d9970';
-    public const COLOR_GREEN   = '#2ecc40';
-    public const COLOR_LIME    = '#01ff70';
-    public const COLOR_YELLOW  = '#ffdc00';
-    public const COLOR_ORANGE  = '#ff851b';
-    public const COLOR_RED     = '#ff4136';
-    public const COLOR_MAROON  = '#85144B';
+    public const COLOR_NAVY = '#001F3F';
+    public const COLOR_BLUE = '#0074d9';
+    public const COLOR_AQUA = '#7fdbff';
+    public const COLOR_TEAL = '#39cccc';
+    public const COLOR_OLIVE = '#3d9970';
+    public const COLOR_GREEN = '#2ecc40';
+    public const COLOR_LIME = '#01ff70';
+    public const COLOR_YELLOW = '#ffdc00';
+    public const COLOR_ORANGE = '#ff851b';
+    public const COLOR_RED = '#ff4136';
+    public const COLOR_MAROON = '#85144B';
     public const COLOR_FUCHSIA = '#f012be';
-    public const COLOR_PURPLE  = '#b10dc9';
-    public const COLOR_BLACK   = '#111111';
-    public const COLOR_GRAY    = '#AAAAAA';
+    public const COLOR_PURPLE = '#b10dc9';
+    public const COLOR_BLACK = '#111111';
+    public const COLOR_GRAY = '#AAAAAA';
 
     /** @var BaseService */
-    protected $baseService;
+    protected BaseService $baseService;
 
     /** @var TranslatorInterface */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     public function __construct(TranslatorInterface $translator)
     {
-        $this->translator   = $translator;
+        $this->translator = $translator;
     }
 
     public function getParent(): ?string
     {
         return TextType::class;
     }
+
     public function getBlockPrefix(): string
     {
         return 'colorpickr';
@@ -163,7 +164,7 @@ final class ColorPickerType extends AbstractType
                 // Any combinations of top, left, bottom or right with one of these optional modifiers' => start, middle, end
                 // Examples' => top-start / right-end
                 // If clipping occurs, the color picker will automatically choose its position.
-                'position' => self::POSITION_BOTTOM.'-'.self::POSITION_MIDDLE,
+                'position' => self::POSITION_BOTTOM . '-' . self::POSITION_MIDDLE,
 
                 // Enables the ability to change numbers in an input field with the scroll-wheel.
                 // To use it set the cursor on a position where a number is and scroll, use ctrl to make steps of five
@@ -221,7 +222,7 @@ final class ColorPickerType extends AbstractType
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $options["pickr"]["el"] = "#".$view->vars["id"];
+        $options["pickr"]["el"] = "#" . $view->vars["id"];
 
         // JSColor requirement
         $view->vars['attr']['data-color-pickr'] = json_encode($options["pickr"]);
@@ -230,7 +231,7 @@ final class ColorPickerType extends AbstractType
         $view->vars['attr']["class"] = "form-color";
 
         // Add alpha channel by default
-        switch(strlen($view->vars['value'])) {
+        switch (strlen($view->vars['value'])) {
             case 4:
                 $view->vars['value'] .= "F";
                 break;
@@ -242,6 +243,5 @@ final class ColorPickerType extends AbstractType
             default:
                 $view->vars['value'] = "#00000000";
         }
-        $options["value"] = $view->vars['value'];
     }
 }

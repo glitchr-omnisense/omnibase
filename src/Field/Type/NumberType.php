@@ -18,12 +18,13 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     public function getBlockPrefix(): string
     {
         return 'number2';
     }
+
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;
@@ -49,19 +50,19 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
-        $view->vars["stepUp"]       = $options["stepUp"] ?? $options["step"];
-        $view->vars["stepDown"]     = $options["stepDown"] ?? $options["step"];
-        $view->vars["keyUp"]        = $options["keyUp"];
-        $view->vars["keyDown"]      = $options["keyDown"];
-        $view->vars["throttleUp"]   = $options["throttleUp"] ?? $options["throttle"];
+        $view->vars["stepUp"] = $options["stepUp"] ?? $options["step"];
+        $view->vars["stepDown"] = $options["stepDown"] ?? $options["step"];
+        $view->vars["keyUp"] = $options["keyUp"];
+        $view->vars["keyDown"] = $options["keyDown"];
+        $view->vars["throttleUp"] = $options["throttleUp"] ?? $options["throttle"];
         $view->vars["throttleDown"] = $options["throttleDown"] ?? $options["throttle"];
-        $view->vars["min"]          = $options["min"];
-        $view->vars["divisor"]      = $options["divisor"];
-        $view->vars["max"]          = $options["max"];
-        $view->vars["suffix"]       = $options["suffix"];
-        $view->vars["inline"]       = $options["inline"];
-        $view->vars["prefix"]       = $options["prefix"];
-        $view->vars["disabled"]     = $options["disabled"];
+        $view->vars["min"] = $options["min"];
+        $view->vars["divisor"] = $options["divisor"];
+        $view->vars["max"] = $options["max"];
+        $view->vars["suffix"] = $options["suffix"];
+        $view->vars["inline"] = $options["inline"];
+        $view->vars["prefix"] = $options["prefix"];
+        $view->vars["disabled"] = $options["disabled"];
         $view->vars["autocomplete"] = $options["autocomplete"];
     }
 
@@ -70,11 +71,11 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
-            'stepUp'  => null,
+            'stepUp' => null,
             'stepDown' => null,
             'divisor' => 1,
             'step' => 1,
-            'throttleUp'  => null,
+            'throttleUp' => null,
             'throttleDown' => null,
             'inline' => false,
             'throttle' => 50,

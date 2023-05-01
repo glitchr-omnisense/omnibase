@@ -13,6 +13,7 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMatcherInterface
 {
     public static $router = null;
+
     public function __construct(array $compiledRoutes, RequestContext $context)
     {
         $this->context = $context;
@@ -22,7 +23,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         // NB: Static routes using multiple host, or domains might be screened.. imo
         $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];
         $replacementChars = array_pad([], count($reservedChars), "_");
-        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName().".static_routes[".self::$router->getLocale()."][".self::$router->getHost()."]");
+        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".static_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
         $staticRoutes = self::$router->getCache()->get($cacheKey, function () use (&$staticRoutes) {
             foreach ($staticRoutes as &$staticRoute) {
                 $host = $staticRoute[0][1];
@@ -38,17 +39,17 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
                     throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
                 }
 
-                $machine   = self::$router->getMachine() ?? null;
+                $machine = self::$router->getMachine() ?? null;
                 $subdomain = self::$router->getSubdomain() ?? null;
-                $domain    = self::$router->getDomain() ?? null;
-                $port      = self::$router->getPort() ?? null;
+                $domain = self::$router->getDomain() ?? null;
+                $port = self::$router->getPort() ?? null;
 
-                $machine   = $machine ? preg_quote($machine) : $machine;
+                $machine = $machine ? preg_quote($machine) : $machine;
                 $subdomain = $subdomain ? preg_quote($subdomain) : $subdomain;
-                $domain    = $domain ? preg_quote($domain) : $domain;
+                $domain = $domain ? preg_quote($domain) : $domain;
 
                 $search = ["\\\\\\{_machine\\\\\\}\.", "\\\\\\{_subdomain\\\\\\}\.", "\\\\\\{_domain\\\\\\}", ":\\\\\\{_port\\\\\\}"];
-                $replace = [$machine ? $machine."." : "", $subdomain ? $subdomain."." : "", preg_quote($domain), $port == 80 || $port == 443 || !$port ? "" : ":".$port];
+                $replace = [$machine ? $machine . "." : "", $subdomain ? $subdomain . "." : "", preg_quote($domain), $port == 80 || $port == 443 || !$port ? "" : ":" . $port];
 
                 $staticRoute[0][1] = str_replace($search, $replace, $host);
             }
@@ -56,7 +57,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
             return $staticRoutes;
         });
 
-        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName().".dynamic_routes[".self::$router->getLocale()."][".self::$router->getHost()."]");
+        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".dynamic_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
         [$regexpList, $dynamicRoutes] = self::$router->getCache()->get($cacheKey, function () use (&$regexpList, &$dynamicRoutes) {
             foreach ($regexpList as $offset => &$regexp) {
                 $ipFallback = array_key_exists("ip", parse_url2(self::$router->getHostFallback()));
@@ -67,17 +68,17 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
                     throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
                 }
 
-                $machine   = self::$router->getMachine() ?? null;
+                $machine = self::$router->getMachine() ?? null;
                 $subdomain = self::$router->getSubdomain() ?? null;
-                $domain    = self::$router->getDomain() ?? null;
-                $port      = self::$router->getPort() ?? null;
+                $domain = self::$router->getDomain() ?? null;
+                $port = self::$router->getPort() ?? null;
 
-                $machine   = $machine ? preg_quote($machine) : $machine;
+                $machine = $machine ? preg_quote($machine) : $machine;
                 $subdomain = $subdomain ? preg_quote($subdomain) : $subdomain;
-                $domain    = $domain ? preg_quote($domain) : $domain;
+                $domain = $domain ? preg_quote($domain) : $domain;
 
                 $search = ["\\\\\\{_machine\\\\\\}\.", "\\\\\\{_subdomain\\\\\\}\.", "\\\\\\{_domain\\\\\\}", "\:\\\\\\{_port\\\\\\}"];
-                $replace = [$machine ? $machine."\." : "", $subdomain ? $subdomain."\." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : "\:".$port];
+                $replace = [$machine ? $machine . "\." : "", $subdomain ? $subdomain . "\." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : "\:" . $port];
                 $regexp = str_replace($search, $replace, $regexp);
             }
 
@@ -92,13 +93,13 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     {
         return [
             '_controller' => RedirectController::class . '::urlRedirectAction',
-            '_route'      => $route,
+            '_route' => $route,
 
-            'path'        => $path,
-            'permanent'   => true,
-            'scheme'      => $scheme,
-            'httpPort'    => $this->context->getHttpPort(),
-            'httpsPort'   => $this->context->getHttpsPort(),
+            'path' => $path,
+            'permanent' => true,
+            'scheme' => $scheme,
+            'httpPort' => $this->context->getHttpPort(),
+            'httpsPort' => $this->context->getHttpsPort(),
         ];
     }
 
@@ -134,7 +135,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
             $_regexpList[0] .= "(*";
             $n = strlen($_regexpList[0]);
-            $_regexpList[0] .= ":".$n.")";
+            $_regexpList[0] .= ":" . $n . ")";
 
             $_dynamicRoutes[$n] = $dynamicRoutes[$dynamicRouteKeys[$key]];
         }
@@ -148,7 +149,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         $parameters = array_reverse($compiledRoute ?? []);
         foreach ($parameters as $parameter) {
             $path .= $parameter[1];
-            $path .= $parameter[3] ?? false ? "{".$parameter[3]."}" : "";
+            $path .= $parameter[3] ?? false ? "{" . $parameter[3] . "}" : "";
         }
 
         return $path;
@@ -158,7 +159,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     {
         $host = null;
         foreach ($compiledRoute[4] ?? [] as $part) {
-            $host = $part[1] . ($part[0] == "variable" ? "{".$part[3]."}" : "") . $host;
+            $host = $part[1] . ($part[0] == "variable" ? "{" . $part[3] . "}" : "") . $host;
         }
 
         return $host;
@@ -203,11 +204,12 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
             return $match;
         }
 
-        if (empty($match) || ($match["_controller"] ?? null) == RedirectController::class."::urlRedirectAction") {
-            $match = parent::match($pathinfo."/");
+        if (empty($match) || ($match["_controller"] ?? null) == RedirectController::class . "::urlRedirectAction") {
+            $match = parent::match($pathinfo . "/");
         }
 
         return $match;
     }
-    public static $i = 0;
+
+    public static int $i = 0;
 }

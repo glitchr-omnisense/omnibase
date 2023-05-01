@@ -15,16 +15,16 @@ final class HtmlTwigExtension extends AbstractExtension
     /**
      * @var HtmlTagRenderer
      */
-    protected $htmlTagRenderer;
+    protected HtmlTagRenderer $htmlTagRenderer;
 
-    protected $wysiwygEnhancer;
-    protected $editorEnhancer;
+    protected WysiwygEnhancerInterface $wysiwygEnhancer;
+    protected EditorEnhancerInterface $editorEnhancer;
 
     public function __construct(HtmlTagRenderer $htmlTagRenderer, WysiwygEnhancerInterface $wysiwygEnhancer, EditorEnhancerInterface $editorEnhancer)
     {
         $this->htmlTagRenderer = $htmlTagRenderer;
-        $this->wysiwygEnhancer  = $wysiwygEnhancer;
-        $this->editorEnhancer  = $editorEnhancer;
+        $this->wysiwygEnhancer = $wysiwygEnhancer;
+        $this->editorEnhancer = $editorEnhancer;
     }
 
     public function getFilters(): array
@@ -74,37 +74,37 @@ final class HtmlTwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('html_entry_link_tags', [$this, 'renderLinkTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
-            new TwigFunction('html_entry_script_tags', [$this, 'renderScriptTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_link_tags', [$this, 'renderLinkTags'], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_script_tags', [$this, 'renderScriptTags'], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
 
-            new TwigFunction('html_entry_head_tags', [$this, 'renderHeadTags'  ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
-            new TwigFunction('html_entry_noscript_tags', [$this, 'renderNoscriptTags' ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
-            new TwigFunction('html_entry_body_tags', [$this, 'renderBodyTags' ], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_head_tags', [$this, 'renderHeadTags'], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_noscript_tags', [$this, 'renderNoscriptTags'], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
+            new TwigFunction('html_entry_body_tags', [$this, 'renderBodyTags'], ["is_safe" => ['all'], 'needs_environment' => true, "raw" => true]),
         ];
     }
 
     public function renderLinkTags(): string
     {
-        return $this->htmlTagRenderer->renderHtmlContent("stylesheet:before").
-               $this->htmlTagRenderer->renderHtmlContent("stylesheet").
-               $this->htmlTagRenderer->renderHtmlContent("stylesheet:after");
+        return $this->htmlTagRenderer->renderHtmlContent("stylesheet:before") .
+            $this->htmlTagRenderer->renderHtmlContent("stylesheet") .
+            $this->htmlTagRenderer->renderHtmlContent("stylesheet:after");
     }
 
     public function renderScriptTags(): string
     {
-        return  $this->htmlTagRenderer->renderHtmlContent("javascript:head").
-                $this->htmlTagRenderer->renderHtmlContent("javascript").
-                $this->htmlTagRenderer->renderHtmlContent("javascript:body");
+        return $this->htmlTagRenderer->renderHtmlContent("javascript:head") .
+            $this->htmlTagRenderer->renderHtmlContent("javascript") .
+            $this->htmlTagRenderer->renderHtmlContent("javascript:body");
     }
 
     public function renderHeadTags(): string
     {
-        return $this->htmlTagRenderer->renderHtmlContent("stylesheet:before").
-               $this->htmlTagRenderer->renderHtmlContent("stylesheet").
-               $this->htmlTagRenderer->renderHtmlContent("stylesheet:after").
+        return $this->htmlTagRenderer->renderHtmlContent("stylesheet:before") .
+            $this->htmlTagRenderer->renderHtmlContent("stylesheet") .
+            $this->htmlTagRenderer->renderHtmlContent("stylesheet:after") .
 
-               $this->htmlTagRenderer->renderHtmlContent("javascript:head").
-               $this->htmlTagRenderer->renderHtmlContent("javascript");
+            $this->htmlTagRenderer->renderHtmlContent("javascript:head") .
+            $this->htmlTagRenderer->renderHtmlContent("javascript");
     }
 
     public function renderNoscriptTags(): string

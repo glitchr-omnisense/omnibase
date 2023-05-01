@@ -26,11 +26,10 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
- *     @DiscriminatorEntry
+ * @DiscriminatorEntry
  *
  * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
  */
-
 abstract class AbstractAdapter implements AttributeAdapterInterface, AutocompleteInterface, TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
@@ -39,6 +38,7 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
     {
         return $this->icon ? [$this->icon] : null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-share-alt"];
@@ -53,10 +53,12 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
     {
         return $this->getLabel();
     }
+
     public function __autocompleteData(): array
     {
         return $this->getOptions();
     }
+
     public function __construct(string $label = "", ?string $code = null)
     {
         $this->attributes = new ArrayCollection();
@@ -72,6 +74,7 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -81,10 +84,12 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
      * @ORM\OneToMany(targetEntity=AbstractAttribute::class, mappedBy="adapter")
      */
     protected $attributes;
+
     public function getAttributes(): Collection
     {
         return $this->attributes;
     }
+
     public function addAttribute(AttributeInterface $attribute): self
     {
         if (!$this->attributes->contains($attribute)) {
@@ -113,10 +118,12 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
      * @Slugify(separator="-")
      */
     protected $code;
+
     public function getCode(): ?string
     {
         return $this->code;
     }
+
     public function setCode(?string $code): self
     {
         $this->code = $code;
@@ -127,10 +134,12 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $icon;
+
     public function getIcon(): ?string
     {
         return $this->icon ?? $this->__iconize()[0] ?? $this->__iconizeStatic()[0] ?? null;
     }
+
     public function setIcon(?string $icon)
     {
         $this->icon = $icon;

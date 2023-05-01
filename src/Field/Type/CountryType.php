@@ -12,8 +12,8 @@ use Symfony\Component\Form\AbstractType;
 
 class CountryType extends SelectType implements SelectInterface
 {
-    private static $additionalList = [];
-    private static $rejectCountryList = [ // Rejected just because missing flag.. to do later
+    private static array $additionalList = [];
+    private static array $rejectCountryList = [ // Rejected just because missing flag.. to do later
         "AO", "AI", "AQ", "AW", "BM", "CW", "GS", "GI", "GL",
         "GP", "GU", "GG", "GF", "BV", "CX", "IM", "NF", "AX",
         "KY", "CC", "CK", "FO", "HM", "FK", "MP", "UM", "PN",
@@ -25,8 +25,9 @@ class CountryType extends SelectType implements SelectInterface
     // A way to add countries to the list.. (Another way is shown below using options)
     public static function addCountry($code, $country)
     {
-        return self::addCountries([$code => $country]);
+        self::addCountries([$code => $country]);
     }
+
     public static function addCountries($array)
     {
         $countryList = Countries::getNames();
@@ -54,6 +55,7 @@ class CountryType extends SelectType implements SelectInterface
     {
         return self::getNames(true);
     }
+
     public static function getNames($addons = false)
     {
         $countryList = Countries::getNames() + ($addons ? self::$additionalList : []);
@@ -78,10 +80,12 @@ class CountryType extends SelectType implements SelectInterface
     {
         return self::getName($id);
     }
+
     public static function getHtml(string $id): ?string
     {
-        return "<img class='country-flag' src='/bundles/base/images/flags/".$id.".svg' alt='".$id."'> ".self::getName($id)."</>";
+        return "<img class='country-flag' src='/bundles/base/images/flags/" . $id . ".svg' alt='" . $id . "'> " . self::getName($id) . "</>";
     }
+
     public static function getData(string $id): ?array
     {
         return [];

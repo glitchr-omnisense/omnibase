@@ -3,10 +3,12 @@
 namespace Base\Controller\Frontend\User;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Base\Enum\UserState;
 use Base\Form\FormProxyInterface;
 use Base\Form\Model\UserSearchModel;
 use Base\Form\Type\UserSearchType;
+use Base\Repository\ThreadIntlRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,12 +17,14 @@ use Symfony\Component\Form\FormInterface;
 
 class SearchController extends AbstractController
 {
-    protected $userRepository;
+    protected FormProxyInterface $formProxy;
+    protected EntityManagerInterface $entityManager;
+    protected UserRepository $userRepository;
 
     public function __construct(FormProxyInterface $formProxy, EntityManagerInterface $entityManager)
     {
-        $this->formProxy      = $formProxy;
-        $this->entityManager  = $entityManager;
+        $this->formProxy = $formProxy;
+        $this->entityManager = $entityManager;
         $this->userRepository = $entityManager->getRepository(User::class);
     }
 
@@ -29,19 +33,18 @@ class SearchController extends AbstractController
      */
     public function Main(Request $request, ?FormInterface $formSearch = null)
     {
-        $formSearch = $formSearch ?? $this->formProxy->getForm("user:search") ?? $this->createForm(UserSearchType::class, new UserSearchModel());
+        $formSearch = $formSearch ?? $this->formProxy->get("user:search") ?? $this->createForm(UserSearchType::class, new UserSearchModel());
         $formSearch->handleRequest($request);
 
         $formattedData = null;
         if ($formSearch->isSubmitted() && $formSearch->isValid()) {
             $formattedData = clone $formSearch->getData();
-            $formattedData->username = $formattedData->username;
         }
 
         $users = [];
         if ($formattedData) {
             $users = array_map(
-                fn ($t) => $t->getTranslatable(),
+                fn($t) => $t->getTranslatable(),
                 $this->userRepository->findByInsensitivePartialModel(
                     ["username" => "%" . ($formattedData->username) . "%",],
                     ["translatable.state" => UserState::VERIFIED]

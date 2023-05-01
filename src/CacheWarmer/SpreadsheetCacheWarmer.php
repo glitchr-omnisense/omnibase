@@ -2,6 +2,7 @@
 
 namespace Base\CacheWarmer;
 
+use PhpOffice\PhpSpreadsheet\Settings;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
@@ -31,7 +32,7 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
         // Implement phpspreadsheet cache
         $psr6Cache = new FilesystemAdapter("phpspreadsheet", 0, $this->cacheDir);
         $psr16Cache = new Psr16Cache($psr6Cache);
-        \PhpOffice\PhpSpreadsheet\Settings::setCache($psr16Cache);
+        Settings::setCache($psr16Cache);
 
         return [get_class($psr16Cache)];
     }

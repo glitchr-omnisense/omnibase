@@ -19,6 +19,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\LogoutMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\RouteMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SubMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
+use Exception;
 
 class WidgetItem
 {
@@ -52,7 +53,7 @@ class WidgetItem
         }
 
         if (!class_exists($crudController)) {
-            throw new \Exception("CRUD controller for \"".$entityFqcnOrCrudController."\" not found");
+            throw new Exception("CRUD controller for \"".$entityFqcnOrCrudController."\" not found");
         }
 
         $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
@@ -97,7 +98,7 @@ class WidgetItem
             if (!class_exists($crudController)) {
                 dump($crudController);
                 exit(1);
-                throw new \Exception("CRUD controller for \"".$labelOrEntityFqcn."\" not found");
+                throw new Exception("CRUD controller for \"".$labelOrEntityFqcn."\" not found");
             }
 
             $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();

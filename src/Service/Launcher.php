@@ -12,16 +12,16 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class Launcher implements LauncherInterface
 {
-    /** @var Router */
-    protected $router;
-    /** @var ParameterBag */
-    protected $parameterBag;
-    /** @var SettingBag */
-    protected $settingBag;
-    /** @var AuthorizationChecker */
-    protected $authorizationChecker;
-    /** @var TokenStorage */
-    protected $tokenStorage;
+    /** @var RouterInterface */
+    protected RouterInterface $router;
+    /** @var ParameterBagInterface */
+    protected ParameterBagInterface $parameterBag;
+    /** @var SettingBagInterface */
+    protected SettingBagInterface $settingBag;
+    /** @var AuthorizationCheckerInterface */
+    protected AuthorizationCheckerInterface $authorizationChecker;
+    /** @var TokenStorageInterface */
+    protected TokenStorageInterface $tokenStorage;
 
     public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, TokenStorageInterface $tokenStorage)
     {
@@ -49,7 +49,7 @@ class Launcher implements LauncherInterface
             return false;
         }
 
-        $now = new \DateTime("now");
+        $now = new DateTime("now");
         return ($launchdate < $now);
     }
 

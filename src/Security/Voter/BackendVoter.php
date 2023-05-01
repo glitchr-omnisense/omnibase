@@ -11,9 +11,9 @@ class BackendVoter extends Voter
     public const BACKEND = "BACKEND";
 
     /**
-     * @var Router
+     * @var RouterInterface
      * */
-    protected $router;
+    protected RouterInterface $router;
 
     public function __construct(RouterInterface $router)
     {

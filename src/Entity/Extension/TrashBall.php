@@ -6,6 +6,7 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 
 use Base\Repository\Extension\TrashBallRepository;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\Cache;
 
@@ -26,12 +27,12 @@ class TrashBall extends AbstractExtension
      */
     protected $permanentAfter;
 
-    public function getPermanentAfter(): ?\DateTimeInterface
+    public function getPermanentAfter(): ?DateTimeInterface
     {
         return $this->permanentAfter;
     }
 
-    public function setPermanentAfter(\DateTimeInterface $permanentAfter): self
+    public function setPermanentAfter(DateTimeInterface $permanentAfter): self
     {
         $this->permanentAfter = $permanentAfter;
         return $this;

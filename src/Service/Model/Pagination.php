@@ -15,22 +15,22 @@ use UnexpectedValueException;
 
 class Pagination implements PaginationInterface, Iterator, Countable
 {
-    protected $router;
-    private $build;
+    protected RouterInterface $router;
+    private bool $build;
 
-    protected $paginator = null;
-    protected $totalCount        = 0;
+    protected mixed $paginator = null;
+    protected mixed $totalCount = 0;
 
-    protected $route           = null;
+    protected $route = null;
     protected array $routeParameters = [];
 
-    protected $page      = 0;
-    protected $pageIter  = 0;
-    protected $pageSize  = 0;
-    protected $pageRange = 0;
+    protected int $page = 0;
+    protected int $pageIter = 0;
+    protected int $pageSize = 0;
+    protected int $pageRange = 0;
 
-    protected $template = "@Base/paginator/sliding.html.twig";
-    protected $parameterName;
+    protected string $template = "@Base/paginator/sliding.html.twig";
+    protected ?string $parameterName;
 
     public function __construct(array|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
     {
@@ -39,11 +39,11 @@ class Pagination implements PaginationInterface, Iterator, Countable
             $query->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [GroupByWalker::class]);
             $query->setHint(GroupByWalker::HINT_GROUP_ARRAY, ["id"]);
             $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
-            $this->paginator     = new DoctrinePaginator($query);
-            $this->totalCount    = $this->getCountQuery($arrayOrQuery, false)->getSingleScalarResult();
+            $this->paginator = new DoctrinePaginator($query);
+            $this->totalCount = $this->getCountQuery($arrayOrQuery, false)->getSingleScalarResult();
         } else {
-            $this->paginator     = $arrayOrQuery;
-            $this->totalCount    = count_leaves($this->paginator);
+            $this->paginator = $arrayOrQuery;
+            $this->totalCount = count_leaves($this->paginator);
         }
 
         $this->parameterName = $parameterName;
@@ -87,6 +87,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
     {
         $this->pageIter = 0;
     }
+
     public function next(): void
     {
         $this->pageIter++;
@@ -96,18 +97,22 @@ class Pagination implements PaginationInterface, Iterator, Countable
     {
         return $this->pageSize > 0 ? ($this->totalCount % $this->pageSize) + 1 : 0;
     }
+
     public function key(): mixed
     {
-        return ($this->page-1) * $this->pageSize + $this->pageIter ;
+        return ($this->page - 1) * $this->pageSize + $this->pageIter;
     }
+
     public function valid(): bool
     {
         return $this->isQuery() ? $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()) : $this->pageIter == 0;
     }
+
     public function current(): mixed
     {
         return $this->isQuery() ? $this->getResult()[$this->pageIter] ?? null : $this->getResult();
     }
+
     public function getBookmark(): mixed
     {
         return $this->pageIter % $this->getPageSize();
@@ -117,10 +122,12 @@ class Pagination implements PaginationInterface, Iterator, Countable
     {
         return $this->paginator;
     }
+
     public function getQuery(): ?Query
     {
-        return $this->isQuery() ? $this->paginator->getQuery()->setFirstResult($this->pageSize * ($this->page-1))->setMaxResults($this->pageSize) : null;
+        return $this->isQuery() ? $this->paginator->getQuery()->setFirstResult($this->pageSize * ($this->page - 1))->setMaxResults($this->pageSize) : null;
     }
+
     public function isQuery()
     {
         return $this->paginator instanceof DoctrinePaginator;
@@ -130,10 +137,12 @@ class Pagination implements PaginationInterface, Iterator, Countable
     {
         return $this->totalCount;
     }
+
     public function getLastPage()
     {
         return $this->getTotalPages();
     }
+
     public function getTotalPages()
     {
         $pageSize = $this->getPageSize();
@@ -144,13 +153,14 @@ class Pagination implements PaginationInterface, Iterator, Countable
         if ($this->getTotalCount() <= $pageSize) {
             return 1;
         }
-        return ceil(max(1, $this->getTotalCount()/$pageSize));
+        return ceil(max(1, $this->getTotalCount() / $pageSize));
     }
 
     public function getTemplate()
     {
         return $this->template;
     }
+
     public function setTemplate(string $template)
     {
         $this->template = $template;
@@ -172,6 +182,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
     {
         return $this->pageRange;
     }
+
     public function setPageRange(int $pageRange)
     {
         $this->pageRange = $pageRange;
@@ -182,6 +193,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
     {
         return $this->pageSize;
     }
+
     public function setPageSize($pageSize)
     {
         $pageSize = ($pageSize < 1 ? $this->getTotalCount() : $pageSize);
@@ -197,6 +209,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
     {
         return $this->page;
     }
+
     public function setPage($page)
     {
         $page = min(max(1, $page), $this->getTotalPages());
@@ -218,6 +231,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
     }
 
     protected array $lastResult = [];
+
     public function getResult()
     {
         return $this->build();
@@ -241,6 +255,6 @@ class Pagination implements PaginationInterface, Iterator, Countable
             return $this->lastResult = $this->getQuery()->getResult();
         }
 
-        return $this->lastResult =  array_slice_recursive($this->get(), $this->pageSize * ($this->page-1), $this->pageSize, true /*Always preserve keys*/);
+        return $this->lastResult = array_slice_recursive($this->get(), $this->pageSize * ($this->page - 1), $this->pageSize, true /*Always preserve keys*/);
     }
 }

@@ -30,39 +30,39 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
-    public const LOGIN_ROUTE          = 'security_login';
-    public const LOGOUT_ROUTE         = 'security_logout';
+    public const LOGIN_ROUTE = 'security_login';
+    public const LOGOUT_ROUTE = 'security_logout';
     public const LOGOUT_REQUEST_ROUTE = 'security_logoutRequest';
 
     /**
      * @var ReferrerInterface
      */
-    protected $referrer;
+    protected ReferrerInterface $referrer;
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
     /**
      * @var AuthorizationCheckerInterface
      */
-    protected $authorizationChecker;
+    protected AuthorizationCheckerInterface $authorizationChecker;
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
     /**
      * @var UserRepository
      */
-    protected $userRepository;
+    protected UserRepository $userRepository;
 
     public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, RouterInterface $router, AuthorizationCheckerInterface $authorizationChecker)
     {
-        $this->referrer       = $referrer;
-        $this->entityManager  = $entityManager;
-        $this->authorizationChecker  = $authorizationChecker;
+        $this->referrer = $referrer;
+        $this->entityManager = $entityManager;
+        $this->authorizationChecker = $authorizationChecker;
         $this->userRepository = $entityManager->getRepository(User::class);
 
-        $this->router           = $router;
+        $this->router = $router;
     }
 
     public static function isSecurityRoute(Request|string $routeNameOrRequest)
@@ -90,10 +90,10 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     public function authenticate(Request $request): Passport
     {
         $identifier = $request->get('security_login')["identifier"] ?? $request->get('_base_security_login')["identifier"] ?? $request->get("identifier") ?? "";
-        $password   = $request->get('security_login')["password"] ?? $request->get('_base_security_login')["password"] ?? $request->get("password") ?? "";
+        $password = $request->get('security_login')["password"] ?? $request->get('_base_security_login')["password"] ?? $request->get("password") ?? "";
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
 
-        $badges   = [];
+        $badges = [];
         if (array_key_exists("_remember_me", $request->get('security_login') ?? $request->get('_base_security_login') ?? [])) {
             $badges[] = new RememberMeBadge();
             if ($request->get('security_login')["_remember_me"] ?? $request->get('_base_security_login')["_remember_me"]) {
@@ -115,7 +115,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         );
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewall): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // Update client information
         if (($user = $token->getUser())) {
@@ -140,7 +140,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         if ($targetPath->getUrl() && $targetPath->sameSite() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath)) {
             return $this->router->redirect($targetPath->getUrl());
         }
-        $defaultTargetPath = $request->getSession()->get('_security.'.$this->router->getRouteFirewall()->getName().'.target_path');
+        $defaultTargetPath = $request->getSession()->get('_security.' . $this->router->getRouteFirewall()->getName() . '.target_path');
         return $this->router->redirect($defaultTargetPath ?? $this->router->getBaseDir());
     }
 

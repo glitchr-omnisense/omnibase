@@ -10,27 +10,28 @@ use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\RouterInterface;
+use ErrorException;
 
 class IconProvider extends AbstractLocalCache
 {
     /**
      * @var AnnotationReader
      */
-    protected $annotationReader;
+    protected AnnotationReader $annotationReader;
     /**
-     * @var ImagineService
+     * @var MediaServiceInterface
      */
-    protected $mediaService;
+    protected MediaServiceInterface $mediaService;
     /**
-     * @var Localizer
+     * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
-    public function __construct(AnnotationReader $annotationReader, MediaService $mediaService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir)
+    public function __construct(AnnotationReader $annotationReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir)
     {
         $this->annotationReader = $annotationReader;
         $this->mediaService = $mediaService;
@@ -51,7 +52,7 @@ class IconProvider extends AbstractLocalCache
 
                 try {
                     list($class, $method) = explode("::", $controller);
-                } catch(\ErrorException $e) {
+                } catch (ErrorException $e) {
                     return null;
                 }
                 if (!class_exists($class)) {
@@ -71,28 +72,31 @@ class IconProvider extends AbstractLocalCache
     }
 
     protected ?array $routeIcons = null;
+
     public function getRouteIcons(?string $route = null)
     {
         if ($this->routeIcons && $route === null) {
             return $this->routeIcons;
         }
 
-        return $this->routeIcons[$route.".".$this->localizer->getLocaleLang()]
+        return $this->routeIcons[$route . "." . $this->localizer->getLocaleLang()]
             ?? $this->routeIcons[$route]
 
-            ?? $this->routeIcons[$route.".default.".$this->localizer->getLocaleLang()]
-            ?? $this->routeIcons[$route.".default"]
+            ?? $this->routeIcons[$route . ".default." . $this->localizer->getLocaleLang()]
+            ?? $this->routeIcons[$route . ".default"]
 
-            ?? $this->routeIcons[$route.".".$this->localizer->getDefaultLocaleLang()]
-            ?? $this->routeIcons[$route.".default.".$this->localizer->getDefaultLocaleLang()]
+            ?? $this->routeIcons[$route . "." . $this->localizer->getDefaultLocaleLang()]
+            ?? $this->routeIcons[$route . ".default." . $this->localizer->getDefaultLocaleLang()]
             ?? null;
     }
 
-    protected $adapters = [];
+    protected array $adapters = [];
+
     public function getAdapters()
     {
         return $this->adapters;
     }
+
     public function getAdapter(string $idOrClass): ?IconAdapterInterface
     {
         if (class_exists($idOrClass)) {
@@ -133,10 +137,10 @@ class IconProvider extends AbstractLocalCache
         }
 
         if (is_array($icon) && is_associative($icon)) {
-            return array_map_recursive(fn ($i) => $this->iconify($i, $attributes, false), $icon);
+            return array_map_recursive(fn($i) => $this->iconify($i, $attributes, false), $icon);
         }
         if (is_array($icon)) {
-            $icon = array_filter(array_map(fn ($i) => $this->iconify($i, $attributes, $wrap), $icon));
+            $icon = array_filter(array_map(fn($i) => $this->iconify($i, $attributes, $wrap), $icon));
             if ($icon) {
                 return array_merge(...$icon);
             }

@@ -18,9 +18,8 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry
-*/
-
+ * @DiscriminatorEntry
+ */
 class Address implements IconizeInterface, HtmlizeInterface
 {
     use BaseTrait;
@@ -29,15 +28,17 @@ class Address implements IconizeInterface, HtmlizeInterface
     {
         return null;
     }
+
     public function __toString()
     {
-        return $this->streetAddress.", ".ucfirst($this->city).", ".$this->country;
+        return $this->streetAddress . ", " . ucfirst($this->city) . ", " . $this->country;
     }
 
     public function __iconize(): ?array
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-address-card"];
@@ -58,6 +59,7 @@ class Address implements IconizeInterface, HtmlizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId()
     {
         return $this->id;
@@ -67,10 +69,12 @@ class Address implements IconizeInterface, HtmlizeInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $name;
+
     public function getName(): ?string
     {
         return $this->name;
     }
+
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -88,11 +92,13 @@ class Address implements IconizeInterface, HtmlizeInterface
     {
         return $this->country;
     }
+
     public function setCountry(string $country): self
     {
         $this->country = $country;
         return $this;
     }
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
@@ -102,6 +108,7 @@ class Address implements IconizeInterface, HtmlizeInterface
     {
         return $this->state;
     }
+
     public function setState(?string $state): self
     {
         $this->state = $state;
@@ -112,10 +119,12 @@ class Address implements IconizeInterface, HtmlizeInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $city;
+
     public function getCity(): ?string
     {
         return $this->city;
     }
+
     public function setCity(string $city): self
     {
         $this->city = $city;
@@ -126,10 +135,12 @@ class Address implements IconizeInterface, HtmlizeInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $zipCode;
+
     public function getZipCode(): ?string
     {
         return $this->zipCode;
     }
+
     public function setZipCode(string $zipCode): self
     {
         $this->zipCode = $zipCode;
@@ -146,6 +157,7 @@ class Address implements IconizeInterface, HtmlizeInterface
     {
         return $this->streetAddress;
     }
+
     public function setStreetAddress(?string $streetAddress): self
     {
         $this->streetAddress = $streetAddress;
@@ -156,10 +168,12 @@ class Address implements IconizeInterface, HtmlizeInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $affix;
+
     public function getAffix(): ?string
     {
         return $this->affix;
     }
+
     public function setAffix(?string $affix): self
     {
         $this->affix = $affix;
@@ -171,10 +185,12 @@ class Address implements IconizeInterface, HtmlizeInterface
      * @ORM\Column(type="string", length=15, nullable=true)
      */
     protected $phone;
+
     public function getPhone(): ?string
     {
         return $this->phone;
     }
+
     public function setPhone(?string $phone): self
     {
         $this->phone = $phone;
@@ -185,10 +201,12 @@ class Address implements IconizeInterface, HtmlizeInterface
      * @ORM\Column(type="string", length=15, nullable=true)
      */
     protected $fax;
+
     public function getFax(): ?string
     {
         return $this->fax;
     }
+
     public function setFax(?string $fax): self
     {
         $this->fax = $fax;
@@ -200,20 +218,22 @@ class Address implements IconizeInterface, HtmlizeInterface
      */
     protected $additional;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="addresses")
-     */
-    private $user;
     public function getAdditional(): ?string
     {
         return $this->additional;
     }
+
     public function setAdditional(?string $additional): self
     {
         $this->additional = $additional;
 
         return $this;
     }
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="addresses")
+     */
+    protected $user;
 
     public function getUser(): ?User
     {

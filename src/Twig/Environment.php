@@ -19,33 +19,33 @@ class Environment extends TwigEnvironment
     /**
      * @var RequestStack
      */
-    protected $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     /**
      * @var Environment
      */
-    protected $environment;
+    protected Environment $environment;
 
     public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocalizerInterface $localizer, RouterInterface $router, ParameterBagInterface $parameterBag)
     {
-        $this->requestStack   = $requestStack;
-        $this->router         = $router;
-        $this->parameterBag   = $parameterBag;
+        $this->requestStack = $requestStack;
+        $this->router = $router;
+        $this->parameterBag = $parameterBag;
         $this->localizer = $localizer;
 
         parent::__construct($loader, $options);
@@ -75,10 +75,12 @@ class Environment extends TwigEnvironment
     {
         return $this->getGlobals()[$name] ?? null;
     }
+
     public function setParameter(string $name, $value)
     {
         return $this->addGlobal($name, $value);
     }
+
     public function addParameter(string $name, $newValue)
     {
         $value = $this->getParameter($name);
@@ -105,7 +107,7 @@ class Environment extends TwigEnvironment
     {
         $parameter = $this->getGlobals()[$name] ?? null;
         if (is_string($parameter)) {
-            $this->addGlobal($name, $parameter.$value);
+            $this->addGlobal($name, $parameter . $value);
         }
         if (is_array($parameter)) {
             $this->addGlobal($name, array_merge($parameter, $value));
@@ -114,10 +116,12 @@ class Environment extends TwigEnvironment
     }
 
     protected array $renderers = [];
+
     public function addRenderer(TagRendererInterface $renderer)
     {
         $this->renderers[] = $renderer;
     }
+
     public function getRenderer(string $className): ?TagRendererInterface
     {
         foreach ($this->renderers as $renderer) {
@@ -143,7 +147,7 @@ class Environment extends TwigEnvironment
 
         $contents = $this->getRenderer(HtmlTagRenderer::class)?->render($name, $context);
         if ($contents === null) {
-            throw new RuntimeException(HtmlTagRenderer::class." renderer not found.");
+            throw new RuntimeException(HtmlTagRenderer::class . " renderer not found.");
         }
 
         return $contents;

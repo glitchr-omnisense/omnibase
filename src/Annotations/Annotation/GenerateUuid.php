@@ -22,7 +22,7 @@ use Symfony\Component\Uid\Uuid;
  */
 class GenerateUuid extends AbstractAnnotation
 {
-    private $version;
+    private mixed $version;
     public const V1_MAC = 1;
     public const V2_DCE = 2;
     public const V3_MD5 = 3;
@@ -35,7 +35,7 @@ class GenerateUuid extends AbstractAnnotation
     public const UUID_NS_OID = "6ba7b812-9dad-11d1-80b4-00c04fd430c8";
     public const UUID_NS_X500 = "6ba7b814-9dad-11d1-80b4-00c04fd430c8";
 
-    protected $namespace;
+    protected mixed $namespace;
 
     public function __construct(array $data)
     {
@@ -76,7 +76,7 @@ class GenerateUuid extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if ($this->getFieldValue($entity, $property) === null) {
             $this->setFieldValue($entity, $property, $this->getUuid($entity));

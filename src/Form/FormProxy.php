@@ -9,18 +9,18 @@ use Symfony\Component\Form\FormInterface;
 class FormProxy implements FormProxyInterface
 {
     /**
-     * @var FormFactory
+     * @var FormFactoryInterface
      */
-    protected $formFactory;
+    protected FormFactoryInterface $formFactory;
 
     /**
      * @var array[FormProcessorInterface]
      */
-    protected $formProcessors;
+    protected array $formProcessors;
 
     public function __construct(FormFactoryInterface $formFactory)
     {
-        $this->formFactory  = $formFactory;
+        $this->formFactory = $formFactory;
     }
 
     /** @var array */
@@ -35,6 +35,7 @@ class FormProxy implements FormProxyInterface
     {
         return empty($this->forms);
     }
+
     public function has(string $name): bool
     {
         return array_key_exists($name, $this->forms);
@@ -53,6 +54,7 @@ class FormProxy implements FormProxyInterface
 
         return $data;
     }
+
     public function setData(string $name, mixed $data): self
     {
         $this->forms[$name]?->setData($data);
@@ -64,6 +66,7 @@ class FormProxy implements FormProxyInterface
     {
         return $this->forms[$name] ?? null;
     }
+
     public function add(string $name, ?FormInterface $form): self
     {
         if ($this->get($name) != null) {
@@ -102,6 +105,7 @@ class FormProxy implements FormProxyInterface
     {
         return $this->formProcessors[$name] ?? null;
     }
+
     public function createProcessor(string $name, string $formTypeClass = FormType::class, array $options = [], array $listeners = []): ?FormProcessorInterface
     {
         $this->formProcessors[$name] = $this->formProcessors[$name] ?? new FormProcessor($this->get($name) ?? $this->create($name, $formTypeClass, null, $options, $listeners));

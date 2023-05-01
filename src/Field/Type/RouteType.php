@@ -14,14 +14,15 @@ use Symfony\Component\Routing\RouterInterface;
 class RouteType extends AbstractType
 {
     /** @var RouterInterface */
-    protected $router;
+    protected RouterInterface $router;
     /** @var LocalizerInterface */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     public function getParent(): ?string
     {
         return SelectType::class;
     }
+
     public function getBlockPrefix(): string
     {
         return 'route';
@@ -51,11 +52,11 @@ class RouteType extends AbstractType
                                     return null;
                                 }
 
-                                $k = str_rstrip($k, ".".$lang);
-                                return [$k, "<b>Name:</b> ".strtolower($k.".{_locale}")."<br/><b>Path:</b> ".$r->getPath()];
+                                $k = str_rstrip($k, "." . $lang);
+                                return [$k, "<b>Name:</b> " . strtolower($k . ".{_locale}") . "<br/><b>Path:</b> " . $r->getPath()];
                             }
 
-                            return [$k, "<b>Name:</b> ".strtolower($k)."<br/><b>Path:</b> ".$r->getPath()];
+                            return [$k, "<b>Name:</b> " . strtolower($k) . "<br/><b>Path:</b> " . $r->getPath()];
                         },
                         $this->router->getRouteCollection()->all()
                     ));

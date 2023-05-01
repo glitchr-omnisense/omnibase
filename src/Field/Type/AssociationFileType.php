@@ -16,6 +16,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use Error;
+use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -28,6 +29,8 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Traversable;
 
 class AssociationFileType extends AbstractType implements DataMapperInterface
 {
@@ -36,38 +39,38 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator = null;
+    protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     /**
      * @var FormFactory
      */
-    protected $formFactory = null;
+    protected ?FormFactory $formFactory = null;
 
 
     /**
      * @var FileService
      */
-    protected $fileService = null;
+    protected mixed $fileService = null;
 
     /**
      * @var EntityHydrator
      */
-    protected $entityHydrator = null;
+    protected ?EntityHydrator $entityHydrator = null;
 
     /**
      * @var MediaService
      */
-    protected $mediaService = null;
+    protected ?MediaService $mediaService = null;
 
     /**
      * @var PropertyAccessor
      */
-    protected $propertyAccessor = null;
+    protected ?PropertyAccessor $propertyAccessor = null;
 
     /**
      * @var AdminUrlGenerator
      */
-    protected $adminUrlGenerator = null;
+    protected ?AdminUrlGenerator $adminUrlGenerator = null;
 
     public function getBlockPrefix(): string
     {
@@ -124,19 +127,19 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             if (is_instanceof($value, AvatarType::class)) {
                 return $value;
             }
-            throw new \Exception("Option \"form_type\" must inherit from FileType");
+            throw new Exception("Option \"form_type\" must inherit from FileType");
         });
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
             if ($value === null) {
-                throw new \Exception("Option \"class\" must be defined");
+                throw new Exception("Option \"class\" must be defined");
             }
             return $value;
         });
 
         $resolver->setNormalizer('entity_file', function (Options $options, $value) {
             if ($value === null) {
-                throw new \Exception("Option \"entity_file\" must be pointing to the file field");
+                throw new Exception("Option \"entity_file\" must be pointing to the file field");
             }
             return $value;
         });
@@ -227,11 +230,11 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
     }
 
-    public function mapFormsToData(\Traversable $forms, &$viewData): void
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $parentForm = current(iterator_to_array($forms))->getParent();
         if ($parentForm?->getData() instanceof PersistentCollection &&
@@ -247,7 +250,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
         $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["data_class"]);
         if (!$classMetadata) {
-            throw new \Exception("Entity \"" . $options['data_class'] . "\" not found.");
+            throw new Exception("Entity \"" . $options['data_class'] . "\" not found.");
         }
 
         $newData = new ArrayCollection();

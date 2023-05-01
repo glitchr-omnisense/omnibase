@@ -4,11 +4,13 @@ namespace Base\Subscriber;
 
 use Base\Entity\User as BaseUser;
 use App\Repository\UserRepository;
+use Base\Service\LocalizerInterface;
 use Base\Service\ReferrerInterface;
 use App\Entity\User;
 
 use Base\Security\LoginFormAuthenticator;
 
+use DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
@@ -40,67 +42,67 @@ class SecuritySubscriber implements EventSubscriberInterface
     /**
      * @var RequestStack
      */
-    private $requestStack;
+    private RequestStack $requestStack;
 
     /**
      * @var TokenStorageInterface
      */
-    private $tokenStorage;
+    private TokenStorageInterface $tokenStorage;
 
     /**
      * @var RouterInterface
      */
-    private $router;
+    private RouterInterface $router;
 
     /**
      * @var UserRepository
      */
-    private $userRepository;
+    private UserRepository $userRepository;
 
     /**
      * @var AuthorizationChecker
      */
-    private $authorizationChecker;
+    private AuthorizationChecker $authorizationChecker;
 
     /**
      * @var LauncherInterface
      */
-    private $launcher;
+    private LauncherInterface $launcher;
 
     /**
-     * @var MaintenanceProvider
+     * @var MaintenanceProviderInterface
      */
-    private $maintenanceProvider;
+    private MaintenanceProviderInterface $maintenanceProvider;
 
     /**
-     * @var Profiler
+     * @var ?Profiler
      */
-    private $profiler;
+    private ?Profiler $profiler;
 
     /**
-     * @var Referrer
+     * @var ReferrerInterface
      */
-    private $referrer;
+    private ReferrerInterface $referrer;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    private $parameterBag;
+    private ParameterBagInterface $parameterBag;
 
     /**
-     * @var SettingBag
+     * @var SettingBagInterface
      */
-    private $settingBag;
+    private SettingBagInterface $settingBag;
 
     /**
-     * @var Localizer
+     * @var LocalizerInterface
      */
-    private $localizer;
+    private LocalizerInterface $localizer;
 
     /**
-     * @var Translator
+     * @var TranslatorInterface
      */
-    private $translator;
+    private TranslatorInterface $translator;
 
     public function __construct(
         UserRepository               $userRepository,
@@ -163,7 +165,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         } // Special case for _wdt
 
         $token = $this->tokenStorage->getToken();
-        $user = $token ? $token->getUser() : null;
+        $user = $token?->getUser();
 
         //
         // Redirect if basic access not granted
@@ -209,9 +211,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             }
 
             if ($this->router->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND")) {
-                if (!$isSecurityRoute) {
-                    throw new NotFoundHttpException();
-                }
+                throw new NotFoundHttpException();
             }
 
             //
@@ -247,12 +247,8 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $response = $routeRestriction ? $this->router->redirect(first($routeRestriction) ?? $this->router->getRoute(RescueFormAuthenticator::PENDING_ROUTE)) : null;
                 $response ??= $this->router->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
-                if ($event) {
-                    $event->setResponse($response);
-                }
-                if ($event) {
-                    $event->stopPropagation();
-                }
+                $event->setResponse($response);
+                $event->stopPropagation();
 
                 return false;
             } elseif ($specialGrant) {
@@ -274,7 +270,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         /**
          * @var User
          */
-        $user = $token ? $token->getUser() : null;
+        $user = $token?->getUser();
         if (!$user instanceof BaseUser) {
             return;
         }
@@ -364,7 +360,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         if (!($user->isActive())) {
-            $user->poke(new \DateTime("now"));
+            $user->poke(new DateTime("now"));
             $this->userRepository->flush($user);
         }
     }

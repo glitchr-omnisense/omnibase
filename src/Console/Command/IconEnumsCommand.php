@@ -4,6 +4,7 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 
+use ReflectionClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -21,7 +22,7 @@ class IconEnumsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
+        $baseLocation = dirname((new ReflectionClass('Base\\BaseBundle'))->getFileName());
         $enumRestriction = $input->getOption('enum') ?? "";
         $enums = array_merge(
             BaseBundle::getInstance()->getAllClasses($baseLocation."/Enum"),

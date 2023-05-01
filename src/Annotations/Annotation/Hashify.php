@@ -39,8 +39,8 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class Hashify extends AbstractAnnotation
 {
-    protected $data;
-    protected $nullable;
+    protected array $data;
+    protected mixed $nullable;
     protected $reference;
 
     public bool $random;

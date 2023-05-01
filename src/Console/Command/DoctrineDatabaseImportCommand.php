@@ -3,7 +3,9 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
+use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Notifier\NotifierInterface;
 use Base\Serializer\Encoder\ExcelEncoder;
 
 use Base\Database\Entity\EntityHydrator;
@@ -40,7 +42,7 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 //   his issue: Either explicitly call EntityManager#persist() on this unknown entity or configure cascade persist this association in the mapping for example @ManyTo
 //   One(..,cascade={"persist"}).
 
-#[AsCommand(name:'doctrine:database:import', aliases:[], description:'This command allows to import data from an XLS file into the database')]
+#[AsCommand(name: 'doctrine:database:import', aliases: [], description: 'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
 {
     public const OFFSET = 2;
@@ -51,43 +53,45 @@ class DoctrineDatabaseImportCommand extends Command
     protected $entityManager;
 
     /**
-     * @var EntityHydrator
+     * @var EntityHydratorInterface
      */
-    protected $entityHydrator;
+    protected EntityHydratorInterface $entityHydrator;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
-    public const UNKNOWN_STATE       = -1;
-    public const VALID_ENTITY        =  0;
-    public const FIELD_REQUIRED      =  1;
-    public const PARENT_NOT_FOUND    =  2;
-    public const ALREADY_IN_DATABASE =  3;
+    public const UNKNOWN_STATE = -1;
+    public const VALID_ENTITY = 0;
+    public const FIELD_REQUIRED = 1;
+    public const PARENT_NOT_FOUND = 2;
+    public const ALREADY_IN_DATABASE = 3;
 
     /**
-     * @var Notifier
+     * @var NotifierInterface
      */
-    protected $notifier;
+    protected NotifierInterface $notifier;
 
     /**
      * @var Serializer
      */
-    protected $serializer;
+    protected Serializer $serializer;
+
     public function __construct(
-        LocalizerInterface $localizer,
-        TranslatorInterface $translator,
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        EntityHydrator $entityHydrator,
+        LocalizerInterface       $localizer,
+        TranslatorInterface      $translator,
+        EntityManagerInterface   $entityManager,
+        ParameterBagInterface    $parameterBag,
+        EntityHydrator           $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator,
-        Notifier $notifier
-    ) {
+        Notifier                 $notifier
+    )
+    {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
 
         $this->entityHydrator = $entityHydrator;
-        $this->notifier       = $notifier;
+        $this->notifier = $notifier;
 
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->classMetadataManipulator->setGlobalTrackingPolicy(ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT);
@@ -104,12 +108,12 @@ class DoctrineDatabaseImportCommand extends Command
             $propertyPath = trim(explode('\n', $propertyPath)[0]); // Only keeps headline
             $fieldName = explodeByArray([":", "["], $propertyPath)[0];
             if (preg_match('/(.*)\:explode\((.*)\)(.*)/', $propertyPath, $matches)) {
-                $propertyPath   = $matches[1].$matches[3] ?? "";
+                $propertyPath = $matches[1] . $matches[3] ?? "";
                 $entrySeparator = str_split($matches[2]);
 
                 if (!is_array($entry)) {
                     $entry = array_filter(array_map(
-                        fn ($v) => trim(str_strip(trim($v), $entrySeparator)),
+                        fn($v) => trim(str_strip(trim($v), $entrySeparator)),
                         explodeByArray($entrySeparator, str_strip(trim($entry), $entrySeparator))
                     ));
                 }
@@ -117,11 +121,11 @@ class DoctrineDatabaseImportCommand extends Command
 
             $propertyName = preg_replace("/\:[^\.]*/", "", $propertyPath);
             if (substr_count($propertyName, "[") > 1) {
-                throw new Exception("Backets \"[]\" are expected to appear only once at the end.. \"".$propertyName."\"");
+                throw new Exception("Backets \"[]\" are expected to appear only once at the end.. \"" . $propertyName . "\"");
             }
 
             if (preg_match('/(.+)(?:\[(.*?)\])(?:\((.)\))*(.*)/', $propertyPath, $matches)) {
-                $propertyPath = str_replace(["[", "]"], [".", ""], $matches[1].$matches[4] ?? "");
+                $propertyPath = str_replace(["[", "]"], [".", ""], $matches[1] . $matches[4] ?? "");
                 $propertyName = $matches[2] ?? null;
                 $fieldSeparator = $matches[3] ?? null;
 
@@ -130,7 +134,7 @@ class DoctrineDatabaseImportCommand extends Command
                 $classMetadata = $this->entityManager->getClassMetadata($entityName);
 
                 if (!$classMetadata->hasAssociation($this->classMetadataManipulator->getFieldName($classMetadata, $subFieldName))) {
-                    throw new Exception("Field \"".$subFieldName."\" is expected to be an association.");
+                    throw new Exception("Field \"" . $subFieldName . "\" is expected to be an association.");
                 }
 
                 $isToManySide = in_array($entityMapping["type"], [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
@@ -190,19 +194,19 @@ class DoctrineDatabaseImportCommand extends Command
             $path = $input->getArgument("path");
         }
 
-        $notify       = $input->getOption("notify");
+        $notify = $input->getOption("notify");
         if (!$notify) {
             $this->notifier->disable();
         }
 
-        $force        = $input->getOption("force");
-        $extension    = $input->getOption("extension");
-        $batch        = $input->getOption("batch");
-        $onTheFly        = $input->getOption("on-the-fly");
+        $force = $input->getOption("force");
+        $extension = $input->getOption("extension");
+        $batch = $input->getOption("batch");
+        $onTheFly = $input->getOption("on-the-fly");
         $spreadsheets = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
 
-        $entries      = (int) $input->getOption("entries");
-        $skip         = (int) $input->getOption("skip");
+        $entries = (int)$input->getOption("entries");
+        $skip = (int)$input->getOption("skip");
 
         if (!$entries) {
             $entries = null;
@@ -210,9 +214,9 @@ class DoctrineDatabaseImportCommand extends Command
 
         $output->writeln("");
         if ($path) {
-            $output->writeln(' <info>You have just selected:</info> '.$path);
+            $output->writeln(' <info>You have just selected:</info> ' . $path);
         } else {
-            $helper   = $this->getHelper('question');
+            $helper = $this->getHelper('question');
             $question = new Question(' > ');
 
             $output->writeln(' <info>Please enter the location of your file (either local path or url)</info>: ');
@@ -225,16 +229,19 @@ class DoctrineDatabaseImportCommand extends Command
         $mimeTypes = new MimeTypes();
 
         $extension = $extension ?? $mimeTypes->getExtensions($mimeType)[0] ?? null;
-        switch($extension) {
+        switch ($extension) {
             case "xml":
-            case "xls": case "xlsx": case "xlsm":
+            case "xls":
+            case "xlsx":
+            case "xlsm":
                 $rawData = $this->serializer->decode(file_get_contents2($path), $extension);
                 break;
 
-            case "csv": case "txt":
+            case "csv":
+            case "txt":
                 $rawData = $this->serializer->decode(file_get_contents2($path), 'csv');
 
-                // no break
+            // no break
             default:
                 throw new Exception("File extension couldn't be determine.. Please use \"--extension\" option.");
         }
@@ -246,24 +253,24 @@ class DoctrineDatabaseImportCommand extends Command
             $question = new ChoiceQuestion(' <info>Please choose which spreadsheet to process </info>: (separated with ,)', array_keys($rawData));
             $question->setMultiselect(true);
 
-            $spreadsheets = array_map(fn ($i) => array_search($i, array_keys($rawData)), $helper->ask($input, $output, $question));
+            $spreadsheets = array_map(fn($i) => array_search($i, array_keys($rawData)), $helper->ask($input, $output, $question));
         }
 
         //
         // Import required spreadsheets
-        $baseClass  = [];
+        $baseClass = [];
 
-        $entities   = [];
+        $entities = [];
         $entityData = [];
 
-        $entityStates         = [];
-        $entityUniqueKeys     = [];
+        $entityStates = [];
+        $entityUniqueKeys = [];
         $entityRequiredFields = [];
 
         // Shrink and restrict according to options
         $spreadsheetKeys = [];
         if ($spreadsheets !== null) {
-            $spreadsheetKeys = array_filter(array_keys($rawData), fn ($id) => !in_array($id, $spreadsheets), ARRAY_FILTER_USE_KEY);
+            $spreadsheetKeys = array_filter(array_keys($rawData), fn($id) => !in_array($id, $spreadsheets), ARRAY_FILTER_USE_KEY);
         }
 
         $rawData = array_key_removes($rawData, ...$spreadsheetKeys);
@@ -275,28 +282,28 @@ class DoctrineDatabaseImportCommand extends Command
         // Process spreadsheet
         $output->writeln(' Normalizing rows..');
         $totalData = 0;
-        $counter   = 0;
+        $counter = 0;
         foreach ($rawData as $spreadsheet => $entry) {
             $parentThread = null;
 
-            $entities[$spreadsheet]   = [];
+            $entities[$spreadsheet] = [];
             $entityData[$spreadsheet] = [];
 
-            $entityStates[$spreadsheet]         = [];
-            $entityUniqueKeys[$spreadsheet]     = [];
+            $entityStates[$spreadsheet] = [];
+            $entityUniqueKeys[$spreadsheet] = [];
             $entityRequiredFields[$spreadsheet] = [];
 
             //
             // Import type
             $baseName = array_key_first($entry[0] ?? []);
-            $baseClass[$spreadsheet] =  $baseName;
+            $baseClass[$spreadsheet] = $baseName;
             if (!$this->classMetadataManipulator->isEntity($baseName)) {
                 $output->section()->writeln(" <warning>* Spreadsheet \"$spreadsheet\" is ignored, no valid entity found</warning>\n");
                 continue;
             }
 
-            $entities[$spreadsheet][$baseName]    ??= [];
-            $entityData[$spreadsheet][$baseName]  ??= [];
+            $entities[$spreadsheet][$baseName] ??= [];
+            $entityData[$spreadsheet][$baseName] ??= [];
 
             $entityStates        [$spreadsheet][$baseName] ??= [];
             $entityUniqueKeys    [$spreadsheet][$baseName] ??= [];
@@ -321,11 +328,11 @@ class DoctrineDatabaseImportCommand extends Command
 
             //
             // Clean up empty fields
-            $rawData[$spreadsheet] = array_filter_recursive($entry, fn ($d) => $d !== null);
+            $rawData[$spreadsheet] = array_filter_recursive($entry, fn($d) => $d !== null);
 
             // Process them
             foreach ($rawData[$spreadsheet] as &$data) {
-                if ($counter < $skip || ($entries !== null && $counter > $entries+$skip-1)) {
+                if ($counter < $skip || ($entries !== null && $counter > $entries + $skip - 1)) {
                     $counter++;
                     continue;
                 }
@@ -335,9 +342,9 @@ class DoctrineDatabaseImportCommand extends Command
                     $entityName = $discriminatorMap[$data[$baseName] ?? array_flip($discriminatorMap)[$baseName]] ?? null;
 
                     if (is_a($baseName, first($discriminatorMap))) {
-                        throw new Exception("Entity \"".$baseName."\" doesn't inherit from \"".first($discriminatorMap)."\"");
+                        throw new Exception("Entity \"" . $baseName . "\" doesn't inherit from \"" . first($discriminatorMap) . "\"");
                     } elseif (!array_key_exists($discriminatorEntry, $discriminatorMap)) {
-                        throw new Exception("Discriminatory entry \"".$discriminatorEntry."\" not found in the discriminator list of \"".first($discriminatorMap)."\".. something wrong ?");
+                        throw new Exception("Discriminatory entry \"" . $discriminatorEntry . "\" not found in the discriminator list of \"" . first($discriminatorMap) . "\".. something wrong ?");
                     }
                 }
 
@@ -349,7 +356,7 @@ class DoctrineDatabaseImportCommand extends Command
             }
         }
 
-        $output->writeln(' Hydrating entities..'.($onTheFly ? " and import them on the fly" : null));
+        $output->writeln(' Hydrating entities..' . ($onTheFly ? " and import them on the fly" : null));
         $progressBar = $totalData ? new ProgressBar($output, $totalData) : null;
 
         $entityParentColumn = null;
@@ -358,14 +365,12 @@ class DoctrineDatabaseImportCommand extends Command
         $counter = 0;
         foreach ($rawData as $spreadsheet => $__) {
             foreach ($entityData[$spreadsheet] ?? [] as $baseName => &$entries) {
-                $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $baseName");
+                $output->writeln("\n * <info>Spreadsheet \"" . $spreadsheet . "\"</info>: $baseName");
 
                 //
                 // Loop over entries
                 foreach ($entries as $iEntry => &$_) {
-                    if ($progressBar) {
-                        $progressBar->advance();
-                    }
+                    $progressBar?->advance();
                     $counter++;
 
                     $keyDepth = [];
@@ -383,7 +388,7 @@ class DoctrineDatabaseImportCommand extends Command
                         $targetEntity[$d] = $targetName;
 
                         if (is_array($v)) {
-                            $v = array_transforms($fn, $v, $d+1);
+                            $v = array_transforms($fn, $v, $d + 1);
                         }
 
                         if (!$v && $v !== false) {
@@ -400,13 +405,13 @@ class DoctrineDatabaseImportCommand extends Command
                         if ($special) {
                             $resolvedFieldPath = $this->classMetadataManipulator->resolveFieldPath($entityName, $fieldPath);
                             if ($resolvedFieldPath === null) {
-                                throw new Exception("Cannot resolve field path \"$fieldPath\" for \"$entityName\" for entry #".($iEntry+self::OFFSET+1));
+                                throw new Exception("Cannot resolve field path \"$fieldPath\" for \"$entityName\" for entry #" . ($iEntry + self::OFFSET + 1));
                             }
 
                             $fieldName = explode(".", $resolvedFieldPath);
                             $fieldName = end($fieldName);
 
-                            $targetName = $targetEntity[$d-1] ?? $entityName;
+                            $targetName = $targetEntity[$d - 1] ?? $entityName;
                             if (!array_key_exists($targetName, $entityUniqueKeys[$spreadsheet])) {
                                 $entityUniqueKeys[$spreadsheet][$targetName] = [];
                             }
@@ -441,24 +446,24 @@ class DoctrineDatabaseImportCommand extends Command
                                                 if ($isToOneSide) {
                                                     $v = $targetRepository->findBy($vBak);
                                                     if (count($v) > 1) {
-                                                        throw new Exception("Failed to parse \"".$targetName."\";\nduplicate entity returned with \"".$fieldName."\" for entry #".($iEntry+self::OFFSET+1)."\n(did you forgot to explode the input string ? double check case ?)");
+                                                        throw new Exception("Failed to parse \"" . $targetName . "\";\nduplicate entity returned with \"" . $fieldName . "\" for entry #" . ($iEntry + self::OFFSET + 1) . "\n(did you forgot to explode the input string ? double check case ?)");
                                                     }
 
                                                     $v = first($v);
                                                 } else {
                                                     $v = array_filter(array_map(function ($e) use ($fieldName, $targetName, $targetRepository, $iEntry) {
                                                         if (!is_array($e)) {
-                                                            throw new Exception("Failed to parse \"".$targetName."\";\nunexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET+1)."\n(did you forgot to explode the input string ? double check case ?)");
+                                                            throw new Exception("Failed to parse \"" . $targetName . "\";\nunexpected value \"" . serialize($e) . "\" for entry #" . ($iEntry + self::OFFSET + 1) . "\n(did you forgot to explode the input string ? double check case ?)");
                                                         }
 
                                                         $e = array_filter($e);
                                                         if (empty($e)) {
-                                                            throw new Exception("Failed to find entity for \"".$targetName."::$fieldName\";\nunexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET+1)."\n(did you forgot to explode the input string ? double check case ?)");
+                                                            throw new Exception("Failed to find entity for \"" . $targetName . "::$fieldName\";\nunexpected value \"" . serialize($e) . "\" for entry #" . ($iEntry + self::OFFSET + 1) . "\n(did you forgot to explode the input string ? double check case ?)");
                                                         }
 
                                                         $findBy = $targetRepository->findBy($e);
                                                         if (empty($findBy)) {
-                                                            throw new Exception("Failed to find entity for \"".$targetName."::$fieldName\";\ninput was \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET+1)."\n(did you forgot to explode the input string ? double check case ?)");
+                                                            throw new Exception("Failed to find entity for \"" . $targetName . "::$fieldName\";\ninput was \"" . serialize($e) . "\" for entry #" . ($iEntry + self::OFFSET + 1) . "\n(did you forgot to explode the input string ? double check case ?)");
                                                         }
 
                                                         return first($findBy);
@@ -466,7 +471,7 @@ class DoctrineDatabaseImportCommand extends Command
                                                 }
 
                                                 if ($v === null) {
-                                                    throw new Exception("Failed to find \"".$targetName."\" with parameters \"".serialize($vBak)."\" for entry #".($iEntry+self::OFFSET+1));
+                                                    throw new Exception("Failed to find \"" . $targetName . "\" with parameters \"" . serialize($vBak) . "\" for entry #" . ($iEntry + self::OFFSET + 1));
                                                 }
                                             }
                                         }
@@ -476,28 +481,28 @@ class DoctrineDatabaseImportCommand extends Command
                                     case "enum":
 
                                         $special = str_lstrip($special, "enum(");
-                                        $enumType = substr($special, 0, strlen($special)-1);
+                                        $enumType = substr($special, 0, strlen($special) - 1);
 
                                         $typeOfField = $this->classMetadataManipulator->getTargetClass($targetName, $fieldName);
                                         if (!is_instanceof($typeOfField, $enumType)) {
-                                            throw new Exception("Incompatibility between EnumType provided \"".$enumType."\" and database type \"".$typeOfField."\" for entry #".($iEntry+self::OFFSET+1));
+                                            throw new Exception("Incompatibility between EnumType provided \"" . $enumType . "\" and database type \"" . $typeOfField . "\" for entry #" . ($iEntry + self::OFFSET + 1));
                                         }
 
                                         if (is_instanceof($enumType, SetType::class)) {
                                             $v = array_map(function ($k) use ($enumType, $iEntry) {
                                                 $value = $enumType::getValue($k);
                                                 if (!$value) {
-                                                    throw new Exception("Invalid enum key \"".$k."\" provided for EnumType \"".$enumType."\" for entry #".($iEntry+self::OFFSET_TOP+1));
+                                                    throw new Exception("Invalid enum key \"" . $k . "\" provided for EnumType \"" . $enumType . "\" for entry #" . ($iEntry + self::OFFSET_TOP + 1));
                                                 }
                                                 return $value;
                                             }, $v);
                                         } elseif (is_instanceof($enumType, EnumType::class)) {
-                                            $v = $enumType::getValue($v) ;
+                                            $v = $enumType::getValue($v);
                                             if (!$v) {
-                                                throw new Exception("Invalid enum key provided for EnumType \"".$enumType."\" for entry #".($iEntry+self::OFFSET+1));
+                                                throw new Exception("Invalid enum key provided for EnumType \"" . $enumType . "\" for entry #" . ($iEntry + self::OFFSET + 1));
                                             }
                                         } else {
-                                            throw new Exception("Class must be either \"".EnumType::class."\" or \"".SetType::class."\" for entry #".($iEntry+self::OFFSET+1));
+                                            throw new Exception("Class must be either \"" . EnumType::class . "\" or \"" . SetType::class . "\" for entry #" . ($iEntry + self::OFFSET + 1));
                                         }
 
                                         break;
@@ -519,15 +524,16 @@ class DoctrineDatabaseImportCommand extends Command
                             }
                         }
 
-                        $hydrationOptions = EntityHydrator::CLASS_METHODS|EntityHydrator::OBJECT_PROPERTIES;
+                        $hydrationOptions = EntityHydrator::CLASS_METHODS | EntityHydrator::OBJECT_PROPERTIES;
                         if ($state == self::FIELD_REQUIRED) {
                             $hydrationOptions |= EntityHydrator::PREVENT_ASSOCIATIONS;
                         }
-                        $entity = $this->entityHydrator->hydrate($entityName, $entry, [], );
+                        $entity = $this->entityHydrator->hydrate($entityName, $entry, [], $hydrationOptions);
 
                         //
                         // Check if duplicates found in the processed list
                         foreach ($entityUniqueKeys[$spreadsheet][$entityName] ?? [] as $_) {
+
                             list($targetName, $resolvedFieldPath) = $_;
                             $fieldPath = explode(".", $resolvedFieldPath);
 
@@ -581,13 +587,13 @@ class DoctrineDatabaseImportCommand extends Command
                                 }
 
                                 $counter++;
-                            } catch (\Exception $e) {
-                                $msg = " Failed to write ".$this->translator->transEntity($entity)."(".$entity.") for entry #".($iEntry+self::OFFSET+1);
+                            } catch (Exception $e) {
+                                $msg = " Failed to write " . $this->translator->transEntity($entity) . "(" . $entity . ") for entry #" . ($iEntry + self::OFFSET + 1);
                                 $output->writeln('');
                                 $output->writeln('');
-                                $output->writeln('<red,bkg>'.str_blankspace(strlen($msg)));
+                                $output->writeln('<red,bkg>' . str_blankspace(strlen($msg)));
                                 $output->writeln($msg);
-                                $output->writeln(str_blankspace(strlen($msg)).'</red,bkg>');
+                                $output->writeln(str_blankspace(strlen($msg)) . '</red,bkg>');
 
                                 throw $e;
                             }
@@ -600,60 +606,58 @@ class DoctrineDatabaseImportCommand extends Command
             // Check if duplicates found in the entity data list
             foreach ($entityUniqueValues as $targetName => $_) {
                 foreach ($_ as $uniqueKey => $values) {
-                    $occurences = array_filter(array_count_values($values), fn ($v) => $v > 1);
+                    $occurences = array_filter(array_count_values($values), fn($v) => $v > 1);
                     $duplicates = !empty($occurences);
                     if ($duplicates) {
-                        throw new Exception("Duplicate entries \"".implode(",", array_unique(array_keys($occurences)))."\" found for $targetName::$".$uniqueKey ."(for entry #".($iEntry+self::OFFSET+1));
+                        throw new Exception("Duplicate entries \"" . implode(",", array_unique(array_keys($occurences))) . "\" found for $targetName::$" . $uniqueKey . "(for entry #" . ($iEntry + self::OFFSET + 1));
                     }
                 }
             }
         }
 
-        if ($progressBar) {
-            $progressBar->finish();
-        }
+        $progressBar?->finish();
         $output->writeln('');
         $output->writeln('');
 
         $totalNewEntries = 0;
-        $output->writeln(' <info>New data found: </info>'.implode(", ", array_map(function ($spreadsheet) use (&$totalNewEntries, $baseClass, $entityData, $entityStates) {
-            $countData = 0;
-            foreach (array_keys($entityData[$spreadsheet]) as $baseName) {
-                $countData    += count($entityData[$spreadsheet][$baseName] ?? []);
-            }
+        $output->writeln(' <info>New data found: </info>' . implode(", ", array_map(function ($spreadsheet) use (&$totalNewEntries, $baseClass, $entityData, $entityStates) {
+                $countData = 0;
+                foreach (array_keys($entityData[$spreadsheet]) as $baseName) {
+                    $countData += count($entityData[$spreadsheet][$baseName] ?? []);
+                }
 
-            $countNewData = 0;
-            foreach (array_keys($entityStates[$spreadsheet]) as $baseName) {
-                $countNewData += count(array_filter($entityStates[$spreadsheet][$baseName] ?? [], fn ($s) => $s == self::VALID_ENTITY));
-            }
+                $countNewData = 0;
+                foreach (array_keys($entityStates[$spreadsheet]) as $baseName) {
+                    $countNewData += count(array_filter($entityStates[$spreadsheet][$baseName] ?? [], fn($s) => $s == self::VALID_ENTITY));
+                }
 
-            $totalNewEntries += $countNewData;
+                $totalNewEntries += $countNewData;
 
-            $count  = $countData > 0 ? $countNewData."/".$countData : "0";
-            $plural = ($countNewData > 1);
+                $count = $countData > 0 ? $countNewData . "/" . $countData : "0";
+                $plural = ($countNewData > 1);
 
-            return $count." <ln>".lcfirst($this->translator->transEntity($baseClass[$spreadsheet], null, $plural ? Translator::NOUN_PLURAL : Translator::NOUN_SINGULAR)) .'</ln>';
-        }, array_keys(array_filter($entityData)))));
+                return $count . " <ln>" . lcfirst($this->translator->transEntity($baseClass[$spreadsheet], null, $plural ? Translator::NOUN_PLURAL : Translator::NOUN_SINGULAR)) . '</ln>';
+            }, array_keys(array_filter($entityData)))));
 
         foreach ($entityData as $spreadsheet => $___) {
             foreach ($___ as $baseName => $__) {
                 $baseNameStr = $this->translator->transEntity($baseName);
 
-                $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $baseName", OutputInterface::VERBOSITY_VERBOSE);
+                $output->writeln("\n * <info>Spreadsheet \"" . $spreadsheet . "\"</info>: $baseName", OutputInterface::VERBOSITY_VERBOSE);
 
                 $totalEntries = count($entities[$spreadsheet][$baseName]);
                 foreach ($entities[$spreadsheet][$baseName] ?? [] as $i => $entity) {
                     $state = $entityStates[$spreadsheet][$baseName][$i] ?? self::UNKNOWN_STATE;
-                    $spacer = str_blankspace(strlen($totalEntries) - strlen($i+1));
+                    $spacer = str_blankspace(strlen($totalEntries) - strlen($i + 1));
                     $entityStr = $this->translator->transEntity($entity);
 
-                    switch($state) {
+                    switch ($state) {
                         case self::VALID_ENTITY:
-                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <ln>".$entityStr.": </ln><info>\"". $entity."\"</info> ".($onTheFly ? " just got imported on the fly" : "is ready for import")." !");
+                            $output->writeln("\t" . $baseNameStr . " #" . ($i + $skip + 1) . $spacer . " / <ln>" . $entityStr . ": </ln><info>\"" . $entity . "\"</info> " . ($onTheFly ? " just got imported on the fly" : "is ready for import") . " !");
                             break;
 
                         case self::ALREADY_IN_DATABASE:
-                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <warning>".$entityStr.": </warning> \"". $entity."\" already exists in database", OutputInterface::VERBOSITY_VERBOSE);
+                            $output->writeln("\t" . $baseNameStr . " #" . ($i + $skip + 1) . $spacer . " / <warning>" . $entityStr . ": </warning> \"" . $entity . "\" already exists in database", OutputInterface::VERBOSITY_VERBOSE);
                             break;
 
                         default:
@@ -666,7 +670,7 @@ class DoctrineDatabaseImportCommand extends Command
                                 $msg = "unknown reason";
                             }
 
-                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <red>".$entityStr.": </red>\"". $entity."\" is invalid  <warning>(hint:\"".$msg."\")</warning> and cannot be imported", OutputInterface::VERBOSITY_VERBOSE);
+                            $output->writeln("\t" . $baseNameStr . " #" . ($i + $skip + 1) . $spacer . " / <red>" . $entityStr . ": </red>\"" . $entity . "\" is invalid  <warning>(hint:\"" . $msg . "\")</warning> and cannot be imported", OutputInterface::VERBOSITY_VERBOSE);
                     }
                 }
             }
@@ -676,9 +680,9 @@ class DoctrineDatabaseImportCommand extends Command
 
         if ($totalNewEntries == 0) {
             $msg = ' [OK] Nothing to update - your database is already in sync with the current dataset. ';
-            $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+            $output->writeln('<info,bkg>' . str_blankspace(strlen($msg)));
             $output->writeln($msg);
-            $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+            $output->writeln(str_blankspace(strlen($msg)) . '</info,bkg>');
 
             $output->section()->writeln("");
             return Command::SUCCESS;
@@ -688,7 +692,7 @@ class DoctrineDatabaseImportCommand extends Command
             if ($force) {
                 $apply = "y";
             } else {
-                $helper   = $this->getHelper('question');
+                $helper = $this->getHelper('question');
                 $question = new Question(' > ');
 
                 $output->writeln(' <info>Do you want to import these entries into the database ? (yes/no)</info> [<warning>no</warning>]: ');
@@ -701,7 +705,7 @@ class DoctrineDatabaseImportCommand extends Command
 
             $counter = 0;
             $progressBar = new ProgressBar($output, $totalNewEntries);
-            foreach ($entities as $spreadsheet => &$_) {
+            foreach ($entities as $spreadsheet => $_) {
                 foreach ($_ as $baseName => $entries) {
                     foreach ($entries as $i => $entity) {
                         $state = $entityStates[$spreadsheet][$baseName][$i] ?? self::UNKNOWN_STATE;
@@ -717,13 +721,13 @@ class DoctrineDatabaseImportCommand extends Command
                             }
 
                             $counter++;
-                        } catch (\Exception $e) {
-                            $msg = " Failed to write ".$this->translator->transEntity($entity)."(".$entity.")  ";
+                        } catch (Exception $e) {
+                            $msg = " Failed to write " . $this->translator->transEntity($entity) . "(" . $entity . ")  ";
                             $output->writeln('');
                             $output->writeln('');
-                            $output->writeln('<red,bkg>'.str_blankspace(strlen($msg)));
+                            $output->writeln('<red,bkg>' . str_blankspace(strlen($msg)));
                             $output->writeln($msg);
-                            $output->writeln(str_blankspace(strlen($msg)).'</red,bkg>');
+                            $output->writeln(str_blankspace(strlen($msg)) . '</red,bkg>');
 
                             throw $e;
                         }
@@ -737,12 +741,12 @@ class DoctrineDatabaseImportCommand extends Command
         }
 
         $output->section()->writeln("\n\n Updating database...");
-        $output->section()->writeln("\n\t <info>".$totalNewEntries."</info> entries were added\n");
+        $output->section()->writeln("\n\t <info>" . $totalNewEntries . "</info> entries were added\n");
 
         $msg = ' [OK] Database content imported successfully! ';
-        $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+        $output->writeln('<info,bkg>' . str_blankspace(strlen($msg)));
         $output->writeln($msg);
-        $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+        $output->writeln(str_blankspace(strlen($msg)) . '</info,bkg>');
 
         $output->section()->writeln("");
         return Command::SUCCESS;

@@ -3,6 +3,7 @@
 namespace Base\Validator;
 
 use Base\Service\Translator;
+use Base\Service\TranslatorInterface;
 use Base\Traits\BaseTrait;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
@@ -21,9 +22,9 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
     public string $constraintClass;
 
     /**
-     * @var Translator
+     * @var ?TranslatorInterface
      */
-    protected $translator;
+    protected ?TranslatorInterface $translator;
 
     public function __construct()
     {
@@ -34,12 +35,12 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
     public function setParameter(string $parameterName, ?string $parameterValue = null)
     {
         if ($this->buildViolation == null) {
-            throw new UnexpectedValueException("Please build violation before calling ".self::class."::setParameter.");
+            throw new UnexpectedValueException("Please build violation before calling " . self::class . "::setParameter.");
         }
 
         $this->buildViolation
-            ->setParameter("{{ ".$parameterName." }}", $parameterValue ?? "")
-            ->setParameter("{ ".$parameterName." }", $parameterValue ?? "");
+            ->setParameter("{{ " . $parameterName . " }}", $parameterValue ?? "")
+            ->setParameter("{ " . $parameterName . " }", $parameterValue ?? "");
 
         return $this;
     }
@@ -48,6 +49,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
     {
         return str_lstrip($this->context->getPropertyPath(), "data.");
     }
+
     public function getConstraintType()
     {
         return empty($this->getPropertyName()) ? "class" : "property";
@@ -59,6 +61,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
     }
 
     protected $buildViolation = null;
+
     public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface
     {
         $this->buildViolation = $this->context->buildViolation($this->formatIdentifier($constraint));

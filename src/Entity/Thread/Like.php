@@ -19,7 +19,7 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ * @DiscriminatorEntry( value = "abstract" )
  */
 class Like implements IconizeInterface
 {
@@ -27,6 +27,7 @@ class Like implements IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-thumbs-up"];
@@ -55,10 +56,12 @@ class Like implements IconizeInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $user;
+
     public function getUser(): ?User
     {
         return $this->user;
     }
+
     public function setUser(?User $user): self
     {
         $this->user = $user;
@@ -76,6 +79,7 @@ class Like implements IconizeInterface
     {
         return $this->thread;
     }
+
     public function setThread(?Thread $thread): self
     {
         $this->thread = $thread;
@@ -87,10 +91,12 @@ class Like implements IconizeInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $icon;
+
     public function getIcon(): ?string
     {
         return $this->icon;
     }
+
     public function setIcon(string $icon): self
     {
         $this->icon = $icon;

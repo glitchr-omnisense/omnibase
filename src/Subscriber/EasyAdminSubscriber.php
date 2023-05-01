@@ -19,21 +19,22 @@ use Base\Controller\Backend\AbstractCrudController;
 use Base\Entity\User\Notification;
 use Base\Routing\RouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
+use TypeError;
 
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
     /**
      * @var AdminContextProvider
      */
-    protected $adminContextProvider;
+    protected AdminContextProvider $adminContextProvider;
     /**
      * @var AdminUrlGenerator
      */
-    protected $adminUrlGenerator;
+    protected AdminUrlGenerator $adminUrlGenerator;
 
     public function __construct(RouterInterface $router, AdminContextProvider $adminContextProvider, AdminUrlGenerator $adminUrlGenerator)
     {
@@ -46,7 +47,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => [['onKernelRequest']],
+            KernelEvents::REQUEST => [['onKernelRequest']],
             KernelEvents::EXCEPTION => ['onKernelException'],
             AfterEntityUpdatedEvent::class => ['postEntityUpdate']
         ];
@@ -62,7 +63,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
     {
         $request->overrideGlobals();
 
-        $queryString = $request->getQueryString() ? "?".$request->getQueryString() : "";
+        $queryString = $request->getQueryString() ? "?" . $request->getQueryString() : "";
         return explode("?", $request->getRequestUri())[0] . $queryString;
     }
 
@@ -85,7 +86,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
         try {
             $entity = $this->adminContextProvider->getContext()->getEntity();
             $entityCrudController = AbstractCrudController::getCrudControllerFqcn($entity->getInstance());
-        } catch (\TypeError $e) {
+        } catch (TypeError $e) {
             return;
         }
 
@@ -113,17 +114,17 @@ class EasyAdminSubscriber implements EventSubscriberInterface
             return;
         }
         if (!$this->router->isDebug()) {
-            $request   = $e->getRequest();
+            $request = $e->getRequest();
             $exception = $e->getThrowable();
 
             $eaCanonicException = true;
-            switch(get_class($exception)) {
+            switch (get_class($exception)) {
                 case InvalidArgumentException::class:
                     $request->query->remove("crudControllerFqcn");
-                    // no break
+                // no break
                 case EntityNotFoundException::class:
                     $request->query->remove("entityId");
-                    // no break
+                // no break
                 case ForbiddenActionException::class:
                     if ($request->query->get("crudAction") !== null) {
                         $request->query->set("crudAction", "index");

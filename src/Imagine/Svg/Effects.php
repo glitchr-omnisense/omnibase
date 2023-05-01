@@ -2,30 +2,34 @@
 
 namespace Base\Imagine\Svg;
 
+use DOMDocument;
+use DOMElement;
 use Imagine\Effects\EffectsInterface;
 use Imagine\Exception\InvalidArgumentException;
 use Imagine\Exception\NotSupportedException;
 use Imagine\Image\Palette\Color\ColorInterface;
 use Imagine\Image\Palette\Color\RGB;
 use Imagine\Utils\Matrix;
+use function in_array;
+use function is_string;
 
 class Effects implements EffectsInterface
 {
     private const SVG_FILTER_ID_PREFIX = 'svgImagineFilterV1_';
 
     /**
-     * @var \DOMDocument
+     * @var DOMDocument
      */
-    private $document;
+    private DOMDocument $document;
 
-    public function __construct(\DOMDocument $document)
+    public function __construct(DOMDocument $document)
     {
         $this->document = $document;
     }
 
     public function gamma($correction): self
     {
-        $gamma = (float) $correction;
+        $gamma = (float)$correction;
 
         if ($gamma <= 0) {
             throw new InvalidArgumentException(sprintf('Invalid gamma correction value %s, must be a positive float or integer', var_export($correction, true)));
@@ -79,9 +83,9 @@ class Effects implements EffectsInterface
         $this->addFilterElement('feColorMatrix', [
             'type' => 'matrix',
             'values' => implode(' ', [
-                '1 0 0 0 '.$this->numberToString($color->getRed() / 255),
-                '0 1 0 0 '.$this->numberToString($color->getGreen() / 255),
-                '0 0 1 0 '.$this->numberToString($color->getBlue() / 255),
+                '1 0 0 0 ' . $this->numberToString($color->getRed() / 255),
+                '0 1 0 0 ' . $this->numberToString($color->getGreen() / 255),
+                '0 0 1 0 ' . $this->numberToString($color->getBlue() / 255),
                 '0 0 0 1 0',
             ]),
         ]);
@@ -105,7 +109,7 @@ class Effects implements EffectsInterface
 
     public function blur($sigma = 1): self
     {
-        $deviation = (float) $sigma;
+        $deviation = (float)$sigma;
 
         if ($deviation <= 0) {
             throw new InvalidArgumentException(sprintf('Invalid sigma %s, must be a positive float or integer', var_export($sigma, true)));
@@ -120,7 +124,7 @@ class Effects implements EffectsInterface
 
     public function brightness($brightness): self
     {
-        $intercept = ((int) $brightness) / 100;
+        $intercept = ((int)$brightness) / 100;
 
         if ($intercept < -1 || $intercept > 1) {
             throw new InvalidArgumentException(sprintf('Invalid brightness value %s, must be between -100 and 100', var_export($brightness, true)));
@@ -150,12 +154,12 @@ class Effects implements EffectsInterface
             'kernelUnitLength' => '1',
         ];
 
-        if (!\in_array((float) array_sum($matrix->getValueList()), [0.0, 1.0], true)) {
+        if (!in_array((float)array_sum($matrix->getValueList()), [0.0, 1.0], true)) {
             $attributes['divisor'] = '1';
         }
 
         if (3 !== $matrix->getWidth() || 3 !== $matrix->getHeight()) {
-            $attributes['order'] = $matrix->getWidth().' '.$matrix->getHeight();
+            $attributes['order'] = $matrix->getWidth() . ' ' . $matrix->getHeight();
         }
 
         $this->addFilterElement('feConvolveMatrix', $attributes);
@@ -178,17 +182,17 @@ class Effects implements EffectsInterface
     /**
      * Get the main filter element or create it if none is present.
      */
-    private function getSvgFilter(): \DOMElement
+    private function getSvgFilter(): DOMElement
     {
         $svg = $this->document->documentElement;
         $filter = null;
 
         if (
             1 === $svg->childNodes->length
-            && $svg->firstChild instanceof \DOMElement
+            && $svg->firstChild instanceof DOMElement
             && 'g' === $svg->firstChild->nodeName
             && preg_match(
-                '/^url\(#('.self::SVG_FILTER_ID_PREFIX.'[0-9a-f]{16})\)$/',
+                '/^url\(#(' . self::SVG_FILTER_ID_PREFIX . '[0-9a-f]{16})\)$/',
                 $svg->firstChild->getAttribute('filter'),
                 $matches
             )
@@ -196,11 +200,11 @@ class Effects implements EffectsInterface
             $id = $matches[1];
         } else {
             $group = $this->wrapSvg();
-            $id = self::SVG_FILTER_ID_PREFIX.bin2hex(substr(hash('sha256', $this->document->saveXML()), 0, 8));
-            $group->setAttribute('filter', 'url(#'.$id.')');
+            $id = self::SVG_FILTER_ID_PREFIX . bin2hex(substr(hash('sha256', $this->document->saveXML()), 0, 8));
+            $group->setAttribute('filter', 'url(#' . $id . ')');
         }
 
-        /** @var \DOMElement $element */
+        /** @var DOMElement $element */
         foreach ($this->document->getElementsByTagName('filter') as $element) {
             if ($element->getAttribute('id') === $id) {
                 return $element;
@@ -217,7 +221,7 @@ class Effects implements EffectsInterface
     /**
      * Add a group element that wraps all contents.
      */
-    private function wrapSvg(): \DOMElement
+    private function wrapSvg(): DOMElement
     {
         $svg = $this->document->documentElement;
         $group = $this->document->createElement('g');
@@ -236,12 +240,12 @@ class Effects implements EffectsInterface
      *
      * @param array<string|int,string|array<string|array<string>>> $attributes
      */
-    private function createElement(string $name, array $attributes): \DOMElement
+    private function createElement(string $name, array $attributes): DOMElement
     {
         $filter = $this->document->createElement($name);
 
         foreach ($attributes as $key => $value) {
-            if (\is_string($key)) {
+            if (is_string($key)) {
                 $filter->setAttribute($key, $value);
             } else {
                 $filter->appendChild($this->createElement($value[0], $value[1]));
@@ -252,9 +256,9 @@ class Effects implements EffectsInterface
     }
 
     /**
-     * @param int|float $number
+     * @param float|int $number
      */
-    private function numberToString($number): string
+    private function numberToString(float|int $number): string
     {
         return rtrim(rtrim(sprintf('%.7F', $number), '0'), '.');
     }

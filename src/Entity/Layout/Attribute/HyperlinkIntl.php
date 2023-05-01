@@ -36,6 +36,7 @@ class HyperlinkIntl implements TranslationInterface
      * @ORM\Column(type="array")
      */
     protected $value;
+
     public function getValue(): array
     {
         return $this->value !== null && !is_array($this->value) ? [$this->value] : $this->value ?? [];

@@ -24,14 +24,14 @@ class LocalizerSubscriber implements EventSubscriberInterface
     public const __TIMEZONE_IDENTIFIER__ = "TIMEZONE";
 
     /**
-     * @var Localizer
+     * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var TokenStorageInterface
@@ -41,8 +41,8 @@ class LocalizerSubscriber implements EventSubscriberInterface
     public function __construct(LocalizerInterface $localizer, RouterInterface $router, TokenStorageInterface $tokenStorage)
     {
         $this->localizer = $localizer;
-        $this->router         = $router;
-        $this->tokenStorage   = $tokenStorage;
+        $this->router = $router;
+        $this->tokenStorage = $tokenStorage;
     }
 
     public static function getSubscribedEvents(): array
@@ -119,7 +119,7 @@ class LocalizerSubscriber implements EventSubscriberInterface
 
             $this->localizer->setTimezone($timezone);
 
-            $country  = User::getCookie("country");
+            $country = User::getCookie("country");
             if ($country) {
                 $this->localizer->setCountry($country);
             }

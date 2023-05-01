@@ -2,26 +2,27 @@
 
 namespace Base\Database\Repository;
 
+use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 /**
  * @method Entity[]    findBy*(...array $customs,
  *      array $criteria, array ??array $orderBy = null, $limit = null, $offset = null)
  */
-
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
     /**
      * @var ClassMetadataCompletor
      */
-    protected $classMetadataCompletor;
+    protected ClassMetadataCompletor $classMetadataCompletor;
 
     /**
      * @var ServiceEntityParser
      */
-    protected $serviceParser;
+    protected ServiceEntityParser $serviceParser;
 
     public static function getFqcnEntityName()
     {
@@ -58,18 +59,22 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     {
         return $this->findOneById($id, $lockMode, $lockVersion);
     }
+
     public function findAll(): array
     {
         return $this->__call(__METHOD__, [])->getResult();
     }
+
     public function findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null): array
     {
         return $this->__call(__METHOD__, [$criteria, $orderBy, $limit, $offset])->getResult();
     }
+
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object
     {
         return $this->__call(__METHOD__, [$criteria, $orderBy]);
     }
+
     public function count(array $criteria): int
     {
         return $this->__call(__METHOD__, [$criteria]);
@@ -78,7 +83,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     public function flush($entity = null)
     {
         $entityFqcn = self::getFqcnEntityName();
-        $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn ($e) => $e instanceof $entityFqcn);
+        $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn($e) => $e instanceof $entityFqcn);
 
         if (count($entityList) || $entity === null) {
             $this->getEntityManager()->flush($entity);
@@ -89,7 +94,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     {
         if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
-            throw new \Exception("Repository \"".static::class."\" is expected \"".$this->_entityName."\" entity, you passed \"".$class."\"");
+            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $this->_entityName . "\" entity, you passed \"" . $class . "\"");
         }
 
         $this->getEntityManager()->persist($entity);

@@ -10,12 +10,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionConfigDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
+use Exception;
 use function Symfony\Component\Translation\t;
 
 class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
 {
-    protected $adminUrlGenerator;
-    protected $entityManager;
+    protected AdminUrlGenerator $adminUrlGenerator;
+    protected EntityManagerInterface $entityManager;
+
     protected function __construct(ActionConfigDto $actionConfigDto, AdminUrlGenerator $adminUrlGenerator, EntityManagerInterface $entityManager)
     {
         $this->dto = $actionConfigDto;
@@ -37,21 +39,21 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
     {
         if (Action::SEPARATOR === $actionName) {
             return Action::new(Action::SEPARATOR, "")
-                ->setCssClass('action-'.Action::SEPARATOR)
+                ->setCssClass('action-' . Action::SEPARATOR)
                 ->displayAsSeparator()
                 ->linkToCrudAction(Action::SEPARATOR);
         }
 
         if (Action::GROUP === $actionName) {
             return Action::new(Action::GROUP, ":::")
-                ->setCssClass('action-'.Action::GROUP)
+                ->setCssClass('action-' . Action::GROUP)
                 ->displayAsDropdown()
                 ->linkToCrudAction(Action::GROUP);
         }
 
         if (Action::SAVE_AND_RETURN === $actionName) {
             return Action::new(Action::SAVE_AND_RETURN, t(Crud::PAGE_EDIT === $pageName ? 'action.save' : 'action.create', domain: 'EasyAdminBundle'))
-                ->setCssClass('action-'.Action::SAVE_AND_RETURN)
+                ->setCssClass('action-' . Action::SAVE_AND_RETURN)
                 ->addCssClass('btn btn-primary action-save')
                 ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])
                 ->displayAsButton()
@@ -61,7 +63,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
 
         if (Action::SAVE_AND_CONTINUE === $actionName) {
             return Action::new(Action::SAVE_AND_CONTINUE, t(Crud::PAGE_EDIT === $pageName ? 'action.save_and_continue' : 'action.create_and_continue', domain: 'EasyAdminBundle'), 'fa-regular fa-edit')
-                ->setCssClass('action-'.Action::SAVE_AND_CONTINUE)
+                ->setCssClass('action-' . Action::SAVE_AND_CONTINUE)
                 ->addCssClass('btn btn-secondary action-save text-success')
                 ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])
                 ->displayAsButton()
@@ -71,7 +73,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
 
         if (Action::GOTO_PREV === $actionName) {
             return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'backoffice'))
-                ->setCssClass('action-'.Action::GOTO_PREV)
+                ->setCssClass('action-' . Action::GOTO_PREV)
                 ->addCssClass('btn btn-secondary')
                 ->displayAsLink()
                 ->renderAsTooltip()
@@ -93,14 +95,14 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
 
         if (Action::GOTO_SEE === $actionName) {
             return Action::new(Action::GOTO_SEE, t('action.goto_see', domain: 'backoffice'))
-                ->setCssClass('action-'.Action::GOTO_SEE)
+                ->setCssClass('action-' . Action::GOTO_SEE)
                 ->addCssClass('btn btn-secondary')
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
                     try {
                         $linkToEntity = $entity instanceof LinkableInterface ? $entity->__toLink() : "";
-                    } catch(\Exception $e) {
+                    } catch (Exception $e) {
                         $linkToEntity = "";
                     }
 
@@ -110,7 +112,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
 
         if (Action::GOTO_NEXT === $actionName) {
             return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'backoffice'))
-                ->setCssClass('action-'.Action::GOTO_NEXT)
+                ->setCssClass('action-' . Action::GOTO_NEXT)
                 ->addCssClass('btn btn-secondary')
                 ->displayAsLink()
                 ->renderAsTooltip()

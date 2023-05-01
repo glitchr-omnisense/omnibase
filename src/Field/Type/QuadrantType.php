@@ -25,7 +25,7 @@ class QuadrantType extends AbstractType implements DataMapperInterface
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     public function __construct(Environment $twig)
     {
@@ -49,15 +49,16 @@ class QuadrantType extends AbstractType implements DataMapperInterface
     {
         parent::buildView($view, $form, $options);
 
-        $view->vars['positions']  = json_encode($options["class"]::getPositions());
-        $view->vars['quadrants']  = $options["class"]::getPermittedValues();
-        $view->vars['icons']      = $options["class"]::getIcons();
-        $view->vars['default']    = $options["class"]::getDefault();
+        $view->vars['positions'] = json_encode($options["class"]::getPositions());
+        $view->vars['quadrants'] = $options["class"]::getPermittedValues();
+        $view->vars['icons'] = $options["class"]::getIcons();
+        $view->vars['default'] = $options["class"]::getDefault();
     }
 
     public function mapDataToForms($viewData, Traversable $forms)
     {
     }
+
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $windType = current(iterator_to_array($forms));

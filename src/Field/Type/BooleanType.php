@@ -12,7 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class BooleanType extends AbstractType
 {
     /** @var Environment */
-    protected $twig;
+    protected Environment $twig;
 
     public function __construct(Environment $twig)
     {
@@ -23,6 +23,7 @@ class BooleanType extends AbstractType
     {
         return 'boolean';
     }
+
     public function getParent(): ?string
     {
         return CheckboxType::class;
@@ -31,11 +32,11 @@ class BooleanType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            "confirmation[onCheck]"   => true,
+            "confirmation[onCheck]" => true,
             "confirmation[onUncheck]" => true,
-            "toogle_url"              => null,
-            "switch"                  => true,
-            "inline"                  => false,
+            "toogle_url" => null,
+            "switch" => true,
+            "inline" => false,
             "required" => false
         ]);
     }

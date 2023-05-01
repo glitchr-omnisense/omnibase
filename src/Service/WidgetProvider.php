@@ -19,14 +19,16 @@ class WidgetProvider implements WidgetProviderInterface
     }
 
     protected $widgets = [];
-    public function get(string $uuid, bool $useCache = BaseBundle::USE_CACHE): ?Widget
+
+    public function get(string $widgetName, bool $useCache = BaseBundle::USE_CACHE): ?Widget
     {
-        return $this->getWidget($uuid, $useCache);
+        return $this->getWidget($widgetName, $useCache);
     }
-    public function getWidget(string $uuid, bool $useCache = BaseBundle::USE_CACHE): ?Widget
+
+    public function getWidget(string $widgetName, bool $useCache = BaseBundle::USE_CACHE): ?Widget
     {
         $fn = $useCache ? "cacheOneByPath" : "findOneByPath";
-        return $this->widgetRepository ? $this->widgetRepository->$fn($uuid) : null;
+        return $this->widgetRepository?->$fn($widgetName);
     }
 
     public function all(bool $useCache = BaseBundle::USE_CACHE): array
@@ -34,19 +36,21 @@ class WidgetProvider implements WidgetProviderInterface
         $fn = $useCache ? "cacheAll" : "findAll";
         return $this->widgetRepository ? $this->widgetRepository->$fn()->getResult() : [];
     }
+
     public function allSlots(bool $useCache = BaseBundle::USE_CACHE): array
     {
         $fn = $useCache ? "cacheAll" : "findAll";
-        return array_transforms(fn ($k, $s): array => [$s->getPath(), $s], $this->widgetSlotRepository->$fn()->getResult());
+        return array_transforms(fn($k, $s): array => [$s->getPath(), $s], $this->widgetSlotRepository->$fn()->getResult());
     }
 
-    public function getSlot(string $path, bool $useCache = BaseBundle::USE_CACHE): ?Slot
+    public function getSlot(string $widgetSlotName, bool $useCache = BaseBundle::USE_CACHE): ?Slot
     {
-        return $this->getWidgetSlot($path, $useCache);
+        return $this->getWidgetSlot($widgetSlotName, $useCache);
     }
+
     public function getWidgetSlot(string $path, bool $useCache = BaseBundle::USE_CACHE): ?Slot
     {
         $fn = $useCache ? "cacheOneByPath" : "findOneByPath";
-        return $this->widgetSlotRepository ? $this->widgetSlotRepository->$fn($path) : null;
+        return $this->widgetSlotRepository?->$fn($path);
     }
 }

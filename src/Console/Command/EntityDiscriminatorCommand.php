@@ -15,21 +15,22 @@ use Exception;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'entity:discriminator', aliases:[], description:'')]
+#[AsCommand(name: 'entity:discriminator', aliases: [], description: '')]
 class EntityDiscriminatorCommand extends Command
 {
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     public function __construct(
-        LocalizerInterface $localizer,
-        TranslatorInterface $translator,
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
+        LocalizerInterface       $localizer,
+        TranslatorInterface      $translator,
+        EntityManagerInterface   $entityManager,
+        ParameterBagInterface    $parameterBag,
         ClassMetadataManipulator $classMetadataManipulator
-    ) {
+    )
+    {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
@@ -41,10 +42,10 @@ class EntityDiscriminatorCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $entity                  = $input->getArgument('entity');
+        $entity = $input->getArgument('entity');
 
         if (!$this->classMetadataManipulator->isEntity($entity)) {
-            throw new Exception("Class \"".$entity."\" is not an entity.");
+            throw new Exception("Class \"" . $entity . "\" is not an entity.");
         }
 
         dump($this->classMetadataManipulator->getClassMetadata($entity)->discriminatorMap);

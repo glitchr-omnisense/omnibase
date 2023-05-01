@@ -4,24 +4,29 @@ namespace Base\Subscriber;
 
 use Base\Annotations\Annotation\IsGranted;
 use Base\Annotations\AnnotationReader;
+use LogicException;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use function array_key_exists;
+use function count;
+use function is_array;
 
 class IsGrantedSubscriber implements EventSubscriberInterface
 {
     /**
      * @var AuthorizationCheckerInterface
      */
-    private $authorizationChecker;
+    private ?AuthorizationCheckerInterface $authorizationChecker;
 
     /**
      * @var AnnotationReader
      */
-    private $annotationReader;
+    private AnnotationReader $annotationReader;
 
     public function __construct(AnnotationReader $annotationReader, AuthorizationCheckerInterface $authorizationChecker = null)
     {
@@ -33,9 +38,9 @@ class IsGrantedSubscriber implements EventSubscriberInterface
     {
         $request = $event->getRequest();
 
-        $controller = $request->attributes->get("_controller") ;
-        $array  = is_array($controller) ? $controller : explode("::", $controller ?? "");
-        $class  = $array[0] ?? null;
+        $controller = $request->attributes->get("_controller");
+        $array = is_array($controller) ? $controller : explode("::", $controller ?? "");
+        $class = $array[0] ?? null;
         $method = $array[1] ?? null;
 
         if (!class_exists($class)) {
@@ -48,7 +53,7 @@ class IsGrantedSubscriber implements EventSubscriberInterface
         );
 
         if (null === $this->authorizationChecker) {
-            throw new \LogicException('To use the @IsGranted tag, you need to install symfony/security-bundle and configure your security system.');
+            throw new LogicException('To use the @IsGranted tag, you need to install symfony/security-bundle and configure your security system.');
         }
 
         $arguments = $request->attributes->get("_route_parameters");
@@ -57,16 +62,16 @@ class IsGrantedSubscriber implements EventSubscriberInterface
             $subject = null;
 
             if ($subjectRef) {
-                if (\is_array($subjectRef)) {
+                if (is_array($subjectRef)) {
                     foreach ($subjectRef as $ref) {
-                        if (!\array_key_exists($ref, $arguments)) {
+                        if (!array_key_exists($ref, $arguments)) {
                             throw $this->createMissingSubjectException($ref);
                         }
 
                         $subject[$ref] = $arguments[$ref];
                     }
                 } else {
-                    if (!\array_key_exists($subjectRef, $arguments)) {
+                    if (!array_key_exists($subjectRef, $arguments)) {
                         throw $this->createMissingSubjectException($subjectRef);
                     }
 
@@ -94,15 +99,15 @@ class IsGrantedSubscriber implements EventSubscriberInterface
 
     private function createMissingSubjectException(string $subject)
     {
-        return new \RuntimeException(sprintf('Could not find the subject "%s" for the @IsGranted annotation. Try adding a "$%s" argument to your controller method.', $subject, $subject));
+        return new RuntimeException(sprintf('Could not find the subject "%s" for the @IsGranted annotation. Try adding a "$%s" argument to your controller method.', $subject, $subject));
     }
 
     private function getIsGrantedString(IsGranted $isGranted)
     {
         $attributes = array_map(function ($attribute) {
             return sprintf('"%s"', $attribute);
-        }, (array) $isGranted->getAttributes());
-        if (1 === \count($attributes)) {
+        }, (array)$isGranted->getAttributes());
+        if (1 === count($attributes)) {
             $argsString = reset($attributes);
         } else {
             $argsString = sprintf('[%s]', implode(', ', $attributes));

@@ -5,13 +5,14 @@ namespace Base\Console\Command;
 use App\Entity\User;
 use Base\Entity\Extension\Log;
 
+use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Base\Console\Command;
 
-#[AsCommand(name:'user:log', aliases:[], description:'')]
+#[AsCommand(name: 'user:log', aliases: [], description: '')]
 class UserLogCommand extends Command
 {
     protected function configure(): void
@@ -30,14 +31,14 @@ class UserLogCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $event                  = $input->getOption('event');
+        $event = $input->getOption('event');
 
-        $userIdentifier         = $input->getOption('user');
+        $userIdentifier = $input->getOption('user');
         $impersonatorIdentifier = $input->getOption('impersonator');
 
-        $actionShow             = $input->getOption('show');
-        $actionClear            = $input->getOption('clear');
-        $actionClearAll         = $input->getOption('clear-all');
+        $actionShow = $input->getOption('show');
+        $actionClear = $input->getOption('clear');
+        $actionClearAll = $input->getOption('clear-all');
 
         $logRepository = $this->entityManager->getRepository(Log::class);
         $userRepository = $this->entityManager->getRepository(User::class);
@@ -55,13 +56,13 @@ class UserLogCommand extends Command
             $filteredLogs = [];
             if ($event) {
                 $filter = [];
-                $filter["event"]        = $event;
+                $filter["event"] = $event;
                 $filter["impersonator"] = $impersonator;
-                $filter["pretty"]       = $pretty ?? ".*";
-                $filter["pretty"]       = str_replace("\\", "\\\\", $filter["pretty"]);
-                $filter["pretty"]       = trim(ltrim($filter["pretty"], '\\'));
-                $filter['expiry']       = $expiry ?? $defaultExpiry;
-                $filter['statusCode']   = trim($statusCode ?? ".*");
+                $filter["pretty"] = $pretty ?? ".*";
+                $filter["pretty"] = str_replace("\\", "\\\\", $filter["pretty"]);
+                $filter["pretty"] = trim(ltrim($filter["pretty"], '\\'));
+                $filter['expiry'] = $expiry ?? $defaultExpiry;
+                $filter['statusCode'] = trim($statusCode ?? ".*");
 
                 if ($user) {
                     $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]])->getResult();
@@ -75,16 +76,16 @@ class UserLogCommand extends Command
                 $monitoredEntries = $this->parameterBag->get("base.logging") ?? [];
                 foreach ($monitoredEntries as $key => $entry) {
                     if (!array_key_exists("event", $entry)) {
-                        throw new \Exception("Missing key \"event\" in monitored events #" . $key);
+                        throw new Exception("Missing key \"event\" in monitored events #" . $key);
                     }
 
-                    $filter["event"]        = $entry["event"];
+                    $filter["event"] = $entry["event"];
                     $filter["impersonator"] = $impersonator;
-                    $filter["pretty"]       = $entry["pretty"] ?? ".*";
-                    $filter["pretty"]       = str_replace("\\", "\\\\", $filter["pretty"]);
-                    $filter["pretty"]       = trim(ltrim($filter["pretty"], '\\'));
-                    $filter['expiry']       = $expiry ?? $entry["expiry"] ?? $defaultExpiry;
-                    $filter["statusCode"]   = trim($entry["statusCode"] ?? ".*");
+                    $filter["pretty"] = $entry["pretty"] ?? ".*";
+                    $filter["pretty"] = str_replace("\\", "\\\\", $filter["pretty"]);
+                    $filter["pretty"] = trim(ltrim($filter["pretty"], '\\'));
+                    $filter['expiry'] = $expiry ?? $entry["expiry"] ?? $defaultExpiry;
+                    $filter["statusCode"] = trim($entry["statusCode"] ?? ".*");
 
                     if ($user) {
                         $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]])->getResult();
@@ -101,7 +102,7 @@ class UserLogCommand extends Command
         $nLogs = count($filteredLogs);
         if ($actionShow) {
             foreach ($logs as $key => $log) {
-                $message = "Entry ID #" .($key+1) . " / <info>Log #" . $log->getId()." \"".$log."\"</info>";
+                $message = "Entry ID #" . ($key + 1) . " / <info>Log #" . $log->getId() . " \"" . $log . "\"</info>";
                 $output->section()->writeln($message);
             }
         }
@@ -120,11 +121,11 @@ class UserLogCommand extends Command
 
     public function applyFilter($logs, $filter)
     {
-        $filteredLogs = array_filter($logs, function ($log) use ($filter) {
-            if (!preg_match("/".$filter["statusCode"]."/", $log->getStatusCode())) {
+        return array_filter($logs, function ($log) use ($filter) {
+            if (!preg_match("/" . $filter["statusCode"] . "/", $log->getStatusCode())) {
                 return false;
             }
-            if (!preg_match("/".$filter["pretty"]."/", $log->getPretty())) {
+            if (!preg_match("/" . $filter["pretty"] . "/", $log->getPretty())) {
                 return false;
             }
             if ($log->getImpersonator() != $filter["impersonator"]) {
@@ -133,7 +134,5 @@ class UserLogCommand extends Command
 
             return true;
         });
-
-        return $filteredLogs;
     }
 }

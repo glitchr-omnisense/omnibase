@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class InvalidUuidException extends \Exception
+use Exception;
+
+class InvalidUuidException extends Exception
 {
     /**
      * {@inheritdoc}

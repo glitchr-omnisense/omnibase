@@ -7,6 +7,7 @@ use Base\Enum\ThreadState;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
 use Base\Form\Type\ThreadSearchType;
+use Base\Repository\ThreadIntlRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,18 +15,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class SearchController extends AbstractController
 {
-    protected $threadRepository;
+    protected FormProxyInterface $formProxy;
+    protected EntityManagerInterface $entityManager;
+    protected ThreadIntlRepository $threadIntlRepository;
 
     public function __construct(FormProxyInterface $formProxy, EntityManagerInterface $entityManager)
     {
-        $this->formProxy        = $formProxy;
-        $this->entityManager    = $entityManager;
+        $this->formProxy = $formProxy;
+        $this->entityManager = $entityManager;
         $this->threadIntlRepository = $entityManager->getRepository(ThreadIntl::class);
     }
 
     /**
      * @Route({"en": "/search", "fr": "/rechercher"}, name="thread_search")
-    */
+     */
     public function Main(Request $request)
     {
         $formProcessor = $this->formProxy->createProcessor("thread:search", ThreadSearchType::class, []);
@@ -42,12 +45,12 @@ class SearchController extends AbstractController
                 $data = $formProcessor->getData() ? clone $formProcessor->getData() : null;
                 if ($data) {
                     $data->content = $data->content ?? $data->generic ?? "";
-                    $data->title = $data->title   ?? $data->generic ?? "";
+                    $data->title = $data->title ?? $data->generic ?? "";
                     $data->excerpt = $data->excerpt ?? $data->generic ?? "";
 
                     $formattedData = clone $data;
                     $formattedData->content = str_strip("%" . $data->content . "%", "%%", "%%");
-                    $formattedData->title   = str_strip("%" . $data->title   . "%", "%%", "%%");
+                    $formattedData->title = str_strip("%" . $data->title . "%", "%%", "%%");
                     $formattedData->excerpt = str_strip("%" . $data->excerpt . "%", "%%", "%%");
                     $formattedData->generic = str_strip("%" . $data->generic . "%", "%%", "%%");
 
@@ -56,9 +59,9 @@ class SearchController extends AbstractController
                         $states = [];
                     }
 
-                    $threads = array_map(fn ($t) => $t->getTranslatable(), $this->threadIntlRepository->cacheByInsensitivePartialModel([
+                    $threads = array_map(fn($t) => $t->getTranslatable(), $this->threadIntlRepository->cacheByInsensitivePartialModel([
                         "content" => $formattedData->content,
-                        "title"   => $formattedData->title,
+                        "title" => $formattedData->title,
                         "excerpt" => $formattedData->excerpt,
                     ], ["translatable.state" => $states, "translatable.parent" => $formattedData->parent_id])->getResult());
 
@@ -76,7 +79,6 @@ class SearchController extends AbstractController
                     "threads" => $threads,
                 ]);
             })
-
             ->handleRequest($request);
 
         return $formProcessor->getResponse();

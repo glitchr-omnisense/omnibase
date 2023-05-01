@@ -10,15 +10,17 @@ class ZlibCompression extends AbstractCompression
     {
         return "zlib";
     }
+
     public function getEncoding(): ?string
     {
         return $this->encoding ?? ZLIB_ENCODING_DEFLATE;
     }
 
-    protected function encodeHex(string $data): string|false
+    protected function encodeHex(string $hex): string|false
     {
-        return gzcompress($data, $this->getLevel(), $this->getEncoding());
+        return gzcompress($hex, $this->getLevel(), $this->getEncoding());
     }
+
     protected function decodeHex(string $data): string|false
     {
         return gzuncompress($data, $this->getMaxLength());

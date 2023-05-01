@@ -20,6 +20,7 @@ class Permission implements IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-lock"];

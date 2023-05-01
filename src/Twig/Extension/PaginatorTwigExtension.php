@@ -11,9 +11,9 @@ use Twig\TwigFunction;
 final class PaginatorTwigExtension extends AbstractExtension
 {
     /**
-     * @var Translator
+     * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     public function __construct(TranslatorInterface $translator)
     {
@@ -24,6 +24,7 @@ final class PaginatorTwigExtension extends AbstractExtension
     {
         return 'paginator_extension';
     }
+
     public function getFunctions(): array
     {
         return [
@@ -69,9 +70,7 @@ final class PaginatorTwigExtension extends AbstractExtension
         }
 
         $label = $label ?? $this->translator->trans("messages.paginator.rewind");
-        $str = "<a href='".$pagination->getPath($name, 1, $parameters)."'>".$label."</a>";
-
-        return $str;
+        return "<a href='" . $pagination->getPath($name, 1, $parameters) . "'>" . $label . "</a>";
     }
 
     public function getFirst(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
@@ -81,9 +80,7 @@ final class PaginatorTwigExtension extends AbstractExtension
         }
 
         $label = $label ?? $this->translator->trans("messages.paginator.first");
-        $str = "<a href='".$pagination->getPath($name, 1, $parameters)."'>".$label."</a>";
-
-        return $str;
+        return "<a href='" . $pagination->getPath($name, 1, $parameters) . "'>" . $label . "</a>";
     }
 
     public function getFirstSeparator(PaginationInterface $pagination, string $separator): ?string
@@ -102,8 +99,8 @@ final class PaginatorTwigExtension extends AbstractExtension
         }
 
         $array = [];
-        for ($i = 1, $N = min($pagination->getPageRange(), $pagination->getPage()-1); $i <= $N; $i++) {
-            $array[] = "<a href='".$pagination->getPath($name, $i, $parameters)."'>".($this->translator->trans($label, [$i]) ?? $i)."</a>";
+        for ($i = 1, $N = min($pagination->getPageRange(), $pagination->getPage() - 1); $i <= $N; $i++) {
+            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($this->translator->trans($label, [$i]) ?? $i) . "</a>";
         }
 
         return $array;
@@ -116,8 +113,8 @@ final class PaginatorTwigExtension extends AbstractExtension
         }
 
         $array = [];
-        for ($i = max(1, $pagination->getPage()-$pagination->getPageRange()), $N = $pagination->getPage(); $i < $N; $i++) {
-            $array[] = "<a href='".$pagination->getPath($name, $i, $parameters)."'>".($this->translator->trans($label, [$i]) ?? $i)."</a>";
+        for ($i = max(1, $pagination->getPage() - $pagination->getPageRange()), $N = $pagination->getPage(); $i < $N; $i++) {
+            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($this->translator->trans($label, [$i]) ?? $i) . "</a>";
         }
 
         return $array;
@@ -129,10 +126,8 @@ final class PaginatorTwigExtension extends AbstractExtension
             return "";
         }
 
-        $label = $label ?? $this->translator->trans("messages.paginator.previous", [$pagination->getPage()-1]);
-        $str = "<a href='".$pagination->getPath($name, $pagination->getPage()-1, $parameters)."'>".$label."</a>";
-
-        return $str;
+        $label = $label ?? $this->translator->trans("messages.paginator.previous", [$pagination->getPage() - 1]);
+        return "<a href='" . $pagination->getPath($name, $pagination->getPage() - 1, $parameters) . "'>" . $label . "</a>";
     }
 
     public function getCurrent(PaginationInterface $pagination, ?string $label = null): ?string
@@ -146,10 +141,8 @@ final class PaginatorTwigExtension extends AbstractExtension
             return "";
         }
 
-        $label = $label ?? $this->translator->trans("messages.paginator.next", [$pagination->getPage()+1]);
-        $str = "<a href='".$pagination->getPath($name, $pagination->getPage()+1, $parameters)."'>".$label."</a>";
-
-        return $str;
+        $label = $label ?? $this->translator->trans("messages.paginator.next", [$pagination->getPage() + 1]);
+        return "<a href='" . $pagination->getPath($name, $pagination->getPage() + 1, $parameters) . "'>" . $label . "</a>";
     }
 
     public function getNextOnes(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?array
@@ -159,8 +152,8 @@ final class PaginatorTwigExtension extends AbstractExtension
         }
 
         $array = [];
-        for ($i = $pagination->getPage()+1, $N = min($pagination->getTotalPages(), $pagination->getPage()+$pagination->getPageRange())+1; $i < $N; $i++) {
-            $array[] = "<a href='".$pagination->getPath($name, $i, $parameters)."'>".($this->translator->trans($label, [$i]) ?? $i)."</a>";
+        for ($i = $pagination->getPage() + 1, $N = min($pagination->getTotalPages(), $pagination->getPage() + $pagination->getPageRange()) + 1; $i < $N; $i++) {
+            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($this->translator->trans($label, [$i]) ?? $i) . "</a>";
         }
 
         return $array;
@@ -173,9 +166,7 @@ final class PaginatorTwigExtension extends AbstractExtension
         }
 
         $label = $label ?? $this->translator->trans("messages.paginator.last");
-        $str = "<a href='".$pagination->getPath($name, $pagination->getTotalPages(), $parameters)."'>".$label."</a>";
-
-        return $str;
+        return "<a href='" . $pagination->getPath($name, $pagination->getTotalPages(), $parameters) . "'>" . $label . "</a>";
     }
 
     public function getLastOnes(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?array
@@ -185,8 +176,8 @@ final class PaginatorTwigExtension extends AbstractExtension
         }
 
         $array = [];
-        for ($i = max($pagination->getPage()+1, $pagination->getTotalPages()-$pagination->getPageRange()), $N = $pagination->getTotalPages(); $i <= $N; $i++) {
-            $array[] = "<a href='".$pagination->getPath($name, $i, $parameters)."'>".($this->translator->trans($label, [$i]) ?? $i)."</a>";
+        for ($i = max($pagination->getPage() + 1, $pagination->getTotalPages() - $pagination->getPageRange()), $N = $pagination->getTotalPages(); $i <= $N; $i++) {
+            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($this->translator->trans($label, [$i]) ?? $i) . "</a>";
         }
 
         return $array;
@@ -194,7 +185,7 @@ final class PaginatorTwigExtension extends AbstractExtension
 
     public function getLastSeparator(PaginationInterface $pagination, string $separator): ?string
     {
-        if ($pagination->getPage()+$pagination->getPageRange() <= $pagination->getTotalPages()-1) {
+        if ($pagination->getPage() + $pagination->getPageRange() <= $pagination->getTotalPages() - 1) {
             return $separator;
         }
 
@@ -208,8 +199,6 @@ final class PaginatorTwigExtension extends AbstractExtension
         }
 
         $label = $label ?? $this->translator->trans("messages.paginator.fastforward", [$pagination->getTotalPages()]);
-        $str = "<a href='".$pagination->getPath($name, $pagination->getTotalPages(), $parameters)."'>".$label."</a>";
-
-        return $str;
+        return "<a href='" . $pagination->getPath($name, $pagination->getTotalPages(), $parameters) . "'>" . $label . "</a>";
     }
 }

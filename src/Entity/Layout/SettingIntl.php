@@ -32,7 +32,7 @@ class SettingIntl implements TranslationInterface
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    protected $label;
+    protected $label = null;
 
     public function getLabel(): ?string
     {
@@ -48,7 +48,7 @@ class SettingIntl implements TranslationInterface
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    protected $help;
+    protected $help = null;
 
     public function getHelp(): ?string
     {
@@ -66,7 +66,7 @@ class SettingIntl implements TranslationInterface
      * @Uploader(storage="local.storage", max_size="2MB", missable=true, nullable=true)
      * @Associate(metadata="class")
      */
-    protected $value;
+    protected $value = null;
 
     public function getValue()
     {
@@ -87,7 +87,7 @@ class SettingIntl implements TranslationInterface
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    protected $class;
+    protected $class = null;
 
     public function getClass(): ?string
     {

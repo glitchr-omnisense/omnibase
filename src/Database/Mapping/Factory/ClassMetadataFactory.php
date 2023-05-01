@@ -34,6 +34,7 @@ use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\ReflectionService;
+use Exception;
 use ReflectionClass;
 use ReflectionException;
 
@@ -52,20 +53,20 @@ use ReflectionException;
  */
 class ClassMetadataFactory extends AbstractClassMetadataFactory
 {
-    /** @var EntityManagerInterface|null */
-    private $em;
+    /** @var ?EntityManagerInterface */
+    private ?EntityManagerInterface $em;
 
     /** @var AbstractPlatform */
     private $targetPlatform;
 
     /** @var MappingDriver */
-    private $driver;
+    private MappingDriver $driver;
 
     /** @var EventManager */
-    private $evm;
+    private EventManager $evm;
 
     /** @var mixed[] */
-    private $embeddablesActiveNesting = [];
+    private array $embeddablesActiveNesting = [];
 
     /**
      * @return void
@@ -85,10 +86,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         $this->initialized = true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function onNotFoundMetadata($className): ?ClassMetadata
+    protected function onNotFoundMetadata($className): null|ClassMetadataInterface
     {
         if (!$this->evm->hasListeners(Events::onClassMetadataNotFound)) {
             return null;
@@ -257,7 +255,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      *
      * @throws MappingException
      */
-    protected function validateRuntimeMetadata($class, $parent)
+    protected function validateRuntimeMetadata(ClassMetadata $class, ?ClassMetadataInterface $parent)
     {
         if (!$class->reflClass) {
             // only validate if there is a reflection class instance
@@ -662,7 +660,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     {
         if (
             $platform instanceof Platforms\OraclePlatform
-            || $platform instanceof Platforms\PostgreSQL94Platform
             || $platform instanceof Platforms\PostgreSQLPlatform
         ) {
             return ClassMetadata::GENERATOR_TYPE_SEQUENCE;
@@ -807,7 +804,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
         if (is_subclass_of($classMetadata->getName(), TranslationInterface::class)) {
             if (!str_ends_with($classMetadata->getName(), NamingStrategy::TABLE_I18N_SUFFIX)) {
-                throw new \Exception("Invalid class name for \"" . $classMetadata->getName() . "\"");
+                throw new Exception("Invalid class name for \"" . $classMetadata->getName() . "\"");
             }
 
             $translatableClass = $classMetadata->getName()::getTranslatableEntityClass();

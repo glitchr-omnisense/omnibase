@@ -17,7 +17,7 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- *     @DiscriminatorEntry(value="abstract")
+ * @DiscriminatorEntry(value="abstract")
  */
 abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
 {
@@ -25,6 +25,7 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
     {
         return $this->adapter ? $this->adapter->__iconizeStatic() : null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-share-alt"];
@@ -32,7 +33,7 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
 
     public function __toString()
     {
-        return $this->getId() ? "<b>".($this->getAdapter() ?? "Attribute")." #".$this->getId()."</b>" : get_class($this);
+        return $this->getId() ? "<b>" . ($this->getAdapter() ?? "Attribute") . " #" . $this->getId() . "</b>" : get_class($this);
     }
 
     public function __construct(AbstractAdapter $adapter)
@@ -46,6 +47,7 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -56,10 +58,12 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $adapter;
+
     public function getAdapter(): ?AbstractAdapter
     {
         return $this->adapter;
     }
+
     public function setAdapter(?AbstractAdapter $adapter): self
     {
         $this->adapter = $adapter;
@@ -70,10 +74,12 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
     {
         return $this->getAdapter()->getCode();
     }
+
     public function getType(): ?string
     {
         return get_class($this->getAdapter());
     }
+
     public function getOptions(): array
     {
         return $this->getAdapter()->getOptions();

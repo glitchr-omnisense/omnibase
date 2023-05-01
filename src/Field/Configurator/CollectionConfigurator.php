@@ -13,6 +13,9 @@ use Symfony\Component\Form\Extension\Core\Type\LanguageType;
 use Symfony\Component\Form\Extension\Core\Type\LocaleType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
 
+use Traversable;
+use function count;
+use function in_array;
 use function Symfony\Component\String\u;
 
 class CollectionConfigurator implements FieldConfiguratorInterface
@@ -32,7 +35,7 @@ class CollectionConfigurator implements FieldConfiguratorInterface
         }
 
         $autocompletableFormTypes = [CountryType::class, CurrencyType::class, LanguageType::class, LocaleType::class, TimezoneType::class];
-        if (\in_array($entryTypeFqcn, $autocompletableFormTypes, true)) {
+        if (in_array($entryTypeFqcn, $autocompletableFormTypes, true)) {
             $field->setFormTypeOption('entry_options.attr.data-widget', 'autocomplete');
         }
 
@@ -64,10 +67,10 @@ class CollectionConfigurator implements FieldConfiguratorInterface
         }
 
         if (is_countable($collection)) {
-            return \count($collection);
+            return count($collection);
         }
 
-        if ($collection instanceof \Traversable) {
+        if ($collection instanceof Traversable) {
             return iterator_count($collection);
         }
 

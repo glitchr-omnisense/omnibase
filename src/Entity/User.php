@@ -17,6 +17,8 @@ use App\Entity\User\Permission;
 use App\Entity\User\Notification;
 use Base\Database\Annotation\OrderColumn;
 
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -158,7 +160,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function logout(?string $domain)
     {
         $token = $this->getTokenStorage()->getToken();
-        if ($token === null || $token->getUser() != $this) {
+        if ($token === null || $token->getUser() !== $this) {
             $this->kick();
         } else {
             $this->getTokenStorage()->setToken(null);
@@ -181,14 +183,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         if (!isset($cookie)) {
             return null;
         }
-        if (!isset($key) || empty($key)) {
+        if (empty($key)) {
             return $cookie;
         }
 
         return $cookie[$key] ?? null;
     }
 
-    public static function setCookie(string $key = null, $value, int $lifetime = 0)
+    public static function setCookie(string $key, $value, int $lifetime = 0)
     {
         $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
         $cookie = array_merge($cookie, [$key => $value]);
@@ -392,7 +394,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function setPlainPassword(?string $password): void
     {
         $this->plainPassword = $password;
-        $this->updatedAt = new \DateTime("now"); // Plain password is not an ORM variable..
+        $this->updatedAt = new DateTime("now"); // Plain password is not an ORM variable..
     }
 
     public function eraseCredentials()
@@ -416,7 +418,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function getPassword(): ?string
     {
-        return (string)$this->password;
+        return $this->password;
     }
 
     public function setPassword(string $password): self
@@ -636,14 +638,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getTokens($type = Token::ALL): Collection
     {
         return $this->tokens->filter(function ($token) use ($type) {
-            switch ($type) {
-                case Token::VALID:
-                    return $token->isValid();
-                case Token::EXPIRED:
-                    return !$token->isValid();
-            }
+            return match ($type) {
+                Token::VALID => $token->isValid(),
+                Token::EXPIRED => !$token->isValid(),
+                default => true,
+            };
 
-            return true;
         });
     }
 
@@ -1033,7 +1033,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $createdAt;
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
@@ -1044,7 +1044,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $updatedAt;
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -1054,12 +1054,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $activeAt;
 
-    public function getActiveAt(): ?\DateTimeInterface
+    public function getActiveAt(): ?DateTimeInterface
     {
         return $this->activeAt;
     }
 
-    public function poke(?\DateTimeInterface $activeAt): self
+    public function poke(?DateTimeInterface $activeAt): self
     {
         $this->activeAt = $activeAt;
         return $this;
@@ -1072,7 +1072,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function isActive(): bool
     {
-        return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getActiveDelay() . ' seconds ago');
+        return $this->getActiveAt() && $this->getActiveAt() > new DateTime($this->getActiveDelay() . ' seconds ago');
     }
 
     public static function getOnlineDelay(): int
@@ -1082,7 +1082,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function isOnline(): bool
     {
-        return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getOnlineDelay() . ' seconds ago');
+        return $this->getActiveAt() && $this->getActiveAt() > new DateTime($this->getOnlineDelay() . ' seconds ago');
     }
 
     /**

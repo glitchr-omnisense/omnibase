@@ -12,11 +12,11 @@ class PasteFilter implements FilterInterface
     /**
      * @var ImagineInterface
      */
-    protected $imagine;
+    protected ImagineInterface $imagine;
 
     public function __toString()
     {
-        return "paste:".$this->x."x".$this->y;
+        return "paste:" . $this->x . "x" . $this->y;
     }
 
     public function __construct(ImageInterface $destination, int $x = 0, int $y = 0)

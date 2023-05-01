@@ -12,11 +12,11 @@ class IconCacheWarmer extends AbstractLocalCacheWarmer
     /**
      * @var array[AbstractLocalCacheInterface]
      */
-    protected $adapters;
+    protected mixed $adapters;
 
     public function __construct(IconProvider $iconProvider, string $cacheDir)
     {
-        $this->adapters = array_filter($iconProvider->getAdapters(), fn ($a) => $a instanceof AbstractLocalCacheInterface);
+        $this->adapters = array_filter($iconProvider->getAdapters(), fn($a) => $a instanceof AbstractLocalCacheInterface);
         parent::__construct($iconProvider, $cacheDir);
     }
 

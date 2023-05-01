@@ -28,32 +28,32 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
     /**
      * @var RouterInterface
      * */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var MediaServiceInterface
      * */
-    protected $mediaService;
+    protected MediaServiceInterface $mediaService;
 
     /**
      * @var SettingBagInterface
      * */
-    protected $settingBag;
+    protected SettingBagInterface $settingBag;
 
     /**
      * @var Environment
      * */
-    protected $twig;
+    protected Environment $twig;
 
     /**
      * @var TranslatorInterface
      * */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var FormProxyInterface
      * */
-    protected $formProxy;
+    protected FormProxyInterface $formProxy;
 
     public function __construct(RouterInterface $router, MediaServiceInterface $mediaService, SettingBagInterface $settingBag, Environment $twig, TranslatorInterface $translator, FormProxyInterface $formProxy)
     {
@@ -63,7 +63,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
 
         $this->mediaService = $mediaService;
         $this->translator = $translator;
-        $this->formProxy  = $formProxy;
+        $this->formProxy = $formProxy;
     }
 
     /**
@@ -76,7 +76,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->settingBag->getScalar("base.settings.logo.backoffice");
+        $logo = $this->settingBag->getScalar("base.settings.logo.backoffice");
         if (!$logo) {
             $logo = $this->settingBag->getScalar("base.settings.logo");
         }
@@ -84,7 +84,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
             $logo = "bundles/base/images/logo.svg";
         }
 
-        $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
+        $title = $this->settingBag->getScalar("base.settings.title") ?? $this->translator->trans("backoffice.title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
         return Dashboard::new()
             ->setFaviconPath("favicon.ico")
             ->setTitle($title);
@@ -128,7 +128,6 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
                     "form" => $formProcessor->getForm()->createView()
                 ]);
             })
-
             ->handleRequest($request);
 
         return $formProcessor->getResponse();

@@ -2,6 +2,7 @@
 
 namespace Base\DatabaseSubscriber;
 
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
@@ -11,7 +12,6 @@ use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
@@ -20,21 +20,21 @@ class AnnotationSubscriber implements EventSubscriberInterface
     /**
      * @var AnnotationReader
      */
-    protected $annotationReader;
+    protected AnnotationReader $annotationReader;
 
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator, AnnotationReader $annotationReader)
     {
-        $this->entityManager    = $entityManager;
+        $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->annotationReader = $annotationReader;
     }
@@ -47,12 +47,13 @@ class AnnotationSubscriber implements EventSubscriberInterface
             Events::postLoad,
 
             Events::preFlush, Events::onFlush, Events::postFlush,
-            Events::prePersist,  Events::preUpdate,  Events::preRemove,
+            Events::prePersist, Events::preUpdate, Events::preRemove,
             Events::postPersist, Events::postUpdate, Events::postRemove,
         ];
     }
 
     protected array $subscriberHistory = [];
+
     public function loadClassMetadata(LoadClassMetadataEventArgs $event)
     {
         // needs to be booted to be aware of custom doctrine types.
@@ -60,13 +61,13 @@ class AnnotationSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $className     = $event->getClassMetadata()->name;
+        $className = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
 
         if (in_array($className, $this->subscriberHistory)) {
             return;
         }
-        $this->subscriberHistory[] =  $className."::".__FUNCTION__;
+        $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
         $annotations = $this->annotationReader->getAnnotations($className);
 
@@ -128,7 +129,7 @@ class AnnotationSubscriber implements EventSubscriberInterface
 
     public function preFlush(PreFlushEventArgs $event)
     {
-        $uow = $event->getEntityManager()->getUnitOfWork();
+        $uow = $event->getObjectManager()->getUnitOfWork();
 
         foreach ($uow->getIdentityMap() as $class => $entities) {
             foreach ($entities as $entity) {
@@ -191,9 +192,10 @@ class AnnotationSubscriber implements EventSubscriberInterface
     protected array $entityInsertionBuffer = [];
     protected array $entityUpdateBuffer = [];
     protected array $entityDeletionBuffer = [];
+
     public function onFlush(OnFlushEventArgs $event)
     {
-        $uow = $event->getEntityManager()->getUnitOfWork();
+        $uow = $event->getObjectManager()->getUnitOfWork();
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $this->entityInsertionBuffer[] = $entity;
         }
@@ -207,7 +209,7 @@ class AnnotationSubscriber implements EventSubscriberInterface
         $entities = array_merge($this->entityInsertionBuffer, $this->entityUpdateBuffer, $this->entityDeletionBuffer);
         foreach ($entities as $entity) {
             $className = get_class($entity);
-            $classMetadata  = $this->entityManager->getClassMetadata($className);
+            $classMetadata = $this->entityManager->getClassMetadata($className);
 
             if (in_array($className, $this->subscriberHistory)) {
                 return;
@@ -261,12 +263,12 @@ class AnnotationSubscriber implements EventSubscriberInterface
 
     public function postFlush(PostFlushEventArgs $event)
     {
-        $uow = $event->getEntityManager()->getUnitOfWork();
+        $uow = $event->getObjectManager()->getUnitOfWork();
 
         $entities = array_merge($this->entityCandidateBuffer, $this->entityInsertionBuffer, $this->entityUpdateBuffer, $this->entityDeletionBuffer);
         foreach ($entities as $entity) {
             $className = get_class($entity);
-            $classMetadata  = $this->entityManager->getClassMetadata($className);
+            $classMetadata = $this->entityManager->getClassMetadata($className);
 
             if (in_array($className, $this->subscriberHistory)) {
                 return;
@@ -325,17 +327,17 @@ class AnnotationSubscriber implements EventSubscriberInterface
 
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)
     {
-        $entity         = $event->getObject();
+        $entity = $event->getObject();
 
-        $className      = get_class($entity);
-        $classMetadata  = $this->entityManager->getClassMetadata($className);
+        $className = get_class($entity);
+        $classMetadata = $this->entityManager->getClassMetadata($className);
 
         if (in_array($className, $this->subscriberHistory)) {
             return;
         }
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
-        $annotations    = $this->annotationReader->getAnnotations($className);
+        $annotations = $this->annotationReader->getAnnotations($className);
 
         $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
         foreach ($propertyAnnotations as $property => $_) {
@@ -378,10 +380,12 @@ class AnnotationSubscriber implements EventSubscriberInterface
     {
         $this->onLifecycle($event, __FUNCTION__);
     }
+
     public function preUpdate(LifecycleEventArgs $event)
     {
         $this->onLifecycle($event, __FUNCTION__);
     }
+
     public function preRemove(LifecycleEventArgs $event)
     {
         $this->onLifecycle($event, __FUNCTION__);
@@ -391,14 +395,17 @@ class AnnotationSubscriber implements EventSubscriberInterface
     {
         $this->onLifecycle($event, __FUNCTION__);
     }
+
     public function postPersist(LifecycleEventArgs $event)
     {
         $this->onLifecycle($event, __FUNCTION__);
     }
+
     public function postUpdate(LifecycleEventArgs $event)
     {
         $this->onLifecycle($event, __FUNCTION__);
     }
+
     public function postRemove(LifecycleEventArgs $event)
     {
         $this->onLifecycle($event, __FUNCTION__);

@@ -5,6 +5,7 @@ namespace Base\Controller\UX;
 use Base\Service\FileService;
 use Base\Service\ObfuscatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,25 +32,25 @@ class DropzoneController extends AbstractController
     /**
      * @var CacheInterface
      */
-    protected $cache;
+    protected CacheInterface $cache;
 
     /**
      * @var ObfuscatorInterface
      */
-    protected $obfuscator;
+    protected ObfuscatorInterface $obfuscator;
 
     /** * @var string */
-    protected $cacheDir;
+    protected string $cacheDir;
 
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
-     * @var \Symfony\Component\Filesystem\Filesystem
+     * @var Filesystem
      */
-    protected $filesystem;
+    protected Filesystem $filesystem;
 
     public function __construct(TranslatorInterface $translator, CacheInterface $cache, ObfuscatorInterface $obfuscator, string $cacheDir)
     {
@@ -58,7 +59,7 @@ class DropzoneController extends AbstractController
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;
 
-        $this->filesystem = new \Symfony\Component\Filesystem\Filesystem();
+        $this->filesystem = new Filesystem();
     }
 
     public function getCacheDir()

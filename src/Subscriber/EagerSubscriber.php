@@ -16,7 +16,7 @@ class EagerSubscriber implements EventSubscriberInterface
     /**
      * @var BaseService
      */
-    protected $baseService;
+    protected BaseService $baseService;
 
     public function __construct(BaseService $baseService)
     {
@@ -26,7 +26,7 @@ class EagerSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => [['onKernelRequest', 2049], ['onValidCache', 8]],
+            KernelEvents::REQUEST => [['onKernelRequest', 2049], ['onValidCache', 8]],
             ConsoleEvents::COMMAND => ['onCommand', 2049]
         ];
     }
@@ -34,10 +34,12 @@ class EagerSubscriber implements EventSubscriberInterface
     public function onCommand()
     {
     }
+
     public function onValidCache(KernelEvent $e)
     {
         BaseBundle::getInstance()->markCacheAsValid();
     }
+
     public function onKernelRequest(KernelEvent $e)
     {
         if ($e->getRequest()->getPathInfo() == "/") {

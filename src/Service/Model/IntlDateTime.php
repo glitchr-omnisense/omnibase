@@ -13,16 +13,17 @@ class IntlDateTime extends DateTime
     /**
      * @var IntlDateFormatter
      */
-    protected $intlDateFormatter;
+    protected IntlDateFormatter $intlDateFormatter;
 
     public function __construct(
-        DateTime|string $datetime = "now",
-        ?string $locale = null,
-        int $dateType = IntlDateFormatter::FULL,
-        int $timeType = IntlDateFormatter::FULL,
+        DateTime|string                       $datetime = "now",
+        ?string                               $locale = null,
+        int                                   $dateType = IntlDateFormatter::FULL,
+        int                                   $timeType = IntlDateFormatter::FULL,
         IntlTimeZone|DateTimeZone|string|null $timezone = null,
-        IntlCalendar|int|null $calendar = null
-    ) {
+        IntlCalendar|int|null                 $calendar = null
+    )
+    {
         if (is_string($datetime)) {
             parent::__construct($datetime, $timezone);
         } else {
@@ -34,20 +35,21 @@ class IntlDateTime extends DateTime
         $this->intlDateFormatter = new IntlDateFormatter($locale, $dateType, $timeType, $timezone, $calendar);
     }
 
-    public function format(string $pattern): string
+    public function format(string $format): string
     {
-        $this->intlDateFormatter->setPattern($pattern);
+        $this->intlDateFormatter->setPattern($format);
         return $this->intlDateFormatter->format($this);
     }
 
     public static function createFromDateTime(
-        DateTime $datetime,
-        ?string $locale = null,
-        int $dateType = IntlDateFormatter::FULL,
-        int $timeType = IntlDateFormatter::FULL,
-        IntlTimeZone|DateTimeZone|string|null $timezone = null,
-        IntlCalendar|int|null $calendar = null
-    ) {
+        DateTime                 $datetime,
+        ?string                  $locale = null,
+        int                      $dateType = IntlDateFormatter::FULL,
+        int                      $timeType = IntlDateFormatter::FULL,
+        DateTimeZone|string|null $timezone = null,
+        int|null                 $calendar = null
+    )
+    {
         return new IntlDateTime($datetime, $locale, $dateType, $timeType, $timezone, $calendar);
     }
 }

@@ -4,6 +4,7 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
+use function is_string;
 
 /**
  * @Annotation
@@ -16,21 +17,21 @@ class IsGranted extends AbstractAnnotation
      *
      * @var mixed
      */
-    private $attributes;
+    protected mixed $attributes;
 
     /**
      * Sets the second argument passed to isGranted().
      *
      * @var mixed
      */
-    private $subject;
+    protected mixed $subject;
 
     /**
      * The message of the exception - has a nice default if not set.
      *
-     * @var string
+     * @var ?string
      */
-    private $message;
+    protected ?string $message;
 
     /**
      * If set, will throw Symfony\Component\HttpKernel\Exception\HttpException
@@ -40,20 +41,21 @@ class IsGranted extends AbstractAnnotation
      *
      * @var int|null
      */
-    private $statusCode;
+    protected ?int $statusCode;
 
     /**
-     * @param mixed        $subject
+     * @param mixed|null $subject
      * @param array|string $data
      */
     public function __construct(
-        $data = [],
-        $subject = null,
-        string $message = null,
-        ?int $statusCode = null
-    ) {
+        array|string $data = [],
+        mixed        $subject = null,
+        string       $message = null,
+        ?int         $statusCode = null
+    )
+    {
         $values = [];
-        if (\is_string($data)) {
+        if (is_string($data)) {
             $values['attributes'] = $data;
         } else {
             $values = $data;
@@ -65,7 +67,7 @@ class IsGranted extends AbstractAnnotation
 
         $this->setSubject($values['subject'] ?? $subject);
         $this->setMessage($values['message'] ?? $message);
-        $this->setMessage($values['statusCode'] ?? $statusCode);
+        $this->setStatusCode($values['statusCode'] ?? $statusCode);
         $this->setAttributes($values['value'] ?? null);
     }
 
@@ -73,6 +75,7 @@ class IsGranted extends AbstractAnnotation
     {
         return true;
     }
+
     public function setAttributes($attributes)
     {
         $this->attributes = $attributes;

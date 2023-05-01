@@ -4,6 +4,8 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 
+use Exception;
+use ReflectionClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -18,21 +20,22 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'autocomplete:entities', aliases:[], description:'')]
+#[AsCommand(name: 'autocomplete:entities', aliases: [], description: '')]
 class AutocompleteEntitiesCommand extends Command
 {
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     public function __construct(
-        LocalizerInterface $localizer,
-        TranslatorInterface $translator,
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
+        LocalizerInterface       $localizer,
+        TranslatorInterface      $translator,
+        EntityManagerInterface   $entityManager,
+        ParameterBagInterface    $parameterBag,
         ClassMetadataManipulator $classMetadataManipulator
-    ) {
+    )
+    {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
@@ -45,26 +48,26 @@ class AutocompleteEntitiesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
+        $baseLocation = dirname((new ReflectionClass('Base\\BaseBundle'))->getFileName());
 
         $entityId = $input->getOption('id') ?? null;
         $entityClass = $input->getOption('entity') ?? "";
 
         if ($entityClass) {
             if (!$this->classMetadataManipulator->isEntity($entityClass)) {
-                throw new \Exception("Entity \"$entityClass\" doesn't exists");
+                throw new Exception("Entity \"$entityClass\" doesn't exists");
             }
             if (!class_implements_interface($entityClass, AutocompleteInterface::class)) {
-                throw new \Exception("Entity \"$entityClass\" doesn't implement ".AutocompleteInterface::class);
+                throw new Exception("Entity \"$entityClass\" doesn't implement " . AutocompleteInterface::class);
             }
 
             $repository = $this->entityManager->getRepository($entityClass);
             $entities = $entityId ? $repository->findBy(["id" => $entityId]) : $repository->findAll();
             if (empty($entities)) {
                 if ($entityId) {
-                    throw new \Exception($entityClass." #".$entityId." not found.");
+                    throw new Exception($entityClass . " #" . $entityId . " not found.");
                 } else {
-                    throw new \Exception("No ".$entityClass." found.");
+                    throw new Exception("No " . $entityClass . " found.");
                 }
             }
 
@@ -81,21 +84,23 @@ class AutocompleteEntitiesCommand extends Command
                     $autocompleteData = trim(str_replace(["\t", "\n"], ["", " "], print_r($autocompleteData, true)));
                 }
 
-                $space = str_repeat(" ", max($maxLength-strlen($autocomplete), 0));
+                $space = str_repeat(" ", max($maxLength - strlen($autocomplete), 0));
 
-                $output->section()->writeln("<info>".$entityClass." #".$entity->getId()."</info>; <warning>Autocomplete = </warning>\"". $autocomplete."\"".$space."<warning> / Data = </warning>\"$autocompleteData\"");
+                $output->section()->writeln("<info>" . $entityClass . " #" . $entity->getId() . "</info>; <warning>Autocomplete = </warning>\"" . $autocomplete . "\"" . $space . "<warning> / Data = </warning>\"$autocompleteData\"");
             }
         } else {
+
             $entity = array_filter(array_merge(
-                BaseBundle::getInstance()->getAllClasses($baseLocation."/Entity"),
+                BaseBundle::getInstance()->getAllClasses($baseLocation . "/Entity"),
                 BaseBundle::getInstance()->getAllClasses("./src/Entity"),
-            ), fn ($c) => class_implements_interface($c, AutocompleteInterface::class));
+            ), fn($c) => class_implements_interface($c, AutocompleteInterface::class));
 
             if ($entity) {
-                $output->section()->writeln("Entity candidate list: ".$entityClass);
+                $output->section()->writeln("Entity candidate list: " . $entityClass);
             }
-            foreach ($entity as $entity) {
-                $output->section()->writeln(" * <info>".$entity."</info>");
+
+            foreach ($entity as $_entity) {
+                $output->section()->writeln(" * <info>" . $_entity . "</info>");
             }
         }
 

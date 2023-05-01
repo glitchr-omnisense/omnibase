@@ -4,6 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Form\FormFactory;
 
+use Exception;
 use InvalidArgumentException;
 use Base\Field\Type\SelectType;
 use Base\Entity\Layout\Attribute;
@@ -40,28 +41,29 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 
 use Base\Twig\Environment;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Traversable;
 
 class AttributeType extends AbstractType implements DataMapperInterface
 {
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator = null;
+    protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     /**
      * @var FormFactory
      */
-    protected $formFactory = null;
+    protected ?FormFactory $formFactory = null;
 
     /**
      * @var Environment
      */
-    protected $twig = null;
+    protected ?Environment $twig = null;
 
     /**
      * @var PropertyAccessorInterface
      */
-    protected $propertyAccessor = null;
+    protected ?PropertyAccessorInterface $propertyAccessor = null;
 
     public function getBlockPrefix(): string
     {
@@ -245,7 +247,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
         // there is no data yet, so nothing to prepopulate
         if (null === $viewData) {
@@ -274,7 +276,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         }
     }
 
-    public function mapFormsToData(\Traversable $forms, &$viewData): void
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $form = iterator_to_array($forms)["choice"]->getParent();
         $options = $form->getConfig()->getOptions();
@@ -286,7 +288,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $choiceData = $choiceForm->getData();
 
         if ($choiceMultiple != $options["multiple"]) {
-            throw new \Exception("Unexpected mismatching between choices and attributes");
+            throw new Exception("Unexpected mismatching between choices and attributes");
         }
 
         if (!$choiceMultiple) {

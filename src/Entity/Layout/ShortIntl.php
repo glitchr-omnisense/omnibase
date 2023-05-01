@@ -36,7 +36,7 @@ class ShortIntl implements TranslationInterface
      * @ORM\Column(type="text")
      * @Assert\Url
      */
-    protected ?string $url = null;
+    protected $url = null;
     public function getUrl(): ?string
     {
         return $this->url;

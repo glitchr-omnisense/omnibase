@@ -4,6 +4,7 @@ namespace Base\EntitySubscriber;
 
 use Base\Database\Entity\EntityExtension;
 
+use Base\Database\Entity\EntityExtensionInterface;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Enum\EntityAction;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
@@ -13,24 +14,26 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use LogicException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 class ExtensionSubscriber implements EventSubscriberInterface
 {
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
-     * @var EntityExtensionInterface
+     * @var EntityExtension
      */
-    protected $entityExtension;
+    protected EntityExtension $entityExtension;
 
     /**
-     * @var PropertyAccess
+     * @var PropertyAccessorInterface
      */
-    protected $propertyAccessor;
+    protected PropertyAccessorInterface $propertyAccessor;
 
     /**
      * @return string[]
@@ -44,7 +47,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
     public function __construct(EntityManagerInterface $entityManager, EntityExtension $entityExtension)
     {
-        $this->entityManager  = $entityManager;
+        $this->entityManager = $entityManager;
         $this->entityExtension = $entityExtension;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -66,11 +69,12 @@ class ExtensionSubscriber implements EventSubscriberInterface
         ));
     }
 
-    protected $scheduledEntityInsertions = [];
-    protected $scheduledEntityUpdates    = [];
-    protected $scheduledEntityDeletions  = [];
+    protected array $scheduledEntityInsertions = [];
+    protected array $scheduledEntityUpdates = [];
+    protected array $scheduledEntityDeletions = [];
 
-    protected $entriesPendingForIds = [];
+    protected array $entriesPendingForIds = [];
+
     public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $this->entityManager->getUnitOfWork();
@@ -94,8 +98,8 @@ class ExtensionSubscriber implements EventSubscriberInterface
         }
 
         $this->scheduledEntityInsertions = array_unique_object($this->scheduledEntityInsertions);
-        $this->scheduledEntityUpdates    = array_unique_object($this->scheduledEntityUpdates);
-        $this->scheduledEntityDeletions  = array_unique_object($this->scheduledEntityDeletions);
+        $this->scheduledEntityUpdates = array_unique_object($this->scheduledEntityUpdates);
+        $this->scheduledEntityDeletions = array_unique_object($this->scheduledEntityDeletions);
 
         $this->entriesPendingForIds = $this->payload(EntityAction::INSERT, $this->scheduledEntityInsertions);
         foreach ($this->payload(EntityAction::UPDATE, $this->scheduledEntityUpdates) as $id => $array) {
@@ -115,15 +119,15 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
         $uow = $this->entityManager->getUnitOfWork();
 
-        $splObjectIdInsertions = array_map(fn ($e) => spl_object_id($e), $this->scheduledEntityInsertions);
-        $splObjectIdUpdates    = array_map(fn ($e) => spl_object_id($e), $this->scheduledEntityUpdates);
+        $splObjectIdInsertions = array_map(fn($e) => spl_object_id($e), $this->scheduledEntityInsertions);
+        $splObjectIdUpdates = array_map(fn($e) => spl_object_id($e), $this->scheduledEntityUpdates);
         foreach ($this->entriesPendingForIds as $id => $entries) {
             if (($key = array_search($id, $splObjectIdUpdates)) !== false) {
                 $entity = $this->scheduledEntityUpdates[$key];
             } elseif (($key = array_search($id, $splObjectIdInsertions)) !== false) {
                 $entity = $this->scheduledEntityInsertions[$key];
             } else {
-                throw new \LogicException("Entry pending for id not found in the scheduled entity");
+                throw new LogicException("Entry pending for id not found in the scheduled entity");
             }
 
             foreach ($entries as $entry) {
@@ -178,7 +182,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
                         $entry->setEntityClass($className);
                         $entry->setEntityId($entry->getEntityId() ?? $entity->getId());
                         $entry->setAction($action);
-                        switch($action) {
+                        switch ($action) {
                             case EntityAction::INSERT:
 
                                 $this->entityManager->persist($entry);
@@ -202,12 +206,10 @@ class ExtensionSubscriber implements EventSubscriberInterface
                                 break;
                         }
 
-                        if ($entry) {
-                            if (!array_key_exists($id, $entries)) {
-                                $entries[$id] = [];
-                            }
-                            $entries[$id][] = $entry;
+                        if (!array_key_exists($id, $entries)) {
+                            $entries[$id] = [];
                         }
+                        $entries[$id][] = $entry;
                     }
                 }
             }

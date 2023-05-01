@@ -15,7 +15,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
     /**
      * @var BaseService
      */
-    protected $baseService;
+    protected BaseService $baseService;
 
     public function __construct(BaseService $baseService)
     {
@@ -64,12 +64,12 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
 
         $label = $view->vars["label"] ?? null;
         if ($label === null) {
-            $label = mb_ucfirst((string) $view->vars["name"]);
+            $label = mb_ucfirst((string)$view->vars["name"]);
         }
 
         $attr = $view->vars["attr"];
 
-        switch(end($type)) {
+        switch (end($type)) {
             case "CheckboxType":
                 self::addAttribute($view, "class", "form-switch form-switch-lg form-check-input");
                 self::addRowAttribute($view, "class", "form-switch form-switch-lg form-group form-check");
@@ -78,8 +78,6 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
 
             case "ButtonType":
             case "SubmitType":
-                break;
-
             case "HiddenType":
                 break;
 
@@ -105,7 +103,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
             return $view->vars["attr"][$name] = $value;
         }
 
-        $classList  = explode(" ", trim($view->vars["attr"][$name], " "));
+        $classList = explode(" ", trim($view->vars["attr"][$name], " "));
         foreach (explode(" ", $value) as $class) {
             $classList[] = $class;
         }
@@ -120,7 +118,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
             return $view->vars["row_attr"][$name] = $value;
         }
 
-        $classList  = explode(" ", trim($view->vars["row_attr"][$name], " "));
+        $classList = explode(" ", trim($view->vars["row_attr"][$name], " "));
         foreach (explode(" ", $value) as $class) {
             $classList[] = $class;
         }
@@ -139,7 +137,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
             return $view->vars["label_attr"][$name] = $value;
         }
 
-        $classList  = explode(" ", trim($view->vars["label_attr"][$name], " "));
+        $classList = explode(" ", trim($view->vars["label_attr"][$name], " "));
         foreach (explode(" ", $value) as $class) {
             $classList[] = $class;
         }

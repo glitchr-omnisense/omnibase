@@ -12,6 +12,7 @@ use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -30,7 +31,7 @@ class ArrayType extends CollectionType
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -42,6 +43,7 @@ class ArrayType extends CollectionType
     {
         return 'array';
     }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
@@ -59,13 +61,13 @@ class ArrayType extends CollectionType
 
         $resolver->setNormalizer('target', function (Options $options, $value) {
             if ($options["pattern"] !== null && $value !== null) {
-                throw new \Exception("Option \"target\" cannot be set at the same time as \"pattern\"");
+                throw new Exception("Option \"target\" cannot be set at the same time as \"pattern\"");
             }
         });
 
-        $resolver->setNormalizer('length', fn (Options $options, $value) => $options["pattern"] ? $this->getNumberOfArguments($options["pattern"]) : $value);
-        $resolver->setNormalizer('allow_add', fn (Options $options, $value) => $options["length"] == 0 && $value);
-        $resolver->setNormalizer('allow_delete', fn (Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('length', fn(Options $options, $value) => $options["pattern"] ? $this->getNumberOfArguments($options["pattern"]) : $value);
+        $resolver->setNormalizer('allow_add', fn(Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('allow_delete', fn(Options $options, $value) => $options["length"] == 0 && $value);
     }
 
     public function buildFormArray(FormBuilderInterface $builder, array $options)
@@ -111,9 +113,9 @@ class ArrayType extends CollectionType
             $form = $event->getForm();
             $data = $event->getData();
 
-            $data = array_transforms(fn ($key, $entry): array => [null, [
-                    "key" => is_array($entry) ? ($entry["key"] ?? null) : $key,
-                    "value" => is_array($entry) ? ($entry["value"] ?? first($entry) ?? null) : $entry,
+            $data = array_transforms(fn($key, $entry): array => [null, [
+                "key" => is_array($entry) ? ($entry["key"] ?? null) : $key,
+                "value" => is_array($entry) ? ($entry["value"] ?? first($entry) ?? null) : $entry,
             ]], $data);
 
             $event->setData($data);
@@ -142,7 +144,7 @@ class ArrayType extends CollectionType
 
         $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use (&$options, $builder, $prototypeOptions) {
             $event->setData(
-                array_transforms(fn ($k, $v): array => [
+                array_transforms(fn($k, $v): array => [
                     first($v) ?? null,
                     second($v) ?? null
                 ], $event->getData())

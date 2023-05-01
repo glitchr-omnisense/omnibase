@@ -10,6 +10,8 @@ use Base\Notifier\Recipient\Recipient;
 use Base\Notifier\Recipient\TimezoneRecipientInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
+use Base\Service\SettingBagInterface;
+use DateTime;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
 use Base\Service\LocalizerInterface;
@@ -77,49 +79,49 @@ abstract class BaseNotifier implements BaseNotifierInterface
     }
 
     /**
-     * @var SymfonyNotifier
+     * @var SymfonyNotifierInterface
      */
-    protected $notifier;
+    protected SymfonyNotifierInterface $notifier;
 
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /**
      * @var ChannelPolicyInterface
      */
-    protected $policy;
+    protected ChannelPolicyInterface $policy;
 
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
-     * @var Localizer
+     * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     /**
-     * @var SettingBag
+     * @var SettingBagInterface
      */
-    protected $settingBag;
+    protected SettingBagInterface $settingBag;
 
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     protected bool $debug;
 
@@ -130,7 +132,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
     /** * @var bool */
     protected ?bool $technicalLoopback;
     /** * @var RecipientInterface */
-    protected $testRecipient;
+    protected RecipientInterface $testRecipient;
 
     /**
      * @var array
@@ -333,9 +335,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         $this->markAsAdmin = $markAsAdmin;
 
-        if ($notification) {
-            $notification->markAsAdmin();
-        }
+        $notification?->markAsAdmin();
 
         return $this;
     }
@@ -526,7 +526,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         }
 
         $notification->setChannels($prevChannels);
-        $notification->setSentAt(new \DateTime("now"));
+        $notification->setSentAt(new DateTime("now"));
 
         return $this;
     }
@@ -554,7 +554,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         }
 
         $notification->setChannels($prevChannels);
-        $notification->setSentAt(new \DateTime("now"));
+        $notification->setSentAt(new DateTime("now"));
 
         return $this;
     }

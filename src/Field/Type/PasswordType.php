@@ -16,18 +16,19 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Traversable;
 
 class PasswordType extends AbstractType implements AutovalidateInterface, DataMapperInterface
 {
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     public function __construct(TranslatorInterface $translator, Environment $twig)
     {
@@ -42,36 +43,36 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["inline"]       = $options["inline"];
-        $view->vars["hint"]         = $options["hint"];
-        $view->vars["secure"]       = $options["secure"];
-        $view->vars["repeater"]     = $options["repeater"];
-        $view->vars["revealer"]     = $options["revealer"];
-        $view->vars["min_length"]   = $options["min_length"];
+        $view->vars["inline"] = $options["inline"];
+        $view->vars["hint"] = $options["hint"];
+        $view->vars["secure"] = $options["secure"];
+        $view->vars["repeater"] = $options["repeater"];
+        $view->vars["revealer"] = $options["revealer"];
+        $view->vars["min_length"] = $options["min_length"];
         $view->vars["min_strength"] = $options["min_strength"];
         $view->vars["max_strength"] = $options["max_strength"];
         $view->vars["autocomplete"] = $options["autocomplete"];
-        $view->vars["suggestions"]  = $options["suggestions"];
-        $view->vars["required"]     = $options["required"];
+        $view->vars["suggestions"] = $options["suggestions"];
+        $view->vars["required"] = $options["required"];
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'inline'            => true,
-            'secure'            => true,
-            'hint'              => true,
-            'revealer'          => false,
-            'repeater'          => true,
-            'autocomplete'      => false,
-            'suggestions'       => false,
-            "min_length"        => Password::MIN_LENGTH_FALLBACK,
-            "min_strength"      => Password::MIN_STRENGTH_FALLBACK,
-            "max_strength"      => Password::MAX_STRENGTH_FALLBACK,
-            "required"          => false,
-            'options'           => [],
+            'inline' => true,
+            'secure' => true,
+            'hint' => true,
+            'revealer' => false,
+            'repeater' => true,
+            'autocomplete' => false,
+            'suggestions' => false,
+            "min_length" => Password::MIN_LENGTH_FALLBACK,
+            "min_strength" => Password::MIN_STRENGTH_FALLBACK,
+            "max_strength" => Password::MAX_STRENGTH_FALLBACK,
+            "required" => false,
+            'options' => [],
             'options[repeater]' => [],
-            'invalid_message'   => '@fields.password.invalid_message'
+            'invalid_message' => '@fields.password.invalid_message'
         ]);
 
         $resolver->setNormalizer('revealer', function (Options $options, $value) {
@@ -107,7 +108,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         }
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
         $plainPasswordType = iterator_to_array($forms)["plain"];
         if ($plainPasswordType) {
@@ -115,7 +116,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         }
     }
 
-    public function mapFormsToData(\Traversable $forms, &$viewData): void
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $plainPasswordType = iterator_to_array($forms)["plain"] ?? null;
         if ($plainPasswordType == null) {

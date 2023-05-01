@@ -7,6 +7,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\CountryType;
 use Symfony\Component\Form\Extension\Core\Type\CurrencyType;
 use Symfony\Component\Form\Extension\Core\Type\LanguageType;
@@ -14,6 +15,9 @@ use Symfony\Component\Form\Extension\Core\Type\LocaleType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+use Traversable;
+use function count;
+use function in_array;
 use function Symfony\Component\String\u;
 
 class ArrayConfigurator implements FieldConfiguratorInterface
@@ -33,7 +37,7 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         }
 
         $autocompletableFormTypes = [CountryType::class, CurrencyType::class, LanguageType::class, LocaleType::class, TimezoneType::class];
-        if (\in_array($entryTypeFqcn, $autocompletableFormTypes, true)) {
+        if (in_array($entryTypeFqcn, $autocompletableFormTypes, true)) {
             $field->setFormTypeOption('entry_options.attr.data-widget', 'autocomplete');
         }
 
@@ -58,12 +62,12 @@ class ArrayConfigurator implements FieldConfiguratorInterface
                 if (is_object($entity)) {
                     $entity = PropertyAccess::createPropertyAccessor()->getValue($entity, $propertyPath);
                 } else {
-                    throw new \Exception("Invalid property path for \"".get_class($entity)."\": ".$patternFieldName);
+                    throw new Exception("Invalid property path for \"" . get_class($entity) . "\": " . $patternFieldName);
                 }
             }
 
             $formattedValue = $this->resolve($entity, ...PropertyAccess::createPropertyAccessor()->getValue($entityDto->getInstance(), $field->getProperty()));
-            $field->setFormattedValue(is_url(sanitize_url($formattedValue)) ? "<a href='".sanitize_url($formattedValue)."'>".$formattedValue."</a>" : $formattedValue);
+            $field->setFormattedValue(is_url(sanitize_url($formattedValue)) ? "<a href='" . sanitize_url($formattedValue) . "'>" . $formattedValue . "</a>" : $formattedValue);
         } else {
             $field->setFormattedValue($this->formatCollection($field, $context));
         }
@@ -77,7 +81,7 @@ class ArrayConfigurator implements FieldConfiguratorInterface
 
         $search = [];
         foreach ($patternOpts as $index => $_) {
-            $search[] = "{".$index."}";
+            $search[] = "{" . $index . "}";
         }
 
         $url = str_replace($search, $patternOpts, $pattern);
@@ -96,10 +100,10 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         }
 
         if (is_countable($collection)) {
-            return \count($collection);
+            return count($collection);
         }
 
-        if ($collection instanceof \Traversable) {
+        if ($collection instanceof Traversable) {
             return iterator_count($collection);
         }
 

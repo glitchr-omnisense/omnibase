@@ -4,6 +4,7 @@ namespace Base\Validator\Constraints;
 
 use Base\Validator\Constraint;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
+use function is_callable;
 
 /**
  * Constraint for the Unique Entity validator.
@@ -15,7 +16,7 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
 class NotBlank extends Constraint
 {
     public $message = '@validators.not_blank';
-    public $allowNull = false;
+    public bool $allowNull = false;
     public $normalizer;
 
     public function getTargets(): string|array
@@ -30,7 +31,7 @@ class NotBlank extends Constraint
         $this->allowNull = $allowNull ?? $this->allowNull;
         $this->normalizer = $normalizer ?? $this->normalizer;
 
-        if (null !== $this->normalizer && !\is_callable($this->normalizer)) {
+        if (null !== $this->normalizer && !is_callable($this->normalizer)) {
             throw new InvalidArgumentException(sprintf('The "normalizer" option must be a valid callable ("%s" given).', get_debug_type($this->normalizer)));
         }
     }

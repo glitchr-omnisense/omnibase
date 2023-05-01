@@ -30,6 +30,7 @@ trait TranslationTrait
     {
         return self::getTranslatableEntityClass()::getTranslationEntityClass();
     }
+
     public static function getTranslatableEntityClass(): string
     {
         // By default, the translatable class has the same name but without the suffix
@@ -47,6 +48,7 @@ trait TranslationTrait
     {
         return $this->translatable;
     }
+
     public function setTranslatable(?TranslatableInterface $translatable)
     {
         $this->translatable = $translatable;
@@ -65,11 +67,8 @@ trait TranslationTrait
             return Localizer::normalizeLocale($this->locale);
         }
 
-        if ($this->getTranslatable() === null) {
-            return null;
-        }
+        return $this->getTranslatable()?->getTranslations()->indexOf($this);
 
-        return $this->getTranslatable()->getTranslations()->indexOf($this);
     }
 
     public function setLocale(string $locale)
@@ -97,7 +96,7 @@ trait TranslationTrait
                 return false;
             } elseif (is_array($value) && $value !== []) {
                 return false;
-            } elseif (is_bool($value) && $value === true) {
+            } elseif ($value === true) {
                 return false;
             } elseif (!empty($value)) {
                 return false;

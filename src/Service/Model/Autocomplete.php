@@ -9,7 +9,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 class Autocomplete
 {
     /** @var TranslatorInterface */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     public function __construct(TranslatorInterface $translator)
     {
@@ -19,7 +19,7 @@ class Autocomplete
     public function resolve($entry, $class = null, array $entryOptions = [])
     {
         $entryOptions["format"] ??= FORMAT_IDENTITY;
-        $entryOptions["html"]   ??= true;
+        $entryOptions["html"] ??= true;
 
         if ($entry == null) {
             return null;
@@ -29,7 +29,7 @@ class Autocomplete
             $accessor = PropertyAccess::createPropertyAccessor();
             $id = $accessor->isReadable($entry, "id") ? strval($accessor->getValue($entry, "id")) : null;
 
-            $autocomplete     = null;
+            $autocomplete = null;
             $autocompleteData = [];
 
             $entityStr = is_stringeable($entry) ? $entry->__toString() : null;
@@ -46,7 +46,7 @@ class Autocomplete
             $data = $autocompleteData;
 
             if (!$text) {
-                $text = is_stringeable($entry) ? strip_tags(strval($entry)) : $className . " #".$entry->getId();
+                $text = is_stringeable($entry) ? strip_tags(strval($entry)) : $className . " #" . $entry->getId();
             }
 
             $icons = [];
@@ -69,36 +69,36 @@ class Autocomplete
             }
             $color = null;
         } elseif (class_implements_interface($class, SelectInterface::class)) {
-            $id    = $entry;
-            $icon  = $class::getIcon($entry, 0);
-            $text  = $class::getText($entry, $this->translator);
-            $html  = $class::getHtml($entry);
-            $data  = $class::getData($entry);
+            $id = $entry;
+            $icon = $class::getIcon($entry, 0);
+            $text = $class::getText($entry, $this->translator);
+            $html = $class::getHtml($entry);
+            $data = $class::getData($entry);
 
             $color = null;
             if (class_implements_interface($entry, ColorizeInterface::class)) {
                 $color = $class::getColor($entry);
             }
         } else {
-            $icon  = is_array($entry) ? ($entry[2] ?? $entry[1] ?? $entry[0]) : null  ;
-            $text  = is_array($entry) ? ($entry[1] ?? $entry[0]) : $entry;
-            $id    = is_array($entry) ? ($entry[0]) : $entry;
-            $html  = null;
-            $data  = [];
+            $icon = is_array($entry) ? ($entry[2] ?? $entry[1] ?? $entry[0]) : null;
+            $text = is_array($entry) ? ($entry[1] ?? $entry[0]) : $entry;
+            $id = is_array($entry) ? ($entry[0]) : $entry;
+            $html = null;
+            $data = [];
 
             $color = null;
         }
 
         return
-        [
-            "id"   => $id ?? null,
-            "icon" => $icon,
-            "color" => $color,
-            "search" => null,
-            "text" => is_string($text) ? castcase($text, $entryOptions["format"]) : $text,
-            "html" => $entryOptions["html"] ? $html : null,
-            "data" => $data,
-        ];
+            [
+                "id" => $id ?? null,
+                "icon" => $icon,
+                "color" => $color,
+                "search" => null,
+                "text" => is_string($text) ? castcase($text, $entryOptions["format"]) : $text,
+                "html" => $entryOptions["html"] ? $html : null,
+                "data" => $data,
+            ];
     }
 
     public function resolveArray($entry, array $entryOptions = [])

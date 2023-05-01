@@ -8,10 +8,13 @@ use Base\Database\TranslationInterface;
 
 use Base\Service\LocalizerInterface;
 use Base\Twig\Environment;
+use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
+use Exception;
 use InvalidArgumentException;
+use ReflectionFunction;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -25,6 +28,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Traversable;
 use UnexpectedValueException;
+use function count;
 
 class TranslationType extends AbstractType implements DataMapperInterface
 {
@@ -125,7 +129,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 ];
 
                 $defaultLocale = $options["default_locale"];
-                if ($options["single_locale"] && \count($dataLocale) == 1) {
+                if ($options["single_locale"] && count($dataLocale) == 1) {
                     $defaultLocale = $locale = $dataLocale[0];
                 }
 
@@ -139,8 +143,8 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
                 // Special case for required option (allowing to turn translation requirements depending on some options..)
                 foreach ($entityOptions["fields"] as &$translationField) {
-                    if (array_key_exists("required", $translationField) && $translationField["required"] instanceof \Closure) {
-                        $reflFn = new \ReflectionFunction($translationField["required"]);
+                    if (array_key_exists("required", $translationField) && $translationField["required"] instanceof Closure) {
+                        $reflFn = new ReflectionFunction($translationField["required"]);
 
                         if ($reflFn->getNumberOfParameters() != 3) {
                             throw new InvalidArgumentException("required-callable method is expecting 3 arguments: \"\$value\", \"\$locale\", \"\$options\"");
@@ -259,7 +263,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $excludedFields = $options["excluded_fields"] ?? [];
         foreach ($excludedFields as $field) {
             if (!property_exists($classMetadata->getName(), $field)) {
-                throw new \Exception("Field \"" . $field . "\" requested for exclusion doesn't exist in \"" . $translationClass . "\"");
+                throw new Exception("Field \"" . $field . "\" requested for exclusion doesn't exist in \"" . $translationClass . "\"");
             }
         }
 
@@ -316,14 +320,14 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
             $translatableClass = $this->getTranslatableClass($form->getParent());
             $form = $form->getParent();
-        };
+        }
 
         if (!$translatableClass) {
-            throw new \Exception("No \"translation_class\" found in \"" . $form->getName() . "\" and no hint (data_class or data) from inherited from FormType \"" . $formInit->getName() . "\" (" . get_class($formInit->getConfig()->getType()->getInnerType()) . ") or any of its parents");
+            throw new Exception("No \"translation_class\" found in \"" . $form->getName() . "\" and no hint (data_class or data) from inherited from FormType \"" . $formInit->getName() . "\" (" . get_class($formInit->getConfig()->getType()->getInnerType()) . ") or any of its parents");
         }
 
         if (!is_subclass_of($translatableClass, TranslatableInterface::class)) {
-            throw new \Exception("Translatable interface not implemented in \"" . $translatableClass . "\"");
+            throw new Exception("Translatable interface not implemented in \"" . $translatableClass . "\"");
         }
 
         return $translatableClass::getTranslationEntityClass(); //, false);
@@ -403,9 +407,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                         }
                     }
 
-                    if ($translation) {
-                        $viewData[$key][$locale] = $translation;
-                    }
+                    $viewData[$key][$locale] = $translation;
                 }
             }
         }

@@ -17,14 +17,14 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 class EditorType extends AbstractType
 {
     /** @var Environment */
-    protected $twig;
+    protected Environment $twig;
 
     /** @var ParameterBagInterface */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
-    protected $router;
-    protected $csrfTokenManager;
-    protected $obfuscator;
+    protected RouterInterface $router;
+    protected CsrfTokenManagerInterface $csrfTokenManager;
+    protected ObfuscatorInterface $obfuscator;
 
     public function __construct(ParameterBagInterface $parameterBag, Environment $twig, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator)
     {
@@ -72,10 +72,10 @@ class EditorType extends AbstractType
         $editorOpts = [];
         $editorOpts["placeholder"] = $options["placeholder"];
 
-        $token  = $this->csrfTokenManager->getToken("editorjs")->getValue();
+        $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
         $data = $this->obfuscator->encode(["token" => $token]);
-        $view->vars["uploadByFile"]     = $this->router->generate("ux_editorjs_endpointByFile", ["data" => $data]);
-        $view->vars["uploadByUrl"]     = $this->router->generate("ux_editorjs_endpointByUrl", ["data" => $data]);
+        $view->vars["uploadByFile"] = $this->router->generate("ux_editorjs_endpointByFile", ["data" => $data]);
+        $view->vars["uploadByUrl"] = $this->router->generate("ux_editorjs_endpointByUrl", ["data" => $data]);
 
         $view->vars["editor"] = json_encode($editorOpts);
     }

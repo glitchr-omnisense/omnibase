@@ -17,23 +17,24 @@ class ReferrerSubscriber implements EventSubscriberInterface
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var ReferrerInterface
      */
-    protected $referrer;
+    protected ReferrerInterface $referrer;
 
     public function __construct(
-        ReferrerInterface $referrer,
-        RouterInterface $router,
+        ReferrerInterface     $referrer,
+        RouterInterface       $router,
         ParameterBagInterface $parameterBag
-    ) {
+    )
+    {
         $this->router = $router;
         $this->parameterBag = $parameterBag;
         $this->referrer = $referrer;
@@ -41,7 +42,7 @@ class ReferrerSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-        return [RequestEvent::class    => [['onKernelRequest', 4]]];
+        return [RequestEvent::class => [['onKernelRequest', 4]]];
     }
 
     public function getCurrentRouteName($event)

@@ -6,28 +6,31 @@ use Imagine\Filter\Basic\Resize;
 use Base\Imagine\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
+use InvalidArgumentException;
 
 class ScaleFilter implements FilterInterface
 {
     /**
      * @var string
      */
-    protected $dimensionKey;
+    protected ?string $dimensionKey;
 
     /**
      * @var string
      */
-    protected $ratioKey;
+    protected ?string $ratioKey;
 
     /**
      * @var bool
      */
-    protected $absoluteRatio;
+    protected bool $absoluteRatio;
+
+    protected array $options;
 
     public function __toString()
     {
         $scale = $this->options[$this->ratioKey] ?? implode("x", $this->options[$this->dimensionKey] ?? []);
-        return "scale:".$scale;
+        return "scale:" . $scale;
     }
 
     public function __construct(array $options = [], $dimensionKey = 'dim', $ratioKey = 'to', $absoluteRatio = true)
@@ -41,7 +44,7 @@ class ScaleFilter implements FilterInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         if (!isset($this->options[$this->dimensionKey]) && !isset($this->options[$this->ratioKey])) {
-            throw new \InvalidArgumentException("Missing $this->dimensionKey or $this->ratioKey option.");
+            throw new InvalidArgumentException("Missing $this->dimensionKey or $this->ratioKey option.");
         }
 
         $size = $image->getSize();
@@ -53,8 +56,8 @@ class ScaleFilter implements FilterInterface
             $ratio = $this->absoluteRatio ? $this->options[$this->ratioKey] : $this->calcAbsoluteRatio($this->options[$this->ratioKey]);
         } elseif (isset($this->options[$this->dimensionKey])) {
             $size = $this->options[$this->dimensionKey];
-            $width = isset($size[0]) ? $size[0] : null;
-            $height = isset($size[1]) ? $size[1] : null;
+            $width = $size[0] ?? null;
+            $height = $size[1] ?? null;
 
             $widthRatio = $width / $origWidth;
             $heightRatio = $height / $origHeight;

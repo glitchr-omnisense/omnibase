@@ -2,6 +2,8 @@
 
 namespace Base\Annotations\Traits;
 
+use Exception;
+
 trait HierarchifyTrait
 {
     public function getHierarchy($id = -1, ?string $separator = null)
@@ -24,7 +26,7 @@ trait HierarchifyTrait
     {
         $entityHierarchy = $this->getClassMetadataCompletor()->entityHierarchy;
         if (empty($entityHierarchy)) {
-            throw new \Exception("Missing @Hierarchify for class \"" . get_class($this) . "\"");
+            throw new Exception("Missing @Hierarchify for class \"" . get_class($this) . "\"");
         }
 
         $entityHierarchySeparator = $this->getClassMetadataCompletor()->entityHierarchySeparator;

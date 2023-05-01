@@ -4,6 +4,7 @@ namespace Base\Controller\Frontend\User;
 
 use App\Entity\User;
 use App\Form\Type\UserProfileType;
+use App\Repository\UserRepository;
 use Base\Annotations\Annotation\Iconize;
 use Base\Enum\UserRole;
 use Base\Form\FormProcessorInterface;
@@ -19,17 +20,17 @@ class ProfileController extends AbstractController
     /**
      * @var FormProxyInterface
      */
-    protected $formProxy;
+    protected FormProxyInterface $formProxy;
 
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var UserRepository
      */
-    protected $userRepository;
+    protected UserRepository $userRepository;
 
     public function __construct(EntityManagerInterface $entityManager, FormProxyInterface $formProxy)
     {
@@ -53,27 +54,27 @@ class ProfileController extends AbstractController
             }
         }
 
-        if ($user != $this->getUser() && !$this->isGranted(UserRole::ADMIN)) {
+        if ($user !== $this->getUser() && !$this->isGranted(UserRole::ADMIN)) {
             throw new AccessDeniedException();
         }
 
         return $this->formProxy
-                ->createProcessor("profile:user", UserProfileType::class, ["use_model" => true])
-                ->setData($user)
-                ->onDefault(function (FormProcessorInterface $formProcessor) use ($user) {
-                    return $this->render('client/user/profile_edit.html.twig', [
-                        'user' => $user,
-                        "form" => $formProcessor->getForm()->createView()
-                    ]);
-                })
-                ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($user) {
-                    $user = $formProcessor->hydrate($user);
-                    $this->entityManager->flush();
+            ->createProcessor("profile:user", UserProfileType::class, ["use_model" => true])
+            ->setData($user)
+            ->onDefault(function (FormProcessorInterface $formProcessor) use ($user) {
+                return $this->render('client/user/profile_edit.html.twig', [
+                    'user' => $user,
+                    "form" => $formProcessor->getForm()->createView()
+                ]);
+            })
+            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($user) {
+                $user = $formProcessor->hydrate($user);
+                $this->entityManager->flush();
 
-                    return $this->redirectToRoute('user_profileEdit');
-                })
-                ->handleRequest($request)
-                ->getResponse();
+                return $this->redirectToRoute('user_profileEdit');
+            })
+            ->handleRequest($request)
+            ->getResponse();
     }
 
     /**

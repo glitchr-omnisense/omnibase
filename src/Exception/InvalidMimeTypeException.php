@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class InvalidMimeTypeException extends \Exception
+use Exception;
+
+class InvalidMimeTypeException extends Exception
 {
     /**
      * {@inheritdoc}

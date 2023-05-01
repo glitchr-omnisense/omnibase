@@ -16,7 +16,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'timemachine:snapshot', aliases:[], description:'')]
+#[AsCommand(name: 'timemachine:snapshot', aliases: [], description: '')]
 class TimeMachineSnapshotCommand extends Command
 {
     /**
@@ -30,13 +30,14 @@ class TimeMachineSnapshotCommand extends Command
     protected $flysystem;
 
     public function __construct(
-        LocalizerInterface $localizer,
-        TranslatorInterface $translator,
+        LocalizerInterface     $localizer,
+        TranslatorInterface    $translator,
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        TimeMachineInterface $timeMachine,
-        FlysystemInterface $flysystem
-    ) {
+        ParameterBagInterface  $parameterBag,
+        TimeMachineInterface   $timeMachine,
+        FlysystemInterface     $flysystem
+    )
+    {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->timeMachine = $timeMachine;
         $this->flysystem = $flysystem;
@@ -53,18 +54,16 @@ class TimeMachineSnapshotCommand extends Command
     {
         $this->timeMachine->setCommandOutput($output);
 
-        $storages       = $input->getArgument('storages') ?? [];
-        $prefix         = $input->getOption('prefix')   ?? null;
-        $cycle          = $input->getOption('cycle')      ?? -1;
+        $storages = $input->getArgument('storages') ?? [];
+        $prefix = $input->getOption('prefix') ?? null;
+        $cycle = $input->getOption('cycle') ?? -1;
 
         $output->section()->writeln("<info>Available database connection(s)</info>:");
         foreach ($this->timeMachine->getDatabaseList() as $connectionName => $database) {
-            $output->section()->writeln(" * <info>" . $connectionName . "</info> (". get_class($database).")");
+            $output->section()->writeln(" * <info>" . $connectionName . "</info> (" . get_class($database) . ")");
         }
 
-        if ($output) {
-            $output->section()->writeln("");
-        }
+        $output->section()->writeln("");
 
         $output->section()->writeln("<info>Storage filesystem:</info> ");
         foreach ($this->timeMachine->getStorageList() as $storageName => $storage) {
@@ -75,29 +74,25 @@ class TimeMachineSnapshotCommand extends Command
                 $selected = $selected ? " <warning><-- selected</warning> " : "";
 
                 $remote = $this->flysystem->isRemote($storageName) ? "<magenta>(remote)</magenta> " : "";
-                $output->section()->writeln("* [<info>".$storageName."</info>] ".$remote.$public.$selected);
+                $output->section()->writeln("* [<info>" . $storageName . "</info>] " . $remote . $public . $selected);
             }
         }
 
-        if ($output) {
-            $output->section()->writeln("");
-        }
+        $output->section()->writeln("");
 
         $index = 0;
         foreach ($this->timeMachine->getSnapshots($storages, null, $cycle) as $storageName => $snapshot) {
-            $output->section()->writeln("<info>Available snapshot(s) in</info>: ". $storageName, OutputInterface::VERBOSITY_VERBOSE);
+            $output->section()->writeln("<info>Available snapshot(s) in</info>: " . $storageName, OutputInterface::VERBOSITY_VERBOSE);
 
             $public = $this->flysystem->getPublic("/", $storageName);
             if (!$snapshot) {
                 $output->section()->writeln("* No snapshot found", OutputInterface::VERBOSITY_VERBOSE);
             }
             foreach ($snapshot as $file) {
-                $output->section()->writeln("* [<info>".$index++."</info>] ".$public.$file, OutputInterface::VERBOSITY_VERBOSE);
+                $output->section()->writeln("* [<info>" . $index++ . "</info>] " . $public . $file, OutputInterface::VERBOSITY_VERBOSE);
             }
 
-            if ($output) {
-                $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
-            }
+            $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
         }
 
         return Command::SUCCESS;

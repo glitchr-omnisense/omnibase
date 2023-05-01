@@ -36,6 +36,9 @@ use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\LayoutSettingListType;
 use Base\Form\Type\LayoutWidgetListType;
+use Base\Repository\Layout\SettingRepository;
+use Base\Repository\Layout\Widget\SlotRepository;
+use Base\Repository\Layout\WidgetRepository;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -92,67 +95,67 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * @var AdminUrlGenerator
      */
-    protected $adminUrlGenerator;
+    protected AdminUrlGenerator $adminUrlGenerator;
 
     /**
      * @var AdminContextProvider
      */
-    protected $adminContextProvider;
+    protected AdminContextProvider $adminContextProvider;
 
     /**
      * @var RequestStack
      */
-    protected $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var Extension
      */
-    protected $extension;
+    protected Extension $extension;
 
     /**
      * @var Translator
      */
-    protected $translator;
+    protected TranslatorInterface|Translator $translator;
 
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /**
      * @var MediaService
      */
-    protected $mediaService;
+    protected MediaService $mediaService;
 
     /**
-     * @var SettingBag
+     * @var SettingBagInterface
      */
     protected $settingBag;
 
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
     protected $entityManager;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var SettingRepository
      */
-    protected $settingRepository;
+    protected SettingRepository $settingRepository;
 
     /**
      * @var WidgetRepository
      */
-    protected $widgetRepository;
+    protected WidgetRepository $widgetRepository;
 
     /**
      * @var SlotRepository
      */
-    protected $slotRepository;
+    protected SlotRepository $slotRepository;
 
     public const TRANSLATION_DASHBOARD = "backoffice";
     public const TRANSLATION_ENTITY = "entities";
@@ -457,6 +460,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function addRoles(array &$menu, string $class)
     {
         foreach ($class::getPermittedValuesByGroup(false) as $values) {
+
             if ($values == UserRole::USER) {
                 continue;
             }
@@ -464,6 +468,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if (!is_array($values)) {
                 $values = ["_self" => $values];
             }
+
             $role = array_pop_key("_self", $values);
             $crudController = UserRole::getCrudController($role);
             if (!$crudController) {
@@ -483,8 +488,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 ->generateUrl();
 
             if (empty($values)) {
+
                 $item = MenuItem::linkToUrl($label, $icon, $url);
             } else {
+
                 $item = MenuItem::subMenu($label, $icon, $url);
 
                 $subItems = [];
@@ -563,10 +570,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->add(Crud::PAGE_EDIT, Action::SEPARATOR)
             ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right')
             ->add(Crud::PAGE_EDIT, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right')
-            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-edit')
+            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-floppy-disk')
             ->add(Crud::PAGE_EDIT, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left')
             ->add(Crud::PAGE_NEW, Action::INDEX, 'fa-solid fa-fw fa-backspace')
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN, 'fa-solid fa-fw fa-edit')
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN, 'fa-solid fa-share-from-square')
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-floppy-disk')
             ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER, 'fa-solid fa-fw fa-edit');
     }
 
@@ -591,9 +599,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', "fa-solid fa-book"));
         if ($this->isGranted('ROLE_EDITOR')) {
             $section = $this->getSectionWidgetItem($widgets, "LAYOUT");
-            if ($section) {
-                $section->setWidth(2);
-            }
+            $section?->setWidth(2);
 
             $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
                 WidgetItem::linkToCrud(Setting::class),

@@ -7,22 +7,22 @@ use Symfony\Component\Routing\RouterInterface;
 
 class Breadgrinder implements BreadgrinderInterface
 {
-    protected $breadcrumbs = [];
+    protected array $breadcrumbs = [];
 
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
-     * @var Translator
+     * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     public function __construct(RouterInterface $router, TranslatorInterface $translator, ParameterBagInterface $parameterBag)
     {
@@ -35,13 +35,14 @@ class Breadgrinder implements BreadgrinderInterface
     {
         return array_key_exists($name, $this->breadcrumbs);
     }
+
     public function grind(string $name, array $options = [], ?string $template = null): Breadcrumb
     {
         // Some default parameters (if not created yet)
         if (!$this->has($name)) {
-            $options["class"]      = $options["class"]      ?? $this->parameterBag->get("base.breadcrumb.class");
+            $options["class"] = $options["class"] ?? $this->parameterBag->get("base.breadcrumb.class");
             $options["class_item"] = $options["class_item"] ?? $this->parameterBag->get("base.breadcrumb.class_item");
-            $options["separator"]  = $options["separator"]  ?? $this->parameterBag->get("base.breadcrumb.separator");
+            $options["separator"] = $options["separator"] ?? $this->parameterBag->get("base.breadcrumb.separator");
         }
 
         // Prepare object

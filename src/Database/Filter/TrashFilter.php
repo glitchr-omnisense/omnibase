@@ -9,7 +9,7 @@ use Doctrine\ORM\Query\Filter\SQLFilter;
 
 class TrashFilter extends SQLFilter
 {
-    public function addFilterConstraint(ClassMetadata $targetEntity, $alias): string
+    public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string
     {
         $trasheableAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Trasheable::class);
 
@@ -19,8 +19,8 @@ class TrashFilter extends SQLFilter
 
         $fieldName = end($trasheableAnnotation)->deletedAt;
         if ($targetEntity->hasField($fieldName)) {
-            $date = date("Y-m-d H:00:00", time()+3600);
-            return $alias.".".$fieldName." < '".$date."' OR ".$alias.".".$fieldName." IS NULL";
+            $date = date("Y-m-d H:00:00", time() + 3600);
+            return $targetTableAlias . "." . $fieldName . " < '" . $date . "' OR " . $alias . "." . $fieldName . " IS NULL";
         }
 
         return "";

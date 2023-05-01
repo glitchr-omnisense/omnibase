@@ -4,6 +4,8 @@ namespace Base\Twig\Renderer\Adapter;
 
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 
+use LogicException;
+use RuntimeException;
 use Twig\Environment;
 use Base\Twig\AssetPackage;
 use InvalidArgumentException;
@@ -30,12 +32,12 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     /**
      * @var Packages
      */
-    protected $packages;
+    protected Packages $packages;
 
     /**
      * @var ?EntrypointLookupCollectionInterface
      */
-    protected $entrypointLookupCollection;
+    protected ?EntrypointLookupCollectionInterface $entrypointLookupCollection;
 
     /** @var string */
     protected string $publicDir;
@@ -45,7 +47,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     private bool $saveDeferred = false;
     private ?CacheItemPoolInterface $cache = null;
 
-    protected $debug;
+    protected bool $debug;
 
     public function __construct(
         Environment                          $twig,
@@ -176,7 +178,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     public function addEntrypoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
     {
         if ($this->entrypointLookupCollection == null) {
-            throw new \LogicException('You cannot use "' . __CLASS__ . "::" . __METHOD__ . '" as the "symfony/webpack-encore-bundle" package is not installed. Try running "composer require symfony/webpack-encore-bundle".');
+            throw new LogicException('You cannot use "' . __CLASS__ . "::" . __METHOD__ . '" as the "symfony/webpack-encore-bundle" package is not installed. Try running "composer require symfony/webpack-encore-bundle".');
         }
 
         $this->encoreEntrypoints[$value] = new EntrypointLookup($entrypointJsonPath, $cache, $cacheKey, $strictMode);
@@ -186,7 +188,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     public function removeEntrypoint(string $value)
     {
         if ($this->entrypointLookupCollection == null) {
-            throw new \LogicException('You cannot use "' . __CLASS__ . "::" . __METHOD__ . '" as the "symfony/webpack-encore-bundle" package is not installed. Try running "composer require symfony/webpack-encore-bundle".');
+            throw new LogicException('You cannot use "' . __CLASS__ . "::" . __METHOD__ . '" as the "symfony/webpack-encore-bundle" package is not installed. Try running "composer require symfony/webpack-encore-bundle".');
         }
 
         if (array_key_exists($value, $this->encoreEntrypoints)) {
@@ -202,9 +204,9 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
             return false;
         }
 
-        $entrypointLookup = $this->entrypointLookupCollection?->getEntrypointLookup($entrypointName);
+        $entrypointLookup = $this->entrypointLookupCollection->getEntrypointLookup($entrypointName);
         if (!$entrypointLookup instanceof EntrypointLookup) {
-            throw new \LogicException(sprintf('Cannot use entryExists() unless the entrypoint lookup is an instance of "%s"', EntrypointLookup::class));
+            throw new LogicException(sprintf('Cannot use entryExists() unless the entrypoint lookup is an instance of "%s"', EntrypointLookup::class));
         }
 
         try {
@@ -232,7 +234,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
                 $this->encoreEntrypointHashes[$entrypointJsonPath] ??= $entrypointHash;
                 if (!is_cli() && $entrypointHash != $this->encoreEntrypointHashes[$entrypointJsonPath]) {
                     $this->encoreEntrypointHashes[$entrypointJsonPath] = $entrypointHash;
-                    throw new \RuntimeException("Entrypoint '" . $id . "' got modified.. please refresh your cache");
+                    throw new RuntimeException("Entrypoint '" . $id . "' got modified.. please refresh your cache");
                 }
             }
         }
@@ -257,7 +259,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     {
         $this->refreshCacheIfNeeded();
 
-        $entryName = (string)$this->slugify($value);
+        $entryName = $this->slugify($value);
         if (!array_key_exists($entryName, $this->encoreEntryLinkTags)) {
             $this->encoreEntryLinkTags[$entryName] = array_filter([
                 "value" => $value,
@@ -284,7 +286,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
     {
         $this->refreshCacheIfNeeded();
 
-        $entryName = (string)$this->slugify($value);
+        $entryName = $this->slugify($value);
         if (!array_key_exists($entryName, $this->encoreEntryScriptTags)) {
             $this->encoreEntryScriptTags[$entryName] = array_filter([
                 "value" => $value,
@@ -373,14 +375,12 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
             return "";
         }
 
-        $entryName = (string)$this->slugify($entryName);
+        $entryName = $this->slugify($entryName);
         if (array_key_exists($entryName, $this->renderedCssSource)) {
             return $this->renderedCssSource[$entryName] . $this->renderOptionalCssSource($entryName);
         }
 
-        if (!array_key_exists($entryName, $this->renderedCssSource)) {
-            $this->addLinkTag($entryName, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
-        }
+        $this->addLinkTag($entryName, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
 
         $source = "";
 
@@ -432,7 +432,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
             return "";
         }
 
-        $entryName = (string)$this->slugify($entryName);
+        $entryName = $this->slugify($entryName);
         if (array_key_exists($entryName, $this->renderedLinkTags)) {
             return $this->renderedLinkTags[$entryName] . $this->renderOptionalLinkTags($entryName);
         }
@@ -534,7 +534,7 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
             return "";
         }
 
-        $entryName = (string)$this->slugify($entryName);
+        $entryName = $this->slugify($entryName);
         if (array_key_exists($entryName, $this->renderedScriptTags)) {
             return $this->renderedScriptTags[$entryName] . $this->renderOptionalScriptTags($entryName);
         }
@@ -587,10 +587,10 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         return "";
     }
 
-    public function render(string $value, ?array $context = [], ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []): string
+    public function render(string $name, ?array $context = [], ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []): string
     {
-        return $this->renderLinkTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes) . PHP_EOL .
-            $this->renderScriptTags($value, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
+        return $this->renderLinkTags($name, $webpackPackageName, $webpackEntrypointName, $htmlAttributes) . PHP_EOL .
+            $this->renderScriptTags($name, $webpackPackageName, $webpackEntrypointName, $htmlAttributes);
     }
 
     public function renderFallback(Response $response): Response

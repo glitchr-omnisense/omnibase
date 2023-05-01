@@ -6,7 +6,9 @@ use Base\BaseBundle;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Repository\Layout\ImageRepository;
 use Base\Service\Model\Obfuscator\CompressionInterface;
+use ErrorException;
 use Hashids\Hashids;
+use LogicException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV5;
@@ -16,7 +18,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     protected string $uuid;
     protected array $compressions = [];
 
-    protected $compression;
+    protected string $compression;
     protected int $level = -1;
     protected int $maxLength = 0;
     protected ?string $encoding;
@@ -70,7 +72,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 
         if ($compression == null) {
             $compressionIds = array_keys($this->getCompressions());
-            throw new \LogicException("No compression class retrieved from \"" . $compressionId . "\" identifier (available: " . implode(", ", $compressionIds) . ")");
+            throw new LogicException("No compression class retrieved from \"" . $compressionId . "\" identifier (available: " . implode(", ", $compressionIds) . ")");
         }
 
         $compression->setLevel($this->level);
@@ -82,7 +84,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 
     public function isShort()
     {
-        return $this->uuid !== null;
+        return true;
     }
 
     public function getUuid(string $name): ?UuidV5
@@ -108,23 +110,23 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return $identifier;
     }
 
-    public function decode(string $data): ?array
+    public function decode(string $hash): ?array
     {
-        $uuid = $data;
+        $uuid = $hash;
         if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
             $_ = $this->getCache("/Identifiers/" . $uuid);
             if ($_) {
-                $data = $_;
+                $hash = $_;
             }
         }
 
-        $data = $this->getCompression($this->compression)->decode($data);
+        $hash = $this->getCompression($this->compression)->decode($hash);
         try {
-            if ($data) {
-                $data = unserialize($data);
+            if ($hash) {
+                $hash = unserialize($hash);
             }
-            return $data ?: null;
-        } catch (\ErrorException $e) {
+            return $hash ?: null;
+        } catch (ErrorException $e) {
         }
 
         if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {

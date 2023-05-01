@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class MissingLocaleException extends \Exception
+use Exception;
+
+class MissingLocaleException extends Exception
 {
     /**
      * {@inheritdoc}

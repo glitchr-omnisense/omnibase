@@ -34,7 +34,7 @@ trait FormGuessTrait
         ];
 
         foreach ($options["guess_priority"] as $priority) {
-            switch($priority) {
+            switch ($priority) {
                 case FormGuessInterface::GUESS_FROM_FORM:
 
                     $class = $options["class"] ?? null;
@@ -152,7 +152,7 @@ trait FormGuessTrait
                 if ($this->classMetadataManipulator->hasAssociation($target, $targetField)) {
                     return $this->classMetadataManipulator->isToManySide($target, $targetField);
                 } elseif ($this->classMetadataManipulator->hasField($target, $targetField)) {
-                    $typeOfField  = $this->classMetadataManipulator->getTypeOfField($target, $targetField);
+                    $typeOfField = $this->classMetadataManipulator->getTypeOfField($target, $targetField);
                     $doctrineType = $this->classMetadataManipulator->getDoctrineType($typeOfField);
 
                     if ($this->classMetadataManipulator->isSetType($doctrineType)) {
@@ -197,7 +197,7 @@ trait FormGuessTrait
 
             if ($this->classMetadataManipulator->isEntity($target)) {
                 $targetField = $form->getName();
-                $this->classMetadataManipulator->getMapping($target, $targetField)["allow_null"] ?? false;
+                    $this->classMetadataManipulator->getMapping($target, $targetField)["allow_null"] ?? false;
             }
         }
 
@@ -256,7 +256,7 @@ trait FormGuessTrait
             } elseif ($this->classMetadataManipulator->isSetType($class)) {
                 $permittedValues = $class::getPermittedValuesByClass();
             } elseif (array_key_exists("choice_loader", $options) && $options["choice_loader"] instanceof ChoiceLoaderInterface) {
-                $permittedValues = $options["choice_loader"] ? $options["choice_loader"]->loadChoiceList()->getStructuredValues() : null;
+                $permittedValues = $options["choice_loader"]->loadChoiceList()->getStructuredValues();
             }
 
             if ($permittedValues === null) {
@@ -265,7 +265,7 @@ trait FormGuessTrait
             return count($permittedValues) == 1 ? begin($permittedValues) : $permittedValues;
         }
 
-        return $options["choices"] ?? null;
+        return $options["choices"];
     }
 
     public function guessChoiceAutocomplete(FormInterface|FormBuilderInterface $form, ?array $options = null)
@@ -282,7 +282,7 @@ trait FormGuessTrait
             return false;
         }
         if ($options["autocomplete"] === null && $options["class"]) {
-            $target = $options["class"] ?? null;
+            $target = $options["class"];
             if ($this->classMetadataManipulator->isEntity($target)) {
                 return true;
             }
@@ -321,7 +321,7 @@ trait FormGuessTrait
                 }
             }
 
-            if (!$options["choice_filter"]  && $options["class"]) {
+            if (!$options["choice_filter"] && $options["class"]) {
                 $options["choice_filter"][] = $options["class"];
             }
         }

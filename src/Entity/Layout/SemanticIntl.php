@@ -23,10 +23,12 @@ class SemanticIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $label;
+
     public function getLabel(): ?string
     {
         return $this->label;
     }
+
     public function setLabel(?string $label)
     {
         $this->label = $label;
@@ -38,10 +40,12 @@ class SemanticIntl implements TranslationInterface
      * @OrderColumn
      */
     protected $keywords = [];
+
     public function getKeywords(): array
     {
         return $this->keywords ?? [];
     }
+
     public function setKeywords(array $keywords)
     {
         $this->keywords = $keywords;

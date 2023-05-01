@@ -5,6 +5,7 @@ namespace Base\Routing\Generator;
 use Base\BaseBundle;
 use Base\Service\Localizer;
 use Exception;
+use Generator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Exception\InvalidParameterException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -15,8 +16,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 {
     public static $router = null;
 
-    protected $cachedRoutes = [];
-    protected $compiledRoutes;
+    protected array $cachedRoutes = [];
+    protected array $compiledRoutes;
 
     public function getCompiledRoutes(): array
     {
@@ -56,9 +57,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     protected function resolveUrl(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
     {
         // Transforms requested route by adding parameters
-        if ($routeName === null) {
-            return null;
-        }
 
         if (($route = self::$router->getRoute($routeName))) {
             if ($route->getHost()) {
@@ -92,7 +90,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                         if (!$routeParameter) {
                             continue;
                         }
-                        $routeParameters[$key] = str_replace($search, $replace, $routeParameter ?? "");
+                        $routeParameters[$key] = str_replace($search, $replace, $routeParameter);
                     }
                 }
 
@@ -183,80 +181,80 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         return $routeParameters;
     }
 
-    public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
+    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         //
         // Prevent to generate custom route with Symfony internal route.
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
-        if (str_starts_with($routeName, "_") || !self::$router->useAdvancedFeatures()) {
-            $routeParameters = $this->resolveParameters($routeParameters);
-            return parent::generate($routeName, $routeParameters, $referenceType);
+        if (str_starts_with($name, "_") || !self::$router->useAdvancedFeatures()) {
+            $parameters = $this->resolveParameters($parameters);
+            return parent::generate($name, $parameters, $referenceType);
         }
 
         //
         // Extract locale from route name if found
         foreach (self::$router->getLocalizer()->getAvailableLocaleLangs() as $lang) {
-            if (str_ends_with($routeName, "." . $lang)) {
-                $routeName = str_rstrip($routeName, "." . $lang);
+            if (str_ends_with($name, "." . $lang)) {
+                $name = str_rstrip($name, "." . $lang);
                 $locale = $lang;
             }
         }
 
         // Check whether the route is already cached
-        $hash = self::$router->getRouteHash($routeName, $routeParameters, $referenceType);
+        $hash = self::$router->getRouteHash($name, $parameters, $referenceType);
         if (array_key_exists($hash, $this->cachedRoutes) && $this->cachedRoutes[$hash]["_name"] !== null && BaseBundle::USE_CACHE) {
             $cachedRoute = $this->cachedRoutes[$hash];
 
-            $locale = array_key_exists("_locale", $routeParameters) ? self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]) : self::$router->getLocalizer()->getLocaleLang();
+            $locale = array_key_exists("_locale", $parameters) ? self::$router->getLocalizer()->getLocaleLang($parameters["_locale"]) : self::$router->getLocalizer()->getLocaleLang();
             try {
-                return $this->resolveUrl($cachedRoute["_name"] . ($locale ? "." . $locale : ""), $routeParameters, $referenceType);
-            } catch (\Exception $exception) {
-                return $this->resolveUrl($cachedRoute["_name"], $routeParameters, $referenceType);
+                return $this->resolveUrl($cachedRoute["_name"] . ($locale ? "." . $locale : ""), $parameters, $referenceType);
+            } catch (Exception $exception) {
+                return $this->resolveUrl($cachedRoute["_name"], $parameters, $referenceType);
             }
         }
 
-        $routeGroups = self::$router->getRouteGroups($routeName);
+        $routeGroups = self::$router->getRouteGroups($name);
         $routeDefaultName = first($routeGroups);
-        if (array_key_exists("_locale", $routeParameters)) {
-            $locale = self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
-            if (!str_ends_with($routeName, "." . $locale)) {
-                $routeDefaultName .= "." . self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]);
+        if (array_key_exists("_locale", $parameters)) {
+            $locale = self::$router->getLocalizer()->getLocaleLang($parameters["_locale"]);
+            if (!str_ends_with($name, "." . $locale)) {
+                $routeDefaultName .= "." . self::$router->getLocalizer()->getLocaleLang($parameters["_locale"]);
             }
         }
 
-        $routes = array_filter(array_transforms(fn($k, $routeName): array => [$routeName, self::$router->getRoute($routeName)], $routeGroups));
+        $routes = array_filter(array_transforms(fn($k, $name): array => [$name, self::$router->getRoute($name)], $routeGroups));
 
         //
         // Try to compute subgroup (if not found compute base)
         try {
-            $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
+            $routeUrl = $this->resolveUrl($name, $parameters, $referenceType);
         } catch (Exception $e) {
-            if (str_starts_with($routeName, "app_")) {
-                $routeName = "base_" . substr($routeName, 4);
+            if (str_starts_with($name, "app_")) {
+                $name = "base_" . substr($name, 4);
                 try {
-                    $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
+                    $routeUrl = $this->resolveUrl($name, $parameters, $referenceType);
                 } catch (Exception $_) {
                     throw $e;
                 }
-            } elseif ($routeName == $routeDefaultName || $routeDefaultName === null) {
+            } elseif ($name == $routeDefaultName || $routeDefaultName === null) {
                 throw $e;
             }
 
-            $routeName = $routeDefaultName;
-            if ($routeName !== null) {
-                $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
+            $name = $routeDefaultName;
+            if ($name !== null) {
+                $routeUrl = $this->resolveUrl($name, $parameters, $referenceType);
             }
         }
 
         $cache = self::$router->getCache();
         if ($cache !== null) {
             $routeRequirements = [];
-            if (array_key_exists($routeName, $routes)) {
-                $routeRequirements = $routes[$routeName]->getRequirements();
+            if (array_key_exists($name, $routes)) {
+                $routeRequirements = $routes[$name]->getRequirements();
             }
 
             $this->cachedRoutes[$hash] = [
-                "_name" => $routeName,
+                "_name" => $name,
                 "_requirements" => $routeRequirements
             ];
 
@@ -272,7 +270,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeName = explode(".", $routeName ?? "")[0];
 
         $routeNames = array_keys($this->getCompiledRoutes());
-        $routeGroups = array_transforms(function ($k, $_routeName) use ($routeName): ?\Generator {
+        $routeGroups = array_transforms(function ($k, $_routeName) use ($routeName): ?Generator {
             if ($_routeName !== $routeName && !str_starts_with($_routeName, $routeName . ".")) {
                 return null;
             }

@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class MissingDiscriminatorValueException extends \Exception
+use Exception;
+
+class MissingDiscriminatorValueException extends Exception
 {
     /**
      * {@inheritdoc}

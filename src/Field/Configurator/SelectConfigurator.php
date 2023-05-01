@@ -22,22 +22,22 @@ class SelectConfigurator implements FieldConfiguratorInterface
     /**
      * @var AdminUrlGenerator
      */
-    protected $adminUrlGenerator;
+    protected AdminUrlGenerator $adminUrlGenerator;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var Autocomplete
      */
-    protected $autocomplete;
+    protected Autocomplete $autocomplete;
 
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
     {
@@ -112,11 +112,5 @@ class SelectConfigurator implements FieldConfiguratorInterface
         }
 
         $field->setFormattedValue($formattedValues);
-        $fieldValue = $field->getValue();
-
-        $isIndexOrDetail = \in_array($context->getCrud()->getCurrentPage(), [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true);
-        if (null === $fieldValue || !$isIndexOrDetail) {
-            return;
-        }
     }
 }

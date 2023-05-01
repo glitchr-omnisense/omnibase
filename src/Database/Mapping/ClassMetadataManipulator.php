@@ -2,10 +2,7 @@
 
 namespace Base\Database\Mapping;
 
-use App\Entity\Marketplace\Product\Extra\Wallpaper;
-use App\Entity\Marketplace\Sales\Region;
 use Base\Cache\Abstract\AbstractLocalCache;
-use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
@@ -15,15 +12,19 @@ use Base\Field\Type\SelectType;
 use Base\Field\Type\TranslationType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Exception;
 use InvalidArgumentException;
 
 use Base\Database\Mapping\Factory\ClassMetadataFactory;
 use Doctrine\Persistence\Proxy;
+use LogicException;
+use RuntimeException;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -32,18 +33,20 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use function count;
+use function in_array;
 
 class ClassMetadataManipulator extends AbstractLocalCache
 {
     /**
      * @var ManagerRegistry
      * */
-    protected $doctrine;
+    protected ManagerRegistry $doctrine;
 
     /**
      * @var EntityManagerInterface
      * */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var array
@@ -95,7 +98,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public const DEFAULT_TRACKING = 0;
 
-    protected $globalTrackingPolicy = self::DEFAULT_TRACKING;
+    protected int $globalTrackingPolicy = self::DEFAULT_TRACKING;
 
     public function getGlobalTrackingPolicy()
     {
@@ -106,14 +109,14 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
         if (!in_array($policy, $trackingPolicies)) {
-            throw new \Exception("Invalid global tracking policy \"$policy\" provided");
+            throw new Exception("Invalid global tracking policy \"$policy\" provided");
         }
 
         $this->globalTrackingPolicy = $policy;
         return $this;
     }
 
-    protected $trackingPolicy = [];
+    protected array $trackingPolicy = [];
 
     public function getTrackingPolicy($className)
     {
@@ -124,7 +127,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
         if (!in_array($policy, $trackingPolicies)) {
-            throw new \Exception("Invalid tracking policy \"$policy\" provided for \"$className\"");
+            throw new Exception("Invalid tracking policy \"$policy\" provided for \"$className\"");
         }
 
         $this->trackingPolicy[$className] = $policy;
@@ -149,9 +152,9 @@ class ClassMetadataManipulator extends AbstractLocalCache
         }
 
         try {
-            $doctrineType = \Doctrine\DBAL\Types\Type::getType($type);
-        } catch (\Exception $e) {
-            throw new \LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e);
+            $doctrineType = Type::getType($type);
+        } catch (Exception $e) {
+            throw new LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e);
         }
 
         return $doctrineType;
@@ -216,7 +219,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     public function getFields(null|string|object $entityOrClassOrMetadata, array $fields = [], array $excludedFields = []): array
     {
         if (!empty($fields) && !is_associative($fields)) {
-            throw new \Exception("Associative array expected for 'fields' parameter, '" . gettype($fields) . "' received");
+            throw new Exception("Associative array expected for 'fields' parameter, '" . gettype($fields) . "' received");
         }
 
         $fieldKeys = array_keys($fields);
@@ -275,7 +278,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         $unmappedFields = $this->filteringRemainingFields($validFields, $fields, $excludedFields, $entityOrClassOrMetadata);
         foreach ($fields as $fieldName => $field) {
-            if (\in_array($fieldName, $excludedFields, true)) {
+            if (in_array($fieldName, $excludedFields, true)) {
                 continue;
             }
 
@@ -317,7 +320,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         $validFields = [];
         foreach ($fields as $fieldName => $field) {
-            if (\in_array($fieldName, $excludedFields, true)) {
+            if (in_array($fieldName, $excludedFields, true)) {
                 continue;
             }
 
@@ -335,10 +338,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
         $unknowsFields = [];
 
         foreach ($fields as $fieldName => $field) {
-            if (\in_array($fieldName, $excludedFields)) {
+            if (in_array($fieldName, $excludedFields)) {
                 continue;
             }
-            if (\in_array($fieldName, $validFieldKeys, true)) {
+            if (in_array($fieldName, $validFieldKeys, true)) {
                 continue;
             }
 
@@ -350,8 +353,8 @@ class ClassMetadataManipulator extends AbstractLocalCache
             $unknowsFields[] = $fieldName;
         }
 
-        if (\count($unknowsFields) > 0) {
-            throw new \RuntimeException(sprintf("Field(s) '%s' doesn't exist in %s", implode(', ', $unknowsFields), $entityOrClassOrMetadata));
+        if (count($unknowsFields) > 0) {
+            throw new RuntimeException(sprintf("Field(s) '%s' doesn't exist in %s", implode(', ', $unknowsFields), $entityOrClassOrMetadata));
         }
 
         return $unmappedFields;
@@ -407,7 +410,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             $fieldPath = explode(".", $fieldPath);
         }
         if (empty($fieldPath)) {
-            throw new \Exception("No field path provided for \"" . get_class($entity) . "\" ");
+            throw new Exception("No field path provided for \"" . get_class($entity) . "\" ");
         }
 
         if (!$entity) {
@@ -420,9 +423,9 @@ class ClassMetadataManipulator extends AbstractLocalCache
         $fieldName = array_shift($fieldPath);
 
         // Check entity validity
-        if ($entity === null || !is_object($entity)) {
+        if (!is_object($entity)) {
             if (!empty($fieldName)) {
-                throw new \Exception("Failed to find property \"" . implode('.', array_merge([$fieldName], $fieldPath)) . "\" using \"" . (is_object($entity) ? get_class($entity) : "NULL") . "\" data");
+                throw new Exception("Failed to find property \"" . implode('.', array_merge([$fieldName], $fieldPath)) . "\" using \"" . (is_object($entity) ? get_class($entity) : "NULL") . "\" data");
             } else {
                 return null;
             }
@@ -467,11 +470,11 @@ class ClassMetadataManipulator extends AbstractLocalCache
             $fieldValue = $fieldValue->containsKey($fieldKey) ? $fieldValue->get($fieldKey ?? 0) : null;
         }
 
-        if ($fieldValue === null || !is_object($fieldValue)) {
+        if (!is_object($fieldValue)) {
             if (empty($fieldPath)) {
                 return $fieldValue;
             }
-            throw new \Exception("Failed to resolve property path \"" . implode('.', array_merge([$fieldName], $fieldPath)) . "\" in \"" . $entityName . "\"");
+            throw new Exception("Failed to resolve property path \"" . implode('.', array_merge([$fieldName], $fieldPath)) . "\" in \"" . $entityName . "\"");
         }
 
         // If field path is not empty
@@ -491,7 +494,9 @@ class ClassMetadataManipulator extends AbstractLocalCache
         }
 
         $fieldName = $this->getFieldName($entity, $fieldPath) ?? $fieldPath;
-        return $classMetadata->setFieldValue($entity, $fieldName, $value);
+        $classMetadata->setFieldValue($entity, $fieldName, $value);
+
+        return $this;
     }
 
     public function hasField(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
@@ -529,7 +534,9 @@ class ClassMetadataManipulator extends AbstractLocalCache
         $fieldName = $classMetadata->getFieldName($property);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        return $propertyAccessor->setValue($entity, $fieldName, $value);
+        $propertyAccessor->setValue($entity, $fieldName, $value);
+
+        return $this;
     }
 
     public function getType(null|string|object $entityOrClassOrMetadata, string $property)
@@ -583,9 +590,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
             return null;
         }
 
-        if ($entity instanceof Fee) {
-        }
-
         if ($collection instanceof PersistentCollection) {
             if ($collection->getOwner() === null) {
                 return null;
@@ -613,9 +617,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             $fieldPath = trim(substr($fieldPath, 0, $dot));
             $fieldPath = $this->getFieldName($entityOrClassOrMetadata, $fieldPath) ?? $fieldPath;
 
-            $entityOrClassOrMetadata = $this->getTargetClass($entityOrClassOrMetadata, $fieldPath);
-
-            return $entityOrClassOrMetadata;
+            return $this->getTargetClass($entityOrClassOrMetadata, $fieldPath);
         }
 
         return $this->getClassMetadata($entityOrClassOrMetadata)?->getName();
@@ -654,7 +656,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             $property = trim(substr($property, $dot + 1));
 
             if (!$classMetadata->hasAssociation($field)) {
-                throw new \Exception("No association found for field \"$field\" in \"" . get_class($entityOrClassOrMetadata) . "\"");
+                throw new Exception("No association found for field \"$field\" in \"" . get_class($entityOrClassOrMetadata) . "\"");
             }
 
             $entityOrClassOrMetadata = $this->getTypeOfField($entityOrClassOrMetadata, $field);
@@ -684,7 +686,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             $property = trim(substr($property, $dot + 1));
 
             if (!$classMetadata->hasAssociation($field)) {
-                throw new \Exception("No association found for field \"$field\" in \"" . get_class($entityOrClassOrMetadata) . "\"");
+                throw new Exception("No association found for field \"$field\" in \"" . get_class($entityOrClassOrMetadata) . "\"");
             }
 
             $entityOrClassOrMetadata = $this->getTypeOfAssociation($entityOrClassOrMetadata, $field);
@@ -881,7 +883,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
-            return false;
+            return null;
         }
 
         return $this->fetchEntityMapping($classMetadata->getName(), $fieldName);
@@ -891,18 +893,18 @@ class ClassMetadataManipulator extends AbstractLocalCache
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
-            return false;
+            return null;
         }
 
         $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return $classMetadata->getAssociationMapping($fieldName) ?? null;
     }
 
-    public function getUniqueKeys(null|string|object $entityOrClassOrMetadata, bool $inherits = false): array
+    public function getUniqueKeys(null|string|object $entityOrClassOrMetadata, bool $inherits = false): ?array
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
-            return false;
+            return null;
         }
 
         $uniqueKeys = [];
@@ -932,7 +934,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             return $this->getMapping($this->getClassMetadata($entityOrClassOrMetadata)->getAssociationMapping("translations")["targetEntity"], $fieldName);
         }
 
-        return false;
+        return null;
     }
 
     public function getMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
@@ -948,14 +950,11 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return null;
     }
 
-    public function getAssociationMappings(null|string|object $entityOrClassOrMetadata): array
+    public function getAssociationMappings(null|string|object $entityOrClassOrMetadata): ?array
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
-        if (!$classMetadata) {
-            return false;
-        }
+        return $classMetadata?->getAssociationMappings();
 
-        return $classMetadata->getAssociationMappings();
     }
 
     public function isOwningSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
@@ -988,22 +987,22 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function isToOneSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true);
+        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true);
     }
 
     public function isToManySide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
+        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
     }
 
     public function isManyToSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true);
+        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true);
     }
 
     public function isOneToSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true);
+        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true);
     }
 
     public function isManyToMany(null|string|object $entityOrClassOrMetadata, string $fieldName): bool

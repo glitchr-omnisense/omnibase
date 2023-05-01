@@ -29,15 +29,15 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
     /**
      * @var EntityHydratorInterface
      */
-    protected $entityHydrator;
+    protected EntityHydratorInterface $entityHydrator;
     /**
      * @var ValidatorInterface
      */
-    protected $validator;
+    protected ValidatorInterface $validator;
 
     public function __construct(FormRegistryInterface $registry, ValidatorInterface $validator, ClassMetadataManipulator $classMetadataManipulator, EntityHydratorInterface $entityHydrator)
     {
@@ -53,7 +53,7 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
         // I recommend not using entity data..
         // NB: https://blog.martinhujer.cz/symfony-forms-with-request-objects/
         if ($this->classMetadataManipulator->isEntity($data)) {
-            throw new Exception("An entity \"" . get_class($data) . "\" is passed as data in \"".$type."\".\nThis is not recommended due to possible database flush conflict. Please use a DTO model.");
+            throw new Exception("An entity \"" . get_class($data) . "\" is passed as data in \"" . $type . "\".\nThis is not recommended due to possible database flush conflict. Please use a DTO model.");
         }
 
         return parent::createBuilder($type, $data, $options);
@@ -160,7 +160,7 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
                 $priority = $_[1] ?? 0;
 
                 if (!is_callable($listener)) {
-                    throw new Exception("Invalid listener (".$eventName.") information provided for Form \"".$name."\".");
+                    throw new Exception("Invalid listener (" . $eventName . ") information provided for Form \"" . $name . "\".");
                 }
 
                 $listeners[] = [$listener, $priority];

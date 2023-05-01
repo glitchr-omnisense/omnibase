@@ -9,6 +9,7 @@ use App\Entity\Thread\Mention;
 use Base\Database\Annotation\ColumnAlias;
 
 use Base\Database\Annotation\OrderColumn;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -236,7 +237,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     {
         $this->state = $state;
         if ($this->isPublished() && !$this->getPublishedAt()) {
-            $this->setPublishedAt(new \DateTime("now"));
+            $this->setPublishedAt(new DateTime("now"));
         }
 
         return $this;
@@ -268,10 +269,10 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return str_starts_with($this->state, ThreadState::SECRET);
     }
 
-    public function isPublished(null|\DateTime|string $within = null): bool
+    public function isPublished(null|DateTime|string $within = null): bool
     {
         if ($within) {
-            $within = $within instanceof DateTime ? $within : new \DateTime($within);
+            $within = $within instanceof DateTime ? $within : new DateTime($within);
             return $this->isScheduled() && $this->publishedAt < $within;
         }
 
@@ -553,7 +554,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      */
     protected $createdAt;
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
@@ -564,7 +565,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      */
     protected $updatedAt;
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -580,7 +581,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      */
     protected $publishedAt;
 
-    public function getPublishedAt(): ?\DateTimeInterface
+    public function getPublishedAt(): ?DateTimeInterface
     {
         return $this->publishedAt;
     }
@@ -596,101 +597,101 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $publishTime ? $this->getTranslator()->transTime($publishTime) : null;
     }
 
-    public function setPublishedAt(?\DateTimeInterface $publishedAt): self
+    public function setPublishedAt(?DateTimeInterface $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
         return $this;
     }
 
-    public function getKeywords(?string $locale = null, int $depth = 0): array
+    public function getKeywords(?string $locale = null, int $inheritanceDepthIfNotSet = 0): array
     {
         $keywords = $this->translate($locale)->getKeywords();
-        if (!$keywords && $depth > 0) {
-            $keywords = ($this->getParent() ? $this->getParent()->getKeywords($locale, --$depth) : null);
+        if (!$keywords && $inheritanceDepthIfNotSet > 0) {
+            $keywords = ($this->getParent() ? $this->getParent()->getKeywords($locale, --$inheritanceDepthIfNotSet) : null);
         }
 
         return $keywords ?? [];
     }
 
-    public function setKeywords(array $keywords, ?string $locale = null, int $depth = 0)
+    public function setKeywords(array $keywords, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
-        if ($depth > 0) {
-            return $this->translate($locale)->setKeywords(empty($keywords) || $keywords === $this->getParent()->getKeywords($locale, --$depth) ? [] : $keywords);
+        if ($inheritanceDepthIfNotSet > 0) {
+            return $this->translate($locale)->setKeywords(empty($keywords) || $keywords === $this->getParent()->getKeywords($locale, --$inheritanceDepthIfNotSet) ? [] : $keywords);
         }
 
         return $this->translate($locale)->setKeywords($keywords);
     }
 
-    public function getHeadline(?string $locale = null, int $depth = 0): ?string
+    public function getHeadline(?string $locale = null, int $inheritanceDepthIfNotSet = 0): ?string
     {
         $headline = $this->translate($locale)->getHeadline();
-        if ($depth > 0) {
-            $headline ??= ($this->getParent() ? $this->getParent()->getHeadline($locale, --$depth) : null);
+        if ($inheritanceDepthIfNotSet > 0) {
+            $headline ??= ($this->getParent() ? $this->getParent()->getHeadline($locale, --$inheritanceDepthIfNotSet) : null);
         }
 
         return $headline;
     }
 
-    public function setHeadline(?string $headline, ?string $locale = null, int $depth = 0)
+    public function setHeadline(?string $headline, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
-        if ($depth > 0) {
-            return $this->translate($locale)->setHeadline(empty($headline) || $headline === $this->getParent()->getHeadline($locale, --$depth) ? null : $headline);
+        if ($inheritanceDepthIfNotSet > 0) {
+            return $this->translate($locale)->setHeadline(empty($headline) || $headline === $this->getParent()->getHeadline($locale, --$inheritanceDepthIfNotSet) ? null : $headline);
         }
 
         return $this->translate($locale)->setHeadline($headline);
     }
 
-    public function getTitle(?string $locale = null, int $depth = 0): ?string
+    public function getTitle(?string $locale = null, int $inheritanceDepthIfNotSet = 0): ?string
     {
         $title = $this->translate($locale)->getTitle();
-        if ($depth > 0) {
-            $title ??= ($this->getParent() ? $this->getParent()->getTitle($locale, --$depth) : null);
+        if ($inheritanceDepthIfNotSet > 0) {
+            $title ??= ($this->getParent() ? $this->getParent()->getTitle($locale, --$inheritanceDepthIfNotSet) : null);
         }
 
         return $title;
     }
 
-    public function setTitle(?string $title, ?string $locale = null, int $depth = 0)
+    public function setTitle(?string $title, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
-        if ($depth > 0) {
-            return $this->translate($locale)->setTitle(empty($title) || $title === $this->getParent()->getTitle($locale, --$depth) ? null : $title);
+        if ($inheritanceDepthIfNotSet > 0) {
+            return $this->translate($locale)->setTitle(empty($title) || $title === $this->getParent()->getTitle($locale, --$inheritanceDepthIfNotSet) ? null : $title);
         }
         return $this->translate($locale)->setTitle($title);
     }
 
-    public function getExcerpt(?string $locale = null, int $depth = 0): ?string
+    public function getExcerpt(?string $locale = null, int $inheritanceDepthIfNotSet = 0): ?string
     {
         $excerpt = $this->translate($locale)->getExcerpt();
-        if ($depth > 0) {
-            $excerpt ??= ($this->getParent() ? $this->getParent()->getExcerpt($locale, --$depth) : null);
+        if ($inheritanceDepthIfNotSet > 0) {
+            $excerpt ??= ($this->getParent() ? $this->getParent()->getExcerpt($locale, --$inheritanceDepthIfNotSet) : null);
         }
 
         return $excerpt;
     }
 
-    public function setExcerpt(?string $excerpt, ?string $locale = null, int $depth = 0)
+    public function setExcerpt(?string $excerpt, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
-        if ($depth > 0) {
-            return $this->translate($locale)->setExcerpt(empty($excerpt) || $excerpt === $this->getParent()->getExcerpt($locale, --$depth) ? null : $excerpt);
+        if ($inheritanceDepthIfNotSet > 0) {
+            return $this->translate($locale)->setExcerpt(empty($excerpt) || $excerpt === $this->getParent()->getExcerpt($locale, --$inheritanceDepthIfNotSet) ? null : $excerpt);
         }
 
         return $this->translate($locale)->setExcerpt($excerpt);
     }
 
-    public function getContent(?string $locale = null, int $depth = 0): ?string
+    public function getContent(?string $locale = null, int $inheritanceDepthIfNotSet = 0): ?string
     {
         $content = $this->translate($locale)->getContent();
-        if ($depth > 0) {
-            $content ??= ($this->getParent() ? $this->getParent()->getContent($locale, --$depth) : null);
+        if ($inheritanceDepthIfNotSet > 0) {
+            $content ??= ($this->getParent() ? $this->getParent()->getContent($locale, --$inheritanceDepthIfNotSet) : null);
         }
 
         return $content;
     }
 
-    public function setContent(?string $content, ?string $locale = null, int $depth = 0)
+    public function setContent(?string $content, ?string $locale = null, int $inheritanceDepthIfNotSet = 0)
     {
-        if ($depth > 0) {
-            return $this->translate($locale)->setContent(empty($content) || $content === $this->getParent()->getContent($locale, --$depth) ? null : $content);
+        if ($inheritanceDepthIfNotSet > 0) {
+            return $this->translate($locale)->setContent(empty($content) || $content === $this->getParent()->getContent($locale, --$inheritanceDepthIfNotSet) ? null : $content);
         }
 
         return $this->translate($locale)->setContent($content);

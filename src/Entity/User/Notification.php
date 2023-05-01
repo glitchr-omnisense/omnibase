@@ -6,6 +6,8 @@ use App\Entity\User;
 use Base\Notifier\Abstract\BaseNotificationInterface;
 use Base\Service\Model\IconizeInterface;
 
+use DateTimeInterface;
+use RuntimeException;
 use Symfony\Component\Notifier\Notification\Notification as SymfonyNotification;
 
 use Base\Service\BaseService;
@@ -286,12 +288,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      */
     protected $sentAt = null;
 
-    public function getSentAt(): ?\DateTimeInterface
+    public function getSentAt(): ?DateTimeInterface
     {
         return $this->sentAt;
     }
 
-    public function setSentAt(?\DateTimeInterface $sentAt): self
+    public function setSentAt(?DateTimeInterface $sentAt): self
     {
         $this->sentAt = $sentAt;
         return $this;
@@ -300,7 +302,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     /**
      * @ORM\Column(type="text")
      */
-    protected string $backtrace = ""; // Internal use only (code line might be changing..)
+    protected $backtrace = ""; // Internal use only (code line might be changing..)
 
     public function getBacktrace(): string
     {
@@ -310,7 +312,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     /**
      * @ORM\Column(type="boolean")
      */
-    protected bool $markAsAdmin = false;
+    protected $markAsAdmin = false;
 
     public function isMarkAsAdmin()
     {
@@ -326,7 +328,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     /**
      * @var array
      */
-    protected array $context = [];
+    protected $context = [];
 
     public function getContext(array $additionalContext = [])
     {
@@ -376,7 +378,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     }
 
     /* Handle custom emails */
-    protected string $htmlTemplate = "";
+    protected $htmlTemplate = "";
 
     public function getHtmlTemplate()
     {
@@ -393,7 +395,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    protected array $htmlParameters = [];
+    protected $htmlParameters = [];
 
     public function getHtmlParameters(): array
     {
@@ -645,9 +647,9 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         // I was hoping to replace content with html(), but this gets overriden by Symfony notification
         try {
             $htmlTemplate = $this->getTwig()->render($this->htmlTemplate, $context);
-        } catch (\Twig\Error\LoaderError $e) {
+        } catch (LoaderError $e) {
             $htmlTemplate = $this->getTwig()->render("@Base/notifier/email.html.twig", $context);
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             throw new UnexpectedValueException("Template \"$this->htmlTemplate\" not found.", 500, $e);
         }
 

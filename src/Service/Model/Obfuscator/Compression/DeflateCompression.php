@@ -10,15 +10,17 @@ class DeflateCompression extends AbstractCompression
     {
         return "deflate";
     }
+
     public function getEncoding(): ?string
     {
         return $this->encoding ?? ZLIB_ENCODING_RAW;
     }
 
-    protected function encodeHex(string $data): string|false
+    protected function encodeHex(string $hex): string|false
     {
-        return gzdeflate($data, $this->getLevel(), $this->getEncoding());
+        return gzdeflate($hex, $this->getLevel(), $this->getEncoding());
     }
+
     protected function decodeHex(string $data): string|false
     {
         return gzinflate($data, $this->getMaxLength());

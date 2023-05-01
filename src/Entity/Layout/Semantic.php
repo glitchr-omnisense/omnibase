@@ -9,6 +9,9 @@ use Base\Service\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\SemanticRepository;
 use Base\Traits\BaseTrait;
+use DomDocument;
+use DOMXPath;
+use Exception;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 
@@ -25,6 +28,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-award"];
@@ -48,6 +52,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -57,10 +62,12 @@ class Semantic implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $routeName;
+
     public function getRouteName(): ?string
     {
         return $this->routeName;
     }
+
     public function setRouteName(?string $routeName): self
     {
         $this->routeName = $routeName;
@@ -71,10 +78,12 @@ class Semantic implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="array", nullable=true)
      */
     protected $routeParameters;
+
     public function getRouteParameters(): ?array
     {
         return $this->routeParameters;
     }
+
     public function setRouteParameters(?array $routeParameters): self
     {
         $this->routeParameters = $routeParameters;
@@ -84,17 +93,19 @@ class Semantic implements TranslatableInterface, IconizeInterface
     public function getPath()
     {
         $route = $this->getRouter()->getRouteCollection()->get($this->routeName);
-        return $route ? $route->getPath() : null;
+        return $route?->getPath();
     }
 
     public function getRoute(): ?string
     {
         return $this->getRouter()->getRoute($this->getUrl());
     }
+
     public function getRouteIcons()
     {
         return $this->getIconProvider()->getRouteIcons($this->routeName);
     }
+
     public function getUrl(): ?string
     {
         return $this->generate();
@@ -102,14 +113,14 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
     protected function match(string $keyword): bool
     {
-        return in_array(strtolower($keyword), array_map(fn ($k) => strtolower($k), $this->keywords));
+        return in_array(strtolower($keyword), array_map(fn($k) => strtolower($k), $this->keywords));
     }
 
     protected function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         try {
             return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         return null;
@@ -122,23 +133,23 @@ class Semantic implements TranslatableInterface, IconizeInterface
             return $text;
         }
 
-        $dom = new \DomDocument();
+        $dom = new DomDocument();
         $encoding = mb_detect_encoding($text);
         $dom->loadHTML(mb_convert_encoding($text, 'HTML-ENTITIES', $encoding));
 
-        $xpath = new \DOMXPath($dom);
+        $xpath = new DOMXPath($dom);
         foreach ($xpath->query('//text()') as $text) {
             if (trim($text->nodeValue)) {
                 $text->nodeValue = preg_replace(
-                    "/(\b".implode("\b|\b", $keywords)."\b)/i",
-                    "<a href='".$this->generate()."' ".html_attributes($attributes).">$1</a>",
+                    "/(\b" . implode("\b|\b", $keywords) . "\b)/i",
+                    "<a href='" . $this->generate() . "' " . html_attributes($attributes) . ">$1</a>",
                     $text->nodeValue
                 );
             }
         }
 
         $node = $dom->getElementsByTagName('body')->item(0);
-        return html_entity_decode(trim(implode(array_map([$node->ownerDocument,"saveHTML"], iterator_to_array($node->childNodes)))));
+        return html_entity_decode(trim(implode(array_map([$node->ownerDocument, "saveHTML"], iterator_to_array($node->childNodes)))));
     }
 
     public function highlight(string $text, array $attributes = [])
@@ -148,7 +159,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
     public function highlightBy(string $text, array|string $keywords, array $attributes)
     {
-        $keywords = array_filter(is_array($keywords) ? $keywords : [$keywords], fn ($k) => $this->match($k));
+        $keywords = array_filter(is_array($keywords) ? $keywords : [$keywords], fn($k) => $this->match($k));
 
         return $this->doHighlight($text, $keywords, $attributes);
     }

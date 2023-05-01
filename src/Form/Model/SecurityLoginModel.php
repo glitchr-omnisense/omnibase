@@ -13,10 +13,10 @@ class SecurityLoginModel extends AbstractModel
     /**
      * @var string
      */
-    public $identifier;
+    public string $identifier;
 
     /**
      * @var string
      */
-    public $password;
+    public string $password;
 }

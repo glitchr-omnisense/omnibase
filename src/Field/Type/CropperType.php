@@ -9,6 +9,7 @@ use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -18,6 +19,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -26,27 +28,27 @@ class CropperType extends AbstractType implements DataMapperInterface
     /**
      * @var FormFactory
      */
-    protected $formFactory;
+    protected FormFactory $formFactory;
 
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /**
-     * @var PropertyAccessor
+     * @var PropertyAccessorInterface
      */
-    protected $propertyAccessor;
+    protected PropertyAccessorInterface $propertyAccessor;
 
     public function getBlockPrefix(): string
     {
@@ -170,7 +172,7 @@ class CropperType extends AbstractType implements DataMapperInterface
             $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
             foreach ($targetPath ?? [] as $path) {
                 if (!array_key_exists($path, $target->children)) {
-                    throw new \Exception("Child form \"$path\" related to view data \"" . $target->vars["name"] . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["target"] . "\")");
+                    throw new Exception("Child form \"$path\" related to view data \"" . $target->vars["name"] . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["target"] . "\")");
                 }
 
                 $target = $target->children[$path];
@@ -195,7 +197,7 @@ class CropperType extends AbstractType implements DataMapperInterface
             $quadrantPath = $options["quadrant"] ? explode(".", $options["quadrant"]) : null;
             foreach ($quadrantPath ?? [] as $path) {
                 if (!array_key_exists($path, $quadrant->children)) {
-                    throw new \Exception("Child form \"$path\" related to view data \"" . $quadrant->vars["name"] . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["quadrant"] . "\")");
+                    throw new Exception("Child form \"$path\" related to view data \"" . $quadrant->vars["name"] . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["quadrant"] . "\")");
                 }
 
                 $quadrant = $quadrant->children[$path];

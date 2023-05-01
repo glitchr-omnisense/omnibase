@@ -4,6 +4,7 @@ namespace Base\Imagine\Filter\Format;
 
 use Base\Imagine\FilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
+use Exception;
 use Imagine\Filter\Basic\Autorotate;
 use Imagine\Filter\Basic\WebOptimization;
 use Imagine\Image\ImageInterface;
@@ -14,7 +15,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 
     public function __toString()
     {
-        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
+        $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
         return path_suffix("", $pathSuffixes);
     }
 
@@ -22,6 +23,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
     {
         return $this->filters;
     }
+
     public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;
@@ -35,7 +37,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
             unlink_tmpfile($path);
         }
 
-        $this->path    = $path.".webp";
+        $this->path = $path . ".webp";
         $this->filters = $filters;
 
         if (array_key_exists("quality", $options)) {
@@ -50,10 +52,12 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
     }
 
     protected string $path;
+
     public function getPath(): ?string
     {
         return $this->path;
     }
+
     public function setPath(?string $path)
     {
         $this->path = $path;
@@ -66,7 +70,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
             $oldImage = $image;
             try {
                 $image = $filter->apply($oldImage);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $image = $oldImage;
             }
 
@@ -75,8 +79,6 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
             }
         }
 
-        $image = parent::apply($image);
-
-        return $image;
+        return parent::apply($image);
     }
 }

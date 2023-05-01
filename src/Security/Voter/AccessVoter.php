@@ -28,49 +28,50 @@ class AccessVoter extends Voter
     /**
      * @var RequestStack
      * */
-    protected $requestStack;
+    protected RequestStack $requestStack;
     /**
-     * @var Router
+     * @var RouterInterface
      * */
-    protected $router;
+    protected RouterInterface $router;
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      * */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
     /**
-     * @var Localizer
+     * @var LocalizerInterface
      * */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
     /**
-     * @var SettingBag
+     * @var SettingBagInterface
      * */
-    protected $settingBag;
+    protected SettingBagInterface $settingBag;
     /**
      * @var FirewallMapInterface
      * */
-    protected $firewallMap;
+    protected FirewallMapInterface $firewallMap;
     /**
-     * @var MaintenanceProvider
+     * @var MaintenanceProviderInterface
      * */
-    protected $maintenanceProvider;
+    protected MaintenanceProviderInterface $maintenanceProvider;
     /**
-     * @var Launcher
+     * @var LauncherInterface
      * */
-    protected $launcher;
+    protected LauncherInterface $launcher;
 
     protected ?array $urlExceptions;
+
     public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocalizerInterface $localizer, MaintenanceProviderInterface $maintenanceProvider, LauncherInterface $launcher)
     {
-        $this->requestStack   = $requestStack;
-        $this->router         = $router;
-        $this->settingBag     = $settingBag;
-        $this->parameterBag   = $parameterBag;
-        $this->firewallMap    = $firewallMap;
+        $this->requestStack = $requestStack;
+        $this->router = $router;
+        $this->settingBag = $settingBag;
+        $this->parameterBag = $parameterBag;
+        $this->firewallMap = $firewallMap;
         $this->localizer = $localizer;
         $this->maintenanceProvider = $maintenanceProvider;
-        $this->launcher    = $launcher;
+        $this->launcher = $launcher;
 
-        $this->urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
+        $this->urlExceptions = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocaleLang());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocale());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocaleLang());
@@ -84,28 +85,28 @@ class AccessVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        $user    = $subject instanceof User ? $subject : null;
-        $url     = is_string($subject) || $subject instanceof Referrer ? $subject : get_url();
+        $user = $subject instanceof User ? $subject : null;
+        $url = is_string($subject) || $subject instanceof Referrer ? $subject : get_url();
 
-        switch($attribute) {
+        switch ($attribute) {
             case self::ADMIN_ACCESS:
-                $access  = filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
+                $access = filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= $user && $user->isGranted("ROLE_SUPERADMIN");
                 return $access;
 
             case self::USER_ACCESS:
-                $access  = filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
+                $access = filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |=
                     filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN)
                     && $user && $user->isGranted("ROLE_ADMIN");
                 return $access;
 
             case self::ANONYMOUS_ACCESS:
-                $access  = filter_var($this->parameterBag->get("base.access_restriction.public_access"), FILTER_VALIDATE_BOOLEAN);
+                $access = filter_var($this->parameterBag->get("base.access_restriction.public_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= (
-                    filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN) ||
-                    filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN)
-                ) && $user && $user->isGranted("ROLE_USER");
+                        filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN) ||
+                        filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN)
+                    ) && $user && $user->isGranted("ROLE_USER");
 
                 return $access;
 
@@ -145,42 +146,42 @@ class AccessVoter extends Voter
 
                     $locale = $urlException["locale"] ?? null;
                     if ($locale !== null) {
-                        $exception &= $locale == $this->localizer->getLocale() ;
+                        $exception &= $locale == $this->localizer->getLocale();
                     }
 
                     $country = $urlException["country"] ?? null;
                     if ($country !== null) {
-                        $exception &= $country == $this->localizer->getLocaleCountry() ;
+                        $exception &= $country == $this->localizer->getLocaleCountry();
                     }
 
                     $lang = $urlException["lang"] ?? null;
                     if ($lang !== null) {
-                        $exception &= $lang == $this->localizer->getLocaleLang() ;
+                        $exception &= $lang == $this->localizer->getLocaleLang();
                     }
 
                     $scheme = $urlException["scheme"] ?? null;
                     if ($scheme !== null) {
-                        $exception &= array_key_exists("scheme", $url) && preg_match("/".$scheme."/", $url["scheme"]);
+                        $exception &= array_key_exists("scheme", $url) && preg_match("/" . $scheme . "/", $url["scheme"]);
                     }
 
                     $host = $urlException["host"] ?? null;
                     if ($host !== null) {
-                        $exception &= array_key_exists("host", $url) && preg_match("/".$host."/", $url["host"]);
+                        $exception &= array_key_exists("host", $url) && preg_match("/" . $host . "/", $url["host"]);
                     }
 
                     $domain = $urlException["domain"] ?? null;
                     if ($domain !== null) {
-                        $exception &= array_key_exists("domain", $url) && preg_match("/".$domain."/", $url["domain"]);
+                        $exception &= array_key_exists("domain", $url) && preg_match("/" . $domain . "/", $url["domain"]);
                     }
 
                     $subdomain = $urlException["subdomain"] ?? null;
                     if ($subdomain !== null) {
-                        $exception &= array_key_exists("subdomain", $url) && preg_match("/".$subdomain."/", $url["subdomain"]);
+                        $exception &= array_key_exists("subdomain", $url) && preg_match("/" . $subdomain . "/", $url["subdomain"]);
                     }
 
                     $path = $urlException["path"] ?? null;
                     if ($path !== null) {
-                        $exception &= array_key_exists("path", $url) && preg_match("/".$path."/", $url["path"]);
+                        $exception &= array_key_exists("path", $url) && preg_match("/" . $path . "/", $url["path"]);
                     }
 
                     if ($exception) {
@@ -188,7 +189,7 @@ class AccessVoter extends Voter
                     }
                 }
 
-                // no break
+            // no break
             default:
                 return false;
         }

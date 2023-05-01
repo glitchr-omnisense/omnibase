@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Entity\User\Penalty;
 use App\Entity\User\Permission;
 use Base\Service\Model\IconizeInterface;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Base\Database\Annotation\Cache;
@@ -142,12 +143,12 @@ class Group implements IconizeInterface
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
 

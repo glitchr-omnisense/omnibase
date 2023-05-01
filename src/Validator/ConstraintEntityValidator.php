@@ -5,12 +5,17 @@ namespace Base\Validator;
 use Base\BaseBundle;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
 
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use function count;
+use function get_class;
+use function is_array;
+use function is_string;
 
 /**
  * @Annotation
@@ -18,9 +23,9 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 abstract class ConstraintEntityValidator extends ConstraintValidator
 {
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
-    protected $em;
+    protected EntityManagerInterface $em;
 
     public function getOriginalEntity($entity)
     {
@@ -80,7 +85,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
                 throw new ConstraintDefinitionException(sprintf('Object manager "%s" does not exist.', $constraint->em));
             }
         } else {
-            $em = $this->getDoctrine()->getManagerForClass(\get_class($entity));
+            $em = $this->getDoctrine()->getManagerForClass(get_class($entity));
 
             if (!$em) {
                 throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
@@ -91,10 +96,11 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         return $buildViolation;
     }
 
-    public function validate($entity, Constraint $constraint)
+    public function validate($value, Constraint $constraint)
     {
+        $entity = $value;
         $fields = (array)$constraint->fields;
-        if (0 === \count($fields)) {
+        if (0 === count($fields)) {
             throw new ConstraintDefinitionException('At least one field has to be specified.');
         }
 
@@ -106,7 +112,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, $this->constraintClass);
         }
 
-        if (!\is_array($constraint->fields) && !\is_string($constraint->fields)) {
+        if (!is_array($constraint->fields) && !is_string($constraint->fields)) {
             throw new UnexpectedTypeException($constraint->fields, 'array');
         }
 

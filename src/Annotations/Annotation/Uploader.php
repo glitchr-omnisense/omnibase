@@ -64,7 +64,7 @@ class Uploader extends AbstractAnnotation
 
     protected array $ancestorEntity = [];
 
-    public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         if (!$this->getEntityManager()->contains($entity)) {
             return;
@@ -408,8 +408,8 @@ class Uploader extends AbstractAnnotation
 
             //
             // Upload files
-            $path = $this->getPath($entity ?? $oldEntity ?? null, $fieldName);
-            $contents = ($file ? file_get_contents($file->getPathname()) : "");
+            $path = $this->getPath($entity, $fieldName);
+            $contents = (file_get_contents($file->getPathname()));
 
             if (!$this->getFlysystem()->write($path, $contents, $this->getStorage(), $this->getConfig())) {
                 throw new InvalidMimeTypeException("Failed to write \"" . $path . "\" in " . get_class($entity) . ".");
@@ -472,38 +472,38 @@ class Uploader extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $fieldName = null)
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         try {
-            $this->uploadFiles($entity, null, $fieldName);
+            $this->uploadFiles($entity, null, $property);
         } catch (Exception $e) {
-            $this->deleteFiles(null, $entity, $fieldName);
-            self::setFieldValue($entity, $fieldName, null);
+            $this->deleteFiles(null, $entity, $property);
+            self::setFieldValue($entity, $property, null);
 
             throw $e;
         }
     }
 
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $fieldName = null)
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $oldEntity = $this->getOldEntity($entity);
         try {
-            if ($this->uploadFiles($entity, $oldEntity, $fieldName)) {
-                $this->deleteFiles($entity, $oldEntity, $fieldName);
+            if ($this->uploadFiles($entity, $oldEntity, $property)) {
+                $this->deleteFiles($entity, $oldEntity, $property);
             }
         } catch (Exception $e) {
-            $this->deleteFiles($oldEntity, $entity, $fieldName);
-            $old = self::getFieldValue($oldEntity, $fieldName);
+            $this->deleteFiles($oldEntity, $entity, $property);
+            $old = self::getFieldValue($oldEntity, $property);
 
-            self::setFieldValue($entity, $fieldName, $old);
+            self::setFieldValue($entity, $property, $old);
             //throw $e;
         }
 
         $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
     }
 
-    public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $fieldName = null)
+    public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $this->deleteFiles(null, $entity, $fieldName);
+        $this->deleteFiles(null, $entity, $property);
     }
 }

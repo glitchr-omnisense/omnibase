@@ -15,7 +15,7 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
 
     public function __construct(string $cacheDir)
     {
-        $phpCacheFile = $cacheDir."/pools/simple/php/".str_replace(['\\', '/'], ['__', '_'], IconProvider::class).".php";
+        $phpCacheFile = $cacheDir . "/pools/simple/php/" . str_replace(['\\', '/'], ['__', '_'], IconProvider::class) . ".php";
 
         $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter("", 0, str_rstrip($phpCacheFile, ".php"))));
         $this->warmUp($cacheDir);
@@ -44,13 +44,15 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
         return true;
     }
 
-    protected $version;
+    protected string $version;
+
     public function getVersion(): string
     {
         return $this->version ?? "unk";
     }
 
-    protected $contents = [];
+    protected array $contents = [];
+
     public function getContents()
     {
         return $this->contents;
@@ -60,10 +62,12 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
     {
         return $this->metadata;
     }
+
     public function getEntries()
     {
         return $this->contents ?? [];
     }
+
     public function getEntry(string $value = null): string
     {
         return $this->contents[$value] ?? "";
@@ -82,6 +86,6 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
         $class = implode(" ", array_unique(explode(" ", $class)));
         $attributes = array_key_removes($attributes, "class");
 
-        return "<i ".html_attributes($attributes)." class='".$class."'></i>";
+        return "<i " . html_attributes($attributes) . " class='" . $class . "'></i>";
     }
 }

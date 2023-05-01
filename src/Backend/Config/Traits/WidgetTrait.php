@@ -4,23 +4,22 @@ namespace Base\Backend\Config\Traits;
 
 use Base\Backend\Config\Menu\SectionWidgetItem;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
+use Exception;
+use const ARRAY_FILTER_USE_BOTH;
 
 trait WidgetTrait
 {
-    public function getSectionWidgetItem(array $widgets = [], $positionOrLabel = null): ?SectionWidgetItem
+    public function getSectionWidgetItem(array $widgets = [], $positionOrLabel = null): null|SectionWidgetItem
     {
-        $sectionOffsetAndLength = [0, null];
         if (!$positionOrLabel) {
-            return $sectionOffsetAndLength;
+            return null;
         }
 
-        $sectionFound   = false;
+        $sectionFound = false;
         $sectionCounter = 0;
-        foreach ($widgets as $key => $widget) {
+        foreach ($widgets as $widget) {
+
             if ($widget instanceof SectionWidgetItem) {
-                if ($sectionFound) {
-                    break;
-                }
 
                 $sectionFound |= (is_int($positionOrLabel) && $positionOrLabel == $sectionCounter);
                 $sectionFound |= (is_string($positionOrLabel) && $widget->getAsDto()->getLabel() == $positionOrLabel);
@@ -44,14 +43,14 @@ trait WidgetTrait
         }
 
         $sectionCounter = 0;
-        $sectionFound   = false;
+        $sectionFound = false;
         foreach ($widgets as $key => $widget) {
             if ($widget instanceof SectionWidgetItem) {
                 if ($sectionFound) {
                     break;
                 }
 
-                $sectionFound  = (is_object($sectionOrPositionOrLabel) && $sectionOrPositionOrLabel === $widget);
+                $sectionFound = (is_object($sectionOrPositionOrLabel) && $sectionOrPositionOrLabel === $widget);
                 $sectionFound |= (is_int($sectionOrPositionOrLabel) && $sectionOrPositionOrLabel == $sectionCounter);
                 $sectionFound |= (is_string($sectionOrPositionOrLabel) && $widget->getAsDto()->getLabel() == $sectionOrPositionOrLabel);
 
@@ -72,19 +71,19 @@ trait WidgetTrait
 
     public function extractSectionWidgetItem(array $widgets, int $offset, ?int $length)
     {
-        $previousWidgets   = array_slice($widgets, 0, $offset, true);
+        $previousWidgets = array_slice($widgets, 0, $offset, true);
         $sectionWidgetItem = ($length !== null ? array_slice($widgets, $offset, 1, true) : []);
-        $widgetItems       = ($length !== null ? array_slice($widgets, $offset+1, $length-1, true) : []);
-        $nextWidgets       = array_slice($widgets, $offset + $length, null, true);
+        $widgetItems = ($length !== null ? array_slice($widgets, $offset + 1, $length - 1, true) : []);
+        $nextWidgets = array_slice($widgets, $offset + $length, null, true);
 
         $sectionWidget = $sectionWidgetItem[0] ?? null;
         if ($sectionWidget && !($sectionWidget instanceof SectionWidgetItem)) {
-            throw new \Exception("Expected ".SectionWidgetItem::class." object, but you pass : \"". $sectionWidget."\"");
+            throw new Exception("Expected " . SectionWidgetItem::class . " object, but you pass : \"" . $sectionWidget . "\"");
         }
 
         foreach ($widgetItems as $widgetItem) {
             if (!($widgetItem instanceof MenuItemInterface)) {
-                throw new \Exception("Expected ".MenuItemInterface::class.", but you pass: \"". $widgetItem."\"");
+                throw new Exception("Expected " . MenuItemInterface::class . ", but you pass: \"" . $widgetItem . "\"");
             }
         }
 
@@ -103,7 +102,7 @@ trait WidgetTrait
 
         foreach ($sectionOrArray as $sectionWidget) {
             if (!($sectionWidget instanceof SectionWidgetItem)) {
-                throw new \Exception("Invalid section widget item provided: ". $sectionWidget);
+                throw new Exception("Invalid section widget item provided: " . $sectionWidget);
             }
         }
 
@@ -148,7 +147,7 @@ trait WidgetTrait
         }
         foreach ($itemOrArray as $item) {
             if ($item && !($item instanceof MenuItemInterface)) {
-                throw new \Exception("Invalid section widget item provided: ". $item);
+                throw new Exception("Invalid section widget item provided: " . $item);
             }
         }
 
@@ -156,16 +155,16 @@ trait WidgetTrait
         [$_, $sectionWidgetItem, $widgetItems, $_] = $this->extractSectionWidgetItem($widgets, $offset, $length);
 
         if (!$sectionWidgetItem) {
-            throw new \Exception("Section widget \"". $item."\" not found.");
+            throw new Exception("Section widget \"" . $item . "\" not found.");
         }
 
         if ($position < 0) {
-            $position = $length-1;
+            $position = $length - 1;
         }
 
         array_splice($widgetItems, $position, 0, $itemOrArray);
-        array_splice($widgets, $offset+1, $length-1);
-        array_splice($widgets, $offset+1, 0, $widgetItems);
+        array_splice($widgets, $offset + 1, $length - 1);
+        array_splice($widgets, $offset + 1, 0, $widgetItems);
 
 
         return $widgets;
@@ -181,15 +180,15 @@ trait WidgetTrait
         [$previousWidgets, $sectionWidgetItem, $widgetItems, $nextWidgets] = $this->extractSectionWidgetItem($widgets, $offset, $length);
 
         $widgetItems = array_filter(array_values($widgetItems), function ($widget, $widgetItemCounter) use ($widgetItemOrPositionOrLabel) {
-            $widgetItemFound  = (is_object($widgetItemOrPositionOrLabel) && $widgetItemOrPositionOrLabel === $widget);
+            $widgetItemFound = (is_object($widgetItemOrPositionOrLabel) && $widgetItemOrPositionOrLabel === $widget);
             $widgetItemFound |= (is_int($widgetItemOrPositionOrLabel) && $widgetItemOrPositionOrLabel == $widgetItemCounter);
             $widgetItemFound |= (is_string($widgetItemOrPositionOrLabel) && $widget->getAsDto()->getLabel() == $widgetItemOrPositionOrLabel);
 
             return !$widgetItemFound;
-        }, \ARRAY_FILTER_USE_BOTH);
+        }, ARRAY_FILTER_USE_BOTH);
 
-        array_splice($widgets, $offset+1, $length-1);
-        array_splice($widgets, $offset+1, 0, $widgetItems);
+        array_splice($widgets, $offset + 1, $length - 1);
+        array_splice($widgets, $offset + 1, 0, $widgetItems);
 
         return $widgets;
     }

@@ -4,6 +4,8 @@ namespace Base\Service;
 
 use Base\Controller\UX\MediaController;
 use Base\Routing\RouterInterface;
+use finfo;
+use League\Flysystem\Filesystem;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
 use InvalidArgumentException;
@@ -18,27 +20,27 @@ class FileService implements FileServiceInterface
     /**
      * @var MimeTypes
      */
-    protected $mimeTypes;
+    protected MimeTypes $mimeTypes;
 
     /**
-     * @var Obfuscator
+     * @var ObfuscatorInterface
      */
     protected $obfuscator;
 
     /**
-     * @var Filesystem
+     * @var FlysystemInterface
      */
-    protected $flysystem;
+    protected FlysystemInterface $flysystem;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /** * @var string */
     protected string $projectDir;
@@ -49,7 +51,7 @@ class FileService implements FileServiceInterface
     /**
      * @var MediaController
      */
-    protected $mediaController;
+    protected ?MediaController $mediaController = null;
 
     public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
@@ -141,7 +143,7 @@ class FileService implements FileServiceInterface
                 return $mimeType;
             }
 
-            return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */
+            return explode(";", (new finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */
         }
     }
 
@@ -294,9 +296,9 @@ class FileService implements FileServiceInterface
         return array_merge($config, ["options" => $config["options"] ?? []]);
     }
 
-    public function serve(?string $file, int $status = 200, array $headers = []): ?Response
+    public function serve(?string $path, int $status = 200, array $headers = []): ?Response
     {
-        return $this->serveContents(file_get_contents($file), $status, $headers);
+        return $this->serveContents(file_get_contents($path), $status, $headers);
     }
 
     public function serveContents(?string $contents, int $status = 200, array $headers = []): ?Response

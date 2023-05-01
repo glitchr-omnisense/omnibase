@@ -4,8 +4,11 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Traits\VaultTrait;
 use Base\Database\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
+use Doctrine\ORM\Event\PostFlushEventArgs;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\UnitOfWork;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -15,7 +18,6 @@ use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 use Symfony\Component\Cache\Marshaller\SodiumMarshaller;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-use function GuzzleHttp\Promise\queue;
 use function is_file;
 
 /**
@@ -27,7 +29,6 @@ use function is_file;
  *   @Attribute("unique", type = "array")
  * })
  */
-
 class Vault extends AbstractAnnotation
 {
     public string $vault;
@@ -36,19 +37,20 @@ class Vault extends AbstractAnnotation
 
     public function __construct(array $data = [])
     {
-        $this->vault  = $data["vault"] ?? "vault";
+        $this->vault = $data["vault"] ?? "vault";
         $this->fields = $data["fields"] ?? [];
         $this->unique = $data["unique"] ?? [];
     }
 
-    public function supports(string $target, ?string $targetValue = null, $classMetadata = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        if ($classMetadata instanceof ClassMetadata) {
+        if ($object instanceof ClassMetadata) {
             if (!$this->vault) {
-                throw new Exception("Vault field for environment context missing, please provide a valid field \"".$this->vault."\"");
+                throw new Exception("Vault field for environment context missing, please provide a valid field \"" . $this->vault . "\"");
             }
-            if (!$classMetadata->getFieldName($this->vault)) {
-                throw new Exception("Field \"".$this->vault."\" is missing, did you forget to import \"".VaultTrait::class."\" ?");
+
+            if (!$object->getFieldName($this->vault)) {
+                throw new Exception("Field \"" . $this->vault . "\" is missing, did you forget to import \"" . VaultTrait::class . "\" ?");
             }
         }
 
@@ -61,11 +63,11 @@ class Vault extends AbstractAnnotation
             $vault = $this->getEnvironment();
         }
 
-        $pathPrefix = $this->getProjectDir()."/config/secrets/".$vault."/".$vault.".";
-        $decryptionKey = is_file($pathPrefix.'decrypt.private.php') ? (string) include $pathPrefix.'decrypt.private.php' : null;
+        $pathPrefix = $this->getProjectDir() . "/config/secrets/" . $vault . "/" . $vault . ".";
+        $decryptionKey = is_file($pathPrefix . 'decrypt.private.php') ? (string)include $pathPrefix . 'decrypt.private.php' : null;
 
         if ($decryptionKey === null) {
-            throw new Exception('Decryption key not found in "'.dirname($pathPrefix).'".');
+            throw new Exception('Decryption key not found in "' . dirname($pathPrefix) . '".');
         }
         /* Rotation keys ? Encryption key ? Probably not needed.. input very welcome here :o) */
         // if (is_file($pathPrefix.'encrypt.public.php')) {
@@ -100,7 +102,7 @@ class Vault extends AbstractAnnotation
             }
 
             return $encryptedValues;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
     }
@@ -113,7 +115,7 @@ class Vault extends AbstractAnnotation
 
         try {
             return $marshaller?->unmarshall($value);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
     }
@@ -149,10 +151,9 @@ class Vault extends AbstractAnnotation
         }
     }
 
-    public function preFlush(\Doctrine\ORM\Event\PreFlushEventArgs $args, \Doctrine\ORM\Mapping\ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();
-        $marshaller = $this->getMarshaller($vault);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
@@ -183,10 +184,12 @@ class Vault extends AbstractAnnotation
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
     }
+
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
     }
+
     public function preLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();
@@ -214,15 +217,16 @@ class Vault extends AbstractAnnotation
         }
     }
 
-    public function postFlush(\Doctrine\ORM\Event\PostFlushEventArgs $args, \Doctrine\ORM\Mapping\ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function postFlush(PostFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
-        $this->postLifecycleEvent($args, $classMetadata, $entity, $property);
+        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
 
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
+
     public function postLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();

@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
+use NumberFormatter;
 
 final class StockConfigurator implements FieldConfiguratorInterface
 {
@@ -53,13 +54,13 @@ final class StockConfigurator implements FieldConfiguratorInterface
     private function getRoundingModeAsString(int $mode): string
     {
         return [
-            \NumberFormatter::ROUND_DOWN => 'down',
-            \NumberFormatter::ROUND_FLOOR => 'floor',
-            \NumberFormatter::ROUND_UP => 'up',
-            \NumberFormatter::ROUND_CEILING => 'ceiling',
-            \NumberFormatter::ROUND_HALFDOWN => 'halfdown',
-            \NumberFormatter::ROUND_HALFEVEN => 'halfeven',
-            \NumberFormatter::ROUND_HALFUP => 'halfup',
+            NumberFormatter::ROUND_DOWN => 'down',
+            NumberFormatter::ROUND_FLOOR => 'floor',
+            NumberFormatter::ROUND_UP => 'up',
+            NumberFormatter::ROUND_CEILING => 'ceiling',
+            NumberFormatter::ROUND_HALFDOWN => 'halfdown',
+            NumberFormatter::ROUND_HALFEVEN => 'halfeven',
+            NumberFormatter::ROUND_HALFUP => 'halfup',
         ][$mode];
     }
 }

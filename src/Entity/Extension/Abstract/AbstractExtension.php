@@ -9,6 +9,7 @@ use Base\Entity\User;
 use Base\Repository\Extension\Abstract\AbstractExtensionRepository;
 use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\Cache;
 
@@ -150,12 +151,12 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $createdAt;
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
         return $this;

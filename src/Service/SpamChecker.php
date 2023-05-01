@@ -5,6 +5,7 @@ namespace Base\Service;
 use Base\Enum\SpamApi;
 use Base\Enum\SpamScore;
 use Base\Service\Model\SpamProtectionInterface;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -41,12 +42,12 @@ class SpamChecker implements SpamCheckerInterface
     public function __construct(RequestStack $requestStack, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, TranslatorInterface $translator, HttpClientInterface $client, bool $debug)
     {
         $this->requestStack = $requestStack;
-        $this->settingBag   = $settingBag;
+        $this->settingBag = $settingBag;
         $this->parameterBag = $parameterBag;
 
-        $this->translator   = $translator;
-        $this->client       = $client;
-        $this->debug        = $debug;
+        $this->translator = $translator;
+        $this->client = $client;
+        $this->debug = $debug;
     }
 
     public function getLang()
@@ -70,13 +71,10 @@ class SpamChecker implements SpamCheckerInterface
 
     public function getKey($api): ?string
     {
-        switch($api) {
-            case SpamApi::AKISMET:
-                return $this->settingBag->getScalar("api.spam.akismet");
-
-            default:
-                throw new \RuntimeException("Unknown Spam API \"".$api."\".");
-        }
+        return match ($api) {
+            SpamApi::AKISMET => $this->settingBag->getScalar("api.spam.akismet"),
+            default => throw new RuntimeException("Unknown Spam API \"" . $api . "\"."),
+        };
     }
 
     public function getEndpoint($api): ?string
@@ -85,13 +83,10 @@ class SpamChecker implements SpamCheckerInterface
         if (!$key) {
             return null;
         }
-        switch($api) {
-            case SpamApi::AKISMET:
-                return sprintf('https://%s.rest.akismet.com/1.1/comment-check', $key);
-
-            default:
-                throw new \RuntimeException("Unknown Spam API \"".$api."\".");
-        }
+        return match ($api) {
+            SpamApi::AKISMET => sprintf('https://%s.rest.akismet.com/1.1/comment-check', $key),
+            default => throw new RuntimeException("Unknown Spam API \"" . $api . "\"."),
+        };
     }
 
     public function check(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
@@ -105,7 +100,7 @@ class SpamChecker implements SpamCheckerInterface
     /**
      * @return int Spam score: 0: not spam, 1: maybe spam, 2: blatant spam
      *
-     * @throws \RuntimeException if the call did not work
+     * @throws RuntimeException if the call did not work
      */
     public function score(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
     {
@@ -115,9 +110,9 @@ class SpamChecker implements SpamCheckerInterface
         }
 
         $request = $this->requestStack->getCurrentRequest();
-        switch($api) {
+        switch ($api) {
             default:
-                throw new \RuntimeException("Unknown Spam API \"".$api."\".");
+                throw new RuntimeException("Unknown Spam API \"" . $api . "\".");
 
             case SpamApi::AKISMET :
                 $options = [
@@ -153,7 +148,7 @@ class SpamChecker implements SpamCheckerInterface
                 } else {
                     $content = $response->getContent();
                     if (isset($headers['x-akismet-debug-help'][0])) {
-                        throw new \RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
+                        throw new RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
                     }
 
                     $score = ($content === "true" ? $enum[SpamScore::MAYBE_SPAM] : $enum[SpamScore::NOT_SPAM]);

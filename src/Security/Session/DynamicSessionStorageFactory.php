@@ -11,6 +11,7 @@
 
 namespace Base\Security\Session;
 
+use SessionHandlerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
 use Symfony\Component\HttpFoundation\Session\Storage\Proxy\AbstractProxy;
@@ -26,14 +27,14 @@ class_exists(DynamicSessionStorage::class);
 class DynamicSessionStorageFactory implements SessionStorageFactoryInterface
 {
     private array $options;
-    private AbstractProxy|\SessionHandlerInterface|null $handler;
+    private AbstractProxy|SessionHandlerInterface|null $handler;
     private ?MetadataBag $metaBag;
     private bool $secure;
 
     /**
      * @see DynamicSessionStorage constructor.
      */
-    public function __construct(array $options = [], AbstractProxy|\SessionHandlerInterface $handler = null, MetadataBag $metaBag = null, bool $secure = false)
+    public function __construct(array $options = [], AbstractProxy|SessionHandlerInterface $handler = null, MetadataBag $metaBag = null, bool $secure = false)
     {
         $this->options = $options;
         $this->handler = $handler;

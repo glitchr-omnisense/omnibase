@@ -23,6 +23,8 @@ use Backup\Manager\Filesystems\SftpFilesystem;
 use Backup\Manager\Filesystems\WebdavFilesystem;
 use Backup\Manager\Manager as BackupManager;
 
+use DateTime;
+use LogicException;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 
@@ -99,14 +101,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             }
             $type = explode(".", $storageName)[0] ?? "local";
 
-            switch ($type) {
-                case "ftp":
-                case "sftp":
-                    $config = ["type" => $type, 'root' => $flysystem->prefixPath("", $storageName), "connection" => $flysystem->getConnectionOptions($storageName)];
-                    break;
-                default:
-                    $config = ['type' => $type, 'root' => $flysystem->prefixPath("", $storageName)];
-            }
+            $config = match ($type) {
+                "ftp", "sftp" => ["type" => $type, 'root' => $flysystem->prefixPath("", $storageName), "connection" => $flysystem->getConnectionOptions($storageName)],
+                default => ['type' => $type, 'root' => $flysystem->prefixPath("", $storageName)],
+            };
 
             $this->filesystemConfigs[$storageName] = $config;
         }
@@ -247,7 +245,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     {
         $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
         if ($id >= count_leaves($snapshots)) {
-            throw new \LogicException("Unknown ID #" . $id . " provided.");
+            throw new LogicException("Unknown ID #" . $id . " provided.");
         }
 
         $prefix = $prefix ?? "backup";
@@ -323,12 +321,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     public function backup(null|string|array $databases, int|array $storageNames = [], $prefix = null, $cycle = -1)
     {
         $prefix = $prefix ?? "backup";
-        if ($this->output) {
-            $this->output->section()->writeln("<info>Backup procedure started:</info> " . $prefix);
-        }
+        $this->output?->section()->writeln("<info>Backup procedure started:</info> " . $prefix);
 
         // Remove too old backup
-        $dateLimit = new \DateTime($this->timeLimit);
+        $dateLimit = new DateTime($this->timeLimit);
         $snapshots = $this->getSnapshots($storageNames, $prefix);
         foreach ($snapshots as $storageName => $files) {
             $filesystem = $this->filesystems->get($storageName);
@@ -336,13 +332,11 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
                 $matches = [];
                 $dateTime = null;
                 if (preg_match('/' . preg_quote($prefix) . '-([0-9]*)/', $file, $matches)) {
-                    $dateTime = \DateTime::createFromFormat('Ymd', $matches[1]);
+                    $dateTime = DateTime::createFromFormat('Ymd', $matches[1]);
                 }
 
                 if ($dateTime && $dateTime < $dateLimit) {
-                    if ($this->output) {
-                        $this->output->section()->writeln("- Too old version found (older than " . $this->timeLimit . "), deleting <warning>" . $file . "</warning>");
-                    }
+                    $this->output?->section()->writeln("- Too old version found (older than " . $this->timeLimit . "), deleting <warning>" . $file . "</warning>");
                     $filesystem->delete($file);
                 }
             }
@@ -351,21 +345,19 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Find today versions
         $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
         if (!$snapshots) {
-            throw new \LogicException("No valid storage selected.");
+            throw new LogicException("No valid storage selected.");
         }
 
         // Prepare Backup filesystem
         $destinations = [];
 
-        $prefix = $prefix . "-" . (new \DateTime())->format('Ymd');
+        $prefix = $prefix . "-" . (new DateTime())->format('Ymd');
         foreach ($snapshots as $storageName => $files) {
             //
             // Remote older version
             $filesystem = $this->filesystems->get($storageName);
             for ($i = 0; $i < max(count($files) - $this->getMaxCycle(), 0); $i++) {
-                if ($this->output) {
-                    $this->output->section()->writeln("- Too many versions found, deleting <warning>" . $files[$i] . "</warning>");
-                }
+                $this->output?->section()->writeln("- Too many versions found, deleting <warning>" . $files[$i] . "</warning>");
                 $filesystem->delete($files[$i]);
             }
 
@@ -379,14 +371,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
 
         // Dump database to local repository
-        if ($this->output) {
-            $this->output->section()->writeln("<info>- Temporary working directory:</info> " . $this->getCacheDir() . "/" . $prefix);
-        }
+        $this->output?->section()->writeln("<info>- Temporary working directory:</info> " . $this->getCacheDir() . "/" . $prefix);
         if ($databases) {
             $databases = is_string($databases) ? [$databases] : $databases;
-            if ($this->output) {
-                $this->output->section()->writeln("<info>- Backing databases:</info> " . implode(", ", $databases));
-            }
+            $this->output?->section()->writeln("<info>- Backing databases:</info> " . implode(", ", $databases));
 
             foreach ($databases as $database) {
                 parent::makeBackup()->run($database, [new Destination("local", $prefix . "/databases/" . $database . ".sql")], "null");
@@ -414,9 +402,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
                 fclose($stream);
             }
 
-            if ($this->output) {
-                $this->output->section()->writeln("<info>- Application backup #" . ($id + 1) . "</info> in \"" . $destination->destinationFilesystem() . "\": " . $prefix);
-            }
+            $this->output?->section()->writeln("<info>- Application backup #" . ($id + 1) . "</info> in \"" . $destination->destinationFilesystem() . "\": " . $prefix);
         }
 
         if (file_exists($output)) {
@@ -432,12 +418,12 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         list($storageName, $file) = $this->getSnapshot($id, $storageNames, $prefix, $cycle);
         if (!$storageName) {
-            throw new \LogicException("No snapshot found among the list of storages provided: \"" . implode(",", $storageNames) . "\"");
+            throw new LogicException("No snapshot found among the list of storages provided: \"" . implode(",", $storageNames) . "\"");
         }
 
         $location = getcwd() . "-" . str_lstrip(basename(basenameWithoutExtension($file), ".tar"), $prefix . "-") . "-at-" . date("Ymd-his");
         if (!dir_empty($location)) {
-            throw new \LogicException("Restoration directory is not empty: \"" . $location . "\"");
+            throw new LogicException("Restoration directory is not empty: \"" . $location . "\"");
         }
 
         $filesystem = $this->filesystems->get($storageName);
@@ -454,9 +440,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Restore filesystem
         $outputDir = dirname($localFile) . "/" . basename(basenameWithoutExtension($localFile), ".tar");
         if (!$restoreApplication) {
-            if ($this->output) {
-                $this->output->section()->writeln("<info>- Application not restored !</info> ");
-            }
+            $this->output?->section()->writeln("<info>- Application not restored !</info> ");
         } else {
             $this->openArchive($outputDir . "/application.tar");
             rename($outputDir . "/application", $location);
@@ -468,9 +452,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
 
         if (!$restoreDatabase) {
-            if ($this->output) {
-                $this->output->section()->writeln("<info>- Database not restored !</info> ");
-            }
+            $this->output?->section()->writeln("<info>- Database not restored !</info> ");
         } else {
             $finder = new Finder();
             $databases = [];
@@ -479,9 +461,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             }
 
             if ($databases) {
-                if ($this->output) {
-                    $this->output->section()->writeln("<info>- Restoring databases:</info> " . implode(", ", $databases));
-                }
+                $this->output?->section()->writeln("<info>- Restoring databases:</info> " . implode(", ", $databases));
                 foreach ($databases as $database) {
                     parent::makeRestore()->run("local", basename($outputDir) . "/databases/" . $database . ".sql", $database, "null");
                 }
@@ -501,15 +481,13 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Compress tarball
         if ($compression) {
             if ($ret) {
-                throw new \LogicException("Failed to decompress tarball: " . $output);
+                throw new LogicException("Failed to decompress tarball: " . $output);
             }
 
             $compressor = $this->compressors->get($this->compression);
             $decompressedOutput = $compressor->getDecompressedPath($output);
 
-            if ($this->output) {
-                $this->output->section()->writeln("<info>- Decompressing.. </info> ./" . basename($decompressedOutput));
-            }
+            $this->output?->section()->writeln("<info>- Decompressing.. </info> ./" . basename($decompressedOutput));
             $command = $compressor->getDecompressCommandLine($output);
 
             list($_, $ret) = [[], false];
@@ -550,9 +528,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             $exclusions .= "--exclude='" . $exclude . "'";
         }
 
-        if ($this->output) {
-            $this->output->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output));
-        }
+        $this->output?->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output));
 
         list($_, $ret) = [[], false];
         exec(sprintf('tar %s --directory=%s -cf %s %s', $exclusions, escapeshellarg($directory), escapeshellarg($output), '.'), $_);
@@ -560,15 +536,13 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Compress tarball
         if ($compression) {
             if ($ret) {
-                throw new \LogicException("Failed to create tarball: " . $output);
+                throw new LogicException("Failed to create tarball: " . $output);
             }
 
             $compressor = $this->compressors->get($this->compression);
             $compressedOutput = $compressor->getCompressedPath($output);
 
-            if ($this->output) {
-                $this->output->section()->writeln("<info>- Compressing.. </info> ./" . basename($compressedOutput));
-            }
+            $this->output?->section()->writeln("<info>- Compressing.. </info> ./" . basename($compressedOutput));
             $command = $compressor->getCompressCommandLine($output);
 
             list($_, $ret) = [[], false];

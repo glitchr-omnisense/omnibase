@@ -36,22 +36,22 @@ class CacheClearCommand extends Command
     /**
      * @var SymfonyCacheClearCommand
      */
-    protected $cacheClearCommand;
+    protected SymfonyCacheClearCommand $cacheClearCommand;
 
     /**
      * @var Flysystem
      */
-    protected $flysystem;
+    protected Flysystem $flysystem;
 
     /**
      * @var Notifier
      */
-    protected $notifier;
+    protected Notifier $notifier;
 
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     public function __construct(
         LocalizerInterface       $localizer,

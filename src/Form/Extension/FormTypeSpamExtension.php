@@ -29,21 +29,21 @@ class FormTypeSpamExtension extends AbstractTypeExtension
     /**
      * @var SpamChecker
      */
-    protected $spamChecker;
+    protected SpamChecker $spamChecker;
 
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /** @var bool */
     private bool $defaultEnabled;
 
     public function __construct(SpamChecker $spamChecker, RouterInterface $router, bool $defaultEnabled = true)
     {
-        $this->spamChecker      = $spamChecker;
-        $this->defaultEnabled   = $defaultEnabled;
-        $this->router           = $router;
+        $this->spamChecker = $spamChecker;
+        $this->defaultEnabled = $defaultEnabled;
+        $this->router = $router;
     }
 
     /**
@@ -85,7 +85,7 @@ class FormTypeSpamExtension extends AbstractTypeExtension
             $score = $this->spamChecker->check($data);
 
             $enum = SpamScore::__toInt();
-            switch($score) {
+            switch ($score) {
                 default:
                 case $enum[SpamScore::NOT_SPAM]:
                 case $enum[SpamScore::MAYBE_SPAM]:

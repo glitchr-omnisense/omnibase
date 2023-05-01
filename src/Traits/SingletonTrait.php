@@ -3,6 +3,7 @@
 namespace Base\Traits;
 
 use ArgumentCountError;
+use Exception;
 
 trait SingletonTrait
 {
@@ -35,14 +36,14 @@ trait SingletonTrait
 
     public function __clone()
     {
-        throw new \Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected");
+        throw new Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected");
     }
     public function __sleep()
     {
-        throw new \Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected");
+        throw new Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected");
     }
     public function __wakeup()
     {
-        throw new \Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected");
+        throw new Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected");
     }
 }

@@ -1,19 +1,22 @@
 <?php
 
 namespace {
+
+    use Base\BaseBundle;
+
     function dumpif(...$variadic)
     {
-        \Base\BaseBundle::dump("", ...$variadic);
+        BaseBundle::dump("", ...$variadic);
     }
 
     function enable_dumpif()
     {
-        \Base\BaseBundle::enableDump("");
+        BaseBundle::enableDump("");
     }
 
     function disable_dumpif()
     {
-        \Base\BaseBundle::disableDump("");
+        BaseBundle::disableDump("");
     }
 
     if (!extension_loaded('bcmath')) {
@@ -152,7 +155,7 @@ namespace {
     {
         try {
             $exif = exif_read_data($fname);
-        } catch (\ErrorException $e) {
+        } catch (ErrorException $e) {
             return 1;
         }
 
@@ -235,19 +238,19 @@ namespace {
         return rmdir($dir);
     }
 
-    define("SANITIZE_URL_STANDARD", 0);
-    define("SANITIZE_URL_NOMACHINE", 1);
-    define("SANITIZE_URL_NOSUBDOMAIN", 2);
-    define("SANITIZE_URL_KEEPSLASH", 4);
+    const SANITIZE_URL_STANDARD = 0;
+    const SANITIZE_URL_NOMACHINE = 1;
+    const SANITIZE_URL_NOSUBDOMAIN = 2;
+    const SANITIZE_URL_KEEPSLASH = 4;
     function sanitize_url(string $url, int $format = SANITIZE_URL_STANDARD)
     {
         return format_url($url, $format);
     }
 
-    define("FORMAT_URL_STANDARD", SANITIZE_URL_STANDARD);
-    define("FORMAT_URL_NOMACHINE", SANITIZE_URL_NOMACHINE);
-    define("FORMAT_URL_NOSUBDOMAIN", SANITIZE_URL_NOSUBDOMAIN);
-    define("FORMAT_URL_KEEPSLASH", SANITIZE_URL_KEEPSLASH);
+    const FORMAT_URL_STANDARD = SANITIZE_URL_STANDARD;
+    const FORMAT_URL_NOMACHINE = SANITIZE_URL_NOMACHINE;
+    const FORMAT_URL_NOSUBDOMAIN = SANITIZE_URL_NOSUBDOMAIN;
+    const FORMAT_URL_KEEPSLASH = SANITIZE_URL_KEEPSLASH;
     function format_url(string $url, int $format = FORMAT_URL_STANDARD): ?string
     {
         $parse = parse_url2($url);
@@ -714,12 +717,10 @@ namespace {
 
     function to_array(object $class)
     {
-        $array = array_transforms(
+        return array_transforms(
             fn($k, $v): array => [str_replace("\x00" . get_class($class) . "\x00", "", $k), $v],
             (array)$class
         );
-
-        return $array;
     }
 
     function in_class(object $class, mixed $needle)
@@ -735,7 +736,7 @@ namespace {
 
     function synopsis(...$args)
     {
-        return class_synopsis(...$args);
+        class_synopsis(...$args);
     }
 
     function class_synopsis(...$args)
@@ -762,11 +763,11 @@ namespace {
             $classMethods = get_class_methods($className);
             $classVars = get_class_vars($className);
 
-            $classReflection = new \ReflectionClass($object);
+            $classReflection = new ReflectionClass($object);
 
             $methods = "";
             foreach ($classMethods as $methodName) {
-                $params = (new \ReflectionMethod($className, $methodName))->getParameters();
+                $params = (new ReflectionMethod($className, $methodName))->getParameters();
 
                 $args = "";
                 foreach ($params as $param) {
@@ -846,11 +847,11 @@ namespace {
         return $backtrace;
     }
 
-    define("SHORTEN_FRONT", -1); // [..] dolor sit amet
-    define("SHORTEN_MIDDLE", 0); // Lorem ipsum [..] amet
-    define("SHORTEN_BACK", 1); // Lorem ipsum dolor [..]
-    define("SHORTEN_BACK_SHRINK", 2); // Lorem ipsum dolor [..]
-    define("SHORTEN_BACK_EXTEND", 3); // Lorem ipsum dolor [..]
+    const SHORTEN_FRONT = -1; // [..] dolor sit amet
+    const SHORTEN_MIDDLE = 0; // Lorem ipsum [..] amet
+    const SHORTEN_BACK = 1; // Lorem ipsum dolor [..]
+    const SHORTEN_BACK_SHRINK = 2; // Lorem ipsum dolor [..]
+    const SHORTEN_BACK_EXTEND = 3; // Lorem ipsum dolor [..]
     function str_shorten(?string $haystack, int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): ?string
     {
         $haystack = trim(strip_tags($haystack));
@@ -971,7 +972,7 @@ namespace {
         } elseif (all_in_array($unitPrefix, BINARY_PREFIX)) {
             $divider = 1024;
         } else {
-            throw new \Exception("Unknown prefix found: \"" . implode(",", $unitPrefix) . "\"");
+            throw new Exception("Unknown prefix found: \"" . implode(",", $unitPrefix) . "\"");
         }
         $unitPrefix = [''] + $unitPrefix;
 
@@ -1017,7 +1018,7 @@ namespace {
     {
         $val = trim($str);
         if (!preg_match('/^([bo]{0,2})([a-z]{0,2})([0-9]*)/i', strrev($val), $matches)) {
-            throw new \Exception("Failed to parse string \"" . $str . "\"");
+            throw new Exception("Failed to parse string \"" . $str . "\"");
         }
 
         $val = intval($matches[3] == "" ? 1 : strrev($matches[3]));
@@ -1034,7 +1035,7 @@ namespace {
             $binFactor = array_search($unitPrefix, BINARY_PREFIX);
             $decFactor = array_search($unitPrefix, DECIMAL_PREFIX);
             if (!(($decFactor !== false) xor ($binFactor !== false))) {
-                throw new \Exception("Unexpected prefix unit \"$unitPrefix\" for \"" . $str . "\"");
+                throw new Exception("Unexpected prefix unit \"$unitPrefix\" for \"" . $str . "\"");
             }
 
             if ($decFactor !== false) {
@@ -1060,7 +1061,7 @@ namespace {
     {
         $family = [is_object($object_or_class) ? get_class($object_or_class) : $object_or_class];
         while ($object_or_class = get_parent_class($object_or_class)) {
-            $family[] = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
+            $family[] = $object_or_class;
         }
 
         return $family;
@@ -1084,22 +1085,15 @@ namespace {
 
     function builtin_default(string $builtin)
     {
-        switch ($builtin) {
-            case "string":
-                return "";
-            case "array":
-                return [];
-            case "float":
-                return NAN;
-            case "int" :
-                return 0;
-            case "callable" :
-                return function () {
-                };
-
-            default:
-                return null;
-        }
+        return match ($builtin) {
+            "string" => "",
+            "array" => [],
+            "float" => NAN,
+            "int" => 0,
+            "callable" => function () {
+            },
+            default => null,
+        };
     }
 
     function initialize_property(object $object, string $property): bool
@@ -1136,7 +1130,7 @@ namespace {
     function path_suffix(string|array|null $path, $suffix, $separator = "_"): string|array|null
     {
         if ($path === null) {
-            return $path;
+            return null;
         }
 
         if (!is_array($suffix)) {
@@ -1166,7 +1160,7 @@ namespace {
     function path_prefix(string|array|null $path, $prefix, $separator = "_"): string|array|null
     {
         if ($path === null) {
-            return $path;
+            return null;
         }
 
         if (!is_array($prefix)) {
@@ -1287,7 +1281,7 @@ namespace {
             return $haystack;
         }
 
-        while (strrpos($haystack, $needle) !== false && !empty($needle) && 0 === strpos($haystack, $needle)) {
+        while (strrpos($haystack, $needle) !== false && !empty($needle) && str_starts_with($haystack, $needle)) {
             $haystack = substr($haystack, $needleLength);
             if (!$recursive) {
                 break;
@@ -1308,12 +1302,12 @@ namespace {
         return false;
     }
 
-    function begin(object|array &$array)
+    function begin(object|array $array)
     {
         return array_values(array_slice($array, 0, 1))[0] ?? null;
     }
 
-    function head(object|array &$array): mixed
+    function head(object|array $array): mixed
     {
         return begin($array);
     }
@@ -1323,7 +1317,7 @@ namespace {
         return end($array) ?? null;
     }
 
-    function tail(object|array &$array, int $length = -1, bool $preserve_keys = false): array
+    function tail(object|array $array, int $length = -1, bool $preserve_keys = false): array
     {
         return array_slice($array, -min(count($array) - 1, $length), null, $preserve_keys);
     }
@@ -1403,7 +1397,7 @@ namespace {
 
     function is_stringeable($value)
     {
-        return (!is_object($value) && !is_array($value)) || ((is_string($value) || is_object($value)) && method_exists($value, '__toString'));
+        return (!is_object($value) && !is_array($value)) || ((is_object($value)) && method_exists($value, '__toString'));
     }
 
     function tmpfile2(string $extension = "", string $suffix = "", string $prefix = "")
@@ -1415,7 +1409,7 @@ namespace {
         return fopen($fname, "w");
     }
 
-    define("HEADER_FOLLOW_REDIRECT", 1);
+    const HEADER_FOLLOW_REDIRECT = 1;
     function file_get_contents2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null)
     {
         if ($mode == HEADER_FOLLOW_REDIRECT) {
@@ -1455,7 +1449,7 @@ namespace {
 
     function dir_empty(string $dir): bool
     {
-        return !file_exists($dir) || (is_dir($dir) && !(new \FilesystemIterator($dir))->valid());
+        return !file_exists($dir) || (is_dir($dir) && !(new FilesystemIterator($dir))->valid());
     }
 
     function mime_content_type2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT)
@@ -1773,12 +1767,12 @@ namespace {
 
     function array_prepend(array &$array, ...$value): int
     {
-        return array_unshift($array, ...(!is_array($value) ? [$value] : $value));
+        return array_unshift($array, ...$value);
     }
 
     function array_append(array &$array, ...$value): int
     {
-        return array_push($array, ...(!is_array($value) ? [$value] : $value));
+        return array_push($array, ...$value);
     }
 
     function array_append_recursive()
@@ -1817,7 +1811,7 @@ namespace {
 
     function browser_supports_webp(): bool
     {
-        if (strpos($_SERVER['HTTP_ACCEPT'] ?? "", 'image/webp') !== false) {
+        if (str_contains($_SERVER['HTTP_ACCEPT'] ?? "", 'image/webp')) {
             return true;
         }
 
@@ -1911,7 +1905,7 @@ namespace {
         }
 
         $results = [];
-        foreach ($array as $k => &$v) {
+        foreach ($array as $k => $v) {
             if (!is_array($v)) {
                 continue;
             }
@@ -2008,17 +2002,12 @@ namespace {
             return null;
         }
 
-        switch ($extension) {
-            case "ico":
-                return "icon";
-            case "css":
-                return "stylesheet";
-            case "js":
-                return "javascript";
-
-            default:
-                return "preload";
-        }
+        return match ($extension) {
+            "ico" => "icon",
+            "css" => "stylesheet",
+            "js" => "javascript",
+            default => "preload",
+        };
     }
 
     function is_associative(array $arr): bool
@@ -2056,7 +2045,7 @@ namespace {
             return $array;
         } elseif (gettype($old) == "array" || gettype($new) == "array") {
             if (gettype($new) != gettype($old)) {
-                throw new \Exception(__FUNCTION__ . "() : Argument #2 (\$new) must be of same type as argument #1 (\$old)");
+                throw new Exception(__FUNCTION__ . "() : Argument #2 (\$new) must be of same type as argument #1 (\$old)");
             }
         }
 
@@ -2116,13 +2105,13 @@ namespace {
 
     function cmyk_profile(string $path, string $name)
     {
-        $image = new \Imagick($path); // load image
+        $image = new Imagick($path); // load image
         return $image->getImageProfiles($name)[$name] ?? null; // get profiles
     }
 
     function write_cmyk_profiles(string $path, array $profiles)
     {
-        $image = new \Imagick($path); // load image
+        $image = new Imagick($path); // load image
         foreach ($profiles as $name => $data) {
             $image->profileImage($name, $data);
         }
@@ -2133,7 +2122,7 @@ namespace {
 
     function write_cmyk_profile(string $path, string $name, $data)
     {
-        $image = new \Imagick($path); // load image
+        $image = new Imagick($path); // load image
         $image->profileImage($name, $data);
         $image->setImageColorSpace(is_cmyk($path) ? Imagick::COLORSPACE_CMYK : Imagick::COLORSPACE_RGB);
         $image->writeImage($path);
@@ -2141,13 +2130,13 @@ namespace {
 
     function cmyk_profiles(string $path)
     {
-        $image = new \Imagick($path); // load image
+        $image = new Imagick($path); // load image
         return $image->getImageProfiles(); // get profiles
     }
 
     function cmyk_icc_profile(string $path)
     {
-        $image = new \Imagick($path); // load image
+        $image = new Imagick($path); // load image
         return $image->getImageProfiles('icc')['icc'] ?? null; // get profiles
     }
 
@@ -2161,8 +2150,8 @@ namespace {
             throw new Exception(__FUNCTION__ . "(): Imagick driver not found.");
         }
 
-        $image = new \Imagick($path);
-        $image->transformImageColorspace(\Imagick::COLORSPACE_SRGB);
+        $image = new Imagick($path);
+        $image->transformImageColorspace(Imagick::COLORSPACE_SRGB);
         $image->writeImage($path);
         $image->destroy();
 
@@ -2178,8 +2167,8 @@ namespace {
             throw new Exception(__FUNCTION__ . "(): Imagick driver not found.");
         }
 
-        $image = new \Imagick($path);
-        $image->transformImageColorspace(\Imagick::COLORSPACE_CMYK);
+        $image = new Imagick($path);
+        $image->transformImageColorspace(Imagick::COLORSPACE_CMYK);
         $image->writeImage($path);
         $image->destroy();
 
@@ -2200,8 +2189,8 @@ namespace {
         return true;
     }
 
-    define("ARRAY_USE_KEYS", 0);
-    define("ARRAY_USE_VALUES", 1);
+    const ARRAY_USE_KEYS = 0;
+    const ARRAY_USE_VALUES = 1;
     function array_contains(array $haystack, string $needle, int $mode = ARRAY_USE_KEYS)
     {
         return array_filter($haystack, fn($k, $v) => str_contains($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
@@ -2217,11 +2206,11 @@ namespace {
         return array_filter($haystack, fn($k, $v) => str_ends_with($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
     }
 
-    define("FORMAT_IDENTITY", 0); // "no changes"
-    define("FORMAT_TITLECASE", 1); // Lorem Ipsum Dolor Sit Amet
-    define("FORMAT_SENTENCECASE", 2); // Lorem ipsum dolor sit amet
-    define("FORMAT_LOWERCASE", 3); // lorem ipsum dolor sit amet
-    define("FORMAT_UPPERCASE", 4); // LOREM IPSUM DOLOR SIT AMET
+    const FORMAT_IDENTITY = 0; // "no changes"
+    const FORMAT_TITLECASE = 1; // Lorem Ipsum Dolor Sit Amet
+    const FORMAT_SENTENCECASE = 2; // Lorem ipsum dolor sit amet
+    const FORMAT_LOWERCASE = 3; // lorem ipsum dolor sit amet
+    const FORMAT_UPPERCASE = 4; // LOREM IPSUM DOLOR SIT AMET
 
     function array_any($array, ...$values)
     {
@@ -2286,14 +2275,14 @@ namespace {
     }
 
 
-    define('ARRAY_TRANSFORMS_OVERRIDE', 1);
-    define('ARRAY_TRANSFORMS_MERGE', 2);
+    const ARRAY_TRANSFORMS_OVERRIDE = 1;
+    const ARRAY_TRANSFORMS_MERGE = 2;
 
     function array_transforms(callable $callback, array $array, int $depth = 0, int $prevent_conflicts = ARRAY_TRANSFORMS_OVERRIDE): array
     {
         $reflection = new ReflectionFunction($callback);
         if (!$reflection->getReturnType() || !in_array($reflection->getReturnType()->getName(), ['array', 'Generator'])) {
-            throw new \Exception('Callable function must use "array" or "Generator" return type');
+            throw new Exception('Callable function must use "array" or "Generator" return type');
         }
 
         $tArray = [];
@@ -2416,8 +2405,7 @@ namespace {
         return array_transforms(function ($k, $v, $callback, $i) use ($preserve_keys, &$offsetCounter, $offset, &$lengthCounter, $length): ?array {
             if (is_array($v)) {
                 $v = array_transforms($callback, $v);
-                $array = empty($v) ? null : [$preserve_keys ? $k : $i, $v];
-                return $array;
+                return empty($v) ? null : [$preserve_keys ? $k : $i, $v];
             }
 
             $array = ($offsetCounter < $offset || ($lengthCounter >= $length)) ? null : [$preserve_keys ? $k : $i, $v];
@@ -2430,8 +2418,8 @@ namespace {
         }, $array);
     }
 
-    define('ARRAY_FLATTEN_PRESERVE_KEYS', 1);
-    define('ARRAY_FLATTEN_PRESERVE_DUPLICATES', 2);
+    const ARRAY_FLATTEN_PRESERVE_KEYS = 1;
+    const ARRAY_FLATTEN_PRESERVE_DUPLICATES = 2;
     function array_key_flattens(string $separator, ?array $array, int $limit = PHP_INT_MAX)
     {
         return array_flatten($separator, $array, $limit, ARRAY_FLATTEN_PRESERVE_KEYS);
@@ -2447,7 +2435,7 @@ namespace {
 
         $reflection = new ReflectionFunction($fn);
         if (!$reflection->getReturnType() || $reflection->getReturnType()->getName() != 'bool') {
-            throw new \Exception('Callable function must use "bool" return type');
+            throw new Exception('Callable function must use "bool" return type');
         }
 
         $ret = [];
@@ -2490,11 +2478,11 @@ namespace {
         return $ret;
     }
 
-    define('ARRAY_INFLATE_INCREMENT_INTKEYS', 1);
+    const ARRAY_INFLATE_INCREMENT_INTKEYS = 1;
     function array_inflate(string $separator, ?array $array, int $mode = 0, int $limit = PHP_INT_MAX)
     {
         if (!is_array($array)) {
-            return $array;
+            return null;
         }
 
         $ret = [];
@@ -2505,14 +2493,10 @@ namespace {
 
             $limit = ($limit == PHP_INT_MAX) ? PHP_INT_MAX : $limit - count($keys);
             if ($tail !== "") {
-                switch ($mode) {
-                    case ARRAY_INFLATE_INCREMENT_INTKEYS:
-                        $ret[$head] = array_merge_recursive($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit));
-                        break;
-
-                    default:
-                        $ret[$head] = array_merge_recursive2($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit));
-                }
+                $ret[$head] = match ($mode) {
+                    ARRAY_INFLATE_INCREMENT_INTKEYS => array_merge_recursive($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit)),
+                    default => array_merge_recursive2($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit)),
+                };
             } else {
                 if (is_array($value)) {
                     $ret[$head] = array_inflate($separator, $value, $mode, $limit);
@@ -2545,7 +2529,7 @@ namespace {
                                 $ret[$key] = [$ret[$key]];
                                 $ret[$key][] = $value;
                             }
-                        } elseif (empty($ret[$key])) {
+                        } else {
                             $ret[$key] = $value;
                         }
                     }
@@ -2743,7 +2727,7 @@ namespace {
     {
         $arrayOut = [];
         foreach ($array as $k => $v) {
-            if (array_filter($needles, fn($needle) => str_starts_with($needle, $k))) {
+            if (array_filter($needles, fn($haystack) => str_starts_with($haystack, $k))) {
                 continue;
             } elseif ($recursive && is_array($v)) {
                 $arrayOut[$k] = array_key_removes_startsWith($v, $recursive, ...$needles);
@@ -2759,7 +2743,7 @@ namespace {
     {
         $arrayOut = [];
         foreach ($array as $k => $v) {
-            if (array_filter($needles, fn($needle) => str_ends_with($needle, $k))) {
+            if (array_filter($needles, fn($haystack) => str_ends_with($haystack, $k))) {
                 continue;
             } elseif ($recursive && is_array($v)) {
                 $arrayOut[$k] = array_key_removes_endsWith($v, $recursive, ...$needles);
@@ -2976,11 +2960,11 @@ namespace {
 
         try {
             $ret = unserialize($str);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
 
-        return is_string($str) && ($str == 'b:0;' || $ret !== false);
+        return ($str == 'b:0;' || $ret !== false);
     }
 
     function is_serializable($object): bool
@@ -3358,7 +3342,7 @@ namespace {
         return (int)$diff->format("%R%a");
     }
 
-    function ceil_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    function ceil_datetime(null|string|int|DateTime $datetime, null|string|int $precision): DateTime
     {
         $datetime = cast_datetime($datetime);
         $precision = cast_datetime($precision);
@@ -3370,7 +3354,7 @@ namespace {
         return $datetime->setTimestamp($timestamp - $delta + $modulo);
     }
 
-    function floor_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    function floor_datetime(null|string|int|DateTime $datetime, null|string|int $precision): DateTime
     {
         $datetime = cast_datetime($datetime);
         $precision = cast_datetime($precision);
@@ -3424,7 +3408,7 @@ namespace {
         return true;
     }
 
-    function round_datetime(null|string|int|DateTime $datetime, null|string|int $precision): \DateTime
+    function round_datetime(null|string|int|DateTime $datetime, null|string|int $precision): DateTime
     {
         $datetime = cast_datetime($datetime);
         $precision = cast_datetime($precision);

@@ -10,11 +10,14 @@ use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\HtmlizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Base\Service\TranslatorInterface;
+use Closure;
 use DateInterval;
 use DateTime;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Type;
+use Exception;
 use ReflectionFunction;
+use RuntimeException;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Twig\Environment;
@@ -30,38 +33,43 @@ use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFunction;
+use function count;
+use function is_array;
+use function is_bool;
+use function is_object;
+use function is_string;
 
 final class FunctionTwigExtension extends AbstractExtension
 {
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var MediaService
      */
-    protected $mediaService;
+    protected MediaService $mediaService;
 
     /**
      * @var IconProvider
      */
-    protected $iconProvider;
+    protected IconProvider $iconProvider;
 
     /**
      * @var IntlExtension
      */
-    protected $intlExtension;
+    protected IntlExtension $intlExtension;
 
     /**
      * @var MimeTypes
      */
-    protected $mimeTypes;
+    protected MimeTypes $mimeTypes;
 
     /**
      * @var AssetExtension
      */
-    protected $assetExtension;
+    protected AssetExtension $assetExtension;
 
     /**
      * @var string
@@ -71,12 +79,12 @@ final class FunctionTwigExtension extends AbstractExtension
     /**
      * @var AdminUrlGenerator
      */
-    protected $adminUrlGenerator;
+    protected AdminUrlGenerator $adminUrlGenerator;
 
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGenerator $adminUrlGenerator, string $projectDir)
     {
@@ -214,7 +222,7 @@ final class FunctionTwigExtension extends AbstractExtension
             $path = str_replace("\\_", "/", camel2snake(str_lstrip($className, ["Proxies\\__CG__\\", "App\\", "Base\\"])));
             try {
                 return $this->twig->render($path . ".html.twig", ["options" => $options, "entity" => $object]);
-            } catch (\RuntimeException|LoaderError $e) {
+            } catch (RuntimeException|LoaderError $e) {
             }
 
             $className = get_parent_class($className);
@@ -263,10 +271,10 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function transforms(array $array = [], $arrow = null)
     {
-        return $arrow instanceof \Closure ? $arrow($array) : $array;
+        return $arrow instanceof Closure ? $arrow($array) : $array;
     }
 
-    public function enum(null|string|array $class): ?EnumType
+    public function enum(null|string|array $class): null|Type|array
     {
         if (is_array($class)) {
             return array_map(fn($c) => $this->enum($c), $class);
@@ -319,10 +327,10 @@ final class FunctionTwigExtension extends AbstractExtension
             $class = get_class($class);
         }
         if (!class_exists($class)) {
-            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid class");
+            throw new Exception("Cannot call static property $propertyName on \"$class\": invalid class");
         }
         if (!property_exists($class, $propertyName)) {
-            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid property");
+            throw new Exception("Cannot call static property $propertyName on \"$class\": invalid property");
         }
 
         return $class::$$propertyName;
@@ -416,10 +424,10 @@ final class FunctionTwigExtension extends AbstractExtension
             $class = get_class($class);
         }
         if (!class_exists($class)) {
-            throw new \Exception("Cannot call static method $method on \"$class\": invalid class");
+            throw new Exception("Cannot call static method $method on \"$class\": invalid class");
         }
         if (!method_exists($class, $method)) {
-            throw new \Exception("Cannot call static method $method on \"$class\": invalid method");
+            throw new Exception("Cannot call static method $method on \"$class\": invalid method");
         }
 
         return forward_static_call_array([$class, $method], $args);
@@ -540,15 +548,15 @@ final class FunctionTwigExtension extends AbstractExtension
     public function less_than($date, $diff): bool
     {
         if (is_string($date)) {
-            $date = new \DateTime($date);
+            $date = new DateTime($date);
         }
-        if ($date instanceof \DateTime) {
+        if ($date instanceof DateTime) {
             $date = $date->getTimestamp();
         }
         if (is_string($diff)) {
-            $diff = new \DateTime($diff);
+            $diff = new DateTime($diff);
         }
-        if ($diff instanceof \DateTime) {
+        if ($diff instanceof DateTime) {
             $diff = $diff->getTimestamp() - time();
         }
 
@@ -559,15 +567,12 @@ final class FunctionTwigExtension extends AbstractExtension
     public function greater_than($date, int $diff): bool
     {
         if (is_string($date)) {
-            $date = new \DateTime($date);
+            $date = new DateTime($date);
         }
-        if ($date instanceof \DateTime) {
+        if ($date instanceof DateTime) {
             $date = $date->getTimestamp();
         }
-        if (is_string($diff)) {
-            $diff = new \DateTime($diff);
-        }
-        if ($diff instanceof \DateTime) {
+        if ($diff instanceof DateTime) {
             $diff = $diff->getTimestamp() - time();
         }
 
@@ -606,7 +611,7 @@ final class FunctionTwigExtension extends AbstractExtension
             $highlightContent = preg_replace_callback(
                 '/([^ ]*)(' . $pattern . ')([^ ]*)/im',
                 function ($matches) {
-                    if (!isset($matches[2]) || empty($matches[2])) {
+                    if (empty($matches[2])) {
                         return $matches[0];
                     }
 
@@ -657,7 +662,7 @@ final class FunctionTwigExtension extends AbstractExtension
             return '';
         }
 
-        if (\is_string($value)) {
+        if (is_string($value)) {
             return $value;
         }
 
@@ -665,15 +670,15 @@ final class FunctionTwigExtension extends AbstractExtension
             return (string)$value;
         }
 
-        if (\is_bool($value)) {
+        if (is_bool($value)) {
             return $value ? 'true' : 'false';
         }
 
-        if (\is_array($value)) {
-            return sprintf('Array (%d items)', \count($value));
+        if (is_array($value)) {
+            return sprintf('Array (%d items)', count($value));
         }
 
-        if (\is_object($value)) {
+        if (is_object($value)) {
             if (is_stringeable($value)) {
                 return (string)$value;
             }

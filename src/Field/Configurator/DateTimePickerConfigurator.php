@@ -12,13 +12,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
 
 use Base\Field\DateTimePickerField;
+use function in_array;
 
 class DateTimePickerConfigurator implements FieldConfiguratorInterface
 {
     /**
      * @var IntlFormatter
      */
-    private $intlFormatter;
+    private IntlFormatter $intlFormatter;
 
     public function __construct()
     {
@@ -27,7 +28,7 @@ class DateTimePickerConfigurator implements FieldConfiguratorInterface
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
-        return \in_array($field->getFieldFqcn(), [DateTimePickerField::class, DateField::class, TimeField::class], true);
+        return in_array($field->getFieldFqcn(), [DateTimePickerField::class, DateField::class, TimeField::class], true);
     }
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
@@ -48,7 +49,7 @@ class DateTimePickerConfigurator implements FieldConfiguratorInterface
             [$defaultDatePattern, $defaultTimePattern] = $crud->getDateTimePattern();
             $datePattern = $field->getCustomOption(DateTimePickerField::OPTION_DATE_PATTERN) ?? $defaultDatePattern;
             $timePattern = $field->getCustomOption(DateTimePickerField::OPTION_TIME_PATTERN) ?? $defaultTimePattern;
-            if (\in_array($datePattern, DateTimePickerField::VALID_DATE_FORMATS, true)) {
+            if (in_array($datePattern, DateTimePickerField::VALID_DATE_FORMATS, true)) {
                 $dateFormat = $datePattern;
                 $timeFormat = $timePattern;
             } else {
@@ -58,7 +59,7 @@ class DateTimePickerConfigurator implements FieldConfiguratorInterface
             $formattedValue = $this->intlFormatter->formatDateTime($field->getValue(), $dateFormat, $timeFormat, $icuDateTimePattern, $timezone);
         } elseif (DateField::class === $field->getFieldFqcn()) {
             $dateFormatOrPattern = $field->getCustomOption(DateField::OPTION_DATE_PATTERN) ?? $crud->getDatePattern();
-            if (\in_array($dateFormatOrPattern, DateTimePickerField::VALID_DATE_FORMATS, true)) {
+            if (in_array($dateFormatOrPattern, DateTimePickerField::VALID_DATE_FORMATS, true)) {
                 $dateFormat = $dateFormatOrPattern;
             } else {
                 $icuDateTimePattern = $dateFormatOrPattern;
@@ -67,7 +68,7 @@ class DateTimePickerConfigurator implements FieldConfiguratorInterface
             $formattedValue = $this->intlFormatter->formatDate($field->getValue(), $dateFormat, $icuDateTimePattern, $timezone);
         } elseif (TimeField::class === $field->getFieldFqcn()) {
             $timeFormatOrPattern = $field->getCustomOption(TimeField::OPTION_TIME_PATTERN) ?? $crud->getTimePattern();
-            if (\in_array($timeFormatOrPattern, DateTimePickerField::VALID_DATE_FORMATS, true)) {
+            if (in_array($timeFormatOrPattern, DateTimePickerField::VALID_DATE_FORMATS, true)) {
                 $timeFormat = $timeFormatOrPattern;
             } else {
                 $icuDateTimePattern = $timeFormatOrPattern;
@@ -95,7 +96,7 @@ class DateTimePickerConfigurator implements FieldConfiguratorInterface
             return;
         }
         $doctrineDataType = $entityDto->getPropertyMetadata($field->getProperty())->get('type');
-        $isImmutableDateTime = \in_array($doctrineDataType, [Types::DATETIMETZ_IMMUTABLE, Types::DATETIME_IMMUTABLE, Types::DATE_IMMUTABLE, Types::TIME_IMMUTABLE], true);
+        $isImmutableDateTime = in_array($doctrineDataType, [Types::DATETIMETZ_IMMUTABLE, Types::DATETIME_IMMUTABLE, Types::DATE_IMMUTABLE, Types::TIME_IMMUTABLE], true);
         if ($isImmutableDateTime) {
             $field->setFormTypeOptionIfNotSet('input', 'datetime_immutable');
         }

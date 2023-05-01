@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class NotFoundResourceException extends \Exception
+use Exception;
+
+class NotFoundResourceException extends Exception
 {
     /**
      * {@inheritdoc}

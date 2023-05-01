@@ -9,12 +9,11 @@ use Base\Validator\ConstraintEntityValidator;
 
 class StringCaseEntityValidator extends ConstraintEntityValidator
 {
-    public function validate($entity, Constraint $constraint)
+    public function validate($value, Constraint $constraint)
     {
-        if (parent::validate($entity, $constraint)) {
-            return;
-        }
+        parent::validate($value, $constraint);
 
+        $entity = $value;
         $originalEntity = $this->getOriginalEntity($entity);
         if (empty($originalEntity)) {
             throw new ConstraintDefinitionException(sprintf('The "%s" entity is not persistent yet. StringCase can only be used with persistent entities', get_class($entity)));
@@ -22,7 +21,7 @@ class StringCaseEntityValidator extends ConstraintEntityValidator
 
         $entityChanges = $this->getEntityChangeSet($entity);
 
-        $fields = (array) $constraint->fields;
+        $fields = (array)$constraint->fields;
         foreach ($fields as $fieldName) {
             if (!array_key_exists($fieldName, $entityChanges)) {
                 continue;

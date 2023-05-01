@@ -5,6 +5,7 @@ namespace Base\Field\Type;
 use AsyncAws\Core\Exception\LogicException;
 use Base\Service\TradingMarketInterface;
 use Base\Twig\Environment;
+use Exception;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -22,7 +23,8 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     /**
      * @var TradingMarketInterface
      */
-    protected $tradingMarket;
+    protected TradingMarketInterface $tradingMarket;
+
     public function __construct(TradingMarketInterface $tradingMarket)
     {
         $this->tradingMarket = $tradingMarket;
@@ -35,12 +37,12 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            "currency_target"   => null,
-            "currency_label"    => self::LABEL_ONLY,
+            "currency_target" => null,
+            "currency_label" => self::LABEL_ONLY,
             "currency_exchange" => null,
-            'currency_list'     => null,
-            "use_swap"          => false,
-            "divisor"           => 100
+            'currency_list' => null,
+            "use_swap" => false,
+            "divisor" => 100
         ]);
     }
 
@@ -54,7 +56,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
             $target = $form->getParent();
             foreach ($targetPath as $path) {
                 if (!$target->has($path)) {
-                    throw new \Exception("Cannot determine currency.. Child path \"$path\" doesn't exists in \"".get_class($target->getViewData())."\".");
+                    throw new Exception("Cannot determine currency.. Child path \"$path\" doesn't exists in \"" . get_class($target->getViewData()) . "\".");
                 }
 
                 $target = $target->get($path);
@@ -81,7 +83,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
         $view->vars["currency_list"] = array_values(array_unique(array_merge([$options["currency"]], $options["currency_list"] ?? [])));
         foreach ($view->vars["currency_list"] as $currency) {
             if (!Currencies::exists($view->vars["currency"])) {
-                throw new LogicException("Currency \"\" not referenced in \"". Currencies::class."\"");
+                throw new LogicException("Currency \"\" not referenced in \"" . Currencies::class . "\"");
             }
         }
 
@@ -105,7 +107,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
 
         $view->vars["currency_list"] = array_values(array_intersect($view->vars["currency_list"], array_keys($view->vars["currency_exchange"])));
 
-        switch($options["currency_label"]) {
+        switch ($options["currency_label"]) {
             case self::CODE_ONLY:
                 $view->vars["currency_label"] = array_combine($view->vars["currency_list"], $view->vars["currency_list"]);
                 break;
@@ -114,7 +116,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
             case self::LABEL_ONLY:
                 $view->vars["currency_label"] = array_combine(
                     $view->vars["currency_list"],
-                    array_map(fn ($c) => Currencies::getSymbol($c), $view->vars["currency_list"])
+                    array_map(fn($c) => Currencies::getSymbol($c), $view->vars["currency_list"])
                 );
 
                 break;
@@ -122,7 +124,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
             case self::LABELCODE_ONLY:
                 $view->vars["currency_label"] = array_combine(
                     $view->vars["currency_list"],
-                    array_map(fn ($c) => Currencies::getSymbol($c) . " (".$c.")", $view->vars["currency_list"])
+                    array_map(fn($c) => Currencies::getSymbol($c) . " (" . $c . ")", $view->vars["currency_list"])
                 );
                 break;
         }

@@ -12,8 +12,12 @@ use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
 use Base\Field\Type\TranslationType;
 use Base\Form\Common\AbstractType;
+use Base\Service\LocalizerInterface;
 use Base\Service\SettingBag;
 use Base\Service\Localizer;
+use Base\Service\SettingBagInterface;
+use DateTime;
+use Exception;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 
@@ -24,23 +28,24 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Util\StringUtil;
+use Traversable;
 
 class LayoutSettingListType extends AbstractType implements DataMapperInterface
 {
     /**
-     * @var SettingBag
+     * @var SettingBagInterface
      */
-    protected $settingBag;
+    protected SettingBagInterface $settingBag;
 
     /**
-     * @var Localizer
+     * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     public function __construct(SettingBag $settingBag, Localizer $localizer, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -83,7 +88,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
         } elseif (is_subclass_of($data, Setting::class)) {
             $newData[str_replace($from, $to, $data->getPath())] = $data->getValue();
         } else {
-            throw new \Exception("Unexpected data provided (expecting either associative array, Setting or BaseSetting)");
+            throw new Exception("Unexpected data provided (expecting either associative array, Setting or BaseSetting)");
         }
 
         return $newData;
@@ -151,16 +156,16 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
                     switch ($fieldOptions["form_type"]) {
                         case DateTimePickerType::class:
-                            $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
+                            $datetime = $settingValue instanceof DateTime ? $settingValue : null;
                             if (!$datetime) {
-                                $datetime = $settingValue ? new \DateTime($settingValue) : null;
+                                $datetime = $settingValue ? new DateTime($settingValue) : null;
                             }
                             $settingTranslation->setValue($datetime);
                             break;
 
                         case CheckboxType::class:
                             $bool = !empty($settingValue) && $settingValue != "0";
-                            $settingTranslation->setValue((bool)$bool);
+                            $settingTranslation->setValue($bool);
                             break;
                     }
                 }
@@ -204,11 +209,11 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
     }
 
-    public function mapFormsToData(\Traversable $forms, &$viewData): void
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         foreach (iterator_to_array($forms) as $formName => $form) {
             if ($formName == "valid") {
@@ -217,9 +222,9 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 foreach ($form->getData() as $formattedField => $translations) {
                     $field = str_replace("-", ".", $formattedField);
                     foreach ($translations as $locale => $translation) {
-                        $viewData[$field] = $viewData[$field] ?? $this->settingBag->getRawScalar($field) ?? new Setting($field);;
+                        $viewData[$field] = $viewData[$field] ?? $this->settingBag->getRawScalar($field) ?? new Setting($field);
                         if ($viewData[$field]->isLocked()) {
-                            throw new \Exception("Setting \"" . $viewData[$field]->getPath() . "\" is locked, you cannot edit this variable.");
+                            throw new Exception("Setting \"" . $viewData[$field]->getPath() . "\" is locked, you cannot edit this variable.");
                         }
 
                         if ($translation->getValue() == []) {
@@ -235,7 +240,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 }
 
                 if ($viewData[$formName]->isLocked()) {
-                    throw new \Exception("Setting \"" . $viewData[$formName]->getPath() . "\" is currently locked.");
+                    throw new Exception("Setting \"" . $viewData[$formName]->getPath() . "\" is currently locked.");
                 }
 
                 $translation = $form->getViewData();

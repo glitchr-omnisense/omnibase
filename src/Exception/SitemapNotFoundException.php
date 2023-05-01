@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class SitemapNotFoundException extends \Exception
+use Exception;
+
+class SitemapNotFoundException extends Exception
 {
     /**
      * {@inheritdoc}

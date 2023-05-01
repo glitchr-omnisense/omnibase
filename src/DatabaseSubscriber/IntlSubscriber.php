@@ -35,12 +35,12 @@ class IntlSubscriber implements EventSubscriberInterface
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     public function getLocalizer()
     {
@@ -249,14 +249,12 @@ class IntlSubscriber implements EventSubscriberInterface
             if (is_subclass_of($targetEntity, $mapping["targetEntity"] ?? null)) {
                 $classMetadata->associationMappings["translatable"]["targetEntity"] = $targetEntity;
                 $classMetadata->associationMappings["translatable"]["sourceEntity"] = $classMetadata->getName();
-                $classMetadata->cache = $classMetadata->cache ?? null;
                 $classMetadata->cache = [
                     "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                     "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
             }
         } else {
-            $classMetadata->cache = $classMetadata->cache ?? null;
             $classMetadata->cache = [
                 "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                 "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,

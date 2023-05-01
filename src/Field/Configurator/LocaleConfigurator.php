@@ -8,8 +8,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\LocaleField;
+use InvalidArgumentException;
 use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\Intl\Locales;
+use function in_array;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -25,7 +27,7 @@ class LocaleConfigurator implements FieldConfiguratorInterface
     {
         $field->setFormTypeOptionIfNotSet('attr.data-ea-widget', 'ea-autocomplete');
 
-        if (\in_array($context->getCrud()->getCurrentPage(), [Crud::PAGE_EDIT, Crud::PAGE_NEW], true)) {
+        if (in_array($context->getCrud()->getCurrentPage(), [Crud::PAGE_EDIT, Crud::PAGE_NEW], true)) {
             $field->setFormTypeOption('choices', $this->generateFormTypeChoices($field->getCustomOption(LocaleField::OPTION_LOCALE_CODES_TO_KEEP), $field->getCustomOption(LocaleField::OPTION_LOCALE_CODES_TO_REMOVE)));
             $field->setFormTypeOption('choice_loader', null);
         }
@@ -36,7 +38,7 @@ class LocaleConfigurator implements FieldConfiguratorInterface
 
         $localeName = $this->getLocaleName(str_replace("-", "_", $localeCode));
         if (null === $localeName) {
-            throw new \InvalidArgumentException(sprintf('The "%s" value used as the locale code of the "%s" field is not a valid ICU locale code.', $localeCode, $field->getProperty()));
+            throw new InvalidArgumentException(sprintf('The "%s" value used as the locale code of the "%s" field is not a valid ICU locale code.', $localeCode, $field->getProperty()));
         }
 
         $field->setFormattedValue($localeName);
@@ -57,11 +59,11 @@ class LocaleConfigurator implements FieldConfiguratorInterface
 
         $locales = Locales::getNames();
         foreach ($locales as $localeCode => $localeName) {
-            if (null !== $localeCodesToKeep && !\in_array($localeCode, $localeCodesToKeep, true)) {
+            if (null !== $localeCodesToKeep && !in_array($localeCode, $localeCodesToKeep, true)) {
                 continue;
             }
 
-            if (null !== $localeCodesToRemove && \in_array($localeCode, $localeCodesToRemove, true)) {
+            if (null !== $localeCodesToRemove && in_array($localeCode, $localeCodesToRemove, true)) {
                 continue;
             }
 

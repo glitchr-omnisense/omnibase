@@ -15,14 +15,14 @@ class BitmapFilter implements BitmapFilterInterface
 
     public function __toString()
     {
-        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
+        $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
         return path_suffix("", $pathSuffixes);
     }
 
     /**
      * @var MimeTypes
      */
-    protected $mimeTypes;
+    protected MimeTypes $mimeTypes;
 
     public function __construct(?string $path = null, array $options = [], array $filters = [])
     {
@@ -31,9 +31,9 @@ class BitmapFilter implements BitmapFilterInterface
             unlink_tmpfile($path);
         }
 
-        $this->path    = $path;
+        $this->path = $path;
         $this->filters = $filters;
-        $this->options  = $options;
+        $this->options = $options;
 
         if (array_key_exists("quality", $options)) {
             $options["quality"] /= $options["quality"] <= 1 ? 100 : 1;
@@ -50,6 +50,7 @@ class BitmapFilter implements BitmapFilterInterface
     {
         return $this->filters;
     }
+
     public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;
@@ -57,10 +58,12 @@ class BitmapFilter implements BitmapFilterInterface
     }
 
     protected ?string $path;
+
     public function getPath(): ?string
     {
         return $this->path;
     }
+
     public function setPath(?string $path)
     {
         $this->path = $path;
@@ -94,7 +97,6 @@ class BitmapFilter implements BitmapFilterInterface
             }
         }
 
-        $image = $this->path === null ? $image : $image->save($this->path, $this->options);
-        return $image;
+        return $this->path === null ? $image : $image->save($this->path, $this->options);
     }
 }

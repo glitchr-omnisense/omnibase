@@ -3,15 +3,15 @@
 namespace Base\Service;
 
 use Base\Traits\BagTrait;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 
-class ParameterBag extends ContainerBag implements ParameterBagInterface, ContainerInterface
+class ParameterBag extends ContainerBag implements ParameterBagInterface
 {
     use BagTrait;
 
     #[SentitiveParameter]
     protected ?array $normalizedAll = null;
+
     public function normalizeAll(): array
     {
         $this->normalizedAll = $this->normalizedAll ?? $this->normalize(null, parent::all());

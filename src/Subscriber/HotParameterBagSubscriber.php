@@ -3,7 +3,9 @@
 namespace Base\Subscriber;
 
 use Base\Service\HotParameterBag;
+use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
+use PDOException;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -13,13 +15,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class HotParameterBagSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
     /**
-     * @var SettingBag
+     * @var SettingBagInterface
      */
-    protected $settingBag;
+    protected SettingBagInterface $settingBag;
 
     public function __construct($parameterBag, SettingBagInterface $settingBag)
     {
@@ -31,7 +33,7 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
     {
         return [
             ConsoleEvents::COMMAND => ['onRequest', 2048],
-            KernelEvents::REQUEST  => ['onRequest', 512]
+            KernelEvents::REQUEST => ['onRequest', 512]
         ];
     }
 
@@ -50,7 +52,7 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
         $allRaw = [];
         try {
             $allRaw = $this->settingBag->allRaw(true, true);
-        } catch(\PDOException $e) {
+        } catch (PDOException $e) {
             return;
         }
 

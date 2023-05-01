@@ -82,9 +82,9 @@ trait BaseTrait
         return BaseService::getObjectManager(is_object($object) ? get_class($object) : $object)->getRepository(is_object($object) ? get_class($object) : $object);
     }
 
-    public static function isEntity(mixed $entity): ?bool
+    public static function isEntity(mixed $entityOrClassOrMetadata): ?bool
     {
-        return BaseService::getClassMetadataManipulator()?->isEntity($entity);
+        return BaseService::getClassMetadataManipulator()?->isEntity($entityOrClassOrMetadata);
     }
 
     public static function getProjectDir(): string

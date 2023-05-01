@@ -2,6 +2,7 @@
 
 namespace Base\Annotations\Annotation;
 
+use Attribute;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
@@ -12,7 +13,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  * @Target({"CLASS", "METHOD"})
  *
  */
-#[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class Route extends \Symfony\Component\Routing\Annotation\Route
 {
     public function __construct(

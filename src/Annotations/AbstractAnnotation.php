@@ -228,8 +228,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $fields = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
-        $entity = AnnotationReader::getInstance()->getEntityHydrator()->hydrate($classname, array_merge($fields, $associations));
-        return $entity;
+        return AnnotationReader::getInstance()->getEntityHydrator()->hydrate($classname, array_merge($fields, $associations));
     }
 
     public static function getOriginalEntity($entity): ?object
@@ -310,15 +309,15 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
     }
 
-    public function preFlush(PreFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
 
-    public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
 
-    public function postFlush(PostFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function postFlush(PostFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
     }
 

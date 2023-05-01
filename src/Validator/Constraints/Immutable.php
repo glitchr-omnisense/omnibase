@@ -13,13 +13,13 @@ use Base\Validator\ConstraintEntity;
  */
 class Immutable extends ConstraintEntity
 {
-    public $service = 'doctrine.orm.validator.immutable';
-    public $em = null;
-    public $entityClass = null;
-    public $repositoryMethod = 'findBy';
+    public mixed $service = 'doctrine.orm.validator.immutable';
+    public mixed $em = null;
+    public mixed $entityClass = null;
+    public mixed $repositoryMethod = 'findBy';
     public $fields = [];
-    public $errorPath = null;
-    public $ignoreNull = true;
+    public mixed $errorPath = null;
+    public mixed $ignoreNull = true;
 
     /**
      * {@inheritdoc}
@@ -38,7 +38,8 @@ class Immutable extends ConstraintEntity
         array $groups = null,
         $payload = null,
         array $options = []
-    ) {
+    )
+    {
         parent::__construct($fields, $options, $groups, $payload);
 
         $this->message = $message ?? $this->message;

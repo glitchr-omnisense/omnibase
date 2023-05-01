@@ -3,30 +3,32 @@
 namespace Base\Validator\Constraints;
 
 use Base\Validator\ConstraintValidator;
+use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use function is_string;
 
 class NotBlankValidator extends ConstraintValidator
 {
     /**
      * {@inheritdoc}
      */
-    public function validate($object, Constraint $constraint)
+    public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof NotBlank) {
             throw new UnexpectedTypeException($constraint, NotBlank::class);
         }
 
-        if ($constraint->allowNull && null === $object) {
+        if ($constraint->allowNull && null === $value) {
             return;
         }
 
-        if (\is_string($object) && null !== $constraint->normalizer) {
-            $object = ($constraint->normalizer)($object);
+        if (is_string($value) && null !== $constraint->normalizer) {
+            $value = ($constraint->normalizer)($value);
         }
 
-        if (false === $object || (empty($object) && '0' != $object) || ($object instanceof \Doctrine\ORM\PersistentCollection && empty($object->toArray()))) {
-            $this->buildViolation($constraint, $object)->addViolation();
+        if (false === $value || (empty($value) && '0' != $value) || ($value instanceof PersistentCollection && empty($value->toArray()))) {
+            $this->buildViolation($constraint, $value)->addViolation();
         }
     }
 }

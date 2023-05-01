@@ -14,9 +14,9 @@ use Twig\TwigFunction;
 final class LocalizerTwigExtension extends AbstractExtension
 {
     /**
-     * @var Localizer
+     * @var LocalizerInterface
      */
-    protected $localizer;
+    protected LocalizerInterface $localizer;
 
     public function __construct(LocalizerInterface $localizer)
     {
@@ -51,7 +51,7 @@ final class LocalizerTwigExtension extends AbstractExtension
     {
         return $twig->render($template, array_merge($options, [
             "available_locales" => $this->localizer->getAvailableLocales(),
-            "current_locale"    => $this->localizer->getLocale()
+            "current_locale" => $this->localizer->getLocale()
         ]));
     }
 
@@ -59,7 +59,7 @@ final class LocalizerTwigExtension extends AbstractExtension
     {
         return $twig->render($template, array_merge($options, [
             "available_countries" => $this->localizer->getAvailableLocaleCountries(),
-            "country"    => $this->localizer->getLocaleCountry()
+            "country" => $this->localizer->getLocaleCountry()
         ]));
     }
 
@@ -67,7 +67,7 @@ final class LocalizerTwigExtension extends AbstractExtension
     {
         return $twig->render($template, array_merge($options, [
             "available_timezones" => $this->localizer->getAvailableTimezones(),
-            "current_timezone"    => $this->localizer->getTimezone()
+            "current_timezone" => $this->localizer->getTimezone()
         ]));
     }
 
@@ -76,7 +76,7 @@ final class LocalizerTwigExtension extends AbstractExtension
     {
         return $twig->render($template, array_merge($options, [
             "available_currencies" => $this->localizer->getAvailableCurrencies(),
-            "current_currency"    => $this->localizer->getCurrency()
+            "current_currency" => $this->localizer->getCurrency()
         ]));
     }
 }

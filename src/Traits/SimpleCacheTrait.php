@@ -2,6 +2,7 @@
 
 namespace Base\Traits;
 
+use DateInterval;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
@@ -53,7 +54,7 @@ trait SimpleCacheTrait
         return $this;
     }
 
-    public function getCache(?string $key = null, mixed $fallback = null, int|\DateInterval|null $ttl = null, $deferred = false): mixed
+    public function getCache(?string $key = null, mixed $fallback = null, int|DateInterval|null $ttl = null, $deferred = false): mixed
     {
         if ($key === null) {
             return $this->cache;
@@ -69,7 +70,7 @@ trait SimpleCacheTrait
         return $this->cache?->getItem($this->getCacheKey(static::class.$key))->get();
     }
 
-    public function setCache(CacheItemPoolInterface|string $cacheOrKey, mixed $value = null, int|\DateInterval|null $ttl = null, bool $deferred = false)
+    public function setCache(CacheItemPoolInterface|string $cacheOrKey, mixed $value = null, int|DateInterval|null $ttl = null, bool $deferred = false)
     {
         if ($cacheOrKey instanceof CacheItemPoolInterface) {
             $this->cache = $cacheOrKey;
@@ -99,7 +100,7 @@ trait SimpleCacheTrait
         return $this;
     }
 
-    public function executeOnce(callable $fn, int|\DateInterval|null $ttl = null): mixed
+    public function executeOnce(callable $fn, int|DateInterval|null $ttl = null): mixed
     {
         $keyCache = "/ExecuteOnce/".callable_hash($fn);
         return $this->getCache($keyCache, $fn, $ttl);

@@ -15,7 +15,6 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "scalar" )
  */
-
 class ScalarAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -27,13 +26,14 @@ class ScalarAdapter extends AbstractAdapter
     {
         return NumberType::class;
     }
+
     public function getOptions(): array
     {
         return [
-                "suffix" => $this->getUnit(),
-                "min" => $this->getMinimum(),
-                "max" => $this->getMaximum()
-            ];
+            "suffix" => $this->getUnit(),
+            "min" => $this->getMinimum(),
+            "max" => $this->getMaximum()
+        ];
     }
 
     public function resolve(mixed $value): mixed
@@ -45,7 +45,7 @@ class ScalarAdapter extends AbstractAdapter
     {
         parent::__construct($label, $code);
 
-        $this->unit    = $unit;
+        $this->unit = $unit;
         $this->minimum = min($minimum, $maximum);
         $this->maximum = max($minimum, $maximum);
     }
@@ -54,10 +54,12 @@ class ScalarAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $unit;
+
     public function getUnit(): ?int
     {
         return $this->unit;
     }
+
     public function setUnit(?int $unit)
     {
         $this->unit = $unit;
@@ -68,10 +70,12 @@ class ScalarAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $minimum;
+
     public function getMinimum(): ?int
     {
         return $this->minimum;
     }
+
     public function setMinimum(?int $minimum)
     {
         $this->minimum = $minimum;
@@ -82,10 +86,12 @@ class ScalarAdapter extends AbstractAdapter
      * @ORM\Column(type="integer", nullable = true)
      */
     protected $maximum;
+
     public function getMaximum(): ?int
     {
         return $this->maximum;
     }
+
     public function setMaximum(?int $maximum)
     {
         $this->maximum = $maximum;

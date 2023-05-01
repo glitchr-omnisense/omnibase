@@ -5,6 +5,7 @@ namespace Base\Imagine\Filter\Format;
 use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Imagine\FilterInterface;
 
+use Exception;
 use Imagine\Image\Format;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
@@ -80,7 +81,7 @@ class SvgFilter implements SvgFilterInterface
             $oldImage = $image;
             try {
                 $image = $filter->apply($oldImage);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $image = $oldImage;
             }
 

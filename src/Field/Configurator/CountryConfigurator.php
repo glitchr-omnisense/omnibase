@@ -84,12 +84,5 @@ class CountryConfigurator extends SelectConfigurator implements FieldConfigurato
         }
 
         $field->setFormattedValue($formattedValues);
-
-        $fieldValue = $field->getValue();
-
-        $isIndexOrDetail = \in_array($context->getCrud()->getCurrentPage(), [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true);
-        if (null === $fieldValue || !$isIndexOrDetail) {
-            return;
-        }
     }
 }

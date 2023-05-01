@@ -17,7 +17,7 @@ use Base\Database\Annotation\Cache;
  *
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- *     @DiscriminatorEntry(value="abstract_scope")
+ * @DiscriminatorEntry(value="abstract_scope")
  */
 abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
 {
@@ -25,6 +25,7 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
     {
         return ["fa-solid fa-crosshairs"];
     }
+
     public function contains(mixed $subject): bool
     {
         if (!$this->adapter) {
@@ -51,10 +52,12 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
      * @Associate(metadata="class")
      */
     protected $value;
+
     public function getValue()
     {
         return $this->value;
     }
+
     public function setValue($value)
     {
         $this->value = $value;
@@ -70,6 +73,7 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
     {
         return $this->class;
     }
+
     public function setClass(?string $class)
     {
         $this->class = $class;

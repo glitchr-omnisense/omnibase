@@ -10,7 +10,8 @@ class HashidsCompression extends AbstractCompression
     /**
      * @var Hashids
      */
-    protected $hashids;
+    protected Hashids $hashids;
+
     public function __construct(string $secret)
     {
         if (class_exists(Hashids::class)) {
@@ -22,6 +23,7 @@ class HashidsCompression extends AbstractCompression
     {
         return "hashids";
     }
+
     public function getEncoding(): ?string
     {
         return $this->encoding ?? ZLIB_ENCODING_GZIP;
@@ -36,6 +38,7 @@ class HashidsCompression extends AbstractCompression
     {
         return $this->hashids->encodeHex($hex);
     }
+
     protected function decodeHex(string $data): string|false
     {
         if (!$this->isValid($data)) {

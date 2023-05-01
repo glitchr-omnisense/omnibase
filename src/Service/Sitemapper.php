@@ -47,12 +47,12 @@ class Sitemapper implements SitemapperInterface
 
     public function __construct(Environment $twig, AnnotationReader $annotationReader, RouterInterface $router, LocalizerInterface $localizer)
     {
-        $this->twig             = $twig;
-        $this->router           = $router;
-        $this->localizer   = $localizer;
+        $this->twig = $twig;
+        $this->router = $router;
+        $this->localizer = $localizer;
         $this->annotationReader = $annotationReader;
 
-        $this->mimeTypes        = new MimeTypes();
+        $this->mimeTypes = new MimeTypes();
     }
 
     public function getSitemap(Route $route): ?Sitemap
@@ -78,6 +78,7 @@ class Sitemapper implements SitemapperInterface
     {
         return $this->hostname;
     }
+
     public function setHostname(string $hostname): self
     {
         $this->hostname = $hostname;
@@ -99,10 +100,10 @@ class Sitemapper implements SitemapperInterface
 
         $sitemap = $this->getSitemap($route);
         if (!$sitemap) {
-            throw new SitemapNotFoundException("Sitemap annotation not found for \"".($routeMatch["_controller"] ?? $route->getPath())."\".");
+            throw new SitemapNotFoundException("Sitemap annotation not found for \"" . ($routeMatch["_controller"] ?? $route->getPath()) . "\".");
         }
 
-        $routeName     = $sitemap->getGroup() ?? $route->getDefaults()["_canonical_route"] ?? $routeMatch["_route"] ?? null;
+        $routeName = $sitemap->getGroup() ?? $route->getDefaults()["_canonical_route"] ?? $routeMatch["_route"] ?? null;
         if (!$routeName) {
             return $this;
         }
@@ -110,7 +111,7 @@ class Sitemapper implements SitemapperInterface
         $this->computeFlag = false;
 
         $routeDefaults = $route->getDefaults();
-        $routeParameters = array_filter($routeParameters, fn ($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
+        $routeParameters = array_filter($routeParameters, fn($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
         if (array_key_exists("_locale", $routeDefaults)) {
             $routeParameters["_locale"] = $routeDefaults["_locale"];
         }
@@ -125,13 +126,13 @@ class Sitemapper implements SitemapperInterface
         $locale = $this->localizer->getLocale($routeParameters["_locale"] ?? null);
         $sitemapEntry->setLocale($locale);
 
-        $routeParameters = array_filter($routeParameters, fn ($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
-        if (!array_key_exists($routeName.".".md5(serialize($routeParameters)), $this->urlset)) {
-            $this->urlset[$routeName.".".md5(serialize($routeParameters))] = $sitemapEntry;
+        $routeParameters = array_filter($routeParameters, fn($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
+        if (!array_key_exists($routeName . "." . md5(serialize($routeParameters)), $this->urlset)) {
+            $this->urlset[$routeName . "." . md5(serialize($routeParameters))] = $sitemapEntry;
         }
 
         if (array_key_exists("_locale", $routeDefaults)) {
-            $this->urlset[$routeName.".".md5(serialize($routeParameters))]->addAlternate($sitemapEntry);
+            $this->urlset[$routeName . "." . md5(serialize($routeParameters))]->addAlternate($sitemapEntry);
         }
 
         return $this;
@@ -157,14 +158,14 @@ class Sitemapper implements SitemapperInterface
             }
 
             $routeParameters = $this->router->getRouteMatch($route->getPath()) ?? [];
-            $numberOfParameters = count(array_filter($routeParameters, fn ($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY));
+            $numberOfParameters = count(array_filter($routeParameters, fn($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY));
             if ($numberOfParameters > 0) {
                 continue;
             }
 
             try {
                 $this->register($route);
-            } catch(\Base\Exception\SitemapNotFoundException $e) {
+            } catch (SitemapNotFoundException $e) {
             }
         }
 
@@ -265,7 +266,7 @@ class Sitemapper implements SitemapperInterface
 
     public function serve(string $name, array $context = []): Response
     {
-        $urlset = array_reverse(array_map(fn ($s) => $s->toArray($this->hostname), $this->doCompute()));
+        $urlset = array_reverse(array_map(fn($s) => $s->toArray($this->hostname), $this->doCompute()));
 
         $extension = explode(".", basename($name, ".twig"));
         $extension = end($extension) ?? "txt";

@@ -12,7 +12,7 @@ final class SemanticTwigExtension extends AbstractExtension
     /**
      * @var SemanticEnhancerInterface
      */
-    protected $semanticEnhancer;
+    protected SemanticEnhancerInterface $semanticEnhancer;
 
     public function __construct(SemanticEnhancerInterface $semanticEnhancer)
     {
@@ -27,7 +27,7 @@ final class SemanticTwigExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('semantify', [SemanticEnhancer::class, 'highlight' ], ['is_safe' => ['all']]),
+            new TwigFilter('semantify', [SemanticEnhancer::class, 'highlight'], ['is_safe' => ['all']]),
             new TwigFilter('semantify_only', [SemanticEnhancer::class, 'highlightOne'], ['is_safe' => ['all']]),
         ];
     }

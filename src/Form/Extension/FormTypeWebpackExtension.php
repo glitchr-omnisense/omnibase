@@ -16,16 +16,16 @@ class FormTypeWebpackExtension extends AbstractTypeExtension
     /**
      * @var FormProxyInterface
      */
-    protected $formProxy;
+    protected FormProxyInterface $formProxy;
 
     /**
      * @var EncoreTagRenderer
      */
-    protected $encoreTagRenderer;
+    protected EncoreTagRenderer $encoreTagRenderer;
 
     public function __construct(FormProxyInterface $formProxy, EncoreTagRenderer $encoreTagRenderer)
     {
-        $this->formProxy    = $formProxy;
+        $this->formProxy = $formProxy;
         $this->encoreTagRenderer = $encoreTagRenderer;
     }
 

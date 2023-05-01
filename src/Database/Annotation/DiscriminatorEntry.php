@@ -16,7 +16,6 @@ use Exception;
  *   @Attribute("value", type = "string")
  * })
  */
-
 class DiscriminatorEntry extends AbstractAnnotation
 {
     /** @Required */
@@ -66,15 +65,15 @@ class DiscriminatorEntry extends AbstractAnnotation
                     $parentNamespace = explodeByArray("\\Entity\\", $parentClassName)[1] ?? null;
                     $parentAnnotations = $this->getAnnotationReader()->getAnnotations($parentClassName, $this);
                     $parentAnnotations = $parentAnnotations[AnnotationReader::TARGET_CLASS][$parentClassName];
-                    if (($parentAnnotation  = $parentAnnotations ? end($parentAnnotations) : null)) {
+                    if (($parentAnnotation = $parentAnnotations ? end($parentAnnotations) : null)) {
                         $parentValue = $parentAnnotation->getValue($parentClassName);
                         $parentValue = in_array($parentValue, ["abstract", "common"]) ? null : $parentValue;
                     }
                 }
 
                 // Strip parent prefix namespace
-                if ($parentNamespace !== null && $parentValue !== null && str_starts_with($namespace, $parentNamespace."\\")) {
-                    $namespace = explode("\\", str_lstrip($namespace, $parentNamespace."\\"));
+                if ($parentNamespace !== null && $parentValue !== null && str_starts_with($namespace, $parentNamespace . "\\")) {
+                    $namespace = explode("\\", str_lstrip($namespace, $parentNamespace . "\\"));
                     array_unshift($namespace, $parentValue);
                 } else {
                     $namespace = explode("\\", $namespace);
@@ -105,7 +104,7 @@ class DiscriminatorEntry extends AbstractAnnotation
             return false;
         }
         if (empty($classMetadata->discriminatorMap) || empty($classMetadata->discriminatorColumn)) {
-            throw new \Exception("@DiscriminatorEntry \"".$this->getValue($classMetadata->getName())."\" found for \"".$classMetadata->getName()."\", but missing discriminator mapping");
+            throw new Exception("@DiscriminatorEntry \"" . $this->getValue($classMetadata->getName()) . "\" found for \"" . $classMetadata->getName() . "\", but missing discriminator mapping");
         }
 
         // Only act on the top parent class when discriminatorMap found
@@ -121,16 +120,16 @@ class DiscriminatorEntry extends AbstractAnnotation
             $annotations = $annotations[AnnotationReader::TARGET_CLASS][$className];
             $annotation = $annotations ? end($annotations) : null;
             if ($annotation === null) {
-                throw new \Exception("@DiscriminatorEntry annotation not found for \"".$className."\". Have you doom the cache ?");
+                throw new Exception("@DiscriminatorEntry annotation not found for \"" . $className . "\". Have you doom the cache ?");
             }
 
             $discriminatorValues[$className] = $annotation->getValue($className);
         }
 
-        $classMetadata->discriminatorMap   = array_flip($discriminatorValues);
+        $classMetadata->discriminatorMap = array_flip($discriminatorValues);
         $classMetadata->discriminatorValue = $discriminatorValues[$classMetadata->getName()] ?? null;
         if ($classMetadata->discriminatorValue === null) {
-            throw new \Exception("Missing discriminator entry in ".$classMetadata->getName());
+            throw new Exception("Missing discriminator entry in " . $classMetadata->getName());
         }
     }
 }

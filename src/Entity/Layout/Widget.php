@@ -13,6 +13,7 @@ use Base\Database\Annotation\OrderColumn;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Repository\Layout\WidgetRepository;
@@ -29,9 +30,8 @@ use Base\Annotations\Annotation\Timestamp;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
- *     @DiscriminatorEntry
+ * @DiscriminatorEntry
  */
-
 class Widget implements TranslatableInterface, IconizeInterface, CacheableInterface
 {
     use BaseTrait;
@@ -51,6 +51,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-cube"];
@@ -58,7 +59,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
 
     public function __toString()
     {
-        return $this->getTitle() ?? $this->getTranslator()->transEntity(self::class)." #".$this->getId();
+        return $this->getTitle() ?? $this->getTranslator()->transEntity(self::class) . " #" . $this->getId();
     }
 
     public function __construct(?string $title = null, ?string $excerpt = null, ?string $content = null)
@@ -70,7 +71,8 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         $this->setContent($content);
     }
 
-    protected ?string $template = null;
+    protected $template = null;
+
     public function getTemplate()
     {
         if ($this->template) {
@@ -78,9 +80,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         }
 
         $defaultTemplate = camel2snake(class_basename(get_called_class()));
-        $defaultTemplate = "widget/".$defaultTemplate.".html.twig";
-
-        return $defaultTemplate;
+        return "widget/" . $defaultTemplate . ".html.twig";
     }
 
     public function setTemplate(?string $template)
@@ -95,6 +95,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
      * @ORM\Column(type="integer")
      */
     protected $id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -106,6 +107,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
      * @GenerateUuid(version=4)
      */
     protected $uuid;
+
     public function getUuid()
     {
         return $this->uuid;
@@ -117,14 +119,17 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
      * @AssertBase\File(max_size="1024KB", mime_types={"image/*"}, groups={"new", "edit"})
      */
     protected $thumbnail;
+
     public function getThumbnail()
     {
         return Uploader::getPublic($this, "thumbnail");
     }
+
     public function getThumbnailFile()
     {
         return Uploader::get($this, "thumbnail");
     }
+
     public function setThumbnail($thumbnail)
     {
         $this->thumbnail = $thumbnail;
@@ -137,10 +142,12 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
      * @OrderColumn
      */
     protected $connexes;
+
     public function getConnexes(): Collection
     {
         return $this->connexes;
     }
+
     public function addConnex(Widget $connex): self
     {
         if (!$this->connexes->contains($connex)) {
@@ -161,17 +168,19 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
      * @Timestamp(on="create")
      */
     protected $createdAt;
-    public function getCreatedAt(): ?\DateTimeInterface
+
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
-     /**
+    /**
      * @ORM\Column(type="datetime", nullable=true)
      * @Timestamp(on={"update", "create"})
      */
     protected $updatedAt;
-    public function getUpdatedAt(): ?\DateTimeInterface
+
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }

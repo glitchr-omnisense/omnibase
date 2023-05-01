@@ -12,6 +12,7 @@ use Base\BaseBundle;
 use Base\Routing\RouterInterface;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\ORM\EntityNotFoundException;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Doctrine\ORM\PersistentCollection;
@@ -34,37 +35,37 @@ class IntegritySubscriber implements EventSubscriberInterface
     /**
      * @var TokenStorageInterface
      */
-    protected $tokenStorage;
+    protected TokenStorageInterface $tokenStorage;
 
     /**
      * @var ManagerRegistry
      */
-    protected $doctrine;
+    protected ManagerRegistry $doctrine;
 
     /**
      * @var RequestStack
      */
-    protected $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @Vault
      */
-    protected $vault;
+    protected Vault $vault;
 
     /**
      * @string
      */
-    private $secret;
+    private ?string $secret;
 
     public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, RouterInterface $router, string $secret = null)
     {
@@ -95,14 +96,14 @@ class IntegritySubscriber implements EventSubscriberInterface
             $throwable instanceof EntityNotFoundException);
 
         if ($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace())) {
-            throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
+            throw new RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
         }
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
         if (BaseBundle::getInstance()->isBroken() && $event->isMainRequest()) {
-            throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?");
+            throw new RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?");
         }
 
         $token = $this->tokenStorage->getToken();

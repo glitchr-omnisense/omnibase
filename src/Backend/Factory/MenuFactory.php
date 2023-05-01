@@ -13,9 +13,9 @@ use Symfony\Component\Security\Http\Logout\LogoutUrlGenerator;
 class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
 {
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     public function __construct(AdminContextProvider $adminContextProvider, AuthorizationCheckerInterface $authChecker, LogoutUrlGenerator $logoutUrlGenerator, AdminUrlGenerator $adminUrlGenerator, MenuItemMatcherInterface $menuItemMatcher, RouterInterface $router)
     {
@@ -28,7 +28,7 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
         $menuItemType = $menuItemDto->getType();
         if (MenuItemDto::TYPE_EXIT_IMPERSONATION === $menuItemType) {
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
-            return '?'.$switchParameter.'=_exit';
+            return '?' . $switchParameter . '=_exit';
         }
 
         if (MenuItemDto::TYPE_SUBMENU === $menuItemType) {
@@ -39,16 +39,16 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
             $url["query"] = str_replace("\"", "", implode_attributes("&", $url["query"]));
 
             return compose_url(
-                $url["scheme"]  ?? null,
-                $url["user"]      ?? null,
+                $url["scheme"] ?? null,
+                $url["user"] ?? null,
                 $url["password"] ?? null,
                 $url["machine"] ?? null,
                 $url["subdomain"] ?? null,
-                $url["domain"]   ?? null,
+                $url["domain"] ?? null,
                 $url["port"] ?? null,
-                $url["path"]    ?? null,
-                $url["query"]     ?? null,
-                $url["fragment"]     ?? null
+                $url["path"] ?? null,
+                $url["query"] ?? null,
+                $url["fragment"] ?? null
             );
         }
 
@@ -60,15 +60,15 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
             $url["query"] = str_replace("\"", "", implode_attributes("&", $url["query"]));
 
             return compose_url(
-                $url["scheme"]  ?? null,
-                $url["user"]      ?? null,
+                $url["scheme"] ?? null,
+                $url["user"] ?? null,
                 $url["password"] ?? null,
                 $url["machine"] ?? null,
                 $url["subdomain"] ?? null,
-                $url["domain"]   ?? null,
+                $url["domain"] ?? null,
                 $url["port"] ?? null,
-                $url["path"]    ?? null,
-                $url["query"]     ?? null
+                $url["path"] ?? null,
+                $url["query"] ?? null
             );
         }
 

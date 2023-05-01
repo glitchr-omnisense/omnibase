@@ -15,24 +15,24 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 class RouterSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var AuthorizationChecker
      */
-    protected $authorizationChecker;
+    protected AuthorizationChecker $authorizationChecker;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
-     * @var SettingBag
+     * @var SettingBagInterface
      */
-    protected $settingBag;
+    protected SettingBagInterface $settingBag;
 
     public function __construct(AuthorizationChecker $authorizationChecker, RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag)
     {

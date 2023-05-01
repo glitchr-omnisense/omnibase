@@ -6,6 +6,7 @@ use Base\Field\Type\MoneyType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use InvalidArgumentException;
 use Symfony\Component\Intl\Currencies;
 
 final class MoneyField implements FieldInterface
@@ -47,7 +48,7 @@ final class MoneyField implements FieldInterface
     public function setCurrency(string $currencyCode): self
     {
         if (!Currencies::exists($currencyCode)) {
-            throw new \InvalidArgumentException(sprintf('The argument of the "%s()" method must be a valid currency code according to ICU data ("%s" given).', __METHOD__, $currencyCode));
+            throw new InvalidArgumentException(sprintf('The argument of the "%s()" method must be a valid currency code according to ICU data ("%s" given).', __METHOD__, $currencyCode));
         }
 
         $this->setCustomOption(self::OPTION_CURRENCY, $currencyCode);
@@ -77,7 +78,7 @@ final class MoneyField implements FieldInterface
     public function setNumDecimals(int $num): self
     {
         if ($num < 0) {
-            throw new \InvalidArgumentException(sprintf('The argument of the "%s()" method must be 0 or higher (%d given).', __METHOD__, $num));
+            throw new InvalidArgumentException(sprintf('The argument of the "%s()" method must be 0 or higher (%d given).', __METHOD__, $num));
         }
 
         $this->setCustomOption(self::OPTION_NUM_DECIMALS, $num);

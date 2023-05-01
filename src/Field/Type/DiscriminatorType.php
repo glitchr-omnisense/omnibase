@@ -9,6 +9,7 @@ use Base\Service\Model\Autocomplete;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
+use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -23,12 +24,12 @@ class DiscriminatorType extends AbstractType
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator = null;
+    protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     /**
      * @var FormFactory
      */
-    protected $formFactory = null;
+    protected ?FormFactory $formFactory = null;
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -43,11 +44,11 @@ class DiscriminatorType extends AbstractType
 
             $class = $options["data_class"] ?? $this->formFactory->guessClass($form->getParent());
             if (!$class) {
-                throw new \Exception("Entity cannot be determined for " . $form->getName());
+                throw new Exception("Entity cannot be determined for " . $form->getName());
             }
 
-            $discriminatorMap   = $this->classMetadataManipulator->getDiscriminatorMap($class);
-            $rootEntityName   = $this->classMetadataManipulator->getRootEntityName($class);
+            $discriminatorMap = $this->classMetadataManipulator->getDiscriminatorMap($class);
+            $rootEntityName = $this->classMetadataManipulator->getRootEntityName($class);
 
             if ($options["discriminator_autoload"]) {
                 $choices = [];
@@ -76,8 +77,8 @@ class DiscriminatorType extends AbstractType
         $formattedValues = (new Autocomplete($translator))->resolve($entry, $class, ["format" => $format]);
         $formattedValues["icon"] = class_implements_interface($class, IconizeInterface::class) ? $class::__iconizeStatic()[0] ?? null : null;
 
-        $text = $translator->trans($entry.".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
-        switch($format) {
+        $text = $translator->trans($entry . "." . Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
+        switch ($format) {
             case FORMAT_TITLECASE:
                 $text = mb_ucwords(mb_strtolower($text));
                 break;

@@ -9,9 +9,9 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class PasswordValidator extends ConstraintValidator
 {
-    public function validate($entry, Constraint $constraint)
+    public function validate($value, Constraint $constraint)
     {
-        if (null === $entry || '' === $entry) {
+        if (null === $value || '' === $value) {
             return;
         }
 
@@ -19,14 +19,14 @@ class PasswordValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, Password::class);
         }
 
-        $minLength   = $constraint->getMinLength();
+        $minLength = $constraint->getMinLength();
         $minStrength = $constraint->getMinStrength();
 
         // Check length of password
-        if (strlen($entry) < $minLength) {
+        if (strlen($value) < $minLength) {
             $constraint->message = $constraint->messageMinLength;
-            $this->buildViolation($constraint, $entry)
-                ->setParameter('{0}', strlen($entry))
+            $this->buildViolation($constraint, $value)
+                ->setParameter('{0}', strlen($value))
                 ->addViolation();
         }
 
@@ -34,25 +34,25 @@ class PasswordValidator extends ConstraintValidator
         $strength = 0;
         if ($minStrength > 0) {
             if ($strength < $minStrength) {
-                $strength += (int) preg_match('/[a-z]+/', $entry);
+                $strength += (int)preg_match('/[a-z]+/', $value);
             } // lowercase
             if ($strength < $minStrength) {
-                $strength += (int) preg_match('/[A-Z]+/', $entry);
+                $strength += (int)preg_match('/[A-Z]+/', $value);
             } // uppercase
             if ($strength < $minStrength) {
-                $strength += (int) preg_match('/[0-9]+/', $entry);
+                $strength += (int)preg_match('/[0-9]+/', $value);
             } // numbers
             if ($strength < $minStrength) {
-                $strength += (int) preg_match('/[\W]+/', $entry);
+                $strength += (int)preg_match('/[\W]+/', $value);
             } // specials
             if ($strength < $minStrength) {
-                $strength += (int) strlen($entry) > 12;
-            } // length12
+                $strength += strlen($value) > 12;
+            } // length
         }
 
         if ($strength < $minStrength) {
             $constraint->message = $constraint->messageMinStrength;
-            $this->buildViolation($constraint, $entry)
+            $this->buildViolation($constraint, $value)
                 ->setParameter('{0}', $strength)
                 ->addViolation();
         }

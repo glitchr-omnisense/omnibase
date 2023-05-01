@@ -6,6 +6,7 @@ use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
+use Base\Service\LocalizerInterface;
 use Base\Service\Model\Autocomplete;
 use Base\Service\Localizer;
 use Base\Service\ObfuscatorInterface;
@@ -19,6 +20,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Exception;
 use Generator;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -33,6 +35,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Csrf\CsrfToken;
@@ -42,46 +45,46 @@ use Traversable;
 class SelectType extends AbstractType implements DataMapperInterface
 {
     /** @var ClassMetadataManipulator */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     /** @var Environment */
-    protected $twig;
+    protected Environment $twig;
 
     /** @var FormFactory */
-    protected $formFactory;
+    protected FormFactory $formFactory;
 
-    /** @var CsrfTokenManager */
-    protected $csrfTokenManager;
+    /** @var CsrfTokenManagerInterface */
+    protected CsrfTokenManagerInterface $csrfTokenManager;
 
     /** @var TranslatorInterface */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /** @var EntityManagerInterface */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
-    /** @var obfuscator */
-    protected $obfuscator;
+    /** @var ObfuscatorInterface */
+    protected ObfuscatorInterface $obfuscator;
 
     /** @var ParameterBagInterface */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /** @var AuthorizationChecker */
-    protected $authorizationChecker;
+    protected AuthorizationChecker $authorizationChecker;
 
-    /** @var Localizer */
-    protected $localizer;
+    /** @var LocalizerInterface */
+    protected LocalizerInterface $localizer;
 
     /** @var AdminUrlGenerator */
-    protected $adminUrlGenerator;
+    protected AdminUrlGenerator $adminUrlGenerator;
 
     /** @var Autocomplete */
-    protected $autocomplete;
+    protected Autocomplete $autocomplete;
 
-    /** @var PropertyAccessor */
-    protected $propertyAccessor;
+    /** @var PropertyAccessorInterface */
+    protected PropertyAccessorInterface $propertyAccessor;
 
     /** @var RouterInterface */
-    protected $router;
+    protected RouterInterface $router;
 
     public function __construct(
         FormFactory               $formFactory,
@@ -254,7 +257,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 /* Override options.. I couldn't done that without accessing data */
                 // It might be good to get read of that and be able to use normalizer.. as expected
                 if (!$options["tags"] && $options["choices"] === null && !$options["autocomplete"]) {
-                    throw new \Exception("No choices, or autocomplete option, could be guessed without using data information for \"" . $form->getName() . "\"");
+                    throw new Exception("No choices, or autocomplete option, could be guessed without using data information for \"" . $form->getName() . "\"");
                 }
             }
 
@@ -421,8 +424,10 @@ class SelectType extends AbstractType implements DataMapperInterface
                     if (!array_key_exists($label, $choices)) {
                         $choices[$label] = $id;
                     } else {
-                        for ($ii = 2; array_key_exists($label . "/" . $ii, $choices); $ii++) {
-                            continue;
+
+                        $ii = 2;
+                        for ($i = 2; array_key_exists($label . "/" . $i, $choices); $i++) {
+                            $ii++;
                         }
 
                         $choices[$label . "/" . $ii] = $id;

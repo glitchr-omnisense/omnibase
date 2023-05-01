@@ -6,13 +6,15 @@ use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Service\Localizer;
 use Base\Service\Translator;
+use Exception;
+use ReflectionClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController as EaCrudController;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'translation:crud', aliases:[], description:'')]
+#[AsCommand(name: 'translation:crud', aliases: [], description: '')]
 class TranslationCrudCommand extends Command
 {
     protected function configure(): void
@@ -25,14 +27,14 @@ class TranslationCrudCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
+        $baseLocation = dirname((new ReflectionClass('Base\\BaseBundle'))->getFileName());
         $crudRestriction = $input->getOption('crud') ?? "";
         $cruds = array_filter(
             array_merge(
-                BaseBundle::getInstance()->getAllClasses($baseLocation."/Controller/Backend/Crud"),
+                BaseBundle::getInstance()->getAllClasses($baseLocation . "/Controller/Backend/Crud"),
                 BaseBundle::getInstance()->getAllClasses("./src/Controller/Backend/Crud"),
             ),
-            fn ($c) => !($c instanceof EaCrudController)
+            fn($c) => !($c instanceof EaCrudController)
         );
 
         $maxLength = 0;
@@ -48,12 +50,12 @@ class TranslationCrudCommand extends Command
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
         if ($locale && !in_array($locale, $availableLocales)) {
-            throw new \Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
+            throw new Exception("Locale not found in the list of available locale: [" . implode(",", $availableLocales) . "]");
         }
 
         $suffix = $input->getOption('suffix');
         if ($cruds) {
-            $output->section()->writeln("CRUD controller list: ".$crudRestriction);
+            $output->section()->writeln("CRUD controller list: " . $crudRestriction);
         }
         foreach ($cruds as $crud) {
             if (!str_starts_with($crud, $crudRestriction)) {
@@ -70,27 +72,25 @@ class TranslationCrudCommand extends Command
                     $space = "";
                 } else {
                     $prefix = "";
-                    $space = str_repeat(" ", max($maxLength-strlen($crud), 0));
+                    $space = str_repeat(" ", max($maxLength - strlen($crud), 0));
                 }
 
                 $translation = "";
-                if (!$translation) {
-                    $path = explode("\\", $crud);
-                    $path = str_strip(implode(".", tail($path, 4)), "", "CrudController");
+                $path = explode("\\", $crud);
+                $path = str_strip(implode(".", tail($path, 4)), "", "CrudController");
 
-                    $translationPath = "@".Translator::DOMAIN_BACKEND.".crud.".camel2snake($path).".".$action.".".$suffix;
-                    $translationPathStr = $prefix."@".Translator::DOMAIN_BACKEND."[$currentLocale].<ln>crud.".camel2snake($path).".".$action.".".$suffix."</ln>";
-                    $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
+                $translationPath = "@" . Translator::DOMAIN_BACKEND . ".crud." . camel2snake($path) . "." . $action . "." . $suffix;
+                $translationPathStr = $prefix . "@" . Translator::DOMAIN_BACKEND . "[$currentLocale].<ln>crud." . camel2snake($path) . "." . $action . "." . $suffix . "</ln>";
+                $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
-                    if ($translation == $translationPath) {
-                        $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red> (possible entity fallback)";
-                    } else {
-                        $trans .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
-                    }
+                if ($translation == $translationPath) {
+                    $trans .= "<warning>" . $translationPathStr . "</warning><red> = \"no translation found\"</red> (possible entity fallback)";
+                } else {
+                    $trans .= "<warning>" . $translationPathStr . " </warning>= \"" . $translation . "\"";
                 }
             }
 
-            $output->section()->writeln(" * <info>".trim($crud)."</info> ".$space.": $trans");
+            $output->section()->writeln(" * <info>" . trim($crud) . "</info> " . $space . ": $trans");
         }
 
 

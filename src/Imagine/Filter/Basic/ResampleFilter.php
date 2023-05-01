@@ -3,20 +3,24 @@
 namespace Base\Imagine\Filter\Basic;
 
 use Base\Imagine\FilterInterface;
+use Exception;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use InvalidArgumentException;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use function constant;
+use function defined;
 
 class ResampleFilter implements FilterInterface
 {
     /**
      * @var ImagineInterface
      */
-    private $imagine;
+    private ImagineInterface $imagine;
 
 
     public function __toString()
@@ -39,7 +43,7 @@ class ResampleFilter implements FilterInterface
             $image->save($tmpFile, $this->getImagineSaveOptions($this->options));
             $image = $this->imagine->open($tmpFile);
             $this->delTemporaryFile($tmpFile);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->delTemporaryFile($tmpFile);
             throw new FileNotFoundException('Unable to save/open file in resample filter loader.');
         }
@@ -51,13 +55,13 @@ class ResampleFilter implements FilterInterface
      * @param string $path
      *
      * @return string
-     * @throws \RuntimeException
+     * @throws RuntimeException
      *
      */
-    private function getTemporaryFile($path)
+    private function getTemporaryFile(string $path)
     {
         if (!is_dir($path) || false === $file = tempnam($path, 'liip-imagine-bundle')) {
-            throw new \RuntimeException(sprintf('Unable to create temporary file in "%s" base path.', $path));
+            throw new RuntimeException(sprintf('Unable to create temporary file in "%s" base path.', $path));
         }
 
         return $file;
@@ -66,7 +70,7 @@ class ResampleFilter implements FilterInterface
     /**
      * @param $file
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     private function delTemporaryFile($file)
     {
@@ -117,8 +121,8 @@ class ResampleFilter implements FilterInterface
 
         $resolver->setNormalizer('filter', function (Options $options, $value) {
             foreach (['\Imagine\Image\ImageInterface::FILTER_%s', '\Imagine\Image\ImageInterface::%s', '%s'] as $format) {
-                if (\defined($constant = sprintf($format, mb_strtoupper($value))) || \defined($constant = sprintf($format, $value))) {
-                    return \constant($constant);
+                if (defined($constant = sprintf($format, mb_strtoupper($value))) || defined($constant = sprintf($format, $value))) {
+                    return constant($constant);
                 }
             }
 

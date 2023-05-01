@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class MissingDiscriminatorMapException extends \Exception
+use Exception;
+
+class MissingDiscriminatorMapException extends Exception
 {
     /**
      * {@inheritdoc}

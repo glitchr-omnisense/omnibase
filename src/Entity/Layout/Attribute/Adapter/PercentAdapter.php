@@ -15,7 +15,6 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "percent" )
  */
-
 class PercentAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -27,10 +26,12 @@ class PercentAdapter extends AbstractAdapter
     {
         return PercentType::class;
     }
+
     public function getOptions(): array
     {
         return [];
     }
+
     public function resolve(mixed $value): mixed
     {
         return $value;
@@ -52,6 +53,7 @@ class PercentAdapter extends AbstractAdapter
     {
         return $this->epsilon;
     }
+
     public function setPrecision(int $epsilon)
     {
         $this->epsilon = $epsilon;
@@ -67,6 +69,7 @@ class PercentAdapter extends AbstractAdapter
     {
         return $this->scale;
     }
+
     public function setScale(int $scale)
     {
         $this->scale = $scale;

@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class OwnerSideException extends \Exception
+use Exception;
+
+class OwnerSideException extends Exception
 {
     /**
      * {@inheritdoc}

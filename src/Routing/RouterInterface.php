@@ -45,8 +45,8 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getPortFallback(?string $locale = null, ?string $environment = null): mixed;
     public function getPortFallbacks(?string $locale = null, ?string $environment = null): ?array;
 
-    public function getUrl(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string;
-    public function getAssetUrl(string $name, ?string $packageName = null): string;
+    public function getUrl(string $nameOrUrl, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string;
+    public function getAssetUrl(string $nameOrUrl, ?string $packageName = null): string;
 
     public function getRequest(): ?Request;
     public function getEnvironment(): string;
@@ -71,7 +71,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getRouteHash(string $routeNameOrUrl): string;
     public function getRouteName(?string $routeUrl = null): ?string;
     public function getRouteMatch(?string $routeUrl = null): ?array;
-    public function getRouteGroups(string $routeName): array;
+    public function getRouteGroups(string $routeNameOrUrl): array;
     public function getRouteFirewall(?string $routeUrl = null): ?FirewallConfig;
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse;

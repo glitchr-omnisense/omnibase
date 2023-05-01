@@ -2,6 +2,8 @@
 
 namespace Base\Imagine\Svg;
 
+use DOMDocument;
+use DOMXPath;
 use Imagine\Draw\DrawerInterface;
 use Imagine\Exception\InvalidArgumentException;
 use Imagine\Exception\NotSupportedException;
@@ -19,24 +21,25 @@ use Imagine\Image\Palette\RGB;
 use Imagine\Image\Point;
 use Imagine\Image\PointInterface;
 use Imagine\Image\ProfileInterface;
+use function in_array;
 
 class Image extends AbstractImage
 {
     /**
-     * @var \DOMDocument
+     * @var DOMDocument
      */
-    private $document;
+    private DOMDocument $document;
 
     /**
      * @var PaletteInterface
      */
-    private $palette;
+    private PaletteInterface $palette;
 
     /**
      * @phpstan-param MetadataBag<mixed> $metadata
      * @psalm-param MetadataBag $metadata
      */
-    public function __construct(\DOMDocument $document, MetadataBag $metadata)
+    public function __construct(DOMDocument $document, MetadataBag $metadata)
     {
         $this->document = $document;
         $this->metadata = $metadata;
@@ -67,7 +70,7 @@ class Image extends AbstractImage
     /**
      * Returns the DOM document.
      */
-    public function getDomDocument(): \DOMDocument
+    public function getDomDocument(): DOMDocument
     {
         return $this->document;
     }
@@ -87,7 +90,7 @@ class Image extends AbstractImage
             && Box::TYPE_NONE !== $currentSize->getType()
             && !$currentSize->contains($size, $start)
         ) {
-            throw new OutOfBoundsException('Crop coordinates must start at minimum 0, 0 position from top left corner, crop height and width '.'must be positive integers and must not exceed the current image borders');
+            throw new OutOfBoundsException('Crop coordinates must start at minimum 0, 0 position from top left corner, crop height and width ' . 'must be positive integers and must not exceed the current image borders');
         }
 
         if (
@@ -115,14 +118,14 @@ class Image extends AbstractImage
             $svg->removeAttribute('x');
             $svg->removeAttribute('y');
         } else {
-            $svg->setAttribute('x', (string) (-$start->getX()));
-            $svg->setAttribute('y', (string) (-$start->getY()));
+            $svg->setAttribute('x', (string)(-$start->getX()));
+            $svg->setAttribute('y', (string)(-$start->getY()));
         }
 
         $svgWrap = $this->document->createElementNS('http://www.w3.org/2000/svg', 'svg');
         $svgWrap->setAttribute('version', '1.1');
-        $svgWrap->setAttribute('width', (string) $size->getWidth());
-        $svgWrap->setAttribute('height', (string) $size->getHeight());
+        $svgWrap->setAttribute('width', (string)$size->getWidth());
+        $svgWrap->setAttribute('height', (string)$size->getHeight());
         $svgWrap->appendChild($svg);
 
         $this->document->appendChild($svgWrap);
@@ -170,18 +173,18 @@ class Image extends AbstractImage
         $this->fixViewBox();
 
         if (Box::TYPE_ABSOLUTE === $newSizeType) {
-            $this->document->documentElement->setAttribute('width', (string) $size->getWidth());
-            $this->document->documentElement->setAttribute('height', (string) $size->getHeight());
+            $this->document->documentElement->setAttribute('width', (string)$size->getWidth());
+            $this->document->documentElement->setAttribute('height', (string)$size->getHeight());
         } elseif (Box::TYPE_ASPECT_RATIO === $newSizeType) {
             if (
-                (int) round($currentSize->getWidth() / $currentSize->getHeight() * $size->getHeight()) === $size->getWidth()
-                || (int) round($size->getWidth() / $size->getHeight() * $currentSize->getHeight()) === $currentSize->getWidth()
+                (int)round($currentSize->getWidth() / $currentSize->getHeight() * $size->getHeight()) === $size->getWidth()
+                || (int)round($size->getWidth() / $size->getHeight() * $currentSize->getHeight()) === $currentSize->getWidth()
             ) {
                 $this->document->documentElement->removeAttribute('width');
                 $this->document->documentElement->removeAttribute('height');
             } else {
-                $this->document->documentElement->setAttribute('width', (string) $size->getWidth());
-                $this->document->documentElement->setAttribute('height', (string) $size->getHeight());
+                $this->document->documentElement->setAttribute('width', (string)$size->getWidth());
+                $this->document->documentElement->setAttribute('height', (string)$size->getHeight());
                 $this->crop(new Point(0, 0), $size);
             }
         } else {
@@ -274,7 +277,7 @@ class Image extends AbstractImage
         $image = $this->get($format, $options);
 
         if (!file_put_contents($path, $image)) {
-            throw new RuntimeException('Unable to save image to '.$path);
+            throw new RuntimeException('Unable to save image to ' . $path);
         }
 
         return $this;
@@ -309,7 +312,7 @@ class Image extends AbstractImage
 
         $supported = ['svg', 'svgz'];
 
-        if (!\in_array($format, $supported, true)) {
+        if (!in_array($format, $supported, true)) {
             throw new InvalidArgumentException(sprintf('Saving image in "%s" format is not supported, please use one of the following extensions: "%s"', $format, implode('", "', $supported)));
         }
 
@@ -334,7 +337,7 @@ class Image extends AbstractImage
 
     public function strip(): self
     {
-        $xPath = new \DOMXPath($this->document);
+        $xPath = new DOMXPath($this->document);
 
         foreach ($xPath->query('//comment()') as $comment) {
             $comment->parentNode->removeChild($comment);
@@ -366,8 +369,8 @@ class Image extends AbstractImage
         }
 
         $viewBox = preg_split('/[\s,]+/', $svg->getAttribute('viewBox') ?: '');
-        $viewBoxWidth = (float) ($viewBox[2] ?? 0);
-        $viewBoxHeight = (float) ($viewBox[3] ?? 0);
+        $viewBoxWidth = (float)($viewBox[2] ?? 0);
+        $viewBoxHeight = (float)($viewBox[3] ?? 0);
 
         // Missing width/height and viewBox
         if ($viewBoxWidth <= 0 || $viewBoxHeight <= 0) {
@@ -376,12 +379,12 @@ class Image extends AbstractImage
 
         // Fixed width and viewBox
         if ($width) {
-            return Box::createTypeAbsolute($width, (int) round($width / $viewBoxWidth * $viewBoxHeight));
+            return Box::createTypeAbsolute($width, (int)round($width / $viewBoxWidth * $viewBoxHeight));
         }
 
         // Fixed height and viewBox
         if ($height) {
-            return Box::createTypeAbsolute((int) round($height / $viewBoxHeight * $viewBoxWidth), $height);
+            return Box::createTypeAbsolute((int)round($height / $viewBoxHeight * $viewBoxWidth), $height);
         }
 
         // Normalize floating point values to integer ratio
@@ -457,10 +460,10 @@ class Image extends AbstractImage
     private function normalizeRatio(float $a, float $b): array
     {
         if ($a < $b) {
-            return [(int) round($a * 65535 / $b), 65535];
+            return [(int)round($a * 65535 / $b), 65535];
         }
 
-        return [65535, (int) round($b * 65535 / $a)];
+        return [65535, (int)round($b * 65535 / $a)];
     }
 
     /**
@@ -478,7 +481,7 @@ class Image extends AbstractImage
         $height = $this->getPixelValue($svg->getAttribute('height'));
 
         if ($width && $height) {
-            $svg->setAttribute('viewBox', '0 0 '.$width.' '.$height);
+            $svg->setAttribute('viewBox', '0 0 ' . $width . ' ' . $height);
         }
     }
 
@@ -504,13 +507,13 @@ class Image extends AbstractImage
         $unit = substr($size, -2);
 
         if (is_numeric($value) && isset($map[$unit])) {
-            $pixelValue = ((float) $value) * $map[$unit];
+            $pixelValue = ((float)$value) * $map[$unit];
         } elseif (is_numeric($size)) {
-            $pixelValue = (float) $size;
+            $pixelValue = (float)$size;
         } else {
             $pixelValue = 0;
         }
 
-        return (int) round($pixelValue);
+        return (int)round($pixelValue);
     }
 }

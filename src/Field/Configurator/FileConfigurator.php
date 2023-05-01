@@ -16,7 +16,7 @@ class FileConfigurator implements FieldConfiguratorInterface
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     public function __construct(ClassMetadataManipulator $classMetadataManipulator)
     {

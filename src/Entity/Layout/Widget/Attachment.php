@@ -23,13 +23,13 @@ use Base\Database\Annotation\Cache;
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
-
 class Attachment extends Widget implements IconizeInterface, LinkableInterface
 {
     public function __iconize(): ?array
     {
         return null;
     }
+
     public static function __iconizeStatic(): ?array
     {
         return ["fa-solid fa-paperclip"];
@@ -53,10 +53,12 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $slug;
+
     public function getSlug(): ?string
     {
         return $this->slug;
     }
+
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
@@ -69,14 +71,17 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
      * @AssertBase\File(max_size="4096K", groups={"new", "edit"})
      */
     protected $download;
+
     public function getDownload()
     {
         return Uploader::getPublic($this, "download");
     }
+
     public function getDownloadFile()
     {
         return Uploader::get($this, "download");
     }
+
     public function setDownload($file)
     {
         $this->file = $file;

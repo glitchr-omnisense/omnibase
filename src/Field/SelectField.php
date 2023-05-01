@@ -8,6 +8,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
+use InvalidArgumentException;
+use function gettype;
+use function is_array;
+use function is_callable;
 
 class SelectField implements FieldInterface
 {
@@ -135,8 +139,8 @@ class SelectField implements FieldInterface
 
     public function setChoices($choiceGenerator)
     {
-        if (!\is_array($choiceGenerator) && !\is_callable($choiceGenerator)) {
-            throw new \InvalidArgumentException(sprintf('The argument of the "%s" method must be an array or a closure ("%s" given).', __METHOD__, \gettype($choiceGenerator)));
+        if (!is_array($choiceGenerator) && !is_callable($choiceGenerator)) {
+            throw new InvalidArgumentException(sprintf('The argument of the "%s" method must be an array or a closure ("%s" given).', __METHOD__, gettype($choiceGenerator)));
         }
 
         $this->setFormTypeOption(self::OPTION_CHOICES, $choiceGenerator);

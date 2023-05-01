@@ -7,6 +7,7 @@ use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
@@ -26,22 +27,22 @@ class CollectionType extends AbstractType
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /**
-     * @var Translator
+     * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var AuthorizationChecker
      */
-    protected $authorizationChecker;
+    protected AuthorizationChecker $authorizationChecker;
 
     /**
      * @var AdminUrlGenerator
      */
-    protected $adminUrlGenerator;
+    protected AdminUrlGenerator $adminUrlGenerator;
 
     public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator)
     {
@@ -151,7 +152,7 @@ class CollectionType extends AbstractType
 
             foreach ($data as $id => $entry) {
                 if (is_object($entry) && !$options["allow_object"]) {
-                    throw new \Exception("Object data are not allowed in collection unless you mark it as so.. (use `allow_object` option)");
+                    throw new Exception("Object data are not allowed in collection unless you mark it as so.. (use `allow_object` option)");
                 }
             }
 

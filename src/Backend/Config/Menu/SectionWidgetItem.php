@@ -13,13 +13,15 @@ final class SectionWidgetItem implements MenuItemInterface
         setLinkRel as private;
         setLinkTarget as private;
     }
-    protected $width;
-    protected $column;
+
+    protected int $width;
+    protected ?int $column;
 
     public function getWidth()
     {
         return $this->width;
     }
+
     public function setWidth(int $width): self
     {
         $this->width = $width;
@@ -30,6 +32,7 @@ final class SectionWidgetItem implements MenuItemInterface
     {
         return $this->column ?? $this->width;
     }
+
     public function setColumn(int $column): self
     {
         $this->column = $column;
@@ -41,7 +44,7 @@ final class SectionWidgetItem implements MenuItemInterface
         $this->width = $width;
         $this->column = $column;
 
-        $this->dto   = new MenuItemDto();
+        $this->dto = new MenuItemDto();
         $this->dto->setType(MenuItemDto::TYPE_SECTION);
         $this->dto->setLabel($label ?? '');
         $this->dto->setIcon($icon ?? "fa-solid fa-circle-question");

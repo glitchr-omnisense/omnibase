@@ -18,12 +18,12 @@ class HtmlTagRenderer extends AbstractTagRenderer
     /**
      * @var RequestStack
      */
-    protected $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     public function __construct(Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, RouterInterface $router)
     {
@@ -53,7 +53,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
         return $path;
     }
 
-    protected $htmlContent = [];
+    protected array $htmlContent = [];
 
     public function renderHtmlContent(string $location)
     {
@@ -104,18 +104,10 @@ class HtmlTagRenderer extends AbstractTagRenderer
             $attributes = html_attributes($options);
 
             // Convert into html tag
-            switch ($relationship) {
-                case "javascript":
-                    $content = "<script src='" . $this->getAsset($contentOrArrayOrFile) . "' " . $attributes . "></script>";
-                    break;
-
-                case "icon":
-                case "preload":
-                case "stylesheet":
-                default:
-                    $content = "<link rel='" . $relationship . "' href='" . $this->getAsset($contentOrArrayOrFile) . "' " . $attributes . ">";
-                    break;
-            }
+            $content = match ($relationship) {
+                "javascript" => "<script src='" . $this->getAsset($contentOrArrayOrFile) . "' " . $attributes . "></script>",
+                default => "<link rel='" . $relationship . "' href='" . $this->getAsset($contentOrArrayOrFile) . "' " . $attributes . ">",
+            };
         }
 
         if (!array_key_exists($location, $this->htmlContent)) {

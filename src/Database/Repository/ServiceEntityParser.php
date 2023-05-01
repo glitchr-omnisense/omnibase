@@ -12,6 +12,7 @@ use Base\Database\TranslatableInterface;
 use Base\Database\Walker\TranslatableWalker;
 use Base\Entity\Extension\Ordering;
 use Base\Service\Model\IntlDateTime;
+use DateTime;
 use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -124,33 +125,33 @@ class ServiceEntityParser
     public const COUNT_DISTINCT = "DISTINCT";
 
     protected $operator = null;
-    protected $column = null;
+    protected mixed $column = null;
     protected bool $cacheable = false;
-    protected $eagerly = false;
+    protected bool $eagerly = false;
     protected array $criteria = [];
     protected array $options = [];
 
-    protected $classMetadata = null;
+    protected mixed $classMetadata = null;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator = null;
+    protected ?ClassMetadataManipulator $classMetadataManipulator = null;
 
     /**
      * @var ServiceEntityRepository
      */
-    protected $serviceEntity;
+    protected ServiceEntityRepository $serviceEntity;
 
     /**
      * @var EntityHydrator
      */
-    protected $entityHydrator;
+    protected EntityHydrator $entityHydrator;
 
     /**
      * @var EntityManager
      */
-    protected $entityManager;
+    protected EntityManager $entityManager;
 
     public function __construct(ServiceEntityRepository $serviceEntity, EntityManager $entityManager, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
     {
@@ -255,11 +256,8 @@ class ServiceEntityParser
     {
         $mode ??= self::COUNT_ALL;
         $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
-        if (!$query) {
-            return null;
-        }
+        return $query?->getResult();
 
-        return $query->getResult();
     }
 
 
@@ -343,7 +341,7 @@ class ServiceEntityParser
 
     protected function validateDate($date, $format = 'Y-m-d H:i:s')
     {
-        $d = \DateTime::createFromFormat($format, $date);
+        $d = DateTime::createFromFormat($format, $date);
         return $d && IntlDateTime::createFromDateTime($d)->format($format) == $date;
     }
 
@@ -501,8 +499,6 @@ class ServiceEntityParser
 
         $special = null;
         $magicExtra = [];
-        $magicFn = null;
-        $byNames = [];
 
         $requestType = self::REQUEST_FIND;
         if (preg_match('/^(?P<fn>' . $countRequest . ')(?:' . $for . '(?P<column>[^' . $by . ']*))?' . $by . '(?P<names>.*)/', $method, $magicExtra)) {
@@ -1111,10 +1107,6 @@ class ServiceEntityParser
             $tableOperator = self::OPTION_NOT_EQUAL;
         }
 
-        if (is_array($tableOperator)) {
-            throw new Exception("Too many operator requested for \"$fieldName\": " . implode(",", $tableOperator));
-        }
-
         switch ($tableOperator) {
             case self::OPTION_MEMBEROF:
             case self::OPTION_NOT_MEMBEROF:
@@ -1142,21 +1134,21 @@ class ServiceEntityParser
                 $fieldValue = ($fieldValue > 0 ? "+" : "-") . $fieldValue . " second" . ($fieldValue > 1 ? "s" : "");
             }
 
-            if ($fieldValue instanceof \DateTime && in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL])) {
+            if ($fieldValue instanceof DateTime && in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL])) {
                 throw new Exception("Please use string or int with Older/Younger operands");
             }
 
             if (in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) {
-                $fieldValue = new \DateTime("now");
-            } elseif ($this->validateDate($fieldValue) && !$fieldValue instanceof \DateTime) {
-                $fieldValue = new \DateTime($fieldValue);
-            } elseif (!$fieldValue instanceof \DateTime) {
+                $fieldValue = new DateTime("now");
+            } elseif ($this->validateDate($fieldValue) && !$fieldValue instanceof DateTime) {
+                $fieldValue = new DateTime($fieldValue);
+            } elseif (!$fieldValue instanceof DateTime) {
                 $subtract = $fieldValue;
                 if (in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL])) {
                     $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
                 }
 
-                $fieldValue = round_datetime(new \DateTime("now"), $subtract);
+                $fieldValue = round_datetime(new DateTime("now"), $subtract);
             }
         }
 
@@ -1412,10 +1404,10 @@ class ServiceEntityParser
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "like" : "notLike");
 
                 if (!is_array($fieldValue)) {
-                    $queryExpr[] = $queryBuilder->expr()->$fnExpr($tableColumn, ":{$fieldID}");
+                    $queryExpr[] = $queryBuilder->expr()->$fnExpr($tableColumn, ":$fieldID");
                 } else {
                     foreach ($fieldValue as $subFieldID => $_) {
-                        $queryExpr[] = $queryBuilder->expr()->$fnExpr($fieldID, ":{$fieldID}_{$subFieldID}");
+                        $queryExpr[] = $queryBuilder->expr()->$fnExpr($fieldID, ":{$fieldID}_$subFieldID");
                     }
                 }
 
@@ -1434,7 +1426,7 @@ class ServiceEntityParser
                     return $queryBuilder->expr()->eq(1, 1);
                 }
 
-                return $queryBuilder->expr()->$fnExpr($tableColumn, ":{$fieldID}");
+                return $queryBuilder->expr()->$fnExpr($tableColumn, ":$fieldID");
             } elseif ($regexRequested) {
                 if ($tableOperator == self::OPTION_STARTING_WITH) {
                     $fnExpr = "like";
@@ -1512,20 +1504,18 @@ class ServiceEntityParser
                     $fnExpr = "le";
                 } elseif ($tableOperator == self::OPTION_WITHIN) {
                     $fnExpr = "lt";
-                } elseif ($tableOperator == self::OPTION_OLDER_EQUAL) {
-                    $fnExpr = "le";
                 } else {
                     throw new Exception("Invalid operator for field \"$fieldName\": " . $tableOperator);
                 }
 
-                return $queryBuilder->expr()->$fnExpr($tableColumn, ":{$fieldID}");
+                return $queryBuilder->expr()->$fnExpr($tableColumn, ":$fieldID");
             }
         }
 
         throw new Exception("Failed to build expression \"" . $field . "\": " . $fieldValue);
     }
 
-    protected static $i = 0;
+    protected static int $i = 0;
 
     protected function getQueryBuilder(array $criteria = [], array $orderBy = [], $limit = null, $offset = null, array $groupBy = [], array $selectAs = []): ?QueryBuilder
     {
@@ -1619,9 +1609,7 @@ class ServiceEntityParser
 
         $queryBuilder = $this->selectAs($queryBuilder, $selectAs);
         $queryBuilder = $this->orderBy($queryBuilder, $orderBy);
-        $queryBuilder = $this->groupBy($queryBuilder, $groupBy);
-
-        return $queryBuilder;
+        return $this->groupBy($queryBuilder, $groupBy);
     }
 
     protected function getEagerQuery(QueryBuilder $queryBuilder, array $options = [], ?ClassMetadata $classMetadata = null): Query
@@ -1859,7 +1847,7 @@ class ServiceEntityParser
         return $queryBuilder->groupBy(implode(",", $groupBy));
     }
 
-    protected $joinList = [];
+    protected array $joinList = [];
 
     protected function innerJoin(QueryBuilder $queryBuilder, $join, $alias = null, $conditionType = null, $condition = null, $indexBy = null): bool
     {

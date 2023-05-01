@@ -11,10 +11,10 @@ class ArrayField extends CollectionField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_ASSOCIATIVE        = 'associative';
-    public const OPTION_LENGTH             = 'length';
+    public const OPTION_ASSOCIATIVE = 'associative';
+    public const OPTION_LENGTH = 'length';
     public const OPTION_PATTERN_FIELD_NAME = 'pattern';
-    public const OPTION_PLACEHOLDER        = 'placeholder';
+    public const OPTION_PLACEHOLDER = 'placeholder';
 
     /**
      * @param string|false|null $label
@@ -78,16 +78,16 @@ class ArrayField extends CollectionField implements FieldInterface
         return $this;
     }
 
-    public function setEntryType(string $formTypeFqcn): self
+    public function setEntryType(string $entryType): self
     {
-        $this->setCustomOption(self::OPTION_ENTRY_TYPE, $formTypeFqcn);
+        $this->setCustomOption(self::OPTION_ENTRY_TYPE, $entryType);
 
         return $this;
     }
 
-    public function setEntryOptions(array $formOptions): self
+    public function setEntryOptions(array $entryOptions): self
     {
-        $this->setCustomOption(self::OPTION_ENTRY_OPTIONS, $formOptions);
+        $this->setCustomOption(self::OPTION_ENTRY_OPTIONS, $entryOptions);
 
         return $this;
     }

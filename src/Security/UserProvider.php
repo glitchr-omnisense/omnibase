@@ -20,9 +20,9 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      * {@inheritdoc}
      */
 
-    public function loadUserByIdentifier($response): UserInterface
+    public function loadUserByIdentifier($identifier): UserInterface
     {
-        $data = $response->getData();
+        $data = $identifier->getData();
 
         $user = new User();
         $user->setId(0);

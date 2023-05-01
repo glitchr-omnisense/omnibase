@@ -12,12 +12,12 @@ class Paginator implements PaginatorInterface
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag)
     {
@@ -25,14 +25,14 @@ class Paginator implements PaginatorInterface
         $this->parameterBag = $parameterBag;
     }
 
-    public function paginate(array|Query $arrayOrQuery, int $page = 1, int $pageSize = 0, int $pageRange = 0): ?Pagination
+    public function paginate(array|Query $query, int $page = 1, int $pageSize = 0, int $pageRange = 0): ?Pagination
     {
-        $pageSize      = ($pageSize  < 1 ? $this->parameterBag->get("base.paginator.page_size") : $pageSize);
-        $pageRange     = ($pageRange < 1 ? $this->parameterBag->get("base.paginator.page_range") : $pageRange);
+        $pageSize = ($pageSize < 1 ? $this->parameterBag->get("base.paginator.page_size") : $pageSize);
+        $pageRange = ($pageRange < 1 ? $this->parameterBag->get("base.paginator.page_range") : $pageRange);
         $parameterName = $this->parameterBag->get("base.paginator.page_parameter");
-        $pageTemplate  = $this->parameterBag->get("base.paginator.default_template");
+        $pageTemplate = $this->parameterBag->get("base.paginator.default_template");
 
-        $pagination = new Pagination($arrayOrQuery, $this->router, $parameterName);
+        $pagination = new Pagination($query, $this->router, $parameterName);
         $pagination->setPageSize($pageSize);
         $pagination->setPageRange($pageRange);
         $pagination->setTemplate($pageTemplate);

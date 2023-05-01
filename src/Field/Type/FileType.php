@@ -5,9 +5,12 @@ namespace Base\Field\Type;
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
+use Base\Form\FormFactoryInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\FileService;
+use Base\Service\FileServiceInterface;
 use Base\Service\MediaService;
+use Base\Service\MediaServiceInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
@@ -28,58 +31,59 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Traversable;
 
 class FileType extends AbstractType implements DataMapperInterface
 {
     /**
      * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     /**
      * @var TranslatorInterface
      */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     /**
      * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /**
-     * @var CsrfTokenManager
+     * @var CsrfTokenManagerInterface
      */
-    protected $csrfTokenManager;
+    protected CsrfTokenManagerInterface $csrfTokenManager;
 
     /**
-     * @var FormFactory
+     * @var FormFactoryInterface
      */
-    protected $formFactory;
+    protected FormFactoryInterface $formFactory;
 
     /**
-     * @var Obfuscator
+     * @var ObfuscatorInterface
      */
-    protected $obfuscator;
+    protected ObfuscatorInterface $obfuscator;
 
     /**
-     * @var FileService
+     * @var FileServiceInterface
      */
-    protected $fileService;
+    protected FileServiceInterface $fileService;
 
     /**
-     * @var MediaService
+     * @var MediaServiceInterface
      */
-    protected $mediaService;
+    protected MediaServiceInterface $mediaService;
 
 
     /** * @var string */
@@ -302,7 +306,6 @@ class FileType extends AbstractType implements DataMapperInterface
         }
 
         $view->vars["mime_types"] = $mimeTypes;
-        $view->vars["value"] = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value'] = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
 
         $view->vars['clippable'] = $view->vars['path'] = $view->vars['download'] = json_encode([]);
@@ -347,16 +350,14 @@ class FileType extends AbstractType implements DataMapperInterface
             $action = (!empty($options["action"]) ? $options["action"] : ".");
             $view->vars["attr"]["class"] = "dropzone";
 
-            $options["dropzone"] = $options["dropzone"];
+            $options["dropzone"] ??= [];
             if (!array_key_exists("url", $options["dropzone"])) {
                 $options["dropzone"]["url"] = $action;
             }
             if ($options['allow_delete'] !== null) {
                 $options["dropzone"]["addRemoveLinks"] = $options['allow_delete'];
             }
-            if ($options['max_size'] !== null) {
-                $options["dropzone"]["maxFilesize"] = $options["max_size"] / 1e6;
-            } // from B to MB
+            $options["dropzone"]["maxFilesize"] = $options["max_size"] / 1e6; // from B to MB
             if ($options['max_files'] !== null) {
                 $options["dropzone"]["maxFiles"] = $options["max_files"];
             }
@@ -405,7 +406,7 @@ class FileType extends AbstractType implements DataMapperInterface
         }
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
         // there is no data yet, so nothing to prepopulate
         if (null === $viewData) {
@@ -435,7 +436,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $fileForm->setData($viewData);
     }
 
-    public function mapFormsToData(\Traversable $forms, &$viewData): void
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $childForms = iterator_to_array($forms);
         $options = current($childForms)->getParent()->getConfig()->getOptions();

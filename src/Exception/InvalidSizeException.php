@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class InvalidSizeException extends \Exception
+use Exception;
+
+class InvalidSizeException extends Exception
 {
     /**
      * {@inheritdoc}

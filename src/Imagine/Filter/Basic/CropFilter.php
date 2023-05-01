@@ -8,6 +8,7 @@ use Imagine\Filter\Basic\Crop;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\Point;
+use InvalidArgumentException;
 
 class CropFilter implements FilterInterface
 {
@@ -24,7 +25,7 @@ class CropFilter implements FilterInterface
 
     public function __toString()
     {
-        return "crop:".$this->getPosition().":".implode("x", $this->getXY()).":".implode("x", $this->getSize());
+        return "crop:" . $this->getPosition() . ":" . implode("x", $this->getXY()) . ":" . implode("x", $this->getSize());
     }
 
     public function __construct(float $x = 0, float $y = 0, ?float $width = null, ?float $height = null, string $position = "lefttop")
@@ -32,19 +33,19 @@ class CropFilter implements FilterInterface
         $this->x = $x ?? 0;
         $this->y = $y ?? 0;
 
-        $this->width  = $width  ?? 0;
+        $this->width = $width ?? 0;
         $this->height = $height ?? 0;
     }
 
     public function isNormalized(): bool
     {
-        if ($this->x      > 1) {
+        if ($this->x > 1) {
             return false;
         }
-        if ($this->y      > 1) {
+        if ($this->y > 1) {
             return false;
         }
-        if ($this->width  > 1) {
+        if ($this->width > 1) {
             return false;
         }
         if ($this->height > 1) {
@@ -58,10 +59,11 @@ class CropFilter implements FilterInterface
     {
         return $this->position ?? "topleft";
     }
+
     public function getSize(?ImageInterface $image = null): array
     {
         if ($this->isNormalized() && $image !== null) {
-            return [$image->getSize()->getWidth()*$this->width, $image->getSize()->getHeight()*$this->height];
+            return [$image->getSize()->getWidth() * $this->width, $image->getSize()->getHeight() * $this->height];
         }
 
         return [$this->width, $this->height];
@@ -85,10 +87,7 @@ class CropFilter implements FilterInterface
                 $x0 = $width - $image->getSize()->getWidth();
                 $y0 = 0;
                 break;
-            case 'left':
-                $x0 = 0;
-                $y0 = ($height - $image->getSize()->getHeight()) / 2;
-                break;
+            case 'right':
             case 'centerright':
                 $x0 = $width - $image->getSize()->getWidth();
                 $y0 = ($height - $image->getSize()->getHeight()) / 2;
@@ -97,12 +96,9 @@ class CropFilter implements FilterInterface
                 $x0 = ($width - $image->getSize()->getWidth()) / 2;
                 $y0 = ($height - $image->getSize()->getHeight()) / 2;
                 break;
+            case 'left':
             case 'centerleft':
                 $x0 = 0;
-                $y0 = ($height - $image->getSize()->getHeight()) / 2;
-                break;
-            case 'right':
-                $x0 = $width - $image->getSize()->getWidth();
                 $y0 = ($height - $image->getSize()->getHeight()) / 2;
                 break;
             case 'bottomleft':
@@ -118,12 +114,12 @@ class CropFilter implements FilterInterface
                 $y0 = $height - $image->getSize()->getHeight();
                 break;
             default:
-                throw new \InvalidArgumentException("Unexpected position '{$position}'");
+                throw new InvalidArgumentException("Unexpected position `" . $position . "`");
                 break;
         }
 
         if ($this->isNormalized() && $image !== null) {
-            return [$image->getSize()->getWidth()*$this->x, $x0, $image->getSize()->getHeight()*$this->y, $y0];
+            return [$image->getSize()->getWidth() * $this->x, $x0, $image->getSize()->getHeight() * $this->y, $y0];
         }
 
         return [$this->x, $x0, $this->y, $y0];
@@ -132,11 +128,11 @@ class CropFilter implements FilterInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         list($x, $x0, $y, $y0) = $this->getXY($image);
-        list($w, $h)          = $this->getSize($image);
+        list($w, $h) = $this->getSize($image);
 
         $filter = new Crop(
-            new Point((int) $x - $x0, (int) $y - $y0),
-            new Box((int) $w - $x0, (int) $h - $y0)
+            new Point((int)$x - $x0, (int)$y - $y0),
+            new Box((int)$w - $x0, (int)$h - $y0)
         );
 
         try {

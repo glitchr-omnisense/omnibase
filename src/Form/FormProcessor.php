@@ -23,11 +23,10 @@ class FormProcessor implements FormProcessorInterface
     use BaseTrait;
     use FormProcessorTrait;
 
-    /** @var FormInterface */
-    protected $form = [];
+    protected array $form = [];
 
-    public $flowSessions = [];
-    public $flowCallbacks = [];
+    public array $flowSessions = [];
+    public array $flowCallbacks = [];
 
     public function __construct(FormInterface $form)
     {
@@ -61,7 +60,7 @@ class FormProcessor implements FormProcessorInterface
     public function getData(?string $childName = null): mixed
     {
         $form = $childName ? $this->form->get($childName) : $this->form;
-        $data = $form?->getData();
+        $data = $form->getData();
 
         // Special case for buttons
         if ($form && $data instanceof FormModelInterface) {
@@ -97,21 +96,20 @@ class FormProcessor implements FormProcessorInterface
         return $this;
     }
 
-    public function hydrate(mixed $entity): mixed
+    public function hydrate(mixed $data): mixed
     {
-        if ($entity == null) {
-            return $entity;
+        if ($data == null) {
+            return null;
         }
 
         $ignoredFields = [];
-        $data = $this->form->getData();
         foreach ($this->form as $childName => $child) {
             if (!$child->getConfig()->getMapped()) {
                 $ignoredFields[] = $childName;
             }
         }
 
-        return $this->getEntityHydrator()->hydrate($entity, $data, $ignoredFields, EntityHydrator::CLASS_METHODS | EntityHydrator::FETCH_ASSOCIATIONS);
+        return $this->getEntityHydrator()->hydrate($data, $this->form->getData(), $ignoredFields, EntityHydrator::CLASS_METHODS | EntityHydrator::FETCH_ASSOCIATIONS);
     }
 
     protected $onDefaultCallback;
@@ -138,7 +136,7 @@ class FormProcessor implements FormProcessorInterface
         return $this;
     }
 
-    protected $response;
+    protected ?Response $response;
 
     public function hasResponse(): bool
     {

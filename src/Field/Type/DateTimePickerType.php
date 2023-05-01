@@ -16,13 +16,13 @@ use Symfony\Component\Form\FormView;
 class DateTimePickerType extends AbstractType
 {
     /** @var ParameterBagInterface */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
-    /** @var Localizer */
-    protected $localizer;
+    /** @var LocalizerInterface */
+    protected LocalizerInterface $localizer;
 
     /** @var Environment */
-    protected $twig;
+    protected Environment $twig;
 
     public function __construct(ParameterBagInterface $parameterBag, Environment $twig, LocalizerInterface $localizer)
     {
@@ -38,7 +38,7 @@ class DateTimePickerType extends AbstractType
             // PHP Datetime format:
             // This format is replacing the shitty HTML5_FORMAT :-)
             "format" => "yyyy-MM-dd HH:mm",
-            "html5"  => false,
+            "html5" => false,
             "widget" => "single_text",
             "required" => false,
             "webpack_entry" => "form.datetime",
@@ -56,6 +56,7 @@ class DateTimePickerType extends AbstractType
     {
         return DateTimeType::class;
     }
+
     public function getBlockPrefix(): string
     {
         return 'datetimepicker';

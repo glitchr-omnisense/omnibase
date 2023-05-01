@@ -13,7 +13,8 @@ use Base\Annotations\AbstractAnnotation;
  */
 class Iconize extends AbstractAnnotation
 {
-    protected $icons;
+    protected array $icons;
+
     public function __construct(array $data)
     {
         $icons = $data["value"] ?? [];
@@ -24,6 +25,7 @@ class Iconize extends AbstractAnnotation
     {
         return true;
     }
+
     public function getIcons()
     {
         return $this->icons;

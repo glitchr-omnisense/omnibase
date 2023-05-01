@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class NotReadableException extends \Exception
+use Exception;
+
+class NotReadableException extends Exception
 {
     /**
      * {@inheritdoc}

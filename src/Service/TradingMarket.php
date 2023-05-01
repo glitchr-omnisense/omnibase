@@ -2,14 +2,13 @@
 
 namespace Base\Service;
 
-use Base\Cache\Abstract\AbstractLocalCache;
-use Base\Cache\SimpleCache;
 use Base\Cache\SimpleCacheInterface;
 use Base\Service\Model\Currency\CurrencyApiInterface;
-use Exchanger\Contract\CurrencyPair as CurrencyPairContract;
+use DateTime;
+use Exception;
 use Exchanger\Contract\ExchangeRate;
 use Exchanger\CurrencyPair;
-use Exchanger\Exception\UnsupportedCurrencyPairException;
+use Exchanger\Exception\ChainException;
 use Psr\SimpleCache\CacheInterface;
 use Swap\Builder;
 use Swap\Swap;
@@ -35,7 +34,7 @@ class TradingMarket implements TradingMarketInterface
      */
     protected $simpleCache;
 
-    public function __construct(SimpleCacheInterface $simpleCache, HttpClientInterface $httpClient, string $cacheDir)
+    public function __construct(HttpClientInterface $httpClient, string $cacheDir)
     {
         $this->httpClient = new Psr18Client($httpClient);
         $this->simpleCache = new Psr16Cache(new FilesystemAdapter("swap", 0, $cacheDir));
@@ -46,10 +45,12 @@ class TradingMarket implements TradingMarketInterface
     }
 
     protected $providers = [];
+
     public function getProviders()
     {
-        return array_filter($this->providers, fn ($p) => $p->getKey() !== null);
+        return array_filter($this->providers, fn($p) => $p->getKey() !== null);
     }
+
     public function getProvider(string $idOrClass): ?CurrencyApiInterface
     {
         if (class_exists($idOrClass)) {
@@ -66,17 +67,19 @@ class TradingMarket implements TradingMarketInterface
     }
 
     protected ?string $renderedCurrency = null;
+
     public function getRenderedCurrency(): ?string
     {
         return $this->renderedCurrency;
     }
+
     public function setRenderedCurrency(?string $renderedCurrency)
     {
         $this->renderedCurrency = $renderedCurrency;
         return $this;
     }
 
-    public function normalize(string $source, string $target, mixed $value, null|string|int|\DateTime $datetime): ?ExchangeRate
+    public function normalize(string $source, string $target, mixed $value, null|string|int|DateTime $datetime): ?ExchangeRate
     {
         if ($value instanceof \Exchanger\ExchangeRate) {
             return $value;
@@ -91,29 +94,30 @@ class TradingMarket implements TradingMarketInterface
     }
 
     protected $fallbacks = [];
+
     public function getFallback(string $source, ?string $target = null): ExchangeRate|array|null
     {
         if ($target === null) {
-            return array_transforms(fn ($k, $v): array => [explode("/", $k)[1],$v], array_key_startsWith($this->fallbacks, $source."/"));
+            return array_transforms(fn($k, $v): array => [explode("/", $k)[1], $v], array_key_startsWith($this->fallbacks, $source . "/"));
         }
 
-        return $this->fallbacks[$source."/".$target] ?? null;
+        return $this->fallbacks[$source . "/" . $target] ?? null;
     }
 
-    public function addFallback(string $source, string $target, mixed $value, null|string|int|\DateTime $date = "now"): self
+    public function addFallback(string $source, string $target, mixed $value, null|string|int|DateTime $date = "now"): self
     {
-        $this->fallbacks[$source."/".$source] = $this->normalize($source, $source, 1.0, cast_datetime($date));
-        $this->fallbacks[$target."/".$target] = $this->normalize($target, $target, 1.0, cast_datetime($date));
+        $this->fallbacks[$source . "/" . $source] = $this->normalize($source, $source, 1.0, cast_datetime($date));
+        $this->fallbacks[$target . "/" . $target] = $this->normalize($target, $target, 1.0, cast_datetime($date));
 
-        $this->fallbacks[$source."/".$target] = $this->normalize($source, $target, $value, cast_datetime($date));
-        $this->fallbacks[$target."/".$source] = $this->normalize($target, $source, 1./$value, cast_datetime($date));
+        $this->fallbacks[$source . "/" . $target] = $this->normalize($source, $target, $value, cast_datetime($date));
+        $this->fallbacks[$target . "/" . $source] = $this->normalize($target, $source, 1. / $value, cast_datetime($date));
 
         return $this;
     }
 
     public function removeFallback(string $source, string $target): self
     {
-        array_key_removes($this->fallbacks, $source."/".$target, $target."/".$source);
+        array_key_removes($this->fallbacks, $source . "/" . $target, $target . "/" . $source);
         return $this;
     }
 
@@ -153,30 +157,31 @@ class TradingMarket implements TradingMarketInterface
         }
 
         $this->swap = $builder->build();
-        return $this->swap !== null;
+        return true;
     }
 
     protected array $options = [];
+
     public function setCacheTTL(int $ttl)
     {
         $this->options["cache"] = ($this->simpleCache instanceof CacheInterface);
         $this->options["cache_ttl"] = $ttl;
     }
 
-    public function getLatest(string $from, string $to, array $options = []): ?ExchangeRate
+    public function getLatest(string $source, string $target, array $options = []): ?ExchangeRate
     {
         $options = array_merge($this->options, $options);
         $options["use_swap"] ??= true;
         $options["use_swap"] &= $this->build();
 
         if (!$options["use_swap"]) {
-            return $this->getFallback($from, $to);
+            return $this->getFallback($source, $target);
         }
 
         try {
-            return $this->swap?->latest($from.'/'.$to, $options);
-        } catch (\Exchanger\Exception\ChainException $e) {
-            return $this->getFallback($from, $to);
+            return $this->swap?->latest($source . '/' . $target, $options);
+        } catch (ChainException $e) {
+            return $this->getFallback($source, $target);
         }
     }
 
@@ -196,8 +201,8 @@ class TradingMarket implements TradingMarketInterface
 
         $timeAgo = (str_starts_with($timeAgo, "-") ? '' : '-') . $timeAgo;
         try {
-            return $this->swap?->historical($from.'/'.$to, (new \DateTime())->modify($timeAgo), $options);
-        } catch (\Exchanger\Exception\ChainException $e) {
+            return $this->swap?->historical($from . '/' . $to, (new DateTime())->modify($timeAgo), $options);
+        } catch (ChainException $e) {
             return null;
         }
     }
@@ -205,7 +210,7 @@ class TradingMarket implements TradingMarketInterface
     public function convert(string|float $cash, string $source, string $target, array $options = [], string $timeAgo = "now"): ?float
     {
         if (!is_string($cash)) {
-            $cash = (string) $cash;
+            $cash = (string)$cash;
         }
 
         if ($source == $target) {
@@ -214,7 +219,7 @@ class TradingMarket implements TradingMarketInterface
 
         $rate = $this->get($source, $target, $options, $timeAgo)?->getValue();
         if ($rate == null) {
-            throw new \Exception("No source available for currency exchange.");
+            throw new Exception("No source available for currency exchange.");
         }
 
         return $cash * $rate;
@@ -223,20 +228,20 @@ class TradingMarket implements TradingMarketInterface
     public function convertLatest(string|float $cash, string $source, string $target, array $options = []): ?float
     {
         if (!is_string($cash)) {
-            $cash = (string) $cash;
+            $cash = (string)$cash;
         }
 
         $rate = $this->getLatest($source, $target, $options)->getValue();
-        return $rate === null ? null : $cash * $rate;
+        return $cash * $rate;
     }
 
     public function convertFallback(string|float $cash, string $source, string $target): ?float
     {
         if (!is_string($cash)) {
-            $cash = (string) $cash;
+            $cash = (string)$cash;
         }
 
         $rate = $this->getFallback($source, $target)->getValue();
-        return $rate === null ? null : $cash * $rate;
+        return $cash * $rate;
     }
 }

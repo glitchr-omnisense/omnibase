@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Twig\Environment;
+use DOMDocument;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 class WysiwygEnhancer implements WysiwygEnhancerInterface
@@ -49,7 +50,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         $maxLevel ??= 6;
         $encoding = mb_detect_encoding($html);
 
-        $dom = new \DOMDocument('1.0', $encoding);
+        $dom = new DOMDocument('1.0', $encoding);
         $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding));
 
         $attrs ??= [];

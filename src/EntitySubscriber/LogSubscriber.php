@@ -20,33 +20,34 @@ use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Throwable;
 
 class LogSubscriber implements EventSubscriberInterface
 {
     /**
      * @var BaseService
      */
-    protected $baseService;
+    protected BaseService $baseService;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
-    protected $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var UserRepository
      */
-    protected $userRepository;
+    protected UserRepository $userRepository;
 
     /**
      * @var TokenStorageInterface
      */
-    protected $tokenStorage;
+    protected TokenStorageInterface $tokenStorage;
 
     /**
      * @var array[TraceableEventDispatcher]
      */
-    protected $dispatchers = [];
+    protected array $dispatchers = [];
 
     public function __construct(
         ServiceLocator        $dispatcherLocator,
@@ -92,7 +93,7 @@ class LogSubscriber implements EventSubscriberInterface
         $this->loggingOutUser = $user;
     }
 
-    protected function storeLog(KernelEvent $event, ?\Throwable $exception = null)
+    protected function storeLog(KernelEvent $event, ?Throwable $exception = null)
     {
         if (self::$exceptionOnHold && self::$exceptionOnHold != $exception) {
             return;
@@ -118,10 +119,10 @@ class LogSubscriber implements EventSubscriberInterface
 
         // Format monitored entries
         foreach ($monitoredEntries as $key => $monitoredEntry) {
-            if (!array_key_exists("event", $entry)) {
+            if (!array_key_exists("event", $monitoredEntry)) {
                 throw new Exception("Missing key \"event\" in monitored events #" . $key);
             }
-            if (!array_key_exists("pretty", $entry)) {
+            if (!array_key_exists("pretty", $monitoredEntry)) {
                 $monitoredEntries[$key]["pretty"] = "*";
             }
             if (!array_key_exists("statusCode", $monitoredEntries[$key])) {
@@ -213,7 +214,7 @@ class LogSubscriber implements EventSubscriberInterface
         }
     }
 
-    private static $exceptionOnHold = null;
+    protected static $exceptionOnHold;
 
     public function onKernelException(ExceptionEvent $event)
     {
@@ -226,7 +227,7 @@ class LogSubscriber implements EventSubscriberInterface
         // Initial exception held here, this is in case of nested exceptions..
         // This guard must be set here, otherwise you are going to miss the first exception..
         // In case the initial exception is related to doctrine, entity manager will be closed.
-        if (self::$exceptionOnHold instanceof \Throwable) {
+        if (self::$exceptionOnHold instanceof Throwable) {
             throw self::$exceptionOnHold;
         }
 

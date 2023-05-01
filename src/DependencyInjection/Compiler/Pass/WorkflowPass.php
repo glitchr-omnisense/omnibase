@@ -5,6 +5,7 @@ namespace Base\DependencyInjection\Compiler\Pass;
 use Base\Annotations\AnnotationReader;
 use Base\DependencyInjection\Compiler\AbstractPass;
 use Base\Service\Model\WorkflowInterface;
+use LogicException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -50,7 +51,7 @@ class WorkflowPass extends AbstractPass
             if ($supportedClassNames) {
                 foreach ($supportedClassNames as $supportedClassName) {
                     if (!class_exists($supportedClassName)) {
-                        throw new \LogicException("Non-existing class \"" . $supportedClassName . "\" requesting support for \"" . $className . "\" workflow.");
+                        throw new LogicException("Non-existing class \"" . $supportedClassName . "\" requesting support for \"" . $className . "\" workflow.");
                     }
 
                     $strategyDefinition = new Definition(InstanceOfSupportStrategy::class, [$supportedClassName]);

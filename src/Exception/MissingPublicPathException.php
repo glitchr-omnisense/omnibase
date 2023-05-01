@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class MissingPublicPathException extends \Exception
+use Exception;
+
+class MissingPublicPathException extends Exception
 {
     /**
      * {@inheritdoc}

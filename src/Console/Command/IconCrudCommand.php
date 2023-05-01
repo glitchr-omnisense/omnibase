@@ -8,6 +8,7 @@ use Base\Console\Command;
 use Base\Controller\Backend\AbstractCrudController;
 
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController as EaCrudController;
+use ReflectionClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,7 +24,7 @@ class IconCrudCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
+        $baseLocation = dirname((new ReflectionClass('Base\\BaseBundle'))->getFileName());
         $crudRestriction = $input->getOption('crud') ?? "";
         $cruds = array_filter(
             array_merge(

@@ -13,6 +13,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\LogRepository;
 use Base\Database\Annotation\Cache;
+use Throwable;
 
 /**
  * @ORM\Entity(repositoryClass=LogRepository::class)
@@ -38,12 +39,12 @@ class Log extends AbstractExtension
             throw new Exception("Array key \"pretty\" missing in dispatcher entry");
         }
 
-        $this->event    = $listener["event"];
+        $this->event = $listener["event"];
         $this->priority = $listener["priority"];
-        $this->pretty   = $listener["pretty"];
-        $this->level    = LogLevel::INFO;
-        $this->browser  = User::getBrowser();
-        $this->ip       = User::getIp();
+        $this->pretty = $listener["pretty"];
+        $this->level = LogLevel::INFO;
+        $this->browser = User::getBrowser();
+        $this->ip = User::getIp();
 
         if ($request) {
             $this->setRequest($request);
@@ -52,7 +53,7 @@ class Log extends AbstractExtension
 
     public function __toString()
     {
-        return __CLASS__." #".$this->getId().": ".$this->event."/". $this->level ."/".$this->createdAt;
+        return __CLASS__ . " #" . $this->getId() . ": " . $this->event . "/" . $this->level . "/" . $this->createdAt;
     }
 
     public function supports(): bool
@@ -64,10 +65,12 @@ class Log extends AbstractExtension
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="logs")
      */
     protected $user;
+
     public function getUser(): ?User
     {
         return $this->user;
     }
+
     public function setUser(?User $user): self
     {
         $this->user = $user;
@@ -83,6 +86,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="string", length=255)
      */
     protected $event;
+
     public function getEvent()
     {
         return $this->event;
@@ -92,6 +96,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="string", length=255)
      */
     protected $priority;
+
     public function getPriority()
     {
         return $this->priority;
@@ -101,6 +106,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="text")
      */
     protected $pretty;
+
     public function getPretty()
     {
         return $this->pretty;
@@ -110,6 +116,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="string", length=20)
      */
     protected $ip;
+
     public function getIp()
     {
         return $this->ip;
@@ -119,6 +126,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="string", length=5, nullable=true)
      */
     protected $locale;
+
     public function getLocale()
     {
         return $this->locale;
@@ -128,6 +136,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $method;
+
     public function getMethod()
     {
         return $this->method;
@@ -137,6 +146,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="text", nullable=true)
      */
     protected $requestUri;
+
     public function getRequestUri()
     {
         return $this->requestUri;
@@ -146,6 +156,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="integer")
      */
     protected $statusCode;
+
     public function getStatusCode()
     {
         return $this->statusCode;
@@ -155,6 +166,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="text", nullable=true)
      */
     protected $browser;
+
     public function getBrowser()
     {
         return $this->browser;
@@ -164,6 +176,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="text", nullable=true)
      */
     protected $extra;
+
     public function getExtra()
     {
         return $this->extra;
@@ -173,6 +186,7 @@ class Log extends AbstractExtension
      * @ORM\Column(type="log_level")
      */
     protected $level;
+
     public function getLevel()
     {
         return $this->level;
@@ -182,21 +196,21 @@ class Log extends AbstractExtension
     {
         $this->statusCode = "302";
         $this->requestUri = $request->getRequestUri() ?? null;
-        $this->locale     = $request->getLocale()     ?? null;
-        $this->method     = $request->getMethod()     ?? null;
+        $this->locale = $request->getLocale() ?? null;
+        $this->method = $request->getMethod() ?? null;
     }
 
-    public function setException(?\Throwable $exception)
+    public function setException(?Throwable $exception)
     {
         if (!$exception) {
             return;
         }
-        $this->level      = LogLevel::CRITICAL;
+        $this->level = LogLevel::CRITICAL;
         $this->statusCode = $exception->getStatusCode();
 
         $this->extra = "";
         if ($exception instanceof HttpException) {
-            $this->extra .= "HTTP ".$exception->getStatusCode() . " ";
+            $this->extra .= "HTTP " . $exception->getStatusCode() . " ";
         }
         $this->extra .= get_class($exception) . PHP_EOL;
         $this->extra .= PHP_EOL;

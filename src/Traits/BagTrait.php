@@ -2,6 +2,8 @@
 
 namespace Base\Traits;
 
+use Exception;
+
 trait BagTrait
 {
     public static function read(?string $path, array $bag = [])
@@ -9,15 +11,15 @@ trait BagTrait
         if ($path) {
             $pathArray = explode(".", $path);
             foreach ($pathArray as $index => $key) {
-                if ($key == "_self" && $index != count($pathArray)-1) {
-                    throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
+                if ($key == "_self" && $index != count($pathArray) - 1) {
+                    throw new Exception("Failed to read \"$path\": _self can only be used as tail parameter");
                 }
 
-                if (!array_key_exists($key.".", $bag)) {
+                if (!array_key_exists($key . ".", $bag)) {
                     return null;
                 }
 
-                $bag = &$bag[$key."."];
+                $bag = &$bag[$key . "."];
             }
         }
 
@@ -49,10 +51,10 @@ trait BagTrait
         $array = &$values;
         if ($path !== null) {
             $el = explode(".", $path);
-            $last = count($el)-1;
+            $last = count($el) - 1;
             foreach ($el as $index => $key) {
                 if ($key == "_self" && $index != $last) {
-                    throw new \Exception("Failed to normalize \"$path\": \"_self\" key can only be used as tail parameter");
+                    throw new Exception("Failed to normalize \"$path\": \"_self\" key can only be used as tail parameter");
                 }
 
                 if (!array_key_exists($key, $array)) {
@@ -66,7 +68,7 @@ trait BagTrait
         foreach ($bag as $keys => $entry) {
             $array = &$values;
             foreach (explode(".", $keys) as $key) {
-                $array = &$array[$key."."];
+                $array = &$array[$key . "."];
             }
 
             $array["_self"] = $entry;
@@ -79,15 +81,13 @@ trait BagTrait
     {
         if ($path) {
             foreach (explode(".", $path) as $value) {
-                $bag = $bag[$value."."];
+                $bag = $bag[$value . "."];
             }
         }
 
-        $bag = array_transforms(
-            fn ($k, $v): ?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v],
-            array_flatten("", $bag, -1, ARRAY_FLATTEN_PRESERVE_KEYS, fn ($k, $v): bool => is_numeric($k) || str_ends_with($k, "."))
+        return array_transforms(
+            fn($k, $v): ?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v],
+            array_flatten("", $bag, -1, ARRAY_FLATTEN_PRESERVE_KEYS, fn($k, $v): bool => is_numeric($k) || str_ends_with($k, "."))
         );
-
-        return $bag;
     }
 }

@@ -30,7 +30,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 {
-    public const ASC  = "ASC";
+    public const ASC = "ASC";
     public const DESC = "DESC";
 
     public string $order;
@@ -48,7 +48,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
             $isArray = is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, JsonType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
-            $isSet  = is_instanceof($doctrineType, SetType::class);
+            $isSet = is_instanceof($doctrineType, SetType::class);
 
             if (!$isSet && !$isArray && !$isToMany) {
                 return false;
@@ -56,24 +56,27 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
             $siblingAnnotations = $this->getAnnotationReader()->getDefaultPropertyAnnotations($object->getName(), OrderBy::class);
             if (array_key_exists($targetValue, $siblingAnnotations)) {
-                throw new \Exception("@OrderBy annotation is in conflict with @OrderColum for \"".$object->getName()."::$targetValue\"");
+                throw new Exception("@OrderBy annotation is in conflict with @OrderColum for \"" . $object->getName() . "::$targetValue\"");
             }
         }
 
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public static $orderedColumns   = [];
+    public static array $orderedColumns = [];
+
     public static function get(): array
     {
         return self::$orderedColumns;
     }
+
     public static function has(string $className, ?string $property = null): bool
     {
         return isset(self::$orderedColumns[$className]) && in_array($property, self::$orderedColumns[$className]);
     }
 
-    protected $ordering = [];
+    protected array $ordering = [];
+
     public function getOrderedColumns(mixed $entity)
     {
         $orderedColumns = [];
@@ -90,8 +93,8 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     public function addOrderedColumnIfNotSet(ClassMetadata $classMetadata, ?string $property = null)
     {
         $className = $classMetadata->getReflectionProperty($property)->getDeclaringClass()->getName();
-        if (!in_array($className."::".$property, self::$orderedColumns)) {
-            self::$orderedColumns[] = $className."::".$property;
+        if (!in_array($className . "::" . $property, self::$orderedColumns)) {
+            self::$orderedColumns[] = $className . "::" . $property;
         }
     }
 
@@ -140,7 +143,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         }
 
         if (is_array($entityValue)) {
-            $entityValue = array_flip(array_transforms(fn ($k, $v): array => [$entityValue[$k],$v], $orderedIndexes));
+            $entityValue = array_flip(array_transforms(fn($k, $v): array => [$entityValue[$k], $v], $orderedIndexes));
             ksort($entityValue);
 
             if ($this->order == "DESC") {
@@ -164,7 +167,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $classMetadataManipulator = $this->getClassMetadataManipulator();
 
         $id = spl_object_id($entity);
-        switch($action) {
+        switch ($action) {
             case EntityAction::INSERT:
             case EntityAction::UPDATE:
 
@@ -192,8 +195,8 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                         $data[$property] = $value->toArray();
                         $nData = count($data[$property]);
 
-                        $dataIdentifier = array_filter(array_map(fn ($e) => $e->getId(), $data[$property]));
-                        uasort($dataIdentifier, fn ($a, $b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1)));
+                        $dataIdentifier = array_filter(array_map(fn($e) => $e->getId(), $data[$property]));
+                        uasort($dataIdentifier, fn($a, $b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1)));
 
                         $data[$property] = array_flip($dataIdentifier);
                         ksort($data[$property]);
@@ -228,12 +231,12 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                     }
                 }
 
-                // no break
+            // no break
             case EntityAction::DELETE:
                 break;
 
             default:
-                throw new Exception("Unknown action \"$action\" passed to ".__CLASS__);
+                throw new Exception("Unknown action \"$action\" passed to " . __CLASS__);
         }
 
         return isset($this->ordering[$className][$id]) ? [$this->ordering[$className][$id]] : [];

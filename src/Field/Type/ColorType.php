@@ -23,10 +23,10 @@ use Symfony\Component\Form\FormEvents;
 final class ColorType extends AbstractType
 {
     /** @var Environment */
-    protected $twig;
+    protected Environment $twig;
 
-    /** @var ParameterBag */
-    protected $parameterBag;
+    /** @var ParameterBagInterface */
+    protected ParameterBagInterface $parameterBag;
 
     public function __construct(Environment $twig, ParameterBagInterface $parameterBag)
     {
@@ -38,10 +38,11 @@ final class ColorType extends AbstractType
     {
         return 'jscolor';
     }
+
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'jscolor'     => [],
+            'jscolor' => [],
             'is_nullable' => true,
             "webpack_entry" => "form.color"
         ]);
@@ -82,6 +83,6 @@ final class ColorType extends AbstractType
         $view->vars['attr']["class"] = "form-color";
 
         // Add alpha channel by default
-        $options["value"] = expandhex($view->vars["value"], true);
+        $view->vars["value"] = expandhex($view->vars["value"], true);
     }
 }

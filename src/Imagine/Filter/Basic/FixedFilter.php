@@ -14,8 +14,9 @@ class FixedFilter implements FilterInterface
 {
     public function __toString()
     {
-        return ($this->options["width"] ?? "auto")."x".($this->options["height"] ?? "auto");
+        return ($this->options["width"] ?? "auto") . "x" . ($this->options["height"] ?? "auto");
     }
+
     public function __construct(array $options = [])
     {
         $this->options = $options;
@@ -48,8 +49,6 @@ class FixedFilter implements FilterInterface
 
         // apply filters to image
         $image = $resize->apply($image);
-        $image = $crop->apply($image);
-
-        return $image;
+        return $crop->apply($image);
     }
 }

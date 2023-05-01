@@ -14,9 +14,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ProfilerSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var Router
+     * @var RouterInterface
      */
-    protected $router;
+    protected RouterInterface $router;
 
     public function __construct(RouterInterface $router)
     {
@@ -26,7 +26,7 @@ class ProfilerSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => ['onKernelRequest', 512],
+            KernelEvents::REQUEST => ['onKernelRequest', 512],
             KernelEvents::RESPONSE => ['onKernelResponse'],
         ];
     }

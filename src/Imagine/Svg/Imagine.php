@@ -2,6 +2,7 @@
 
 namespace Base\Imagine\Svg;
 
+use DOMDocument;
 use Imagine\Exception\InvalidArgumentException;
 use Imagine\Exception\NotSupportedException;
 use Imagine\Exception\RuntimeException;
@@ -10,6 +11,8 @@ use Imagine\Image\BoxInterface as ImageBoxInterface;
 use Imagine\Image\FontInterface;
 use Imagine\Image\Metadata\MetadataBag;
 use Imagine\Image\Palette\Color\ColorInterface;
+use function in_array;
+use function is_resource;
 
 class Imagine extends AbstractImagine
 {
@@ -19,7 +22,7 @@ class Imagine extends AbstractImagine
             throw new InvalidArgumentException('Imagine SVG does not support colors');
         }
 
-        $document = new \DOMDocument();
+        $document = new DOMDocument();
         $svg = $document->createElementNS('http://www.w3.org/2000/svg', 'svg');
         $svg->setAttribute('version', '1.1');
 
@@ -56,7 +59,7 @@ class Imagine extends AbstractImagine
 
     public function read($resource): Image
     {
-        if (!\is_resource($resource)) {
+        if (!is_resource($resource)) {
             throw new InvalidArgumentException('Variable does not contain a stream resource');
         }
 
@@ -98,7 +101,7 @@ class Imagine extends AbstractImagine
             $disableEntities = libxml_disable_entity_loader();
         }
 
-        $document = new \DOMDocument();
+        $document = new DOMDocument();
         $document->loadXML($data, LIBXML_NONET);
 
         libxml_use_internal_errors($internalErrors);
@@ -110,7 +113,7 @@ class Imagine extends AbstractImagine
         if ($error = libxml_get_last_error()) {
             libxml_clear_errors();
 
-            if (\in_array($error->level, [LIBXML_ERR_ERROR, LIBXML_ERR_FATAL], true)) {
+            if (in_array($error->level, [LIBXML_ERR_ERROR, LIBXML_ERR_FATAL], true)) {
                 throw new RuntimeException($error->message);
             }
         }

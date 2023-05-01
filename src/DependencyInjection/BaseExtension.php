@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorageFactory;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Workflow\WorkflowInterface;
+use function dirname;
 
 class BaseExtension extends Extension
 {
@@ -36,7 +37,7 @@ class BaseExtension extends Extension
         // Load service declaration (includes services, controllers,..)
 
         // Format XML
-        $loader = new XmlFileLoader($container, new FileLocator(\dirname(__DIR__, 2).'/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(dirname(__DIR__, 2) . '/config'));
         $loader->load('services.xml');
         $loader->load('services-public.xml');
         $loader->load('services-fix.xml');

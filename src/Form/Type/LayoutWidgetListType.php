@@ -8,6 +8,7 @@ use Base\Entity\Layout\Widget\Slot;
 use Base\Field\Type\SelectType;
 use Base\Service\WidgetProvider;
 use Base\Service\WidgetProviderInterface;
+use Exception;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 
@@ -17,23 +18,25 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Util\StringUtil;
+use Traversable;
 
 class LayoutWidgetListType extends AbstractType implements DataMapperInterface
 {
     /**
-     * @var WidgetProvider
+     * @var WidgetProviderInterface
      */
-    protected $widgetProvider;
+    protected WidgetProviderInterface $widgetProvider;
 
     public function getBlockPrefix(): string
     {
-        return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+        return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
     public function __construct(WidgetProviderInterface $widgetProvider)
     {
         $this->widgetProvider = $widgetProvider;
     }
+
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -59,7 +62,7 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
         } elseif (is_subclass_of($data, Widget::class)) {
             $newData[str_replace($from, $to, $data->getName())] = $data->getName();
         } else {
-            throw new \Exception("Unexpected data provided (expecting either associative array, Setting or BaseSetting)");
+            throw new Exception("Unexpected data provided (expecting either associative array, Setting or BaseSetting)");
         }
 
         return $newData;
@@ -91,12 +94,12 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
                 $widgetOptions["attr"] = $opts["attr"] ?? [];
 
                 $widgetOptions["data_class"] = null;
-                $widgetOptions["required"]   = $options["widgets"][$widget]["required"] ?? false;
-                $widgetOptions["select2"]    = $options["select2"] ?? [];
+                $widgetOptions["required"] = $options["widgets"][$widget]["required"] ?? false;
+                $widgetOptions["select2"] = $options["select2"] ?? [];
 
                 $widgetOptions["class"] = Widget::class;
                 $widgetOptions["choice_filter"] = $options["widgets"][$widget]["choice_filter"] ?? null;
-                $widgetOptions["choice_filter"][] = "^".Slot::class;
+                $widgetOptions["choice_filter"][] = "^" . Slot::class;
 
                 // Set default label
                 if (!array_key_exists("label", $widgetOptions)) {
@@ -118,11 +121,11 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
     }
 
-    public function mapFormsToData(\Traversable $forms, &$viewData): void
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);
 

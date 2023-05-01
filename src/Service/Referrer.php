@@ -11,10 +11,10 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class Referrer implements ReferrerInterface
 {
     /** @var RequestStack */
-    private $requestStack;
+    private RequestStack $requestStack;
 
     /** @var RouterInterface */
-    private $router;
+    private RouterInterface $router;
 
     public function __toString(): string
     {

@@ -2,6 +2,7 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\BooleanField;
 use Base\Service\BaseService;
 use Base\Twig\Environment;
@@ -19,22 +20,22 @@ final class BooleanConfigurator implements FieldConfiguratorInterface
     /**
      * @var AdminUrlGenerator
      */
-    private $adminUrlGenerator;
+    private AdminUrlGenerator $adminUrlGenerator;
 
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
 
     /**
      * @var ?CsrfTokenManagerInterface
      */
-    private $csrfTokenManager;
+    private ?CsrfTokenManagerInterface $csrfTokenManager;
 
     public function __construct(AdminUrlGenerator $adminUrlGenerator, ?CsrfTokenManagerInterface $csrfTokenManager = null)
     {
         $this->adminUrlGenerator = $adminUrlGenerator;
-        $this->csrfTokenManager  = $csrfTokenManager;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -58,14 +59,14 @@ final class BooleanConfigurator implements FieldConfiguratorInterface
                     ->setAction(Action::EDIT)
                     ->setEntityId($entityDto->getPrimaryKeyValue())
                     ->set('fieldName', $field->getProperty())
-                    ->set('csrfToken', $this->csrfTokenManager ? $this->csrfTokenManager->getToken(BooleanField::CSRF_TOKEN_NAME) : null)
+                    ->set('csrfToken', $this->csrfTokenManager?->getToken(BooleanField::CSRF_TOKEN_NAME))
                     ->generateUrl();
 
                 $field->setCustomOption(BooleanField::OPTION_TOGGLE_URL, $toggleUrl);
             }
 
             $field->setFormTypeOptionIfNotSet('label_attr.class', 'checkbox-switch');
-            $field->setCssClass($field->getCssClass().' has-switch');
+            $field->setCssClass($field->getCssClass() . ' has-switch');
         }
     }
 }

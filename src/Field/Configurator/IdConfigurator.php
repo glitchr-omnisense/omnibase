@@ -23,17 +23,17 @@ class IdConfigurator implements FieldConfiguratorInterface
     /**
      * @var AuthorizationCheckerInterface
      */
-    private $authorizationChecker;
+    private AuthorizationCheckerInterface $authorizationChecker;
 
     /**
      * @var AdminUrlGenerator
      */
-    private $adminUrlGenerator;
+    private AdminUrlGenerator $adminUrlGenerator;
 
     /**
      * @var RouterInterface
      */
-    private $router;
+    private RouterInterface $router;
 
     public function __construct(AuthorizationCheckerInterface $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, RouterInterface $router)
     {
@@ -55,7 +55,7 @@ class IdConfigurator implements FieldConfiguratorInterface
         }
 
         // Check access rights and context to impersonate
-        $switchRole      = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
+        $switchRole = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
         $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
         $field->setCustomOption(IdField::OPTION_IMPERSONATE, $switchParameter);
@@ -75,7 +75,7 @@ class IdConfigurator implements FieldConfiguratorInterface
             ? $accessor->getValue($field->getValue(), $field->getProperty()) : null;
 
         $hashtag = gettype($value) == "integer" ? "#" : "";
-        $value   = $hashtag . ($maxLength !== -1 ? u($value)->truncate($maxLength, '…')->toString() : $value);
+        $value = $hashtag . ($maxLength !== -1 ? u($value)->truncate($maxLength, '…')->toString() : $value);
 
         $url = null;
         if (Crud::PAGE_DETAIL !== $context->getCrud()->getCurrentPage() &&
@@ -86,6 +86,6 @@ class IdConfigurator implements FieldConfiguratorInterface
                 ->generateUrl();
         }
 
-        $field->setFormattedValue(($url ? "<a href='".$url."'>".$value."</a>" : $value));
+        $field->setFormattedValue(($url ? "<a href='" . $url . "'>" . $value . "</a>" : $value));
     }
 }

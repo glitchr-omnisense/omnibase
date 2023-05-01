@@ -11,12 +11,13 @@ class EasyAdminVariable
     /**
      * @var AdminUrlGenerator
      */
-    protected $adminUrlGenerator;
+    protected AdminUrlGenerator $adminUrlGenerator;
 
     public function __construct(AdminUrlGenerator $adminUrlGenerator)
     {
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
+
     public function crudify(mixed $entity)
     {
         if ($entity == null) {
@@ -29,10 +30,10 @@ class EasyAdminVariable
         }
 
         return $this->adminUrlGenerator->unsetAll()
-                    ->setController($entityCrudController)
-                    ->setEntityId($entity->getId())
-                    ->setAction(Crud::PAGE_EDIT)
-                    ->includeReferrer()
-                    ->generateUrl();
+            ->setController($entityCrudController)
+            ->setEntityId($entity->getId())
+            ->setAction(Crud::PAGE_EDIT)
+            ->includeReferrer()
+            ->generateUrl();
     }
 }

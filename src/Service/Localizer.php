@@ -3,8 +3,12 @@
 namespace Base\Service;
 
 use Base\Cache\Abstract\AbstractLocalCache;
+use DateTimeZone;
+use Exception;
+use Locale;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Currencies;
 use Symfony\Component\Intl\Languages;
@@ -15,8 +19,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 {
     public const LOCALE_FORMAT = "xx-XX";
 
-    protected $requestStack = null;
-    protected $parameterBag = null;
+    protected ?ParameterBagInterface $parameterBag = null;
 
     protected static $isLate = null; // Turns on when on kernel request
 
@@ -68,7 +71,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     /**
      * @var TranslatorInterface
      */
-    protected $translator = null;
+    protected ?TranslatorInterface $translator = null;
 
     public const SEPARATOR = "-";
 
@@ -100,9 +103,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
         $country = substr($locale, 3, 2);
         $country = $country ?: null;
-        $country = $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
-
-        return $country;
+        return $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
     }
 
     private static ?array $locales = null;
@@ -163,7 +164,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
             if (self::isLate()) {
                 $method = __CLASS__ . "::" . __FUNCTION__;
                 $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
-                throw new \Exception("You cannot call " . $method . ", after \"" . $location . "\" got triggered.");
+                throw new Exception("You cannot call " . $method . ", after \"" . $location . "\" got triggered.");
             }
 
             // Symfony request needs underscore separator, regardless of the constant defined above
@@ -252,7 +253,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         return self::__toLocaleCountry($locale);
     }
 
-    protected static $cacheLocales = [];
+    protected static array $cacheLocales = [];
 
     public static function normalizeLocale(string|array $locale, string $separator = self::SEPARATOR): string|array
     {
@@ -332,7 +333,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     public static function __toTimezone(string $countryCode)
     {
         $alpha2country = Countries::getAlpha2Code($countryCode);
-        return \DateTimeZone::listIdentifiers(\DateTimeZone::PER_COUNTRY, $alpha2country);
+        return DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $alpha2country);
     }
 
     /**
@@ -347,7 +348,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
     public function getCountryName(?string $displayLocale = null)
     {
-        return \Locale::getDisplayRegion($this->countryCode, $displayLocale);
+        return Locale::getDisplayRegion($this->countryCode, $displayLocale);
     }
 
     public function setCountry(string $countryCode): self

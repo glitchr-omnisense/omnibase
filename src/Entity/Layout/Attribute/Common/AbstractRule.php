@@ -18,7 +18,7 @@ use Base\Database\Annotation\Cache;
  *
  * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- *     @DiscriminatorEntry(value="abstract_rule")
+ * @DiscriminatorEntry(value="abstract_rule")
  */
 abstract class AbstractRule extends AbstractAttribute implements RuleInterface
 {
@@ -26,6 +26,7 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
     {
         return ["fa-solid fa-poll"];
     }
+
     public function compliesWith(mixed $subject): bool
     {
         return $this->adapter?->compliesWith($this->getValue(), $subject) ?? true;
@@ -36,10 +37,12 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
      * @Associate(metadata="class")
      */
     protected $value;
+
     public function getValue()
     {
         return $this->value;
     }
+
     public function setValue($value)
     {
         $this->value = $value;
@@ -55,6 +58,7 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
     {
         return $this->class;
     }
+
     public function setClass(?string $class)
     {
         $this->class = $class;

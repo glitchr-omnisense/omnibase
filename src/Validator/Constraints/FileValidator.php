@@ -13,13 +13,13 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class FileValidator extends ConstraintValidator
 {
-    public function validate($entry, Constraint $constraint)
+    public function validate($value, Constraint $constraint)
     {
-        if (null === $entry || '' === $entry) {
+        if (null === $value || '' === $value) {
             return;
         }
 
-        if (!$entry instanceof File) {
+        if (!$value instanceof File) {
             return;
         }
 
@@ -35,19 +35,19 @@ class FileValidator extends ConstraintValidator
 
         $compatibleMimeType = empty($mimeTypes);
         foreach ($mimeTypes as $mimeType) {
-            $compatibleMimeType |= preg_match("/" . str_replace("/", "\/", $mimeType) . "/", $entry->getMimeType());
+            $compatibleMimeType |= preg_match("/" . str_replace("/", "\/", $mimeType) . "/", $value->getMimeType());
         }
 
         if (!$compatibleMimeType) {
             $constraint->message = $constraint->messageMimeType;
-            $this->buildViolation($constraint, $entry)
+            $this->buildViolation($constraint, $value)
                 ->setParameter('{0}', count($mimeTypes))
                 ->setParameter('{1}', implode(", ", $types))
                 ->addViolation();
-        } elseif ($entry->getSize() > $constraint->getMaxSize()) {
+        } elseif ($value->getSize() > $constraint->getMaxSize()) {
             $constraint->message = $constraint->messageMaxSize;
-            $this->buildViolation($constraint, $entry)
-                ->setParameter('{1}', byte2str($entry->getSize()))
+            $this->buildViolation($constraint, $value)
+                ->setParameter('{1}', byte2str($value->getSize()))
                 ->setParameter('{0}', byte2str($constraint->getMaxSize()))
                 ->addViolation();
         }

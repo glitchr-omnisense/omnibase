@@ -31,36 +31,36 @@ class AutocompleteController extends AbstractController
     use BaseTrait;
 
     /**
-     * @var Paginator
+     * @var PaginatorInterface
      */
-    protected $paginator;
+    protected PaginatorInterface $paginator;
 
     /**
      * @var ObfuscatorInterface
      */
-    protected $obfuscator;
+    protected ObfuscatorInterface $obfuscator;
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
     /**
      * @var ClassMetadataManipulator
      */
-    protected $classMetadataManipulator;
+    protected ClassMetadataManipulator $classMetadataManipulator;
     /**
      * @var Autocomplete
      */
-    protected $autocomplete;
+    protected Autocomplete $autocomplete;
 
     /**
-     * @var TradingMarket
+     * @var TradingMarketInterface
      */
-    protected $tradingMarket;
+    protected TradingMarketInterface $tradingMarket;
 
     /**
      * @var Profiler
      */
-    protected $profiler;
+    protected ?Profiler $profiler;
 
     public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
     {
@@ -85,22 +85,22 @@ class AutocompleteController extends AbstractController
             $this->profiler->disable();
         }
 
-        $dict    = $this->obfuscator->decode($data);
+        $dict = $this->obfuscator->decode($data);
         if ($dict === null) {
             return new JsonResponse("Unexpected request", 500);
         }
 
-        $fields  = $dict["fields"] ?? null;
+        $fields = $dict["fields"] ?? null;
         $filters = $dict["filters"] ?? null;
-        $class   = $dict["class"] ?? null;
-        $html    = $dict["html"] ?? true;
+        $class = $dict["class"] ?? null;
+        $html = $dict["html"] ?? true;
 
         $format = FORMAT_IDENTITY;
         if ($dict["capitalize"] !== null) {
             $format = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
         }
 
-        $token   = $dict["token"] ?? null;
+        $token = $dict["token"] ?? null;
         $tokenName = $dict["token_name"] ?? null;
         if (!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
             return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
@@ -110,7 +110,7 @@ class AutocompleteController extends AbstractController
         if ($request->getMethod() == $expectedMethod) {
             $term = strtolower(str_strip_accents($request->get("term")) ?? "");
             $meta = explode(".", $request->get("page") ?? "");
-            $page     = max(1, intval($meta[0] ?? 1));
+            $page = max(1, intval($meta[0] ?? 1));
             $bookmark = max(0, intval($meta[1] ?? 0));
 
             $results = [];
@@ -129,7 +129,7 @@ class AutocompleteController extends AbstractController
                 do {
                     $bookIsFull = false;
                     $book = $this->paginator->paginate($entries, $page);
-                    if ($page > $book->getTotalPages()+1) {
+                    if ($page > $book->getTotalPages() + 1) {
                         break;
                     }
 
@@ -167,17 +167,17 @@ class AutocompleteController extends AbstractController
                 $pagination["more"] = $book->getTotalPages() > $book->getPage() || $bookIsFull;
                 if ($pagination["more"]) {
                     $page = $book->getPage();
-                    $bookmark = ($book->getBookmark()+1) % $book->getPageSize();
+                    $bookmark = ($book->getBookmark() + 1) % $book->getPageSize();
                     if ($bookmark == 0) {
                         $page++;
                     }
 
-                    $pagination["page"] = $page.".".$bookmark;
+                    $pagination["page"] = $page . "." . $bookmark;
                 }
             } elseif ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
                 $values = $class::getPermittedValues();
                 foreach ($values as $value) {
-                    $results[] = array_values(array_filter($this->autocomplete->resolve($value, $class, ["format" => $format, "html" => $html]), fn ($r) => !empty($fields) || str_contains(mb_strtolower(strval($r["text"])), $term)));
+                    $results[] = array_values(array_filter($this->autocomplete->resolve($value, $class, ["format" => $format, "html" => $html]), fn($r) => !empty($fields) || str_contains(mb_strtolower(strval($r["text"])), $term)));
                 }
             }
 
@@ -237,10 +237,10 @@ class AutocompleteController extends AbstractController
             $this->profiler->disable();
         }
 
-        $dict     = $this->obfuscator->decode($data);
+        $dict = $this->obfuscator->decode($data);
 
-        $token    = $dict["token"] ?? null;
-        $html     = $dict["html"] ?? true;
+        $token = $dict["token"] ?? null;
+        $html = $dict["html"] ?? true;
         $pageSize = $dict["page_size"] ?? 200;
 
         $format = FORMAT_IDENTITY;
@@ -254,7 +254,7 @@ class AutocompleteController extends AbstractController
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
             $term = mb_strtolower($request->get("term")) ?? "";
             $meta = explode(".", $request->get("page") ?? "");
-            $page     = max(1, intval($meta[0] ?? 1));
+            $page = max(1, intval($meta[0] ?? 1));
             $bookmark = max(0, intval($meta[1] ?? 0));
 
             $iconProvider = $this->getIconProvider()->getAdapter($provider);
@@ -264,7 +264,7 @@ class AutocompleteController extends AbstractController
             do {
                 $bookIsFull = false;
                 $book = $this->paginator->paginate($entries, $page, $pageSize);
-                if ($page > $book->getTotalPages()+1) {
+                if ($page > $book->getTotalPages() + 1) {
                     break;
                 }
 
@@ -296,12 +296,12 @@ class AutocompleteController extends AbstractController
             $pagination["more"] = $book->getTotalPages() > $book->getPage() || $bookIsFull;
             if ($pagination["more"]) {
                 $page = $book->getPage();
-                $bookmark = ($book->getBookmark()+1) % $book->getPageSize();
+                $bookmark = ($book->getBookmark() + 1) % $book->getPageSize();
                 if ($bookmark == 0) {
                     $page++;
                 }
 
-                $pagination["page"] = $page.".".$bookmark;
+                $pagination["page"] = $page . "." . $bookmark;
             }
 
             $array = [

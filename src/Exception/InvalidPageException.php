@@ -2,7 +2,9 @@
 
 namespace Base\Exception;
 
-class InvalidPageException extends \Exception
+use Exception;
+
+class InvalidPageException extends Exception
 {
     /**
      * {@inheritdoc}

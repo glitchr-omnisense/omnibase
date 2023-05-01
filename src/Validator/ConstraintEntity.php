@@ -3,6 +3,8 @@
 namespace Base\Validator;
 
 use Base\Service\TranslatorInterface;
+use function is_array;
+use function is_string;
 
 /**
  * @Annotation
@@ -22,8 +24,9 @@ abstract class ConstraintEntity extends Constraint
         array $options = [],
         array $groups = null,
         $payload = null
-    ) {
-        if (\is_array($fields) && \is_string(key($fields))) {
+    )
+    {
+        if (is_array($fields) && is_string(key($fields))) {
             $options = array_merge($fields, $options);
         } elseif (null !== $fields) {
             $options['fields'] = $fields;
@@ -34,7 +37,7 @@ abstract class ConstraintEntity extends Constraint
             $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
             $firstField = $fields['fields'][0] ?? "unknown";
 
-            $this->message = camel2snake($firstField) .".". camel2snake($constraintName);
+            $this->message = camel2snake($firstField) . "." . camel2snake($constraintName);
         }
 
         parent::__construct($options, $groups, $payload);
@@ -44,6 +47,7 @@ abstract class ConstraintEntity extends Constraint
     {
         return ['fields'];
     }
+
     public function getDefaultOption(): ?string
     {
         return 'fields';
