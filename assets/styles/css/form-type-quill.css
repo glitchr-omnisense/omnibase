@@ -1,6 +1,6 @@
 
-.ql-editor img { 
-    float: left; 
+.ql-editor img {
+    float: left;
     margin: 0 2em 1em 1em;
     max-height:400px;
 }
@@ -17,7 +17,7 @@
 }
 
 @media all and (max-width: 470px) {
-    
+
     .ql-editor img
     {
         max-height:initial;
