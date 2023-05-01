@@ -135,9 +135,13 @@ trait FormGuessTrait
         if (!array_key_exists("multiple", $options)) {
             $options["multiple"] = false;
         }
+
         if ($options["multiple"] === null) {
+
+            $target = null;
             $parentForm = $form->getParent();
             if ($parentForm) {
+
                 $options = $parentForm->getConfig()->getOptions();
                 $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
             }
@@ -184,6 +188,8 @@ trait FormGuessTrait
         }
 
         if ($options["allow_null"] === null) {
+
+            $target = null;
             $parentForm = $form->getParent();
             if ($parentForm) {
                 $options = $parentForm->getConfig()->getOptions();
@@ -222,6 +228,8 @@ trait FormGuessTrait
             return false;
         }
         if ($options["sortable"] === null) {
+
+            $target = null;
             $parentForm = $form->getParent();
             if ($parentForm) {
                 $options = $parentForm->getConfig()->getOptions();

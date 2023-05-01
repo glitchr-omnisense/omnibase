@@ -4,7 +4,6 @@ namespace Base\Service;
 
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
-use Doctrine\Common\Collections\ArrayCollection;
 
 interface WidgetProviderInterface
 {

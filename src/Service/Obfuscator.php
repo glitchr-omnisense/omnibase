@@ -4,12 +4,9 @@ namespace Base\Service;
 
 use Base\BaseBundle;
 use Base\Cache\Abstract\AbstractLocalCache;
-use Base\Repository\Layout\ImageRepository;
 use Base\Service\Model\Obfuscator\CompressionInterface;
 use ErrorException;
-use Hashids\Hashids;
 use LogicException;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV5;
 
@@ -59,9 +56,13 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 
     public function getCompression(string $idOrClass): ?CompressionInterface
     {
+        $compression = null;
         if (class_exists($idOrClass)) {
+
             $compression = $this->compressions[$idOrClass] ?? null;
+
         } else {
+
             foreach ($this->compressions as $availableCompression) {
                 if ($availableCompression->supports($idOrClass)) {
                     $compression = $availableCompression;
@@ -71,8 +72,9 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         }
 
         if ($compression == null) {
+
             $compressionIds = array_keys($this->getCompressions());
-            throw new LogicException("No compression class retrieved from \"" . $compressionId . "\" identifier (available: " . implode(", ", $compressionIds) . ")");
+            throw new LogicException("No compression class retrieved from \"" . $idOrClass . "\" identifier (available: " . implode(", ", $compressionIds) . ")");
         }
 
         $compression->setLevel($this->level);

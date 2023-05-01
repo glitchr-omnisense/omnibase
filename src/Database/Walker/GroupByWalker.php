@@ -35,12 +35,13 @@ class GroupByWalker extends TreeWalkerAdapter
             throw new InvalidArgumentException("Invalid hint \"" . self::HINT_GROUP_ARRAY . "\" type provided. Array expected");
         }
 
+        $AST->groupByClause ??= new GroupByClause([]);
         foreach ($groupBy as $columnName) {
+
             $pathExpression = new PathExpression(PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName, $columnName);
             $pathExpression->type = PathExpression::TYPE_STATE_FIELD;
-        }
 
-        $AST->groupByClause ??= new GroupByClause([]);
-        $AST->groupByClause->groupByItems[] = $pathExpression;
+            $AST->groupByClause->groupByItems[] = $pathExpression;
+        }
     }
 }

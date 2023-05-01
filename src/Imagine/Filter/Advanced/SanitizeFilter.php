@@ -9,6 +9,8 @@ use Imagine\Image\ImageInterface;
 
 class SanitizeFilter implements FilterInterface
 {
+    private Sanitizer $sanitizer;
+
     public function __toString()
     {
         return "sanitize";

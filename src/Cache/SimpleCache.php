@@ -38,10 +38,12 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
     {
         return $this->getCache();
     }
+
     public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
     {
         return $this->setCache($key, $value, $ttl);
     }
+
     public function delete(string $key): bool
     {
         return $this->deleteCache($key);
@@ -62,7 +64,7 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
         return $multiple;
     }
 
-    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
+    public function setMultiple(iterable $keys, null|int|DateInterval $ttl = null): bool
     {
         $ret = true;
         foreach ($keys as $key) {

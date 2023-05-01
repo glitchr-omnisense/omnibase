@@ -4,7 +4,6 @@ namespace Base\Controller\Backend\Crud\Layout\Widget;
 
 use Base\Field\FileField;
 use Base\Field\SlugField;
-use Base\Field\TranslationField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;

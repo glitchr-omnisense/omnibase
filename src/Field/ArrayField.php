@@ -92,13 +92,6 @@ class ArrayField extends CollectionField implements FieldInterface
         return $this;
     }
 
-    public function showEntryLabel(bool $showLabel = true): self
-    {
-        $this->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, $showLabel);
-
-        return $this;
-    }
-
     public function renderExpanded(bool $renderExpanded = true): self
     {
         $this->setCustomOption(self::OPTION_RENDER_EXPANDED, $renderExpanded);

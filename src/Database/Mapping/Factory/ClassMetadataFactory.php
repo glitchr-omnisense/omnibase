@@ -779,6 +779,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     {
         $loadedMetadata = parent::loadMetadata($name);
 
+        $classMetadataList = [];
         foreach ($loadedMetadata as $classMetadata) {
             $classMetadataList[] = $this->getMetadataFor($classMetadata);
         }

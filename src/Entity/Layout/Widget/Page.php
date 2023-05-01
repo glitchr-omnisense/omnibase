@@ -11,7 +11,6 @@ use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\PageRepository;
-use Base\Service\BaseService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Base\Database\Annotation\Cache;

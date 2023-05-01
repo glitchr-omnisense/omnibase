@@ -5,14 +5,11 @@ namespace Base\Field\Type;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-use Traversable;
 
 class WysiwygType extends AbstractType
 {

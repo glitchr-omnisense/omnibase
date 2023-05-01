@@ -2,7 +2,6 @@
 
 namespace Base\Console;
 
-use Base\Service\BaseService;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;

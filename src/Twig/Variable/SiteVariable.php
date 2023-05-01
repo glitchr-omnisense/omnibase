@@ -2,7 +2,6 @@
 
 namespace Base\Twig\Variable;
 
-use Base\Entity\User;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LocalizerInterface;
@@ -132,7 +131,7 @@ class SiteVariable
     {
         return $this->launcher->getLaunchdate($locale);
     }
-    public function is_launcherd(?string $locale = null): bool
+    public function is_launchedd(?string $locale = null): bool
     {
         return $this->launcher->isLaunched($locale);
     }

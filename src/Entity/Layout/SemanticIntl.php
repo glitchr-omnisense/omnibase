@@ -4,8 +4,6 @@ namespace Base\Entity\Layout;
 
 use Base\Database\Annotation\OrderColumn;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
-use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;

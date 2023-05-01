@@ -55,7 +55,11 @@ class TranslationEnumsCommand extends Command
                 continue;
             }
 
+            $space = "";
             $trans = "";
+
+            $path = explode("\\", $enum);
+
             foreach ($availableLocales as $currentLocale) {
                 if ($locale !== null && $locale != $currentLocale) {
                     continue;
@@ -89,9 +93,11 @@ class TranslationEnumsCommand extends Command
             }
 
             foreach ($enum::getPermittedValues(false) as $value) {
+
                 $value = strval($value);
-                $trans2 = "";
+                $translatedValue = "";
                 foreach ($availableLocales as $currentLocale) {
+
                     if ($locale !== null && $locale != $currentLocale) {
                         continue;
                     }
@@ -108,12 +114,12 @@ class TranslationEnumsCommand extends Command
                     $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                     if ($translation == $translationPath) {
-                        $trans2 .= "<warning>" . $translationPathStr . "</warning><red> = \"no translation found\"</red>";
+                        $translatedValue .= "<warning>" . $translationPathStr . "</warning><red> = \"no translation found\"</red>";
                     } else {
-                        $trans2 .= "<warning>" . $translationPathStr . " </warning>= \"" . $translation . "\"";
+                        $translatedValue .= "<warning>" . $translationPathStr . " </warning>= \"" . $translation . "\"";
                     }
                 }
-                $output->section()->writeln("\t * <info>" . trim($enum . "::" . $value) . "</info> " . $space . ": $trans2");
+                $output->section()->writeln("\t * <info>" . trim($enum . "::" . $value) . "</info> " . $space . ": $translatedValue");
             }
         }
 

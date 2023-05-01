@@ -460,7 +460,6 @@ namespace {
                 break;
 
             case 6:
-
                 if ($hex[0] == $hex[1] && $hex[2] == $hex[3] && $hex[4] == $hex[5]) {
                     $hex = $hex[0] . $hex[2] . $hex[4];
                 }
@@ -468,7 +467,6 @@ namespace {
                 break;
 
             case 8:
-
                 if ($hex[0] == $hex[1] && $hex[2] == $hex[3] && $hex[4] == $hex[5] && $hex[6] == $hex[7]) {
                     $hex = $hex[0] . $hex[2] . $hex[4] . $hex[6];
                     if (str_ends_with($hex, "F")) {
@@ -879,7 +877,6 @@ namespace {
                 case SHORTEN_BACK:
                 case SHORTEN_BACK_SHRINK:
                 case SHORTEN_BACK_EXTEND:
-
                     if ($position == SHORTEN_BACK_SHRINK) {
                         $pos = strrpos(substr($haystack, 0, $length), ".");
                         if ($pos === false) {
@@ -929,7 +926,7 @@ namespace {
         return $randomString;
     }
 
-    function rotate_str(int $n = 1)
+    function rotate_str(string $str, int $n = 1)
     {
         return substr($str, -$n) . substr($str, 0, -$n);
     }
@@ -1436,6 +1433,7 @@ namespace {
             $pattern = "/^Location:\s*(.*)$/i";
             $location_headers = preg_grep($pattern, $http_response_header);
 
+            $matches = [];
             $repeat = !empty($location_headers) && preg_match($pattern, array_values($location_headers)[0], $matches);
             if ($repeat) {
                 $url = $matches[1];
@@ -2297,7 +2295,6 @@ namespace {
                     $tKey = !empty($tKey) ? $tKey : count($tArray);
                     switch ($prevent_conflicts) {
                         case ARRAY_TRANSFORMS_MERGE:
-
                             $yield ??= [];
 
                             $tArray[$tKey] ??= [];
@@ -2325,7 +2322,6 @@ namespace {
             list($tKey, $tEntry) = [$ret[0] ?? count($tArray), $ret[1] ?? null];
             switch ($prevent_conflicts) {
                 case ARRAY_TRANSFORMS_MERGE:
-
                     if (!is_array($tEntry)) {
                         $tArray[$tKey] = $tEntry;
                     } else {
@@ -2613,7 +2609,7 @@ namespace {
         return array_transforms(fn($k, $v): ?array => str_starts_with($k, $needle) ? [$k, $v] : null, $array);
     }
 
-    function array_key_endsWith(array $array): array
+    function array_key_endsWith(array $array, string $needle): array
     {
         return array_transforms(fn($k, $v): ?array => str_ends_with($k, $needle) ? [$k, $v] : null, $array);
     }
@@ -3463,8 +3459,10 @@ namespace {
             if (!array_key_exists("class", $trace)) {
                 continue;
             }
-            if (($str_ends_with && str_ends_with($trace["class"], $str_ends_with)) &&
-                ($str_starts_with && str_starts_with($trace["class"], $str_starts_with))) {
+            if (
+                ($str_ends_with && str_ends_with($trace["class"], $str_ends_with)) &&
+                ($str_starts_with && str_starts_with($trace["class"], $str_starts_with))
+            ) {
                 return true;
             }
         }

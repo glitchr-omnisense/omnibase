@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'translation:controllers', aliases:[], description:'')]
+#[AsCommand(name: 'translation:controllers', aliases: [], description: '')]
 class TranslationControllersCommand extends Command
 {
     protected function configure(): void
@@ -45,7 +45,7 @@ class TranslationControllersCommand extends Command
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
         if ($locale && !in_array($locale, $availableLocales)) {
-            throw new Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
+            throw new Exception("Locale not found in the list of available locale: [" . implode(",", $availableLocales) . "]");
         }
 
         $suffix = $input->getOption('suffix');
@@ -57,6 +57,7 @@ class TranslationControllersCommand extends Command
                 continue;
             }
 
+            $space = "";
             $trans = "";
             foreach ($availableLocales as $currentLocale) {
                 if ($locale !== null && $locale != $currentLocale) {
@@ -67,21 +68,21 @@ class TranslationControllersCommand extends Command
                     $space = "";
                 } else {
                     $prefix = "";
-                    $space = str_repeat(" ", max($maxLength-strlen($controller), 0));
+                    $space = str_repeat(" ", max($maxLength - strlen($controller), 0));
                 }
 
-                $translationPath = "@controllers.".$path.".".$suffix;
-                $translationPathStr = $prefix."@controllers[$currentLocale].<ln>".$path.".".$suffix."</ln>";
+                $translationPath = "@controllers." . $path . "." . $suffix;
+                $translationPathStr = $prefix . "@controllers[$currentLocale].<ln>" . $path . "." . $suffix . "</ln>";
                 $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                 if ($translation == $translationPath) {
-                    $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
+                    $trans .= "<warning>" . $translationPathStr . "</warning><red> = \"no translation found\"</red>";
                 } else {
-                    $trans .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
+                    $trans .= "<warning>" . $translationPathStr . " </warning>= \"" . $translation . "\"";
                 }
             }
 
-            $output->section()->writeln(" * <info>".trim($controller)."</info> ".$space.": $trans");
+            $output->section()->writeln(" * <info>" . trim($controller) . "</info> " . $space . ": $trans");
         }
 
         return Command::SUCCESS;

@@ -166,7 +166,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         if (is_array($parse)) {
             if ($parse && array_key_exists("host", $parse)) {
-                $this->getContext()->setHost($host);
+                $this->getContext()->setHost($parse["host"]);
             }
             if ($parse && array_key_exists("base_dir", $parse)) {
                 $this->getContext()->setBaseUrl($parse["base_dir"]);

@@ -2,11 +2,8 @@
 
 namespace Base\Controller;
 
-use App\Entity\User as User;
-
 use Base\Annotations\Annotation\Iconize;
 use Base\Controller\Backend\AbstractDashboardController;
-use Base\Form\Common\FormModelInterface;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
 use Base\Form\Type\SecurityLoginType;

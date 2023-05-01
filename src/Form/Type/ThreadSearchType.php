@@ -3,7 +3,6 @@
 namespace Base\Form\Type;
 
 use App\Entity\Destination\Destination;
-use Base\Field\Type\SelectType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 

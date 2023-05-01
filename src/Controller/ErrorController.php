@@ -4,7 +4,6 @@ namespace Base\Controller;
 
 use Base\Service\BaseService;
 
-use Base\Entity\User\Notification;
 use Base\Routing\RouterInterface;
 use Error;
 use ErrorException;

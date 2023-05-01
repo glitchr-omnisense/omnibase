@@ -5,7 +5,6 @@ namespace Base\Form\Extension;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 

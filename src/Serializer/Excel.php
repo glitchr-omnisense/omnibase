@@ -22,6 +22,10 @@ use function is_file;
 
 class Excel
 {
+    private array $context;
+    private string $format;
+    private mixed $data;
+
     public function __construct(mixed $data, string $format, array $context = [])
     {
         $this->filesystem = new Filesystem();

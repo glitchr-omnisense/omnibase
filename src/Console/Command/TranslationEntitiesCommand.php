@@ -14,7 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'translation:entities', aliases:[], description:'')]
+#[AsCommand(name: 'translation:entities', aliases: [], description: '')]
 class TranslationEntitiesCommand extends Command
 {
     protected function configure(): void
@@ -30,17 +30,17 @@ class TranslationEntitiesCommand extends Command
         $entityRestriction = $input->getOption('entity') ?? "";
         $entities = array_merge(
             BaseBundle::getInstance()->getAllNamespacesAndClasses("./src/Entity"),
-            BaseBundle::getInstance()->getAllNamespacesAndClasses($baseLocation."/Entity"),
+            BaseBundle::getInstance()->getAllNamespacesAndClasses($baseLocation . "/Entity"),
         );
         $namespaces = array_merge(
             BaseBundle::getInstance()->getAllNamespaces("./src/Entity"),
-            BaseBundle::getInstance()->getAllNamespaces($baseLocation."/Entity"),
+            BaseBundle::getInstance()->getAllNamespaces($baseLocation . "/Entity"),
         );
 
         $maxLength = [];
         if (!$entityRestriction) {
             foreach ($entities as $entity) {
-                if (in_array($entity, ["App\Entity","Base\Entity"])) {
+                if (in_array($entity, ["App\Entity", "Base\Entity"])) {
                     continue;
                 }
                 if (str_ends_with($entity, NamingStrategy::TABLE_I18N_SUFFIX)) {
@@ -55,12 +55,12 @@ class TranslationEntitiesCommand extends Command
         $locale = $locale ? $this->localizer->getLocale($locale) : null;
         $availableLocales = Localizer::getAvailableLocales();
         if ($locale && !in_array($locale, $availableLocales)) {
-            throw new Exception("Locale not found in the list of available locale: [".implode(",", $availableLocales)."]");
+            throw new Exception("Locale not found in the list of available locale: [" . implode(",", $availableLocales) . "]");
         }
 
         $suffix = $input->getOption('suffix');
         if ($entities) {
-            $output->section()->writeln("Entity list: ".$entityRestriction);
+            $output->section()->writeln("Entity list: " . $entityRestriction);
         }
         foreach ($entities as $entity) {
             if ($entity == "App\Entity") {
@@ -77,11 +77,13 @@ class TranslationEntitiesCommand extends Command
             }
 
             $isClass = class_exists($entity) ? " <info>& class</info>" : "";
-            $entityStr = $entity . (in_array($entity, $namespaces) ? " (namespace".$isClass.")" : null);
+            $entityStr = $entity . (in_array($entity, $namespaces) ? " (namespace" . $isClass . ")" : null);
             $color = in_array($entity, $namespaces) ? "magenta" : "info";
 
+            $space = "";
             $trans = "";
             foreach ($availableLocales as $currentLocale) {
+
                 if ($locale !== null && $locale != $currentLocale) {
                     continue;
                 }
@@ -91,18 +93,18 @@ class TranslationEntitiesCommand extends Command
                 $path = explode("\\", $entity);
                 $path = implode(".", tail($path, -2));
 
-                $translationPath = "@entities.".camel2snake($path, ".").".".$suffix;
-                $translationPathStr = $prefix."@entities[$currentLocale].<ln>".camel2snake($path, ".").".".$suffix."</ln>";
+                $translationPath = "@entities." . camel2snake($path, ".") . "." . $suffix;
+                $translationPathStr = $prefix . "@entities[$currentLocale].<ln>" . camel2snake($path, ".") . "." . $suffix . "</ln>";
                 $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                 if ($translation == $translationPath) {
-                    $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
+                    $trans .= "<warning>" . $translationPathStr . "</warning><red> = \"no translation found\"</red>";
                 } else {
-                    $trans .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
+                    $trans .= "<warning>" . $translationPathStr . " </warning>= \"" . $translation . "\"";
                 }
             }
 
-            $output->section()->writeln(" * <".$color.">".trim($entityStr)."</".$color."> ".$space.": $trans");
+            $output->section()->writeln(" * <" . $color . ">" . trim($entityStr) . "</" . $color . "> " . $space . ": $trans");
         }
 
 

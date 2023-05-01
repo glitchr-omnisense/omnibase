@@ -2,11 +2,8 @@
 
 namespace Base\Entity\Layout\Attribute\Common;
 
-use Base\Annotations\Annotation\Uploader;
 use Base\Database\Annotation\Associate;
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
-use Base\Service\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractRuleRepository;

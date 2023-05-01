@@ -2,15 +2,12 @@
 
 namespace Base\Field\Type;
 
-use Base\Form\FormFactory;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\DataMapperInterface;
 
-use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 use Symfony\Component\Form\FormBuilderInterface;

@@ -5,7 +5,6 @@ namespace Base\Field\Type;
 use Base\Enum\UserRole;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class RoleType extends AbstractType

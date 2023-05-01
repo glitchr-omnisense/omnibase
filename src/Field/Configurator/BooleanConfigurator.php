@@ -4,8 +4,6 @@ namespace Base\Field\Configurator;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\BooleanField;
-use Base\Service\BaseService;
-use Base\Twig\Environment;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;

@@ -2,7 +2,6 @@
 
 namespace Base\Database\Repository;
 
-use App\Entity\User;
 use AsyncAws\Core\Exception\LogicException;
 use Base\BaseBundle;
 use Base\Database\Entity\EntityHydrator;
@@ -10,10 +9,8 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
-use Base\Entity\Extension\Ordering;
 use Base\Service\Model\IntlDateTime;
 use DateTime;
-use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -1155,13 +1152,16 @@ class ServiceEntityParser
         $regexRequested = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
 
         if ($this->classMetadataManipulator->getTypeOfField($this->classMetadata, $fieldName) == "json") {
+
             if (is_array($fieldValue)) {
+
                 if (empty($fieldValue)) {
                     return $queryBuilder->expr()->eq(1, 1);
                 }
 
                 $queryExpr = [];
                 foreach ($fieldValue as $subFieldID => $subFieldValue) {
+
                     if ($isInsensitive) {
                         $queryExpr[] = $queryBuilder->expr()->eq("JSON_CONTAINS(LOWER(JSON_EXTRACT(" . self::ALIAS_ENTITY . "." . $fieldName . ", '$')), LOWER(:" . $fieldID . "_" . $subFieldID . "), '$')", "1");
                     } else {
@@ -1178,14 +1178,18 @@ class ServiceEntityParser
                 }
 
                 throw new Exception("Invalid operator for field \"$fieldName\": " . $tableOperator);
+
             } elseif ($isEmpty || $isNotEmpty) {
+
                 $fnExpr = $tableOperator == self::OPTION_EMPTY ? "eq" : "neq";
-                $queryBuilder->expr()->$fnExpr("JSON_LENGTH(" . self::ALIAS_ENTITY . "." . $fieldName . ", :" . $fieldID . "_" . $subFieldID . ", '$')", "0");
+                $queryBuilder->expr()->$fnExpr("JSON_LENGTH(" . self::ALIAS_ENTITY . "." . $fieldName . ", :" . $fieldID . ", '$')", "0");
+
             } else {
+
                 if ($isInsensitive) {
-                    return $queryBuilder->expr()->eq("JSON_CONTAINS(JSON_EXTRACT(LOWER(" . self::ALIAS_ENTITY . "." . $fieldName . "), '$.NODE'), LOWER(:" . $fieldID . "_" . $subFieldID . "), '$')", "1");
+                    return $queryBuilder->expr()->eq("JSON_CONTAINS(JSON_EXTRACT(LOWER(" . self::ALIAS_ENTITY . "." . $fieldName . "), '$.NODE'), LOWER(:" . $fieldID . "), '$')", "1");
                 } else {
-                    return $queryBuilder->expr()->eq("JSON_CONTAINS(" . self::ALIAS_ENTITY . "." . $fieldName . ", :" . $fieldID . "_" . $subFieldID . ", '$')", "1");
+                    return $queryBuilder->expr()->eq("JSON_CONTAINS(" . self::ALIAS_ENTITY . "." . $fieldName . ", :" . $fieldID . ", '$')", "1");
                 }
             }
 

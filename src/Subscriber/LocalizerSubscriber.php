@@ -5,14 +5,11 @@ namespace Base\Subscriber;
 use App\Entity\User;
 use Base\Entity\User as BaseUser;
 
-use Base\Service\Localizer;
 use Base\Service\LocalizerInterface;
 
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\Intl\Currencies;
-use Symfony\Component\Intl\Timezones;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;

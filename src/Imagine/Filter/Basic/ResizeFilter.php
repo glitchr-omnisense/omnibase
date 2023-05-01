@@ -9,14 +9,17 @@ use Imagine\Image\ImageInterface;
 
 class ResizeFilter implements FilterInterface
 {
+    private ?int $height;
+    private ?int $width;
+
     public function __toString()
     {
-        return mod($this->angle, 360) ? "resize:".implode("x", $this->getSize()) : "";
+        return mod($this->angle, 360) ? "resize:" . implode("x", $this->getSize()) : "";
     }
 
     public function __construct(?int $width = null, ?int $height = null)
     {
-        $this->width  = $width;
+        $this->width = $width;
         $this->height = $height;
     }
 
@@ -24,6 +27,7 @@ class ResizeFilter implements FilterInterface
     {
         return [$this->width, $this->height];
     }
+
     public function apply(ImageInterface $image): ImageInterface
     {
         $filter = new Resize(new Box($this->width, $this->height));

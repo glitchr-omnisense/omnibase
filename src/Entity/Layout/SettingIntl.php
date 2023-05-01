@@ -5,8 +5,6 @@ namespace Base\Entity\Layout;
 use Base\Database\Annotation\Associate;
 use Doctrine\ORM\Mapping as ORM;
 
-use Base\Validator\Constraints as AssertBase;
-
 use Base\Database\Annotation\Vault;
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\TranslationInterface;

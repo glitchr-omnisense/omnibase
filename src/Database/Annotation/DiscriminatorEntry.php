@@ -4,8 +4,6 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Entity\User\Notification;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 

@@ -3,10 +3,8 @@
 namespace Base\Form\Type;
 
 use Base\Entity\Layout\Widget;
-use Base\Entity\Layout\Widget\Route;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Field\Type\SelectType;
-use Base\Service\WidgetProvider;
 use Base\Service\WidgetProviderInterface;
 use Exception;
 use Symfony\Component\OptionsResolver\OptionsResolver;

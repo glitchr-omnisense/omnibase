@@ -8,7 +8,6 @@ use Exception;
 use Locale;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Currencies;
 use Symfony\Component\Intl\Languages;
@@ -346,9 +345,9 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         return $this->country ?? $this->getLocaleCountry();
     }
 
-    public function getCountryName(?string $displayLocale = null)
+    public function getCountryName(string $countryCode, ?string $displayLocale = null)
     {
-        return Locale::getDisplayRegion($this->countryCode, $displayLocale);
+        return Locale::getDisplayRegion($countryCode, $displayLocale);
     }
 
     public function setCountry(string $countryCode): self

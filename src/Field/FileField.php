@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\AvatarType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 

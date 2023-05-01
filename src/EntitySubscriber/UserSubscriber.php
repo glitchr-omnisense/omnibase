@@ -5,13 +5,11 @@ namespace Base\EntitySubscriber;
 use App\Entity\User;
 use Base\Entity\User as BaseUser;
 
-use App\Repository\UserRepository;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\EntityDispatcher\Event\UserEvent;
 use Base\Notifier\NotifierInterface;
 use Base\Routing\RouterInterface;
-use Base\Service\BaseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 

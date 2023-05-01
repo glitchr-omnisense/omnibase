@@ -176,6 +176,8 @@ class DataCollector extends AbstractDataCollector
     private function getDoctrineConnections()
     {
         $defaultConnectionName = $this->doctrine->getDefaultConnectionName();
+
+        $connections = [];
         foreach ($this->doctrine->getConnectionNames() as $connectionName => $_) {
             $connection = $this->doctrine->getConnection($connectionName);
 

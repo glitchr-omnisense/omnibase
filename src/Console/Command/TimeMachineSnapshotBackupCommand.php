@@ -4,19 +4,12 @@ namespace Base\Console\Command;
 
 use BackupManager\Filesystems\Destination;
 use Base\Console\Command;
-use Base\Service\LocalizerInterface;
-use Base\Service\ParameterBagInterface;
-use Base\Service\TimeMachineInterface;
-use Base\Service\FlysystemInterface;
-use Base\Service\TranslatorInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'timemachine:snapshot:backup', aliases:[], description:'')]
+#[AsCommand(name: 'timemachine:snapshot:backup', aliases: [], description: '')]
 class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
 {
     protected function configure(): void
@@ -31,11 +24,12 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
         parent::execute($input, $output);
 
         $storages = $input->getArgument('storages') ?? [];
-        $database = $input->getOption('database')   ?? null;
-        $prefix   = $input->getOption('prefix')     ?? null;
+        $database = $input->getOption('database') ?? null;
+        $prefix = $input->getOption('prefix') ?? null;
+        $cycle = $input->getOption('cycle') ?? -1;
 
         if (!$storages) {
-            return Command::FAILED;
+            return Command::FAILURE;
         }
 
         $helper = $this->getHelper('question');

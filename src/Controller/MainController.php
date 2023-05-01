@@ -4,17 +4,13 @@ namespace Base\Controller;
 
 use Base\BaseBundle;
 
-use Base\Enum\UserRole;
-use Base\Form\FormProcessorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
 
 use  Base\Service\BaseService;
 use  Base\Service\SettingBag;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use function dirname;
 
 /**

@@ -12,6 +12,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class StockType extends NumberType
 {
+    private Environment $twig;
+
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;
@@ -21,7 +23,7 @@ class StockType extends NumberType
     {
         parent::buildView($view, $form, $options);
         $view->vars['allow_infinite'] = $options["allow_infinite"];
-        $view->vars["stepUp"]   = $options["stepUp"];
+        $view->vars["stepUp"] = $options["stepUp"];
         $view->vars["stepDown"] = $options["stepDown"];
     }
 
@@ -30,7 +32,7 @@ class StockType extends NumberType
         parent::configureOptions($resolver);
         $resolver->setDefaults([
             'allow_infinite' => true,
-            'stepUp'  => 1,
+            'stepUp' => 1,
             'stepDown' => 1,
             'target' => null
         ]);
@@ -73,7 +75,7 @@ class StockType extends NumberType
         $targetPath = $targetPath ? explode(".", $targetPath) : null;
         foreach ($targetPath ?? [] as $path) {
             if (!$target->has($path)) {
-                throw new Exception("Child form \"$path\" related to view data \"".get_class($target->getViewData())."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
+                throw new Exception("Child form \"$path\" related to view data \"" . get_class($target->getViewData()) . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["target"] . "\")");
             }
 
             $target = $target->get($path);

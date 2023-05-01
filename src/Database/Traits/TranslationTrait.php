@@ -5,7 +5,6 @@ namespace Base\Database\Traits;
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Service\Localizer;
-use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 

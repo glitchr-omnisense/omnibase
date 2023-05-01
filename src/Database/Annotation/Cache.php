@@ -84,7 +84,7 @@ final class Cache extends AbstractAnnotation
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_CLASS || $entity == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AnnotationReader::TARGET_CLASS || $object == AnnotationReader::TARGET_PROPERTY);
     }
 
     public function getRegion(ClassMetadata $classMetadata)
@@ -101,6 +101,7 @@ final class Cache extends AbstractAnnotation
     {
         $region = $this->getRegion($classMetadata);
 
+        $usage = null;
         switch ($this->usage) {
             case self::READ_ONLY:
                 $usage = ClassMetadata::CACHE_USAGE_READ_ONLY;

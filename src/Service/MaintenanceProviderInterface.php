@@ -2,7 +2,6 @@
 
 namespace Base\Service;
 
-use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 interface MaintenanceProviderInterface

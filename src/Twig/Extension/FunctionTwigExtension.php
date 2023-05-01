@@ -19,10 +19,8 @@ use Exception;
 use ReflectionFunction;
 use RuntimeException;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
-use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Twig\Environment;
 use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -349,8 +347,9 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         // Special case for array
-        if (is_array($object) || $object instanceof Collection) {
-            $id = array_unshift($attributes);
+        if ($object instanceof Collection) $object = $object->toArray();
+        if (is_array($object)) {
+            $id = array_unshift($object);
             $object = $object[$id] ?? null;
         }
 

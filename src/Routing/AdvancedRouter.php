@@ -4,8 +4,6 @@ namespace Base\Routing;
 
 use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
-use Base\Service\Localizer;
-use Generator;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use InvalidArgumentException;
@@ -16,9 +14,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\Exception\RouteCircularReferenceException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
@@ -26,8 +22,6 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
-use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
-use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
@@ -277,22 +271,6 @@ class AdvancedRouter extends Router implements RouterInterface
 
         $eaParents = array_filter($parents, fn($c) => str_starts_with($c, "EasyCorp\Bundle\EasyAdminBundle"));
         return !empty($eaParents);
-    }
-
-    public function factorize(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
-    {
-        $parsedUrl = parse_url($nameOrUrl);
-        $parameters = array_merge(
-            array_transforms(fn($k, $v): array => [explode("=", $v)[0], explode("=", $v)[1] ?? ""], explode("&", $parsedUrl["query"])),
-            $parameters
-        );
-
-        $routeName = $this->getRouteName($nameOrUrl);
-        foreach ($parameters as $name => $value) {
-            $route->setDefault(snake2camel($name), $value);
-        }
-
-        return $this->getUrl($routeName, $route->getDefaults(), $referenceType);
     }
 
     public function getUrl(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string

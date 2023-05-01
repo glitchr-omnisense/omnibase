@@ -2,14 +2,8 @@
 
 namespace Base\CacheWarmer;
 
-use Base\Console\Command\UploaderImagesCommand;
-use Base\Console\Command\UploaderImagesCropCommand;
 use Base\Console\CommandExecutorInterface;
 use Base\Console\ConsoleInterface;
-use Base\Entity\Layout\Image;
-use Base\Repository\Layout\ImageRepository;
-use Base\Service\SettingBag;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 class ImageCacheWarmer implements CacheWarmerInterface

@@ -6,12 +6,10 @@ use Base\Backend\Config\Extension;
 use Base\Field\TranslationField;
 
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Controller\Backend\AbstractDashboardController;
 use Base\Entity\Layout\Semantic;
 use Base\Field\ArrayField;
 use Base\Field\RouteField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class SemanticCrudController extends AbstractCrudController
 {

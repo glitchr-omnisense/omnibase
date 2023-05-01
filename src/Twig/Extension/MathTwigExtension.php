@@ -3,7 +3,6 @@
 namespace Base\Twig\Extension;
 
 use Countable;
-use Base\Service\TranslatorInterface;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;

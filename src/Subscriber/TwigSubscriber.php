@@ -7,8 +7,6 @@ use Base\Routing\RouterInterface;
 use Base\Service\ParameterBag;
 use Base\Twig\Renderer\Adapter\EncoreTagRenderer;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
-use Symfony\Component\Console\ConsoleEvents;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

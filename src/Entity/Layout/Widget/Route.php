@@ -2,7 +2,6 @@
 
 namespace Base\Entity\Layout\Widget;
 
-use App\Enum\UserRole;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;

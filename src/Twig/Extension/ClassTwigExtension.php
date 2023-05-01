@@ -9,10 +9,6 @@ use Twig\Extension\AbstractExtension;
  * @author Marco Meyer <marco.meyerconde@gmail.com>
  *
  */
-
-use Twig\Extra\Intl\IntlExtension;
-use Symfony\Component\DependencyInjection\Container;
-
 final class ClassTwigExtension extends AbstractExtension
 {
     public function getFunctions(): array

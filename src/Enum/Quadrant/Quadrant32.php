@@ -2,8 +2,6 @@
 
 namespace Base\Enum\Quadrant;
 
-use Base\Service\Model\IconizeInterface;
-
 class Quadrant32 extends Quadrant16
 {
     public const NbW = "NORTH_BY_WEST";

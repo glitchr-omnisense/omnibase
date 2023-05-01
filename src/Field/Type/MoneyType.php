@@ -4,7 +4,6 @@ namespace Base\Field\Type;
 
 use AsyncAws\Core\Exception\LogicException;
 use Base\Service\TradingMarketInterface;
-use Base\Twig\Environment;
 use Exception;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;

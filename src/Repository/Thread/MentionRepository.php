@@ -3,8 +3,6 @@
 namespace Base\Repository\Thread;
 
 use App\Entity\Thread\Mention;
-use Base\Entity\Thread;
-use Doctrine\Persistence\ManagerRegistry;
 
 use Base\Database\Repository\ServiceEntityRepository;
 

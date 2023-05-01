@@ -7,9 +7,11 @@ use Imagine\Image\ImageInterface;
 
 class InterlaceFilter implements FilterInterface
 {
+    private string $mode;
+
     public function __toString()
     {
-        return "interlace:".$this->mode;
+        return "interlace:" . $this->mode;
     }
 
     public function __construct(string $mode = ImageInterface::INTERLACE_LINE)

@@ -5,7 +5,6 @@ namespace Base\Backend\Config;
 use Base\Backend\Config\Menu\RouteMenuItem;
 use Base\Backend\Config\Menu\SubMenuItem;
 use Base\Service\IconProvider;
-use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Service\TranslatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\CrudMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;

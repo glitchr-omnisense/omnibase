@@ -4,7 +4,6 @@ namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Annotation\OrderColumn;
-use Base\Entity\Layout\Widget\Set\SetInterface;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;

@@ -2,9 +2,6 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Entity\Layout\ImageCrop;
-use Base\Validator\Constraints as AssertBase;
-
 use Base\Annotations\Annotation\Uploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

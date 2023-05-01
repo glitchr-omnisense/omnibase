@@ -2,7 +2,6 @@
 
 namespace Base\Validator;
 
-use Base\Service\TranslatorInterface;
 use function is_array;
 use function is_string;
 

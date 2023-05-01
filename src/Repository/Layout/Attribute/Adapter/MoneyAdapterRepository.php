@@ -5,7 +5,6 @@ namespace Base\Repository\Layout\Attribute\Adapter;
 use Base\Entity\Layout\Attribute\Adapter\MoneyAdapter;
 
 use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
-use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method MoneyAdapter|null find($id, $lockMode = null, $lockVersion = null)

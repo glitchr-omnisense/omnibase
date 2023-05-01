@@ -4,7 +4,6 @@ namespace Base\Repository\User;
 
 use App\Entity\User\Penalty;
 use Base\Database\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Penalty|null find($id, $lockMode = null, $lockVersion = null)

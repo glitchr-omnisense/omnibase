@@ -6,15 +6,12 @@ use Base\Form\FormFactory;
 
 use Exception;
 use InvalidArgumentException;
-use Base\Field\Type\SelectType;
 use Base\Entity\Layout\Attribute;
 use Base\Entity\Layout\Attribute\Common\AbstractRule;
 use Base\Entity\Layout\Attribute\Common\AbstractAction;
 use Base\Entity\Layout\Attribute\Common\AbstractScope;
 
 
-use Base\Field\Type\AssociationType;
-use Base\Field\Type\TranslationType;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvent;
 use Doctrine\ORM\PersistentCollection;

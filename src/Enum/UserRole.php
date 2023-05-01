@@ -5,7 +5,6 @@ namespace Base\Enum;
 use Base\Controller\Backend\Crud\UserCrudController;
 use Base\Database\Type\SetType;
 use Base\Service\Model\IconizeInterface;
-use Exception;
 
 class UserRole extends SetType implements IconizeInterface
 {

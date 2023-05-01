@@ -3,7 +3,6 @@
 namespace Base\Twig\Extension;
 
 use Base\Controller\UX\MediaController;
-use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Routing\AdvancedRouter;
 use Base\Service\Model\LinkableInterface;
 use Base\Routing\RouterInterface;

@@ -2,8 +2,6 @@
 
 namespace Base\Enum\Quadrant;
 
-use Base\Service\Model\IconizeInterface;
-
 class Quadrant16 extends Quadrant8
 {
     public const NNE = "NORTH_NORTHEAST";

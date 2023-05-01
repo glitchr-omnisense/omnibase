@@ -4,7 +4,6 @@ namespace Base\EntitySubscriber;
 
 use Base\Database\Entity\EntityExtension;
 
-use Base\Database\Entity\EntityExtensionInterface;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Enum\EntityAction;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
@@ -13,7 +12,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use LogicException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;

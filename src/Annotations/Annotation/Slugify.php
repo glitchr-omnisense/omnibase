@@ -116,7 +116,7 @@ class Slugify extends AbstractAnnotation
         if (!$input) {
             $input = camel2snake(class_basename($entity), '-');
         }
-        $input .= !empty($suffix) ? $this->separator.$suffix : '';
+        $input .= !empty($suffix) ? $this->separator . $suffix : '';
 
         if (!$this->keep) {
             $slug = $this->slugger->slug($input, $this->separator);
@@ -153,7 +153,7 @@ class Slugify extends AbstractAnnotation
             return $slug;
         }
         for ($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); ++$i) {
-            $slug = $defaultSlug.$this->separator.$i;
+            $slug = $defaultSlug . $this->separator . $i;
         }
 
         return $slug;

@@ -3,7 +3,6 @@
 namespace Base\Service;
 
 use Base\Service\Model\LinkableInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 interface SharerInterface
 {

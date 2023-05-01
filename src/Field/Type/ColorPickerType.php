@@ -9,9 +9,7 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Base\Service\BaseService;
-use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
-use Base\Twig\Environment;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;

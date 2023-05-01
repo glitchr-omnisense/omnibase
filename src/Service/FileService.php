@@ -5,7 +5,6 @@ namespace Base\Service;
 use Base\Controller\UX\MediaController;
 use Base\Routing\RouterInterface;
 use finfo;
-use League\Flysystem\Filesystem;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
 use InvalidArgumentException;

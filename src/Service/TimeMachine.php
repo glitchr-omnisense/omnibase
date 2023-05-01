@@ -241,7 +241,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $list;
     }
 
-    public function getSnapshot(int $id, int|array $storageNames, $prefix = null, $cycle = -1)
+    public function getSnapshot(int $id, int|array $storageNames, ?string $prefix = null, int $cycle = -1)
     {
         $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
         if ($id >= count_leaves($snapshots)) {
@@ -267,7 +267,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return null;
     }
 
-    public function getSnapshots(int|array $storageNames = [], $prefix = null, $cycle = -1): array
+    public function getSnapshots(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
     {
         $snapshots = [];
         $prefix = $prefix ?? "backup";
@@ -305,7 +305,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $snapshots;
     }
 
-    public function getLastCycle(array $files): int
+    public function getLastCycle(array $files, ?string $prefix = null): int
     {
         $matches = [];
         $lastCycle = 0;
@@ -318,7 +318,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $lastCycle;
     }
 
-    public function backup(null|string|array $databases, int|array $storageNames = [], $prefix = null, $cycle = -1)
+    public function backup(null|string|array $databases, int|array $storageNames = [], ?string $prefix = null, int $cycle = -1)
     {
         $prefix = $prefix ?? "backup";
         $this->output?->section()->writeln("<info>Backup procedure started:</info> " . $prefix);
@@ -412,7 +412,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return true;
     }
 
-    public function restore(int $id, bool $restoreDatabase, bool $restoreApplication, int|array $storageNames = [], $prefix = null, $cycle = -1)
+    public function restore(int $id, bool $restoreDatabase, bool $restoreApplication, int|array $storageNames = [], ?string $prefix = null, int $cycle = -1)
     {
         $prefix = $prefix ?? "backup";
 
@@ -480,9 +480,6 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     {
         // Compress tarball
         if ($compression) {
-            if ($ret) {
-                throw new LogicException("Failed to decompress tarball: " . $output);
-            }
 
             $compressor = $this->compressors->get($this->compression);
             $decompressedOutput = $compressor->getDecompressedPath($output);
@@ -494,6 +491,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             if ($command) {
                 exec($command, $_, $ret);
             }
+
             $output = $decompressedOutput;
         }
 

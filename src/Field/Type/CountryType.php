@@ -8,7 +8,6 @@ use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\Form\AbstractType;
 
 class CountryType extends SelectType implements SelectInterface
 {

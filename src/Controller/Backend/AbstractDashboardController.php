@@ -39,7 +39,6 @@ use Base\Form\Type\LayoutWidgetListType;
 use Base\Repository\Layout\SettingRepository;
 use Base\Repository\Layout\Widget\SlotRepository;
 use Base\Repository\Layout\WidgetRepository;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -543,9 +542,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
 //        if ($this->isGranted('ROLE_EDITOR')) {
 //
-//            $menu[] = MenuItem::section('DOCUMENTATION');
-//            $menu[] = MenuItem::linkToRoute("backoffice_manual", [], 'Manual', 'fa-solid fa-fw fa-book');
-//            $menu[] = MenuItem::linkToRoute("backoffice_manual_developer", [], 'Developer', 'fa-solid fa-fw fa-life-ring');
+//            $menu[] = MenuItem::section('SUPPORT');
+//            $menu[] = MenuItem::linkToRoute("backoffice_manual", [], 'User manual', 'fa-solid fa-fw fa-book');
+//            $menu[] = MenuItem::linkToRoute("backoffice_manual_developer", [], 'Developers', 'fa-solid fa-fw fa-life-ring');
 //        }
 
         return $menu;

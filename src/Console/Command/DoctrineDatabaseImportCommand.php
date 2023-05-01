@@ -190,6 +190,7 @@ class DoctrineDatabaseImportCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $path = null;
         if ($input->hasArgument("path")) {
             $path = $input->getArgument("path");
         }
@@ -492,7 +493,7 @@ class DoctrineDatabaseImportCommand extends Command
                                             $v = array_map(function ($k) use ($enumType, $iEntry) {
                                                 $value = $enumType::getValue($k);
                                                 if (!$value) {
-                                                    throw new Exception("Invalid enum key \"" . $k . "\" provided for EnumType \"" . $enumType . "\" for entry #" . ($iEntry + self::OFFSET_TOP + 1));
+                                                    throw new Exception("Invalid enum key \"" . $k . "\" provided for EnumType \"" . $enumType . "\" for entry #" . ($iEntry + self::OFFSET + 1));
                                                 }
                                                 return $value;
                                             }, $v);

@@ -2,7 +2,6 @@
 
 namespace Base\Validator;
 
-use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Base\Traits\BaseTrait;
 use Symfony\Component\Validator\Constraint;

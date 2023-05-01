@@ -12,7 +12,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\Model\IconizeInterface;
-use Base\Service\BaseService;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;

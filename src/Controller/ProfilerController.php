@@ -2,24 +2,10 @@
 
 namespace Base\Controller;
 
-use App\Entity\Marketplace\Product\Extra\Wallpaper\Variant as WallpaperVariant;
-use Base\Annotations\Annotation\Iconize;
-use Base\Annotations\Annotation\IsGranted;
-use Base\Annotations\Annotation\Sitemap;
-use Base\Entity\User\Notification;
 use Base\Notifier\NotifierInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
-use App\Repository\Marketplace\Product\Extra\WallpaperRepository;
-use App\Repository\Marketplace\ReviewRepository;
-use App\Repository\Marketplace\Sales\ChannelRepository;
-use App\Repository\Marketplace\StoreRepository;
-use App\Repository\User\ArtistRepository;
-use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Notifier\Notifier;
-use Base\Service\SettingBagInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 class ProfilerController extends AbstractController
 {

@@ -22,6 +22,9 @@ class Token implements IconizeInterface
 {
     use BaseTrait;
 
+    private Hashids $hashIds;
+    private $throttle;
+
     public function __iconize(): ?array
     {
         return self::__iconizeStatic()[$this->isValid() ? 1 : 0];

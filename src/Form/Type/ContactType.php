@@ -2,12 +2,9 @@
 
 namespace Base\Form\Type;
 
-use Base\Field\Type\AvatarType;
 use Base\Field\Type\FileType;
-use Base\Field\Type\PasswordType;
 use Base\Field\Type\SubmitType;
 use Base\Form\Model\ContactModel;
-use Base\Form\Model\UserProfileModel;
 use Google\Service\GrService;
 use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;

@@ -25,7 +25,6 @@ use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\ORM\Cache\Exception\NonCacheableEntity;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\MappingException;
 use Exception;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
@@ -35,7 +34,6 @@ use Symfony\Component\Notifier\Recipient\NoRecipient;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 
-use Symfony\Component\Notifier\Notifier as SymfonyNotifier;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 

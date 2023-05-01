@@ -3,7 +3,6 @@
 namespace Base\Enum;
 
 use Base\Database\Type\EnumType;
-use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\IconizeInterface;
 
 class Operation extends EnumType implements IconizeInterface

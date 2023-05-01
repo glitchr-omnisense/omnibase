@@ -2,7 +2,6 @@
 
 namespace Base\Database\Type;
 
-use ArrayAccess;
 use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\SelectInterface;

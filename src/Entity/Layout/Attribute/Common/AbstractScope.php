@@ -2,11 +2,9 @@
 
 namespace Base\Entity\Layout\Attribute\Common;
 
-use Base\Annotations\Annotation\Uploader;
 use Base\Database\Annotation\Associate;
 use Base\Database\Annotation\DiscriminatorEntry;
 
-use Base\Entity\Thread\Taxon;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractScopeRepository;
 use Base\Database\Annotation\Cache;

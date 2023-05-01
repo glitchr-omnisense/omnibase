@@ -9,7 +9,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer implements AbstractLocalCacheWarmerInterface
 {
     /** @var string */
-    private ?string $cacheFile = null;
+    private ?string $cacheFile;
 
     /** @var int */
     protected int $shellVerbosity = 0;

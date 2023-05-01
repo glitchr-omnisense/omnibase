@@ -21,6 +21,7 @@ class ResampleFilter implements FilterInterface
      * @var ImagineInterface
      */
     private ImagineInterface $imagine;
+    private array $options;
 
 
     public function __toString()

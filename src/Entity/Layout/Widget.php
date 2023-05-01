@@ -20,7 +20,6 @@ use Base\Repository\Layout\WidgetRepository;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 use Base\Annotations\Annotation\Timestamp;
 

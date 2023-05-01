@@ -5,7 +5,6 @@ namespace Base\Repository\Layout\Attribute\Adapter;
 use Base\Entity\Layout\Attribute\Adapter\ScalarAdapter;
 
 use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
-use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method ScalarAdapter|null find($id, $lockMode = null, $lockVersion = null)

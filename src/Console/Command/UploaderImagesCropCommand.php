@@ -17,7 +17,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(name: 'uploader:images:crop', aliases: [], description: '')]
 class UploaderImagesCropCommand extends UploaderImagesCommand
@@ -25,6 +24,8 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
     protected $input;
     protected $output;
     protected $maxDefinition;
+    private \Doctrine\ORM\EntityRepository $imageCropRepository;
+    private \Doctrine\ORM\EntityRepository $imageRepository;
 
     protected function configure(): void
     {

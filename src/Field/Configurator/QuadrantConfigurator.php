@@ -2,9 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Annotations\Annotation\Uploader;
 use Base\Field\QuadrantField;
-use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 

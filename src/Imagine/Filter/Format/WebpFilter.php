@@ -3,7 +3,6 @@
 namespace Base\Imagine\Filter\Format;
 
 use Base\Imagine\FilterInterface;
-use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Exception;
 use Imagine\Filter\Basic\Autorotate;
 use Imagine\Filter\Basic\WebOptimization;

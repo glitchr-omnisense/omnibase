@@ -3,7 +3,6 @@
 namespace Base\Field\Configurator;
 
 use Base\Field\IconField;
-use Base\Field\Type\IconType;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;

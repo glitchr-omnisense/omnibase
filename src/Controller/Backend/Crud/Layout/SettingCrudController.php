@@ -8,10 +8,7 @@ use Base\Controller\Backend\AbstractCrudController;
 use Base\Entity\Layout\Setting;
 use Base\Field\BooleanField;
 use Base\Field\SlugField;
-use Base\Field\Type\EditorType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class SettingCrudController extends AbstractCrudController
 {

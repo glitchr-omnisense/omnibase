@@ -4,7 +4,6 @@ namespace Base\Annotations;
 
 use App\Entity\User;
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;

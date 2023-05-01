@@ -4,15 +4,8 @@ namespace Base\Controller\Backend\Crud\User;
 
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\CountryField;
-use Base\Field\DateTimePickerField;
-use Base\Field\DiscriminatorField;
-use Base\Field\SelectField;
-use Base\Field\SlugField;
-use Base\Field\StateField;
-use Base\Field\TranslationField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class AddressCrudController extends AbstractCrudController
 {

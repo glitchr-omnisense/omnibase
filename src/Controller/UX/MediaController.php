@@ -11,7 +11,6 @@ use Base\Repository\Layout\ImageCropRepository;
 use Base\Service\FileService;
 use Base\Service\Flysystem;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;

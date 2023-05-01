@@ -15,6 +15,9 @@ class WatermarkFilter implements FilterInterface
      * @var ImagineInterface
      */
     protected $imagine;
+    private \Imagine\Image\BoxInterface $watermarkSize;
+    private array $options;
+    private ImageInterface $watermark;
 
     public function __toString()
     {

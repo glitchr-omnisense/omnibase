@@ -4,7 +4,6 @@ namespace Base\Console\Command;
 
 use App\Entity\User;
 use Base\Entity\User\Notification;
-use Base\Service\BaseService;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;

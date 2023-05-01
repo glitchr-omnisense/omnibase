@@ -2,7 +2,6 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Form\FormProxy;
 use Base\Form\FormProxyInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;

@@ -13,7 +13,6 @@ use Base\Annotations\Annotation\Randomize;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ShortRepository;
-use Base\Traits\BaseTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 

@@ -5,7 +5,6 @@ namespace Base\Field\Configurator;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\AssociationField;
-use Base\Field\CollectionField;
 use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;

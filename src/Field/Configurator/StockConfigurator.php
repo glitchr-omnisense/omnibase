@@ -2,7 +2,6 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Field\SlugField;
 use Base\Field\StockField;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;

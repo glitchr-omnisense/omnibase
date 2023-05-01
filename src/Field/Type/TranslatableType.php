@@ -2,8 +2,6 @@
 
 namespace Base\Field\Type;
 
-use Base\Field\Type\TranslationType;
-
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 

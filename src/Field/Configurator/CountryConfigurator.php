@@ -3,21 +3,15 @@
 namespace Base\Field\Configurator;
 
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\CountryField;
 use Base\Field\SelectField;
-use Base\Routing\RouterInterface;
-use Base\Service\Model\Autocomplete;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CountryConfigurator extends SelectConfigurator implements FieldConfiguratorInterface
 {

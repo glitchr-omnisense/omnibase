@@ -5,9 +5,7 @@ namespace Base\Controller\UX;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\CurrencyApi;
 use Base\Service\Model\Autocomplete;
-use Base\Service\Model\Currency\CurrencyApiInterface;
 use Base\Service\ObfuscatorInterface;
-use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
 use Base\Service\TradingMarketInterface;
 use Base\Traits\BaseTrait;
@@ -61,6 +59,7 @@ class AutocompleteController extends AbstractController
      * @var Profiler
      */
     protected ?Profiler $profiler;
+    private RequestStack $requestStack;
 
     public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
     {

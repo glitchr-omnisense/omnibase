@@ -6,10 +6,8 @@ use Base\Validator\Constraints\File as ConstraintsFile;
 use Base\Validator\Constraints\FileSize;
 use Base\Validator\ConstraintValidator;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class FileValidator extends ConstraintValidator
 {

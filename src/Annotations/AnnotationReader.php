@@ -2,11 +2,9 @@
 
 namespace Base\Annotations;
 
-use Base\Database\Entity\EntityExtensionInterface;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\ORM\EntityManager;
 
-use Base\Annotations\AbstractAnnotation;
 use Base\Database\Entity\EntityHydrator;
 use Exception;
 

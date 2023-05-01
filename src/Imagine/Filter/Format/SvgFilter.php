@@ -2,11 +2,9 @@
 
 namespace Base\Imagine\Filter\Format;
 
-use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Imagine\FilterInterface;
 
 use Exception;
-use Imagine\Image\Format;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
 

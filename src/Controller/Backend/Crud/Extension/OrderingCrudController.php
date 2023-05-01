@@ -3,9 +3,7 @@
 namespace Base\Controller\Backend\Crud\Extension;
 
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Field\ArrayField;
 use Base\Field\CollectionField;
-use Base\Field\DiscriminatorField;
 use Base\Field\NumberField;
 use Base\Field\SelectField;
 use Base\Field\Type\ArrayType;

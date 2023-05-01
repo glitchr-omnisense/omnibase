@@ -36,7 +36,7 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
         }
 
         // Extract [base] tags
-        $baseJsonPath = str_rstrip($publicDir, '/').'/bundles/base/entrypoints.json';
+        $baseJsonPath = str_rstrip($publicDir, '/') . '/bundles/base/entrypoints.json';
         if (file_exists($baseJsonPath)) {
             $encoreTagRenderer->addEntrypoint('_base', $baseJsonPath);
             $entrypoints = json_decode(file_get_contents($baseJsonPath), true)['entrypoints'];

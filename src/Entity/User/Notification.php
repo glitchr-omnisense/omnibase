@@ -10,10 +10,7 @@ use DateTimeInterface;
 use RuntimeException;
 use Symfony\Component\Notifier\Notification\Notification as SymfonyNotification;
 
-use Base\Service\BaseService;
-use Google\Service\Analytics\Upload;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\Notifier\Bridge\Discord\DiscordOptions;
@@ -24,10 +21,8 @@ use Symfony\Component\Notifier\Notification\ChatNotificationInterface;
 use Symfony\Component\Notifier\Notification\EmailNotificationInterface;
 use Symfony\Component\Notifier\Notification\SmsNotificationInterface;
 
-use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Notifier\Recipient\NoRecipient;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
-use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 
 use Base\Traits\BaseTrait;

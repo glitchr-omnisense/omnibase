@@ -5,8 +5,6 @@ namespace Base\Field\Type;
 use Base\Form\Transformer\ScaleNumberTransformer;
 use Base\Form\Transformer\StrippedNumberToLocalizedStringTransformer;
 use Base\Twig\Environment;
-use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Extension\Core\DataTransformer\NumberToLocalizedStringTransformer;
 use Symfony\Component\Form\Extension\Core\DataTransformer\StringToFloatTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;

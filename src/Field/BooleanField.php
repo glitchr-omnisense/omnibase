@@ -5,7 +5,6 @@ namespace Base\Field;
 use Base\Field\Type\BooleanType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
 final class BooleanField implements FieldInterface

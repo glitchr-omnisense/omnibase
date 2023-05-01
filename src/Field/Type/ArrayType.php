@@ -3,17 +3,10 @@
 namespace Base\Field\Type;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Entity\Layout\Attribute;
-use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
-use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
-use Base\Form\Common\AbstractType;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;

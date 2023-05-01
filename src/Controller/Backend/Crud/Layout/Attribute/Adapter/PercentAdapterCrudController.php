@@ -3,7 +3,6 @@
 namespace Base\Controller\Backend\Crud\Layout\Attribute\Adapter;
 
 use Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 
 class PercentAdapterCrudController extends AbstractAdapterCrudController
 {

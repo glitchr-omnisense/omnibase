@@ -4,12 +4,9 @@ namespace Base\Controller\Backend\Crud\Thread;
 
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\DiscriminatorField;
-use Base\Field\IdField;
 use Base\Field\TranslationField;
 use Base\Field\Type\SelectType;
-use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class TagCrudController extends AbstractCrudController
 {

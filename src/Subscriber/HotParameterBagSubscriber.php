@@ -7,7 +7,6 @@ use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
 use PDOException;
 use Symfony\Component\Console\ConsoleEvents;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

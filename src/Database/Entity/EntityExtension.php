@@ -2,8 +2,6 @@
 
 namespace Base\Database\Entity;
 
-use Base\Database\Entity\EntityExtensionInterface;
-
 class EntityExtension
 {
     public const ACTION_CREATE = 'create';

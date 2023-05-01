@@ -3,7 +3,6 @@
 namespace Base\Service\Model;
 
 use App\Entity\User;
-use Base\Enum\SpamScore;
 use DateTime;
 
 interface SpamProtectionInterface

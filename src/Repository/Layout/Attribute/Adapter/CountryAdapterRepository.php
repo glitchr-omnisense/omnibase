@@ -5,7 +5,6 @@ namespace Base\Repository\Layout\Attribute\Adapter;
 use Base\Entity\Layout\Attribute\Adapter\CountryAdapter;
 
 use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
-use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method CountryAdapter|null find($id, $lockMode = null, $lockVersion = null)

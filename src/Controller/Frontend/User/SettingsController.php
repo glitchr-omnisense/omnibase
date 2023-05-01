@@ -17,7 +17,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
@@ -30,10 +29,12 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInte
 class SettingsController extends AbstractController
 {
     private $baseService;
+    private UserRepository $userRepository;
+
     public function __construct(BaseService $baseService, UserRepository $userRepository)
     {
-        $this->baseService     = $baseService;
-        $this->userRepository  = $userRepository;
+        $this->baseService = $baseService;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -119,12 +120,12 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('client/user/settings_2fa.html.twig', [
-           'form' => $form->createView(),
-           'user' => $this->getUser()
+            'form' => $form->createView(),
+            'user' => $this->getUser()
         ]);
     }
 
-     /**
+    /**
      * @Route("/settings/2fa/qr-code", name="user_settings_2fa_qrcode")
      */
     public function TwoFactorAuthentification_QrCode()

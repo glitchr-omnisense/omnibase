@@ -2,7 +2,6 @@
 
 namespace Base\Field\Type;
 
-use InvalidArgumentException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;

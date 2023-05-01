@@ -8,7 +8,6 @@ use Base\Entity\User as BaseUser;
 use App\Repository\UserRepository;
 use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
-use Doctrine\ORM\Query;
 use Google\Service\GaService;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;

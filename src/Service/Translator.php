@@ -2,7 +2,6 @@
 
 namespace Base\Service;
 
-use AsyncAws\Core\Exception\LogicException;
 use Base\Database\Type\SetType;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;

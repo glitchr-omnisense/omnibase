@@ -5,10 +5,8 @@ namespace Base\Twig\Extension;
 use Base\Service\Localizer;
 use Base\Service\LocalizerInterface;
 use Base\Service\Translator;
-use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
-use Twig\TwigFunction;
 
 final class TranslatorTwigExtension extends AbstractExtension
 {

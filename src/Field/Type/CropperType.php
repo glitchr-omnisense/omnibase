@@ -5,7 +5,6 @@ namespace Base\Field\Type;
 use Base\Entity\Layout\ImageCrop;
 use Base\Enum\Quadrant\Quadrant8;
 use Base\Form\FormFactory;
-use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 use Doctrine\ORM\EntityManagerInterface;

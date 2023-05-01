@@ -13,6 +13,9 @@ class PasteFilter implements FilterInterface
      * @var ImagineInterface
      */
     protected ImagineInterface $imagine;
+    private int $y;
+    private int $x;
+    private ImageInterface $destination;
 
     public function __toString()
     {

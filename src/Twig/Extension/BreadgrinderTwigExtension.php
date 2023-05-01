@@ -2,9 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Service\Breadgrinder;
 use Base\Service\BreadgrinderInterface;
-use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;

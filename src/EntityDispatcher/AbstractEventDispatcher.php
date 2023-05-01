@@ -2,8 +2,6 @@
 
 namespace Base\EntityDispatcher;
 
-use Base\Database\Entity\EntityHydrator;
-
 use Base\Database\Entity\EntityHydratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;

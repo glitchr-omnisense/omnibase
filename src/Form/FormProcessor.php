@@ -3,7 +3,6 @@
 namespace Base\Form;
 
 use Base\Database\Entity\EntityHydrator;
-use Base\Field\Type\SubmitType;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\Traits\FormProcessorTrait;
 use Base\Traits\BaseTrait;
@@ -11,8 +10,6 @@ use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\ClickableInterface;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\SubmitButton;
-use Symfony\Component\Form\SubmitButtonTypeInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\FormInterface;

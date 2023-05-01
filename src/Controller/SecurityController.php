@@ -468,11 +468,14 @@ class SecurityController extends AbstractController
 
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
         if (!$resetPasswordToken) {
+
             $notification = new Notification("resetPassword.invalidToken");
             $notification->send("danger");
 
             return $this->redirectToRoute($this->router->getRouteIndex());
+
         } else {
+
             $user = $resetPasswordToken->getUser();
 
             // The token is valid; allow the user to change their password.
@@ -490,10 +493,10 @@ class SecurityController extends AbstractController
                 $rememberMeBadge = new RememberMeBadge();
                 $rememberMeBadge->enable();
 
-                $userAuthenticator->authenticateUser($newUser, $authenticator, $request, [$rememberMeBadge]);
+                $userAuthenticator->authenticateUser($user, $authenticator, $request, [$rememberMeBadge]);
                 $notification->send("success");
 
-                return $authenticateUser;
+                return $this->redirectToRoute($this->router->getRouteIndex());
             }
 
             return $this->render('security/reset_password.html.twig', ['form' => $form->createView()]);
@@ -523,7 +526,7 @@ class SecurityController extends AbstractController
     {
         return $this->render('security/launchdate.html.twig', [
             'launchdate' => $launcher->getLaunchdate(),
-            'is_launcherd' => $launcher->isLaunched()
+            'is_launchedd' => $launcher->isLaunched()
         ]);
     }
 

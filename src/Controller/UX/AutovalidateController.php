@@ -20,6 +20,10 @@ class AutovalidateController extends AbstractController
 {
     use BaseTrait;
 
+    private TranslatorInterface $translator;
+    private EntityManagerInterface $entityManager;
+    private Hashids $hashIds;
+
     public function __construct(TranslatorInterface $translator, EntityManagerInterface $entityManager)
     {
         $this->hashIds = new Hashids($this->getService()->getSalt());
@@ -44,9 +48,9 @@ class AutovalidateController extends AbstractController
      */
     public function Main(Request $request, string $hashid): Response
     {
-        $dict     = $this->decode($hashid);
-        $token    = $dict["token"] ?? null;
-        $value    = $dict["value"] ?? null;
+        $dict = $this->decode($hashid);
+        $token = $dict["token"] ?? null;
+        $value = $dict["value"] ?? null;
         $formType = $dict["form_type"] ?? null;
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";

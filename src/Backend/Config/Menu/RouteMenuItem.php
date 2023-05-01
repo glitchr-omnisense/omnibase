@@ -4,7 +4,6 @@ namespace Base\Backend\Config\Menu;
 
 use Base\Backend\Config\MenuItem;
 use Base\Service\Translator;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\RouteMenuItem as EaRouteMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 use Exception;

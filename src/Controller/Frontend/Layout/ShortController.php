@@ -2,11 +2,8 @@
 
 namespace Base\Controller\Frontend\Layout;
 
-use Base\BaseBundle;
 use Base\Repository\Layout\ShortRepository;
 use Base\Routing\RouterInterface;
-use Base\Service\SettingBagInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Base\Annotations\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +15,7 @@ class ShortController extends AbstractController
      * @var ShortRepository
      */
     protected $shortRepository;
+    private RouterInterface $router;
 
     public function __construct(RouterInterface $router, ShortRepository $shortRepository)
     {

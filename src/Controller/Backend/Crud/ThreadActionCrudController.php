@@ -6,7 +6,6 @@ use Base\Controller\Backend\AbstractCrudController;
 use Base\Enum\ThreadState;
 use Base\Backend\Filter\DiscriminatorFilter;
 use Base\Controller\Backend\AbstractDashboardController;
-use Base\Entity\Thread;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;

@@ -8,7 +8,6 @@ use Base\Repository\Layout\SettingRepository;
 use Psr\Cache\CacheItemInterface;
 use Symfony\Component\Asset\Packages;
 
-use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;

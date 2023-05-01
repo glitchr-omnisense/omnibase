@@ -3,7 +3,6 @@
 namespace Base\Imagine\Filter\Format;
 
 use Base\Imagine\FilterInterface;
-use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Imagine\Filter\Basic\Autorotate;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;

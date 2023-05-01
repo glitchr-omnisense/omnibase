@@ -3,10 +3,6 @@
 namespace Base\Field\Type;
 
 use Base\Form\Common\AbstractType;
-use Symfony\Component\Form\ButtonTypeInterface;
-use Symfony\Component\Form\Extension\Core\Type\BaseType;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\SubmitButtonTypeInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 

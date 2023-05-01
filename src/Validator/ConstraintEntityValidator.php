@@ -2,9 +2,6 @@
 
 namespace Base\Validator;
 
-use Base\BaseBundle;
-use Base\Service\TranslatorInterface;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Constraint;

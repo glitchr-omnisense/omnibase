@@ -2,7 +2,6 @@
 
 namespace Base\Field\Type;
 
-use Base\Field\Type\SelectType;
 use Base\Service\LocalizerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\ChoiceList;

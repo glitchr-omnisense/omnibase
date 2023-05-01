@@ -6,7 +6,6 @@ use Base\Field\Type\IconType;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
 class IconField extends SelectField implements FieldInterface
 {

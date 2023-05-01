@@ -3,7 +3,6 @@
 namespace Base\Controller\Backend\Crud\Layout\Attribute\Adapter\Common;
 
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Field\AssociationField;
 use Base\Field\DiscriminatorField;
 use Base\Field\IconField;
 use Base\Field\SlugField;
@@ -29,7 +28,7 @@ class AbstractAdapterCrudController extends AbstractCrudController
             if (count($entityDto->getInstance()->getAttributes()) === 0) {
                 continue;
             }
-            $action->setCssClass($action->getCssClass()." hide");
+            $action->setCssClass($action->getCssClass() . " hide");
         }
 
         return $actions;

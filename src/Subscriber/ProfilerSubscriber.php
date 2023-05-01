@@ -3,7 +3,6 @@
 namespace Base\Subscriber;
 
 use Base\Routing\RouterInterface;
-use Base\Service\BaseService;
 
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;

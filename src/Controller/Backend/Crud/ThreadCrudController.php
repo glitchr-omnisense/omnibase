@@ -2,7 +2,6 @@
 
 namespace Base\Controller\Backend\Crud;
 
-use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use Base\Field\DateTimePickerField;
 use Base\Field\DiscriminatorField;
 

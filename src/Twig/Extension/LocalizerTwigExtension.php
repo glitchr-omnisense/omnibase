@@ -2,10 +2,8 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Entity\User;
 use Base\Service\Localizer;
 use Base\Service\LocalizerInterface;
-use Base\Service\Translator;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;

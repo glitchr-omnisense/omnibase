@@ -11,7 +11,6 @@ use Exception;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 
 use Doctrine\Common\Util\ClassUtils;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * Class Hashify

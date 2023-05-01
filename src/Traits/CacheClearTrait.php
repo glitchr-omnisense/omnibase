@@ -2,7 +2,6 @@
 
 namespace Base\Traits;
 
-use Base\BaseBundle;
 use Base\Database\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;

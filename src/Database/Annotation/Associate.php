@@ -4,18 +4,11 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Base\Database\TranslationInterface;
-use Base\Database\Walker\TranslatableWalker;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
-use Symfony\Component\Cache\Marshaller\MarshallerInterface;
-use Symfony\Component\Cache\Marshaller\SodiumMarshaller;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
-
-use function is_file;
 
 /**
  * @Annotation

@@ -4,7 +4,6 @@ namespace Base\Repository\User;
 
 use App\Entity\User\Notification;
 use Base\Database\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Notification|null find($id, $lockMode = null, $lockVersion = null)

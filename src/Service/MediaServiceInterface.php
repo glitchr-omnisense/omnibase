@@ -3,7 +3,6 @@
 namespace Base\Service;
 
 use Base\Imagine\FilterInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 interface MediaServiceInterface extends FileServiceInterface
 {

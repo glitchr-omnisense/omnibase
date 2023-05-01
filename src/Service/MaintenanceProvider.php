@@ -49,6 +49,8 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         }
         $this->lockPath = $this->parameterBag->get("base.maintenance.lockpath");
 
+        $uptime = null;
+        $downtime = null;
         if ($this->lockPath && ($f = @fopen($this->lockPath, "r"))) {
             $downtime = trim(fgets($f, 4096));
             if (!feof($f)) {
@@ -61,8 +63,8 @@ class MaintenanceProvider implements MaintenanceProviderInterface
             $uptime = $this->settingBag->get("base.settings.maintenance.uptime")["_self"] ?? null;
         }
 
-        $downtime = $downtime ? $downtime->getTimestamp() : 0;
-        $uptime = $uptime ? $uptime->getTimestamp() : 0;
+        $downtime = $downtime?->getTimestamp() ?? 0;
+        $uptime = $uptime?->getTimestamp() ?? 0;
 
         $this->remainingTime = $uptime ? $uptime - time() : 0;
         if ($downtime - time() > 0 || $downtime < 1) {

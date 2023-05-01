@@ -8,7 +8,6 @@ use Base\Enum\UserState;
 use Base\Form\FormProxyInterface;
 use Base\Form\Model\UserSearchModel;
 use Base\Form\Type\UserSearchType;
-use Base\Repository\ThreadIntlRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;

@@ -4,7 +4,6 @@ namespace Base\Repository\User;
 
 use App\Entity\User\Group;
 use Base\Database\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Group|null find($id, $lockMode = null, $lockVersion = null)

@@ -3,7 +3,6 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
-use Base\Service\BaseService;
 use Base\Service\Localizer;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;

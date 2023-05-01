@@ -7,10 +7,8 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\Common\FormTypeInterface;
 use Base\Form\Traits\FormGuessTrait;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormTypeInterface as SymfonyFormTypeInterface;
 
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -160,7 +158,7 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
                 $priority = $_[1] ?? 0;
 
                 if (!is_callable($listener)) {
-                    throw new Exception("Invalid listener (" . $eventName . ") information provided for Form \"" . $name . "\".");
+                    throw new Exception("Invalid listener (" . $eventName . ") information provided for Form \"" . $type . "\".");
                 }
 
                 $listeners[] = [$listener, $priority];
