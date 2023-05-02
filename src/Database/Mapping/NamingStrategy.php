@@ -15,10 +15,6 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     public const TABLE_NAME_SIZE = 64;
     public const TABLE_I18N_SUFFIX = "Intl";
 
-    /**
-     * {}
-     */
-
     private array $uniqueTableName = [];
 
     /**
@@ -52,21 +48,35 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
         //
         // Determination of table name based on class information
-        if (!$tableName) {
-            $tableName = str_strip(strstr($className, "\\Entity\\"), "\\Entity\\");
+        if(!$tableName) {
+
+            // Strip App\ or Base\ namespace..
+            $tableName = str_lstrip($className, ["App\\", "Base\\"]);
+
+            // Strip first occurence of \Entity\
+            $entityNamespace = "Entity\\";
+            $pos = strpos($tableName, $entityNamespace);
+            if ($pos !== false) $tableName = substr_replace($tableName, "", $pos, strlen($entityNamespace));
+
+            // Defaulting case
             if (empty($tableName)) {
+
                 $tableName = $className;
                 if (strrpos($tableName, '\\') !== false) {
+
                     $tableName = lcfirst(substr($className, strrpos($className, '\\') + 1));
                 }
             }
 
+            // Turn from namespace into camel string..
             $tableName = str_replace("\\", "", $tableName);
             $tableName = explode("_", camel2snake($tableName));
             $tableName = array_unique($tableName);
 
             $tableName = snake2camel(implode("_", $tableName));
             $tableName = lcfirst($tableName);
+
+            // Handle I18n case
             $tableName = preg_replace('/' . self::TABLE_I18N_SUFFIX . '$/', self::TABLE_I18N_SUFFIX, $tableName);
         }
 

@@ -536,6 +536,7 @@ class BaseBundle extends Bundle
         $namespacesAndClasses = [];
 
         $filenames = $this->getFilePaths($path);
+
         foreach ($filenames as $filename) {
             if (filesize($filename) == 0) {
                 continue;
