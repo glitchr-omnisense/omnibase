@@ -12,7 +12,7 @@ use Symfony\Component\Uid\Uuid;
 /**
  *
  */
-class Configuration implements ConfigurationInterface
+class BaseConfiguration implements ConfigurationInterface
 {
     private TreeBuilder $treeBuilder;
 
