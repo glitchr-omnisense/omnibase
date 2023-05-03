@@ -22,8 +22,8 @@ class Token implements IconizeInterface
 {
     use BaseTrait;
 
-    private Hashids $hashIds;
-    private $throttle;
+    private hashIds $hashIds;
+    private ?int $throttle;
 
     public function __iconize(): ?array
     {
@@ -46,10 +46,10 @@ class Token implements IconizeInterface
         $this->expireAt = null;
         $this->allowAt = null;
 
-        $this->throttle = $this->getService()->getParameterBag("base.user.token_default_throttling");
+        $this->throttle = $throttle ?? $this->getService()->getParameterBag("base.user.token_default_throttling");
 
         $this->hashIds = new Hashids($this->getService()->getSalt());
-        $this->generate($expiry, $throttle);
+        $this->generate($expiry, $this->throttle);
     }
 
     /**
