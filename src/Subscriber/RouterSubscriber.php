@@ -71,7 +71,7 @@ class RouterSubscriber implements EventSubscriberInterface
             }
 
             $parsedUrl = parse_url2(get_url());
-            $parsedUrl["scheme"] = $this->router->getScheme();
+            //$parsedUrl["scheme"] = $this->router->getScheme(); //NB: Some server returns http when connection is not secured
             $parsedUrl["host"] = $this->router->getHostFallback();
 
             $url = compose_url(
@@ -86,9 +86,11 @@ class RouterSubscriber implements EventSubscriberInterface
                 $parsedUrl["query"] ?? null,
                 $parsedUrl["fragment"] ?? null
             );
+
         } elseif (!$route->getHost() && $this->router->reducesOnFallback()) {
+
             $parsedUrl = parse_url2(get_url());
-            $parsedUrl["scheme"] = $this->router->getScheme();
+            //$parsedUrl["scheme"] = $this->router->getScheme(); //NB: Some server returns http when connection is not secured
             $parsedUrl["machine"] = $this->router->getMachine() ?? null;
             $parsedUrl["subdomain"] = $this->router->getSubdomain() ?? null;
             $parsedUrl["domain"] = $this->router->getDomain() ?? null;
