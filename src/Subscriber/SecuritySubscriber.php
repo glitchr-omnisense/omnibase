@@ -380,7 +380,10 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $importance = $exception->getMessageData()["importance"] ?? $importance;
             }
 
-	    unsetcookies();
+            // Deeper exception that might require killing cookies
+            if($exception->getPrevious()) {
+                unsetcookies();
+            }
         }
 
         $notification = new Notification($message);
