@@ -197,6 +197,30 @@ namespace {
         return getimageorientation($fname) > 4;
     }
 
+    function unsetcookies(string $domain = '')
+    {
+        foreach ($_COOKIE as $name => $value)
+        {
+                unsetcookie($name, $domain);
+        }
+    }
+
+    function unsetcookie(string $name, string $domain = '')
+    {
+        setcookie($name, '', 1, '', $domain);
+        setcookie($name, '', 1, '/', $domain);
+
+	if(!$domain) {
+
+                $domain = parse_url2(get_url())["domain"] ?? '';
+                if($domain) {
+
+                        setcookie($name, '', 1, '', '.'.$domain);
+                        setcookie($name, '', 1, '/', '.'.$domain);
+                }
+        }
+    }
+
     /**
      * @param $image
      * @param $fname
