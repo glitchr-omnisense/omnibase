@@ -49,7 +49,8 @@ class ArrayType extends CollectionType
             "associative" => null,
             "allow_add" => true,
             "allow_delete" => true,
-            'entry_type' => TextType::class,
+            "entry_type" => TextType::class,
+            "webpack_entry" => "form.array",
             "pattern" => null,
             "length" => 0,
             "placeholder" => []

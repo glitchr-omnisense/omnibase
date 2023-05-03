@@ -642,7 +642,9 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
             return $this->renderedLinkTags[$entryName] . $this->renderOptionalLinkTags($entryName);
         }
 
-        throw new EntrypointNotFoundException('Failed to find "' . $entryName . '" in the lookup collection: ' . implode(', ', array_keys($this->getEntrypoints())));
+        // Link is not mandatory.. (e.g. when no css needed)
+        //throw new EntrypointNotFoundException('Failed to find "' . $entryName . '" in the lookup collection: ' . implode(', ', array_keys($this->getEntrypoints())));
+        return '';
     }
 
     public function renderOptionalScriptTags(null|string|array $entryName = null, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, array $htmlAttributes = []): string
