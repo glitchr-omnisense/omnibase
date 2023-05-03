@@ -48,7 +48,8 @@ window.addEventListener('load', function(event) {
                             invalidRequiredField[0].reportValidity();
                         });
 
-                    location.hash = navButton.data("bs-target");
+                    var target = navButton.data("bs-target");
+                    if (target) location.hash = target;
                 }
 
             }
