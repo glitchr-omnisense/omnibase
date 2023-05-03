@@ -370,18 +370,23 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onLoginFailure(LoginFailureEvent $event)
     {
-        $message = "@notifications.login.failed";
+	$message = "@notifications.login.failed";
         $importance = "danger";
-        $data = [];
 
         if (($exception = $event->getException())) {
-            $importance = $exception->getMessageData()["importance"] ?? $importance;
-            $data = $exception->getMessageData();
 
-            $message = $this->translator->trans($exception->getMessageKey() ?? $message, $data, "security");
+            if($this->router->isDebug()) {
+                $message = $exception->getMessage() ?? $message;
+                $importance = $exception->getMessageData()["importance"] ?? $importance;
+            }
+
+            // Deeper exception that might require killing cookies
+            if($exception->getPrevious()) {
+                unsetcookies();
+            }
         }
 
-        $notification = new Notification($message, $data);
+        $notification = new Notification($message);
         $notification->send($importance);
     }
 
