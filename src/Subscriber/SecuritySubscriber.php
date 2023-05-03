@@ -376,7 +376,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if (($exception = $event->getException())) {
 
             if($this->router->isDebug()) {
-                $message = $exception->getMessage();
+                $message = $exception->getMessage() ?? $message;
                 $importance = $exception->getMessageData()["importance"] ?? $importance;
             }
 
