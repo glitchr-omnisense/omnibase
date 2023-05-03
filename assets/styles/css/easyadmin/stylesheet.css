@@ -370,8 +370,7 @@ margin: 0 0.25em;
 .online-user-wrapper img.user-avatar,
 .user-menu-wrapper img.user-avatar {
 height: 40px;
-max-width: 40px;
-width: auto;
+min-width: 40px;
 background-color: #FFF5;
 }
 
