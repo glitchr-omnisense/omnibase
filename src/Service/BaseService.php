@@ -121,6 +121,8 @@ class BaseService implements RuntimeExtensionInterface
         return $this->container->getServiceIds();
     }
 
+    protected ?Profiler $profiler = null;
+
     public function __construct(
         KernelInterface               $kernel,
         RequestStack                  $requestStack,
@@ -144,7 +146,8 @@ class BaseService implements RuntimeExtensionInterface
         RouterInterface               $router,
         EntityHydratorInterface       $entityHydrator,
         ClassMetadataManipulator      $classMetadataManipulator,
-        AdminUrlGenerator             $adminUrlGenerator
+        AdminUrlGenerator             $adminUrlGenerator,
+        ?Profiler                     $profiler
     )
     {
         $this->setInstance($this);
@@ -159,6 +162,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->authorizationChecker = $authorizationChecker;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory = $formFactory;
+        $this->profiler = $profiler;
 
         // Additional common containers
         $this->setClassMetadataManipulator($classMetadataManipulator);
@@ -393,7 +397,7 @@ class BaseService implements RuntimeExtensionInterface
 
     public function getProfiler(): ?Profiler
     {
-        return $this->kernel->getContainer()->get('profiler');
+        return $this->profiler;
     }
 
     /**
