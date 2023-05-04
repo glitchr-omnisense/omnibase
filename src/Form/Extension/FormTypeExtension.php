@@ -64,6 +64,7 @@ class FormTypeExtension extends AbstractTypeExtension
             'validation_entity' => null,
             'use_model' => false,
             'submit_on_enter' => true,
+            'translation_domain' => "fields"
         ]);
 
         $resolver->setNormalizer('form_flow_id', function (Options $options, $value) {
