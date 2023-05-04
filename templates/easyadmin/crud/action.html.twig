@@ -37,8 +37,6 @@
     {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
 
     {% if action.crudActionName == "group" %}
-        TODO..
-        {{dump(action)}}
         <span class="input-group dropdown {{ action.type == 'entity' ? 'd-inline' : ''}} action-discriminator">
         {#
             {% set actionHtmlAttributes = action.htmlAttributes %}
