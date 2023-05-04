@@ -206,7 +206,8 @@
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-        </service>
+            <argument type="service" id="profiler" on-invalid="null" />
+       </service>
 
         <service id="Base\Service\Localizer" parent="Base\Cache\Abstract\AbstractLocalCache" public="true">
             <tag name="twig.runtime" />
