@@ -318,7 +318,11 @@
 
 {%- block button2_attributes -%}
     id="{{ id }}" name="{{ full_name }}"{% if disabled %} disabled="disabled"{% endif -%}
-    {{ block('attributes') }}
+
+    {% set attr_request = attr|merge(form.vars.attr) %}
+    {% set attr_request = attr_request|merge({"class": (attr.class ?? "") ~ " " ~ (attr_request.class ?? "")}) %}
+    {{ html_attributes(attr_request) }}
+
 {%- endblock button2_attributes -%}
 
 {%- block button2_widget -%}

@@ -61,6 +61,9 @@ class FormProcessor implements FormProcessorInterface
 
         // Special case for buttons
         if ($form && $data instanceof FormModelInterface) {
+
+            object_init($data);
+
             foreach ($form->all() as $childName => $child) { // @TODO Use array_map_recursive()
                 if (!$child instanceof ClickableInterface) {
                     continue;

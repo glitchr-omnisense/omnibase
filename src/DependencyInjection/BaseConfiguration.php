@@ -68,7 +68,7 @@ class BaseConfiguration implements ConfigurationInterface
             ->end()
             ->arrayNode('user')->addDefaultsIfNotSet()
             ->children()
-            ->scalarNode('token_default_throttling')
+            ->integerNode('token_default_throttling')
             ->info('Default throttling time between two tokens received')
             ->defaultValue(3 * 60)
             ->end()

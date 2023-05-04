@@ -51,6 +51,7 @@ class UniqueEntity extends ConstraintEntity
         $this->service = $service ?? $this->service;
         $this->em = $em ?? $this->em;
         $this->entityClass = $entityClass ?? $this->entityClass;
+
         $this->repositoryMethod = $repositoryMethod ?? $this->repositoryMethod;
         $this->errorPath = $errorPath ?? $this->errorPath;
         $this->ignoreNull = $ignoreNull ?? $this->ignoreNull;

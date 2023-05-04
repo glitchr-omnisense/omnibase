@@ -3,6 +3,10 @@
   line-height: calc(1.5em + 0.75rem);
 }
 
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered
+{
+  min-height:38px;
+}
 .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
   position: absolute;
   top: 18px;

@@ -99,8 +99,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
                 throw new ConstraintDefinitionException(sprintf('Object manager "%s" does not exist.', $constraint->em));
             }
         } else {
-            $em = $this->getDoctrine()->getManagerForClass(get_class($entity));
-
+            $em = $this->getDoctrine()->getManagerForClass($constraint->entityClass ?? get_class($entity));
             if (!$em) {
                 throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
             }
@@ -139,7 +138,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         // if (null !== $constraint->errorPath && !\is_string($constraint->errorPath))
         //     throw new UnexpectedTypeException($constraint->errorPath, 'string or null');
 
-        $this->em = $this->getDoctrine()->getManagerForClass(get_class($entity));
+        $this->em = $this->getDoctrine()->getManagerForClass($constraint->entityClass ?? get_class($entity));
     }
 
     /**

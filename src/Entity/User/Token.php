@@ -47,7 +47,6 @@ class Token implements IconizeInterface
         $this->allowAt = null;
 
         $this->throttle = $throttle ?? $this->getService()->getParameterBag("base.user.token_default_throttling");
-
         $this->hashIds = new Hashids($this->getService()->getSalt());
         $this->generate($expiry, $this->throttle);
     }

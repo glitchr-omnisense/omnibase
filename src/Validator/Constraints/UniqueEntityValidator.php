@@ -15,6 +15,7 @@ use Base\Validator\ConstraintEntity;
 use Countable;
 use Iterator;
 use IteratorAggregate;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\Constraint;
 use Base\Validator\ConstraintEntityValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
@@ -38,12 +39,12 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         $entity = $value;
         parent::validate($entity, $constraint);
 
-        $em = $constraint->em ?? $this->getEntityManager(get_class($entity));
+        $em = $constraint->em ?? $this->getEntityManager($constraint->entityClass ?? get_class($entity));
         if (!$em) {
             throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
         }
 
-        $classMetadata = $this->getClassMetadata($entity);
+        $classMetadata = $this->getClassMetadata($constraint->entityClass ?? $entity);
 
         $criteria = [];
         $hasNullValue = false;
@@ -87,7 +88,8 @@ class UniqueEntityValidator extends ConstraintEntityValidator
                 throw new ConstraintDefinitionException(sprintf('The field "%s" in "' . get_class($entity) . '" is not mapped by Doctrine, so it cannot be validated for uniqueness.', $fieldName));
             }
 
-            $fieldValue = $classMetadata->reflFields[$fieldName]->getValue($entity);
+            $propertyAccessor = PropertyAccess::createPropertyAccessor();
+            $fieldValue = $propertyAccessor->getValue($entity, $fieldName);
 
             if (null === $fieldValue) {
                 $hasNullValue = true;
@@ -124,10 +126,9 @@ class UniqueEntityValidator extends ConstraintEntityValidator
              * by checking the entity is the same, or subclass of the supported entity.
              */
             $repository = $em->getRepository($constraint->entityClass);
-            $supportedClass = $repository->getClassName();
 
-            if (!$entity instanceof $supportedClass) {
-                throw new ConstraintDefinitionException(sprintf('The "%s" entity repository does not support the "%s" entity. The entity should be an instance of or extend "%s".', $constraint->entityClass, $classMetadata->getName(), $supportedClass));
+            if (!$repository) {
+                throw new ConstraintDefinitionException(sprintf('No corresponding "%s" entity repository found.', $constraint->entityClass));
             }
         } else {
             $repository = $em->getRepository(get_class($entity));

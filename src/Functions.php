@@ -3424,6 +3424,54 @@ namespace {
      * @return object
      * @throws Exception
      */
+    function object_init(object $object, array $ignore_vars = [])
+    {
+        $reflClass = new ReflectionClass($object);
+
+        do {
+
+            foreach ($reflClass->getProperties() as $reflProperty) {
+
+                if(in_array($reflProperty->getName(), $ignore_vars) ) continue;
+                if($reflProperty->isInitialized($object)) continue;
+
+                $defaultValue = $reflProperty->getDefaultValue();
+                if($defaultValue !== null || $reflProperty->getType()->allowsNull()) {
+                    $reflProperty->setValue($object, $defaultValue);
+                    continue;
+                }
+
+                if($reflProperty->getType()->isBuiltin()) {
+
+                    $defaultBuiltin = match ($reflProperty->getType()->getName())
+                    {
+                        "array" => [],
+                        "callable" => function() {},
+                        "bool" => false,
+                        "float", "int" => 0,
+                        "string" => "",
+                        default => null
+                    };
+
+                    if($defaultBuiltin !== null) {
+                        $reflProperty->setValue($object, $defaultBuiltin);
+                        continue;
+                    }
+                }
+            }
+
+        } while ($reflClass = $reflClass->getParentClass());
+
+        return $object;
+    }
+
+
+    /**
+     * @param object $object
+     * @param array|object|null $vars
+     * @return object
+     * @throws Exception
+     */
     function object_hydrate(object $object, array|object|null $vars = null)
     {
         if ($vars === null) {
