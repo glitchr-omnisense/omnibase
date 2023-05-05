@@ -315,19 +315,21 @@ abstract class BaseNotifier implements BaseNotifierInterface
 
         $mail = trim(explode("<", $mail)[1] ?? $mail, ">");
         $mailName = $this->settingBag->getScalar("base.settings.mail.name");
-        if (!$mailName) {
+        if(!$mailName) {
             $mailName = trim(explode("<", $mail)[0]);
         }
-        if (!$mailName) {
+        if(!$mailName) {
             $mailName = first($defaultMail) ?? null;
         }
-        $mailName = trim(mb_ucwords(
-            str_replace(
-                [".", "_"],
-                [" ", " "],
-                explode("@", $mail)[0]
-            )
-        ));
+        if(!$mailName) {
+            $mailName = trim(mb_ucwords(
+                str_replace(
+                    [".", "_"],
+                    [" ", " "],
+                    explode("@", $mail)[0]
+                )
+            ));
+        }
 
         $phone = $this->settingBag->getScalar("base.settings.phone");
         if (!$phone) {
@@ -545,6 +547,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $timezoneBak = date_default_timezone_get();
 
         foreach ($recipients as $recipient) {
+
             // Send notification with proper locale
             $locale = $this->localizer->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localizer->setLocale($locale);
