@@ -7,12 +7,28 @@ namespace Base\Traits;
  */
 trait CacheableTrait
 {
-    public function __toKey(?string ...$variadic): string
+    public function __toKey(mixed ...$variadic): string
     {
+        $variadic = array_filter($variadic);
+        $variadic = array_map(function($v) {
+
+            if(is_stringeable($v)) {
+                return $v;
+            }
+
+            if($v instanceof \DateTime) {
+                return $v->getTimestamp();
+            }
+
+            return null;
+
+        }, $variadic);
+
         if (empty($variadic)) {
             $variadic[] = spl_object_id($this);
         }
 
+        $variadic = array_flatten(".", $variadic);
         return implode(";", array_filter([
             snake2camel(str_replace("\\", "_", static::class)),
             ...$variadic
