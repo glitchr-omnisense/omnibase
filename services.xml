@@ -841,6 +841,7 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="router" />
+            <argument type="service" id="referrer" />
 
             <bind key="$secret">%kernel.secret%</bind>
         </service>
