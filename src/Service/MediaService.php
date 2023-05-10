@@ -277,22 +277,22 @@ class MediaService extends FileService implements MediaServiceInterface
 
     public function thumbnailInset(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]));
+        return $this->thumbnail($path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]), $filters);
     }
 
     public function thumbnailOutbound(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]));
+        return $this->thumbnail($path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]), $filters);
     }
 
     public function thumbnailNoclone(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]));
+        return $this->thumbnail($path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]), $filters);
     }
 
     public function thumbnailUpscale(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]));
+        return $this->thumbnail($path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]), $filters);
     }
 
     public function thumbnail(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
