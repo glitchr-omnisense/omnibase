@@ -148,7 +148,7 @@ class MediaController extends AbstractController
             throw $this->createNotFoundException();
         }
         if ($extension == null || !in_array($extension, $extensions)) {
-            return $this->redirectToRoute("ux_imageCropExtension", ["data" => $data, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+            return $this->ImageCrop($data, $identifier, first($extensions));
         }
 
         //
