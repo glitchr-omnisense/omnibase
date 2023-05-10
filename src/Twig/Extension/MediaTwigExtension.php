@@ -226,7 +226,7 @@ final class MediaTwigExtension extends AbstractExtension
      * @param int $referenceType
      * @return string|null
      */
-    public function url(array $context, ?string $name, array $parameters = [], int $referenceType = AdvancedRouter::ABSOLUTE_PATH)
+    public function url(array $context, ?string $name, array $parameters = [], int $referenceType = AdvancedRouter::ABSOLUTE_URL)
     {
         if (null == $name) {
             return $name;
