@@ -157,7 +157,6 @@ class MediaService extends FileService implements MediaServiceInterface
         $sources = $this->audio($path);
         $sources = is_array($sources) ? $sources : [$sources];
 
-        // dump($sources);
         return $this->twig->render("@Base/media/audio.html.twig", [
             "sources" => $sources,
             "attr" => $attributes,

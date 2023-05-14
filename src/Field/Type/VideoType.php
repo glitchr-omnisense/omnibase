@@ -26,7 +26,8 @@ class VideoType extends FileType
     {
         $resolver->setDefaults([
             'mime_types' => ["video/*"],
-            'multisource' => true
+            'multisource' => true,
+            "lightbox" => null
         ]);
 
         $resolver->setNormalizer('multiple', function (Options $options, $value) {
