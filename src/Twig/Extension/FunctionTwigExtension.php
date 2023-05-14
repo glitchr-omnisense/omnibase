@@ -150,6 +150,9 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('fifth', 'fifth'),
                 new TwigFilter('empty', 'empty'),
 
+                new TwigFilter('head', 'head'),
+                new TwigFilter('tail', 'tail'),
+
                 new TwigFilter('colorify', [$this, 'colorify']),
                 new TwigFilter('crudify', [$this, 'crudify'], ['is_safe' => ['all']]),
                 new TwigFilter('htmlify', [$this, 'htmlify'], ['is_safe' => ['all']]),

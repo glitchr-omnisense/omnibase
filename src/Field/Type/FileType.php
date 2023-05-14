@@ -288,6 +288,7 @@ class FileType extends AbstractType implements DataMapperInterface
             if ($options["multiple"] && $propertyType != "array") {
                 $view->vars['max_files'] = 1;
             }
+            
         } else {
             $files = $form->getData();
         }
@@ -334,7 +335,9 @@ class FileType extends AbstractType implements DataMapperInterface
             }
 
             $view->vars["value"] = implode("|", array_map(fn($v) => $v !== null ? basename($v) : null, $view->vars["value"]));
+
         } else {
+
             $view->vars['path'] = $this->fileService->isImage($view->vars["value"]) ? $this->mediaService->image($view->vars["value"]) : null;
             $view->vars['download'] = $this->fileService->downloadable($view->vars["value"]);
             $view->vars['clippable'] = $this->fileService->isImage($view->vars["value"]);

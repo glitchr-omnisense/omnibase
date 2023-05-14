@@ -26,6 +26,6 @@ class VideoField extends FileField implements FieldInterface
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet('data_class', null)
             ->setCustomOption(self::OPTION_SHOWFIRST, true)
-            ->setCustomOption(self::OPTION_RENDER_FORMAT, 'count');
+            ->setCustomOption(self::OPTION_RENDER_FORMAT, 'video');
     }
 }

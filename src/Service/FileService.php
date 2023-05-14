@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Controller\UX\MediaController;
+use Base\Routing\AdvancedRouter;
 use Base\Routing\RouterInterface;
 use finfo;
 use Symfony\Component\Uid\Uuid;
@@ -109,6 +110,7 @@ class FileService implements FileServiceInterface
         }
 
         if (is_array($fileOrMimetypeOrArray)) {
+            
             $extensions = [];
             $extensionList = array_map(fn($mimetype) => $this->getExtensions($mimetype), $fileOrMimetypeOrArray);
             foreach ($extensionList as $extension) {
@@ -153,6 +155,10 @@ class FileService implements FileServiceInterface
         try {
             return $this->mimeTypes->guessMimeType($fileOrContentsOrArray);
         } catch (InvalidArgumentException $e) {
+
+            if(is_string($fileOrContentsOrArray) && !is_binary($fileOrContentsOrArray))
+                $fileOrContentsOrArray = $this->router->getUrl($fileOrContentsOrArray, [], AdvancedRouter::ABSOLUTE_URL);
+
             // Attempt to read based on custom mime_content_content method
             $mimeType = mime_content_type2($fileOrContentsOrArray);
             if ($mimeType && $mimeType !== "application/x-empty") {
@@ -356,12 +362,13 @@ class FileService implements FileServiceInterface
         $response->headers->set('Content-Length', strlen($contents));
 
         if ($attachment) {
+            
             $extension = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
             $extensions = $this->getExtensions($mimeType);
 
             if ($attachment === true) {
-                if ($mimeType && str_starts_with($mimeType, "image/")) {
-                    $attachment = "image" . $extension;
+                if ($mimeType) {
+                    $attachment = explode("/", $mimeType)[0] . $extension;
                 } else {
                     $attachment = "unnamed";
                 }

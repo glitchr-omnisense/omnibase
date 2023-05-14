@@ -125,8 +125,8 @@ class MediaService extends FileService implements MediaServiceInterface
         $output = [];
 
         $pathList = is_array($path) ? $path : [$path];
-        foreach ($pathList as $p) {
-            $output[] = $this->generate("ux_serve", [], $path, $config);
+        foreach ($pathList as $_path) {
+            $output[] = $this->generate("ux_serve", [], $_path, $config);
         }
 
         return is_array($path) ? $output : first($output);
@@ -141,38 +141,33 @@ class MediaService extends FileService implements MediaServiceInterface
         $output = [];
 
         $pathList = is_array($path) ? $path : [$path];
-        foreach ($pathList as $p) {
-            $output[] = $this->generate("ux_serve", [], $path, $config);
+        foreach ($pathList as $_path) {
+            $output[] = $this->generate("ux_serve", [], $_path, $config);
         }
 
         return is_array($path) ? $output : first($output);
     }
 
-    public function soundify(null|array|string $path, array $attributes = []): null|array|string
+    public function soundify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
             return $path;
-        }
-        if (is_array($path)) {
-            return array_map(fn($s) => $this->soundify($s, $attributes), $path);
         }
 
         $sources = $this->audio($path);
         $sources = is_array($sources) ? $sources : [$sources];
 
+        // dump($sources);
         return $this->twig->render("@Base/media/audio.html.twig", [
             "sources" => $sources,
             "attr" => $attributes,
         ]);
     }
 
-    public function vidify(null|array|string $path, array $attributes = []): null|array|string
+    public function vidify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
             return $path;
-        }
-        if (is_array($path)) {
-            return array_map(fn($s) => $this->vidify($s, $attributes), $path);
         }
 
         $sources = $this->video($path);
@@ -277,22 +272,22 @@ class MediaService extends FileService implements MediaServiceInterface
 
     public function thumbnailInset(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]));
+        return $this->thumbnail($path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET]), $filters);
     }
 
     public function thumbnailOutbound(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]));
+        return $this->thumbnail($path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND]), $filters);
     }
 
     public function thumbnailNoclone(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]));
+        return $this->thumbnail($path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE]), $filters);
     }
 
     public function thumbnailUpscale(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]));
+        return $this->thumbnail($path, $width, $height, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE]), $filters);
     }
 
     public function thumbnail(array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null

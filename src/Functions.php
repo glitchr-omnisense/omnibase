@@ -1730,6 +1730,9 @@ namespace {
         return !file_exists($dir) || (is_dir($dir) && !(new FilesystemIterator($dir))->valid());
     }
 
+    function is_binary(string $str) {
+        return preg_match('~[^\x20-\x7E\t\r\n]~', $str) > 0;
+    }
     /**
      * @param string $filename
      * @param int $mode
@@ -1741,7 +1744,7 @@ namespace {
         if (filter_var($filename, FILTER_VALIDATE_URL)) {
             $headers = get_headers2($filename, $filename, $mode);
             if (strpos($headers[0], '200')) {
-                return explode("Content-Type: ", $headers[1])[1] ?? null;
+                return str_lstrip(first(array_starts_with($headers, "Content-Type", ARRAY_USE_VALUES)), "Content-Type: ");
             }
         }
 
@@ -2618,7 +2621,7 @@ namespace {
      */
     function array_starts_with(array $haystack, string $needle, int $mode = ARRAY_USE_KEYS)
     {
-        return array_filter($haystack, fn($k, $v) => str_starts_with($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
+        return array_filter($haystack, fn($v,$k) => str_starts_with($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
     }
 
     /**
@@ -2629,7 +2632,7 @@ namespace {
      */
     function array_ends_with(array $haystack, string $needle, int $mode = ARRAY_USE_KEYS)
     {
-        return array_filter($haystack, fn($k, $v) => str_ends_with($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
+        return array_filter($haystack, fn($v,$k) => str_ends_with($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
     }
 
     const FORMAT_IDENTITY = 0; // "no changes"
