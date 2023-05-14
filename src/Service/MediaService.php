@@ -248,7 +248,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "") . "," . $srcset, ",");
 
         return $this->twig->render("@Base/media/image.html.twig", [
-            "path" => $this->image($path),
+            "path" => is_url($path) ? $path : $this->image($path),
             "attr" => $attributes,
             "lazyload" => $lazyload,
             "lazybox" => $lazybox

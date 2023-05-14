@@ -19,6 +19,15 @@
     font-style: normal;
 }
 
+main .exception
+{
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
 .ql-editor img {
     float: left;
     margin: 1em 2em 1em 1em;

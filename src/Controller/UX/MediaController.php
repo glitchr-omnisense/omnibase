@@ -148,7 +148,7 @@ class MediaController extends AbstractController
             throw $this->createNotFoundException();
         }
         if ($extension == null || !in_array($extension, $extensions)) {
-            return $this->redirectToRoute("ux_imageCropExtension", ["data" => $data, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+            return $this->ImageCrop($data, $identifier, first($extensions));
         }
 
         //
@@ -281,8 +281,12 @@ class MediaController extends AbstractController
             return $this->redirectToRoute("ux_imageSvg", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
         }
 
-        $options = $config["options"];
-        $filters = $config["filters"];
+        $filters = $config["filters"] ?? [];
+        $options = $config["options"] ?? [];
+        $identifier = $config["identifier"] ?? null;
+        if ($identifier != null) {
+            return $this->ImageCrop($data, $identifier, "webp");
+        }
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
@@ -360,6 +364,7 @@ class MediaController extends AbstractController
         $output = pathinfo_extension($data . "/image", $extension);
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new BitmapFilter(null, $options, $filters));
         if ($debug) {
+
             dump($data, $config, $path);
             exit(1);
         }

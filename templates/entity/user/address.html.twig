@@ -3,7 +3,7 @@
     {{ entity.streetAddress }},
     {{ entity.city }}<br>
     {{ entity.zipCode }},
-    {{ entity.country|upper }}<br>
+    {{ entity.country|country_name|upper }}<br>
 
     {% set phone = entity.phone %}
     {% if phone is not null %}

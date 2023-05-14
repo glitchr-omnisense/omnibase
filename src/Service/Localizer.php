@@ -10,6 +10,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Currencies;
+use Symfony\Component\Intl\Exception\MissingResourceException;
+use Symfony\Component\Intl\Exception\ResourceBundleNotFoundException;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 use Symfony\Component\Intl\Timezones;
@@ -114,7 +116,16 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
         $country = substr($locale, 3, 2);
         $country = $country ?: null;
-        return $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
+
+        if($country !== null && in_array($country, $langCountries)) {
+            return $country;
+        }
+
+        if($country === null) {
+            return $langCountries[0] ?? $defaultCountry;
+        }
+
+        return $country;
     }
 
     private static ?array $locales = null;
@@ -255,7 +266,8 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
     public function getLocaleLangName(?string $locale = null): ?string
     {
-        return Languages::getName($this->getLocaleLang($locale));
+        try { return Languages::getName($this->getLocaleLang($locale)); }
+        catch(MissingResourceException $e) { return $locale; }
     }
 
     public function getLocaleLang(?string $locale = null): string
@@ -268,7 +280,8 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
     public function getLocaleCountryName(?string $locale = null): string
     {
-        return Countries::getName($this->getLocaleCountry($locale));
+        try { return Countries::getName($this->getLocaleCountry($locale)); }
+        catch(MissingResourceException $e) { return $locale; }
     }
 
     public function getLocaleCountry(?string $locale = null): string
@@ -276,6 +289,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         if ($locale === null) {
             $locale = $this->getLocale();
         }
+
         return self::__toLocaleCountry($locale);
     }
 

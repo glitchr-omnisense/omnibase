@@ -62,7 +62,7 @@ class Referrer implements ReferrerInterface
 
     public function clear()
     {
-        $this->requestStack->getMainRequest()->getSession()->remove('_security.main.target_path');    // Internal definition by firewall
+        $this->requestStack->getMainRequest()->getSession()->remove('_security.' . $this->router->getRouteFirewall()->getName() . '.target_path');
         $this->requestStack->getMainRequest()->getSession()->remove('_security.account.target_path'); // Internal definition by firewall
         $this->requestStack->getMainRequest()->getSession()->set('_target_path', null);
     }
@@ -80,8 +80,8 @@ class Referrer implements ReferrerInterface
         if ($this->isVetoed($this->router->getRouteName($url))) {
             return $this;
         }
-
-        $this->requestStack->getMainRequest()->getSession()->remove('_security.main.target_path');    // Internal definition by firewall
+        
+        $this->requestStack->getMainRequest()->getSession()->remove('_security.' . $this->router->getRouteFirewall()->getName() . '.target_path');
         $this->requestStack->getMainRequest()->getSession()->remove('_security.account.target_path'); // Internal definition by firewall
         $this->requestStack->getMainRequest()->getSession()->set('_target_path', $url);
 

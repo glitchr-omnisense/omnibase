@@ -59,7 +59,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         CacheableTrait::__toKey as __toDefaultKey;
     }
 
-    public function __toKey(?string ...$variadic): string
+    public function __toKey(mixed ...$variadic): string
     {
         $variadic[] = $this->getId();
         $variadic[] = $this->getUpdatedAt();

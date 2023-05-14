@@ -10,6 +10,7 @@ use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
 use Base\BaseBundle;
 use Base\Routing\RouterInterface;
+use Base\Service\ReferrerInterface;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\ORM\EntityNotFoundException;
 use RuntimeException;
@@ -69,13 +70,16 @@ class IntegritySubscriber implements EventSubscriberInterface
      */
     private ?string $secret;
 
-    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, RouterInterface $router, string $secret = null)
+    protected ReferrerInterface $referrer;
+
+    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, RouterInterface $router, ReferrerInterface $referrer, string $secret = null)
     {
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
         $this->translator = $translator;
         $this->doctrine = $doctrine;
         $this->router = $router;
+        $this->referrer = $referrer;
 
         $this->secret = $secret;
         $this->vault = new Vault();
@@ -136,7 +140,10 @@ class IntegritySubscriber implements EventSubscriberInterface
                 $notification->send("danger");
             }
 
+            $this->referrer->clear();
+
             $this->tokenStorage->setToken(null);
+
             $session = $this->requestStack->getSession();
             $session->remove("_integrity/secret");
             $session->remove("_integrity/doctrine");

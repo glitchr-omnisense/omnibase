@@ -94,10 +94,16 @@ class EasyAdminSubscriber implements EventSubscriberInterface
         if ($crud == null) {
             return;
         }
+
         try {
             $entity = $this->adminContextProvider->getContext()->getEntity();
             $entityCrudController = AbstractCrudController::getCrudControllerFqcn($entity->getInstance());
         } catch (TypeError $e) {
+            return;
+        }
+
+        // Special case for PATCH requests
+        if($e->getRequest()->getMethod() == "PATCH") {
             return;
         }
 
