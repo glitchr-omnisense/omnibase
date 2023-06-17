@@ -89,7 +89,7 @@ class UploaderEntitiesCommand extends Command
                 }
 
                 if ($annotation->getMissable()) {
-                    $output->section()->writeln("             $class::$field <warning> is missable.. cannot have orphan..</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
+                    $output->section()->writeln("             $class::$field <warning> is missable.. cannot have orphan files..</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                     continue;
                 } else {
                     $output->section()->writeln("             Processing <info>$class::$field</info>..");

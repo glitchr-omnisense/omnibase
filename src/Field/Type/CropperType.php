@@ -233,9 +233,11 @@ class CropperType extends AbstractType implements DataMapperInterface
         $fieldNames = $classMetadata->getFieldNames();
         $fieldNames[] = "is_normalized"; // Include normalization information
         foreach (iterator_to_array($forms) as $formName => $form) {
+            
             if (!in_array($formName, $fieldNames)) {
                 continue;
             }
+            
             $form->setData($this->propertyAccessor->getValue($viewData, $formName));
         }
     }
@@ -251,9 +253,11 @@ class CropperType extends AbstractType implements DataMapperInterface
         $fieldNames = $classMetadata->getFieldNames();
 
         foreach (iterator_to_array($forms) as $formName => $form) {
+
             if (!in_array($formName, $fieldNames)) {
                 continue;
             }
+
             $this->propertyAccessor->setValue($viewData, $formName, $form->getData());
         }
     }

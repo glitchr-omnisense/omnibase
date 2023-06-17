@@ -218,6 +218,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         if ($this->technicalLoopback) {
             return true;
         }
+        
         if (!$this->debug) {
             return false;
         }
@@ -582,7 +583,6 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Set importance of the notification
         $this->markAsAdmin(false);
 
-        $prevRecipient = $notification->getRecipients();
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
 
@@ -593,6 +593,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // Determine recipient information
         $browserNotificationOnce = false;
         foreach (array_unique($recipients) as $i => $recipient) {
+            
             // Set selected channels, if any
             $channels = $this->getUserChannels($notification->getImportance(), $recipient);
             if (empty($channels)) {

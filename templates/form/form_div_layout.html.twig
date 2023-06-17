@@ -1221,53 +1221,53 @@
 
 {%- block cropper_widget -%}
 
-{# Search for target inside form based on parent including translation #}
-{% set targetForm = form.vars.ancestor %}
-{% for child in target %}
+    {# Search for target inside form based on parent including translation #}
+    {% set targetForm = form.vars.ancestor %}
+    {% for child in target %}
 
-    {% set targetForm = targetForm[child] %}
+        {% set targetForm = targetForm[child] %}
 
-    {% if child == "translations" %}
-        {% if targetForm.vars.default_locale is defined and targetForm.vars.default_locale in targetForm|keys %}
-            {% set targetForm = targetForm[targetForm.vars.default_locale] %}
-        {% else %}
-            {% set targetForm = targetForm|first %}
+        {% if child == "translations" %}
+            {% if targetForm.vars.default_locale is defined and targetForm.vars.default_locale in targetForm|keys %}
+                {% set targetForm = targetForm[targetForm.vars.default_locale] %}
+            {% else %}
+                {% set targetForm = targetForm|first %}
+            {% endif %}
         {% endif %}
-    {% endif %}
-{% endfor %}
+    {% endfor %}
 
-{% set quadrantForm = form.vars.ancestor %}
-{% for child in quadrant %}
+    {% set quadrantForm = form.vars.ancestor %}
+    {% for child in quadrant %}
 
-    {% set quadrantForm = quadrantForm[child] %}
+        {% set quadrantForm = quadrantForm[child] %}
 
-    {% if child == "translations" %}
-        {% if quadrantForm.vars.default_locale is defined and quadrantForm.vars.default_locale in quadrantForm|keys %}
-            {% set quadrantForm = quadrantForm[quadrantForm.vars.default_locale] %}
-        {% else %}
-            {% set quadrantForm = quadrantForm|first %}
+        {% if child == "translations" %}
+            {% if quadrantForm.vars.default_locale is defined and quadrantForm.vars.default_locale in quadrantForm|keys %}
+                {% set quadrantForm = quadrantForm[quadrantForm.vars.default_locale] %}
+            {% else %}
+                {% set quadrantForm = quadrantForm|first %}
+            {% endif %}
         {% endif %}
-    {% endif %}
-{% endfor %}
+    {% endfor %}
 
-{% set attr = attr|merge({
-    'data-cropper': form.vars.cropper,
-    'data-cropper-field': form.vars.id
-}) %}
-
-{% if form.vars.quadrant is not null %}
     {% set attr = attr|merge({
-        'data-cropper-quadrant': quadrantForm.vars.id,
-        'data-cropper-positions': quadrantForm.parent ? quadrantForm.parent.vars.positions : null
+        'data-cropper': form.vars.cropper,
+        'data-cropper-field': form.vars.id
     }) %}
-{% endif %}
 
-{# todo: handle xhr errors #}
-{# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fa-solid fa-fw fa-exclamation-circle'|iconify|first|raw)~" "~('@fields.cropper.error')~"</div>", #}
-<div class="form-group form-cropper {{ cropper_info ? "form-cropper-info" : "" }}">
-    <div class="cropper">
-        <img id="{{ id }}_image" class="hidden" src="{{image(targetForm.vars.value)}}">
-        <div id="{{ id }}_loader" class="loader">
+    {% if form.vars.quadrant is not null %}
+        {% set attr = attr|merge({
+            'data-cropper-quadrant': quadrantForm.vars.id,
+            'data-cropper-positions': quadrantForm.parent ? quadrantForm.parent.vars.positions : null
+        }) %}
+    {% endif %}
+
+    {# todo: handle xhr errors #}
+    {# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fa-solid fa-fw fa-exclamation-circle'|iconify|first|raw)~" "~('@fields.cropper.error')~"</div>", #}
+    <div class="form-group form-cropper {{ cropper_info ? "form-cropper-info" : "" }}">
+        <div class="cropper">
+            <img id="{{ id }}_image" class="hidden" src="{{image(targetForm.vars.value)}}">
+            <div id="{{ id }}_loader" class="loader">
             {% if targetForm.vars.value is not empty%}
                 <div class="loader-spinner"></div> {{ '@fields.cropper.loading.wait'|trans }}
             {% else %}
@@ -1275,32 +1275,32 @@
             {% endif %}
             </div>
 
-        {% if cropper_actions %}
-        <div class="hidden cropper-actions" id="{{ id }}_actions">
-            <button class="btn btn-warning" type="button" data-cropper-reset="true">{{"fa-solid fa-undo"|iconify|first|raw}}</button>
-            {% for label,aspectRatio in form.vars.aspectRatios %}
-                <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}" data-labelledby="{{form.vars.id ~ "_label"}}" data-labelledby-value="{{ label|trans }}">{{ label|trans }}</button>
-            {% endfor %}
+            {% if cropper_actions %}
+            <div class="hidden cropper-actions" id="{{ id }}_actions">
+                <button class="btn btn-warning" type="button" data-cropper-reset="true">{{"fa-solid fa-undo"|iconify|first|raw}}</button>
+                {% for label,aspectRatio in form.vars.aspectRatios %}
+                    <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}" data-labelledby="{{form.vars.id ~ "_label"}}" data-labelledby-value="{{ label|trans }}">{{ label|trans }}</button>
+                {% endfor %}
 
-            {% if form.vars.aspectRatios is defined and form.vars.aspectRatios is not empty %}
-                <button class="btn btn-primary" type="button" data-aspect-ratio="NAN" data-labelledby="{{form.vars.id ~ "_label"}}" data-labelledby-value="">{{ "@fields.cropper.aspect_ratio.free"|trans }}</button>
+                {% if form.vars.aspectRatios is defined and form.vars.aspectRatios is not empty %}
+                    <button class="btn btn-primary" type="button" data-aspect-ratio="NAN" data-labelledby="{{form.vars.id ~ "_label"}}" data-labelledby-value="">{{ "@fields.cropper.aspect_ratio.free"|trans }}</button>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
-        {% endif %}
+
+        {%- set attr = attr|merge({'class': 'form-cropper-fields' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+        {%- set attr = attr|merge({'disabled': 'disabled' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+        {{ form_widget(form, {attr:attr}) }}
     </div>
 
-    {%- set attr = attr|merge({'class': 'form-cropper-fields' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {%- set attr = attr|merge({'disabled': 'disabled' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {{ form_widget(form, {attr:attr}) }}
-</div>
+    {% set isNormalized = form.is_normalized.vars.value ? true : false %}
+    {% set isEmpty = not form.x0.vars.value and not form.y0.vars.value and not form.width0.vars.value and not form.height0.vars.value %}
 
-{% set isNormalized = form.is_normalized.vars.value ? true : false %}
-{% set isEmpty = not form.x0.vars.value and not form.y0.vars.value and not form.width0.vars.value and not form.height0.vars.value %}
-
-{% if not isNormalized and not isEmpty %}
-<hr>
-<div class="form-text text-muted text-danger">{{"@fields.cropper.not_normalized"|trans}}</div>
-{% endif %}
+    {% if not isNormalized and not isEmpty %}
+    <hr>
+    <div class="form-text text-muted text-danger">{{"@fields.cropper.not_normalized"|trans}}</div>
+    {% endif %}
 
 {%- endblock -%}
 

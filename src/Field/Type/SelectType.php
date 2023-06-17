@@ -479,24 +479,36 @@ class SelectType extends AbstractType implements DataMapperInterface
         } else {
             $dataChoices = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
         }
-        $multiple = $options["multiple"];
 
+        $multiple = $options["multiple"];
+        
         //
         // Retrieve existing entities
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
             $classRepository = $this->entityManager->getRepository($options["class"]);
             $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
             if (!$options["multiple"]) {
+
                 $dataChoices = $classRepository->cacheOneById($dataChoices);
+
             } else {
+
                 $orderBy = array_flip($dataChoices);
                 $default = count($orderBy);
 
                 $entities = [];
                 if ($dataChoices) {
-                    $dataChoices = $classRepository->cacheById($dataChoices, [])->getResult();
+                    $entities = $classRepository->cacheById($dataChoices, [])->getResult();
                 }
 
+                foreach ($dataChoices as $pos => $id) {
+                    foreach ($entities as $entity) {
+                        if ($entity->getId() == $id) {
+                            $dataChoices[$pos] = $entity;
+                        }
+                    }
+                }
+        
                 usort($dataChoices, fn($a, $b) => (is_object($a) ? ($orderBy[$a->getId()] ?? $default) : $default) <=> (is_object($b) ? ($orderBy[$b->getId()] ?? $default) : $default));
             }
         }

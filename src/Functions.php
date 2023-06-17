@@ -377,7 +377,8 @@ namespace {
 
         $query = $query ? "?" . $query : null;
 
-        $url = $scheme . $machine . $subdomain . $domain . $port . $user . $password . $path . $query;
+        $pathToQuerySlash = ($path != null && !str_ends_with($path, "/") && !empty($query) ? "/" : "");
+        $url = $scheme . $machine . $subdomain . $domain . $port . $user . $password . $path . $pathToQuerySlash . $query;
         return $url ?: "/";
     }
 

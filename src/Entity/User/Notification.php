@@ -613,6 +613,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         // NB: User recipient is only added if no other recipients are found..
         $recipients = array_merge($this->getRecipients(), $recipients);
         if (empty($recipients)) {
+
             $userRecipient = $this->user?->getRecipient();
             if ($userRecipient !== null) {
                 $recipients[] = $userRecipient;
