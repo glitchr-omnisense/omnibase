@@ -26,7 +26,33 @@
         {% set audios = field.formattedValue is empty or null ? [] : [field.formattedValue] %}
     {% endif %}
 
-    {{ field.formattedValue|soundify }}
+    {% set audio = field.formattedValue|soundify %}
+    {% if audio|trim %} 
+        {{ audio|raw }}
+    {% else %}
+        <div data-toggle="tooltip" data-placement="top" title="No file">-</div>
+    {% endif %}
+
+{% elseif renderFormat == 'video' %}
+
+    {% if field.formattedValue is iterable %}
+
+        {% if ea.crud.currentAction == 'detail' %}
+            {% set videos = field.formattedValue %}
+        {% else %}
+            {% set path  = field.formattedValue|first %}
+            {% set videos = path is empty or null ? [] : [path] %}
+        {% endif %}
+    {% else %}
+        {% set videos = field.formattedValue is empty or null ? [] : [field.formattedValue] %}
+    {% endif %}
+
+    {% set video = field.formattedValue|soundify %}
+    {% if video|trim %} 
+        {{ video|raw }}
+    {% else %}
+        <div data-toggle="tooltip" data-placement="top" title="No file">-</div>
+    {% endif %}
 
 {% elseif renderFormat == 'image' or renderFormat == 'avatar' %}
 

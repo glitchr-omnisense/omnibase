@@ -563,7 +563,8 @@
 {% set clippable = form.vars.clippable ?? [] %}
 
 {% set lightboxIcon = path|length > 1 ? "fa-solid fa-2x fa-fw fa-search-plus" : "fa-solid fa-2x fa-fw fa-image" %}
-{% set lightboxPattern = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~(lightboxIcon|iconify|first|raw)~"</a>" %}
+{% set lightboxPattern = form.vars.lightbox ? "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~(lightboxIcon|iconify|first|raw)~"</a>" %}
+
 {% set downloadPattern = "<a href='{0}' >"~("fa-solid fa-2x fa-fw fa-download"|iconify({"style":"font-size: 1.8em;"})|first|raw)~"</a>" %}
 {% set clipboardPattern = clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) %}
 {% set gotoPattern = "<a target='_blank' href='{0}'>"~("fa-solid fa-fw fa-2x fa-external-link-square-alt"|iconify|first|raw)~"</a>" %}
@@ -647,7 +648,6 @@
     </div>
 
     {% set exts = form.vars.mime_types|extensions %}
-
     {% if form.vars.max_size %}
         <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_size"|trans([form.vars.max_size|filesize])}}</div>
     {% endif %}

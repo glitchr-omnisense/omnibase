@@ -125,8 +125,8 @@ class MediaService extends FileService implements MediaServiceInterface
         $output = [];
 
         $pathList = is_array($path) ? $path : [$path];
-        foreach ($pathList as $p) {
-            $output[] = $this->generate("ux_serve", [], $path, $config);
+        foreach ($pathList as $_path) {
+            $output[] = $this->generate("ux_serve", [], $_path, $config);
         }
 
         return is_array($path) ? $output : first($output);
@@ -141,20 +141,17 @@ class MediaService extends FileService implements MediaServiceInterface
         $output = [];
 
         $pathList = is_array($path) ? $path : [$path];
-        foreach ($pathList as $p) {
-            $output[] = $this->generate("ux_serve", [], $path, $config);
+        foreach ($pathList as $_path) {
+            $output[] = $this->generate("ux_serve", [], $_path, $config);
         }
 
         return is_array($path) ? $output : first($output);
     }
 
-    public function soundify(null|array|string $path, array $attributes = []): null|array|string
+    public function soundify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
             return $path;
-        }
-        if (is_array($path)) {
-            return array_map(fn($s) => $this->soundify($s, $attributes), $path);
         }
 
         $sources = $this->audio($path);
@@ -166,13 +163,10 @@ class MediaService extends FileService implements MediaServiceInterface
         ]);
     }
 
-    public function vidify(null|array|string $path, array $attributes = []): null|array|string
+    public function vidify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
             return $path;
-        }
-        if (is_array($path)) {
-            return array_map(fn($s) => $this->vidify($s, $attributes), $path);
         }
 
         $sources = $this->video($path);

@@ -1,5 +1,5 @@
-<video {{ html_attributes(attr) }}>
-    {% for source in sources %}
+<video src="{{ sources|head }}" controls="controls" {{ html_attributes(attr) }}>
+    {% for source in sources|tail %}
     <source src="{{source}}" type="{{ source|mimetype }}">
     {% endfor %}
     {{ "@fields.video.unsupported_tag"|trans }}

@@ -43,7 +43,7 @@ window.addEventListener("load.form_type", function () {
             var counterMax = "";
             if(!isNaN(maxFiles)) {
 
-                        if(remainingFiles < 1) counterMax = dropzoneEl.data("file-counter-max[none]"    ).replace("{0}", remainingFiles);
+                     if(remainingFiles < 1) counterMax = dropzoneEl.data("file-counter-max[none]"    ).replace("{0}", remainingFiles);
                 else if(remainingFiles < 2) counterMax = dropzoneEl.data("file-counter-max[singular]").replace("{0}", remainingFiles);
                 else                        counterMax = dropzoneEl.data("file-counter-max[plural]"  ).replace("{0}", remainingFiles);
             }
@@ -184,7 +184,7 @@ window.addEventListener("load.form_type", function () {
                             var img = getImage(files[_i].uuid);
                             if(img !== undefined) {
 
-                                if(files[_i].size === file.size && img.src.toString() === dataURL)
+                                if(files[_i].size === file.size && file.uuid == files[_i].uuid && img.src.toString() === dataURL)
                                     return file;
                             }
 
@@ -198,12 +198,19 @@ window.addEventListener("load.form_type", function () {
                     return undefined;
                 }
 
-                this.on("thumbnail", function(file, dataURL) {
+                this.on("thumbnail", function(file, e) {
 
                     $(file.previewTemplate).find(".dz-overlay").remove();
 
-                    var duplicateFile = findDuplicates(this.files, file, dataURL);
-                    if (duplicateFile) this.removeFile(duplicateFile);
+                    if (e.type == "error") {
+
+                        e.target.src = "./bundles/base/images/image.svg";
+                    
+                    } else {
+
+                        var duplicateFile = findDuplicates(this.files, file, e);
+                        if (duplicateFile) this.removeFile(duplicateFile);
+                    }
 
                     updatePositions(this.files);
                 });
@@ -240,8 +247,17 @@ window.addEventListener("load.form_type", function () {
                         var span = $(preview).find(".dz-details .dz-tools")[0];
 
                         var counter = 1;
-                        span.innerHTML = lightboxPattern.replaceAll("{0}", pathLinks[file.uuid] || file.path);
 
+                        span.innerHTML = "";
+                        if(pathLinks[file.uuid] != null) {
+                            
+                            if(lightboxPattern) span.innerHTML += lightboxPattern.replaceAll("{0}", pathLinks[file.uuid]);
+                            else  span.innerHTML += gotoPattern.replaceAll("{0}", pathLinks[file.uuid]);
+
+                        } else {
+                            span.innerHTML += "<i class='blank-space'></i>";
+                        }
+                        
                         var _href = dropzoneEl.data("file-href");
                         if(counter < 4 && deletePattern) {
                             span.innerHTML += deletePattern;

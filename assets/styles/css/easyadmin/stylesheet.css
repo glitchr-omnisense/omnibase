@@ -139,6 +139,12 @@ ul.sidebar-menu a, .user-menu-wrapper a.user-details, .user-menu-wrapper a.user-
     height:100%;
 }
 
+.datagrid td audio, .datagrid td video
+{ 
+    width: auto;
+    min-width: 300px;
+}
+
 .ts-wrapper.form-control, .ts-wrapper.form-select { height:38px !important; }
 
 .ql-editor {
@@ -766,7 +772,9 @@ body.ea-edit .content-header, body.ea-new .content-header {
 
 .login-wrapper { position:relative; }
 
-.content-wrapper .spinner:not(.loaded):before { left: calc(50% + var(--sidebar-max-width)/2); }
+.wrapper .spinner:not(.loaded):before,
+.content-wrapper .spinner:not(.loaded):before
+ { left: calc(50% + var(--sidebar-max-width)/2); }
 .spinner:not(.loaded):before {
 
     animation: 0.5s linear infinite loader;
@@ -848,8 +856,8 @@ body.ea-edit .content-header, body.ea-new .content-header {
 }
 
 .basicLightbox__placeholder {
-                    width: 100%;
-                    min-height: 100%;
+    width: 100%;
+    min-height: 100%;
 }
 
 .thumbnail-image img, .basicLightbox__placeholder img
