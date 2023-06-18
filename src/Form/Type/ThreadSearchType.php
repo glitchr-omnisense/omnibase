@@ -22,7 +22,7 @@ class ThreadSearchType extends AbstractType
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('generic', SearchType::class, ["required" => false]);
         $builder->add('content', SearchType::class, ["required" => false]);

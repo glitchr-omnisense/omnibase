@@ -91,7 +91,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
         return $newData;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {

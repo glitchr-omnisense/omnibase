@@ -22,7 +22,7 @@ class SecurityLoginTwoFactorType extends AbstractType
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('totpSecret', PasswordType::class, [
             "attr" => ["placeholder" => "Code 2FA"]

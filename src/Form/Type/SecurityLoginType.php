@@ -31,7 +31,7 @@ class SecurityLoginType extends AbstractType
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         // $this->builder->getForm()->addStep($options, function (FormBuilderInterface $builder, array $options) {
 

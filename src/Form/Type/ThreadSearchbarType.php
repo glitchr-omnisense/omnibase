@@ -23,7 +23,7 @@ class ThreadSearchbarType extends AbstractType
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('parent_id', HiddenType::class);
         $builder->add('generic', SearchType::class);
