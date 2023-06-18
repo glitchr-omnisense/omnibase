@@ -184,7 +184,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $resolver->setAllowedTypes("dropzone", ['null', 'array']);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
@@ -261,7 +261,7 @@ class FileType extends AbstractType implements DataMapperInterface
         }
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $parent = $form->getParent();
         $entity = $parent->getData();
@@ -310,6 +310,7 @@ class FileType extends AbstractType implements DataMapperInterface
         }
 
         $view->vars["mime_types"] = $mimeTypes;
+
         $view->vars['value'] = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
 
         $view->vars['clippable'] = $view->vars['path'] = $view->vars['download'] = json_encode([]);
@@ -322,16 +323,17 @@ class FileType extends AbstractType implements DataMapperInterface
         if (is_array($view->vars['value'])) {
 
             if ($view->vars['value']) {
+
                 $view->vars['path'] = json_encode(array_transforms(function ($k, $v): ?array {
-                    return $v !== null ? [basename($v), $this->fileService->isImage($v) ? $this->mediaService->image($v) : $this->mediaService->linkable($v)] : null;
+                    return file_exists($v) ? [basename($v), $this->fileService->isImage($v) ? $this->mediaService->image($v) : $this->mediaService->linkable($v)] : null;
                 }, array_filter($view->vars['value'])));
 
                 $view->vars['download'] = json_encode(array_transforms(function ($k, $v): ?array {
-                    return $v !== null ? [basename($v), $this->fileService->downloadable($v)] : null;
+                    return file_exists($v) ? [basename($v), $this->fileService->downloadable($v)] : null;
                 }, array_filter($view->vars['value'])));
 
                 $view->vars['clippable'] = json_encode(array_transforms(function ($k, $v): ?array {
-                    return $v !== null ? [basename($v), $this->fileService->isImage($v)] : null;
+                    return file_exists($v) ? [basename($v), $this->fileService->isImage($v)] : null;
                 }, array_filter($view->vars['value'])));
             }
 

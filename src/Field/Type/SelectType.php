@@ -134,7 +134,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         return self::$icons[static::class] ?? [];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
 
@@ -233,7 +233,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
@@ -582,7 +582,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         }
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         /* Override options.. I couldn't done that without accessing data */
         $options["class"] = $this->formFactory->guessClass($form, $options);

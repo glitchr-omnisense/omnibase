@@ -22,7 +22,7 @@ class IconType extends SelectType implements SelectInterface
         parent::__construct(...$args);
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([

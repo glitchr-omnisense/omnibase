@@ -25,7 +25,7 @@ class ContactType extends AbstractType
         return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $defaults = ['data_class' => ContactModel::class];
 

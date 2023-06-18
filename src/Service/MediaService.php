@@ -425,6 +425,7 @@ class MediaService extends FileService implements MediaServiceInterface
     public function serve(?string $file, int $status = 200, array $headers = []): ?Response
     {
         if (!file_exists($file)) {
+
             if (!$this->fallback) {
                 throw is_length_safe($file) ?
                     new NotFoundHttpException($file ? "Image \"" . str_shorten($file, 50, SHORTEN_MIDDLE) . "\" not found." : "Empty path provided.") :
@@ -598,16 +599,18 @@ class MediaService extends FileService implements MediaServiceInterface
             }
 
             if (!$this->flysystem->fileExists($pathCache, $localCache)) {
+                
                 $maxExecutionTime = ini_get('max_execution_time');
                 set_time_limit($this->timeout);
 
                 $filteredPath = $this->filter($path, array_merge($config, ["local_cache" => false]), $filters) ?? $path;
                 if (!file_exists($filteredPath)) {
+                    
                     if (!$this->fallback) {
                         throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provided.");
                     }
 
-                    return $this->getNoImage($this->getExtension($path));
+                    $filteredPath = $this->getNoImage($this->getExtension($path));
                 }
 
                 try {

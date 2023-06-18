@@ -130,7 +130,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $view->vars["allow_delete"] = $options["allow_delete"];

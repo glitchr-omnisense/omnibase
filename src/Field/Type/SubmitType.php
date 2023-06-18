@@ -19,13 +19,13 @@ class SubmitType extends AbstractType implements SubmitButtonTypeInterface
         return "submit2";
     }
 
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefault("type", "submit");
-    }
-
     public function getParent(): ?string
     {
         return ButtonType::class;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefault("type", "submit");
     }
 }

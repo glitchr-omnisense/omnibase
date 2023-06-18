@@ -20,7 +20,7 @@ final class EmojiPickerType extends AbstractType
         return 'emojipickr';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'renderer' => "native", // native, twemoji, (custom?)

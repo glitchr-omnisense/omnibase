@@ -2,7 +2,6 @@
 
 namespace Base\Field\Type;
 
-use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -15,14 +14,15 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class StockType extends NumberType
 {
-    private Environment $twig;
-
-    public function __construct(Environment $twig)
+    /**
+     * {@inheritdoc}
+     */
+    public function getBlockPrefix(): string
     {
-        $this->twig = $twig;
+        return 'stock';
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         parent::buildView($view, $form, $options);
         $view->vars['allow_infinite'] = $options["allow_infinite"];
@@ -30,7 +30,7 @@ class StockType extends NumberType
         $view->vars["stepDown"] = $options["stepDown"];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
@@ -41,16 +41,7 @@ class StockType extends NumberType
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'stock';
-    }
-
-
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         // Check if path is reacheable..
         if ($options["target"] !== null && str_starts_with($options["target"], ".")) {

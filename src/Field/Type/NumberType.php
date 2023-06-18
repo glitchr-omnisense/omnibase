@@ -21,17 +21,17 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
      */
     protected Environment $twig;
 
-    public function getBlockPrefix(): string
-    {
-        return 'number2';
-    }
-
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function getBlockPrefix(): string
+    {
+        return 'number2';
+    }
+
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->addViewTransformer(new ScaleNumberTransformer($options["divisor"]));
         $builder->addViewTransformer(new StrippedNumberToLocalizedStringTransformer(
@@ -48,9 +48,10 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         }
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         parent::buildView($view, $form, $options);
+
         $view->vars["stepUp"] = $options["stepUp"] ?? $options["step"];
         $view->vars["stepDown"] = $options["stepDown"] ?? $options["step"];
         $view->vars["keyUp"] = $options["keyUp"];
@@ -67,7 +68,7 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["autocomplete"] = $options["autocomplete"];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
 

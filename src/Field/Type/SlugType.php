@@ -66,7 +66,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
         });
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["keep"] = $options["keep"] ? preg_quote($options["keep"]) : null;
         $view->vars["separator"] = $options["separator"] ?: null;

@@ -15,7 +15,7 @@ use Base\Form\Model\ThreadSearchModel;
  */
 class ThreadSearchbarType extends AbstractType
 {
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => ThreadSearchModel::class,

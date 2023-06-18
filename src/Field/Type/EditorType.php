@@ -48,7 +48,7 @@ class EditorType extends AbstractType
         return 'editor';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'empty_data', null,
@@ -71,7 +71,7 @@ class EditorType extends AbstractType
         return $parent->vars["attr"]["id"] ?? null;
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
 

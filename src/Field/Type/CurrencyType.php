@@ -29,7 +29,7 @@ class CurrencyType extends AbstractType
         return 'currency';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'display_symbol' => true,

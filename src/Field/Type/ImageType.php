@@ -43,7 +43,7 @@ class ImageType extends FileType
         $resolver->setAllowedTypes("cropper", ['null', 'array']);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         parent::buildForm($builder, $options);
 
@@ -52,7 +52,7 @@ class ImageType extends FileType
         }
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         parent::buildView($view, $form, $options);
 

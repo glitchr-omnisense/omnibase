@@ -986,7 +986,7 @@
 
         <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="trading_market" /></service>
         <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="twig" /></service>
-        <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="twig" /></service>
+        <service id="Base\Field\Type\StockType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />

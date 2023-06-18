@@ -21,7 +21,7 @@ class UserProfileType extends AbstractType
         return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => UserProfileModel::class

@@ -43,14 +43,14 @@ class AvatarType extends ImageType
         });
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($options["multiple"]) {
             throw new InvalidArgumentException("There can be only one picture for avatar type, please disable 'multiple' option");
         }
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         parent::buildView($view, $form, $options);
 

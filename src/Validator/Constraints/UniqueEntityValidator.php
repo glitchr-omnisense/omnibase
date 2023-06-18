@@ -34,7 +34,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
      * @param Constraint $constraint
      * @throws \Exception
      */
-    public function validate($value, Constraint $constraint)
+    public function validate($value, Constraint $constraint): void
     {
         $entity = $value;
         parent::validate($entity, $constraint);

@@ -17,7 +17,7 @@ class AlphanumericPlusValidator extends ConstraintValidator
      * @param Constraint $constraint
      * @return void
      */
-    public function validate($value, Constraint $constraint)
+    public function validate($value, Constraint $constraint): void
     {
         if (!$constraint instanceof AlphanumericPlus) {
             throw new UnexpectedTypeException($constraint, AlphanumericPlus::class);
