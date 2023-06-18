@@ -169,7 +169,6 @@ class MediaController extends AbstractController
         // Providing "label" information
         $imageCrop = $this->imageCropRepository->cacheOneBySlug($identifier, ["image.source" => $uuid]);
 
-        exit(1);
         // Providing just a "ratio" number
         if ($imageCrop === null && preg_match("/^(\d+|\d*\.\d+)$/", $identifier, $matches)) {
             $ratio = floatval($matches[1]);
