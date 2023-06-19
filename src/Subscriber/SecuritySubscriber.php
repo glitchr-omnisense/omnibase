@@ -30,7 +30,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
@@ -102,16 +101,10 @@ class SecuritySubscriber implements EventSubscriberInterface
      */
     private LocalizerInterface $localizer;
 
-    /**
-     * @var TranslatorInterface
-     */
-    private TranslatorInterface $translator;
-
     public function __construct(
         UserRepository               $userRepository,
         AuthorizationChecker         $authorizationChecker,
         TokenStorageInterface        $tokenStorage,
-        TranslatorInterface          $translator,
         RequestStack                 $requestStack,
         ReferrerInterface            $referrer,
         SettingBagInterface          $settingBag,
@@ -125,7 +118,6 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
-        $this->translator = $translator;
         $this->router = $router;
 
         $this->localizer = $localizer;

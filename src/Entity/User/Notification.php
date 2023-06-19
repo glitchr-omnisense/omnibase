@@ -53,7 +53,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         $symfonyNotification = new SymfonyNotification($this->getSubject(), $this->getChannels($recipient));
         if ($this->getException()) {
-            $symfonyNotification->exception($this->getException());
+            $symfonyNotification->exception(new Exception($this->getExceptionAsString()));
         }
 
         return $symfonyNotification
@@ -551,7 +551,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
 
         // Notification variables
-        $this->importance = parent::getImportance();
+        $this->importance = self::IMPORTANCE_DEFAULT;//parent::getImportance();
         $this->setSubject("");
         $this->setTitle("");
         $this->setFooter("");
@@ -631,11 +631,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @param RecipientInterface ...$recipients
      * @return $this
      */
-    /**
-     * @param array $channels
-     * @param RecipientInterface ...$recipients
-     * @return $this
-     */
     public function sendBy(array $channels, RecipientInterface ...$recipients)
     {
         if (!$this->getImportance()) {
@@ -697,8 +692,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         $content = $this->getContent();
         $footer = $this->getFooter();
 
-        $importance = $this->getImportance();
-
         $fwd = "";
         $subject = $this->getSubject();
         $from = $technicalRecipient->getEmail();
@@ -733,7 +726,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             "warmup" => true, // e.g. when sending emails..
 
         ], $this->getContext([
-            "importance" => $importance,
             "title" => $title,
             "content" => $content,
             "footer_text" => $footer,
@@ -741,13 +733,16 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         ]), $this->getHtmlParameters());
 
         // Append notification attachments
+        $importance = $context["importance"] ?? $this->getImportance();
         $attachments = array_unique(array_merge($this->getAttachments(), $context["attachments"] ?? []));
         $context["attachments"] = $attachments;
 
         foreach ($attachments as $attachment) {
+
             if (!$attachment instanceof UploadedFile) {
                 continue;
             }
+
             $email->embed($attachment->getContent(), $attachment->getClientOriginalName());
         }
 
@@ -766,7 +761,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             list($cid, $path) = explode(":", $value);
             $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $path);
         }
-
 
         // Render html template to get back email title..
         // I was hoping to replace content with html(), but this gets overriden by Symfony notification
@@ -791,10 +785,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             ->subject($subject)
             ->from($from)
             ->to($to)
-            ->replyTo($this->context["replyTo"] ?? $from)
             //->html($html) // DO NOT USE: Overridden by the default Symfony notification template
             ->htmlTemplate($this->htmlTemplate)
             ->context($context);
+
+        if($context["replyTo"] ?? null)
+            $email->replyTo($context["replyTo"]);
 
         return $notification;
     }
@@ -811,7 +807,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             $fwd = "Fwd: ";
             $content = $userIdentifier . " forwarded its notification: \"" . $this->getContent() . "\"";
         } elseif (in_array($recipient, $this->getRecipients()) && $this->getNotifier()->isTest($recipient)) {
-            $user = $recipient;
             $fwd = "Fwd: [TEST:" . $recipient . "] ";
             $content = $this->getContent();
         }

@@ -696,7 +696,6 @@ class AdvancedRouter extends Router implements RouterInterface
         $routeName = $this->getRouteName($url);
 
         if (!$routeName) {
-            exit(1);
             throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
         }
 

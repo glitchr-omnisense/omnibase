@@ -741,9 +741,8 @@
             <tag name="notifier.channel" channel="browser+" />
             <argument type="service" id="request_stack" />
         </service>
-        <service id="Base\Notifier\Channel\EmailPlusChannel">
+        <service id="Base\Notifier\Channel\EmailPlusChannel" parent="notifier.channel.email">
             <tag name="notifier.channel" channel="email+" />
-            <argument type="service" id="mailer.default_transport" on-invalid="null" />
         </service>
 
         <!--
@@ -815,7 +814,6 @@
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
-            <argument type="service" id="translator" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="referrer" />
             <argument type="service" id="setting_bag" />

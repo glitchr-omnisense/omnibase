@@ -191,7 +191,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email") ?? "postmaster@" . $this->router->getDomain();
         $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
         $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
-        $this->technicalLoopback = $parameterBag->get("base.notifier.technical_loopback");
+        $this->technicalLoopback  = $parameterBag->get("base.notifier.technical_loopback");
 
         $this->entityManager = $entityManager;
         $this->settingBag = $settingBag;
@@ -597,7 +597,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
             // Set selected channels, if any
             $channels = $this->getUserChannels($notification->getImportance(), $recipient);
             if (empty($channels)) {
-                throw new Exception("No valid channel for the notification \"" . $notification->getBacktrace() . "\" sent with \"" . $notification->getImportance() . "\"");
+                throw new Exception("No valid channel for the notification \"" . $notification->getBacktrace() . "\" sent with \"" . $notification->getImportance() . "\" priority (maybe `framework.notifier.channel_policy." . $notification->getImportance() . "` is empty or missing ?)");
             }
 
             // Only send browser notification once

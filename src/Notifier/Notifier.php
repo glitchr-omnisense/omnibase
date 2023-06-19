@@ -26,7 +26,6 @@ class Notifier extends BaseNotifier implements NotifierInterface
         }
 
         $notification->setContext([
-            "importance" => "high",
             "markdown" => false,
             "exception" => null,
 
@@ -77,11 +76,11 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification->addRecipient($adminRecipient);
         $notification->setHtmlParameters([
 
-            "importance" => "high",
             "replyTo" => $contactModel->getRecipient(),
             "subject" => $this->translator->trans("@emails.contact.subject"),
             "excerpt" => $this->translator->trans("@emails.contact.excerpt", [$contactModel->name]),
             "content" => $this->translator->trans("@emails.contact.content", [$contactModel->subject, $contactModel->message]),
+            "attachments" => $contactModel->attachments
         ]);
 
         return $notification;
@@ -101,6 +100,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.contact_confirmation.subject", [$contactModel->name]),
             "excerpt" => $this->translator->trans("@emails.contact_confirmation.excerpt"),
             "content" => $this->translator->trans("@emails.contact_confirmation.content", [$contactModel->subject, $contactModel->message]),
+            "attachments" => $contactModel->attachments
         ]);
 
         return $notification;
