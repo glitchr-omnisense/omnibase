@@ -699,7 +699,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
         if ($this->isMarkAsAdmin()) {
             $user = $this->user ?? "User \"" . User::getIp() . "\"";
-            $fwd .= "Admin: ";
+            $fwd .= "Fwd: ";
             $title = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
             $content = $this->getContent();
         }
@@ -709,7 +709,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             $email = mailparse($recipient->getEmail());
             $email = mailformat(mailparse($technicalRecipient->getEmail()), first($email));
             $to = "[" . $notifier->getTranslator()->trans("@emails.fake_test.author") . "] " . $email;
-
+           
             $footer = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
             $footer = implode(" - ", array_filter($footer));
         }

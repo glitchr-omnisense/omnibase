@@ -170,7 +170,7 @@ class BaseBundle extends Bundle
         }
     }
 
-    public function boot()
+    public function boot(): void
     {
         if (!extension_loaded('imagick')) {
             throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
@@ -325,7 +325,7 @@ class BaseBundle extends Bundle
         return true;
     }
 
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
         $this->container = $container;

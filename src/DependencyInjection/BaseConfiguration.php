@@ -319,7 +319,7 @@ class BaseConfiguration implements ConfigurationInterface
             ->children()
             ->scalarNode('snapshot_limit')
             ->info('Maximum number of snapshot in a configuration')
-            ->defaultValue(9)
+            ->defaultValue(7)
             ->end()
             ->scalarNode('compression')
             ->info('Default compression algorithm')

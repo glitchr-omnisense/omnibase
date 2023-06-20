@@ -3365,7 +3365,7 @@ namespace {
     {
         $regex = '/(?:\w*:)*\s*(?:"([^"]*)"|([^,;\/""<>]*))?\s*(?:(?:[,;\/]|<|\s+|^)([^<@\s;,]+@[^>@\s,;\/]+)>?)\s*/';
         if (preg_match_all($regex, $addresses, $matches, PREG_SET_ORDER) > 0) {
-            $matches = array_transforms(fn($k, $x): array => [trim($x[3]), trim($x[1] . $x[2])], $matches);
+            $matches = array_transforms(fn($k, $x): array => [trim($x[3]), empty(trim($x[1] . $x[2])) ? trim($x[3]) : trim($x[1] . $x[2])], $matches);
         }
 
         return $matches;

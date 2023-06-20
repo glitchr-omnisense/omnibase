@@ -30,7 +30,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         return [FormType::class];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'bootstrap' => $this->baseService->getParameterBag("base.twig.use_bootstrap"),
@@ -38,7 +38,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         ]);
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $this->browseView($view, $form, $options);
     }

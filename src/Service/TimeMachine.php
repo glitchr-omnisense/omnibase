@@ -339,6 +339,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         $storageNames = array_flip($storageNames);
         foreach (array_intersect_key($this->getStorageList(), $storageNames) as $storageName => $filesystem) {
+
             $snapshots[$storageName] = [];
             foreach ($filesystem->listContents("/") as $content) {
                 if ($content->type() != "file") {
@@ -355,7 +356,6 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             }
 
             // Properly sort array
-            $matches = [];
             sort($snapshots[$storageName]);
 
             $mask = [];
@@ -372,9 +372,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
     public function getLastCycle(array $files, ?string $prefix = null): int
     {
+        $prefix = $prefix ?? "";
         $matches = [];
         $lastCycle = 0;
-        if (preg_match('/' . preg_quote($prefix) . '\-([0-9]*)\.\w/', basename(end($files)), $matches)) {
+        if (preg_match('/' . preg_quote($prefix) . '\-([0-9]{1,3})\.\w/', basename(end($files)), $matches)) {
             $lastCycle = intval($matches[1]);
         } elseif (preg_match('/' . preg_quote($prefix) . '\.\w/', basename(end($files)), $matches)) {
             $lastCycle = 1;
@@ -405,6 +406,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $dateLimit = new DateTime($this->timeLimit);
         $snapshots = $this->getSnapshots($storageNames, $prefix);
         foreach ($snapshots as $storageName => $files) {
+
             $filesystem = $this->filesystems->get($storageName);
             foreach ($files as $file) {
                 $matches = [];
@@ -452,11 +454,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $this->output?->section()->writeln("<info>- Temporary working directory:</info> " . $this->getCacheDir() . "/" . $prefix);
         if ($databases) {
             $databases = is_string($databases) ? [$databases] : $databases;
-            $this->output?->section()->writeln("<info>- Backing databases:</info> " . implode(", ", $databases));
+            $this->output?->section()->writeln("<info>- Backing database(s):</info> " . implode(", ", $databases));
 
             foreach ($databases as $database) {
                 parent::makeBackup()->run($database, [new Destination("local", $prefix . "/databases/" . $database . ".sql")], "null");
             }
+        } else {
+
+            $this->output?->section()->writeln("<warning>- No database backed up..</warning> please provide `--database` option");
         }
 
         // Prepare backup directory
@@ -469,6 +474,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $output = $this->buildCompressedArchive($this->getCacheDir() . "/" . $prefix . ".tar", $this->getCacheDir() . "/" . $prefix);
 
         foreach ($destinations as $id => $destination) {
+
             $filesystem = $this->filesystems->get($destination->destinationFilesystem());
 
             $compressor = $this->compressors->get($this->compression);
@@ -476,6 +482,8 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             $prefix = $this->flysystem->prefixPath($path, $destination->destinationFilesystem());
 
             if ($stream = fopen($output, 'r')) {
+
+                $this->output?->section()->writeln("<info>- Sending \"".$prefix."\"..</info> to \"".$destination->destinationFilesystem()."\" ongoing. Please wait..");
                 $filesystem->writeStream($path, $stream);
                 fclose($stream);
             }
@@ -483,6 +491,8 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             $this->output?->section()->writeln("<info>- Application backup #" . ($id + 1) . "</info> in \"" . $destination->destinationFilesystem() . "\": " . $prefix);
         }
 
+                
+        $this->output?->section()->writeln("<info>- Data backup saved..</info> That's all folks !");
         if (file_exists($output)) {
             unlink($output);
         }
@@ -619,7 +629,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             $exclusions .= "--exclude='" . $exclude . "'";
         }
 
-        $this->output?->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output));
+        $this->output?->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output). " (temporary working directory: ".escapeshellarg($directory).")");
 
         list($_, $ret) = [[], false];
         exec(sprintf('tar %s --directory=%s -cf %s %s', $exclusions, escapeshellarg($directory), escapeshellarg($output), '.'), $_);

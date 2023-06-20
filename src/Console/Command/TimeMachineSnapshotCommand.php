@@ -51,6 +51,7 @@ class TimeMachineSnapshotCommand extends Command
         $this->addArgument('storages', InputArgument::IS_ARRAY, 'What storages do you want to backup?');
         $this->addOption('cycle', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
         $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', null);
+        $this->addOption('database', null, InputOption::VALUE_OPTIONAL, 'Which database do you want to backup?', null);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -58,12 +59,14 @@ class TimeMachineSnapshotCommand extends Command
         $this->timeMachine->setCommandOutput($output);
 
         $storages = $input->getArgument('storages') ?? [];
-        $prefix = $input->getOption('prefix') ?? null;
+        $database = $input->getOption('database') ?? null;
         $cycle = $input->getOption('cycle') ?? -1;
 
         $output->section()->writeln("<info>Available database connection(s)</info>:");
-        foreach ($this->timeMachine->getDatabaseList() as $connectionName => $database) {
-            $output->section()->writeln(" * <info>" . $connectionName . "</info> (" . get_class($database) . ")");
+        foreach ($this->timeMachine->getDatabaseList() as $connectionName => $connection) {
+
+            $selected = $connectionName == $database ? " <warning><-- selected</warning> " : "";
+            $output->section()->writeln(" * <info>" . $connectionName . "</info> (" . get_class($connection) . ")".$selected);
         }
 
         $output->section()->writeln("");

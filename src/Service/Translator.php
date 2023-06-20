@@ -457,7 +457,7 @@ class Translator implements TranslatorInterface
         }
 
         $entityOrClassName = $this->parseClass($entityOrClassName);
-        $property = $property ? "." . $property : "";
+        $property = $property ? ".__property." . $property : "";
 
         return $entityOrClassName ? $this->transPerms($entityOrClassName . camel2snake($property), $options, [], self::DOMAIN_ENTITY) : null;
     }

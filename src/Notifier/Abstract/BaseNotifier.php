@@ -682,6 +682,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         // to be restored at the end of the method
         $recipients = $this->getAdminRecipients() ?? [new NoRecipient()];
         foreach (array_unique($recipients) as $recipient) {
+            
             // Set selected channels, if any
             $channels = $this->getAdminChannels($notification->getImportance(), $recipient);
 

@@ -368,7 +368,8 @@ class MediaController extends AbstractController
             exit(1);
         }
 
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        $request = $this->requestStack->getCurrentRequest();
+        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 }
