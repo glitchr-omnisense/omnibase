@@ -191,7 +191,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $this->databases = $databases;
         $this->compressors = $compressors;
 
-        $this->maxCycle = 3;
+        $this->maxCycle = 7;
         $this->timeLimit = "+30d";
     }
 
@@ -202,10 +202,6 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $this->maxCycle;
     }
 
-    /**
-     * @param string|null $maxCycle
-     * @return $this
-     */
     /**
      * @param string|null $maxCycle
      * @return $this
@@ -397,7 +393,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @throws FilesystemException
      * @throws FilesystemTypeNotSupported
      */
-    public function backup(null|string|array $databases, int|array $storageNames = [], ?string $prefix = null, int $cycle = -1)
+    public function backup(null|string|array $databases, int|array $storageNames = [], bool $userInfo = false, ?string $prefix = null, int $cycle = -1)
     {
         $prefix = $prefix ?? "backup";
         $this->output?->section()->writeln("<info>Backup procedure started:</info> " . $prefix);
@@ -467,6 +463,11 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Prepare backup directory
         if (!is_dir($this->getCacheDir() . "/" . $prefix)) {
             mkdir($this->getCacheDir() . "/" . $prefix, 0755);
+        }
+
+        // Save some user info
+        if($userInfo) {
+            $this->extractUserInfo($this->getCacheDir() . "/" . $prefix . "/system.log");
         }
 
         // Compress and transfer
@@ -617,6 +618,26 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $this->buildArchive($output, $directory, $excludes, true);
     }
 
+    public function extractUserInfo(string $output): ?string
+    {
+        // Prepare tarball archive
+        $output = str_replace(getcwd(), ".", $output);
+
+        $this->output?->section()->writeln("<info>- Extracting some user information details:</info> ./" . basename($output). " (temporary working directory: ".dirname($output).")");
+
+        list($_, $ret) = [[], false];
+        exec(sprintf('echo "[CMD] date" > %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('date >> %s', escapeshellarg($output)), $_, $ret);
+        
+        exec(sprintf('echo "env" >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('env >> %s', escapeshellarg($output)), $_, $ret);
+
+        exec(sprintf('echo "last" >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('last >> %s', escapeshellarg($output)), $_, $ret);
+
+        return $ret == 0 ? $output : null;
+    }
+
     public function buildArchive(string $output, string $directory, array $excludes = [], bool $compression = false): ?string
     {
         // Prepare tarball archive
@@ -632,10 +653,11 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $this->output?->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output). " (temporary working directory: ".escapeshellarg($directory).")");
 
         list($_, $ret) = [[], false];
-        exec(sprintf('tar %s --directory=%s -cf %s %s', $exclusions, escapeshellarg($directory), escapeshellarg($output), '.'), $_);
+        exec(sprintf('tar %s --directory=%s -cf %s %s', $exclusions, escapeshellarg($directory), escapeshellarg($output), '.'), $_, $ret);
 
         // Compress tarball
         if ($compression) {
+
             if ($ret) {
                 throw new LogicException("Failed to create tarball: " . $output);
             }

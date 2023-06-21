@@ -30,6 +30,7 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
         $storages  = $input->getArgument('storages') ?? [];
         $database  = $input->getOption('database')   ?? null;
         $batchMode = $input->getOption('batch')      ?? false;
+        $userInfo  = $input->getOption('userlog')    ?? false;
         $prefix    = $input->getOption('prefix')     ?? null;
         $cycle     = $input->getOption('cycle')      ?? -1;
 
@@ -38,11 +39,11 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
         }
 
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('You are about to backup this application and its database. Do you wish to continue ?', false);
+        $question = new ConfirmationQuestion('You are about to backup this application and its database. Do you wish to continue [Y/n] ? ', false);
         if ($batchMode) $output?->section()->writeln("<warning>Batch mode detected..</warning>\n");
         if(!$batchMode && !$helper->ask($input, $output, $question))
             return Command::SUCCESS;
 
-        return $this->timeMachine->backup($database, $storages, $prefix, $cycle);
+        return $this->timeMachine->backup($database, $storages, $userInfo, $prefix, $cycle);
     }
 }

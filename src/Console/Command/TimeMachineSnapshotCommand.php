@@ -50,8 +50,9 @@ class TimeMachineSnapshotCommand extends Command
     {
         $this->addArgument('storages', InputArgument::IS_ARRAY, 'What storages do you want to backup?');
         $this->addOption('cycle', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
-        $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', null);
+        $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', "backup");
         $this->addOption('database', null, InputOption::VALUE_OPTIONAL, 'Which database do you want to backup?', null);
+        $this->addOption('userlog', null, InputOption::VALUE_NONE, 'Save user info too?', null);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -60,8 +61,14 @@ class TimeMachineSnapshotCommand extends Command
 
         $storages = $input->getArgument('storages') ?? [];
         $database = $input->getOption('database') ?? null;
-        $cycle = $input->getOption('cycle') ?? -1;
+        $prefix   = $input->getOption('prefix') ?? null;
+        $userlog  = $input->getOption('userlog') ?? null;
+        $cycle    = $input->getOption('cycle') ?? -1;
 
+        if($userlog) {
+            $output->section()->writeln("<info>User configuration will be included in the backup</info>");
+        }
+        
         $output->section()->writeln("<info>Available database connection(s)</info>:");
         foreach ($this->timeMachine->getDatabaseList() as $connectionName => $connection) {
 
@@ -86,9 +93,11 @@ class TimeMachineSnapshotCommand extends Command
 
         $output->section()->writeln("");
 
+        $prefixStr = $prefix ? "prefixed by \"".$prefix."\"" : "";
+
         $index = 0;
-        foreach ($this->timeMachine->getSnapshots($storages, null, $cycle) as $storageName => $snapshot) {
-            $output->section()->writeln("<info>Available snapshot(s) in</info>: " . $storageName, OutputInterface::VERBOSITY_VERBOSE);
+        foreach ($this->timeMachine->getSnapshots($storages, $prefix, $cycle) as $storageName => $snapshot) {
+            $output->section()->writeln("<info>Available snapshot(s)</info> ".$prefixStr." <info>in</info> " . $storageName, OutputInterface::VERBOSITY_VERBOSE);
 
             $public = $this->flysystem->getPublic("/", $storageName);
             if (!$snapshot) {
