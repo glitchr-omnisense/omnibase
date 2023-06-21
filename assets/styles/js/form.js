@@ -7,14 +7,45 @@ window.addEventListener('load', function(event) {
     dispatchEvent(new Event("load.array_type"));
 });
 
+$.fn.find_siblings = function (e = "") {
+    return this.length ? $(this[0].parentNode).children(e).not(this[0]) : [];
+};
+$.fn.find_in_siblings = function (e = "") {
+    return this.length ? $(this[0].parentNode).find(e).not(this[0]) : [];
+};
+
 window.addEventListener('load', function(event) {
 
     $("form :input").keydown(function(event){
         if(event.keyCode == 13) {
 
             var form = $(this).closest("form");
-            if(form.find("[type=submit]").length > 0)
-                return false; // Prevent submission form submission using ENTER
+            if(form.length) {
+
+                if ($(this).find_siblings("[type=submit]").length == 1) {
+                    $(this).find_siblings("[type=submit]").trigger("click");
+                } else if ($(this).find_siblings("[type=button]").length == 1) {
+                           $(this).find_siblings("[type=button]").trigger("click");
+                } else if ($(this).find_in_siblings("[type=submit]").length == 1) {
+                           $(this).find_in_siblings("[type=submit]").trigger("click");
+                } else if ($(this).find_in_siblings("[type=button]").length == 1) {
+                           $(this).find_in_siblings("[type=button]").trigger("click");
+                } else if ($(this).closest("[type=submit]").length == 1) {
+                           $(this).closest("[type=submit]").trigger("click");
+                } else if ($(this).closest("[type=button]").length == 1) {
+                           $(this).closest("[type=button]").trigger("click");
+                } else if(form.find("[type=submit]").length == 1) {
+                        form.find("[type=submit]").trigger("click");
+                } else if(form.find("[type=button]").length == 1) {
+                        form.find("[type=button]").trigger("click");
+                } else if(form.find("[type=submit]").length > 1) {
+                        return false; // Prevent submission form submission using ENTER
+                } else if(form.find("[type=button]").length > 1) {
+                        return false; // Prevent submission form submission using ENTER
+                } else { 
+                    form.trigger("submit");
+                }
+            }
         }
     });
 
@@ -34,7 +65,7 @@ window.addEventListener('load', function(event) {
 
         if ( $(this).hasClass("needs-validation") && !$(submitter).hasClass("skip-validation")) {
 
-            if (!this.checkValidity()) {
+            if (!this.checkValidity()) { 
 
                 e.preventDefault();
                 e.stopPropagation();

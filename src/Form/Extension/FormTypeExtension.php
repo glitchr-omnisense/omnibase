@@ -63,7 +63,6 @@ class FormTypeExtension extends AbstractTypeExtension
             'form_flow_id' => '_flow_token',
             'validation_entity' => null,
             'use_model' => false,
-            'submit_on_enter' => true,
             'translation_domain' => "fields"
         ]);
 
@@ -79,8 +78,6 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function finishView(FormView $view, FormInterface $form, array $options): void
     {
-        $this->submitOnEnter($view, $form, $options);
-
         $this->browseView($view, $form, $options);
     }
 
@@ -164,17 +161,6 @@ class FormTypeExtension extends AbstractTypeExtension
                 }
             }
         }
-    }
-
-    public function submitOnEnter(FormView $view, FormInterface $form, array $options)
-    {
-        $submitOnEnter = $options['submit_on_enter'] ?? null;
-        if ($submitOnEnter || !$form->isRoot()) {
-            return;
-        }
-
-        $view->vars['attr'] ??= [];
-        $view->vars['attr']['disabled'] = '';
     }
 
     public function markDbProperties(FormView $view, FormInterface $form, array $options)

@@ -1119,7 +1119,7 @@ class ServiceEntityParser
                 $magicFn = self::REQUEST_FIND . ucfirst($magicFn);
             } // find <-> cache, findOne <-> cacheOne, [...]
 
-            $this->cacheable = BaseBundle::USE_CACHE;
+            $this->cacheable = BaseBundle::USE_CACHE && !is_cli();
         }
 
         if (str_starts_with($magicFn, self::REQUEST_FIND . self::SPECIAL_ALL)) {

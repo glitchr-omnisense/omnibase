@@ -52,6 +52,10 @@ class BaseBundle extends Bundle
         }
     }
 
+    public static bool $firstClear = true;
+    public static function markAsFirstClear(bool $first = true) { self::$firstClear = $first; }
+    public static function isFirstClear() { return self::$firstClear; }
+
     public static $sessionStorage = null;
     public const VERSION = '1.0.0';
     public const USE_CACHE = true;

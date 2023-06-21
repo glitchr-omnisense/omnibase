@@ -2,6 +2,7 @@
 
 namespace Base\CacheWarmer;
 
+use Base\BaseBundle;
 use Base\Console\CommandExecutorInterface;
 use Base\Console\ConsoleInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;

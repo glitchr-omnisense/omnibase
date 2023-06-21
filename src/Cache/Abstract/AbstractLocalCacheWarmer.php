@@ -16,6 +16,7 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
     /** @var ?AbstractLocalCacheInterface */
     protected ?AbstractLocalCacheInterface $simpleCache;
 
+    protected ArrayAdapter $arrayAdapter;
     public function __construct(AbstractLocalCacheInterface $simpleCache, string $cacheDir)
     {
         $this->shellVerbosity = getenv('SHELL_VERBOSITY');

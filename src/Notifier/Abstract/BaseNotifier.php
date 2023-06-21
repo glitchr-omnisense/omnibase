@@ -273,7 +273,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
             return $this;
         }
 
-        foreach ($this->getAdminUsers() as $adminUser) {
+        foreach (array_filter($this->getAdminUsers()) as $adminUser) {
             $this->adminRecipients[] = $adminUser->getRecipient();
         }
 
