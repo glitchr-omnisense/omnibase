@@ -17,6 +17,7 @@ $.fn.find_in_siblings = function (e = "") {
 window.addEventListener('load', function(event) {
 
     $("form :input").keydown(function(event){
+        
         if(event.keyCode == 13) {
 
             var form = $(this).closest("form");
@@ -45,6 +46,8 @@ window.addEventListener('load', function(event) {
                 } else { 
                     form.trigger("submit");
                 }
+
+                return false; // Disable by default to prevent double submission, if a button is clicked ..
             }
         }
     });
@@ -95,6 +98,8 @@ window.addEventListener('load', function(event) {
                     function () { $(this).addClass('was-validated'); }.bind(this)
                 );
             }
+
+            console.log("SUBMIT", this, e);
         }
     });
 });
