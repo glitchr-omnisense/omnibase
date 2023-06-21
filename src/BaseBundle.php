@@ -138,6 +138,7 @@ class BaseBundle extends Bundle
     public function warmUp()
     {
         $needsWarmup = !file_exists($this->getCacheDir() . "/pools/base/bundle.php");
+
         self::$cache = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter("", 0, $this->getCacheDir() . "/pools/base/fallback"));
         self::$filePaths = self::$filePaths ?? self::$cache->getItem('base.file_paths')->get() ?? [];
         self::$classes = self::$classes ?? self::$cache->getItem('base.classes')->get() ?? [];
@@ -151,20 +152,38 @@ class BaseBundle extends Bundle
             class_alias($class, $alias);
         }
 
+        $baseClassBundles = array_ends_with($this->getDeclaredClasses("Base", 1), "Bundle", ARRAY_USE_VALUES);
+        sort($baseClassBundles);
+
         if ($needsWarmup) {
-            $this->setMapping("./Enum", "Base\Enum", "App\Enum");
-            $this->setMapping("./Notifier", "Base\Notifier", "App\Notifier");
+         
+            foreach(array_reverse($baseClassBundles) as $classBundle)
+            {
+                $classBundlePath = explode("\\", $classBundle);
+                
+                array_pop($classBundlePath);
 
-            $this->setMapping("./Form", "Base\Form", "App\Form");
-            $this->setMapping("./Entity", "Base\Entity", "App\Entity");
-            $this->setMapping("./Repository", "Base\Repository", "App\Repository");
+                $namespace = $classBundlePath[1] ?? "";
+                $baseNamespace = $namespace ? "Base\\".$namespace : "Base";
+                
+                $classRefl = new \ReflectionClass($classBundle);
+                $namespacePath = dirname($classRefl->getFileName());
 
-            $this->getAllClasses($this->getBundleLocation() . "./Database/Annotation");
-            $this->getAllClasses($this->getBundleLocation() . "./Annotations/Annotation");
+                $this->setMapping($namespacePath . "/Controller", $baseNamespace."\Controller", "Base\Controller\\".$namespace);
 
-            $this->getAllClasses($this->getBundleLocation() . "./Enum");
-            $this->getAllClasses($this->getSourceDir() . "./Enum");
+                $this->setMapping($namespacePath . "/Tests"     , $baseNamespace."\Tests"     , "App\Tests\\".$namespace);
+                $this->setMapping($namespacePath . "/Enum"      , $baseNamespace."\Enum"      , "App\Enum\\".$namespace);
+                $this->setMapping($namespacePath . "/Notifier"  , $baseNamespace."\Notifier"  , "App\Notifier\\".$namespace);
+                $this->setMapping($namespacePath . "/Form"      , $baseNamespace."\Form"      , "App\Form\\".$namespace);
+                $this->setMapping($namespacePath . "/Entity"    , $baseNamespace."\Entity"    , "App\Entity\\".$namespace);
+                $this->setMapping($namespacePath . "/Repository", $baseNamespace."\Repository", "App\Repository\\".$namespace);
 
+                $this->getAllClasses($namespacePath . "./Database/Annotation/".$namespace);
+                $this->getAllClasses($namespacePath . "./Annotations/Annotation/".$namespace);
+                $this->getAllClasses($namespacePath . "./Enum/".$namespace);
+            }
+
+            $this->getAllClasses($this->getSourceDir() . "./Enum/".$namespace);
             self::$cache->warmUp([
                 "base.file_paths" => self::$filePaths ?? [],
                 "base.classes" => self::$classes ?? [],
@@ -172,6 +191,18 @@ class BaseBundle extends Bundle
                 "base.alias_repository_list" => self::$aliasRepositoryList ?? []
             ]);
         }
+    }
+
+    public function getDeclaredClasses(string $namespace = "", int $level = -1)
+    {
+        $namespace .= '\\';
+        return array_values(array_unique(array_filter(get_declared_classes(), function($item) use ($namespace, $level) 
+        { 
+            if(substr($item, 0, strlen($namespace)) !== $namespace) return false;
+            if($level < 0) return true;
+
+            return $level >= substr_count(substr($item, strlen($namespace)), "\\");
+        })));
     }
 
     public function boot(): void
@@ -368,13 +399,13 @@ class BaseBundle extends Bundle
         return dirname((new ReflectionClass(self::class))->getFileName()) . "/";
     }
 
-    public function setMapping(string $location = "./", string $inputNamespace = "", string $outputNamespace = "")
+    public function setMapping(string $path, string $inputNamespace = "", string $outputNamespace = "")
     {
-        $classList = $this->getAllClasses($this->getBundleLocation() . $location, $inputNamespace);
+        $classList = $this->getAllClasses($path, $inputNamespace);
 
         $aliasList = [];
         foreach ($classList as $class) {
-            $aliasList[$inputNamespace . "\\" . $class] = $outputNamespace . "\\" . $class;
+            $aliasList[$inputNamespace . "\\" . $class] = str_rstrip($outputNamespace, "\\"). "\\" . $class;
         }
 
         $this->setAlias($aliasList);
@@ -484,86 +515,76 @@ class BaseBundle extends Bundle
     /**
      * @param $path
      * @param $prefix
+     * @param $level
      * @return array
      */
-    public function getAllClasses($path, $prefix = ""): array
+    public function getAllClasses(string $path, string $prefix = "", int $level = -1): array
     {
-        $fullpath = realpath($path) . " << " . $prefix;
+        $fullpath = realpath($path) . " " . $prefix ." (".$level.")";
+        if (!array_key_exists($fullpath, self::$classes)) {
+        
+            self::$classes[$fullpath] = self::$classes[$fullpath] ?? [];
+            foreach ($this->getFilePaths($path, $level) as $filename) {
+                if (filesize($filename) == 0) {
+                    continue;
+                }
+                if (str_ends_with($filename, "Interface")) {
+                    continue;
+                }
 
-        if (array_key_exists($fullpath, self::$classes)) {
-            return self::$classes[$fullpath];
-        }
-
-        self::$classes[$fullpath] = self::$classes[$fullpath] ?? [];
-        foreach ($this->getFilePaths($path) as $filename) {
-            if (filesize($filename) == 0) {
-                continue;
+                self::$classes[$fullpath][] = $this->getFullNamespace($filename, $prefix) . $this->getClassname($filename);
             }
-            if (str_ends_with($filename, "Interface")) {
-                continue;
-            }
 
-            self::$classes[$fullpath][] = $this->getFullNamespace($filename, $prefix) . $this->getClassname($filename);
+            self::$classes[$fullpath] = array_unique(self::$classes[$fullpath]);
         }
 
         return self::$classes[$fullpath];
     }
 
+    protected static ?array $namespaces = null;
+
     /**
      * @param $path
      * @param $prefix
+     * @param $level
      * @return array
      */
-    public function getAllNamespaces($path, $prefix = ""): array
-    {
-        $namespaces = [];
+    public function getAllNamespaces(string $path, string $prefix = "", int $level = -1): array
+    {    
+        $fullpath = realpath($path) . " " . $prefix ." (".$level.")";
+        if (!array_key_exists($fullpath, self::$namespaces)) {
 
-        $filenames = $this->getFilePaths($path);
-        foreach ($filenames as $filename) {
-            if (filesize($filename) == 0) {
-                continue;
+            self::$namespaces[$fullpath] = self::$namespaces[$fullpath] ?? [];
+            foreach ($this->getFilePaths($path, $level) as $filename) {
+                if (filesize($filename) == 0) {
+                    continue;
+                }
+
+                self::$namespaces[$fullpath][] = rtrim($this->getFullNamespace($filename, $prefix), "\\");
             }
 
-            $namespaces[] = rtrim($this->getFullNamespace($filename, $prefix), "\\");
+            self::$namespaces[$fullpath] = array_unique(self::$namespaces[$fullpath]);
         }
 
-        return array_unique($namespaces);
+        return self::$namespaces[$fullpath];
     }
 
     /**
      * @param $path
      * @param $prefix
+     * @param $level
      * @return array
      */
-    public function getAllNamespacesAndClasses($path, $prefix = ""): array
+    public function getAllNamespacesAndClasses(string $path, string $prefix = "", int $level = -1): array
     {
-        $namespacesAndClasses = [];
-
-        $filenames = $this->getFilePaths($path);
-
-        foreach ($filenames as $filename) {
-            if (filesize($filename) == 0) {
-                continue;
-            }
-
-            $namespace = $this->getFullNamespace($filename, $prefix);
-            $className = $this->getClassname($filename);
-            if (str_ends_with($className, "Interface")) {
-                continue;
-            }
-
-            $namespacesAndClasses[] = rtrim($namespace, "\\");
-            $namespacesAndClasses[] = $namespace . $className;
-        }
-
-        return array_unique($namespacesAndClasses);
+        return array_merge($this->getAllNamespaces($path, $prefix, $level), $this->getAllClasses($path, $prefix, $level));
     }
 
     /**
      * @param $filename
      * @return string|null
      */
-    public function getClassname($filename)
+    public function getClassname(string $filename)
     {
         $directoriesAndFilename = explode('/', $filename);
         $filename = array_pop($directoriesAndFilename);
@@ -576,7 +597,7 @@ class BaseBundle extends Bundle
      * @param $prefix
      * @return string
      */
-    public function getFullNamespace($filename, $prefix = "")
+    public function getFullNamespace(string $filename, string $prefix = "")
     {
         $lines = file($filename);
         $array = preg_grep('/^namespace /', $lines);
@@ -598,9 +619,10 @@ class BaseBundle extends Bundle
 
     /**
      * @param $path
+     * @param $level
      * @return array|mixed
      */
-    public function getFilePaths($path)
+    public function getFilePaths(string $path, int $level = -1)
     {
         $path = realpath($path);
         if (!file_exists($path)) {
@@ -611,7 +633,10 @@ class BaseBundle extends Bundle
             return self::$filePaths[$path];
         }
 
-        $finderFiles = Finder::create()->files()->in($path)->name('*.php');
+        $finder = Finder::create();
+        if($level > -1) $finder->depth(" < ".$level);
+
+        $finderFiles = $finder->files()->in($path)->name('*.php');
         $files = [];
         foreach ($finderFiles as $finderFile) {
             $files[] = $finderFile->getRealpath();

@@ -156,7 +156,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             }
         }
 
-        throw new LogicException("Failed to find Entity FQCN from \"" . get_called_class() . "\" CRUD controller..\nDid you remove the Entity but kept the CRUD controller ?", 500);
+        throw new LogicException("Failed to find Entity FQCN \"".$entityFqcn."\" from \"" . get_called_class() . "\" CRUD controller..\nDid you remove the Entity but kept the CRUD controller ?", 500);
     }
 
     protected static array $crudController = [];
