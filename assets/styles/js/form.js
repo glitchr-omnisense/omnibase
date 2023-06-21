@@ -16,38 +16,42 @@ $.fn.find_in_siblings = function (e = "") {
 
 window.addEventListener('load', function(event) {
 
-    $("form :input").keydown(function(event){
+    $("form :input").on("keydown", function(event){
         
-        if(event.keyCode == 13) {
+        if(event.key === 'Enter') {
 
             var form = $(this).closest("form");
             if(form.length) {
 
+                var button = undefined;
                 if ($(this).find_siblings("[type=submit]").length == 1) {
-                    $(this).find_siblings("[type=submit]").trigger("click");
+                    button = $(this).find_siblings("[type=submit]");
                 } else if ($(this).find_siblings("[type=button]").length == 1) {
-                           $(this).find_siblings("[type=button]").trigger("click");
+                    button = $(this).find_siblings("[type=button]");
                 } else if ($(this).find_in_siblings("[type=submit]").length == 1) {
-                           $(this).find_in_siblings("[type=submit]").trigger("click");
+                    button = $(this).find_in_siblings("[type=submit]");
                 } else if ($(this).find_in_siblings("[type=button]").length == 1) {
-                           $(this).find_in_siblings("[type=button]").trigger("click");
+                    button = $(this).find_in_siblings("[type=button]");
                 } else if ($(this).closest("[type=submit]").length == 1) {
-                           $(this).closest("[type=submit]").trigger("click");
+                    button = $(this).closest("[type=submit]");
                 } else if ($(this).closest("[type=button]").length == 1) {
-                           $(this).closest("[type=button]").trigger("click");
+                    button = $(this).closest("[type=button]");
                 } else if(form.find("[type=submit]").length == 1) {
-                        form.find("[type=submit]").trigger("click");
+                    button = form.find("[type=submit]");
                 } else if(form.find("[type=button]").length == 1) {
-                        form.find("[type=button]").trigger("click");
+                    button = form.find("[type=button]");
                 } else if(form.find("[type=submit]").length > 1) {
-                        return false; // Prevent submission form submission using ENTER
+                    return false; // Prevent submission form submission due to ambiguity
                 } else if(form.find("[type=button]").length > 1) {
-                        return false; // Prevent submission form submission using ENTER
-                } else { 
-                    form.trigger("submit");
+                    return false; // Prevent submission form submission due to ambiguity
                 }
 
-                return false; // Disable by default to prevent double submission, if a button is clicked ..
+                if(button != undefined) {
+
+                    var isDisabled = button.prop("disabled");
+                    if(!isDisabled) button.trigger("click");
+                    return false; // Disable by default to prevent double submission, if a button is clicked ..
+                }
             }
         }
     });
@@ -98,8 +102,6 @@ window.addEventListener('load', function(event) {
                     function () { $(this).addClass('was-validated'); }.bind(this)
                 );
             }
-
-            console.log("SUBMIT", this, e);
         }
     });
 });
