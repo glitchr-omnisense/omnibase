@@ -97,10 +97,6 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
          * @param $signal
          * @return void
          */
-        /**
-         * @param $signal
-         * @return void
-         */
         function signal_handler($signal)
         {
             switch ($signal) {
@@ -110,14 +106,19 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
     }
 
+    /**
+     * @var string
+     */
+    protected string $environment;
+
     public function __construct(Flysystem $flysystem, Registry $doctrine, ParameterBagInterface $parameterBag)
     {
         //
         // Common variables
-        $this->cacheDir = $parameterBag->get("kernel.cache_dir");
-        $this->compression = $parameterBag->get("base.time_machine.compression");
+        $this->cacheDir      = $parameterBag->get("kernel.cache_dir");
+        $this->compression   = $parameterBag->get("base.time_machine.compression");
         $this->snapshotLimit = $parameterBag->get("base.time_machine.snapshot_limit");
-
+        $this->environment   = $parameterBag->get("kernel.environment"); 
         //
         // Prepare filesystem configuration
         $config = ["type" => "local", "root" => $this->getCacheDir()];
@@ -303,7 +304,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             throw new LogicException("Unknown ID #" . $id . " provided.");
         }
 
-        $prefix = $prefix ?? "backup";
+        $prefix = $prefix ?? $this->environment;
 
         $i = 0;
 
@@ -331,7 +332,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     public function getSnapshots(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
     {
         $snapshots = [];
-        $prefix = $prefix ?? "backup";
+        $prefix = $prefix ?? $this->environment;
 
         $storageNames = array_flip($storageNames);
         foreach (array_intersect_key($this->getStorageList(), $storageNames) as $storageName => $filesystem) {
@@ -395,8 +396,8 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      */
     public function backup(null|string|array $databases, int|array $storageNames = [], bool $userInfo = false, ?string $prefix = null, int $cycle = -1)
     {
-        $prefix = $prefix ?? "backup";
-        $this->output?->section()->writeln("<info>Backup procedure started:</info> " . $prefix);
+        $prefix = $prefix ?? $this->environment;
+        $this->output?->section()->writeln("<info>Backup procedure started for </info> \"" . $prefix. "\"");
 
         // Remove too old backup
         $dateLimit = new DateTime($this->timeLimit);
@@ -518,7 +519,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      */
     public function restore(int $id, bool $restoreDatabase, bool $restoreApplication, int|array $storageNames = [], ?string $prefix = null, int $cycle = -1)
     {
-        $prefix = $prefix ?? "backup";
+        $prefix = $prefix ?? $this->environment;
 
         list($storageName, $file) = $this->getSnapshot($id, $storageNames, $prefix, $cycle);
         if (!$storageName) {

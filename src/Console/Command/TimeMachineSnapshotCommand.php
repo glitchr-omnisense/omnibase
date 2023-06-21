@@ -32,6 +32,11 @@ class TimeMachineSnapshotCommand extends Command
      */
     protected $flysystem;
 
+    /**
+     * @var string
+     */
+    protected $environment;
+
     public function __construct(
         LocalizerInterface     $localizer,
         TranslatorInterface    $translator,
@@ -41,16 +46,19 @@ class TimeMachineSnapshotCommand extends Command
         FlysystemInterface     $flysystem
     )
     {
-        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
+        $this->environment = $parameterBag->get("kernel.environment");
         $this->timeMachine = $timeMachine;
         $this->flysystem = $flysystem;
+
+        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
     }
 
     protected function configure(): void
     {
         $this->addArgument('storages', InputArgument::IS_ARRAY, 'What storages do you want to backup?');
+
         $this->addOption('cycle', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
-        $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', "backup");
+        $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', $this->environment);
         $this->addOption('database', null, InputOption::VALUE_OPTIONAL, 'Which database do you want to backup?', null);
         $this->addOption('userlog', null, InputOption::VALUE_NONE, 'Save user info too?', null);
     }
@@ -66,7 +74,9 @@ class TimeMachineSnapshotCommand extends Command
         $cycle    = $input->getOption('cycle') ?? -1;
 
         if($userlog) {
-            $output->section()->writeln("<info>User configuration will be included in the backup</info>");
+            $output->section()->writeln("<info>User configuration will be included in the backup</info>\n");
+        } else {
+            $output->section()->writeln("<warning>User configuration will not be included in the backup</warning> (use `--userlog` option to include it)\n");
         }
         
         $output->section()->writeln("<info>Available database connection(s)</info>:");

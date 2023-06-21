@@ -2,7 +2,6 @@
 
 namespace Base\Console\Command;
 
-use BackupManager\Filesystems\Destination;
 use Base\Console\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -40,7 +39,7 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
 
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion('You are about to backup this application and its database. Do you wish to continue [Y/n] ? ', false);
-        if ($batchMode) $output?->section()->writeln("<warning>Batch mode detected..</warning>\n");
+        if ($batchMode) $output?->section()->writeln("<warning>Batch mode enabled..</warning>\n");
         if(!$batchMode && !$helper->ask($input, $output, $question))
             return Command::SUCCESS;
 
