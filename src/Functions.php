@@ -4045,7 +4045,7 @@ namespace {
 
     /**
      * @param string|int|DateTime|null $datetime
-     * @return DateTime|false|int|null
+     * @return DateTime
      */
     function cast_datetime(null|string|int|DateTime $datetime)
     {

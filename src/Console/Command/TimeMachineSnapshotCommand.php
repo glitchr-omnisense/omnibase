@@ -83,7 +83,7 @@ class TimeMachineSnapshotCommand extends Command
         foreach ($this->timeMachine->getDatabaseList() as $connectionName => $connection) {
 
             $selected = $connectionName == $database ? " <warning><-- selected</warning> " : "";
-            $output->section()->writeln(" * <info>" . $connectionName . "</info> (" . get_class($connection) . ")".$selected);
+            $output->section()->writeln("* <info>" . $connectionName . "</info> (" . get_class($connection) . ")".$selected);
         }
 
         $output->section()->writeln("");
@@ -106,15 +106,24 @@ class TimeMachineSnapshotCommand extends Command
         $prefixStr = $prefix ? "prefixed by \"".$prefix."\"" : "";
 
         $index = 0;
-        foreach ($this->timeMachine->getSnapshots($storages, $prefix, $cycle) as $storageName => $snapshot) {
-            $output->section()->writeln("<info>Available snapshot(s)</info> ".$prefixStr." <info>in</info> " . $storageName, OutputInterface::VERBOSITY_VERBOSE);
+        $snapshotsByCycle = $this->timeMachine->getSnapshotsByCycle($storages, $prefix, $cycle);
+        if (!$snapshotsByCycle) {
+            $output->section()->writeln("* No snapshot ".$prefixStr." found", OutputInterface::VERBOSITY_VERBOSE);
+        }
+
+        foreach ($snapshotsByCycle as $storageName => $snapshots) {
 
             $public = $this->flysystem->getPublic("/", $storageName);
-            if (!$snapshot) {
-                $output->section()->writeln("* No snapshot found", OutputInterface::VERBOSITY_VERBOSE);
-            }
-            foreach ($snapshot as $file) {
-                $output->section()->writeln("* [<info>" . $index++ . "</info>] " . $public . $file, OutputInterface::VERBOSITY_VERBOSE);
+            $output->section()->writeln("<info>Available snapshot(s)</info> ".$prefixStr." <info>in</info> " . $storageName, OutputInterface::VERBOSITY_VERBOSE);
+            
+            foreach($snapshots as $date => $snapshot) {
+
+                $date = \DateTime::createFromFormat("Ymd", $date);
+                if($date) $output->section()->writeln("<warning>[".date("D, M j, Y", $date->getTimestamp())."]</warning>", OutputInterface::VERBOSITY_VERBOSE);
+                
+                foreach ($snapshot as $file) {
+                    $output->section()->writeln("* [<info>" . $index++ . "</info>] " . $public . $file, OutputInterface::VERBOSITY_VERBOSE);
+                }
             }
 
             $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
