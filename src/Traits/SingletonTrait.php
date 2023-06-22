@@ -36,6 +36,7 @@ trait SingletonTrait
     public static function getInstance(bool $instanciateIfNotFound = true): ?self
     {
         if ($instanciateIfNotFound && !self::$_instance) {
+
             try {
                 self::setInstance(new self());
             } catch (ArgumentCountError $e) {

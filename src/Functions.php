@@ -3094,6 +3094,20 @@ namespace {
         return false;
     }
 
+    function basename_namespace(string $namespace)
+    {
+        $array = explode("\\", $namespace);
+        return last($array);
+    }
+    
+    function dirname_namespace(string $namespace, int $level = 1)
+    {
+        $array = explode("\\", $namespace);
+        while($level-- > 0) array_pop($array);
+
+        return implode("\\", $array);
+    }
+    
     function array_pop_key(mixed $key, array &$array): mixed
     {
         if (empty($array)) {
@@ -3360,7 +3374,7 @@ namespace {
 
         return $union;
     }
-
+    
     function mailparse(string $addresses): array
     {
         $regex = '/(?:\w*:)*\s*(?:"([^"]*)"|([^,;\/""<>]*))?\s*(?:(?:[,;\/]|<|\s+|^)([^<@\s;,]+@[^>@\s,;\/]+)>?)\s*/';

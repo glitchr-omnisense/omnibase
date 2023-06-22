@@ -15,13 +15,14 @@ use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Workflow\WorkflowInterface;
+
+use Base\Bundle\AbstractBaseExtension;
 
 /**
  *
  */
-class BaseExtension extends Extension
+class BaseExtension extends AbstractBaseExtension
 {
     /**
      * {@inheritdoc}
@@ -64,26 +65,5 @@ class BaseExtension extends Extension
 
         $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
         $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     * @param array $config
-     * @param $globalKey
-     * @return void
-     */
-    public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = '')
-    {
-        foreach ($config as $key => $value) {
-            if (!empty($globalKey)) {
-                $key = $globalKey . '.' . $key;
-            }
-
-            if (is_array($value)) {
-                $this->setConfiguration($container, $value, $key);
-            } else {
-                $container->setParameter($key, $value);
-            }
-        }
     }
 }

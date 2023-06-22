@@ -4,39 +4,20 @@ namespace Base\DependencyInjection;
 
 use Base\Imagine\Filter\Basic\Definition\UltraHighDefinitionFilter;
 use Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter;
-use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Uid\Uuid;
+
+use Base\Bundle\AbstractBaseConfiguration;
 
 /**
  *
  */
-class BaseConfiguration implements ConfigurationInterface
+class BaseConfiguration extends AbstractBaseConfiguration
 {
-    private TreeBuilder $treeBuilder;
-
-    public function getTreeBuilder(): TreeBuilder
-    {
-        return $this->treeBuilder;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $this->treeBuilder = new TreeBuilder('base');
-        $rootNode = $this->treeBuilder->getRootNode();
-
-        $this->addGlobalOptionsSection($rootNode);
-
-        return $this->treeBuilder;
-    }
-
-    private function addGlobalOptionsSection(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
+        $treeBuilder = $this->getTreeBuilder();
+        $treeBuilder->getRootNode()
             ->children()
             ->arrayNode('database')->addDefaultsIfNotSet()
             ->children()
@@ -567,5 +548,7 @@ class BaseConfiguration implements ConfigurationInterface
             ->end()
             ->end()
             ->end();
+
+        return $treeBuilder;
     }
 }

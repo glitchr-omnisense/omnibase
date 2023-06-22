@@ -6,6 +6,7 @@ use Base\Database\Type\SetType;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\Translation\Translator as SymfonyTranslator;
 
 /**
  *
@@ -47,7 +48,7 @@ class Translator implements TranslatorInterface
     protected $parameterBag;
 
     /**
-     * @var Translator
+     * @var SymfonyTranslator
      */
     protected $translator;
 
@@ -233,7 +234,18 @@ class Translator implements TranslatorInterface
             default:
             case self::PARSE_NAMESPACE:
 
-                $class = str_replace(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], ["", "", "",], $class);
+                $bundleEntityNamespaces = array_map(fn($b) => dirname_namespace($b)."\\Entity\\", \Base\BaseBundle::getBundles());
+                $entityNamespaces = array_merge(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], $bundleEntityNamespaces);
+
+                $entityPrefix = array_fill(0, 3, "");
+                foreach($bundleEntityNamespaces as $namespace)
+                {
+                    $baseNamespace = explode("\\", $namespace)[1] ?? null;
+                    if($baseNamespace) $entityPrefix[] = lcfirst($baseNamespace)."\\";
+                }
+
+                $class = str_replace($entityNamespaces, $entityPrefix, $class);
+
                 return camel2snake(implode(".", array_unique(explode("\\", $class))));
         }
     }
@@ -457,7 +469,7 @@ class Translator implements TranslatorInterface
         }
 
         $entityOrClassName = $this->parseClass($entityOrClassName);
-        $property = $property ? ".__property." . $property : "";
+        $property = $property ? ".".self::TRANSLATION_PROPERTIES."." . $property : "";
 
         return $entityOrClassName ? $this->transPerms($entityOrClassName . camel2snake($property), $options, [], self::DOMAIN_ENTITY) : null;
     }
