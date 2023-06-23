@@ -209,11 +209,15 @@ final class MediaTwigExtension extends AbstractExtension
      * @param mixed $urlOrPath
      * @return string|null
      */
-    public function linkify(mixed $urlOrPath)
+    public function linkify(mixed $urlOrLinkableObject)
     {
-        $url = $urlOrPath;
-        if ($urlOrPath instanceof LinkableInterface) {
-            $url = $urlOrPath->__toLink();
+        $url = $urlOrLinkableObject;
+        if (is_object($urlOrLinkableObject)) {
+            
+            if (!$urlOrLinkableObject instanceof LinkableInterface) 
+                throw new \LogicException("Object \"".get_class($urlOrLinkableObject)."\" received doesn't implement \"".LinkableInterface::class."\"");
+            
+            $url = $urlOrLinkableObject->__toLink();
         }
 
         return is_object($url) ? null : (is_string($url) ? $url : null);

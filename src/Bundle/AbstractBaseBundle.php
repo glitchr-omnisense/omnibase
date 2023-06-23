@@ -47,9 +47,26 @@ abstract class AbstractBaseBundle extends Bundle
         }
     }
 
+    protected static ?array $bundles = null;
     public static function getBundles()
     {
-        return array_filter(self::getDeclaredClasses("Base", 2), fn($v) => str_ends_with($v, "Bundle") && $v != self::class && $v != BaseBundle::class);
+        if(self::$bundles === null) {
+
+            self::$bundles = array_filter(
+                self::getDeclaredClasses("Base", 2), 
+                fn($v) => str_ends_with($v, "Bundle") && $v != self::class && $v != BaseBundle::class
+            );
+        }
+
+        return self::$bundles;
+    }
+
+    public static function hasBundle(string $bundleName)
+    {
+        $bundles = self::getBundles();
+        $bundleNames = array_map(fn($c) => camel2snake(str_rstrip(basename_namespace($c), "Bundle")), $bundles);
+
+        return in_array($bundleName, $bundles) || in_array($bundleName, $bundleNames);
     }
 
     public static function getDeclaredClasses(string $namespace = "", int $level = -1)

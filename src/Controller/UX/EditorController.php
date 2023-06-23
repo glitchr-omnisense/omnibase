@@ -112,11 +112,14 @@ class EditorController extends AbstractController
         $fileExtension = $mimeType ? $this->mimeTypes->getExtensions($mimeType)[0] ?? null : null;
         $filePath = "/" . $fileUuid . ($fileExtension ? "." . $fileExtension : "");
 
-        $operator = $this->parameterBag->get("base.twig.editor.operator");
         if (!file_exists($file->getPathname())) {
             return new Response("Uploaded file lost in the limbo.", 500);
         }
-
+        
+        $operator = $this->parameterBag->get("base.twig.editor.operator");
+        if (!$operator) {
+            return new Response("No storage provided.", 500);
+        }
         if (!$this->flysystem->write($filePath, file_get_contents($file->getRealPath()), $operator)) {
             return new Response("Repository directory not writable.", 500);
         }

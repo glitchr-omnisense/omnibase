@@ -3,12 +3,15 @@
 namespace Base\Backend\Context;
 
 use Base\Backend\Config\Extension;
+use Base\Backend\Config\MenuAfterItem;
+use Base\Controller\Backend\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\DashboardControllerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\AssetsDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\CrudDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\DashboardDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\I18nDto;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\MainMenuDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Registry\CrudControllerRegistry;
@@ -68,6 +71,58 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
     public function getImpersonatorPermission(): string
     {
         return class_exists(AuthenticatedVoter::class) ? AuthenticatedVoter::IS_IMPERSONATOR : 'ROLE_PREVIOUS_ADMIN';
+    }
+
+    /**
+     * @var MainMenuDto
+     */
+    protected ?MainMenuDto $mainMenuBeforeDto = null;
+    public function getMainMenuBefore(): ?MainMenuDto
+    {
+        if (null !== $this->mainMenuBeforeDto) {
+            return $this->mainMenuBeforeDto;
+        }
+
+        $mainMenuItems = [];
+        if($this->dashboardControllerInstance instanceof AbstractDashboardController) {
+        
+            $configuredMenuItems = $this->dashboardControllerInstance->configureMenuBeforeItems();
+            $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
+        }
+
+        return $this->mainMenuBeforeDto = $this->menuFactory->createMainMenu($mainMenuItems);
+    }
+
+    public function getMainMenu(): MainMenuDto
+    {
+        if (null !== $this->mainMenuDto) {
+            return $this->mainMenuDto;
+        }
+
+        $configuredMenuItems = $this->dashboardControllerInstance->configureMenuItems();
+        $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
+
+        return $this->mainMenuDto = $this->menuFactory->createMainMenu($mainMenuItems);
+    }
+
+    /**
+     * @var MainMenuDto
+     */
+    protected ?MainMenuDto $mainMenuAfterDto = null;
+    public function getMainMenuAfter(): ?MainMenuDto
+    {
+        if (null !== $this->mainMenuAfterDto) {
+            return $this->mainMenuAfterDto;
+        }
+
+        $mainMenuItems = [];
+        if($this->dashboardControllerInstance instanceof AbstractDashboardController) {
+        
+            $configuredMenuItems = $this->dashboardControllerInstance->configureMenuAfterItems();
+            $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
+        }
+
+        return $this->mainMenuAfterDto = $this->menuFactory->createMainMenu($mainMenuItems);
     }
 
     /**

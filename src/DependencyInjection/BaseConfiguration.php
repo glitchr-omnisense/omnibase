@@ -528,7 +528,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                     ->arrayNode('editor')->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('operator')
-                            ->defaultValue(UltraHighDefinitionFilter::class)
+                            ->defaultValue(null)
                             ->end()
                         ->end()
                     ->end()

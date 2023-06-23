@@ -10,6 +10,13 @@
 
 html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
 
+
+.row {
+    margin-left:0 !important;
+    margin-right:0 !important;
+    margin-top:0 !important;
+}
+
 .row>* { padding-left:0;}
 
 .page-apikey input, .page-settings input
@@ -22,6 +29,21 @@ html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
     border-bottom: var(--bs-accordion-border-width) solid var(--content-top-border-color) !important;
 }
 
+.sidebar .menu.menu-after .menu-item { margin-right: 5px; }
+.sidebar .menu.menu-after .menu-icon { 
+    width:32px !important; 
+    height:32px !important; 
+    margin-right:0 !important; 
+    font-size:20pt !important;
+}
+
+.sidebar .menu.menu-after span { display:none; }
+.sidebar .menu.menu-after {
+    display:inline-flex; 
+    flex-wrap: wrap;
+
+    width:100%;
+}
 
 .accordion-body {
     padding-top: 0 !important;
@@ -1232,7 +1254,14 @@ fieldset {
     /* box-shadow: inset -1px 0 0 var(--sidebar-border-color); */
 }
 
+.menu-without-section
+{
+    font-style: italic;
+    color: var(--sidebar-menu-icon-color) !important;
+}
+
 .content-panel-body.with-background, .content-panel-body.without-footer, .content-panel-footer {
+    padding: 18px 25px;
     border: var(--border-width) var(--border-style) var(--content-top-border-color);
     width:100%;
 }

@@ -1,7 +1,6 @@
 import EditorJs from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import ImageTool from '@editorjs/image';
-import Undo from 'editorjs-undo';
 import Warning from '@editorjs/warning';
 import NestedList from '@editorjs/nested-list';
 import Checklist from '@editorjs/checklist';
@@ -37,9 +36,7 @@ window.addEventListener("load.form_type", function () {
         if (data) Object.assign(options, {data:data});
 
         Object.assign(options, {
-            tools: {
-                warning: Warning,
-                            
+            tools: {    
                 header: {
                     class: Header,
                     inlineToolbar: ['link'],
@@ -52,6 +49,18 @@ window.addEventListener("load.form_type", function () {
                     inlineToolbar: true,
                 },
                 
+                image: {
+                    class: ImageTool,
+                    config: {
+                        accept: 'image/*',
+                        endpoints: {
+                            byFile: endpointByFile,
+                            byUrl: endpointByUrl
+                        },
+                    }
+                },
+
+                warning: Warning,
                 alert: Alert,
                 underline: Underline,
                 code: CodeTool,
@@ -78,34 +87,11 @@ window.addEventListener("load.form_type", function () {
                     class: InlineCode,
                     shortcut: 'CMD+SHIFT+M',
                 },
-                image: {
-                    class: ImageTool,
-                    config: {
-                        accept: 'image/*',
-                        endpoints: {
-                            byFile: endpointByFile,
-                            byUrl: endpointByUrl
-                        },
-                    }
-                }
             }
         });
 
         Object.assign(options, {
             holder: editorId, 
-            onReady: async () => {
-
-                if (!data) {
-
-                    await editor.blocks.renderFromHTML(value);
-
-                } else {
-
-                    const undo = new Undo({ editor });
-                    if(data) undo.initialize(data);
-                }
-
-            },
 
             onChange:() => { 
                 

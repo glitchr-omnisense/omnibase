@@ -9,10 +9,15 @@
 }
 .cdx-notifies
 {
+    z-index:10000 !important; 
     color:#222;
     margin-right:10px;
 }
-.codex-editor
+.ce-popover-item[data-item-name="paragraph"] svg
+{
+    color:transparent;
+}
+.codex-editor__redactor
 {
     color: #222;
     background-color: #FFF;

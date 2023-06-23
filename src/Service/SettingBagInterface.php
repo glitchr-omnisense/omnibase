@@ -7,6 +7,8 @@ namespace Base\Service;
  */
 interface SettingBagInterface
 {
+    public function clearAll();
+
     public function all(?string $locale = null): array;
 
     public function get(null|string|array $path = null, ?string $locale = null): array;

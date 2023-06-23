@@ -5,7 +5,7 @@
 {% block content_excerpt  %}{{ excerpt("backoffice_apikey") }}{% endblock %}
 {% block content %}
 
-{% if form.children|length > 1 %}
+{% if form is defined and form.children|length > 1 %}
     <div class="page-apikey">
     {{ form(form) }}
     </div>

@@ -393,6 +393,7 @@ class Translator implements TranslatorInterface
 
         $trans = null;
         foreach ($permutations as $permutation) {
+
             $trans = $this->transQuiet(mb_strtolower($id . $permutation), [], $domain, $locale, $localeCountry);
             if ($trans !== null) {
                 return true;

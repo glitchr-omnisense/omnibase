@@ -650,7 +650,7 @@ namespace {
 
     function array_unique_object(array $array): array
     {
-        $unique = array_keys(array_unique(array_map(fn($e) => spl_object_hash($e), $array)));
+        $unique = array_keys(array_unique(array_map(fn($e) => spl_object_hash($e), array_filter($array))));
         return array_filter($array, fn($k) => in_array($k, $unique), ARRAY_FILTER_USE_KEY);
     }
 

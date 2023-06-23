@@ -1510,7 +1510,9 @@ class ServiceEntityParser
 
             return $memberOf ? $queryBuilder->expr()->andX(...$memberOf) : "";
         } else {
+
             if ($this->classMetadata->hasAssociation($fieldHead)) {
+
                 // NB:: Still useful for select.. to be improved (fetch owning side ?)
                 // if($this->classMetadata->isAssociationInverseSide($fieldHead))
                 //     throw new Exception("Association \"$fieldHead\" for \"".$this->classMetadata->getName()."\" is not owning side");
@@ -1530,13 +1532,18 @@ class ServiceEntityParser
                         $queryBuilder->setParameter($fieldID . "_" . $subFieldID, $subFieldValue);
                     }
                 } else {
+
                     if (!is_array($fieldValue)) {
+
                         if ($this->classMetadata->hasAssociation($fieldHead)) {
                             $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . $fieldHead);
                         }
 
-                        $queryBuilder->setParameter($fieldID, $fieldValue);
+                        if(!$isEmpty && !$isNotEmpty && !$isBool) {
+                            $queryBuilder->setParameter($fieldID, $fieldValue);
+                        }
                     } else {
+
                         $fieldValue = array_filter($fieldValue);
                         if ($fieldValue) {
                             if ($this->classMetadata->hasAssociation($fieldHead)) {
@@ -1547,6 +1554,7 @@ class ServiceEntityParser
                         }
                     }
                 }
+
             } elseif (is_array($fieldValue)) {
                 if (!empty($fieldValue)) {
                     $queryBuilder->setParameter($fieldID, $fieldValue);
@@ -1554,10 +1562,11 @@ class ServiceEntityParser
             } elseif (!$isEmpty && !$isNotEmpty && !$isBool) {
                 $queryBuilder->setParameter($fieldID, $fieldValue);
             }
-
+            
             if ($isInsensitive) {
                 $tableColumn = "LOWER(" . $tableColumn . ")";
             }
+
             if ($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
                 if ($tableOperator != self::OPTION_EQUAL && $tableOperator != self::OPTION_NOT_EQUAL) {
                     throw new Exception("Invalid operator for association field \"$fieldName\": " . $tableOperator);
@@ -1576,7 +1585,9 @@ class ServiceEntityParser
 
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "orX" : "andX");
                 return $queryBuilder->expr()->$fnExpr(...$queryExpr);
+
             } elseif (is_array($fieldValue)) {
+
                 if ($tableOperator == self::OPTION_EQUAL) {
                     $fnExpr = "in";
                 } elseif ($tableOperator == self::OPTION_NOT_EQUAL) {
@@ -1614,7 +1625,9 @@ class ServiceEntityParser
                 }
 
                 return $queryBuilder->expr()->$fnExpr($tableColumn, ":$fieldID");
+            
             } elseif ($isEmpty || $isNotEmpty) {
+
                 if ($tableOperator == self::OPTION_EMPTY) {
                     $queryExpr = [];
                     $queryExpr[] = $queryBuilder->expr()->isNull($tableColumn);
