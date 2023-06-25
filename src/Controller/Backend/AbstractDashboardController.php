@@ -90,6 +90,8 @@ use Base\Wikidoc\WikidocBundle;
 
 use Base\Wikidoc\Entity\Abstract\AbstractDocument;
 use Base\Wikidoc\Entity\Abstract\AbstractSection;
+use Base\Wikidoc\Entity\AdminDocument;
+use Base\Wikidoc\Entity\AdminSection;
 
 /**
  * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice")
@@ -252,8 +254,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             return $this->redirect("backoffice");
         }
 
-        $documentRepository = $this->entityManager->getRepository(AbstractDocument::class);
-        $sectionRepository = $this->entityManager->getRepository(AbstractSection::class);
+        $documentRepository = $this->entityManager->getRepository(AdminDocument::class);
+        $sectionRepository = $this->entityManager->getRepository(AdminSection::class);
         $orphanDocuments = $documentRepository->cacheBySectionsEmpty()->getResult();
 
         $sectionList = $sectionRepository->cacheAll(["priority" => "DESC"])->getResult();

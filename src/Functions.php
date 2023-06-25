@@ -1399,7 +1399,7 @@ namespace {
 
         if (preg_match('/(.*)(' . implode("|", array_map("preg_quote", $separator)) . ')(.*)/', $str, $matches)) {
             $delimiter = $keepDelimiters ? $matches[2] : "";
-            return array_merge(explodeByArray($separator, $matches[1], --$limit), [$delimiter . $matches[3]]);
+            return array_merge(explodeByArray($separator, $matches[1], $keepDelimiters, --$limit), [$delimiter . $matches[3]]);
         }
 
         return [$str];

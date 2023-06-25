@@ -4,6 +4,7 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Wikidoc\Entity\Abstract\AbstractDocument;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
@@ -32,59 +33,63 @@ class DiscriminatorEntry extends AbstractAnnotation
 
         // Formatting input object
         $className = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
-        $namespace = explodeByArray("\\Entity\\", $className);
+        $namespace = explode("\\Entity\\", $className);
+        
+        $pos = array_search('Entity', $namespace);
+        if($pos !== false) unset($namespace[$pos]);
 
         // Special case for App and Base entities
-        switch (($namespaceRoot = array_shift($namespace))) {
-            case "Base":
+        $namespaceRoot = array_shift($namespace);
+        if(str_starts_with($namespaceRoot, "Base")) {
+       
+            //NB: Either returning "common" or "abstract" value for root entity
+            $namespacePrefix = explode("\\", $namespaceRoot);
+            array_shift($namespacePrefix);
+            
+            $special = $namespaceRoot == "Base" ? (is_abstract($className) ? "abstract" : "common") : null;
+            if ($special && !get_parent_class($className)) {
+                return $special;
+            }
 
-                //NB: Either returning "common" or "abstract" value for root entity
-                $special = $namespaceRoot == "Base" ? (is_abstract($className) ? "abstract" : "common") : null;
-                if ($special && !get_parent_class($className)) {
-                    return $special;
-                }
+            // Otherwise.. Just put the class basename (as it is expected to be "general" terms.)
+            $namespace = array_unique(explode("\\", $namespace[0] ?? ""));
 
-                // Otherwise.. Just put the class basename (as it is expected to be "general" terms.)
-                $namespace = array_unique(explode("\\", $namespace[0] ?? ""));
-                return mb_lcfirst(end($namespace));
-
-            default:
-            case "App":
-
-                $namespace = $namespace[0] ?? null;
-                if ($namespace === null) {
-                    throw new Exception("Unexpected location for \"$className\"");
-                }
-
-                // Looking for custom parent values
-                $parentValue = null;
-                $parentNamespace = null;
-                if ($parentClassName = get_parent_class($className)) {
-                    $parentNamespace = explodeByArray("\\Entity\\", $parentClassName)[1] ?? null;
-                    $parentAnnotations = $this->getAnnotationReader()->getAnnotations($parentClassName, $this);
-                    $parentAnnotations = $parentAnnotations[AnnotationReader::TARGET_CLASS][$parentClassName];
-                    if (($parentAnnotation = $parentAnnotations ? end($parentAnnotations) : null)) {
-                        $parentValue = $parentAnnotation->getValue($parentClassName);
-                        $parentValue = in_array($parentValue, ["abstract", "common"]) ? null : $parentValue;
-                    }
-                }
-
-                // Strip parent prefix namespace
-                if ($parentNamespace !== null && $parentValue !== null && str_starts_with($namespace, $parentNamespace . "\\")) {
-                    $namespace = explode("\\", str_lstrip($namespace, $parentNamespace . "\\"));
-                    array_unshift($namespace, $parentValue);
-                } else {
-                    $namespace = explode("\\", $namespace);
-                }
-
-                // Return final entry value
-                $namespace = array_unique($namespace);
-                $namespace = array_map("mb_lcfirst", $namespace);
-
-                return implode("_", $namespace);
+            $namespacePrefix = implode("_", array_map(fn($n) => mb_lcfirst($n), $namespacePrefix));
+            $namespacePrefix = $namespacePrefix ? $namespacePrefix."_" : "";
+            return $namespacePrefix.mb_lcfirst(end($namespace));
+        }
+    
+        $namespace = $namespace[0] ?? null;
+        if ($namespace === null) {
+            throw new Exception("Unexpected location for \"$className\"");
         }
 
-        return $this->value;
+        // Looking for custom parent values
+        $parentValue = null;
+        $parentNamespace = null;
+        if ($parentClassName = get_parent_class($className)) {
+            $parentNamespace = explodeByArray("\\Entity\\", $parentClassName)[1] ?? null;
+            $parentAnnotations = $this->getAnnotationReader()->getAnnotations($parentClassName, $this);
+            $parentAnnotations = $parentAnnotations[AnnotationReader::TARGET_CLASS][$parentClassName];
+            if (($parentAnnotation = $parentAnnotations ? end($parentAnnotations) : null)) {
+                $parentValue = $parentAnnotation->getValue($parentClassName);
+                $parentValue = in_array($parentValue, ["abstract", "common"]) ? null : $parentValue;
+            }
+        }
+
+        // Strip parent prefix namespace
+        if ($parentNamespace !== null && $parentValue !== null && str_starts_with($namespace, $parentNamespace . "\\")) {
+            $namespace = explode("\\", str_lstrip($namespace, $parentNamespace . "\\"));
+            array_unshift($namespace, $parentValue);
+        } else {
+            $namespace = explode("\\", $namespace);
+        }
+
+        // Return final entry value
+        $namespace = array_unique($namespace);
+        $namespace = array_map("mb_lcfirst", $namespace);
+
+        return implode("_", $namespace);
     }
 
     /**
