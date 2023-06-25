@@ -88,8 +88,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Base\BaseBundle;
 use Base\Wikidoc\WikidocBundle;
 
-use Base\Wikidoc\Entity\Document;
-use Base\Wikidoc\Entity\Section;
+use Base\Wikidoc\Entity\Abstract\AbstractDocument;
+use Base\Wikidoc\Entity\Abstract\AbstractSection;
 
 /**
  * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice")
@@ -252,8 +252,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             return $this->redirect("backoffice");
         }
 
-        $documentRepository = $this->entityManager->getRepository(Document::class);
-        $sectionRepository = $this->entityManager->getRepository(Section::class);
+        $documentRepository = $this->entityManager->getRepository(AbstractDocument::class);
+        $sectionRepository = $this->entityManager->getRepository(AbstractSection::class);
         $orphanDocuments = $documentRepository->cacheBySectionsEmpty()->getResult();
 
         $sectionList = $sectionRepository->cacheAll(["priority" => "DESC"])->getResult();
@@ -752,8 +752,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
                 $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('DOCUMENTATION', 'fa-solid fa-life-ring'));
                 $widgets = $this->addWidgetItem($widgets, 'DOCUMENTATION', [
-                    WidgetItem::linkToCrud(Document::class),
-                    WidgetItem::linkToCrud(Section::class)
+                    WidgetItem::linkToCrud(AbstractDocument::class),
+                    WidgetItem::linkToCrud(AbstractSection::class)
                 ]);
             }
         }

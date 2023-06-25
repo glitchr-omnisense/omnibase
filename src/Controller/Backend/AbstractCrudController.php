@@ -143,10 +143,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         foreach (self::$crudNamespaceCandidates as $namespace) {
             try {
                 $entityFqcn = preg_replace("/" . $namespace . "\/", "\\Entity\\", $entityFqcn);
-                $aliasEntityFqcn = BaseBundle::getInstance()->getAlias($entityFqcn);
-                if ($aliasEntityFqcn) {
-                    $entityFqcn = $aliasEntityFqcn;
-                }
+                // $entityFqcn = BaseBundle::getAlias($entityFqcn);
 
                 if (class_exists($entityFqcn)) {
                     self::$crudController[$entityFqcn] = get_called_class();
@@ -178,6 +175,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         }
 
         foreach (self::$crudNamespaceCandidates as $namespace) {
+                    
             $crudController = preg_replace('/\\\Entity\\\/', $namespace, $entityFqcn);
             $crudController = $crudController . "CrudController";
 
@@ -226,7 +224,17 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      */
     public static function getTranslationPrefix(?string $prefix = ""): array|false|string|null
     {
-        $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", get_called_class()::getEntityFqcn());
+        $bundleEntityNamespaces = array_map(fn($b) => dirname_namespace($b)."\\Entity\\", \Base\BaseBundle::getBundles());
+        $entityNamespaces = array_merge(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], $bundleEntityNamespaces);
+
+        $entityPrefix = array_fill(0, 3, "");
+        foreach($bundleEntityNamespaces as $namespace)
+        {
+            $baseNamespace = explode("\\", $namespace)[1] ?? null;
+            if($baseNamespace) $entityPrefix[] = lcfirst($baseNamespace)."\\";
+        }
+
+        $entityFqcn = str_replace($entityNamespaces, $entityPrefix, get_called_class()::getEntityFqcn());
         return camel2snake(implode(".", array_unique(explode("\\", $entityFqcn))));
     }
 
@@ -277,22 +285,22 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function setDiscriminatorMapAttribute(Action $action): Action
     {
         $entity = $this->getEntityFqcn();
-        $rootEntity = BaseBundle::getInstance()->getAlias($this->classMetadataManipulator->getRootEntityName($entity));
+        $rootEntity = $this->classMetadataManipulator->getRootEntityName($entity);
+        $rootEntity = BaseBundle::getAlias($rootEntity);
         $actionDto = $action->getAsDto();
 
         $discriminatorMap = $this->configureDiscriminatorMap($this->classMetadataManipulator->getDiscriminatorMap($entity), $rootEntity, $entity);
         if ($discriminatorMap === null) {
             $discriminatorMap = array_filter($this->classMetadataManipulator->getDiscriminatorMap($entity), fn($e) => is_instanceof($e, $entity));
         }
-
         $htmlAttributes = $actionDto->getHtmlAttributes();
         $htmlAttributes["crud"] = urlencode(get_class($this));
         $htmlAttributes["root-crud"] = urlencode($this->getCrudControllerFqcn($rootEntity));
         $htmlAttributes["map"] = [];
 
         foreach ($discriminatorMap as $key => $class) {
-            $class = BaseBundle::getInstance()->getAlias($class);
 
+            // $class = BaseBundle::getAlias($class);
             if (is_abstract($class)) {
                 continue;
             }
@@ -301,8 +309,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $key = array_shift($k);
 
             if (($crudClassController = $this->getCrudControllerFqcn($class))) {
-                $array = [implode("_", $k) => urlencode($crudClassController)];
-                $htmlAttributes["map"][$key] = array_merge($htmlAttributes["map"][$key] ?? [], $array);
+                // $array = [get_parent_class($crudClassController) => urlencode($crudClassController)];
+                // dump($crudClassController, get_parent_class($crudClassController));
+                $htmlAttributes["map"][get_parent_class($class)] ?? [];
+                $htmlAttributes["map"][get_parent_class($class)][] = urlencode($crudClassController);
             }
         }
 

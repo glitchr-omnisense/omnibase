@@ -127,6 +127,7 @@
     {% endfor %}
 
     {% set instantiable = false %}
+
     {% for group, entities in discriminatorMap %}
         {% if not instantiable %}
             {% set instantiable = (crud in entities) and static_call(crud|url_decode, "isInstantiable") %}
@@ -139,14 +140,14 @@
             {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
             {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
         </a>
-
+        
         {% if discriminatorMap|count_leaves > 0 %}
         <button type="button" class="btn btn-primary dropdown-toggle root-allowed dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
             <span class="visually-hidden"></span>
         </button>
         {% endif %}
     {% else %}
-        <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="{{ discriminatorMap|count_leaves < 1 ? "disabled" }} dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
             {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
             {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
@@ -161,8 +162,7 @@
                 {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
                 {% if group is not empty %}
                     <li class="dropdown-item label-group">
-                    {% set label = ("@entities."~group~"._singular")|trans(domain = ea.getTranslationDomain()) %}
-                    {{- label !=  ("@entities."~group~"._singular") ? label|capitalize : action.label|trans|capitalize -}}
+                     {{ group|trans_entity|capitalize -}}
                     </li>
                 {% endif %}
             {% endif %}

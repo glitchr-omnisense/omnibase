@@ -1070,6 +1070,12 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .fileupload input {
     padding-right: 30px;
 }
+
+.fileupload input:first-child {
+    border-top-left-radius: 4px !important;
+    border-bottom-left-radius: 4px !important;
+}
+
 .fileupload input.last {
     border-top-right-radius: 4px !important;
     border-bottom-right-radius: 4px !important;
