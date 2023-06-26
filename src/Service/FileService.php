@@ -156,7 +156,7 @@ class FileService implements FileServiceInterface
             return $this->mimeTypes->guessMimeType($fileOrContentsOrArray);
         } catch (InvalidArgumentException $e) {
 
-            if(is_string($fileOrContentsOrArray) && !is_binary($fileOrContentsOrArray))
+            if(is_string($fileOrContentsOrArray) && !is_binary($fileOrContentsOrArray) && is_url($fileOrContentsOrArray))
                 $fileOrContentsOrArray = $this->router->getUrl($fileOrContentsOrArray, [], AdvancedRouter::ABSOLUTE_URL);
 
             // Attempt to read based on custom mime_content_content method
