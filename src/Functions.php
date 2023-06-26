@@ -42,6 +42,15 @@ namespace {
         return ($n < 0) ? "-" : "+";
     }
 
+function is_hex(string $str): bool {
+    if (str_starts_with(strtolower($str), '0x')) {
+        $str = substr($str, 2);
+    }
+
+    return ctype_xdigit($str);
+}
+
+
     /**
      * @param mixed $stringOrObject
      * @return bool
