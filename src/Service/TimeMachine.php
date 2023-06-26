@@ -714,7 +714,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         if ($compression) {
 
             if ($ret) {
-                throw new LogicException("Failed to create tarball: " . $output);
+                throw new LogicException("Failed to create tarball: " . $output."; ".$_);
             }
 
             $compressor = $this->compressors->get($this->compression);

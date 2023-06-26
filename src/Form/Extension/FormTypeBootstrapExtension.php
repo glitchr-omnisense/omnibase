@@ -7,6 +7,7 @@ use Base\Service\BaseService;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\AbstractTypeExtension;
+use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
@@ -83,8 +84,13 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
             case "SubmitType":
             case "HiddenType":
                 break;
+                
+            case "RadioType":
+                self::addAttribute($view, "class", "form-radio");
+                break;
 
             default:
+    
                 self::addAttribute($view, "class", "form-control");
                 self::addRowAttribute($view, "class", "form-group");
 

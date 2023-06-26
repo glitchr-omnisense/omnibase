@@ -109,7 +109,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeUrl = null;
         if (!str_ends_with($routeName, "." . self::$router->getLocaleLang())) {
             try {
-                $routeUrl = sanitize_url(parent::generate($routeName . "." . self::$router->getLocaleLang(), $routeParameters, $referenceType));
+                $routeUrl = sanitize_url(parent::generate($routeName . "." . self::$router->getLocaleLang(), array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
             } catch (InvalidParameterException|RouteNotFoundException $_) {
                 $e = $_;
             }
@@ -117,7 +117,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         if (!$routeUrl) {
             try {
-                $routeUrl = sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType));
+                $routeUrl = sanitize_url(parent::generate($routeName, array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
             } catch (InvalidParameterException|RouteNotFoundException $_) {
                 $e = $_;
             }
@@ -134,7 +134,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             if (!str_ends_with($routeDefaultName, "." . self::$router->getLocaleLang())) {
                 try {
-                    $routeUrl = sanitize_url(parent::generate($routeDefaultName . "." . self::$router->getLocaleLang(), $routeParameters, $referenceType));
+                    $routeUrl = sanitize_url(parent::generate($routeDefaultName . "." . self::$router->getLocaleLang(), array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
                 } catch (InvalidParameterException|RouteNotFoundException $_) {
                 }
             }
@@ -142,7 +142,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         if (!$routeUrl) {
             try {
-                $routeUrl = sanitize_url(parent::generate($routeDefaultName, array_filter($routeParameters), $referenceType));
+                $routeUrl = sanitize_url(parent::generate($routeDefaultName, array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
             } catch (InvalidParameterException|RouteNotFoundException $_) {
                 throw $e;
             }
@@ -202,6 +202,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $locale = $lang;
             }
         }
+
+
 
         // Check whether the route is already cached
         $hash = self::$router->getRouteHash($name, $parameters, $referenceType);
