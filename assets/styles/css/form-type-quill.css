@@ -16,6 +16,12 @@
     white-space: pre-line;
 }
 
+.ql-container
+{
+    max-height: 75vh;
+    overflow: scroll;
+}
+
 @media all and (max-width: 470px) {
 
     .ql-editor img
