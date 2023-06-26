@@ -274,7 +274,7 @@ namespace {
         $port = $port != 80 && $port != 443 ? $port : null;
 
         $request_uri ??= $_SERVER["REQUEST_URI"] ?? null; // Fragment is contained in request URI
-
+	
         return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
 
@@ -375,9 +375,15 @@ namespace {
         $machine = ($domain && $machine) ? $machine . "." : null;
         $port = ($domain && $port && $port != 80 && $port != 443) ? ":" . $port : null;
 
+	$queryInPath = $path ? (explode("?", $path)[1] ?? null) : null;
+	$path = $path ? (explode("?", $path)[0] ?? null) : null;
+
+	if($queryInPath) $query = $query ? $queryInPath."&".$query : $queryInPath;
         $query = $query ? "?" . $query : null;
 
+	if($path != null && str_ends_with($path, "/")) $path = null;
         $pathToQuerySlash = ($path != null && !str_ends_with($path, "/") && !empty($query) ? "/" : "");
+
         $url = $scheme . $machine . $subdomain . $domain . $port . $user . $password . $path . $pathToQuerySlash . $query;
         return $url ?: "/";
     }
