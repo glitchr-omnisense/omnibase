@@ -676,15 +676,19 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         list($_, $ret) = [[], false];
         exec(sprintf('echo "[CMD] date" > %s', escapeshellarg($output)), $_, $ret);
         exec(sprintf('date >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('echo "" >> %s', escapeshellarg($output)), $_, $ret);
         
         exec(sprintf('echo "[CMD] hostname" >> %s', escapeshellarg($output)), $_, $ret);
         exec(sprintf('hostname >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('echo "" >> %s', escapeshellarg($output)), $_, $ret);
 
         exec(sprintf('echo "[CMD] env" >> %s', escapeshellarg($output)), $_, $ret);
         exec(sprintf('env >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('echo "" >> %s', escapeshellarg($output)), $_, $ret);
 
         exec(sprintf('echo "[CMD] last" >> %s', escapeshellarg($output)), $_, $ret);
         exec(sprintf('last >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('echo "" >> %s', escapeshellarg($output)), $_, $ret);
 
         return $ret == 0 ? $output : null;
     }
