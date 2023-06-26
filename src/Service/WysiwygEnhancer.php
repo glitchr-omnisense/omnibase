@@ -117,7 +117,11 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         $maxLevel ??= 6;
         $maxLevel = max(1, $maxLevel);
         $headlines = [];
-        preg_replace_callback("/\<[ ]*(h[1-" . $maxLevel . "])(?:[^\<\>]*)\>([^\<\>]*)\<\/[ ]*h[1-" . $maxLevel . "][ ]*\>/", function ($match) use (&$headlines) {
+
+        $html = preg_replace("/(<\/[ ]*h[1-6][ ]*\>)/i", '$1'.PHP_EOL, $html);
+        preg_replace_callback("/\<[ ]*(h[1-6])(?:[^\<\>]*)\>(.*)\<\/[ ]*h[1-6][ ]*\>/mi", function ($match) use (&$headlines) {
+
+            $match[2] = strip_tags($match[2]);
             $headlines[] = [
                 "tag" => $match[1],
                 "slug" => strtolower($this->slugger->slug($match[2])),
