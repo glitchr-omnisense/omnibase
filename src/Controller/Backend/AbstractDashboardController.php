@@ -254,26 +254,18 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         $documentRepository = $this->entityManager->getRepository(AdminDocument::class);
-        $mainDocuments = $documentRepository->cacheByParentEmpty(["priority" => "DESC"])->getResult();
+        $documents = $documentRepository->cacheByParentEmpty(["priority" => "DESC"])->getResult();
         
-        if($slug != null) $document = $documentRepository->cacheOneBySlug($slug);
-        else $document = first($mainDocuments);
+        if($slug != null) $selectedDocument = $documentRepository->cacheOneBySlug($slug);
+        else $selectedDocument = first($documents);
 
-        if($slug !== null && $slug == first($mainDocuments)?->getSlug()) {
+        if($slug !== null && $slug == first($documents)?->getSlug()) {
             return $this->redirectToRoute("backoffice_manual");
         }
 
-        $sections = [];
-        foreach($mainDocuments as $mainDocument)
-        {
-            $sections[$mainDocument->getId()] = $mainDocument;
-            $documents[$mainDocument->getId()] = $documentRepository->cacheByParent($mainDocument, ["priority" => "DESC"])->getResult();
-        }
-
         return $this->render('@Wikidoc/backoffice/manual.html.twig', [
-            "selected_document" => $document,
-            "documents" => $documents, 
-            "sections" => $sections
+            "selected_document" => $selectedDocument,
+            "documents" => $documents
         ]);
     }
 
