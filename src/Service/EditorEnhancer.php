@@ -76,10 +76,11 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
                 $text = $block->data->text;
                 $id = $this->slugger->slug(str_strip_nonprintable(strip_tags($text)));
 
+
                 $headlines[] = [
                     "tag" => "h" . $block->data->level,
                     "slug" => $id,
-                    "title" => str_strip_nonprintable(strip_tags($text))
+                    "title" => strip_tags($text)
                 ];
             }
         }
