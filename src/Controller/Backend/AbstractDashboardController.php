@@ -264,6 +264,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         $sections = [];
+	$documents = [];
         foreach($mainDocuments as $mainDocument)
         {
             $sections[$mainDocument->getId()] = $mainDocument;
