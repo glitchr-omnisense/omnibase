@@ -29,6 +29,8 @@ html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
     margin-top: 2em;
 }
 
+h2 a, h3 a, h4 a { color: var(--form-panel-header-color); }
+
 .codex-editor__redactor
 {
     border-radius: var(--border-radius);

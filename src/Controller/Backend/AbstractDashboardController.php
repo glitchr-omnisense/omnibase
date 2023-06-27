@@ -254,7 +254,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         $documentRepository = $this->entityManager->getRepository(AdminDocument::class);
-        $documents = $documentRepository->cacheByParentEmpty(["priority" => "DESC"])->getResult();
+        $documents = $documentRepository->cacheByParentEmpty([], ["priority" => "DESC"])->getResult();
         
         if($slug != null) $selectedDocument = $documentRepository->cacheOneBySlug($slug);
         else $selectedDocument = first($documents);
