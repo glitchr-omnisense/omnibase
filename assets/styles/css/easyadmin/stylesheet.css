@@ -25,6 +25,10 @@ html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
     width:auto;
 }
 
+.codex-editor h1,.codex-editor h2,.codex-editor h3,.codex-editor h4,.codex-editor h5,.codex-editor h6,.ql-editor h1,.ql-editor h2,.ql-editor h3,.ql-editor h4,.ql-editor h5,.ql-editor h6 {
+    margin-top: 2em;
+}
+
 .codex-editor__redactor
 {
     border-radius: var(--border-radius);
