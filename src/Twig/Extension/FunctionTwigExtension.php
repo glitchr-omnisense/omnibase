@@ -168,9 +168,10 @@ final class FunctionTwigExtension extends AbstractExtension
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    public function crudify($entity): string
+    public function crudify($entity, array $options = []): string
     {
         return $this->twig->render('@Base/easyadmin/crudify.html.twig', [
+            'label' => $options["label"] ?? null,
             'path' => $this->adminUrlGenerator->unsetAll()
                 ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
                 ->setEntityId($entity->getId())

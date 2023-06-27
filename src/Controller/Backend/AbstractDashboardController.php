@@ -88,10 +88,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Base\BaseBundle;
 use Base\Wikidoc\WikidocBundle;
 
-use Base\Wikidoc\Entity\Abstract\AbstractDocument;
-use Base\Wikidoc\Entity\Abstract\AbstractSection;
 use Base\Wikidoc\Entity\AdminDocument;
-use Base\Wikidoc\Entity\AdminSection;
+use Base\Wikidoc\Entity\DevDocument;
+use Base\Wikidoc\Entity\UserDocument;
 
 /**
  * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice")
@@ -255,30 +254,20 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         $documentRepository = $this->entityManager->getRepository(AdminDocument::class);
-        $sectionRepository = $this->entityManager->getRepository(AdminSection::class);
-        $orphanDocuments = $documentRepository->cacheBySectionsEmpty()->getResult();
-
-        $sectionList = $sectionRepository->cacheAll(["priority" => "DESC"])->getResult();
+        $mainDocuments = $documentRepository->cacheByParentEmpty(["priority" => "DESC"])->getResult();
         
-        $document = null;
         if($slug != null) $document = $documentRepository->cacheOneBySlug($slug);
-        else {
+        else $document = first($mainDocuments);
 
-            foreach($sectionList as $section) {
-
-                if($section->getDocuments()->Count()) {
-                    $document = $section->getDocuments()->First();
-                    break;
-                }
-            }
+        if($slug !== null && $slug == first($mainDocuments)?->getSlug()) {
+            return $this->redirectToRoute("backoffice_manual");
         }
 
         $sections = [];
-        $documents = [0 => $orphanDocuments];
-        foreach($sectionList as $section)
+        foreach($mainDocuments as $mainDocument)
         {
-            $sections[$section->getId()] = $section;
-            $documents[$section->getId()] = $section->getDocuments();
+            $sections[$mainDocument->getId()] = $mainDocument;
+            $documents[$mainDocument->getId()] = $documentRepository->cacheByParent($mainDocument, ["priority" => "DESC"])->getResult();
         }
 
         return $this->render('@Wikidoc/backoffice/manual.html.twig', [
@@ -754,8 +743,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
                 $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('DOCUMENTATION', 'fa-solid fa-life-ring'));
                 $widgets = $this->addWidgetItem($widgets, 'DOCUMENTATION', [
-                    WidgetItem::linkToCrud(AbstractDocument::class),
-                    WidgetItem::linkToCrud(AbstractSection::class)
+                    WidgetItem::linkToCrud(AdminDocument::class),
+                    WidgetItem::linkToCrud(DevDocument::class),
+                    WidgetItem::linkToCrud(UserDocument::class),
                 ]);
             }
         }
