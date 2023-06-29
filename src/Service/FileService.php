@@ -11,6 +11,7 @@ use Twig\Environment;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  *
@@ -282,8 +283,7 @@ class FileService implements FileServiceInterface
 
         $host = array_pop_key("_host", $config); // Use custom _host if found
         $referenceType = array_pop_key("reference_type", $config); // Get reference type
-
-
+        
         $data = $this->obfuscate($path, $config);
         if (!$data) {
             return null;
@@ -292,6 +292,7 @@ class FileService implements FileServiceInterface
         if ($host !== null) {
             $proxyRouteParameters["_host"] = $host;
         }
+
         $proxyRouteParameters["data"] = $data;
 
         $variadic = [$proxyRoute, $proxyRouteParameters];

@@ -186,6 +186,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
+        $referenceType = array_key_exists("_host", $parameters) && $parameters["_host"] !== null ? self::ABSOLUTE_URL : $referenceType;
+
         //
         // Prevent to generate custom route with Symfony internal route.
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
@@ -202,8 +204,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $locale = $lang;
             }
         }
-
-
 
         // Check whether the route is already cached
         $hash = self::$router->getRouteHash($name, $parameters, $referenceType);

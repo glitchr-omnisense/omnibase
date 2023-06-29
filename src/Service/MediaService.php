@@ -403,10 +403,12 @@ class MediaService extends FileService implements MediaServiceInterface
 
         // Call controller to warmup image
         if ($warmup && $this->mediaController !== null) {
+
             $routeMatch = $this->router->getRouteMatch($routeUrl);
 
             list($className, $controllerName) = array_pad(explode("::", $routeMatch["_controller"] ?? ""), 2, null);
             if (is_instanceof($className, get_class($this->mediaController)) && $controllerName) {
+            
                 $routeParameters = array_key_removes($routeMatch, "_route", "_controller");
                 $this->mediaController->{$controllerName}(...$routeParameters);
             }
