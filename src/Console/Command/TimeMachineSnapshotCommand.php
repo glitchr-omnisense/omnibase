@@ -106,7 +106,7 @@ class TimeMachineSnapshotCommand extends Command
         $prefixStr = $prefix ? "prefixed by \"".$prefix."\"" : "";
 
         $index = 0;
-        $snapshotsByCycle = $this->timeMachine->getSnapshotsByCycle($storages, $prefix, $cycle);
+        $snapshotsByCycle = $this->timeMachine->findByCycle($storages, $prefix, $cycle);
         if (!$snapshotsByCycle) {
             $output->section()->writeln("* No snapshot ".$prefixStr." found", OutputInterface::VERBOSITY_VERBOSE);
         }
@@ -115,7 +115,10 @@ class TimeMachineSnapshotCommand extends Command
 
             $public = $this->flysystem->getPublic("/", $storageName);
             $output->section()->writeln("<info>Available snapshot(s)</info> ".$prefixStr." <info>in</info> " . $storageName, OutputInterface::VERBOSITY_VERBOSE);
-            
+            if(count($snapshots) == 0) { 
+                $output->section()->writeln("<warning>[No previous history found]</warning>", OutputInterface::VERBOSITY_VERBOSE);
+            }
+
             foreach($snapshots as $date => $snapshot) {
 
                 $date = \DateTime::createFromFormat("Ymd", $date);

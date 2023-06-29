@@ -194,7 +194,6 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     protected int $maxCycle;
     public function getMaxCycle(): ?int
     {
-        return 4;
         return $this->maxCycle;
     }
 
@@ -292,9 +291,9 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @param int $cycle
      * @return array|null
      */
-    public function getSnapshot(int $id, int|array $storageNames, ?string $prefix = null, int $cycle = -1)
+    public function findOneBy(int $id, int|array $storageNames, ?string $prefix = null, int $cycle = -1)
     {
-        $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
+        $snapshots = $this->findBy($storageNames, $prefix, $cycle);
         if ($id >= count_leaves($snapshots)) {
             throw new LogicException("Unknown ID #" . $id . " provided.");
         }
@@ -324,7 +323,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @param $cycle
      * @return array
      */
-    public function getSnapshots(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
+    public function findBy(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
     {
         $snapshots = [];
         $prefix = $prefix ?? $this->environment;
@@ -334,6 +333,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
             $snapshots[$storageName] = [];
             foreach ($filesystem->listContents("/") as $content) {
+
                 if ($content->type() != "file") {
                     continue;
                 }
@@ -362,21 +362,25 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $snapshots;
     }
 
-    public function getSnapshotsByCycle(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
+    public function findByCycle(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
     {
-        $date = null;
         $snapshotByCycles = [];
-        foreach($this->getSnapshots($storageNames, $prefix, $cycle) as $storageName => $files) {
+        foreach($this->findBy($storageNames, $prefix, $cycle) as $storageName => $files) {
 
             $snapshotByCycles[$storageName] ??= [];
+
             foreach($files as $file) {
 
+                $date = null;
                 $matches = [];
                 if(preg_match('/' . preg_quote($prefix) . '\-([0-9]+)\.\w+/', basename($file), $matches)) {
                     $date = $matches[1];
-                }
+                } else if(preg_match('/' . preg_quote($prefix) . '\-([0-9]+)\-([0-9]{1,3})\.\w+/', basename($file), $matches)) {
+                    $date = $matches[1];
+                } 
                 
                 if($date !== null) {
+
                     $snapshotByCycles[$storageName][$date] ??= [];
                     $snapshotByCycles[$storageName][$date][] = $file;
                 }
@@ -389,11 +393,12 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     public function getLastCycle(array $files, ?string $prefix = null): int
     {
         $prefix = $prefix ?? "";
+        
         $matches = [];
         $lastCycle = 0;
         if (preg_match('/' . preg_quote($prefix) . '\-([0-9]{1,3})\.\w+/', basename(end($files)), $matches)) {
             $lastCycle = intval($matches[1]);
-        } elseif (preg_match('/' . preg_quote($prefix) . '\.\w/', basename(end($files)), $matches)) {
+        } else if (preg_match('/' . preg_quote($prefix) . '\-([0-9]+)\.\w+/', basename(end($files)), $matches)) {
             $lastCycle = 1;
         }
 
@@ -420,7 +425,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         // Remove too old backup
         $dateLimit = $this->getTimeLimit();
-        $snapshots = $this->getSnapshots($storageNames, $prefix);
+        $snapshots = $this->findBy($storageNames, $prefix);
         foreach ($snapshots as $storageName => $files) {
 
             $filesystem = $this->filesystems->get($storageName);
@@ -443,7 +448,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
 
         // Find today versions
-        $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
+        $snapshots = $this->findBy($storageNames, $prefix, $cycle);
         if (!$snapshots) {
             throw new LogicException("No valid storage selected.");
         }
@@ -486,8 +491,8 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             //
             // Remote older version
             $filesystem = $this->filesystems->get($storageName);
-            $lastCycle = $this->getLastCycle($files);
-
+            $lastCycle = $this->getLastCycle($files, $prefix);
+           
             //
             // Compute next version
             $cycle = $cycle < 0 ? $lastCycle + 1 : min($cycle, $lastCycle + 1);
@@ -570,7 +575,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     {
         $prefix = $prefix ?? $this->environment;
 
-        list($storageName, $file) = $this->getSnapshot($id, $storageNames, $prefix, $cycle);
+        list($storageName, $file) = $this->findOneBy($id, $storageNames, $prefix, $cycle);
         if (!$storageName) {
             throw new LogicException("No snapshot found among the list of storages provided: \"" . implode(",", $storageNames) . "\"");
         }

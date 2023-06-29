@@ -275,6 +275,11 @@ line-height: 15px;
 padding: 0.5em;
 text-transform: uppercase;
 }
+
+#main-menu .menu .menu-header
+{
+    line-height:auto;
+}
 fieldset>legend
 {
     text-transform: initial;
