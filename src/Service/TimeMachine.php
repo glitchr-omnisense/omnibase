@@ -514,7 +514,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
             $this->output?->section()->writeln("<warning>- No database backed up..</warning> please provide `--database` option");
         }
-
+        
         // Prepare backup directory
         if (!is_dir($this->getCacheDir() . "/" . $prefix)) {
             mkdir($this->getCacheDir() . "/" . $prefix, 0755);
@@ -549,8 +549,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
                 
         $this->output?->section()->writeln("<info>- Data backup saved..</info> That's all folks !");
+
         if (file_exists($output)) {
             unlink($output);
+        }
+
+        $outputDir = $this->getCacheDir() . "/" . $prefix;
+        if (is_dir($outputDir)) {
+            rrmdir($outputDir);
         }
 
         return true;

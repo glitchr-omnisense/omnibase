@@ -42,13 +42,31 @@ namespace {
         return ($n < 0) ? "-" : "+";
     }
 
-function is_hex(string $str): bool {
-    if (str_starts_with(strtolower($str), '0x')) {
-        $str = substr($str, 2);
+    function rrmdir($dir) { 
+        
+        if (is_dir($dir)) { 
+            $objects = scandir($dir);
+            foreach ($objects as $object) { 
+
+                if ($object != "." && $object != "..") { 
+
+                    if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object))
+                        rrmdir($dir. DIRECTORY_SEPARATOR .$object);
+                else
+                    unlink($dir. DIRECTORY_SEPARATOR .$object); 
+                } 
+            }
+            rmdir($dir); 
+        } 
     }
 
-    return ctype_xdigit($str);
-}
+    function is_hex(string $str): bool {
+        if (str_starts_with(strtolower($str), '0x')) {
+            $str = substr($str, 2);
+        }
+
+        return ctype_xdigit($str);
+    }
 
 
     /**
