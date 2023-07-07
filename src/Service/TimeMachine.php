@@ -535,19 +535,18 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
             $compressor = $this->compressors->get($this->compression);
             $path = $compressor->getCompressedPath($destination->destinationPath());
-            $prefix = $this->flysystem->prefixPath($path, $destination->destinationFilesystem());
+            $location = $this->flysystem->prefixPath($path, $destination->destinationFilesystem());
 
             if ($stream = fopen($output, 'r')) {
 
-                $this->output?->section()->writeln("<info>- Sending \"".$prefix."\"..</info> to \"".$destination->destinationFilesystem()."\" ongoing. Please wait..");
+                $this->output?->section()->writeln("<info>- Sending \"".$location."\"..</info> to \"".$destination->destinationFilesystem()."\" ongoing. Please wait..");
                 $filesystem->writeStream($path, $stream);
                 fclose($stream);
             }
 
-            $this->output?->section()->writeln("<info>- Application backup #" . ($id + 1) . "</info> in \"" . $destination->destinationFilesystem() . "\": " . $prefix);
+            $this->output?->section()->writeln("<info>- Application backup #" . ($id + 1) . "</info> in \"" . $destination->destinationFilesystem() . "\": " . $location);
         }
 
-                
         $this->output?->section()->writeln("<info>- Data backup saved..</info> That's all folks !");
 
         if (file_exists($output)) {
