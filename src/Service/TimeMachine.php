@@ -476,7 +476,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             // Remove today cycles
             $cycles = $snapshotByCycles[(new DateTime())->format('Ymd')] ?? [];
             for ($i = 0, $Ncycles = count($cycles), $N = $Ncycles - $this->getMaxCycle() + 1; $i < $N && $this->getMaxCycle() > 0; $i++) {
-                
+
                 $this->output?->section()->writeln("- Too many cycles found (limit at ".$this->getMaxCycle()."), deleting <warning>" . $cycles[$i] . "</warning>");
                 $filesystem->delete($cycles[$i]);
             }
@@ -485,6 +485,21 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Prepare backup
         $destinations = [];
 
+	// Remove files from -1d
+	$yesterdayPrefix = $prefix . "-" . (new DateTime("-1 day"))->format('Ymd');
+        $outputDir = $this->getCacheDir() . "/" . $yesterdayPrefix;
+        if (is_dir($outputDir)) {
+            rrmdir($outputDir);
+        }
+        $output = $this->getCacheDir() . "/" . $yesterdayPrefix."tar";
+        if (file_exists($output)) {
+            unlink($output);
+        }
+        $output = $this->getCacheDir() . "/" . $yesterdayPrefix."tar.gz";
+        if (file_exists($output)) {
+            unlink($output);
+        }
+
         $prefix = $prefix . "-" . (new DateTime())->format('Ymd');
         foreach ($snapshots as $storageName => $files) {
 
@@ -492,7 +507,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             // Remote older version
             $filesystem = $this->filesystems->get($storageName);
             $lastCycle = $this->getLastCycle($files, $prefix);
-           
+
             //
             // Compute next version
             $cycle = $cycle < 0 ? $lastCycle + 1 : min($cycle, $lastCycle + 1);
@@ -514,7 +529,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
             $this->output?->section()->writeln("<warning>- No database backed up..</warning> please provide `--database` option");
         }
-        
+
         // Prepare backup directory
         if (!is_dir($this->getCacheDir() . "/" . $prefix)) {
             mkdir($this->getCacheDir() . "/" . $prefix, 0755);
@@ -528,6 +543,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Compress and transfer
         $output = $this->buildArchive($this->getCacheDir() . "/" . $prefix . "/application.tar", getcwd(), [$this->cacheDir], false, false);
         $output = $this->buildCompressedArchive($this->getCacheDir() . "/" . $prefix . ".tar", $this->getCacheDir() . "/" . $prefix);
+        $outputDir = $this->getCacheDir() . "/" . $prefix;
+        if (is_dir($outputDir)) {
+            rrmdir($outputDir);
+        }
 
         foreach ($destinations as $id => $destination) {
 
@@ -551,11 +570,6 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         if (file_exists($output)) {
             unlink($output);
-        }
-
-        $outputDir = $this->getCacheDir() . "/" . $prefix;
-        if (is_dir($outputDir)) {
-            rrmdir($outputDir);
         }
 
         return true;
