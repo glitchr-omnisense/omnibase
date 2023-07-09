@@ -37,12 +37,12 @@ class ContactController extends AbstractController
     /**
      * @Route("/contact", name="base_contact")
      */
-    public function Contact(Request $request): Response
+    public function Contact(Request $request, array $options = []): Response
     {
         $user = $this->getUser();
 
         return $this->formProxy
-            ->createProcessor("contact", ContactType::class, ["use_model" => true])
+            ->createProcessor("contact", ContactType::class, array_merge($options, ["use_model" => true]))
             ->setData($user)
             ->onDefault(function (FormProcessorInterface $formProcessor) use ($user) {
                 return $this->render('client/contact/index.html.twig', [
