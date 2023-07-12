@@ -196,7 +196,6 @@ trait WidgetTrait
         foreach ($itemOrArray as $item) {
 
             if ($item && !($item instanceof MenuItemInterface)) {
-                
                 throw new Exception("Invalid section widget item ".spl_object_id($item)." provided in section \"" . $sectionOrPositionOrLabel."\"");
             }
         }
@@ -205,7 +204,8 @@ trait WidgetTrait
         [$_, $sectionWidgetItem, $widgetItems, $_] = $this->extractSectionWidgetItem($widgets, $offset, $length);
 
         if (!$sectionWidgetItem) {
-            throw new Exception("Section widget \"" . $sectionOrPositionOrLabel . "\" not found.");
+            $widget = $this->addSectionWidgetItem($widgets, $sectionOrPositionOrLabel, $position);
+            return $this->addWidgetItem($widget, $sectionOrPositionOrLabel, $itemOrArray, $position);
         }
 
         if ($position < 0) {

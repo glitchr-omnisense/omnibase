@@ -302,6 +302,13 @@ class SecurityController extends AbstractController
         }
 
         $user = $this->getUser();
+        if(!$user) {
+            $notification = new Notification("verifyEmail.invalidToken");
+            $notification->send("danger");
+
+            return $this->redirectToRoute("security_verifyEmail");
+       }
+
         $user->removeExpiredTokens();
 
         if ($user->isVerified()) {

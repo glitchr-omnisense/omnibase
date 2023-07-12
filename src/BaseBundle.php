@@ -234,11 +234,11 @@ class BaseBundle extends AbstractBaseBundle
         /**
          * Testing doctrine connection
          */
-        try {
-            $entityManagerConnection->connect();
-        } catch (Exception $e) {
-            return false;
-        }
+        //try {
+        //    $entityManagerConnection->connect();
+        //} catch (Exception $e) {
+        //    return false;
+        //}
 
         /**
          * Doctrine custom configuration

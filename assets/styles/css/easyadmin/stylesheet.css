@@ -1351,7 +1351,6 @@ select.form-control:disabled, select.form-control[readonly]
 {
     width: auto;
     height: auto;
-    top: 1px;
     position: relative;
 }
 
