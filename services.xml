@@ -177,10 +177,6 @@
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
-        <service id="Base\CacheWarmer\ImageCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
-            <tag name="kernel.cache_warmer" />
-            <argument type="service" id="console" />
-        </service>
 
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
