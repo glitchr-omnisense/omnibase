@@ -43,7 +43,6 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         $this->warmup = $input->getOption('warmup');
         $this->batch  = $input->getOption('batch');
         $this->format = $input->getOption('format');
-        $this->cache  = $input->getOption('cache');
         $this->input  = $input;
         $this->output = $output;
         $this->normalize ??= $input->getOption('normalize');
@@ -204,18 +203,17 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 $dataWebp = $this->mediaService->image($file, ["webp" => true, "local_cache" => true], []);
                 $data = $this->mediaService->image($file, ["webp" => false, "local_cache" => true, "extension" => $extension], []);
                 if ($this->isCached($data)) {
+
                     $this->output->section()->writeln("             <warning>* Already cached main image \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\" .. (" . ($i + 1) . "/" . $N . ")</warning>", OutputInterface::VERBOSITY_VERBOSE);
+
                 } else {
+
                     $this->output->section()->writeln("             <ln>* Warming up main image \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\" .. (" . ($i + 1) . "/" . $N . ")</ln>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
 
-                    if ($this->cache) {
-                        $this->mediaController->ImageWebp($dataWebp);
-                    }
-                    if ($this->cache) {
-                        $this->mediaController->Image($data, $extension);
-                    }
-
+                    $this->mediaController->ImageWebp($dataWebp);
+                    $this->mediaController->Image($data, $extension);
+                    
                     $this->ibatch++;
                 }
 
@@ -227,12 +225,8 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                         $this->output->section()->writeln("             <ln>  Warming up \"" . str_lstrip($file, $publicDir) . "\" (" . $identifier . ") .. (" . ($i + 1) . "/" . $N . ")</ln>", OutputInterface::VERBOSITY_VERBOSE);
                         $this->ibatch++;
 
-                        if ($this->cache) {
-                            $this->mediaController->ImageCrop($dataWebp, $identifier, $extension);
-                        }
-                        if ($this->cache) {
-                            $this->mediaController->ImageCrop($data, $identifier, $extension);
-                        }
+                        $this->mediaController->ImageCrop($dataWebp, $identifier, $extension);
+                        $this->mediaController->ImageCrop($data, $identifier, $extension);
                     }
 
                     $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); " . $identifier, OutputInterface::VERBOSITY_DEBUG);

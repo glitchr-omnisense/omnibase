@@ -80,7 +80,8 @@ class MediaController extends AbstractController
      */
     public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
     {
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        $request = $this->requestStack->getCurrentRequest();
+        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
         if ($this->profiler !== null && $isUX) {
             $this->profiler->disable();
         }
@@ -226,7 +227,8 @@ class MediaController extends AbstractController
         $output = pathinfo_extension($data . "/" . $identifier, $extension);
         $path = $this->mediaService->filter($path, ["local_cache" => $localCache, "output" => $output], new BitmapFilter(null, $options, $filters));
 
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        $request = $this->requestStack->getCurrentRequest();
+        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
@@ -293,7 +295,8 @@ class MediaController extends AbstractController
         $output = pathinfo_extension($data . "/image", "webp");
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new WebpFilter(null, $options, $filters));
 
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        $request = $this->requestStack->getCurrentRequest();
+        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
@@ -321,7 +324,8 @@ class MediaController extends AbstractController
         $output = pathinfo_extension($data . "/image", "svg");
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new SvgFilter(null, $options, $filters));
 
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        $request = $this->requestStack->getCurrentRequest();
+        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
