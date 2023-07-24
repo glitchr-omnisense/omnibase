@@ -52,22 +52,6 @@ class BaseBundle extends AbstractBaseBundle
     /**
      * @return string
      */
-    public function getPublicDir(): string 
-    {
-        return $this->container->getParameter('kernel.project_dir') . "/public/";
-    }
-
-    /**
-     * @return string
-     */
-    public function getSourceDir(): string
-    {
-        return $this->container->getParameter('kernel.project_dir') . "/src/";
-    }
-
-    /**
-     * @return string
-     */
     public function getCacheDir(): string
     {
         return $this->container->getParameter('kernel.cache_dir');
@@ -76,9 +60,33 @@ class BaseBundle extends AbstractBaseBundle
     /**
      * @return string
      */
+    public function getPublicDir(): string 
+    {
+        return $this->getProjectDir() . "/public";
+    }
+
+    /**
+     * @return string
+     */
+    public function getSourceDir(): string
+    {
+        return $this->getProjectDir() . "/src";
+    }
+
+    /**
+     * @return string
+     */
     public function getEnvironment(): string
     {
         return $this->container->getParameter('kernel.environment');
+    }
+
+    /**
+     * @return string
+     */
+    public function getApplicationLocation(): string 
+    { 
+        return $this->getProjectDir();
     }
 
     protected bool $boot = false;
@@ -146,7 +154,6 @@ class BaseBundle extends AbstractBaseBundle
                 $classPath = dirname($classRefl->getFileName());
 
                 $baseNamespace = dirname_namespace($baseBundle);
-                $baseName = basename_namespace($baseBundle);
                 foreach(self::getDirectories($classPath, 1) as $namepath)
                 {
                     $namespace = basename($namepath);
@@ -160,18 +167,18 @@ class BaseBundle extends AbstractBaseBundle
                 }
             }
 
-            self::setMapping($this->getBundleLocation() . "/Tests"     , "Base\Tests"     , "App\Tests");
-            self::setMapping($this->getBundleLocation() . "/Enum"      , "Base\Enum"      , "App\Enum");
-            self::setMapping($this->getBundleLocation() . "/Notifier"  , "Base\Notifier"  , "App\Notifier");
-            self::setMapping($this->getBundleLocation() . "/Form"      , "Base\Form"      , "App\Form");
-            self::setMapping($this->getBundleLocation() . "/Entity"    , "Base\Entity"    , "App\Entity");
-            self::setMapping($this->getBundleLocation() . "/Repository", "Base\Repository", "App\Repository");
+            self::setMapping($this->getBundleLocation() . "/src/Tests"     , "Base\Tests"     , "App\Tests");
+            self::setMapping($this->getBundleLocation() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
+            self::setMapping($this->getBundleLocation() . "/src/Notifier"  , "Base\Notifier"  , "App\Notifier");
+            self::setMapping($this->getBundleLocation() . "/src/Form"      , "Base\Form"      , "App\Form");
+            self::setMapping($this->getBundleLocation() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
+            self::setMapping($this->getBundleLocation() . "/src/Repository", "Base\Repository", "App\Repository");
 
-            self::getAllClasses($this->getBundleLocation() . "./Database/Annotation");
-            self::getAllClasses($this->getBundleLocation() . "./Annotations/Annotation");
+            self::getAllClasses($this->getBundleLocation() . "/src/Database/Annotation");
+            self::getAllClasses($this->getBundleLocation() . "/src/Annotations/Annotation");
 
-            self::getAllClasses($this->getBundleLocation() . "./Enum");
-            self::getAllClasses($this->getSourceDir() . "./Enum");
+            self::getAllClasses($this->getBundleLocation() . "/src/Enum");
+            self::getAllClasses($this->getApplicationLocation() . "/src/Enum");
 
             self::$cache->warmUp([
                 "base.files" => self::$files ?? [],
@@ -287,8 +294,8 @@ class BaseBundle extends AbstractBaseBundle
             ->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
 
         $classList = array_merge(
-            self::getAllClasses(self::getBundleLocation() . "./Enum"),
-            self::getAllClasses($this->getSourceDir() . "./Enum")
+            self::getAllClasses(self::getBundleLocation() . "/src/Enum"),
+            self::getAllClasses($this->getApplicationLocation() . "/src/Enum")
         );
 
         foreach ($classList as $className) {

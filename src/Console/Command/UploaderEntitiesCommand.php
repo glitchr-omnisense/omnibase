@@ -4,7 +4,7 @@ namespace Base\Console\Command;
 
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\AnnotationReader;
-
+use Base\BaseBundle;
 use League\Flysystem\FileAttributes;
 use Base\Console\Command;
 
@@ -29,7 +29,9 @@ class UploaderEntitiesCommand extends Command
 
     protected $propertyAnnotations;
     protected $baseEntities;
+    protected $baseEntityLocation;
     protected $appEntities;
+    protected $appEntityLocation;
 
     protected function configure(): void
     {
@@ -57,13 +59,13 @@ class UploaderEntitiesCommand extends Command
         $nTotalFields = 0;
 
         $this->appEntities ??= "App\\Entity\\" . $this->entityName;
-        $appAnnotations = $this->getUploaderAnnotations($this->appEntities);
+        $appAnnotations = $this->getUploaderAnnotations($output, $this->appEntities);
         if (!$appAnnotations) {
             $output->section()->writeln("\t<warning>Uploader annotation not found for \"$this->appEntities\"</warning>");
         }
 
         $this->baseEntities ??= "Base\\Entity\\" . $this->entityName;
-        $baseAnnotations = $this->getUploaderAnnotations($this->baseEntities);
+        $baseAnnotations = $this->getUploaderAnnotations($output, $this->baseEntities);
         if (!$baseAnnotations) {
             $output->section()->writeln("\t<warning>Uploader annotation not found for \"$this->baseEntities\"</warning>");
         }
@@ -162,11 +164,31 @@ class UploaderEntitiesCommand extends Command
      * @return array
      * @throws \Exception
      */
-    protected function getUploaderAnnotations(?string $namespace)
+    protected function getUploaderAnnotations(OutputInterface $output, ?string $namespace)
     {
-        $classes = array_filter(get_declared_classes(), function ($c) use ($namespace) {
-            return str_starts_with($c, $namespace);
-        });
+        $path = "";
+        if(str_starts_with($namespace, "App\Entity")) {
+        
+            $path = BaseBundle::getBundleLocation()."/src/Entity";
+        
+        } else if(str_starts_with($namespace, "Base\Entity")) {
+        
+            $path = $this->parameterBag->get("kernel.project_dir")."/src/Entity";
+        
+        } else {
+            
+            $msg = ' [ERR] Entity must be located either in `App\Entity` or `Base\Entity`';
+            $output->writeln('');
+            $output->writeln('<warning,bkg>' . str_blankspace(strlen($msg)));
+            $output->writeln($msg);
+            $output->writeln(str_blankspace(strlen($msg)) . '</warning,bkg>');
+            $output->writeln('');
+
+            throw new \Exception();
+        }
+
+        $path = $path."/".($this->entityName ? str_replace("\\", "/", $this->entityName).".php" : "");
+        $classes = BaseBundle::getAllClasses($path, "");
 
         $metadataClasses = [];
         foreach ($classes as $class) {

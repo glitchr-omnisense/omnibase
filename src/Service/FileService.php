@@ -2,7 +2,6 @@
 
 namespace Base\Service;
 
-use Base\Controller\UX\MediaController;
 use Base\Routing\AdvancedRouter;
 use Base\Routing\RouterInterface;
 use finfo;
@@ -11,7 +10,6 @@ use Twig\Environment;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  *
@@ -52,11 +50,6 @@ class FileService implements FileServiceInterface
     /** * @var string */
     protected string $publicDir;
 
-    /**
-     * @var MediaController|null
-     */
-    protected ?MediaController $mediaController = null;
-
     public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
         $this->twig = $twig;
@@ -67,20 +60,6 @@ class FileService implements FileServiceInterface
         $this->publicDir = $flysystem->getPublicDir();
 
         $this->mimeTypes = new MimeTypes();
-    }
-
-    /**
-     * @param MediaController $mediaController
-     * @return $this
-     */
-    /**
-     * @param MediaController $mediaController
-     * @return $this
-     */
-    public function setController(MediaController $mediaController)
-    {
-        $this->mediaController = $mediaController;
-        return $this;
     }
 
     /**

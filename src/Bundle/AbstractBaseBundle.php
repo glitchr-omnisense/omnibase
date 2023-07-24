@@ -25,9 +25,9 @@ abstract class AbstractBaseBundle extends Bundle
     /**
      * @return string
      */
-    public function getBundleLocation()
+    public static function getBundleLocation()
     {
-        return dirname((new ReflectionClass(static::class))->getFileName()) . "/";
+        return dirname((new ReflectionClass(static::class))->getFileName(), 2);
     }
     
     protected static array $dumpEnabled = [];
@@ -218,10 +218,12 @@ abstract class AbstractBaseBundle extends Bundle
         
             self::$classes[$fullpath] = self::$classes[$fullpath] ?? [];
             foreach (self::getFiles($path, $level) as $filename) {
+
                 if (filesize($filename) == 0) {
                     continue;
                 }
-                if (str_ends_with($filename, "Interface")) {
+
+                if (str_ends_with($filename, "Interface.php")) {
                     continue;
                 }
 
@@ -326,13 +328,21 @@ abstract class AbstractBaseBundle extends Bundle
             return self::$files[$path];
         }
 
-        $finder = Finder::create();
-        if($level > -1) $finder->depth(" < ".$level);
+        if(is_file($path) && !is_dir($path)) {
 
-        $finderFiles = $finder->files()->in($path)->name('*.php');
-        $files = [];
-        foreach ($finderFiles as $finderFile) {
-            $files[] = $finderFile->getRealpath();
+            $files = [];
+            $files[] = $path;
+
+        } else {
+
+            $finder = Finder::create();
+            if($level > -1) $finder->depth(" < ".$level);
+
+            $finderFiles = $finder->files()->in($path)->name('*.php');
+            $files = [];
+            foreach ($finderFiles as $finderFile) {
+                $files[] = $finderFile->getRealpath();
+            }
         }
 
         self::$files[$path] = $files;
