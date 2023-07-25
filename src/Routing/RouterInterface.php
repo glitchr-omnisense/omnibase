@@ -50,6 +50,8 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function getMachineFallbacks(?string $locale = null, ?string $environment = null): ?array;
 
+    public function getScheme(?string $locale = null, ?string $environment = null): string;
+    
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string;
 
     public function getSubdomainFallback(?string $locale = null, ?string $environment = null): mixed;

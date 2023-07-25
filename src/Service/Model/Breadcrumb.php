@@ -287,6 +287,8 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             $path = substr($path, strlen($baseDir));
         }
 
+        if(!$path) return '';
+
         try {
             $routeMatch = $this->router->match($path);
         } catch (ResourceNotFoundException $e) {
