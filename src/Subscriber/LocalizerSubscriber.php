@@ -110,12 +110,14 @@ class LocalizerSubscriber implements EventSubscriberInterface
         $this->localizer->setTimezone("UTC");
 
         if (is_instanceof(User::class, BaseUser::class)) {
-            $timezone = User::getCookie("timezone") ?? "UTC";
 
-            $defaultTimezone = date_default_timezone_get();
-            if ($timezone != $defaultTimezone) {
-                $notification = new Notification("invalidTimezone", [$timezone]);
+            $timezone = User::getCookie("timezone") ?? "UTC";            
+            if (!in_array($timezone, timezone_identifiers_list())) {
+
+                $notification = new Notification("@localizer.timezone.invalid", [$timezone]);
                 $notification->send("info");
+
+                $timezone = "UTC";
             }
 
             $this->localizer->setTimezone($timezone);

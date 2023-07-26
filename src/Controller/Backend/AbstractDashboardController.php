@@ -259,12 +259,19 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if($slug != null) $selectedDocument = $documentRepository->cacheOneBySlug($slug);
         else $selectedDocument = first($documents);
 
+        $currentIndex = first(array_keys(array_column_object($documents, 'id'), $selectedDocument->getId()));
+        $previousDocument = $documents[$currentIndex-1] ?? null;
+        $nextDocument = $documents[$currentIndex+1] ?? null;
+
         if($slug !== null && $slug == first($documents)?->getSlug()) {
             return $this->redirectToRoute("backoffice_manual");
         }
 
         return $this->render('@Wikidoc/backoffice/manual.html.twig', [
             "selected_document" => $selectedDocument,
+            "previous_document" => $previousDocument,
+            "next_document" => $nextDocument,
+            
             "documents" => $documents
         ]);
     }

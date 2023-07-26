@@ -3,21 +3,11 @@
 namespace Base\DatabaseSubscriber;
 
 use Base\Database\Type\EnumType;
-use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
-use Doctrine\ORM\Tools\ToolEvents;
 
-/**
- *
- */
-class EnumSubscriber implements EventSubscriberInterface
+class EnumSubscriber
 {
-    public function getSubscribedEvents(): array
-    {
-        return [ToolEvents::postGenerateSchema];
-    }
-
     public function postGenerateSchema(GenerateSchemaEventArgs $eventArgs)
     {
         $columns = [];

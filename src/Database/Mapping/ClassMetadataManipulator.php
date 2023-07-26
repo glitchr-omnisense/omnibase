@@ -23,7 +23,7 @@ use Doctrine\Persistence\Mapping\ClassMetadata;
 use Exception;
 use InvalidArgumentException;
 
-use Base\Database\Mapping\Factory\ClassMetadataFactory;
+use Base\Database\Mapping\ClassMetadataFactory;
 use Doctrine\Persistence\Proxy;
 use LogicException;
 use RuntimeException;
@@ -1209,19 +1209,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $classMetadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }
 
-    /**
-     * @return array|string[]
-     */
-    public function getAllClassNames()
-    {
-        $classMetadataFactory = $this->entityManager->getMetadataFactory();
-        if ($classMetadataFactory instanceof ClassMetadataFactory) {
-            return $classMetadataFactory->getAllClassNames();
-        }
-
-        return [];
-    }
-
     protected static array $completors = [];
 
     /**
@@ -1238,7 +1225,19 @@ class ClassMetadataManipulator extends AbstractLocalCache
         self::$completors[$className] = new ClassMetadataCompletor($className, []);
         return self::$completors[$className];
     }
+    
+    /**
+     * @return array|string[]
+     */
+    public function getAllClassNames()
+    {
+        $classMetadataFactory = $this->entityManager->getMetadataFactory();
+        if ($classMetadataFactory instanceof ClassMetadataFactory) {
+            return $classMetadataFactory->getAllClassNames();
+        }
 
+        return [];
+    }
 
     public function getClassMetadataCompletor(null|string|object $entityOrClassOrMetadata): ?ClassMetadataCompletor
     {

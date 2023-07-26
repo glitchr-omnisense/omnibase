@@ -28,7 +28,7 @@
         <service id="base.service.sharer" alias="Base\Service\Sharer" />
 
         <service id="twig.html_renderer" alias="Base\Twig\Renderer\Adapter\HtmlTagRenderer" />
-        <service id="twig.encore_renderer" alias="Base\Twig\Renderer\Adapter\EncoreTagRenderer" />
+        <service id="twig.webpack_renderer" alias="Base\Twig\Renderer\Adapter\WebpackTagRenderer" />
         
         <service id="base.service.image" alias="Base\Service\MediaService" />
         <service id="Base\Service\MediaServiceInterface" alias="base.service.image"/>
@@ -84,7 +84,7 @@
         <service id="Base\Service\LocalizerInterface" alias="localizer"/>
 
         <service id="doctrine.orm.naming_strategy.camel" alias="Base\Database\Mapping\NamingStrategy" />
-        <service id="base.database.metadata_factory"     alias="Base\Database\Mapping\Factory\ClassMetadataFactory" />
+        <service id="base.database.metadata_factory"     alias="Base\Database\Mapping\ClassMetadataFactory" />
 
         <service id="Base\Database\Entity\EntityHydratorInterface" alias="base.database.entity_hydrator"/>
         <service id="base.database.entity_hydrator"      alias="Base\Database\Entity\EntityHydrator" />

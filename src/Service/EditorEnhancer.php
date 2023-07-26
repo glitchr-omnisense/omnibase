@@ -17,6 +17,7 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         if (is_string($json)) {
             $json = json_decode($json);
         }
+
         return $this->twig->render("@Base/form/wysiwyg/editor_js.html.twig", ["json" => $json, "options" => $options]);
     }
 
@@ -34,7 +35,7 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         foreach ($json->blocks ?? [] as $block) {
             if ($block->type == "header" && $block->data->level < $maxLevel) {
                 $text = $block->data->text;
-                $id = $this->slugger->slug(str_strip_nonprintable(strip_tags($text)));
+                $id = strtolower($this->slugger->slug(strip_tags($text)));
 
                 $block->data->text = "<a id='" . $id . "' " . html_attributes($attrs) . " href='#" . $id . "'>" . strip_tags($text) . "</a>";
             }
@@ -73,9 +74,9 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         $maxLevel ??= 6;
         foreach ($json->blocks ?? [] as $block) {
             if ($block->type == "header" && $block->data->level < $maxLevel) {
-                $text = $block->data->text;
-                $id = $this->slugger->slug(str_strip_nonprintable(strip_tags($text)));
 
+                $text = $block->data->text;
+                $id = strtolower($this->slugger->slug(strip_tags($text)));
 
                 $headlines[] = [
                     "tag" => "h" . $block->data->level,

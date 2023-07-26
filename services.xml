@@ -91,7 +91,7 @@
         <service id="Base\Subscriber\TwigSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="twig.html_renderer" />
-            <argument type="service" id="twig.encore_renderer" />
+            <argument type="service" id="twig.webpack_renderer" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
@@ -163,9 +163,9 @@
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="localizer" />
         </service>
-        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
+        <service id="Base\CacheWarmer\WebpackCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="twig.encore_renderer" />
+            <argument type="service" id="twig.webpack_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup[_default]" on-invalid="null" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
@@ -402,27 +402,46 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
-        <service id="Base\DatabaseSubscriber\EnumSubscriber"><tag name="doctrine.event_subscriber" /></service>
+        <service id="Base\DatabaseSubscriber\EnumSubscriber">
+            <tag name="doctrine.event_listener" event="postGenerateSchema" />
+        </service>
+
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_subscriber" priority="2048" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="2048" />
+            <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
+            <tag name="doctrine.event_listener" event="preFlush" priority="2048" />
+            <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
+            <tag name="doctrine.event_listener" event="postFlush" priority="2048" />
+            <tag name="doctrine.event_listener" event="prePersist" priority="2048" />
+            <tag name="doctrine.event_listener" event="preUpdate" priority="2048" />
+            <tag name="doctrine.event_listener" event="preRemove" priority="2048" />
+            <tag name="doctrine.event_listener" event="postPersist" priority="2048" />
+            <tag name="doctrine.event_listener" event="postUpdate" priority="2048" />
+            <tag name="doctrine.event_listener" event="postRemove" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.annotation_reader" />
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_subscriber" priority="2048" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="2048" />
+            <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
+            <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
+
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\DatabaseSubscriber\TrackingPolicySubscriber">
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
         <service id="Base\EntitySubscriber\ExtensionSubscriber">
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_listener" event="onFlush" />
+            <tag name="doctrine.event_listener" event="postPersist" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" />
+
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.entity_extension" />
         </service>
@@ -547,7 +566,7 @@
         </service>
 
         <service id="Base\Database\Mapping\NamingStrategy"  public="true" />
-        <service id="Base\Database\Mapping\Factory\ClassMetadataFactory"  public="true"/>
+        <service id="Base\Database\Mapping\ClassMetadataFactory"  public="true"/>
         <service id="Base\Database\Entity\EntityHydrator"  public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -658,7 +677,7 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
         </service>
-        <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractTagRenderer" public="true" >
+        <service id="Base\Twig\Renderer\Adapter\WebpackTagRenderer" parent="Base\Twig\Renderer\AbstractTagRenderer" public="true" >
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup_collection" on-invalid="null" />
@@ -667,7 +686,7 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
           </service>
 
-        <service id="Base\Twig\Extension\EncoreTwigExtension"><tag name="twig.extension" priority="-1" /></service>
+        <service id="Base\Twig\Extension\WebpackTwigExtension"><tag name="twig.extension" priority="-1" /></service>
         <service id="Base\Twig\Extension\HtmlTwigExtension"><tag name="twig.extension" />
             <argument type="service" id="twig.html_renderer" />
             <argument type="service" id="wysiwyg_enhancer" />
@@ -707,7 +726,7 @@
         </service>
          <service id="Base\Form\Extension\FormTypeWebpackExtension"><tag name="form.type_extension" />
             <argument type="service" id="form.proxy" />
-            <argument type="service" id="twig.encore_renderer" />
+            <argument type="service" id="twig.webpack_renderer" />
         </service>
         <service id="Base\Form\Extension\FormTypeCollectionExtension"         ><tag name="form.type_extension" />
             <argument type="service" id="base.service" />
@@ -849,12 +868,8 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\EntityDispatcher\Event\UserEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
-            <tag name="doctrine.event_subscriber" />
-        </service>
-        <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
-            <tag name="doctrine.event_subscriber" />
-        </service>
+        <service id="Base\EntityDispatcher\Event\UserEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher" />
+        <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher" />
         <service id="Base\EntityDispatcher\AbstractEventDispatcher" abstract="true">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="base.database.entity_hydrator" />

@@ -2,6 +2,7 @@
 
 namespace Base\Twig\Variable;
 
+use Symfony\Component\Routing\Router;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LauncherInterface;

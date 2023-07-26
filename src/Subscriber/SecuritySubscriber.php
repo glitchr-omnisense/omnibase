@@ -287,7 +287,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->referrer->setUrl($event->getRequest()->getUri());
             $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
 
-            $this->userRepository->flush($user);
+            $this->userRepository->flush();
             $event->stopPropagation();
 
             return;
@@ -325,10 +325,10 @@ class SecuritySubscriber implements EventSubscriberInterface
         if (!$user->isApproved()) {
             if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
                 $user->approve();
-                $this->userRepository->flush($user);
+                $this->userRepository->flush();
             } elseif ($this->parameterBag->get("base.user.autoapprove")) {
                 $user->approve();
-                $this->userRepository->flush($user);
+                $this->userRepository->flush();
             } elseif ($this->router->isSecured()) {
                 $this->router->redirectEvent($event, "security_pendingForApproval", [], 302, ["exceptions" => $exceptions]);
             }
@@ -356,7 +356,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         if (!($user->isActive())) {
             $user->poke(new DateTime("now"));
-            $this->userRepository->flush($user);
+            $this->userRepository->flush();
         }
     }
 

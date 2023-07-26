@@ -4,16 +4,16 @@ namespace Base\CacheWarmer;
 
 use Base\Cache\Abstract\AbstractLocalCacheWarmer;
 use Base\Service\ParameterBagInterface;
-use Base\Twig\Renderer\Adapter\EncoreTagRenderer;
+use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
 /**
  *
  */
-class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
+class WebpackCacheWarmer extends AbstractLocalCacheWarmer
 {
-    public function __construct(ParameterBagInterface $parameterBag, EncoreTagRenderer $encoreTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
+    public function __construct(ParameterBagInterface $parameterBag, WebpackTagRenderer $webpackTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)
     {
         if (!$parameterBag->get('base.twig.use_custom')) {
             return;
@@ -26,14 +26,14 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
         $appJsonPath = array_filter((array)$entrypointLookup, fn($k) => str_ends_with($k, 'entrypointJsonPath'), ARRAY_FILTER_USE_KEY);
         $appJsonPath = first($appJsonPath);
         if (file_exists($appJsonPath)) {
-            $encoreTagRenderer->addEntrypoint('_default', $appJsonPath);
+            $webpackTagRenderer->addEntrypoint('_default', $appJsonPath);
             $entrypoints = json_decode(file_get_contents($appJsonPath), true)['entrypoints'];
 
             $tags = array_unique(array_map(fn($t) => str_rstrip($t, ['-async', '-defer']), array_keys($entrypoints)));
             foreach ($tags as $tag) {
-                $encoreTagRenderer->addTag($tag);
+                $webpackTagRenderer->addTag($tag);
                 if (str_contains($tag, '.')) {
-                    $encoreTagRenderer->markAsOptional($tag);
+                    $webpackTagRenderer->markAsOptional($tag);
                 }
             }
         }
@@ -41,14 +41,14 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
         // Extract [base] tags
         $baseJsonPath = str_rstrip($publicDir, '/') . '/bundles/base/entrypoints.json';
         if (file_exists($baseJsonPath)) {
-            $encoreTagRenderer->addEntrypoint('_base', $baseJsonPath);
+            $webpackTagRenderer->addEntrypoint('_base', $baseJsonPath);
             $entrypoints = json_decode(file_get_contents($baseJsonPath), true)['entrypoints'];
 
             $tags = array_unique(array_map(fn($t) => str_rstrip($t, ['-async', '-defer']), array_keys($entrypoints)));
             foreach ($tags as $tag) {
-                $encoreTagRenderer->addTag($tag, '_base');
+                $webpackTagRenderer->addTag($tag, '_base');
                 if (str_contains($tag, '.')) {
-                    $encoreTagRenderer->markAsOptional($tag);
+                    $webpackTagRenderer->markAsOptional($tag);
                 }
             }
         }
@@ -56,18 +56,18 @@ class WebpackEntrypointCacheWarmer extends AbstractLocalCacheWarmer
         //
         // Breakpoint based entries
         foreach ($parameterBag->get('base.twig.breakpoints') ?? [] as $breakpoint) {
-            $encoreTagRenderer->addBreakpoint($breakpoint['name'], $breakpoint['media'] ?? 'all');
+            $webpackTagRenderer->addBreakpoint($breakpoint['name'], $breakpoint['media'] ?? 'all');
         }
 
         //
         // Alternative entries
-        $encoreTagRenderer->addAlternative('async');
-        $encoreTagRenderer->addAlternative('defer');
+        $webpackTagRenderer->addAlternative('async');
+        $webpackTagRenderer->addAlternative('defer');
 
         // Encore rest rendering
-        $encoreTagRenderer->renderFallback(new Response());
-        $encoreTagRenderer->reset();
+        $webpackTagRenderer->renderFallback(new Response());
+        $webpackTagRenderer->reset();
 
-        parent::__construct($encoreTagRenderer, $cacheDir);
+        parent::__construct($webpackTagRenderer, $cacheDir);
     }
 }

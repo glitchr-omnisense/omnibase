@@ -6,6 +6,7 @@
     --font-family-base: var(--font-family-system);
     --select2-bg: var(--gray-100);
     --font-size-base:15px;
+    --sidebar-max-width:300px;
 }
 
 html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
@@ -276,9 +277,31 @@ padding: 0.5em;
 text-transform: uppercase;
 }
 
+#main-menu .menu .menu-item.active:not(.expanded) .menu-icon, #main-menu .menu .menu-item.active:not(.expanded) a
+{
+    color: var(--sidebar-menu-active-item-color);
+}
+
+#main-menu .menu .menu-item:hover > a .menu-icon, #main-menu .menu .menu-item:hover {
+    background: var(--sidebar-menu-active-item-bg);
+}
+
+#main-menu .menu .menu-header {
+    margin-top:30px;
+}
+body.ea-sidebar-width-compact #main-menu .menu-after .menu-item .menu-icon
+{
+    font-size: 18px !important;
+    height: 21px !important;
+    max-width: 21px !important;
+}
+body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover, body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover .menu-item-contents
+{
+    background: white !important;
+}
 #main-menu .menu .menu-header
 {
-    line-height:auto;
+    line-height:23px;
 }
 fieldset>legend
 {
@@ -380,7 +403,7 @@ position: absolute;
 color: var(--gray-600);
 }
 
-#main-menu .menu .menu-header {
+#main-menu .menu .menu-header, #main-menu .menu .menu-header > a {
     color: var(--sidebar-menu-active-item-color);
 }
 .hide { visibility:hidden; }
@@ -475,9 +498,9 @@ list-style: none;
 .form-translatable .tab-pane > div { padding-bottom: 0em; }
 .form-entity > div { margin-bottom: 0em; }
 
-#main-menu .menu .menu-item:hover > a .menu-icon, #main-menu .menu .menu-item:hover > a { color: var(--sidebar-menu-active-item-color); }
 #main-menu .menu .menu-item:hover:not(.active) a .menu-item-label {  font-weight:400; }
 #main-menu .menu .menu-item:hover > a .menu-item-label { color: var(--sidebar-menu-active-item-color); }
+#main-menu .menu .menu-header { margin-bottom:2px;}
 #main-menu .menu .menu-item .submenu-toggler { flex-grow: 1;}
 #main-menu .menu .menu-item .submenu-toggle-icon { position:relative; right: 6px; }
 

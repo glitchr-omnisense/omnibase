@@ -50,21 +50,6 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
     public const DISPATCHER_SUFFIX = "Dispatcher";
 
-    public function getSubscribedEvents(): array
-    {
-        return
-            [
-                Events::preUpdate,
-                Events::postUpdate,
-
-                Events::prePersist,
-                Events::postPersist,
-
-                Events::preRemove,
-                Events::postRemove,
-            ];
-    }
-
     /**
      * @return string
      * @throws Exception

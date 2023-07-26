@@ -104,18 +104,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [$criteria]);
     }
 
-    /**
-     * @param $entity
-     * @return void
-     */
-    public function flush($entity = null)
+    public function flush()
     {
-        $entityFqcn = self::getFqcnEntityName();
-        $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn($e) => $e instanceof $entityFqcn);
-
-        if (count($entityList) || $entity === null) {
-            $this->getEntityManager()->flush($entity);
-        }
+        $this->getEntityManager()->flush();
     }
 
     /**

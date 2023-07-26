@@ -53,7 +53,6 @@ class BaseExtension extends AbstractBaseExtension
         ));
 
         $container->registerForAutoconfiguration(AbstractIconAdapter::class)->addTag('base.service.icon');
-        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_subscriber');
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
@@ -65,5 +64,13 @@ class BaseExtension extends AbstractBaseExtension
 
         $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
         $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
+
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "preUpdate"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postUpdate"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "prePersist"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postPersist"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "preRemove"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postRemove"]);
+        
     }
 }

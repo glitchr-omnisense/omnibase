@@ -253,7 +253,7 @@ class BaseBundle extends AbstractBaseBundle
         // $entityManagerConfig
         //     ->setNamingStrategy(new \Base\Database\Mapping\NamingStrategy());
         // $entityManagerConfig
-        //     ->setClassMetadataFactoryName(\Base\Database\Mapping\Factory\ClassMetadataFactory::class);
+        //     ->setClassMetadataFactoryName(\Base\Database\Mapping\ClassMetadataFactory::class);
         $entityManagerConfig
             ->addFilter("trash_filter", TrashFilter::class);
         $entityManagerConfig

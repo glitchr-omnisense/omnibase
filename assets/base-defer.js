@@ -18,19 +18,6 @@ $(window).on("load.tooltip", function() { $('[data-toggle="tooltip"]').tooltip({
 $(window).off("onbeforeunload.tooltip");
 $(window).on("onbeforeunload.tooltip",function() { $("div[id^='tooltip']").hide().remove(); });
 
-import edjsHTML from "editorjs-html";
-$(window).off("DOMContentLoaded.edjs");
-$(window).on("DOMContentLoaded.edjs", function() {
-
-    const edjsParser = edjsHTML();
-    $("[data-edjs]").each(function() {
-
-        const html = edjsParser.parse($(this).data("edjs"));
-        if(html) $(this).html(html);
-    });
-})
-
-
 $(".copy-clipboard").off("click");
 $(".copy-clipboard").on("click", function () {
 

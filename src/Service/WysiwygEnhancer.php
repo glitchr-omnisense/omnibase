@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Twig\Environment;
+use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use DOMDocument;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -11,8 +12,19 @@ use Symfony\Component\String\Slugger\SluggerInterface;
  */
 class WysiwygEnhancer implements WysiwygEnhancerInterface
 {
+    /**
+     * @var Environment
+     */
     protected $twig;
+
+    /**
+     * @var SluggerInterface
+     */
     protected $slugger;
+
+    /**
+     * @var SemanticEnhancerInterface
+     */
     protected $semanticEnhancer;
 
     public function __construct(Environment $twig, SluggerInterface $slugger, SemanticEnhancerInterface $semanticEnhancer)

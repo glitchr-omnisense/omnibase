@@ -10,7 +10,7 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 /**
  *
  */
-interface EventDispatcherInterface extends EventSubscriber
+interface EventDispatcherInterface
 {
     public function supports(mixed $subject): bool;
 

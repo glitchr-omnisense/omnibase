@@ -3217,6 +3217,12 @@ namespace {
         return $array;
     }
 
+    function array_column_object($array, $key) {
+        return array_map(function($e) use ($key) {
+            return is_object($e) ? $e->$key : $e[$key];
+        }, $array);
+    }
+
     /**
      * @param mixed $needle
      * @param array $haystack
