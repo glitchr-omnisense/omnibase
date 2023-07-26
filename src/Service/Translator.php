@@ -470,9 +470,8 @@ class Translator implements TranslatorInterface
         }
 
         $entityOrClassName = $this->parseClass($entityOrClassName);
-        $property = $property ? ".".self::TRANSLATION_PROPERTIES."." . $property : "";
-
-        return $entityOrClassName ? $this->transPerms($entityOrClassName . camel2snake($property), $options, [], self::DOMAIN_ENTITY) : null;
+        $property = $property ? ".".self::TRANSLATION_PROPERTIES."." . camel2snake($property) : "";
+        return $entityOrClassName ? $this->transPerms($entityOrClassName . $property, $options, [], self::DOMAIN_ENTITY) : null;
     }
 
     public function transEntityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): bool
@@ -485,9 +484,9 @@ class Translator implements TranslatorInterface
         }
 
         $entityOrClassName = $this->parseClass($entityOrClassName);
-        $property = $property ? "." . $property : "";
-
-        return $this->transPermExists($entityOrClassName . camel2snake($property), $options, self::DOMAIN_ENTITY);
+        $property = $property ? ".".self::TRANSLATION_PROPERTIES."." . camel2snake($property) : "";
+ 
+       return $this->transPermExists($entityOrClassName . $property, $options, self::DOMAIN_ENTITY);
     }
 
     public function transTime(int $time): string
