@@ -32,17 +32,23 @@ html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
     overflow: scroll;
 }
 
-.codex-editor h1,.codex-editor h2,.codex-editor h3,.codex-editor h4,.codex-editor h5,.codex-editor h6,.ql-editor h1,.ql-editor h2,.ql-editor h3,.ql-editor h4,.ql-editor h5,.ql-editor h6 {
-    margin-top: 2em;
-}
-
-h2 a, h3 a, h4 a { color: var(--form-panel-header-color); }
-
-.codex-editor__redactor
+.ea-new-form .codex-editor__redactor, .ea-edit-form .codex-editor__redactor
 {
+    color: #222;
+    background-color: #FFF;
     border-radius: var(--border-radius);
     border: var(--border-width) var(--border-style) var(--content-top-border-color);
 }
+
+.codex-editor.read-only .codex-editor h1, .codex-editor.read-only .codex-editor h2, .codex-editor.read-only .codex-editor h3, .codex-editor.read-only .codex-editor h4, .codex-editor.read-only .codex-editor h5, .codex-editor.read-only .codex-editor h6
+{
+    margin-top: 0.25em;
+}
+.codex-editor h1,.codex-editor h2,.codex-editor h3,.codex-editor h4,.codex-editor h5,.codex-editor h6,.ql-editor h1,.ql-editor h2,.ql-editor h3,.ql-editor h4,.ql-editor h5,.ql-editor h6 {
+    margin-top: 1em;
+}
+
+h2 a, h3 a, h4 a { color: var(--form-panel-header-color); }
 
 .accordion-collapse.show {
     border-radius: 0px !important;

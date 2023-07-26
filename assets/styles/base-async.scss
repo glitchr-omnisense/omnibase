@@ -197,7 +197,7 @@ main .exception
 .form-translatable .nav-link.active {
     background-color: var(--sidebar-bg) !important;
 }
-pre::before {
+pre::before, .code::before {
     background-color: #fd5e57;
     border-radius: 50%;
     box-shadow: 0 0 0 2px #fd5e57, 20px 0 0 2px #febc2e, 40px 0 0 2px #29c83f;
@@ -210,7 +210,7 @@ pre::before {
     width: 7px;
 }
 
-pre {
+pre, .code {
     margin: 1em 0.25em 1em 0.25em !important;
     padding: 0.75em 1em !important;
     line-height: 1.6em;
@@ -332,7 +332,7 @@ hr { margin: 0.5rem 0; }
 .form-collection-group .form-group { margin-bottom: 1em; }
 .form-collection-group { margin-bottom:1em;}
 .form-collection-plain { border: 0 !important; }
-textarea { min-height:150px !important; }
+
 .form-entity > .form-control { padding: 0; }
 .form-collection-items.form-control { padding: 0; }
 .form-control:not(input):not(textarea):not(select) { background-color:transparent; }
