@@ -2,7 +2,7 @@
 
 namespace Base\Repository;
 
-use Base\Entity\User;
+use App\Entity\User;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 
 use Base\Database\Repository\ServiceEntityRepository;
@@ -47,5 +47,23 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
 
         // execute the queries on the database
         $this->getEntityManager()->flush();
+    }
+
+    public function cacheByInsensitiveIdentifier($identifier, array $fields = []) { return $this->findByInsensitiveIdentifier($identifier, $fields, true); }
+    public function findByInsensitiveIdentifier($identifier, array $fields = [], $cacheable = false)
+    {
+        if(empty($fields)) $fields[] = User::getUserIdentifierField();
+
+        $identifier = preg_replace("/%$/", "", $identifier);
+        $qb = $this->createQueryBuilder('u')
+            ->setCacheable($cacheable)
+            ->setCacheRegion($this->getClassMetadata()->cache["region"] ?? null)
+            ->setParameter('identifier', "%".strtolower($identifier)."%");
+
+        foreach($fields as $field) {
+            $qb->orWhere('LOWER(u.'.$field.') LIKE :identifier');
+        }
+
+        return $qb->getQuery();
     }
 }

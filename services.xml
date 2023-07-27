@@ -971,13 +971,12 @@
 
         <service id="Base\Field\Type\WysiwygType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
             <argument type="service" id="twig" />
-            <argument type="service" id="router" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="obfuscator" />
         </service>
         <service id="Base\Field\Type\EditorType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
             <argument type="service" id="twig" />
             <argument type="service" id="router" />
             <argument type="service" id="security.csrf.token_manager" />
@@ -1028,9 +1027,13 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="base.service.image" />
             <argument type="service" id="flysystem" />
             <argument type="service" id="translator" />
             <argument type="service" id="obfuscator" />
+
+            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="App\Repository\ThreadRepository" />
         </service>
 
         <service id="Base\Controller\UX\AutocompleteController">

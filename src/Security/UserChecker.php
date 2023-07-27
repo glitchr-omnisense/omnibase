@@ -51,6 +51,7 @@ class UserChecker implements UserCheckerInterface
         }
 
         if ($user->isDisabled()) {
+
             $welcomeBackToken = $user->getValidToken("welcome-back");
             if ($welcomeBackToken) {
                 $user->enable();

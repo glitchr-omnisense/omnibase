@@ -9,6 +9,19 @@ entity_action:
     _singular: "suppression"
     _plural: "suppressions"
 
+connection_state:
+  connection_failed:
+    _singular: "échec"
+    _plural: "échecs"
+
+  connection_succeeded:
+    _singular: "réussie"
+    _plural: "réussies"
+
+  connection_logout:
+    _singular: "déconnecté"
+    _plural: "déconnectés"
+    
 operation:
   equal:
     _singular: "égal à"

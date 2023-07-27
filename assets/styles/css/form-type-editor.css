@@ -7,6 +7,7 @@
 {
     color:#000;
 }
+
 .cdx-notifies
 {
     color:#222;
@@ -32,16 +33,9 @@
     left: 0px !important;
 }
 
-.ce-popover__item[data-item-name="paragraph"] svg,
-.ce-inline-toolbar__dropdown-content svg {
-
-    color: transparent !important;
-    width: 8px !important;
-    margin-left: 6px !important;
-}
-
 .ce-block__content, .ce-toolbar__content { max-width:calc(95% - 80px) !important; }
 .cdx-block { max-width: 95% !important; }
+.ce-block { margin: 0.8em 0; }
 
-.codex-editor__redactor { padding:1em; }
+.codex-editor__redactor { padding:1em !important; }
 .form-editor-codex { padding:0em; margin:0; }

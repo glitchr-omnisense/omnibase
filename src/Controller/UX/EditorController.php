@@ -2,7 +2,12 @@
 
 namespace Base\Controller\UX;
 
+use App\Entity\User;
+use App\Repository\UserRepository;
+use Base\Enum\UserRole;
+use Base\Repository\ThreadRepository;
 use Base\Service\FlysystemInterface;
+use Base\Service\MediaServiceInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -51,19 +56,103 @@ class EditorController extends AbstractController
     protected ParameterBagInterface $parameterBag;
 
     /**
+     * @var UserRepository
+     */
+    protected UserRepository $userRepository;
+    
+    /**
+     * @var ThreadRepository
+     */
+    protected ThreadRepository $threadRepository;
+    
+    /**
+     * @var MediaServiceInterface
+     */
+    protected MediaServiceInterface $mediaService;
+    
+    /**
      * @var MimeTypes
      */
     protected MimeTypes $mimeTypes;
 
-    public function __construct(ParameterBagInterface $parameterBag, FlysystemInterface $flysystem, TranslatorInterface $translator, ObfuscatorInterface $obfuscator)
+    public function __construct(ParameterBagInterface $parameterBag, MediaServiceInterface $mediaService, FlysystemInterface $flysystem, TranslatorInterface $translator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository)
     {
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;
 
         $this->flysystem = $flysystem;
+        $this->mediaService = $mediaService;
         $this->parameterBag = $parameterBag;
 
+        $this->threadRepository = $threadRepository;
+        $this->userRepository = $userRepository;
+
         $this->mimeTypes = new MimeTypes();
+    }
+
+    /**
+     * @Route("/ux/editorjs/{data}/user/{query}", name="endpointByUser")
+     */
+    public function EndpointByUser($data = null, array $fields = [], string $query = ""): Response
+    {
+        $config = $this->obfuscator->decode($data);
+        $token = $config["token"] ?? null;
+        if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
+            return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
+        }
+
+        $items = [];
+        foreach($this->userRepository->cacheByInsensitiveIdentifier(urldecode($query), $fields)->getResult() as $user)
+        {
+            $items[] = [
+                "id" => $user->getId(), 
+                "name" => $user->__toString(), 
+                "avatar" => $this->mediaService->image($user->getAvatarFile()),
+                "link" => [
+                    "label" => $this->isGranted(UserRole::ADMIN) ? $user->__autocomplete() : $user->getId(),
+                    "url" => $user->__toLink()
+                ]
+            ];
+        }
+
+        $fileMetadata = [
+            "success" => self::STATUS_OK,
+            "items" => $items
+        ];
+
+        return JsonResponse::fromJsonString(json_encode($fileMetadata));
+    }
+
+    /**
+     * @Route("/ux/editorjs/{data}/user/{query}", name="endpointByThread")
+     */
+    public function EndpointByThread($data = null, array $fields = ["title", "excerpt", "content"], string $query = ""): Response
+    {
+        $config = $this->obfuscator->decode($data);
+        $token = $config["token"] ?? null;
+        if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
+            return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
+        }
+
+        $items = [];
+        foreach($this->threadRepository->cacheByInsensitiveIdentifier(urldecode($query), $fields)->getResult() as $thread)
+        {
+            $items[] = [
+                "id" => $thread->getId(), 
+                "name" => $thread->__toString(), 
+                "link" => [
+                    "label" => $this->isGranted(UserRole::ADMIN) ? $thread->__autocomplete() : $thread->getId(),
+                    "url" => $thread->__toLink()
+                ]
+            ];
+        }
+
+        $fileMetadata = [
+            "success" => self::STATUS_OK,
+            "items" => $items
+        ];
+
+        return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
     /**

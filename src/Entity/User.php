@@ -9,6 +9,7 @@ use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
 use Base\Entity\Extension\Log;
+use Base\Entity\User\Connection;
 
 use App\Entity\User\Token;
 use App\Entity\User\Group;
@@ -52,6 +53,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use App\Enum\UserRole;
 use App\Enum\UserState;
+use Base\Service\Model\AutocompleteInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -64,10 +66,14 @@ use App\Enum\UserState;
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
  */
-class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface
+class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
 {
     use BaseTrait;
 
+    public function __autocomplete(): string { return $this->__toString(); }
+    public function __autocompleteData(): array { return []; }
+
+    public function __toString() { return $this->getEmail() ?? $this->getId(); }
     public function __iconize(): ?array
     {
         return array_map(fn($r) => UserRole::getIcon($r, 0), array_filter($this->getRoles()));
@@ -79,43 +85,31 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     public const __COOKIE_IDENTIFIER__ = "USER/INFO";
-    public const __DEFAULT_IDENTIFIER__ = "email";
 
-    /**
-     * @param $role
-     * @return bool
-     * @throws Exception
-     */
-    public function isGranted($role): bool
+    public static $userIdentifier = "email";
+    public static function getUserIdentifierField(): string
     {
-        return $this->getService()->isGranted($role, $this);
+        return static::$userIdentifier;
     }
-
-    public function killSession()
-    {
-        $this->logout();
-    }
-
-    public static $identifier = self::__DEFAULT_IDENTIFIER__;
 
     public function getUserIdentifier(): string
     {
-        $identifier = null;
+        $userIdentifier = null;
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isReadable($this, self::$identifier)) {
-            $identifier = $accessor->getValue($this, self::$identifier);
+        if ($accessor->isReadable($this, static::$userIdentifier)) {
+            $userIdentifier = $accessor->getValue($this, static::$userIdentifier);
         }
 
-        if ($accessor->isReadable($this, self::__DEFAULT_IDENTIFIER__) && !$identifier) {
-            $identifier = $accessor->getValue($this, self::$identifier);
+        if ($accessor->isReadable($this, static::$userIdentifier) && !$userIdentifier) {
+            $userIdentifier = $accessor->getValue($this, static::$userIdentifier);
         }
 
-        if ($identifier === null) {
+        if ($userIdentifier === null) {
             throw new Exception("User identifier is NULL. Is this user initialized or database persistent ?");
         }
 
-        return $identifier;
+        return $userIdentifier;
     }
 
     /**
@@ -131,11 +125,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @return string
      * @throws Exception
      */
-    public function __toString()
-    {
-        return $this->getUserIdentifier();
-    }
-
     public function __construct(?string $email = null)
     {
         $this->email = $email;
@@ -150,6 +139,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->notifications = new ArrayCollection();
         $this->groups = new ArrayCollection();
         $this->penalties = new ArrayCollection();
+
+        $this->connections = new ArrayCollection();
 
         $this->threads = new ArrayCollection();
         $this->followedThreads = new ArrayCollection();
@@ -172,6 +163,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return new Recipient($email, $phone, $locale, $timezone);
     }
 
+    /**
+     * @param $role
+     * @return bool
+     * @throws Exception
+     */
+    public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
+
+    public function killSession() { $this->logout(); }
     public function logout(?string $domain)
     {
         $token = $this->getTokenStorage()->getToken();
@@ -1205,6 +1204,40 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             // set the owning side to null (unless already changed)
             if ($address->getUser() === $this) {
                 $address->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @ORM\OneToMany(targetEntity=Connection::class, mappedBy="user", orphanRemoval=true)
+     */
+    protected $connections;
+    public function getConnections(): Collection
+    {
+        return $this->connections;
+    }
+
+    public function addConnection(Connection $connection): self
+    {
+        $this->connections[] = $connection;
+
+        if (!$this->connections->contains($connection)) {
+            $this->connections[] = $connection;
+            $connection->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConnection(Connection $connection): self
+    {
+        if ($this->connections->removeElement($connection)) {
+            
+            // set the owning side to null (unless already changed)
+            if ($connection->getUser() === $this) {
+                $connection->setUser(null);
             }
         }
 

@@ -79,6 +79,8 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
+        $user->getCurrentConnection()->setUpdatedAt(new \DateTime("now"));
+
         return $user;
     }
 

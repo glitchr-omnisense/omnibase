@@ -127,11 +127,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
      * @param string $media
      * @return $this
      */
-    /**
-     * @param string $name
-     * @param string $media
-     * @return $this
-     */
     public function addBreakpoint(string $name, string $media)
     {
         $this->encoreBreakpoints[$media] = array_merge($this->encoreBreakpoints[$media] ?? [], [$name]);
@@ -139,10 +134,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @return $this
-     */
     /**
      * @param string $name
      * @return $this
@@ -168,10 +159,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
      * @param string $alternative
      * @return $this
      */
-    /**
-     * @param string $alternative
-     * @return $this
-     */
     public function addAlternative(string $alternative)
     {
         if (!array_key_exists($alternative, $this->encoreAlternatives)) {
@@ -181,10 +168,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         return $this;
     }
 
-    /**
-     * @param string $alternative
-     * @return $this
-     */
     /**
      * @param string $alternative
      * @return $this
@@ -224,14 +207,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
      * @param bool $strictMode
      * @return $this
      */
-    /**
-     * @param string $value
-     * @param string $entrypointJsonPath
-     * @param CacheItemPoolInterface|null $cache
-     * @param string|null $cacheKey
-     * @param bool $strictMode
-     * @return $this
-     */
     public function addEntrypoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
     {
         if (null == $this->entrypointLookupCollection) {
@@ -243,10 +218,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         return $this;
     }
 
-    /**
-     * @param string $value
-     * @return $this
-     */
     /**
      * @param string $value
      * @return $this
@@ -282,13 +253,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         }
     }
 
-    /**
-     * @param string $value
-     * @param string|null $webpackPackageName
-     * @param string|null $webpackEntrypointName
-     * @param string|null $htmlAttributes
-     * @return $this
-     */
     /**
      * @param string $value
      * @param string|null $webpackPackageName
@@ -342,13 +306,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
      * @param string|null $htmlAttributes
      * @return $this
      */
-    /**
-     * @param string $value
-     * @param string|null $webpackPackageName
-     * @param string|null $webpackEntrypointName
-     * @param string|null $htmlAttributes
-     * @return $this
-     */
     public function addLinkTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
     {
         $this->refreshCacheIfNeeded();
@@ -383,13 +340,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
      * @param string|null $htmlAttributes
      * @return $this
      */
-    /**
-     * @param string $value
-     * @param string|null $webpackPackageName
-     * @param string|null $webpackEntrypointName
-     * @param string|null $htmlAttributes
-     * @return $this
-     */
     public function addScriptTag(string $value, ?string $webpackPackageName = null, ?string $webpackEntrypointName = null, ?string $htmlAttributes = null)
     {
         $this->refreshCacheIfNeeded();
@@ -411,10 +361,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
      * @param string $value
      * @return $this
      */
-    /**
-     * @param string $value
-     * @return $this
-     */
     public function removeTags(string $value)
     {
         $this->removeLinkTag($value);
@@ -423,10 +369,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         return $this;
     }
 
-    /**
-     * @param string $entryName
-     * @return $this
-     */
     /**
      * @param string $entryName
      * @return $this
@@ -445,10 +387,6 @@ class EncoreTagRenderer extends AbstractTagRenderer implements AbstractLocalCach
         return $this;
     }
 
-    /**
-     * @param string $entryName
-     * @return $this
-     */
     /**
      * @param string $entryName
      * @return $this

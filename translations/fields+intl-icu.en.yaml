@@ -89,6 +89,10 @@ clipboard:
 
 wysiwyg:
   soft_linebreak: "Use Maj+Enter to make a soft breakline"
+  placeholder: "Compose an epic.."
+
+editor:
+  placeholder: "Let's write an awesome story!"
 
 cropper:
   no_image: "No image to load."

@@ -898,6 +898,11 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
     --bs-text-opacity: 1;
     color:var(--text-muted) !important;
 }
+
+.clear-both {
+    clear:both;
+}
+
 .text-danger {
     --bs-text-opacity: 1;
     color:red !important;

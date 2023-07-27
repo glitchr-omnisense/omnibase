@@ -26,14 +26,14 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  *   @Attribute("map",       type = "array"),
  *   @Attribute("separator", type = "string"),
  *   @Attribute("keep",      type = "array"),
- *   @Attribute("lowercase", type = "bool")
+ *   @Attribute("capital",   type = "bool")
  * })
  */
 class Slugify extends AbstractAnnotation
 {
     protected $slugger;
     protected bool $unique;
-    protected bool $lowercase;
+    protected bool $capital;
     protected bool $nullable;
 
     protected ?array $keep;
@@ -52,7 +52,7 @@ class Slugify extends AbstractAnnotation
 
         $this->separator = $data['separator'] ?? '-';
         $this->keep = $data['keep'] ?? null;
-        $this->lowercase = $data['lowercase'] ?? true;
+        $this->capital = $data['capital'] ?? false;
         $this->slugger = new AsciiSlugger(
             $data['locale'] ?? null,
             $data['map'] ?? null
@@ -151,7 +151,7 @@ class Slugify extends AbstractAnnotation
             $slug = implodeByArray($posList, $slug);
         }
 
-        return $this->lowercase ? strtolower($slug) : $slug;
+        return $this->capital ? $slug : strtolower($slug);
     }
 
     /**

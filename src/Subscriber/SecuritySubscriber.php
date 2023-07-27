@@ -7,7 +7,7 @@ use App\Repository\UserRepository;
 use Base\Service\LocalizerInterface;
 use Base\Service\ReferrerInterface;
 use App\Entity\User;
-
+use Base\Entity\User\Connection;
 use Base\Security\LoginFormAuthenticator;
 
 use DateTime;
@@ -370,7 +370,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onLoginFailure(LoginFailureEvent $event)
     {
-	$message = "@notifications.login.failed";
+	    $message = "@notifications.login.failed";
         $importance = "danger";
 
         if (($exception = $event->getException())) {
@@ -397,10 +397,14 @@ class SecuritySubscriber implements EventSubscriberInterface
          */
         $user = $event->getUser();
         if ($user instanceof BaseUser) {
+
             if (!$user->isPersistent()) {
+            
                 $notification = new Notification("login.social", [$user]);
                 $notification->send("success");
+            
             } elseif ($user->isVerified()) {
+
                 $isAuthenticated = $this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') || $this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED');
                 if (!$isAuthenticated) {
                     $title = "@notifications.login.success.alien";

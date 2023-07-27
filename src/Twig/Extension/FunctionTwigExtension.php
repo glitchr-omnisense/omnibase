@@ -544,7 +544,6 @@ final class FunctionTwigExtension extends AbstractExtension
             return $array;
         }
 
-        $now = time();
         if (null == $datetime) {
             return $pattern;
         }
@@ -552,7 +551,7 @@ final class FunctionTwigExtension extends AbstractExtension
             $datetime = $datetime->getTimestamp();
         }
         if ($datetime instanceof \DateInterval) {
-            $datetime = $now + (int)$datetime->format('s');
+            $datetime = time() + (int)$datetime->format('s');
         }
         if (\is_string($datetime)) {
             return mb_strtolower($datetime);

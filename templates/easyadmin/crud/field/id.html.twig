@@ -9,7 +9,7 @@
 
 {% set switchParameter = field.getCustomOption("impersonate") %}
 {% if switchParameter %}
-    {% set identifier = property_accessor(field.value, constant("Base\\Entity\\User::__DEFAULT_IDENTIFIER__")) %}
+    {% set identifier = property_accessor(field.value, class_exists("App\\Entity\\User", "identifier") ? static_property("App\\Entity\\User", "identifier") : static_property("Base\\Entity\\User::$identifier")) %}
     <a class="field-impersonate" href="?{{ switchParameter }}={{ identifier }}"><i class="fa-solid fa-fw fa-user-secret"></i></a>
 {% endif %}
 
