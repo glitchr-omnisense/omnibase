@@ -1,8 +1,10 @@
+function getLocale() {
+    return navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language;
+}
 
 function getUser()
 {
-    var opts = Intl.DateTimeFormat().resolvedOptions();
-
+    var opts = Intl.DateTimeFormat(getLocale()).resolvedOptions();
     return {
         time:new Date(),
         timezone:opts.timeZone,
