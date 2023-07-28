@@ -109,8 +109,6 @@ class WidgetItem
         if (class_exists($labelOrEntityFqcn)) {
             $crudController = AbstractCrudController::getCrudControllerFqcn($labelOrEntityFqcn);
             if (!class_exists($crudController)) {
-                dump($crudController);
-                exit(1);
                 throw new Exception("CRUD controller for \"" . $labelOrEntityFqcn . "\" not found");
             }
 
