@@ -194,7 +194,7 @@ class MediaController extends AbstractController
             }
 
             $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
-            $identifier = $imageCrop->getWidth() . "x" . $imageCrop->getHeight();
+            if($imageCrop) $identifier = $imageCrop->getWidth() . "x" . $imageCrop->getHeight();
         }
 
         //
