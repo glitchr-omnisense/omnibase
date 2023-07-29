@@ -311,7 +311,7 @@ class AdvancedRouter extends Router implements RouterInterface
         return $this->router->getContext();
     }
 
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
         $this->router->setContext($context);
     }
