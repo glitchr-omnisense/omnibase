@@ -41,15 +41,16 @@ $(window).on("DOMContentLoaded.edjs", function() {
         $(this).removeAttr("edjs");
         $(this).attr("id", $(this).attr("id") ?? "editorjs-"+randid(10));
 
-        edjs($(this).attr("id"), $(this).data("edjs"), {"readOnly": true});
+        edjs(undefined, $(this).attr("id"), $(this).data("edjs"));
     });
 });
 
-function edjs(holder, data = {}, options = {}, endpointByFile = undefined, endpointByUrl = undefined)
+function edjs(id, holder, data = {}, options = {}, endpointByFile = undefined, endpointByUrl = undefined)
 {
     if (data) Object.assign(options, {data:data});
 
     Object.assign(options, {
+        readOnly: (id == undefined),
         tools: {    
             header: {
                 class: Header,
@@ -119,6 +120,7 @@ function edjs(holder, data = {}, options = {}, endpointByFile = undefined, endpo
 
     var editor = new EditorJs(options);
 }
+
 window.addEventListener("load.form_type", function () {
 
     document.querySelectorAll("[data-editor-field]").forEach((function (el) {
@@ -131,6 +133,6 @@ window.addEventListener("load.form_type", function () {
         var endpointByFile = el.getAttribute("data-editor-upload-file"); 
         var endpointByUrl = el.getAttribute("data-editor-upload-url"); 
 
-        edjs(editorId, data, options, endpointByFile, endpointByUrl);
+        edjs(id, editorId, data, options, endpointByFile, endpointByUrl);
     }));
 });

@@ -133,7 +133,12 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function userApprovalRequest(User $user)
     {
         $notification = new Notification("adminApproval.required");
-        $notification->setUser($user);
+        
+        $name = $this->settingBag->getScalar("base.settings.mail.name");
+        $email = $this->settingBag->getScalar("base.settings.mail.contact");
+
+        $adminRecipient = new Recipient(mailformat([], $name, $email));
+        $notification->addRecipient($adminRecipient);
 
         $notification->setHtmlTemplate("email.html.twig");
         $notification->setHtmlParameters([

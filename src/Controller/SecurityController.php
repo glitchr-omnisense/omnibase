@@ -238,7 +238,7 @@ class SecurityController extends AbstractController
                 }
 
                 if ($newUser->isVerified() && $this->parameterBag->get("base.user.register.notify_admins")) {
-                    $this->notifier->sendAdminsUserApprovalRequest($newUser);
+                    $this->notifier->sendUserApprovalRequest($newUser);
                 }
 
                 $this->entityManager->persist($newUser);
@@ -359,7 +359,7 @@ class SecurityController extends AbstractController
                 $adminApprovalToken = new Token("admin-approval");
                 $adminApprovalToken->setUser($user);
 
-                $notification = $this->notifier->sendAdminsUserApprovalRequest($user);
+                $notification = $this->notifier->sendUserApprovalRequest($user);
                 $notification->send("success");
             }
         }
