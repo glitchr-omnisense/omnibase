@@ -1705,19 +1705,22 @@ namespace {
         }
 
         do {
-            $http_response_header = []; // Special PHP variable
-            $context = stream_context_create(["http" => ["follow_location" => false]]);
 
-            get_headers($url, false, $context);
+            $http_response_header = []; // Special PHP variable
+            $context = [];
+            $context["http"] = ["follow_location" => false];
+            
+            get_headers($url, false, stream_context_create($context));
 
             $pattern = "/^Location:\s*(.*)$/i";
             $location_headers = preg_grep($pattern, $http_response_header);
-
+            
             $matches = [];
             $repeat = !empty($location_headers) && preg_match($pattern, array_values($location_headers)[0], $matches);
             if ($repeat) {
                 $url = $matches[1];
             }
+
         } while ($repeat);
 
         $redirect = $url;

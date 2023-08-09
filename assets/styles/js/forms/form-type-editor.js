@@ -5,16 +5,19 @@ import Warning from '@editorjs/warning';
 import NestedList from '@editorjs/nested-list';
 import Checklist from '@editorjs/checklist';
 import Alert from 'editorjs-alert';
-import Paragraph from 'editorjs-paragraph';
-import Mention from 'editorjs-mention';
-import {ImageTool, ImageToolTune} from 'editorjs-image';
-import YTool from 'editorjs-yjs';
 import Table from '@editorjs/table';
 import Marker from '@editorjs/marker';
 import InlineCode from '@editorjs/inline-code';
 import Underline from '@editorjs/underline';
 import CodeTool from 'editorjs-code-highlight';
 import Quote from '@editorjs/quote';
+// import Undo from 'editorjs-undo';
+
+import Paragraph from 'editorjs-paragraph';
+import Mention from 'editorjs-mention';
+import {ImageTool, ImageToolTune} from 'editorjs-image';
+
+import YTool from 'y-editorjs';
 
 function json_decode(str) {
     try {
@@ -43,7 +46,6 @@ window.addEventListener("load.form_type", function () {
         if (data) Object.assign(options, {data:data});
 
         var onSave = (savedData) => { $("#"+id).val(JSON.stringify(savedData)); }
-
         Object.assign(options, {
             tools: {
 
@@ -60,33 +62,33 @@ window.addEventListener("load.form_type", function () {
                     inlineToolbar: true,
                 },
 
-                collaborative: {
-                    class: YTool,
-                    inlineToolbar: true,
-                },
+                // collaborative: {
+                //     class: YTool,
+                //     inlineToolbar: true,
+                // },
 
-                mention: { 
+                // mention: { 
 
-                    class: Mention,
-                    config: {
+                //     class: Mention,
+                //     config: {
 
-                        endpoints: {
-                            'arobase': endpointByUser,
-                            'hashtag': endpointByThread
-                        },
+                //         endpoints: {
+                //             'arobase': endpointByUser,
+                //             'hashtag': endpointByThread
+                //         },
 
-                        data: {
-                            'arobase': {},
-                            'hashtag': {}
-                        },
+                //         data: {
+                //             'arobase': {},
+                //             'hashtag': {}
+                //         },
 
-                    }
-                },
+                //     }
+                // },
                 
-                // imageTune: ImageToolTune,
+                imageTune: ImageToolTune,
                 image: {
                     class: ImageTool,
-                    tunes: [ ImageToolTune ],
+                    tunes: [ 'imageTune' ],
                     config: {
                         accept: 'image/*',
                         endpoints: {
@@ -134,7 +136,8 @@ window.addEventListener("load.form_type", function () {
 
         Object.assign(options, {
 
-            holder: editorId, 
+            holder  : editorId, 
+            // onReady : () => { new Undo({ editor }); },
             onChange: () => { editor.save().then(onSave); }
         });
 
