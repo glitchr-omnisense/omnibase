@@ -761,6 +761,11 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
             list($cid, $path) = explode(":", $value);
             $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $path);
+            // NB: A short image attachment name might be generated using such obfuscator
+            //     Consequently, a modification of MediaTwigExtension would be needed
+            // $filename = $this->getMediaService()->obfuscate($path);
+            // $ext = pathinfo($path, PATHINFO_EXTENSION);
+            // $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $filename.($ext ? ".".$ext : ""));
         }
 
         // Render html template to get back email title..

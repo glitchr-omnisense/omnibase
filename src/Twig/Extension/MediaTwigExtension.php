@@ -285,6 +285,12 @@ final class MediaTwigExtension extends AbstractExtension
         $prefix = str_rstrip($path, [implode('/', tail($url)), '/']);
         $email = $options['email'] ?? $context['email'] ?? null;
 
+        // NB: A short image attachment name might be generated using such obfuscator
+        //     Consequently, a modification of Nofitication.php would be needed too
+        //     (How to handle @Public and other namespace might be required.. to be checked)
+        // $src = $this->getMediaService()->obfuscate($src);
+        // $ext = pathinfo($path, PATHINFO_EXTENSION);
+        // $src = $src.($ext ? ".".$ext : "");
         return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : str_lstrip($path, [
             $prefix,
             $this->projectDir . '/public',
