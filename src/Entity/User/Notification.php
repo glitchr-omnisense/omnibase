@@ -735,19 +735,20 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         // Append notification attachments
         $importance = $context["importance"] ?? $this->getImportance();
         $attachments = array_unique(array_merge($this->getAttachments(), $context["attachments"] ?? []));
-        $context["attachments"] = $attachments;
-
-        foreach ($attachments as $attachment) {
+        
+        $context["attachments"] = [];
+        foreach ($attachments as $key => $attachment) {
 
             if (!$attachment instanceof UploadedFile) {
                 continue;
             }
 
             $email->embed($attachment->getContent(), $attachment->getClientOriginalName());
+            $context["attachments"][] = $attachment->getClientOriginalName();
         }
 
         // Fallback: Append cid:/ like attachments
-        foreach ($context as $key => $value) {
+        foreach ($context as $value) {
             if (!$value) {
                 continue;
             }

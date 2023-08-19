@@ -18,6 +18,7 @@ use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Notifier\Notification\Notification as SymfonyNotification;
 use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
 use Twig\Environment;
 
@@ -538,7 +539,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return array_unique($channels);
     }
 
-    public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void
+    public function send(SymfonyNotification $notification, RecipientInterface ...$recipients): void
     {
         if (!$this->enable) {
             return;
