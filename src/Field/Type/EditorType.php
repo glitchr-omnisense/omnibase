@@ -85,10 +85,13 @@ class EditorType extends AbstractType
 
         $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
         $data = $this->obfuscator->encode(["token" => $token]);
-        $view->vars["uploadByFile"] = $this->router->generate("ux_editorjs_endpointByFile", ["data" => $data]);
-        $view->vars["uploadByUrl"] = $this->router->generate("ux_editorjs_endpointByUrl", ["data" => $data]);
-        $view->vars["uploadByUser"] = $this->router->generate("ux_editorjs_endpointByUser", ["data" => $data]);
-        $view->vars["uploadByThread"] = $this->router->generate("ux_editorjs_endpointByThread", ["data" => $data]);
+
+        $view->vars["uploadByFile"] = $this->router->generate("ux_editorjs_uploadByFile", ["data" => $data]);
+        $view->vars["uploadByUrl"]  = $this->router->generate("ux_editorjs_uploadByUrl", ["data" => $data]);
+
+        $view->vars["endpointByUser"]    = $this->router->generate("ux_editorjs_endpointByUser", ["data" => $data]);
+        $view->vars["endpointByThread"]  = $this->router->generate("ux_editorjs_endpointByThread", ["data" => $data]);
+        $view->vars["endpointByKeyword"] = $this->router->generate("ux_editorjs_endpointByKeyword", ["data" => $data]);
 
         $view->vars["editor"] = json_encode($editorOpts);
     }

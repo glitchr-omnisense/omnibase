@@ -3,9 +3,12 @@
 namespace Base\Controller\UX;
 
 use App\Entity\User;
+use Base\Service\PaginatorInterface;
 use App\Repository\UserRepository;
 use Base\Enum\UserRole;
+use Base\Repository\Layout\SemanticRepository;
 use Base\Repository\ThreadRepository;
+use Base\Traits\BaseTrait;
 use Base\Service\FlysystemInterface;
 use Base\Service\MediaServiceInterface;
 use Base\Service\ObfuscatorInterface;
@@ -17,15 +20,19 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * @Route(priority = -1, name="ux_editorjs_")
  * */
 class EditorController extends AbstractController
 {
+    use BaseTrait;
+
     public const STATUS_OK = 1;
     public const STATUS_BAD = 0;
     public const STATUS_NOTOKEN = -1;
@@ -61,6 +68,11 @@ class EditorController extends AbstractController
     protected UserRepository $userRepository;
     
     /**
+     * @var SemanticRepository
+     */
+    protected SemanticRepository $semanticRepository;
+    
+    /**
      * @var ThreadRepository
      */
     protected ThreadRepository $threadRepository;
@@ -75,7 +87,22 @@ class EditorController extends AbstractController
      */
     protected MimeTypes $mimeTypes;
 
-    public function __construct(ParameterBagInterface $parameterBag, MediaServiceInterface $mediaService, FlysystemInterface $flysystem, TranslatorInterface $translator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository)
+    /**
+     * @var Profiler|null
+     */
+    protected ?Profiler $profiler;
+
+    /**
+     * @var RequestStack
+     */
+    protected RequestStack $requestStack;
+
+    /**
+     * @var PaginatorInterface
+     */
+    protected PaginatorInterface $paginator;
+
+    public function __construct(ParameterBagInterface $parameterBag, MediaServiceInterface $mediaService, FlysystemInterface $flysystem, TranslatorInterface $translator, RequestStack $requestStack, PaginatorInterface $paginator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository, SemanticRepository $semanticRepository, ?Profiler $profiler = null)
     {
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;
@@ -84,17 +111,87 @@ class EditorController extends AbstractController
         $this->mediaService = $mediaService;
         $this->parameterBag = $parameterBag;
 
-        $this->threadRepository = $threadRepository;
-        $this->userRepository = $userRepository;
+        $this->threadRepository   = $threadRepository;
+        $this->semanticRepository = $semanticRepository;
+        $this->userRepository     = $userRepository;
 
         $this->mimeTypes = new MimeTypes();
+        $this->profiler = $profiler;
+
+        $this->requestStack = $requestStack;
+        $this->paginator = $paginator;
     }
 
     /**
-     * @Route("/ux/editorjs/{data}/user/{query}", name="endpointByUser")
+     * @Route("/ux/editorjs/{data}/user/{page}", name="endpointByUser")
      */
-    public function EndpointByUser($data = null, array $fields = [], string $query = ""): Response
+    public function EndpointByUser(Request $request, $data = null, array $fields = [], $page = 1): Response
     {
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX) {
+            $this->profiler->disable();
+        }
+
+        $config = $this->obfuscator->decode($data);
+        $token = $config["token"] ?? null;
+        if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
+            return new Response($this->translator->trans("editor.error.invalid_token", [], "fields"), 500);
+        }
+
+        $vars = json_decode($request->getContent(), true);
+        $page = intval($vars["page"] ?? $page);
+        $page = $page ? $page : 1;
+        
+        $query = $vars["query"] ?? NULL;
+
+        $expectedMethod = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        if (!in_array($request->getMethod(), $expectedMethod) || !$query) {
+            return new Response($this->translator->trans("editor.error.invalid_query", [], "fields"), 500);
+        }
+
+        $items = [];
+
+        $users = $this->paginator->paginate($this->userRepository->cacheByInsensitiveIdentifier(urldecode($query), $fields), $page, 2);
+        foreach($users as $user)
+        {
+            $items[] = [
+
+                "id" => $user->getId(),
+                "label" => $user->__toString(), 
+                "avatar" => $this->mediaService->image($user->getAvatarFile()),
+                "link" => [
+                    "name" => $this->isGranted(UserRole::ADMIN) ? $user->__autocomplete() : $user->getId(),
+                    "url" => $user->__toLink()
+                ],
+
+                "data" => [
+                    "class" => $this->userRepository->getClassMetadata()?->discriminatorValue,
+                ]
+            ];
+        }
+
+        $fileMetadata = [
+            "success" => self::STATUS_OK,
+            "results" => $items,
+            "pagination" => [
+                "page" => $page,
+                "more" => $page > 0 && $page < $users->getTotalPages()
+            ]
+        ];
+
+        return JsonResponse::fromJsonString(json_encode($fileMetadata));
+    }
+
+    /**
+     * @Route("/ux/editorjs/{data}/keyword/{page}", name="endpointByKeyword")
+     */
+    public function EndpointByKeyword(Request $request, $data = null, array $fields = ["label", "keywords"], $page = 1): Response
+    {
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX) {
+            $this->profiler->disable();
+        }
+
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
@@ -102,32 +199,39 @@ class EditorController extends AbstractController
         }
 
         $items = [];
-        foreach($this->userRepository->cacheByInsensitiveIdentifier(urldecode($query), $fields)->getResult() as $user)
+        foreach($this->semanticRepository->cacheByInsensitiveKeywords([urldecode($query)], $fields)->getResult() as $semantic)
         {
             $items[] = [
-                "id" => $user->getId(), 
-                "name" => $user->__toString(), 
-                "avatar" => $this->mediaService->image($user->getAvatarFile()),
+                "id" => $semantic->getId(), 
+                "label" => $semantic->getLabel(),
                 "link" => [
-                    "label" => $this->isGranted(UserRole::ADMIN) ? $user->__autocomplete() : $user->getId(),
-                    "url" => $user->__toLink()
+                    "name" => $this->isGranted(UserRole::ADMIN) ? implode(",", $semantic->getKeywords()) : $semantic->getId(),
+                    "url" => $semantic->__toLink()
                 ]
             ];
         }
 
         $fileMetadata = [
             "success" => self::STATUS_OK,
-            "items" => $items
+            "results" => $items,
+            "pagination" => [
+                "more" => true
+            ]
         ];
 
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
     /**
-     * @Route("/ux/editorjs/{data}/user/{query}", name="endpointByThread")
+     * @Route("/ux/editorjs/{data}/thread/{page}", name="endpointByThread")
      */
-    public function EndpointByThread($data = null, array $fields = ["title", "excerpt", "content"], string $query = ""): Response
+    public function EndpointByThread(Request $request, $data = null, array $fields = ["title", "excerpt", "content"], $page = 1): Response
     {
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        if ($this->profiler !== null && $isUX) {
+            $this->profiler->disable();
+        }
+
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
@@ -139,9 +243,9 @@ class EditorController extends AbstractController
         {
             $items[] = [
                 "id" => $thread->getId(), 
-                "name" => $thread->__toString(), 
+                "label" => $thread->__toString(), 
                 "link" => [
-                    "label" => $this->isGranted(UserRole::ADMIN) ? $thread->__autocomplete() : $thread->getId(),
+                    "name" => $this->isGranted(UserRole::ADMIN) ? $thread->__autocomplete() : $thread->getId(),
                     "url" => $thread->__toLink()
                 ]
             ];
@@ -149,16 +253,19 @@ class EditorController extends AbstractController
 
         $fileMetadata = [
             "success" => self::STATUS_OK,
-            "items" => $items
+            "results" => $items,
+            "pagination" => [
+                "more" => true
+            ]
         ];
 
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
     /**
-     * @Route("/ux/editorjs/{data}", name="endpointByFile")
+     * @Route("/ux/editorjs/{data}", name="uploadByFile")
      */
-    public function EndpointByFile(Request $request, $data = null): Response
+    public function UploadByFile(Request $request, $data = null): Response
     {
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
@@ -221,9 +328,9 @@ class EditorController extends AbstractController
     }
 
     /**
-     * @Route("/ux/editorjs/{data}/fetch", name="endpointByUrl")
+     * @Route("/ux/editorjs/{data}/fetch", name="uploadByUrl")
      */
-    public function EndpointByUrl(Request $request, $data = null): Response
+    public function UploadByUrl(Request $request, $data = null): Response
     {
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;

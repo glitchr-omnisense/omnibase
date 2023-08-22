@@ -11,7 +11,7 @@ import InlineCode from '@editorjs/inline-code';
 import Underline from '@editorjs/underline';
 import CodeTool from 'editorjs-code-highlight';
 import Quote from '@editorjs/quote';
-// import Undo from 'editorjs-undo';
+import Undo from 'editorjs-undo';
 
 import Paragraph from 'editorjs-paragraph';
 import Mention from 'editorjs-mention';
@@ -31,16 +31,18 @@ window.addEventListener("load.form_type", function () {
 
     document.querySelectorAll("[data-editor-field]").forEach((function (el) {
 
-        var id = el.getAttribute("data-editor-field");
+        var id    = el.getAttribute("data-editor-field");
         var value = $("#"+id).val();
 
         var editorId = id+"_editor";         
-        var options = JSON.parse(el.getAttribute("data-editor-options")) || {};
+        var options  = JSON.parse(el.getAttribute("data-editor-options")) || {};
 
-        var endpointByFile = el.getAttribute("data-editor-upload-file"); 
-        var endpointByUrl = el.getAttribute("data-editor-upload-url"); 
-        var endpointByUser = el.getAttribute("data-editor-upload-user");
-        var endpointByThread = el.getAttribute("data-editor-upload-thread");
+        var endpointByFile    = el.getAttribute("data-editor-upload-file") || undefined;
+        var endpointByUrl     = el.getAttribute("data-editor-upload-url")  || undefined;
+
+        var endpointByUser    = el.getAttribute("data-editor-endpoint-user")    || undefined;
+        var endpointByThread  = el.getAttribute("data-editor-endpoint-thread")  || undefined;
+        var endpointByKeyword = el.getAttribute("data-editor-endpoint-keyword") || undefined;
  
         var data = json_decode(value);
         if (data) Object.assign(options, {data:data});
@@ -67,23 +69,19 @@ window.addEventListener("load.form_type", function () {
                 //     inlineToolbar: true,
                 // },
 
-                // mention: { 
+                mention: { 
 
-                //     class: Mention,
-                //     config: {
+                    class: Mention,
+                    config: {
 
-                //         endpoints: {
-                //             'arobase': endpointByUser,
-                //             'hashtag': endpointByThread
-                //         },
-
-                //         data: {
-                //             'arobase': {},
-                //             'hashtag': {}
-                //         },
-
-                //     }
-                // },
+                        typingDelay:1000,
+                        endpoints: {
+                            'arobase': endpointByUser,
+                            'hashtag': endpointByThread,
+                            'dollar': endpointByKeyword
+                        },
+                    }
+                },
                 
                 imageTune: ImageToolTune,
                 image: {
@@ -137,7 +135,7 @@ window.addEventListener("load.form_type", function () {
         Object.assign(options, {
 
             holder  : editorId, 
-            // onReady : () => { new Undo({ editor }); },
+            onReady : () => { new Undo({ editor }); },
             onChange: () => { editor.save().then(onSave); }
         });
 

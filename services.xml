@@ -13,6 +13,10 @@
 
         <service id="Base\Security\Session\DynamicSessionStorageFactory" public="true" parent="session.storage.factory.native" />
 
+        <service id="Base\SecurityAccessTokenHandler">
+            <argument type="service" id="Base\Repository\User\TokenRepository" />
+        </service>
+
         <service id="Base\Service\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
@@ -1030,10 +1034,15 @@
             <argument type="service" id="base.service.image" />
             <argument type="service" id="flysystem" />
             <argument type="service" id="translator" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="base.paginator" />
             <argument type="service" id="obfuscator" />
 
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="App\Repository\ThreadRepository" />
+            <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
+
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\UX\AutocompleteController">

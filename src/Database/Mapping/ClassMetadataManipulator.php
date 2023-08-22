@@ -127,11 +127,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
      * @return $this
      * @throws Exception
      */
-    /**
-     * @param int $policy
-     * @return $this
-     * @throws Exception
-     */
     public function setGlobalTrackingPolicy(int $policy)
     {
         $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
@@ -154,12 +149,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->trackingPolicy[$className] ?? $this->globalTrackingPolicy;
     }
 
-    /**
-     * @param $className
-     * @param int $policy
-     * @return $this
-     * @throws Exception
-     */
     /**
      * @param $className
      * @param int $policy

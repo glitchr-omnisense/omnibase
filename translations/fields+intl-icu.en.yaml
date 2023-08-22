@@ -93,6 +93,10 @@ wysiwyg:
 
 editor:
   placeholder: "Let's write an awesome story!"
+  error:
+    invalid_token: Token expired.
+    invalid_query: "Invalid query."
+    not_found: "Page not found."
 
 cropper:
   no_image: "No image to load."

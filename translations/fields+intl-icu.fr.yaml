@@ -27,6 +27,10 @@ wysiwyg:
 
 editor:
   placeholder: "Écrivons une histoire géniale !"
+  error:
+    invalid_token: Jeton expiré.
+    invalid_query: "Requete invalide."
+    not_found: "Page introuvable"
 
 password:
   invalid_message: "Les mots de passe ne sont pas identiques."

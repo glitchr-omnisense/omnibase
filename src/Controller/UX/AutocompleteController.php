@@ -3,7 +3,7 @@
 namespace Base\Controller\UX;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Service\CurrencyApi;
+
 use Base\Service\Model\Autocomplete;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\PaginatorInterface;
@@ -59,6 +59,10 @@ class AutocompleteController extends AbstractController
      * @var Profiler|null
      */
     protected ?Profiler $profiler;
+
+    /**
+     * @var RequestStack
+     */
     private RequestStack $requestStack;
 
     public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
@@ -105,8 +109,9 @@ class AutocompleteController extends AbstractController
             return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
         }
 
-        $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
-        if ($request->getMethod() == $expectedMethod) {
+        $expectedMethod = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        if (in_array($request->getMethod(), $expectedMethod)) {
+
             $term = strtolower(str_strip_accents($request->get("term")) ?? "");
             $meta = explode(".", $request->get("page") ?? "");
             $page = max(1, intval($meta[0] ?? 1));

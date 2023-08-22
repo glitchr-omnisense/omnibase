@@ -41,21 +41,21 @@ class Connection
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $ip;
-    public function getIp(): ?string
-    {
-        return $this->ip;
-    }
+    // /**
+    //  * @ORM\Column(type="string", length=255)
+    //  */
+    // protected $ip;
+    // public function getIp(): ?string
+    // {
+    //     return $this->ip;
+    // }
 
-    public function setIp(string $ip): self
-    {
-        $this->ip = $ip;
+    // public function setIp(string $ip): self
+    // {
+    //     $this->ip = $ip;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     /**
      * @ORM\Column(type="integer")
@@ -101,36 +101,36 @@ class Connection
     }
 
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $agent;
-    public function getAgent(): ?string
-    {
-        return $this->agent;
-    }
+    // /**
+    //  * @ORM\Column(type="string", length=255)
+    //  */
+    // protected $agent;
+    // public function getAgent(): ?string
+    // {
+    //     return $this->agent;
+    // }
 
-    public function setAgent(string $agent): self
-    {
-        $this->agent = $agent;
-        return $this;
-    }
+    // public function setAgent(string $agent): self
+    // {
+    //     $this->agent = $agent;
+    //     return $this;
+    // }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $timezone;
-    public function getTimezone(): ?string
-    {
-        return $this->timezone;
-    }
+    // /**
+    //  * @ORM\Column(type="string", length=255)
+    //  */
+    // protected $timezone;
+    // public function getTimezone(): ?string
+    // {
+    //     return $this->timezone;
+    // }
 
-    public function setTimezone(string $timezone): self
-    {
-        $this->timezone = $timezone;
+    // public function setTimezone(string $timezone): self
+    // {
+    //     $this->timezone = $timezone;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     /**
      * @ORM\Column(type="datetime")

@@ -49,8 +49,8 @@ class UserCrudController extends UserActionCrudController
             $impersonate = null;
             if ($switchRole && $this->isGranted($switchRole) && !is_instanceof($this->getEntityFqcn(), LoginRestrictionInterface::class) && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
                 $propertyAccessor = PropertyAccess::createPropertyAccessor();
-                if ($propertyAccessor->isReadable($entity, User::__DEFAULT_IDENTIFIER__)) {
-                    $impersonate = '<a class="impersonate" href="?' . $switchParameter . '=' . $propertyAccessor->getValue($entity, User::__DEFAULT_IDENTIFIER__) . '"><i class="fa-solid fa-fw fa-user-secret"></i></a>';
+                if ($propertyAccessor->isReadable($entity, User::$userIdentifier)) {
+                    $impersonate = '<a class="impersonate" href="?' . $switchParameter . '=' . $propertyAccessor->getValue($entity, User::$userIdentifier) . '"><i class="fa-solid fa-fw fa-user-secret"></i></a>';
                 }
             }
 

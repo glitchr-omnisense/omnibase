@@ -6,6 +6,7 @@ use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\Mapping\ClassMetadata;
 use Exception;
 
 /**
@@ -14,6 +15,11 @@ use Exception;
  */
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
+    /**
+     * @var ClassMetadata
+     */
+    protected ClassMetadata $classMetadata;
+
     /**
      * @var ClassMetadataCompletor
      */
@@ -42,6 +48,8 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         $entityManager = $this->getEntityManager();
         $classMetadataManipulator = new ClassMetadataManipulator($doctrine, $entityManager);
+        
+        $this->classMetadata = $entityManager->getClassMetadata($entityName ?? $this->getFqcnEntityName());
         $this->classMetadataCompletor = $classMetadataManipulator->getClassMetadataCompletor($entityName ?? $this->getFqcnEntityName());
 
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
@@ -49,9 +57,17 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     }
 
     /**
+     * @return ClassMetadata|null
+     */
+    public function getClassMetadata(): ?ClassMetadata
+    {
+        return $this->classMetadata;
+    }
+
+    /**
      * @return ClassMetadataCompletor|null
      */
-    public function getClassMetadataCompletor()
+    public function getClassMetadataCompletor(): ?ClassMetadataCompletor
     {
         return $this->classMetadataCompletor;
     }
