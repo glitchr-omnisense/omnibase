@@ -53,7 +53,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
             unlink_tmpfile($path);
         }
 
-        $this->path = $path . ".webp";
+        $this->path = str_rstrip($path, ".".pathinfo($path, PATHINFO_EXTENSION)) . ".webp";
         $this->filters = $filters;
 
         if (array_key_exists("quality", $options)) {
