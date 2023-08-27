@@ -21,11 +21,11 @@ class TagCrudController extends AbstractCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-            yield DiscriminatorField::new('class')->hideOnForm()->showColumnLabel();
-            yield TranslationField::new()->setFields([
+            yield TranslationField::new("label")->setFields([
                 'label' => [],
                 'keywords' => ['form_type' => SelectType::class, 'tags' => [',', ';'], 'required' => false],
             ])->setTextAlign(TextAlign::RIGHT)->hideOnDetail();
+            yield DiscriminatorField::new('class')->hideOnForm()->showColumnLabel();
         });
     }
 }
