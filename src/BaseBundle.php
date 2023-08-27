@@ -33,6 +33,7 @@ use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
+use Base\Traits\SingletonTrait;
 
 /**
  *
