@@ -3,6 +3,7 @@
 namespace Base\Controller\Backend;
 
 use App\Entity\User as User;
+use App\Entity\User\Connection as UserConnection;
 use App\Entity\User\Group as UserGroup;
 use App\Entity\User\Notification as UserNotification;
 use App\Entity\User\Permission as UserPermission;
@@ -207,10 +208,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return $this->extension;
     }
 
-    /**
-     * @param Extension $extension
-     * @return $this
-     */
     /**
      * @param Extension $extension
      * @return $this
@@ -675,6 +672,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', "fa-solid fa-users-viewfinder", 2));
             $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
                 WidgetItem::linkToCrud(User::class),
+                WidgetItem::linkToCrud(UserConnection::class),
                 WidgetItem::linkToCrud(UserGroup::class),
                 WidgetItem::linkToCrud(UserNotification::class),
                 WidgetItem::linkToCrud(UserPermission::class),

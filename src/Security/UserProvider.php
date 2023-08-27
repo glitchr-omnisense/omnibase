@@ -11,7 +11,6 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
@@ -20,44 +19,21 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, OAuthAwareUserProviderInterface
 {
     /**
-     * {@inheritdoc}
+     * @var UserTracker
      */
+    protected UserTracker $userTracker;
 
-    public function loadUserByIdentifier($identifier): UserInterface
+    public function __construct(UserTracker $userTracker)
     {
-        $data = $identifier->getData();
-
-        $user = new User();
-        $user->setId(0);
-        $user->setRoles([UserRole::SOCIAL]);
-        $user->setEmail($data["email"]);
-
-        $user->verify($data["verified_email"]);
-
-        $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "username")) {
-            $accessor->setValue($this, "username", "Google");
-        }
-
-        $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "username")) {
-            $accessor->setValue($this, "username", $data["family_name"]);
-        }
-
-        $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "firstname")) {
-            $accessor->setValue($this, "firstname", $data["given_name"]);
-        }
-
-        return $user;
+        $this->userTracker = $userTracker;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function loadUserByOAuthUserResponse(UserResponseInterface $response): UserInterface
+    public function loadUserByIdentifier($identifier): UserInterface
     {
-        return $this->loadUserByIdentifier($response);
+        throw new \Exception('TODO: fill in loadUserByIdentifier() inside '.__FILE__);
     }
 
     /**
@@ -79,7 +55,8 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
-        // $user->getCurrentConnection()->setUpdatedAt(new \DateTime("now"));
+        $this->userTracker->updateConnection($user);
+
         return $user;
     }
 
@@ -98,5 +75,38 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
     {
         // set the new hashed password on the User object
         $user->setPassword($newHashedPassword);
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function loadUserByOAuthUserResponse(UserResponseInterface $response): UserInterface
+    {
+        // $data = $identifier->getData();
+
+        // $user = new User();
+        // $user->setId(0);
+        // $user->setRoles([UserRole::SOCIAL]);
+        // $user->setEmail($data["email"]);
+
+        // $user->verify($data["verified_email"]);
+
+        // $accessor = PropertyAccess::createPropertyAccessor();
+        // if ($accessor->isWritable($this, "username")) {
+        //     $accessor->setValue($this, "username", "Google");
+        // }
+
+        // $accessor = PropertyAccess::createPropertyAccessor();
+        // if ($accessor->isWritable($this, "username")) {
+        //     $accessor->setValue($this, "username", $data["family_name"]);
+        // }
+
+        // $accessor = PropertyAccess::createPropertyAccessor();
+        // if ($accessor->isWritable($this, "firstname")) {
+        //     $accessor->setValue($this, "firstname", $data["given_name"]);
+        // }
+
+        throw new \Exception('loadUserByOAuthUserResponse() not implemented '.__FILE__);
     }
 }

@@ -24,7 +24,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
-
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use ErrorException;
@@ -598,12 +598,16 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             foreach ($_ ?? [] as $i => $yield) {
                 $property = preg_replace("/^[0-9.]+/", "", $path);
 
-                $yieldList = array_map(fn($y) => $y->getAsDto()->getProperty(), $yields);
+                $yieldList = array_map(fn($y) => $y->getAsDto()->getLabel() ?? $y->getAsDto()->getProperty(), $yields);
                 $yieldPos = array_search($property, $yieldList);
-
                 $yieldPosNext = next_key($yieldList, $yieldPos);
                 $yieldPosNext = $yieldPosNext === false ? false : $yieldPosNext + $i;
-                $yields = array_insert($yields, $yieldPosNext, $yield);
+
+                if($yields[$yieldPos] instanceof FormField && $yields[$yieldPos]->getAsDto()->getColumns() == $yield->getAsDto()->getColumns()) {
+                    $yields[$yieldPos] = $yield;
+                } else {
+                    $yields = array_insert($yields, $yieldPosNext, $yield);
+                }
             }
         }
 

@@ -2,17 +2,18 @@
 
 namespace Base\Enum;
 
-use Base\Database\Type\SetType;
+use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
 /**
  *
  */
-class ConnectionState extends SetType implements IconizeInterface
+class ConnectionState extends EnumType implements IconizeInterface
 {
     public const FAILED = "CONNECTION_FAILED";
+    public const REQUESTED = "CONNECTION_REQUESTED";
     public const SUCCEEDED = "CONNECTION_SUCCEEDED";
-    public const LOGOUT = "CONNECTION_LOGOUT";
+    public const CLOSED = "CONNECTION_CLOSED";
 
     public function __iconize(): ?array
     {
@@ -23,8 +24,9 @@ class ConnectionState extends SetType implements IconizeInterface
     {
         return [
             self::FAILED => ["fa-regular fa-circle-xmark"],
+            self::REQUESTED => ["fa-solid fa-hourglass-half"],
             self::SUCCEEDED => ["fa-regular fa-square-check"],
-            self::LOGOUT => ["fa-solid fa-arrow-right-from-bracket"]
+            self::CLOSED => ["fa-solid fa-arrow-right-from-bracket"]
         ];
     }
 }

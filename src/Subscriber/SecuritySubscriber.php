@@ -7,7 +7,6 @@ use App\Repository\UserRepository;
 use Base\Service\LocalizerInterface;
 use Base\Service\ReferrerInterface;
 use App\Entity\User;
-use Base\Entity\User\Connection;
 use Base\Security\LoginFormAuthenticator;
 
 use DateTime;
@@ -45,67 +44,67 @@ class SecuritySubscriber implements EventSubscriberInterface
     /**
      * @var RequestStack
      */
-    private RequestStack $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var TokenStorageInterface
      */
-    private TokenStorageInterface $tokenStorage;
+    protected TokenStorageInterface $tokenStorage;
 
     /**
      * @var RouterInterface
      */
-    private RouterInterface $router;
+    protected RouterInterface $router;
 
     /**
      * @var UserRepository
      */
-    private UserRepository $userRepository;
+    protected UserRepository $userRepository;
 
     /**
      * @var AuthorizationChecker
      */
-    private AuthorizationChecker $authorizationChecker;
+    protected AuthorizationChecker $authorizationChecker;
 
     /**
      * @var LauncherInterface
      */
-    private LauncherInterface $launcher;
+    protected LauncherInterface $launcher;
 
     /**
      * @var MaintenanceProviderInterface
      */
-    private MaintenanceProviderInterface $maintenanceProvider;
+    protected MaintenanceProviderInterface $maintenanceProvider;
 
     /**
      * @var ?Profiler
      */
-    private ?Profiler $profiler;
+    protected ?Profiler $profiler;
 
     /**
      * @var ReferrerInterface
      */
-    private ReferrerInterface $referrer;
+    protected ReferrerInterface $referrer;
 
     /**
      * @var ParameterBagInterface
      */
-    private ParameterBagInterface $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var SettingBagInterface
      */
-    private SettingBagInterface $settingBag;
+    protected SettingBagInterface $settingBag;
 
     /**
      * @var LocalizerInterface
      */
-    private LocalizerInterface $localizer;
+    protected LocalizerInterface $localizer;
 
     /**
      * @var TranslatorInterface
      */
-    private TranslatorInterface $translator;
+    protected TranslatorInterface $translator;
 
     public function __construct(
         UserRepository               $userRepository,

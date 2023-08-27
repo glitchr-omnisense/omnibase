@@ -136,7 +136,6 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
                 }
             }
 
-            // $user->addConnection(new Connection());
             $user->setTimezone();
             $user->setLocale();
             $user->kick(0);

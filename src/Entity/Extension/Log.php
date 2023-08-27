@@ -43,7 +43,7 @@ class Log extends AbstractExtension
         $this->priority = $listener["priority"];
         $this->pretty = $listener["pretty"];
         $this->level = LogLevel::INFO;
-        $this->browser = User::getAgent();
+        $this->agent = User::getAgent();
         $this->ip = User::getIp();
 
         if ($request) {
@@ -80,7 +80,7 @@ class Log extends AbstractExtension
         $this->user->addLog($this);
 
         $this->ip = $this->getUser()->getIp();
-        $this->browser = $this->getUser()->getAgent();
+        $this->agent = $this->getUser()->getAgent();
 
         return $this;
     }
@@ -192,14 +192,14 @@ class Log extends AbstractExtension
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    protected $browser;
+    protected $agent;
 
     /**
      * @return string|null
      */
     public function getAgent()
     {
-        return $this->browser;
+        return $this->agent;
     }
 
     /**

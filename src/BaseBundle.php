@@ -16,6 +16,7 @@ use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
 use Base\Database\Type\UTCDateTimeType;
 use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
+use Base\DependencyInjection\Compiler\Pass\CrudControllerPass;
 use Base\DependencyInjection\Compiler\Pass\TradingMarketPass;
 use Base\DependencyInjection\Compiler\Pass\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\Pass\IconProviderPass;
@@ -45,6 +46,8 @@ class BaseBundle extends Bundle
 {
     use SingletonTrait;
 
+    protected $container;
+    
     public function __construct()
     {
         if (!$this->hasInstance()) {

@@ -3,7 +3,7 @@
 namespace Base\Repository\User;
 
 use Base\Entity\User\Connection;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Base\Database\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Connection>
