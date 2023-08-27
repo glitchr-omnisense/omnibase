@@ -147,7 +147,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
         $dom = new DomDocument();
         $encoding = mb_detect_encoding($text);
-        $dom->loadHTML(mb_convert_encoding($text, 'HTML-ENTITIES', $encoding));
+        $dom->loadHTML(mb_convert_encoding($text, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
 
         $xpath = new DOMXPath($dom);
         foreach ($xpath->query('//text()') as $text) {
