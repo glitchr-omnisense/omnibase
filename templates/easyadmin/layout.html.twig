@@ -165,7 +165,7 @@
                                             {% if ea.userMenu.isNameDisplayed %}
                                             <div class="dashboard-menu">
                                                 <div class="dashboard-title">{{ ea.dashboardTitle|striptags }}</div>
-                                                <div class="user-name">{{ ea.userMenu.name }}</div>
+                                                <div class="user-name">{{ ea.userMenu.name|str_shorten(15) }}</div>
                                             </div>
                                             {% endif %}
                                         </a>

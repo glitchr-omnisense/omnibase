@@ -7,7 +7,6 @@ use App\Repository\UserRepository;
 use Base\Service\LocalizerInterface;
 use Base\Service\ReferrerInterface;
 use App\Entity\User;
-
 use Base\Security\LoginFormAuthenticator;
 
 use DateTime;
@@ -44,62 +43,62 @@ class SecuritySubscriber implements EventSubscriberInterface
     /**
      * @var RequestStack
      */
-    private RequestStack $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var TokenStorageInterface
      */
-    private TokenStorageInterface $tokenStorage;
+    protected TokenStorageInterface $tokenStorage;
 
     /**
      * @var RouterInterface
      */
-    private RouterInterface $router;
+    protected RouterInterface $router;
 
     /**
      * @var UserRepository
      */
-    private UserRepository $userRepository;
+    protected UserRepository $userRepository;
 
     /**
      * @var AuthorizationChecker
      */
-    private AuthorizationChecker $authorizationChecker;
+    protected AuthorizationChecker $authorizationChecker;
 
     /**
      * @var LauncherInterface
      */
-    private LauncherInterface $launcher;
+    protected LauncherInterface $launcher;
 
     /**
      * @var MaintenanceProviderInterface
      */
-    private MaintenanceProviderInterface $maintenanceProvider;
+    protected MaintenanceProviderInterface $maintenanceProvider;
 
     /**
      * @var ?Profiler
      */
-    private ?Profiler $profiler;
+    protected ?Profiler $profiler;
 
     /**
      * @var ReferrerInterface
      */
-    private ReferrerInterface $referrer;
+    protected ReferrerInterface $referrer;
 
     /**
      * @var ParameterBagInterface
      */
-    private ParameterBagInterface $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var SettingBagInterface
      */
-    private SettingBagInterface $settingBag;
+    protected SettingBagInterface $settingBag;
 
     /**
      * @var LocalizerInterface
      */
-    private LocalizerInterface $localizer;
+    protected LocalizerInterface $localizer;
 
     public function __construct(
         UserRepository               $userRepository,
@@ -362,7 +361,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onLoginFailure(LoginFailureEvent $event)
     {
-	$message = "@notifications.login.failed";
+	    $message = "@notifications.login.failed";
         $importance = "danger";
 
         if (($exception = $event->getException())) {
@@ -389,10 +388,14 @@ class SecuritySubscriber implements EventSubscriberInterface
          */
         $user = $event->getUser();
         if ($user instanceof BaseUser) {
+
             if (!$user->isPersistent()) {
+            
                 $notification = new Notification("login.social", [$user]);
                 $notification->send("success");
+            
             } elseif ($user->isVerified()) {
+
                 $isAuthenticated = $this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') || $this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED');
                 if (!$isAuthenticated) {
                     $title = "@notifications.login.success.alien";

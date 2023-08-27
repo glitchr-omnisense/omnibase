@@ -3,6 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -22,10 +23,14 @@ class WysiwygType extends AbstractType
     /** @var ParameterBagInterface */
     protected $parameterBag;
 
-    public function __construct(ParameterBagInterface $parameterBag, Environment $twig)
+    /** @var TranslatorInterface */
+    protected $translator;
+
+    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig)
     {
         $this->parameterBag = $parameterBag;
         $this->twig = $twig;
+        $this->translator = $translator;
     }
 
     public function getParent(): ?string
@@ -45,7 +50,7 @@ class WysiwygType extends AbstractType
             "webpack_entry" => "form.wysiwyg",
 
             'theme' => "snow",
-            'placeholder' => "Compose an epic..",
+            'placeholder' => $this->translator->trans("@fields.wysiwyg.placeholder"),
             'height' => "250px",
             'modules' => [
                 "syntax" => true,

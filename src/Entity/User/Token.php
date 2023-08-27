@@ -43,6 +43,7 @@ class Token implements IconizeInterface
     {
         $this->name = $name;
         $this->isRevoked = false;
+        $this->isLogginable = false;
         $this->expireAt = null;
         $this->allowAt = null;
 
@@ -70,7 +71,8 @@ class Token implements IconizeInterface
             $this->getCreatedAt()->getTimestamp(),
             $this->getLifetime(),
             $this->getThrottleTime(),
-            $this->isRevoked()
+            $this->isRevoked(),
+            $this->isLogginable()
         ]));
 
         return $this->hashIds->encodeHex($hex);
@@ -89,7 +91,7 @@ class Token implements IconizeInterface
         $hex = $this->hashIds->decodeHex($hash);
         $str = hex2bin($hex);
 
-        list($name, $value, $timestamp, $expiry, $throttle, $isRevoked) = unserialize($str);
+        list($name, $value, $timestamp, $expiry, $throttle, $isRevoked, $isLogginable) = unserialize($str);
         $this->name = $name;
         $this->value = $value;
 
@@ -119,6 +121,7 @@ class Token implements IconizeInterface
         }
 
         $this->isRevoked = $isRevoked;
+        $this->isLogginable = $isLogginable;
 
         return $this;
     }
@@ -374,6 +377,22 @@ class Token implements IconizeInterface
             $user->removeToken($this);
         }
 
+        return $this;
+    }
+    
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $isLogginable;
+
+    public function isLogginable(): bool
+    {
+        return $this->isLogginable;
+    }
+
+    public function markAsLogginable(bool $isLogginable = true): self
+    {
+        $this->isLogginable = $isLogginable;
         return $this;
     }
 }

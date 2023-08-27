@@ -900,6 +900,11 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
     --bs-text-opacity: 1;
     color:var(--text-muted) !important;
 }
+
+.clear-both {
+    clear:both;
+}
+
 .text-danger {
     --bs-text-opacity: 1;
     color:red !important;
@@ -1153,8 +1158,6 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     z-index:2;
     left: 85px;
     top: 0;
-    height: 30px;
-    width: 30px;
     line-height: 0.5;
     display: flex;
     justify-content: center;

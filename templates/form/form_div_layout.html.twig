@@ -111,7 +111,7 @@
 
     {{ form_widget(form) }}
     <div id="{{ id }}_editor" {{ block('attributes') }}>{{ value|wysiwyg|raw }}</div>
-    <div class="form-text text-muted">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
+    <div class="form-text text-muted clear-both">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
 {%- endblock wysiwyg_widget -%}
 
 {%- block editor_row -%}
@@ -129,12 +129,15 @@
         'data-editor-options': editor,
         'data-editor-upload-file'  : form.vars.uploadByFile,
         'data-editor-upload-url'  : form.vars.uploadByUrl,
+        'data-editor-endpoint-user'  : form.vars.endpointByUser,
+        'data-editor-endpoint-thread'  : form.vars.endpointByThread,
+        'data-editor-endpoint-keyword'  : form.vars.endpointByKeyword,
         'class': 'form-editor-codex' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')
     }) %}
 
     {{ form_widget(form) }}
     <div id="{{ id }}_editor" {{ block('attributes') }}></div>
-    <div class="form-text text-muted">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
+    <div class="form-text text-muted clear-both">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
 
 {%- endblock editor_widget -%}
 

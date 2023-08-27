@@ -13,6 +13,10 @@
 
         <service id="Base\Security\Session\DynamicSessionStorageFactory" public="true" parent="session.storage.factory.native" />
 
+        <service id="Base\Security\AccessTokenHandler">
+            <argument type="service" id="Base\Repository\User\TokenRepository" />
+        </service>
+
         <service id="Base\Service\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
@@ -797,11 +801,26 @@
             <argument type="service" id="App\Repository\UserRepository" />
         </service>
 
-        <service id="Base\Security\UserChecker"           >
+        <service id="Base\Security\UserTracker">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="router" />
+            <argument type="service" id="Base\Repository\User\ConnectionRepository" />
+        </service>
+        
+        <service id="Base\EntitySubscriber\ConnectionSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="Base\Security\UserTracker" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="Base\Security\UserProvider"           />
+        <service id="Base\Security\UserChecker">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+        <service id="Base\Security\UserProvider">
+            <argument type="service" id="Base\Security\UserTracker" />
+        </service>
+
         <service id="Base\Security\RescueFormAuthenticator" parent="Base\Security\LoginFormAuthenticator"/>
         <service id="Base\Security\LoginFormAuthenticator">
             <argument type="service" id="referrer" />
@@ -980,13 +999,12 @@
 
         <service id="Base\Field\Type\WysiwygType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
             <argument type="service" id="twig" />
-            <argument type="service" id="router" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="obfuscator" />
         </service>
         <service id="Base\Field\Type\EditorType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
             <argument type="service" id="twig" />
             <argument type="service" id="router" />
             <argument type="service" id="security.csrf.token_manager" />
@@ -1037,9 +1055,18 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="base.service.image" />
             <argument type="service" id="flysystem" />
             <argument type="service" id="translator" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="base.paginator" />
             <argument type="service" id="obfuscator" />
+
+            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="App\Repository\ThreadRepository" />
+            <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
+
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\UX\AutocompleteController">
@@ -1263,6 +1290,7 @@
 
         <service id="Base\Controller\Backend\Crud\UserCrudController"              parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\AddressCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\User\ConnectionCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\GroupCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\NotificationCrudController" parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\PermissionCrudController"   parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>

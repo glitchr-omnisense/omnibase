@@ -159,10 +159,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
      * @param string $alternative
      * @return $this
      */
-    /**
-     * @param string $alternative
-     * @return $this
-     */
     public function addAlternative(string $alternative)
     {
         if (!array_key_exists($alternative, $this->alternatives)) {
@@ -172,10 +168,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         return $this;
     }
 
-    /**
-     * @param string $alternative
-     * @return $this
-     */
     /**
      * @param string $alternative
      * @return $this
@@ -215,14 +207,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
      * @param bool $strictMode
      * @return $this
      */
-    /**
-     * @param string $value
-     * @param string $entrypointJsonPath
-     * @param CacheItemPoolInterface|null $cache
-     * @param string|null $cacheKey
-     * @param bool $strictMode
-     * @return $this
-     */
     public function addEntrypoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
     {
         if (null == $this->entrypointLookupCollection) {
@@ -234,10 +218,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         return $this;
     }
 
-    /**
-     * @param string $value
-     * @return $this
-     */
     /**
      * @param string $value
      * @return $this
@@ -273,13 +253,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         }
     }
 
-    /**
-     * @param string $value
-     * @param string|null $packageName
-     * @param string|null $entrypointName
-     * @param string|null $htmlAttributes
-     * @return $this
-     */
     /**
      * @param string $value
      * @param string|null $packageName
@@ -340,13 +313,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
      * @param string|null $htmlAttributes
      * @return $this
      */
-    /**
-     * @param string $value
-     * @param string|null $packageName
-     * @param string|null $entrypointName
-     * @param string|null $htmlAttributes
-     * @return $this
-     */
     public function addLinkTag(string $value, ?string $packageName = null, ?string $entrypointName = null, ?string $htmlAttributes = null)
     {
         $this->refreshCacheIfNeeded();
@@ -381,13 +347,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
      * @param string|null $htmlAttributes
      * @return $this
      */
-    /**
-     * @param string $value
-     * @param string|null $packageName
-     * @param string|null $entrypointName
-     * @param string|null $htmlAttributes
-     * @return $this
-     */
     public function addScriptTag(string $value, ?string $packageName = null, ?string $entrypointName = null, ?string $htmlAttributes = null)
     {
         $this->refreshCacheIfNeeded();
@@ -409,10 +368,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
      * @param string $value
      * @return $this
      */
-    /**
-     * @param string $value
-     * @return $this
-     */
     public function removeTags(string $value)
     {
         $this->removeLinkTag($value);
@@ -421,10 +376,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         return $this;
     }
 
-    /**
-     * @param string $entryName
-     * @return $this
-     */
     /**
      * @param string $entryName
      * @return $this
@@ -443,10 +394,6 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         return $this;
     }
 
-    /**
-     * @param string $entryName
-     * @return $this
-     */
     /**
      * @param string $entryName
      * @return $this

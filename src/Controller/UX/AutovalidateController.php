@@ -59,6 +59,10 @@ class AutovalidateController extends AbstractController
             return new JsonResponse($array);
         }
 
+        /*
+         * Add some checks here.
+         */
+        
         return new JsonResponse("Invalid request", 500);
     }
 }

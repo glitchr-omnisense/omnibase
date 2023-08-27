@@ -24,6 +24,9 @@ user:
   address:
     _singular: "adresse"
     _plural: "adresses"
+  connection:
+    _singular: "connexion"
+    _plural: "connexions"
 
 extension:
   revision:

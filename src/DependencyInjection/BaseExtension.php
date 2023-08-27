@@ -16,6 +16,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Base\Controller\Backend\AbstractCrudController;
 
 use Base\Bundle\AbstractBaseExtension;
 
@@ -58,10 +59,8 @@ class BaseExtension extends AbstractBaseExtension
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
         $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
         $container->registerForAutoconfiguration(AbstractLocalCacheInterface::class)->addTag('base.simple_cache');
-
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('currency.api');
         $container->registerForAutoconfiguration(CompressionInterface::class)->addTag('obfuscator.compressor');
-
         $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
         $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
 

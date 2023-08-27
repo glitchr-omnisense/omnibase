@@ -13,8 +13,9 @@ final class ClassTwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
+            new TwigFunction('get_class', 'get_class'),
+            new TwigFunction('class_exists', 'class_exists'),
             new TwigFunction('get_short_class', [$this, 'getShortClass']),
-            new TwigFunction('get_class', [$this, 'getClass']),
         ];
     }
 
@@ -24,15 +25,6 @@ final class ClassTwigExtension extends AbstractExtension
     public function getName()
     {
         return 'class_twig_extension';
-    }
-
-    /**
-     * @param $object
-     * @return string
-     */
-    public function getClass($object)
-    {
-        return get_class($object);
     }
 
     /**

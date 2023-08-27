@@ -807,7 +807,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
         $fwd = "";
         $content = $this->getContent();
-        $userIdentifier = $this->user->getUserIdentifier();
+        $userIdentifier = $this->user->getIdentifier();
 
         if ($this->isMarkAsAdmin()) {
             $fwd = "Fwd: ";
