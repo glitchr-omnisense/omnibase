@@ -18,7 +18,7 @@
     color: #222;
     background-color: #FFF;
     border-radius: 4px;
-    z-index:10;
+    z-index:11;
 }
 
 .ce-paragraph[data-placeholder]:empty::before {
