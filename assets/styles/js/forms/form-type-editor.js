@@ -128,14 +128,16 @@ function edjs(id, holder, data = {}, options = {}, endpointByFile = undefined, e
     var editor = new EditorJs(options);
 }
 
-window.addEventListener("load.form_type", function () {
+window.addEventListener("load.form_type", function (el) {
 
     document.querySelectorAll("[data-editor-field]").forEach((function (el) {
 
         var id    = el.getAttribute("data-editor-field");
         var value = $("#"+id).val();
 
-        var editorId = id+"_editor";         
+        var editorId = id+"_editor";
+        $("#"+editorId)[0].innerHTML = ""; // delete existing editorjs instance
+
         var options  = JSON.parse(el.getAttribute("data-editor-options")) || {};
 
         var endpointByFile    = el.getAttribute("data-editor-upload-file") || undefined;
@@ -168,7 +170,7 @@ window.addEventListener("load.form_type", function () {
                 // collaborative: {
                 //     class: YTool,
                 //     inlineToolbar: true,
-                // },
+                // }, 
 
                 mention: { 
 
@@ -178,8 +180,8 @@ window.addEventListener("load.form_type", function () {
                         typingDelay:1000,
                         endpoints: {
                             'arobase': endpointByUser,
-                            'hashtag': endpointByThread,
-                            'dollar': endpointByKeyword
+                            'hashtag': endpointByKeyword,
+                            'dollar': endpointByThread
                         },
                     }
                 },
@@ -188,7 +190,7 @@ window.addEventListener("load.form_type", function () {
                 image: {
                     class: ImageTool,
                     tunes: [ 'imageTune' ],
-                    config: {
+                    config: { 
                         accept: 'image/*',
                         endpoints: {
                             byFile: endpointByFile,
@@ -236,7 +238,10 @@ window.addEventListener("load.form_type", function () {
         Object.assign(options, {
 
             holder  : editorId, 
-            onReady : () => { new Undo({ editor }); },
+            onReady : () => { 
+                if(data == undefined && value != '') editor.blocks.renderFromHTML(value);
+                new Undo({ editor }); 
+            },
             onChange: () => { editor.save().then(onSave); }
         });
 

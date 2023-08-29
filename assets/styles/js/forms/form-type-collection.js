@@ -117,7 +117,7 @@ window.addEventListener("load.collection_type", function () {
 
             $(u).collapse("show");
 
-            $(document).trigger("collection.item-added");
+            dispatchEvent(new Event("load.form_type"));
 
             document.querySelectorAll("button.form-collection-delete-button").forEach(deleteAction);
         });
@@ -127,11 +127,4 @@ window.addEventListener("load.collection_type", function () {
     document.querySelectorAll("form .form-collection").forEach(initAction);
     document.querySelectorAll("button.form-collection-add-button").forEach(addAction);
     document.querySelectorAll("button.form-collection-delete-button").forEach(deleteAction);
-
-    $(document).off("collection.item-added");
-    $(document).on ("collection.item-added", function() {
-
-        dispatchEvent(new Event("load.form_type"));
-        document.dispatchEvent(new Event("load.collection_type"));
-    });
 });

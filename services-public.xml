@@ -50,6 +50,9 @@
 
         <service id="semantic_enhancer" alias="Base\Service\SemanticEnhancer" />
         <service id="Base\Service\SemanticEnhancerInterface" alias="semantic_enhancer"/>
+       
+        <service id="mention_enhancer" alias="Base\Service\MentionEnhancer" />
+        <service id="Base\Service\MentionEnhancerInterface" alias="mention_enhancer"/>
 
         <service id="base.service.maintenance" alias="Base\Service\MaintenanceProvider" />
         <service id="Base\Service\MaintenanceProviderInterface" alias="base.service.maintenance"/>

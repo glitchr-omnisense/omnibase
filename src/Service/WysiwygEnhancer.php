@@ -27,11 +27,18 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
      */
     protected $semanticEnhancer;
 
-    public function __construct(Environment $twig, SluggerInterface $slugger, SemanticEnhancerInterface $semanticEnhancer)
+    /**
+     * @var MentionEnhancerInterface
+     */
+    protected $mentionEnhancer;
+
+    public function __construct(Environment $twig, SluggerInterface $slugger, SemanticEnhancerInterface $semanticEnhancer, MentionEnhancerInterface $mentionEnhancer)
     {
         $this->twig = $twig;
         $this->slugger = $slugger;
+
         $this->semanticEnhancer = $semanticEnhancer;
+        $this->mentionEnhancer = $mentionEnhancer;
     }
 
     public function supports(mixed $html): bool
@@ -53,6 +60,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         if ($html === null) {
             return null;
         }
+
         if (is_array($html)) {
             $toc = [];
             foreach ($html as $htmlEntry) {
@@ -66,7 +74,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         $encoding = mb_detect_encoding($html);
 
         $dom = new DOMDocument('1.0', $encoding);
-        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding));
+        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
 
         $attrs ??= [];
         $attrs["class"] = $attrs["class"] ?? "";
@@ -83,7 +91,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
                 $tag->setAttribute("id", $id);
 
                 $template = $dom->createDocumentFragment();
-                $template->appendXML("<a " . html_attributes($attrs) . " href='#" . $id . "'>" . $content . "</a>");
+                $template->appendXML("<a " . html_attributes($attrs) . " href='#" . $id . "'>" .trim($content) . "</a>");
 
                 $tag->appendChild($template);
             }
@@ -102,13 +110,32 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         if (is_array($html)) {
             $htmlRet = [];
             foreach ($html as $htmlEntry) {
-                $htmlRet[] = $this->semanticEnhancer->highlight($htmlEntry, $words, $attrs);
+                $htmlRet[] = $this->highlightSemantics($htmlEntry, $words, $attrs);
             }
 
             return $htmlRet;
         }
 
         return $this->semanticEnhancer->highlight($html, $words, $attrs);
+    }
+
+    public function highlightMentions(mixed $html, array $attrs = []): mixed
+    {
+        if ($html === null) {
+            return null;
+        }
+
+        if (is_array($html)) {
+
+            $htmlRet = [];
+            foreach ($html as $htmlEntry) {
+                $htmlRet[] = $this->highlightMentions($htmlEntry, $attrs);
+            }
+
+            return $htmlRet;
+        }
+
+        return $this->mentionEnhancer->highlight($html, $attrs);
     }
 
     public function getTableOfContents(mixed $html, ?int $maxLevel = null): array
@@ -139,6 +166,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
                 "slug" => strtolower($this->slugger->slug($match[2])),
                 "title" => $match[2]
             ];
+
         }, $html);
 
         return $headlines;

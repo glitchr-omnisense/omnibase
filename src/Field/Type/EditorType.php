@@ -9,6 +9,9 @@ use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\FormInterface;
@@ -73,6 +76,21 @@ class EditorType extends AbstractType
         }
 
         return $parent->vars["attr"]["id"] ?? null;
+    }
+
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
+            
+            $form = $event->getForm();
+            $data = $event->getData();
+
+            $json = json_decode($data);
+            if($json && count($json->blocks) < 1) {
+                $event->setData(null);
+            }
+
+        });
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options): void

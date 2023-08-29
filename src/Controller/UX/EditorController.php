@@ -6,11 +6,12 @@ use App\Entity\User;
 use Base\Service\PaginatorInterface;
 use App\Repository\UserRepository;
 use Base\Enum\UserRole;
-use Base\Repository\Layout\SemanticRepository;
+use Base\Repository\Thread\TagRepository;
 use Base\Repository\ThreadRepository;
 use Base\Traits\BaseTrait;
 use Base\Service\FlysystemInterface;
 use Base\Service\MediaServiceInterface;
+use Base\Service\Model\LinkableInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,6 +26,7 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
  * @Route(priority = -1, name="ux_editorjs_")
@@ -68,9 +70,9 @@ class EditorController extends AbstractController
     protected UserRepository $userRepository;
     
     /**
-     * @var SemanticRepository
+     * @var TagRepository
      */
-    protected SemanticRepository $semanticRepository;
+    protected TagRepository $tagRepository;
     
     /**
      * @var ThreadRepository
@@ -102,7 +104,12 @@ class EditorController extends AbstractController
      */
     protected PaginatorInterface $paginator;
 
-    public function __construct(ParameterBagInterface $parameterBag, MediaServiceInterface $mediaService, FlysystemInterface $flysystem, TranslatorInterface $translator, RequestStack $requestStack, PaginatorInterface $paginator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository, SemanticRepository $semanticRepository, ?Profiler $profiler = null)
+    /**
+     * @var SluggerInterface
+     */
+    protected SluggerInterface $slugger;
+
+    public function __construct(ParameterBagInterface $parameterBag, SluggerInterface $slugger, MediaServiceInterface $mediaService, FlysystemInterface $flysystem, TranslatorInterface $translator, RequestStack $requestStack, PaginatorInterface $paginator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository, TagRepository $tagRepository, ?Profiler $profiler = null)
     {
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;
@@ -111,8 +118,10 @@ class EditorController extends AbstractController
         $this->mediaService = $mediaService;
         $this->parameterBag = $parameterBag;
 
+        $this->slugger = $slugger;
+
         $this->threadRepository   = $threadRepository;
-        $this->semanticRepository = $semanticRepository;
+        $this->tagRepository = $tagRepository;
         $this->userRepository     = $userRepository;
 
         $this->mimeTypes = new MimeTypes();
@@ -151,7 +160,7 @@ class EditorController extends AbstractController
 
         $items = [];
 
-        $users = $this->paginator->paginate($this->userRepository->cacheByInsensitiveIdentifier(urldecode($query), $fields), $page, 2);
+        $users = $this->paginator->paginate($this->userRepository->cacheByInsensitiveIdentifier($query, $fields), $page, 5);
         foreach($users as $user)
         {
             $items[] = [
@@ -161,12 +170,13 @@ class EditorController extends AbstractController
                 "avatar" => $this->mediaService->image($user->getAvatarFile()),
                 "link" => [
                     "name" => $this->isGranted(UserRole::ADMIN) ? $user->__autocomplete() : $user->getId(),
-                    "url" => $user->__toLink()
+                    "url" => $user instanceof LinkableInterface ? $user->__toLink() : null
                 ],
 
-                "data" => [
-                    "class" => $this->userRepository->getClassMetadata()?->discriminatorValue,
-                ]
+                "data" => [$this->obfuscator->encode([
+                    "id" => $user->getId(), 
+                    "className" => get_class($user)
+                ])]
             ];
         }
 
@@ -185,7 +195,7 @@ class EditorController extends AbstractController
     /**
      * @Route("/ux/editorjs/{data}/keyword/{page}", name="endpointByKeyword")
      */
-    public function EndpointByKeyword(Request $request, $data = null, array $fields = ["label", "keywords"], $page = 1): Response
+    public function EndpointByKeyword(Request $request, $data = null, array $fields = ["slug"], $page = 1): Response
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
         if ($this->profiler !== null && $isUX) {
@@ -195,19 +205,38 @@ class EditorController extends AbstractController
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
-            return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
+            return new Response($this->translator->trans("editor.error.invalid_token", [], "fields"), 500);
+        }
+
+        $vars = json_decode($request->getContent(), true);
+        $page = intval($vars["page"] ?? $page);
+        $page = $page ? $page : 1;
+        
+        $query = $this->slugger->slug($vars["query"] ?? NULL);
+
+        $expectedMethod = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        if (!in_array($request->getMethod(), $expectedMethod) || !$query) {
+            return new Response($this->translator->trans("editor.error.invalid_query", [], "fields"), 500);
         }
 
         $items = [];
-        foreach($this->semanticRepository->cacheByInsensitiveKeywords([urldecode($query)], $fields)->getResult() as $semantic)
+
+        $tags = $this->paginator->paginate($this->tagRepository->cacheByInsensitiveIdentifier($query, $fields), $page, 5);
+        foreach($tags as $tag)
         {
             $items[] = [
-                "id" => $semantic->getId(), 
-                "label" => $semantic->getLabel(),
+
+                "id" => $tag->getId(),
+                "label" => $tag->__toString(), 
                 "link" => [
-                    "name" => $this->isGranted(UserRole::ADMIN) ? implode(",", $semantic->getKeywords()) : $semantic->getId(),
-                    "url" => $semantic->__toLink()
-                ]
+                    "name" => $tag->getId(),
+                    "url" => $tag instanceof LinkableInterface ? $tag->__toLink() : null
+                ],
+
+                "data" => [$this->obfuscator->encode([
+                    "id" => $tag->getId(), 
+                    "className" => get_class($tag)
+                ])]
             ];
         }
 
@@ -215,7 +244,8 @@ class EditorController extends AbstractController
             "success" => self::STATUS_OK,
             "results" => $items,
             "pagination" => [
-                "more" => true
+                "page" => $page,
+                "more" => $page > 0 && $page < $tags->getTotalPages()
             ]
         ];
 
@@ -225,7 +255,7 @@ class EditorController extends AbstractController
     /**
      * @Route("/ux/editorjs/{data}/thread/{page}", name="endpointByThread")
      */
-    public function EndpointByThread(Request $request, $data = null, array $fields = ["title", "excerpt", "content"], $page = 1): Response
+    public function EndpointByThread(Request $request, $data = null, array $fields = [], $page = 1): Response
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
         if ($this->profiler !== null && $isUX) {
@@ -235,19 +265,38 @@ class EditorController extends AbstractController
         $config = $this->obfuscator->decode($data);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
-            return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
+            return new Response($this->translator->trans("editor.error.invalid_token", [], "fields"), 500);
+        }
+
+        $vars = json_decode($request->getContent(), true);
+        $page = intval($vars["page"] ?? $page);
+        $page = $page ? $page : 1;
+        
+        $query = $this->slugger->slug($vars["query"] ?? NULL);
+
+        $expectedMethod = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        if (!in_array($request->getMethod(), $expectedMethod) || !$query) {
+            return new Response($this->translator->trans("editor.error.invalid_query", [], "fields"), 500);
         }
 
         $items = [];
-        foreach($this->threadRepository->cacheByInsensitiveIdentifier(urldecode($query), $fields)->getResult() as $thread)
+
+        $threads = $this->paginator->paginate($this->threadRepository->cacheByInsensitiveIdentifier($query, $fields), $page, 5);
+        foreach($threads as $thread)
         {
             $items[] = [
-                "id" => $thread->getId(), 
+
+                "id" => $thread->getId(),
                 "label" => $thread->__toString(), 
                 "link" => [
-                    "name" => $this->isGranted(UserRole::ADMIN) ? $thread->__autocomplete() : $thread->getId(),
-                    "url" => $thread->__toLink()
-                ]
+                    "name" => $this->isGranted(UserRole::ADMIN) ? str_shorten($thread->getExcerpt(), 40) : $thread->getId(),
+                    "url" => $thread instanceof LinkableInterface ? $thread->__toLink() : null
+                ],
+
+                "data" => [$this->obfuscator->encode([
+                    "id" => $thread->getId(), 
+                    "className" => get_class($thread)
+                ])]
             ];
         }
 
@@ -255,7 +304,8 @@ class EditorController extends AbstractController
             "success" => self::STATUS_OK,
             "results" => $items,
             "pagination" => [
-                "more" => true
+                "page" => $page,
+                "more" => $page > 0 && $page < $threads->getTotalPages()
             ]
         ];
 

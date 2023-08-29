@@ -6,6 +6,7 @@ use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\DiscriminatorField;
 use Base\Field\IconField;
 use Base\Field\NumberField;
+use Base\Field\SlugField;
 use Base\Field\TranslationField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
@@ -23,8 +24,9 @@ class TagCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function () {
             yield DiscriminatorField::new('class')->hideOnForm()->showColumnLabel();
-            yield TranslationField::new()->setTextAlign(TextAlign::RIGHT)->hideOnDetail();
+            yield TranslationField::new("label")->setTextAlign(TextAlign::RIGHT)->hideOnDetail();
 
+            yield SlugField::new('slug')->setColumns(3);
             yield IconField::new('icon')->setColumns(3);
             yield NumberField::new('priority')->setColumns(3);
         });

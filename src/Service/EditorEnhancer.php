@@ -63,6 +63,23 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         return $json;
     }
 
+    public function highlightMentions(mixed $json, array $attrs = []): mixed
+    {    
+        if (is_string($json)) {
+            $json = json_decode($json);
+        }
+
+        $attrs ??= [];
+        $attrs["class"] = $attrs["class"] ?? "";
+        $attrs["class"] = trim($attrs["class"] . " markdown-mention");
+
+        foreach ($json->blocks ?? [] as $block) {
+            $block->data->text = $this->mentionEnhancer->highlight($block->data->text, $attrs);
+        }
+
+        return $json;
+    }
+
     public function getTableOfContents(mixed $json, ?int $maxLevel = null): array
     {
         if (is_string($json)) {
@@ -81,7 +98,7 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
                 $headlines[] = [
                     "tag" => "h" . $block->data->level,
                     "slug" => $id,
-                    "title" => strip_tags($text)
+                    "title" => trim(strip_tags($text))
                 ];
             }
         }

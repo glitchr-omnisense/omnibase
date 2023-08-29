@@ -20,6 +20,10 @@ html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
 
 .row>* { padding-left:0;}
 
+textarea.form-control {
+    min-height: calc(5.5em + .75rem + 2px);
+}
+
 .page-apikey input, .page-settings input
 {
     min-width:50%;

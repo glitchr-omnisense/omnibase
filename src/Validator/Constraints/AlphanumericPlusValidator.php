@@ -31,7 +31,7 @@ class AlphanumericPlusValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, 'string');
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $value, $matches)) {
+        if (!preg_match('/^[a-zA-Z0-9_.\- ]+$/', $value, $matches)) {
             $this->buildViolation($constraint, $value)->addViolation();
         }
     }

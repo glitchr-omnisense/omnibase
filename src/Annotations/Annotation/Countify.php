@@ -84,10 +84,10 @@ class Countify extends AbstractAnnotation
 
     /**
      * @param $entity
-     * @return string
+     * @return int
      * @throws Exception
      */
-    public function getCount($entity): string
+    public function getCount($entity): int
     {
         if (!$this->referenceColumn) {
             throw new Exception("Attribute \"reference\" missing for @Countify in " . get_class($entity));
@@ -95,7 +95,6 @@ class Countify extends AbstractAnnotation
 
         // Check if field already set.. (it needs to be checked)
         $value = $this->getFieldValue($entity, $this->referenceColumn) ?? "";
-
         switch ($this->type) {
             default:
             case self::COUNT_CHARS:
