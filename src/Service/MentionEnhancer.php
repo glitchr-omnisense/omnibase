@@ -36,6 +36,11 @@ class MentionEnhancer implements MentionEnhancerInterface
         $this->obfuscator = $obfuscator;
     }
 
+    public function extract(string|array|null $strOrArray, array $attributes = []): array
+    {
+        return [];        
+    }
+
     public function highlight(string|array|null $strOrArray, array $attributes = []): string|array|null
     {
         if ($strOrArray === null) {

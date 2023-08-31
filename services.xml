@@ -478,6 +478,12 @@
             <argument type="service" id="obfuscator" />
         </service>
 
+        <service id="Base\Service\HeadingEnhancer" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="slugger" />
+        </service>
+
         <service id="Base\Service\EditorEnhancer" parent="Base\Service\WysiwygEnhancer" public="true">
             <tag name="twig.runtime" />
         </service>
@@ -485,7 +491,7 @@
         <service id="Base\Service\WysiwygEnhancer" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="twig" />
-            <argument type="service" id="slugger" />
+            <argument type="service" id="heading_enhancer" />
             <argument type="service" id="semantic_enhancer" />
             <argument type="service" id="mention_enhancer" />
         </service>

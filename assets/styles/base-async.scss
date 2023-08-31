@@ -1061,12 +1061,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     border-radius: 0.25em;
 }
 
-.ql-editor h1, .codex-editor h1,
-.ql-editor h2, .codex-editor h2,
-.ql-editor h3, .codex-editor h3,
-.ql-editor h4, .codex-editor h4,
-.ql-editor h5, .codex-editor h5,
-.ql-editor h6, .codex-editor h6
+.wysiwyg h1, .wysiwyg h2, .wysiwyg h3, .wysiwyg h4, .wysiwyg h5, .wysiwyg h6
 {
     margin-top:1em;
 }
@@ -1123,7 +1118,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 }
 
 .imageupload figure > img {
-    object-fit: cover;
+    object-fit: contain;
     min-height: calc(120px + 5%);
     min-width: calc(120px + 5%);
 }

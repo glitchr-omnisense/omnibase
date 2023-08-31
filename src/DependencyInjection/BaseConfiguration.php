@@ -391,6 +391,14 @@ class BaseConfiguration extends AbstractBaseConfiguration
                         ->defaultValue(true)
                         ->end()
                     ->arrayNode('no_image')
+                        ->defaultValue([
+                            ["extension" => "webp", "path" => "%kernel.project_dir%/public/bundles/base/images/image.webp"], 
+                            ["extension" => "jpg" , "path" => "%kernel.project_dir%/public/bundles/base/images/image.jpg" ], 
+                            ["extension" => "jpeg", "path" => "%kernel.project_dir%/public/bundles/base/images/image.jpg" ], 
+                            ["extension" => "png" , "path" => "%kernel.project_dir%/public/bundles/base/images/image.png" ], 
+                            ["extension" => "svg" , "path" => "%kernel.project_dir%/public/bundles/base/images/image.svg" ], 
+                            ["extension" => "gif" , "path" => "%kernel.project_dir%/public/bundles/base/images/image.gif" ], 
+                        ])
                         ->arrayPrototype()
                         ->info("Replacement image")
                         ->children()

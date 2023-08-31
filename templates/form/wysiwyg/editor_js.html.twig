@@ -1,7 +1,7 @@
 
 {% set attr = options.attr ?? [] %}
 {% set attr = attr|merge({
-    'class': 'codex-editor read-only ' ~ (attr.class is defined ? ' ' ~ attr.class : '')
+    'class': 'codex-editor wysiwyg read-only ' ~ (attr.class is defined ? ' ' ~ attr.class : '')
 }) %}
 
 <div data-edjs="{{ json|json_encode }}" {{ html_attributes(attr) }}></div>

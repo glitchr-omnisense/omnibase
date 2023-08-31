@@ -6,6 +6,8 @@ use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
 
+use Base\Imagine\Filter\Format\BitmapFilter;
+use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\Format\SvgFilterInterface;
 use Base\Imagine\Filter\FormatFilterInterface;
@@ -199,7 +201,8 @@ class MediaService extends FileService implements MediaServiceInterface
     {
         $supports_webp = array_pop_key("webp", $config) ?? browser_supports_webp();
 
-        $extension = array_pop_key("extension", $config) ?? $this->getExtension($path);
+        $extension   = array_pop_key("extension", $config) ?? $this->getExtension($path);
+        $extension ??= $supports_webp ? WebpFilter::getStandardExtension() : BitmapFilter::getStandardExtension();
         if ($extension) {
             $supports_webp &= ($extension != "svg");
         }
@@ -447,11 +450,11 @@ class MediaService extends FileService implements MediaServiceInterface
 
             if (!$this->fallback) {
                 throw is_length_safe($file) ?
-                    new NotFoundHttpException($file ? "Image \"" . str_shorten($file, 50, SHORTEN_MIDDLE) . "\" not found." : "Empty path provided.") :
+                    new NotFoundHttpException($file ? "Image \"" . $file . "\" not found." : "Empty path provided.") :
                     new LogicException("Image \"" . str_shorten($file, 50, SHORTEN_MIDDLE) . "\" overflowed the PHP_MAXPATHLEN (= " . constant("PHP_MAXPATHLEN") . ") limit. Maybe use a compress option (\"gzcompress\",\"gzdeflate\",\"gzencode\") ?");
             }
 
-            $file = $this->getNoImage($this->getExtension($file));
+            $file = $this->getNoImage($this->getExtension($file) ?? BitmapFilter::getStandardExtension());
             array_pop_key("http_cache", $headers);
         }
 
@@ -538,9 +541,6 @@ class MediaService extends FileService implements MediaServiceInterface
 
     public function filter(?string $path, array $config = [], FilterInterface|array $filters = []): ?string
     {
-        if ($this->debug) {
-            return $this->getNoImage($this->getExtension($path));
-        }
         if (!is_array($filters)) {
             $filters = [$filters];
         }
@@ -570,6 +570,10 @@ class MediaService extends FileService implements MediaServiceInterface
             throw new NotFoundHttpException("The last filter must implement \"" . FormatFilterInterface::class . "\"). A \"" . get_class($formatter) . "\" received.");
         }
 
+        if ($this->debug) {
+            return $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension());
+        }
+        
         //
         // Apply size limitation to bitmap only
         if (class_implements_interface($formatter, BitmapFilterInterface::class)) {
@@ -599,16 +603,18 @@ class MediaService extends FileService implements MediaServiceInterface
         // $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
         if (!$pathRelative) {
+
             if (!$this->fallback) {
                 throw new NotFoundHttpException($path ? "Image not found behind system path \"$path\"." : "Empty path provided.");
             }
 
-            return $this->getNoImage($this->getExtension($path));
+            return $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension());
         }
 
         //
         // Compute a response.. (if cache not found)
         if ($config["local_cache"] ?? false) {
+
             $localCache = array_pop_key("local_cache", $config);
             if (!is_string($localCache)) {
                 $localCache = $this->localCache;
@@ -629,12 +635,14 @@ class MediaService extends FileService implements MediaServiceInterface
                         throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provided.");
                     }
 
-                    $filteredPath = $this->getNoImage($this->getExtension($path));
+                    $filteredPath = $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension());
                 }
 
                 try {
+                    
                     $this->flysystem->mkdir(dirname($pathCache), $localCache);
                     $this->flysystem->write($pathCache, file_get_contents($filteredPath), $localCache);
+
                 } catch (UnableToCreateDirectory $e) {
                     $localDir = $this->flysystem->prefixPath("", $localCache);
                     mkdir_length_safe($localDir . "/" . dirname($pathCache));
@@ -661,7 +669,7 @@ class MediaService extends FileService implements MediaServiceInterface
         try {
             $image = $imagine->open($path);
         } catch (Exception $e) {
-            return $this->fallback ? $this->getNoImage($this->getExtension($path)) : null;
+            return $this->fallback ? $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension()) : null;
         }
 
         try {
@@ -698,7 +706,8 @@ class MediaService extends FileService implements MediaServiceInterface
 
         // Fallback
         if (!file_exists($formatter->getPath()) && $this->fallback) {
-            return $this->getNoImage($this->getExtension($path));
+            
+            return $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension());
         }
 
         return $formatter->getPath();
@@ -715,12 +724,10 @@ class MediaService extends FileService implements MediaServiceInterface
             $extension = $extensionOrFormatter;
         }
 
-        $extension ??= "png";
-        if ($extensionOrFormatter instanceof SvgFilterInterface) {
-            $extension = "svg";
+        $extension ??= BitmapFilter::getStandardExtension();
+        if ($extensionOrFormatter instanceof FormatFilterInterface) {
+            $extension = $extensionOrFormatter::getStandardExtension();
         }
-
-        $extensions = array_map(fn($a) => $a["extension"], $this->noImage);
 
         $noImage = first(array_search_by($this->noImage, "extension", $extension));
         if (!$noImage) {

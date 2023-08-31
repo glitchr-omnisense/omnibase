@@ -1,5 +1,4 @@
 import EditorJs from '@editorjs/editorjs';
-import Header from '@editorjs/header';
 import Embed from '@editorjs/embed';
 import Warning from '@editorjs/warning';
 import NestedList from '@editorjs/nested-list';
@@ -13,6 +12,7 @@ import CodeTool from 'editorjs-code-highlight';
 import Quote from '@editorjs/quote';
 import Undo from 'editorjs-undo';
 
+import Header from 'editorjs-header';
 import Paragraph from 'editorjs-paragraph';
 import Mention from 'editorjs-mention';
 import {ImageTool, ImageToolTune} from 'editorjs-image';

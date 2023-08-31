@@ -257,9 +257,6 @@ class FileService implements FileServiceInterface
 
         $extension = array_pop_key("extension", $config);
         if ($extension !== null) {
-            $extension = first($this->getExtensions($path));
-        }
-        if ($extension !== null) {
             $proxyRouteParameters["extension"] = $extension;
         }
 

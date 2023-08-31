@@ -15,6 +15,8 @@ class BitmapFilter implements BitmapFilterInterface
     protected array $filters;
     protected array $options;
 
+    public static function getStandardExtension():string { return "png"; }
+
     /**
      * @return array|string|null
      */

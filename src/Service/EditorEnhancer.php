@@ -21,43 +21,37 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         return $this->twig->render("@Base/form/wysiwyg/editor_js.html.twig", ["json" => $json, "options" => $options]);
     }
 
+    public function getTableOfContents(mixed $json, ?int $maxLevel = null): array
+    {
+        if (is_string($json)) {
+            $json = json_decode($json);
+        }
+
+        $headlines = [];
+
+        foreach ($json->blocks ?? [] as $block) {
+
+            if ($block->type != "header") continue;
+            
+            $headlines = array_merge($headlines, $this->headingEnhancer->toc(strip_tags($block->data->text), $maxLevel));
+        }
+
+        return $headlines;
+    }
+
     public function highlightHeadings(mixed $json, ?int $maxLevel = null, array $attrs = []): mixed
     {
         if (is_string($json)) {
             $json = json_decode($json);
         }
 
-        $attrs ??= [];
-        $attrs["class"] = $attrs["class"] ?? "";
-        $attrs["class"] = trim($attrs["class"] . " markdown-anchor");
-
-        $maxLevel ??= 6;
         foreach ($json->blocks ?? [] as $block) {
-            if ($block->type == "header" && $block->data->level < $maxLevel) {
-                $text = $block->data->text;
-                $id = strtolower($this->slugger->slug(strip_tags($text)));
-
-                $block->data->text = "<a id='" . $id . "' " . html_attributes($attrs) . " href='#" . $id . "'>" . strip_tags($text) . "</a>";
-            }
-        }
-
-        return $json;
-    }
-
-    public function highlightSemantics(mixed $json, null|array|string $words = null, array $attrs = []): mixed
-    {
-        if (is_string($json)) {
-            $json = json_decode($json);
-        }
-
-        $attrs ??= [];
-        $attrs["class"] = $attrs["class"] ?? "";
-        $attrs["class"] = trim($attrs["class"] . " markdown-semantic");
-
-        foreach ($json->blocks ?? [] as $block) {
-            if ($block->type == "paragraph") {
-                $block->data->text = $this->semanticEnhancer->highlight($block->data->text, $words, $attrs);
-            }
+            
+            if ($block->type != "header") continue;
+    
+            $block->data->text = "<h".$block->data->level.">".strip_tags($block->data->text)."</h".$block->data->level.">";
+            $block->data->text = $this->headingEnhancer->highlight($block->data->text, $maxLevel, $attrs);
+            $block->data->text = str_strip($block->data->text, "<h".$block->data->level.">", "</h".$block->data->level.">");
         }
 
         return $json;
@@ -74,35 +68,32 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         $attrs["class"] = trim($attrs["class"] . " markdown-mention");
 
         foreach ($json->blocks ?? [] as $block) {
+
+            if(!isset($block->data->text)) continue;
+    
             $block->data->text = $this->mentionEnhancer->highlight($block->data->text, $attrs);
         }
 
         return $json;
     }
 
-    public function getTableOfContents(mixed $json, ?int $maxLevel = null): array
+    public function highlightSemantics(mixed $json, null|array|string $words = null, array $attrs = []): mixed
     {
         if (is_string($json)) {
             $json = json_decode($json);
         }
 
-        $headlines = [];
+        $attrs ??= [];
+        $attrs["class"] = $attrs["class"] ?? "";
+        $attrs["class"] = trim($attrs["class"] . " markdown-semantic");
 
-        $maxLevel ??= 6;
         foreach ($json->blocks ?? [] as $block) {
-            if ($block->type == "header" && $block->data->level < $maxLevel) {
+    
+            if ($block->type != "paragraph") continue;
 
-                $text = $block->data->text;
-                $id = strtolower($this->slugger->slug(strip_tags($text)));
-
-                $headlines[] = [
-                    "tag" => "h" . $block->data->level,
-                    "slug" => $id,
-                    "title" => trim(strip_tags($text))
-                ];
-            }
+            $block->data->text = $this->semanticEnhancer->highlight($block->data->text, $words, $attrs);
         }
 
-        return $headlines;
+        return $json;
     }
 }

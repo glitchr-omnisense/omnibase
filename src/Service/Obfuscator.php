@@ -18,6 +18,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     protected string $uuid;
     protected array $compressions = [];
 
+    protected bool $short;
     protected string $compression;
     protected int $level = -1;
     protected int $maxLength = 0;
@@ -28,7 +29,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return [];
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir)
+    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir, bool $short = true)
     {
         $this->uuid = $parameterBag->get("base.obfuscator.uuid") ?? Uuid::NAMESPACE_URL;
 
@@ -37,6 +38,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         $this->level = $parameterBag->get("base.obfuscator.level");
         $this->encoding = $parameterBag->get("base.obfuscator.encoding");
 
+        $this->short = $short;
         parent::__construct($cacheDir);
     }
 
@@ -90,11 +92,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     /**
      * @return true
      */
-    public function isShort()
-    {
-        return true;
-    }
-
+    public function isShort():bool { return $this->short; }
     public function getUuid(string $name): ?UuidV5
     {
         return Uuid::v5(Uuid::fromString($this->uuid), $name);

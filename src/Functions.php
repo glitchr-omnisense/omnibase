@@ -126,7 +126,7 @@ namespace {
      */
     function str_strip_nonprintable(string $str)
     {
-        return preg_replace("/[^[:print:]]/", "", $str);
+        return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\xA0]/u', "", $str);
     }
 
     /**

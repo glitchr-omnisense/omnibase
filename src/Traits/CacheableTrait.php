@@ -30,7 +30,8 @@ trait CacheableTrait
 
         $variadic = array_flatten(".", $variadic);
         return implode(";", array_filter([
-            snake2camel(str_replace("\\", "_", static::class)),
+            "class:".snake2camel(str_replace("\\", "_", static::class)),
+            "webp:".browser_supports_webp(),
             ...$variadic
         ]));
     }

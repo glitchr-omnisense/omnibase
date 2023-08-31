@@ -1,7 +1,7 @@
 
 {% set attr = options.attr ?? [] %}
 {% set attr = attr|merge({
-    'class': 'ql-editor ' ~ (attr.class is defined ? ' ' ~ attr.class : '')
+    'class': 'ql-editor wysiwyg ' ~ (attr.class is defined ? ' ' ~ attr.class : '')
 }) %}
 
 <div {{ html_attributes(attr) }}>{{ html|raw }}</div>

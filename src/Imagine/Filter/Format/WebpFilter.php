@@ -15,6 +15,8 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 {
     protected array $filters;
 
+    public static function getStandardExtension():string { return "webp"; }
+    
     /**
      * @return array|string|null
      */

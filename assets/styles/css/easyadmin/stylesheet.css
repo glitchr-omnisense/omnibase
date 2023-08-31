@@ -21,7 +21,7 @@ html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
 .row>* { padding-left:0;}
 
 textarea.form-control {
-    min-height: calc(5.5em + .75rem + 2px);
+    min-height: calc(8.5em + .75rem + 2px);
 }
 
 .page-apikey input, .page-settings input
@@ -454,9 +454,10 @@ margin: 0 0.25em;
 }
 .online-user-wrapper img.user-avatar,
 .user-menu-wrapper img.user-avatar {
-height: 40px;
-min-width: 40px;
-background-color: #FFF5;
+    height: 40px;
+    min-width: 40px;
+    background-color: #FFF5;
+    object-fit: contain;
 }
 
 .online-user-wrapper li:hover { opacity:1; }
@@ -465,17 +466,17 @@ background-color: #FFF5;
 .online-user-wrapper li.active .img-fluid { border: solid 1px rgb(0, 175, 0); }
 .online-user-wrapper i
 {
-color: var(--dropdown-appearance-icon-color);
-font-size: 16px;
+    color: var(--dropdown-appearance-icon-color);
+    font-size: 16px;
 }
 
 .dropdown-user-details .img-fluid, .user-details .img-fluid
 {
-width:40px;
-height:40px;
-overflow:hidden;
-border:1px solid  var(--content-top-border-color);
-border-radius: var(--border-radius);
+    width:40px;
+    height:40px;
+    overflow:hidden;
+    border:1px solid  var(--content-top-border-color);
+    border-radius: var(--border-radius);
 }
 
 .online-user-wrapper
@@ -880,7 +881,7 @@ body.ea-edit .content-header, body.ea-new .content-header {
     align-items:center;
     justify-content:center;
 
-    object-fit:cover;
+    object-fit:contain;
 }
 
 .user-menu-wrapper.user-is-impersonated a.user-details, .user-menu-wrapper.user-is-impersonated a.user-details:hover {

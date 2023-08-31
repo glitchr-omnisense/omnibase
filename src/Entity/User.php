@@ -748,6 +748,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->followedThreads;
     }
 
+    public function isFollowing(Thread $followedThread): bool
+    {
+        return $this->followedThreads->contains($followedThread);
+    }
+
     public function addFollowedThread(Thread $followedThread): self
     {
         if (!$this->followedThreads->contains($followedThread)) {

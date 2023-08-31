@@ -18,9 +18,9 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
     protected $twig;
 
     /**
-     * @var SluggerInterface
+     * @var HeadingEnhancerInterface
      */
-    protected $slugger;
+    protected $headingEnhancer;
 
     /**
      * @var SemanticEnhancerInterface
@@ -32,11 +32,11 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
      */
     protected $mentionEnhancer;
 
-    public function __construct(Environment $twig, SluggerInterface $slugger, SemanticEnhancerInterface $semanticEnhancer, MentionEnhancerInterface $mentionEnhancer)
+    public function __construct(Environment $twig, HeadingEnhancerInterface $headingEnhancer, SemanticEnhancerInterface $semanticEnhancer, MentionEnhancerInterface $mentionEnhancer)
     {
         $this->twig = $twig;
-        $this->slugger = $slugger;
 
+        $this->headingEnhancer = $headingEnhancer;
         $this->semanticEnhancer = $semanticEnhancer;
         $this->mentionEnhancer = $mentionEnhancer;
     }
@@ -55,6 +55,24 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         return $this->twig->render("@Base/form/wysiwyg/quill.html.twig", ["html" => $html, "options" => $options]);
     }
 
+    public function getTableOfContents(mixed $html, ?int $maxLevel = null): array
+    {
+        if ($html === null) {
+            return [];
+        }
+
+        if (is_array($html)) {
+            $toc = [];
+            foreach ($html as $htmlEntry) {
+                $toc[] = $this->getTableOfContents($htmlEntry, $maxLevel);
+            }
+
+            return $toc;
+        }
+
+        return $this->headingEnhancer->toc($html, $maxLevel);
+    }
+
     public function highlightHeadings(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
     {
         if ($html === null) {
@@ -70,35 +88,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
             return $toc;
         }
 
-        $maxLevel ??= 6;
-        $encoding = mb_detect_encoding($html);
-
-        $dom = new DOMDocument('1.0', $encoding);
-        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
-
-        $attrs ??= [];
-        $attrs["class"] = $attrs["class"] ?? "";
-        $attrs["class"] = trim($attrs["class"] . " markdown-anchor");
-
-        for ($i = 1; $i <= $maxLevel; $i++) {
-            $hX = "h" . $i;
-            $tags = $dom->getElementsByTagName($hX);
-            foreach ($tags as $tag) {
-                $content = $tag->nodeValue;
-                $tag->nodeValue = null;
-
-                $id = strtolower($this->slugger->slug($content));
-                $tag->setAttribute("id", $id);
-
-                $template = $dom->createDocumentFragment();
-                $template->appendXML("<a " . html_attributes($attrs) . " href='#" . $id . "'>" .trim($content) . "</a>");
-
-                $tag->appendChild($template);
-            }
-        }
-
-        $node = $dom->getElementsByTagName('body')->item(0);
-        return trim(implode(array_map([$node->ownerDocument, "saveHTML"], iterator_to_array($node->childNodes))));
+        return $this->headingEnhancer->highlight($html, $maxLevel, $attrs);
     }
 
     public function highlightSemantics(mixed $html, null|array|string $words = null, array $attrs = []): mixed
@@ -136,39 +126,5 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         }
 
         return $this->mentionEnhancer->highlight($html, $attrs);
-    }
-
-    public function getTableOfContents(mixed $html, ?int $maxLevel = null): array
-    {
-        if ($html === null) {
-            return [];
-        }
-
-        if (is_array($html)) {
-            $toc = [];
-            foreach ($html as $htmlEntry) {
-                $toc[] = $this->getTableOfContents($htmlEntry, $maxLevel);
-            }
-
-            return $toc;
-        }
-
-        $maxLevel ??= 6;
-        $maxLevel = max(1, $maxLevel);
-        $headlines = [];
-
-        $html = preg_replace("/(<\/[ ]*h[1-6][ ]*\>)/i", '$1'.PHP_EOL, $html);
-        preg_replace_callback("/\<[ ]*(h[1-6])(?:[^\<\>]*)\>(.*)\<\/[ ]*h[1-6][ ]*\>/mi", function ($match) use (&$headlines) {
-
-            $match[2] = strip_tags($match[2]);
-            $headlines[] = [
-                "tag" => $match[1],
-                "slug" => strtolower($this->slugger->slug($match[2])),
-                "title" => $match[2]
-            ];
-
-        }, $html);
-
-        return $headlines;
     }
 }
