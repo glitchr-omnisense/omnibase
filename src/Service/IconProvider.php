@@ -163,6 +163,7 @@ class IconProvider extends AbstractLocalCache
             }
         }
 
+        if($icon == "fa-solid fa-question-circle") return [];
         return $this->iconify("fa-solid fa-question-circle", $attributes, $wrap) ?? null;
     }
 }

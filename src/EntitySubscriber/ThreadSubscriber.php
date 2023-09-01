@@ -2,10 +2,13 @@
 
 namespace Base\EntitySubscriber;
 
+use Base\Entity\Thread;
 use Base\Entity\User\Notification;
 use Base\EntityDispatcher\Event\ThreadEvent;
 use Base\Enum\ThreadState;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Event\PrePersistEventArgs;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -53,5 +56,16 @@ class ThreadSubscriber implements EventSubscriberInterface
             $notification->setUser($author);
             $notification->send("email");
         }
+    }
+
+    public function prePersist(PrePersistEventArgs $event)
+    {
+        if(!$event->getObject() instanceof Thread) return;
+    }
+
+    public function preUpdate(PreUpdateEventArgs $event)
+    {
+        if(!$event->getObject() instanceof Thread) return;
+        if (!$event->hasChangedField('content')) return;
     }
 }

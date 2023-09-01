@@ -913,8 +913,11 @@
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">
             <tag name="kernel.event_subscriber" />
+            <tag name="doctrine.event_listener" event="prePersist" />
+            <tag name="doctrine.event_listener" event="preUpdate" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
+        
         <service id="Base\EntitySubscriber\UserSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.notifier" />
