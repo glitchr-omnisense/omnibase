@@ -79,7 +79,7 @@ class AutocompleteController extends AbstractController
     }
 
     /**
-     * @Route("/autocomplete/{data}", name="ux_autocomplete")
+     * @Route("/ux/autocomplete/{data}", name="ux_autocomplete")
      */
     public function Main(Request $request, string $data): Response
     {
@@ -88,7 +88,7 @@ class AutocompleteController extends AbstractController
             $this->profiler->disable();
         }
 
-        $dict = $this->obfuscator->decode($data);
+        $dict = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         if ($dict === null) {
             return new JsonResponse("Unexpected request", 500);
         }
@@ -198,7 +198,7 @@ class AutocompleteController extends AbstractController
 
 
     /**
-     * @Route("/autocomplete/currency/{source}/{target}/{data}", name="ux_autocomplete_forex")
+     * @Route("/ux/autocomplete/currency/{source}/{target}/{data}", name="ux_autocomplete_forex")
      */
     public function Forex(Request $request, string $source, string $target, string $data, ?Profiler $profiler = null): Response
     {
@@ -207,7 +207,7 @@ class AutocompleteController extends AbstractController
             $this->profiler->disable();
         }
 
-        $dict = $this->obfuscator->decode($data);
+        $dict = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
 
         $token = $dict["token"] ?? null;
         $tokenName = $dict["token_name"] ?? null;
@@ -232,7 +232,7 @@ class AutocompleteController extends AbstractController
 
 
     /**
-     * @Route("/autocomplete/{provider}/{pageSize}/{data}", name="ux_autocomplete_icons")
+     * @Route("/ux/autocomplete/{provider}/{pageSize}/{data}", name="ux_autocomplete_icons")
      */
     public function Icons(Request $request, string $provider, int $pageSize, string $data, ?Profiler $profiler = null): Response
     {
@@ -241,7 +241,7 @@ class AutocompleteController extends AbstractController
             $this->profiler->disable();
         }
 
-        $dict = $this->obfuscator->decode($data);
+        $dict = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
 
         $token = $dict["token"] ?? null;
         $html = $dict["html"] ?? true;

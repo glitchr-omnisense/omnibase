@@ -30,6 +30,10 @@ thread:
                      =1 {# minute}
                      other {# minutes}
                   }"
+  like: "J'aime !"
+  unlink: "Je n'aime plus !"
+  follow: "Vous suivez désormais ce fil"
+  unfollow: "Vous ne suivez plus ce fil"
 
 locale_changeto:
   action: "The website is now displayed in {0}"

@@ -405,7 +405,7 @@ class FileType extends AbstractType implements DataMapperInterface
             }
 
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $data = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
+            $data = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]), ObfuscatorInterface::USE_SHORT);
             $view->vars["ajax"] = $this->router->generate("ux_dropzone", ["data" => $data]);
 
             $options["dropzone"]["url"] = $view->vars["ajax"];

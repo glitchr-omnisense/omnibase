@@ -69,9 +69,10 @@ class TranslationConfigurator implements FieldConfiguratorInterface
             if ($childField instanceof PersistentCollection) {
                 $typeClass = $childField->getTypeClass()->getName();
                 if ($this->classMetadataManipulator->hasField($typeClass, $fieldName)) {
+                    
                     $entity = $childField->get($this->localizer->getLocale());
-                    if (!$entity) {
-                        $entity = $childField->get($this->localizer->getDefaultLocale());
+                    if(!$entity) {
+                        $entity ??= $childField->get(first($childField->getKeys()) ?? $this->localizer->getDefaultLocale());
                     }
 
                     $value = ($entity && $this->propertyAccessor->isReadable($entity, $fieldName) ? $this->propertyAccessor->getValue($entity, $fieldName) : null);

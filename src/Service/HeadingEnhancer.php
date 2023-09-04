@@ -29,14 +29,14 @@ class HeadingEnhancer implements HeadingEnhancerInterface
 
     public function toc(mixed $html, ?int $maxLevel = null): array
     {
-        if ($html === null) {
-            return null;
+        if (!$html) {
+            return $html;
         }
 
         if (is_array($html)) {
             $toc = [];
             foreach ($html as $htmlEntry) {
-                $toc[] = $this->highlight($htmlEntry, $maxLevel);
+                $toc[] = $this->toc($htmlEntry, $maxLevel);
             }
 
             return $toc;
@@ -58,7 +58,6 @@ class HeadingEnhancer implements HeadingEnhancerInterface
     
                 $content = trim(str_strip_nonprintable(strip_tags($tag->nodeValue)));
                 $content = str_replace("&nbsp;", " ", $content);
-                
                 $id = strtolower($this->slugger->slug($content));
                 $headlines[] = [
                     "tag" => $tagName,

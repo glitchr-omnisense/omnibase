@@ -473,7 +473,8 @@
 
         <service id="Base\Service\MentionEnhancer" public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="Base\Repository\Thread\MentionRepository" />
+            <argument type="service" id="App\Repository\Thread\MentionRepository" />
+            <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="obfuscator" />
         </service>
@@ -902,8 +903,22 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\EntityDispatcher\Event\UserEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher" />
-        <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher" />
+        <service id="Base\EntityDispatcher\Event\UserEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
+            <tag name="doctrine.event_listener" event="prePersist" />
+            <tag name="doctrine.event_listener" event="postPersist" />
+            <tag name="doctrine.event_listener" event="preUpdate" />
+            <tag name="doctrine.event_listener" event="postUpdate" />
+            <tag name="doctrine.event_listener" event="preRemove" />
+            <tag name="doctrine.event_listener" event="postRemove" />
+        </service>
+        <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
+            <tag name="doctrine.event_listener" event="prePersist" />
+            <tag name="doctrine.event_listener" event="postPersist" />
+            <tag name="doctrine.event_listener" event="preUpdate" />
+            <tag name="doctrine.event_listener" event="postUpdate" />
+            <tag name="doctrine.event_listener" event="preRemove" />
+            <tag name="doctrine.event_listener" event="postRemove" />
+        </service>
         <service id="Base\EntityDispatcher\AbstractEventDispatcher" abstract="true">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="base.database.entity_hydrator" />
@@ -915,7 +930,9 @@
             <tag name="kernel.event_subscriber" />
             <tag name="doctrine.event_listener" event="prePersist" />
             <tag name="doctrine.event_listener" event="preUpdate" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <tag name="doctrine.event_listener" event="onFlush" />
+
+            <argument type="service" id="mention_enhancer" />
         </service>
         
         <service id="Base\EntitySubscriber\UserSubscriber">
@@ -1109,6 +1126,19 @@
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="validator" />
+        </service>
+
+        <service id="Base\Controller\Api\ThreadController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="translator" />
+
+            <argument type="service" id="App\Repository\ThreadRepository" />
+            <argument type="service" id="App\Repository\Thread\LikeRepository" />
+
         </service>
 
         <service id="Base\Field\Type\QuadrantType"><tag name="form.type" /><argument type="service" id="twig" /></service>

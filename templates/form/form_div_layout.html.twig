@@ -858,10 +858,8 @@
         {% set href = href ?? (form.vars.value == "" ? null : app.ea.crudify(form.vars.value)) %}
         {% if href is iterable %}
             {% set href = form.vars.value ? (href[get_class(form.vars.value)] ?? null) : null %}
-            {% set href = href ? href|url_encode : null %}
         {% endif %}
-        {% set href = href ? href|url_encode : null %}
-        {% endif %}
+    {% endif %}
 
     {% if group %}
 
@@ -916,6 +914,7 @@
                             <a target="_blank" href="{{ _href|url_decode|replace({'{0}': form.vars.value.id}) }}">{{ "fa-solid fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
                             {% endif %}
 
+                            
                         {% endif %}
 
                         {% if allows_deleting_items %}

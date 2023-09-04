@@ -666,7 +666,10 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function getRouteHash(string $routeNameOrUrl): string
     {
-        return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localizer->getLocaleLang();
+        $context = cast_to_array($this->getContext());
+        array_pop_key("parameters", $context);
+ 
+        return $routeNameOrUrl . ";" . serialize($context) . ";" . $this->localizer->getLocaleLang();
     }
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse

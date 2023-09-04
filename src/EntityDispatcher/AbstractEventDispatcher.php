@@ -4,12 +4,15 @@ namespace Base\EntityDispatcher;
 
 use Base\Database\Entity\EntityHydratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Events;
+use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Exception;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
+
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 /**
  *
@@ -38,6 +41,11 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
      */
     protected RequestStack $requestStack;
 
+    /**
+     * @var PropertyAccessorInterface
+     */
+    protected PropertyAccessorInterface $propertyAccessor;
+
     public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydratorInterface $entityHydrator, EntityManagerInterface $entityManager, RequestStack $requestStack)
     {
         $this->dispatcher = $dispatcher;
@@ -46,6 +54,8 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
         $this->requestStack = $requestStack;
         $this->events = [];
+
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     public const DISPATCHER_SUFFIX = "Dispatcher";
@@ -65,9 +75,9 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         return substr($class, 0, -strlen(self::DISPATCHER_SUFFIX));
     }
 
-    public function addEvent(string $event, mixed $subject)
+    public function addEvent(string $event, mixed $object)
     {
-        $id = spl_object_id($subject);
+        $id = spl_object_id($object);
         if (!array_key_exists($id, $this->events)) {
             $this->events[$id] = [];
         }
@@ -79,12 +89,12 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
     public function dispatchEvents(LifecycleEventArgs $event)
     {
-        $subject = $event->getObject();
-        if ($subject == null) {
+        $object = $event->getObject();
+        if ($object == null) {
             return;
         }
 
-        $id = spl_object_id($subject);
+        $id = spl_object_id($object);
         if (!array_key_exists($id, $this->events)) {
             return;
         }
@@ -94,6 +104,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
         $request = $this->requestStack->getCurrentRequest();
         foreach ($this->events[$id] as $eventName => $alreadyTriggered) {
+
             if ($alreadyTriggered === false) {
                 continue;
             }
@@ -116,10 +127,43 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         return $this->entityManager;
     }
 
+    public function getAssociationChangeSet($entity): array
+    {
+        $classMetadata = $this->entityManager->getClassMetadata(is_object($entity) ? get_class($entity) : $entity);
+        if(!$classMetadata) return [];
+
+        $changeSet = [];
+        foreach($classMetadata->getAssociationNames() as $associationName) {
+
+            if(!empty($this->getAssociationDeleteDiff($entity, $associationName))) $changeSet[] = $associationName;
+            else if(!empty($this->getAssociationInsertDiff($entity, $associationName))) $changeSet[] = $associationName;
+        }
+
+        return $changeSet;
+    }
+
+    public function getAssociationDeleteDiff($entity, $field): array
+    {
+        $collection = $this->propertyAccessor->getValue($entity, $field);
+        if(!$collection instanceof PersistentCollection) return [];
+        if(!$collection->isDirty()) return [];
+
+        return $entity->getOwners()->getDeleteDiff();
+    }
+
+    public function getAssociationInsertDiff($entity, $field): array
+    {
+        $collection = $this->propertyAccessor->getValue($entity, $field);
+        if(!$collection instanceof PersistentCollection) return [];
+        if(!$collection->isDirty()) return [];
+
+        return $entity->getOwners()->getInsertDiff();
+    }
+
     public function prePersist(LifecycleEventArgs $event)
     {
-        $subject = $event->getObject();
-        if ($subject == null || !$this->supports($subject)) {
+        $object = $event->getObject();
+        if ($object == null || !$this->supports($object)) {
             return;
         }
 
@@ -128,8 +172,10 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
     public function preUpdate(LifecycleEventArgs $event)
     {
-        $subject = $event->getObject();
-        if ($subject == null || !$this->supports($subject)) {
+        $object = $event->getObject();
+        $this->getAssociationChangeSet($object);
+
+        if ($object == null || !$this->supports($object)) {
             return;
         }
 
@@ -138,24 +184,12 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
     public function preRemove(LifecycleEventArgs $event)
     {
-        $subject = $event->getObject();
-        if ($subject == null || !$this->supports($subject)) {
+        $object = $event->getObject();
+        if ($object == null || !$this->supports($object)) {
             return;
         }
 
         $this->onRemove($event);
-    }
-
-    public function onPersist(LifecycleEventArgs $event)
-    {
-    }
-
-    public function onUpdate(LifecycleEventArgs $event)
-    {
-    }
-
-    public function onRemove(LifecycleEventArgs $event)
-    {
     }
 
     public function postPersist(LifecycleEventArgs $event)
@@ -171,5 +205,17 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function postRemove(LifecycleEventArgs $event)
     {
         $this->dispatchEvents($event);
+    }
+
+    public function onPersist(LifecycleEventArgs $event)
+    {
+    }
+
+    public function onUpdate(LifecycleEventArgs $event)
+    {
+    }
+
+    public function onRemove(LifecycleEventArgs $event)
+    {
     }
 }

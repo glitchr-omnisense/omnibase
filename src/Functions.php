@@ -87,6 +87,22 @@ namespace {
         return false;
     }
 
+    function json_leaves(mixed &$json): array
+    {
+        $leaves = [];
+
+        $array = &$json;
+        if(!is_array($json)) {
+            $array = json_decode(is_object($json) ? json_encode($json) : $json, true);
+        }
+
+        array_walk_recursive($array, function(&$value, $key) use(&$leaves) {
+            $leaves[] = &$value;
+        });
+
+        return $leaves;
+    }
+
     const MAX_DIRSIZE = 255;
     /**
      * @param $path
@@ -364,7 +380,6 @@ namespace {
         }
 
         $urlButQuery = explode("?", $url)[0] ?? "";
-        $pathEndsWithSlash = str_ends_with($urlButQuery, "/");
         $parse["path"] = str_rstrip($parse["path"] ?? "", "/");
 
         return compose_url(
@@ -375,7 +390,7 @@ namespace {
             $parse["subdomain"] ?? null,
             $parse["domain"] ?? null,
             $parse["port"] ?? null,
-            ($format & FORMAT_URL_KEEPSLASH) ? $parse["path"] : str_replace("//", "/", $parse["path"]) . ($pathEndsWithSlash ? "/" : ""),
+            ($format & FORMAT_URL_KEEPSLASH) ? $parse["path"] : str_replace("//", "/", $parse["path"]),
             $parse["query"] ?? null,
             $query["fragment"] ?? null
         );
@@ -402,13 +417,13 @@ namespace {
         $machine = ($domain && $machine) ? $machine . "." : null;
         $port = ($domain && $port && $port != 80 && $port != 443) ? ":" . $port : null;
 
-	$queryInPath = $path ? (explode("?", $path)[1] ?? null) : null;
-	$path = $path ? (explode("?", $path)[0] ?? null) : null;
+        $queryInPath = $path ? (explode("?", $path)[1] ?? null) : null;
+        $path = $path ? (explode("?", $path)[0] ?? null) : null;
 
-	if($queryInPath) $query = $query ? $queryInPath."&".$query : $queryInPath;
-        $query = $query ? "?" . $query : null;
+        if($queryInPath) $query = $query ? $queryInPath."&".$query : $queryInPath;
+            $query = $query ? "?" . $query : null;
 
-	if($path != null && str_ends_with($path, "/")) $path = null;
+        if($path != null && str_ends_with($path, "/")) $path = null;
         $pathToQuerySlash = ($path != null && !str_ends_with($path, "/") && !empty($query) ? "/" : "");
 
         $url = $scheme . $machine . $subdomain . $domain . $port . $user . $password . $path . $pathToQuerySlash . $query;
@@ -2473,6 +2488,16 @@ namespace {
         return array_map($func, $array);
     }
 
+    function array_leaves(array $array): array
+    {
+        $leaves = [];
+        array_map_recursive(function($v) use (&$leaves) {
+            $leaves[] = $v;
+        }, $array);
+
+        return $leaves;
+    }
+
     /**
      * @param array $array
      * @return int
@@ -3565,7 +3590,15 @@ namespace {
      */
     function cast_to_array(object $object)
     {
-        return array_transforms(fn($k, $v): array => [str_lstrip($k, ["\x00", "+", "*"]), $v], (array)$object);
+        return array_transforms(function($k, $v): array {
+            
+            $k = str_lstrip($k, ["+", "*"]);
+            $k = explode("\x00", $k);
+            $k = last($k);
+
+            return [$k, $v];
+        
+        }, (array) $object);
     }
 
     /**
@@ -3804,12 +3837,13 @@ namespace {
         return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null));
     }
 
-    function usort_key(array $array, array $ordering = []): array
+    function usort_key(array &$array, array $ordering = []): array
     {
-        $ordering = array_flip($ordering);
-        ksort($ordering);
+        uksort($array, function($key1, $key2) use ($ordering) {
+            return (array_search($key1, $ordering) > array_search($key2, $ordering));
+        });
 
-        return array_replace(array_flip($ordering), $array);
+        return $array;
     }
 
     /**

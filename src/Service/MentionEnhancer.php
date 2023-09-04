@@ -3,8 +3,9 @@
 namespace Base\Service;
 
 use App\Entity\User;
-use Base\Entity\Thread\Mention;
-use Base\Repository\Thread\MentionRepository as MentionRepository;
+use Base\Entity\Thread;
+use Base\Repository\Thread\MentionRepository;
+use Base\Repository\UserRepository;
 use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMDocument;
@@ -20,6 +21,11 @@ class MentionEnhancer implements MentionEnhancerInterface
     protected MentionRepository $mentionRepository;
 
     /**
+     * @var UserRepository
+     */
+    protected UserRepository $userRepository;
+
+    /**
      * @var EntityManagerInterface
      */
     protected EntityManagerInterface $entityManager;
@@ -29,22 +35,66 @@ class MentionEnhancer implements MentionEnhancerInterface
      */
     protected ObfuscatorInterface $obfuscator;
 
-    public function __construct(MentionRepository $mentionRepository, EntityManagerInterface $entityManager, ObfuscatorInterface $obfuscator)
+    public function __construct(MentionRepository $mentionRepository, UserRepository $userRepository, EntityManagerInterface $entityManager, ObfuscatorInterface $obfuscator)
     {
         $this->mentionRepository = $mentionRepository;
+        $this->userRepository = $userRepository;
+        
         $this->entityManager = $entityManager; 
         $this->obfuscator = $obfuscator;
     }
 
-    public function extract(string|array|null $strOrArray, array $attributes = []): array
+    public function getRepository(): MentionRepository
     {
-        return [];        
+        return $this->mentionRepository;
+    }
+
+    public function extractMentionees(string|array|null $strOrArray, array $attributes = []): array
+    {
+        if ($strOrArray === null) {
+            return [];
+        }
+
+        $array = $strOrArray;
+        if (!is_array($array)) {
+            $array = [$array];
+        }
+
+        $mentionees = [];
+        foreach($array as &$entry) {
+
+            if(!$entry) continue;
+
+            $encoding = mb_detect_encoding($entry);
+            $dom = new DOMDocument('1.0', $encoding);
+            $dom->loadHTML(mb_convert_encoding($entry, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
+
+            $tags = $dom->getElementsByTagName("mention");
+            if(count($tags) < 1) continue;
+
+            foreach (iterator_to_array($tags) as $tag) {
+        
+                $value = first((array) json_decode($tag->getAttribute("data-json"))) ?? null;
+                if($value) {
+                    
+                    $value = $this->obfuscator->decode($value, ObfuscatorInterface::NO_SHORT);
+                    $id = $value["id"] ?? NULL;
+                    $className = $value["className"] ?? Thread::class;
+                    
+                    if(is_instanceof($className, User::class) && !in_array($id, $mentionees)) {
+                        $mentionees[] = $id;
+                    }
+                }
+            }
+        }
+
+        return $mentionees ? $this->userRepository->cacheById($mentionees)->getResult() : [];        
     }
 
     public function highlight(string|array|null $strOrArray, array $attributes = []): string|array|null
     {
-        if ($strOrArray === null) {
-            return null;
+        if (!$strOrArray) {
+            return $strOrArray;
         }
 
         $array = $strOrArray;
@@ -54,13 +104,19 @@ class MentionEnhancer implements MentionEnhancerInterface
 
         foreach($array as &$entry) {
     
+            if(!$entry) continue;
+            
             $encoding = mb_detect_encoding($entry);
 
             $dom = new DOMDocument('1.0', $encoding);
             $dom->loadHTML(mb_convert_encoding($entry, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
 
             $tags = $dom->getElementsByTagName("mention");
+            if(count($tags) < 1) continue;
+
             foreach (iterator_to_array($tags) as $tag) {
+
+                if(!str_contains($tag->getAttribute("class"), "ce-mention")) continue;
 
                 $tagLink = $dom->createDocumentFragment();
                 $tagLink = $dom->createElement("a", $tag->nodeValue);
@@ -68,24 +124,22 @@ class MentionEnhancer implements MentionEnhancerInterface
                 $value = first((array) json_decode($tag->getAttribute("data-json"))) ?? null;
                 if($value) {
                     
-                    $value = $this->obfuscator->decode($value);
+                    $value = $this->obfuscator->decode($value, ObfuscatorInterface::NO_SHORT);
+
                     $id = $value["id"] ?? NULL;
                     $parameters = $value["parameters"] ?? [];
-                    $className = $value["className"] ?? NULL;
-
+                    $className = $value["className"] ?? Thread::class;
+                    
                     if(class_exists($className) && $id !== NULL) {
 
                         $entityRepository = $this->entityManager->getRepository($className);
                         if($entityRepository && is_instanceof($className, LinkableInterface::class)) {
 
                             $entity = $entityRepository->cacheOneById($id);
-                            $tagLink->setAttribute("href", $entity?->__toLink($parameters) ?? "");
-                            // dump($entity, $threadId);
-                            // if ($threadId != null && $entity instanceof User) {
-                                
-                            //     dump($threadId);
-                            //     $mention = $this->mentionRepository->cacheOneByUserAndThread($entity, $threadId);
-                            // }
+                            if($entity) {
+                                $tagLink->setAttribute("href", $entity->__toLink($parameters) ?? "");
+                                $tagLink->nodeValue = $entity?->__toString() ?? "";
+                            }
                         }
                     }
                 }

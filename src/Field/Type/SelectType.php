@@ -678,7 +678,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "token" => $token
             ];
 
-            $hash = $this->obfuscator->encode($array);
+            $hash = $this->obfuscator->encode($array, ObfuscatorInterface::USE_SHORT);
 
             //
             // Prepare select2 options

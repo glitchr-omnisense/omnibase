@@ -33,7 +33,8 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
 
             if ($block->type != "header") continue;
             
-            $headlines = array_merge($headlines, $this->headingEnhancer->toc(strip_tags($block->data->text), $maxLevel));
+            $block->data->text = "<h".$block->data->level.">".strip_tags($block->data->text)."</h".$block->data->level.">";
+            $headlines = array_merge($headlines, $this->headingEnhancer->toc($block->data->text, $maxLevel));
         }
 
         return $headlines;
@@ -57,26 +58,6 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         return $json;
     }
 
-    public function highlightMentions(mixed $json, array $attrs = []): mixed
-    {    
-        if (is_string($json)) {
-            $json = json_decode($json);
-        }
-
-        $attrs ??= [];
-        $attrs["class"] = $attrs["class"] ?? "";
-        $attrs["class"] = trim($attrs["class"] . " markdown-mention");
-
-        foreach ($json->blocks ?? [] as $block) {
-
-            if(!isset($block->data->text)) continue;
-    
-            $block->data->text = $this->mentionEnhancer->highlight($block->data->text, $attrs);
-        }
-
-        return $json;
-    }
-
     public function highlightSemantics(mixed $json, null|array|string $words = null, array $attrs = []): mixed
     {
         if (is_string($json)) {
@@ -87,13 +68,28 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         $attrs["class"] = $attrs["class"] ?? "";
         $attrs["class"] = trim($attrs["class"] . " markdown-semantic");
 
-        foreach ($json->blocks ?? [] as $block) {
-    
-            if ($block->type != "paragraph") continue;
-
-            $block->data->text = $this->semanticEnhancer->highlight($block->data->text, $words, $attrs);
+        foreach (json_leaves($json) as &$block) {
+            $block = $this->semanticEnhancer->highlight($block, $words, $attrs);
         }
 
         return $json;
     }
+
+    public function highlightMentions(mixed $json, array $attrs = []): mixed
+    {    
+        if (is_string($json)) {
+            $json = json_decode($json, true);
+        }
+
+        $attrs ??= [];
+        $attrs["class"] = $attrs["class"] ?? "";
+        $attrs["class"] = trim($attrs["class"] . " markdown-mention");
+
+        foreach (json_leaves($json) as &$block) {
+            $block = $this->mentionEnhancer->highlight($block, $attrs);
+        }
+        
+        return $json;
+    }
+
 }

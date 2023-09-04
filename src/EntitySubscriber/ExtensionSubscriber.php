@@ -27,17 +27,10 @@ class ExtensionSubscriber
      */
     protected EntityExtension $entityExtension;
 
-    /**
-     * @var PropertyAccessorInterface
-     */
-    protected PropertyAccessorInterface $propertyAccessor;
-
     public function __construct(EntityManagerInterface $entityManager, EntityExtension $entityExtension)
     {
         $this->entityManager = $entityManager;
         $this->entityExtension = $entityExtension;
-
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)

@@ -18,7 +18,7 @@
                     ])|raw }}&nbsp
 
                     - {% if app.user == user or is_granted("ROLE_ADMIN") %}
-                        <a href="{{path('user_profileEdit', {'id':user.id})}}">Editer le profil</a>
+                        <a href="{{ path('user_profileEdit', {'id':user.id}) }}">Editer le profil</a>
                     {% endif %}
                     - {% if app.user == user %}
                         <a href="{{ path('security_logout') }}">Se déconnecter</a>

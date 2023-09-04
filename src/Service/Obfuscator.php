@@ -18,7 +18,6 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     protected string $uuid;
     protected array $compressions = [];
 
-    protected bool $short;
     protected string $compression;
     protected int $level = -1;
     protected int $maxLength = 0;
@@ -29,7 +28,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return [];
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir, bool $short = true)
+    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir)
     {
         $this->uuid = $parameterBag->get("base.obfuscator.uuid") ?? Uuid::NAMESPACE_URL;
 
@@ -38,7 +37,6 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         $this->level = $parameterBag->get("base.obfuscator.level");
         $this->encoding = $parameterBag->get("base.obfuscator.encoding");
 
-        $this->short = $short;
         parent::__construct($cacheDir);
     }
 
@@ -89,21 +87,17 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return $compression;
     }
 
-    /**
-     * @return true
-     */
-    public function isShort():bool { return $this->short; }
     public function getUuid(string $name): ?UuidV5
     {
         return Uuid::v5(Uuid::fromString($this->uuid), $name);
     }
 
-    public function encode(array $value): string
+    public function encode(array $value, ?bool $short = Obfuscator::NO_SHORT): string
     {
         ksort($value); // Make sure keys are sorted before serializing..
 
         $data = serialize($value);
-        if ($this->uuid == null) {
+        if (!$short || $this->uuid == null) {
             return $this->getCompression($this->compression)->encode($data);
         }
 
@@ -116,10 +110,10 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return $identifier;
     }
 
-    public function decode(string $hash): ?array
+    public function decode(string $hash, bool $short = Obfuscator::NO_SHORT): ?array
     {
         $uuid = $hash;
-        if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
+        if ($short && Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
             $_ = $this->getCache("/Identifiers/" . $uuid);
             if ($_) {
                 $hash = $_;
@@ -128,14 +122,17 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 
         $hash = $this->getCompression($this->compression)->decode($hash);
         try {
+
             if ($hash) {
                 $hash = unserialize($hash);
             }
+
             return $hash ?: null;
+
         } catch (ErrorException $e) {
         }
 
-        if (Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
+        if ($short && Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
             $this->deleteCache("/Identifiers/" . $uuid);
         }
 

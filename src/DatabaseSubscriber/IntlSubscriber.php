@@ -103,10 +103,6 @@ class IntlSubscriber
      * @param TranslationInterface|TranslatableInterface $entity
      * @return $this
      */
-    /**
-     * @param TranslationInterface|TranslatableInterface $entity
-     * @return $this
-     */
     protected function normalize(TranslationInterface|TranslatableInterface $entity)
     {
         $uow = $this->entityManager->getUnitOfWork();

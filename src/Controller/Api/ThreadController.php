@@ -16,17 +16,13 @@ use Base\Service\BaseService;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
- *
+ * @Route("/api", name="api_")
  */
 class ThreadController extends AbstractController
 {
-    /**
-     * @var BaseService
-     */
-    protected $baseService;
-
     /**
      * @var TranslatorInterface
      */
@@ -47,29 +43,17 @@ class ThreadController extends AbstractController
      */
     protected $likeRepository;
 
-    public function __construct(BaseService $baseService, EntityManagerInterface $entityManager, TranslatorInterface $translator, ThreadRepository $threadRepository, LikeRepository $likeRepository)
+    public function __construct(EntityManagerInterface $entityManager, TranslatorInterface $translator, ThreadRepository $threadRepository, LikeRepository $likeRepository)
     {
-        $this->baseService = $baseService;
+        $this->entityManager = $entityManager;  
         $this->translator = $translator;        
 
-        $this->entityManager = $entityManager;  
         $this->threadRepository = $threadRepository;
         $this->likeRepository = $likeRepository;
     }
 
     /**
-     * @Route({"en": "/thread/{slug}/edit", "fr": "/fil/{slug}/editer"}, name="api_thread_edit")
-     */
-    public function Edit($slug): Response
-    {
-        $thread = $this->threadRepository->cacheOneBySlug($slug);
-        if (!$thread) throw new NotFoundHttpException();
-
-        return $this->redirect($this->baseService->crudify($thread));
-    }
-
-    /**
-     * @Route({"en": "/thread/{slug}/publish", "fr": "/fil/{slug}/publier"}, name="api_thread_publish")
+     * @Route("/thread/{slug}/publish", name="thread_publish")
      */
     public function Publish(string $slug): Response
     {
@@ -94,7 +78,7 @@ class ThreadController extends AbstractController
     }
 
     /**
-     * @Route({"en": "/thread/{slug}/hide", "fr": "/fil/{slug}/cacher"}, name="api_thread_hide")
+     * @Route("/thread/{slug}/hide", name="thread_hide")
      */
     public function Hide(string $slug): Response
     {
@@ -119,12 +103,12 @@ class ThreadController extends AbstractController
     }
 
     /**
-     * @Route({"en": "/thread/{slug}/follow", "fr": "/fil/{slug}/suivre"}, name="api_thread_follow")
+     * @Route("/thread/{slug}/follow", name="thread_follow")
      */
     public function Follow(string $slug): Response
     {
         $thread = $this->threadRepository->cacheOneBySlug($slug);
-        if (!$this->isGranted('ROLE_ADMIN')) {
+        if (!$this->isGranted('ROLE_USER')) {
 
             return JsonResponse::fromJsonString(json_encode([
                 "code"    => 401,
@@ -134,9 +118,9 @@ class ThreadController extends AbstractController
 
         if (!$thread) throw new NotFoundHttpException();
 
-        $thread->setState(ThreadState::PUBLISH);
-        $this->threadRepository->flush();
-
+        $thread->addFollower($this->getUser());
+        $this->entityManager->flush();
+        
         return JsonResponse::fromJsonString(json_encode([
             "code"    => 200,
             "response" => "OK"
@@ -144,12 +128,12 @@ class ThreadController extends AbstractController
     }
 
     /**
-     * @Route({"en": "/thread/{slug}/follow", "fr": "/fil/{slug}/suivre"}, name="api_thread_unfollow")
+     * @Route("/thread/{slug}/unfollow", name="thread_unfollow")
      */
     public function Unfollow(string $slug): Response
     {
         $thread = $this->threadRepository->cacheOneBySlug($slug);
-        if (!$this->isGranted('ROLE_ADMIN')) {
+        if (!$this->isGranted('ROLE_USER')) {
 
             return JsonResponse::fromJsonString(json_encode([
                 "code"    => 401,
@@ -159,8 +143,8 @@ class ThreadController extends AbstractController
 
         if (!$thread) throw new NotFoundHttpException();
 
-        $thread->setState(ThreadState::PUBLISH);
-        $this->threadRepository->flush();
+        $thread->removeFollower($this->getUser());
+        $this->entityManager->flush();
 
         return JsonResponse::fromJsonString(json_encode([
             "code"    => 200,
@@ -170,7 +154,7 @@ class ThreadController extends AbstractController
 
 
     /**
-     * @Route({"en": "/thread/{slug}/like", "fr": "/fil/{slug}/like"}, name="api_thread_like")
+     * @Route("/thread/{slug}/like", name="thread_like")
      */
     public function Like($slug): Response
     {
@@ -201,7 +185,7 @@ class ThreadController extends AbstractController
     }
 
     /**
-     * @Route({"en": "/thread/{slug}/unlike", "fr": "/fil/{slug}/unlike"}, name="api_thread_unlike")
+     * @Route("/thread/{slug}/unlike", name="thread_unlike")
      */
     public function Unlike($slug): Response
     {

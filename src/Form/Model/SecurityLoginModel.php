@@ -20,3 +20,4 @@ class SecurityLoginModel extends AbstractModel
      */
     public /*?string*/ $password;
 }
+

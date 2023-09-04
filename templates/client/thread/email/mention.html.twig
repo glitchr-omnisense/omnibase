@@ -1,0 +1,17 @@
+{% extends 'email.html.twig' %}
+
+{% block subject %}
+    {{ '@emails.thread.mention.subject'|trans([mentionee, thread.title])|raw }}
+{% endblock %}
+
+{% block content %}
+    {{ '@emails.thread.mention.content'|trans([thread.title])|raw }}
+{% endblock %}
+
+{% block action_text %}
+    {{ '@emails.thread.mention.action_text'|trans([(thread|trans_entity)]) | raw }}
+{% endblock %}
+
+{% block action_url %}
+    {{ thread|linkify }}
+{% endblock %}

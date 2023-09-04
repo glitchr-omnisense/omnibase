@@ -236,6 +236,37 @@ class Notifier extends BaseNotifier implements NotifierInterface
      * @param Token $token
      * @return Notification
      */
+    public function loginToken(User $user, Token $token)
+    {
+        $notification = new Notification("loginToken.check");
+        $notification->setUser($user);
+
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
+            "subject" => $this->translator->trans("@emails.loginToken.subject"),
+            "content" => $this->translator->trans("@emails.loginToken.content"),
+            "action_text" => $this->translator->trans("@emails.loginToken.action_text"),
+            "action_url" => $this->router->getUrl("security_loginWithToken", ["token" => $token->get()]),
+        ]);
+
+        if ($token->getLifetime() > 0 && $token->getLifetime() <= 3600 * 24 * 365) {
+
+            $notification->addHtmlParameter(
+                "footer_text",
+                $this->translator->trans("@emails.loginToken.expiry", [
+                    $this->translator->transTime($token->getRemainingTime())
+                ])
+            );
+        }
+
+        return $notification;
+    }
+
+    /**
+     * @param User $user
+     * @param Token $token
+     * @return Notification
+     */
     public function userWelcomeBack(User $user, Token $token)
     {
         $notification = new Notification("accountWelcomeBack.success");

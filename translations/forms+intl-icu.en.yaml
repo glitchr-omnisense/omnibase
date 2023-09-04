@@ -16,11 +16,15 @@ logout:
 login:
     title: "Sign In"
     submit: "Sign In"
+    email: "E-mail address"
     identifier: "Identifier"
     password: "Password"
     rememberMe: "Remember me !"
     noAccount: "Don't have an account?"
     forgotPassword: "Forgot your password?"
+    byToken: "Credentials by email"
+    classic: "Classic login"
+    sendEmail: "Send link"
 
 contact:
     check: Thank you.

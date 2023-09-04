@@ -705,6 +705,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
 
         if ($this->getNotifier()->isTest($recipient)) {
+            
             $fwd .= "Test: ";
             $email = mailparse($recipient->getEmail());
             $email = mailformat(mailparse($technicalRecipient->getEmail()), first($email));
@@ -712,6 +713,14 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
            
             $footer = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
             $footer = implode(" - ", array_filter($footer));
+
+            $htmlFooter = $this->htmlParameters["footer_text"] ?? null;
+            if ($htmlFooter) {
+
+                $htmlFooter = [$htmlFooter, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
+                $htmlFooter = implode(" - ", array_filter($htmlFooter));
+                $this->htmlParameters["footer_text"] = $htmlFooter;
+            }
         }
 
         /**

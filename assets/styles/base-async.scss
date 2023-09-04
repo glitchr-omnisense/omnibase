@@ -1042,20 +1042,20 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     border-bottom-left-radius: 0;
 }
 
-.highlightGate:empty { background-color:transparent; padding:0; }
-.highlightGate    {
+mark.markdown-gate:empty { background-color:transparent; padding:0; }
+mark.markdown-gate    {
     padding: 0em 0.25em;
 }
 
-.highlightWord:empty { background-color:transparent; padding:0; }
-.highlightWord    {
-    background-color:#C4E8AC;
+mark.markdown-word:empty { background-color:transparent; padding:0; }
+mark.markdown-word    {
+    background-color:transparent;
     padding: 0em;
     border-radius: 0.25em;
 }
 
-.highlightPattern:empty { background-color:transparent; padding:0; }
-.highlightPattern {
+mark.markdown-pattern:empty { background-color:transparent; padding:0; }
+mark.markdown-pattern {
     background-color: #FFD37F;
     padding: 0em;
     border-radius: 0.25em;
@@ -1105,6 +1105,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     flex-basis: 125px;
 }
 
+.avatarupload { width:100px; }
 .avatarupload figure {
 
     flex-basis: unset;

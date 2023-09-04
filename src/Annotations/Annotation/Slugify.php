@@ -169,6 +169,7 @@ class Slugify extends AbstractAnnotation
         $repository = $this->getPropertyOwnerRepository($entity, $property);
         $defaultSlug = $this->slug($entity, $defaultInput);
         $slug = $defaultSlug;
+        
         if (!$slug) {
             return null;
         }
@@ -176,7 +177,10 @@ class Slugify extends AbstractAnnotation
         if (!$this->unique) {
             return $slug;
         }
-        for ($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); ++$i) {
+
+        for ($i = 2; ( $persistentEntity = $repository->findOneBy([$property => $slug]) ) || in_array($slug, $invalidSlugs); ++$i) {
+
+            if($persistentEntity === $entity ) break;
             $slug = $defaultSlug . $this->separator . $i;
         }
 
@@ -215,20 +219,21 @@ class Slugify extends AbstractAnnotation
             $oldSlug = $this->getFieldValue($oldEntity, $property);
 
             if ($slug == $oldSlug) {
-                $labelModified = !$this->referenceColumn ? null :
+                
+                $labelModified = ! $this->referenceColumn ? null :
                     $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
 
                 if ($labelModified) {
                     $slug = $this->getSlug($entity, $property);
                 }
             }
+
         } else {
             $currentSlug = $this->getFieldValue($entity, $property);
             $slug = $this->getSlug($entity, $property, $currentSlug, $invalidSlugs);
         }
 
         $this->setFieldValue($entity, $property, $slug);
-
         if ($this->getUnitOfWork()->getEntityChangeSet($entity)) {
             $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
         }

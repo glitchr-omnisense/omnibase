@@ -132,7 +132,7 @@ class EditorController extends AbstractController
     }
 
     /**
-     * @Route("/ux/editorjs/{data}/user/{page}", name="endpointByUser")
+     * @Route("/ux/editorjs/user/{data}/{page}", name="endpointByUser")
      */
     public function EndpointByUser(Request $request, $data = null, array $fields = [], $page = 1): Response
     {
@@ -141,7 +141,7 @@ class EditorController extends AbstractController
             $this->profiler->disable();
         }
 
-        $config = $this->obfuscator->decode($data);
+        $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
             return new Response($this->translator->trans("editor.error.invalid_token", [], "fields"), 500);
@@ -169,7 +169,7 @@ class EditorController extends AbstractController
                 "label" => $user->__toString(), 
                 "avatar" => $this->mediaService->image($user->getAvatarFile()),
                 "link" => [
-                    "name" => $this->isGranted(UserRole::ADMIN) ? $user->__autocomplete() : $user->getId(),
+                    "name" => $this->isGranted(UserRole::ADMIN) ? $user->__autocomplete() : ($this->translator->transEntity($user)." #".$user->getId()),
                     "url" => $user instanceof LinkableInterface ? $user->__toLink() : null
                 ],
 
@@ -193,7 +193,7 @@ class EditorController extends AbstractController
     }
 
     /**
-     * @Route("/ux/editorjs/{data}/keyword/{page}", name="endpointByKeyword")
+     * @Route("/ux/editorjs/keyword/{data}/{page}", name="endpointByKeyword")
      */
     public function EndpointByKeyword(Request $request, $data = null, array $fields = ["slug"], $page = 1): Response
     {
@@ -202,7 +202,7 @@ class EditorController extends AbstractController
             $this->profiler->disable();
         }
 
-        $config = $this->obfuscator->decode($data);
+        $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
             return new Response($this->translator->trans("editor.error.invalid_token", [], "fields"), 500);
@@ -229,7 +229,7 @@ class EditorController extends AbstractController
                 "id" => $tag->getId(),
                 "label" => $tag->__toString(), 
                 "link" => [
-                    "name" => $tag->getId(),
+                    "name" => $this->translator->transEntity($tag)." #".$tag->getId(),
                     "url" => $tag instanceof LinkableInterface ? $tag->__toLink() : null
                 ],
 
@@ -253,7 +253,7 @@ class EditorController extends AbstractController
     }
 
     /**
-     * @Route("/ux/editorjs/{data}/thread/{page}", name="endpointByThread")
+     * @Route("/ux/editorjs/thread/{data}/{page}", name="endpointByThread")
      */
     public function EndpointByThread(Request $request, $data = null, array $fields = [], $page = 1): Response
     {
@@ -262,7 +262,7 @@ class EditorController extends AbstractController
             $this->profiler->disable();
         }
 
-        $config = $this->obfuscator->decode($data);
+        $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
             return new Response($this->translator->trans("editor.error.invalid_token", [], "fields"), 500);
@@ -289,7 +289,7 @@ class EditorController extends AbstractController
                 "id" => $thread->getId(),
                 "label" => $thread->__toString(), 
                 "link" => [
-                    "name" => $this->isGranted(UserRole::ADMIN) ? str_shorten($thread->getExcerpt(), 40) : $thread->getId(),
+                    "name" => $this->isGranted(UserRole::ADMIN) ? str_shorten($thread->getExcerpt(), 40) : ($this->translator->transEntity($thread)." #".$thread->getId()),
                     "url" => $thread instanceof LinkableInterface ? $thread->__toLink() : null
                 ],
 
@@ -317,7 +317,7 @@ class EditorController extends AbstractController
      */
     public function UploadByFile(Request $request, $data = null): Response
     {
-        $config = $this->obfuscator->decode($data);
+        $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
@@ -385,7 +385,7 @@ class EditorController extends AbstractController
      */
     public function UploadByUrl(Request $request, $data = null): Response
     {
-        $config = $this->obfuscator->decode($data);
+        $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);

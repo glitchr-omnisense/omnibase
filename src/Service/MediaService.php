@@ -337,7 +337,7 @@ class MediaService extends FileService implements MediaServiceInterface
             $config["filters"] = $filters;
         }
 
-        while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
+        while (($pathConfig = $this->obfuscator->decode(basename($path), MediaService::USE_SHORT))) {
             $path = $pathConfig["path"] ?? $path;
             $config["path"] = $path;
             $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -345,12 +345,8 @@ class MediaService extends FileService implements MediaServiceInterface
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        $data = $this->obfuscator->encode($config);
-        if ($this->obfuscator->isShort()) {
-            $data = path_subdivide(str_replace("-", "", $data), 5, 2);
-        } else {
-            $data = path_subdivide($data, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
-        }
+        $data = $this->obfuscator->encode($config, MediaService::USE_SHORT);
+        $data = MediaService::USE_SHORT ? path_subdivide(str_replace("-", "", $data), 5, 2) : path_subdivide($data, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
 
         return $data;
     }

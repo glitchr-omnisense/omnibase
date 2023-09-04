@@ -1352,8 +1352,10 @@ class ServiceEntityParser
                 }
             }
 
-            throw new LogicException("Operation not supported for json-like field \"" . $fieldName . "\" in \"" . $this->classMetadata->getName() . "\"");
+            throw new \LogicException("Operation not supported for json-like field \"" . $fieldName . "\" in \"" . $this->classMetadata->getName() . "\"");
+
         } elseif ($regexRequested) {
+
             $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
             if ($tableOperator == self::OPTION_STARTING_WITH) {
@@ -1371,9 +1373,8 @@ class ServiceEntityParser
 
         //
         // Standard field..
-        //
-
         if ($isInstanceOf || $isNotInstanceOf) {
+
             // Cast to array
             if (!is_array($fieldValue)) {
                 $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
@@ -1415,7 +1416,9 @@ class ServiceEntityParser
             }
 
             return $instanceOf ? $queryBuilder->expr()->andX(...$instanceOf) : "";
+
         } elseif ($isClassOf || $isNotClassOf) {
+
             // Cast to array
             if (!is_array($fieldValue)) {
                 $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
@@ -1425,6 +1428,7 @@ class ServiceEntityParser
             $notClassOf = [];
             if ($this->classMetadata->discriminatorColumn !== null) {
                 foreach ($fieldValue as $value) {
+
                     $reverseAssert = str_starts_with($value, "^");
                     if ($reverseAssert) {
                         $value = ltrim($value, "^");
@@ -1439,7 +1443,9 @@ class ServiceEntityParser
                     $childClass = array_filter(array_values($classMetadata->discriminatorMap), fn($c) => $c != $realValue && is_instanceof($c, $realValue));
 
                     if ($isClassOf) {
+
                         if (!$reverseAssert) {
+
                             $queryPart = [$queryBuilder->expr()->isInstanceOf($tableColumn, $realValue)];
                             foreach ($childClass as $child) {
                                 $queryPart[] = $queryBuilder->expr()->not($queryBuilder->expr()->isInstanceOf($tableColumn, $child));
@@ -1454,8 +1460,11 @@ class ServiceEntityParser
 
                             $classOf[] = $queryBuilder->expr()->orX(...$queryPart);
                         }
+
                     } else {
+
                         if ($reverseAssert) {
+
                             $queryPart = [$queryBuilder->expr()->not($queryBuilder->expr()->isInstanceOf($tableColumn, $realValue))];
                             foreach ($childClass as $child) {
                                 $queryPart[] = $queryBuilder->expr()->isInstanceOf($tableColumn, $child);
@@ -1480,7 +1489,9 @@ class ServiceEntityParser
             }
 
             return $classOf ? $queryBuilder->expr()->andX(...$classOf) : "";
+
         } elseif ($isMemberOf || $isNotMemberOf) {
+
             // Cast to array
             if (!is_array($fieldValue)) {
                 $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
@@ -1556,9 +1567,11 @@ class ServiceEntityParser
                 }
 
             } elseif (is_array($fieldValue)) {
+
                 if (!empty($fieldValue)) {
                     $queryBuilder->setParameter($fieldID, $fieldValue);
                 }
+
             } elseif (!$isEmpty && !$isNotEmpty && !$isBool) {
                 $queryBuilder->setParameter($fieldID, $fieldValue);
             }
@@ -1567,7 +1580,8 @@ class ServiceEntityParser
                 $tableColumn = "LOWER(" . $tableColumn . ")";
             }
 
-            if ($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
+            if ($isPartial) { // @TODO: THIS PARTIAL OPTION HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
+
                 if ($tableOperator != self::OPTION_EQUAL && $tableOperator != self::OPTION_NOT_EQUAL) {
                     throw new Exception("Invalid operator for association field \"$fieldName\": " . $tableOperator);
                 }
@@ -1601,7 +1615,9 @@ class ServiceEntityParser
                 }
 
                 return $queryBuilder->expr()->$fnExpr($tableColumn, ":$fieldID");
+
             } elseif ($regexRequested) {
+
                 if ($tableOperator == self::OPTION_STARTING_WITH) {
                     $fnExpr = "like";
                 } elseif ($tableOperator == self::OPTION_ENDING_WITH) {
@@ -1629,12 +1645,15 @@ class ServiceEntityParser
             } elseif ($isEmpty || $isNotEmpty) {
 
                 if ($tableOperator == self::OPTION_EMPTY) {
+                    
                     $queryExpr = [];
                     $queryExpr[] = $queryBuilder->expr()->isNull($tableColumn);
                     $queryExpr[] = $queryBuilder->expr()->eq($tableColumn, "''");
 
                     return $queryBuilder->expr()->orX(...$queryExpr);
+
                 } elseif ($tableOperator == self::OPTION_NOT_EMPTY) {
+
                     $queryExpr = [];
                     $queryExpr[] = $queryBuilder->expr()->isNotNull($tableColumn);
                     $queryExpr[] = $queryBuilder->expr()->neq($tableColumn, "''");
@@ -1643,7 +1662,9 @@ class ServiceEntityParser
                 }
 
                 throw new Exception("Invalid operator for field \"$fieldName\": " . $tableOperator);
+            
             } elseif ($isBool) {
+            
                 if ($tableOperator == self::OPTION_TRUE || $tableOperator == self::OPTION_NOT_FALSE) {
                     $fnExpr = "eq";
                 } elseif ($tableOperator == self::OPTION_FALSE || $tableOperator == self::OPTION_NOT_TRUE) {
@@ -1653,7 +1674,9 @@ class ServiceEntityParser
                 }
 
                 return $queryBuilder->expr()->$fnExpr($tableColumn, true);
+
             } else {
+
                 if ($tableOperator == self::OPTION_EQUAL) {
                     $fnExpr = "eq";
                 } elseif ($tableOperator == self::OPTION_NOT_EQUAL) {
@@ -1792,10 +1815,12 @@ class ServiceEntityParser
         } else {
             $queryBuilder->select(self::ALIAS_ENTITY);
         }
-
+        
         $queryBuilder = $this->selectAs($queryBuilder, $selectAs);
         $queryBuilder = $this->orderBy($queryBuilder, $orderBy);
-        return $this->groupBy($queryBuilder, $groupBy);
+        $queryBuilder = $this->groupBy($queryBuilder, $groupBy);
+
+        return $queryBuilder;
     }
 
     protected function getEagerQuery(QueryBuilder $queryBuilder, array $options = [], ?ClassMetadata $classMetadata = null): Query

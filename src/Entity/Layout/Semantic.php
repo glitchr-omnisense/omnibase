@@ -151,17 +151,22 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
         $xpath = new DOMXPath($dom);
         foreach ($xpath->query('//text()') as $text) {
+
             if (trim($text->nodeValue)) {
+                
                 $text->nodeValue = preg_replace(
                     "/(\b" . implode("\b|\b", $keywords) . "\b)/i",
                     "<a href='" . $this->generate() . "' " . html_attributes($attributes) . ">$1</a>",
                     $text->nodeValue
                 );
+
             }
         }
 
         $node = $dom->getElementsByTagName('body')->item(0);
-        return html_entity_decode(trim(implode(array_map([$node->ownerDocument, "saveHTML"], iterator_to_array($node->childNodes)))));
+        $entry = str_strip(trim(implode(array_map([$node->ownerDocument, "saveHTML"], iterator_to_array($node->childNodes)))), "<p>", "</p>");
+
+        return html_entity_decode($entry);
     }
 
     /**

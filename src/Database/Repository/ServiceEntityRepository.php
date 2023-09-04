@@ -130,7 +130,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
      * @return void
      * @throws Exception
      */
-    public function persist($entity)
+    public function persist($entity, bool $flush = false): void
     {
         if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
@@ -138,5 +138,23 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         }
 
         $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove($entity, bool $flush = false): void
+    {
+        if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
+            $class = (is_object($entity) ? get_class($entity) : "null");
+            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $this->_entityName . "\" entity, you passed \"" . $class . "\"");
+        }
+
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

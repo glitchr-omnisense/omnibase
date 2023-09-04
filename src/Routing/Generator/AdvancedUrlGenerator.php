@@ -107,6 +107,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeParameters = array_filter($routeParameters, fn($p) => $p !== null);
 
         $routeUrl = null;
+        
         if (!str_ends_with($routeName, "." . self::$router->getLocaleLang())) {
             try {
                 $routeUrl = sanitize_url(parent::generate($routeName . "." . self::$router->getLocaleLang(), array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
@@ -232,8 +233,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         //
         // Try to compute subgroup (if not found compute base)
         try {
+
             $routeUrl = $this->resolveUrl($name, $parameters, $referenceType);
+
         } catch (Exception $e) {
+
             if (str_starts_with($name, "app_")) {
                 $name = "base_" . substr($name, 4);
                 try {
@@ -241,6 +245,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 } catch (Exception $_) {
                     throw $e;
                 }
+
             } elseif ($name == $routeDefaultName || $routeDefaultName === null) {
                 throw $e;
             }

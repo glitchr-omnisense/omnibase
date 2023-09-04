@@ -24,6 +24,8 @@ textarea.form-control {
     min-height: calc(8.5em + .75rem + 2px);
 }
 
+.ea-sidebar-width-compact .main-content { max-width: calc(100vw); }
+
 .page-apikey input, .page-settings input
 {
     min-width:50%;

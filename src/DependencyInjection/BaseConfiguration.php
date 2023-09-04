@@ -53,10 +53,18 @@ class BaseConfiguration extends AbstractBaseConfiguration
             ->end()
 
             ->arrayNode('user')->addDefaultsIfNotSet()
+
                 ->children()
                 ->scalarNode('token_default_throttling')
                     ->info('Default throttling time between two tokens received')
                     ->defaultValue(3*60)
+                    ->end()
+                ->end()
+
+                ->children()
+                ->scalarNode('login_with_token')
+                    ->info('Allow using a token sent by email')
+                    ->defaultValue(false)
                     ->end()
                 ->end()
 

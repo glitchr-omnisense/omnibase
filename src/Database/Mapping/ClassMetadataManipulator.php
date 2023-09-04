@@ -567,12 +567,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
      * @param $value
      * @return $this|false
      */
-    /**
-     * @param $entity
-     * @param string|array $fieldPath
-     * @param $value
-     * @return $this|false
-     */
     public function setFieldValue($entity, string|array $fieldPath, $value)
     {
         $classMetadata = $this->getClassMetadata($entity);
@@ -620,12 +614,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->hasProperty($entity, $fieldName) ? $propertyAccessor->getValue($entity, $fieldName) : null;
     }
 
-    /**
-     * @param $entity
-     * @param string $property
-     * @param $value
-     * @return $this
-     */
     /**
      * @param $entity
      * @param string $property

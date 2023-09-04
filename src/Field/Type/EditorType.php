@@ -102,7 +102,7 @@ class EditorType extends AbstractType
         $editorOpts["placeholder"] = $options["placeholder"];
 
         $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
-        $data = $this->obfuscator->encode(["token" => $token]);
+        $data = $this->obfuscator->encode(["token" => $token], ObfuscatorInterface::NO_SHORT);
 
         $view->vars["uploadByFile"] = $this->router->generate("ux_editorjs_uploadByFile", ["data" => $data]);
         $view->vars["uploadByUrl"]  = $this->router->generate("ux_editorjs_uploadByUrl", ["data" => $data]);

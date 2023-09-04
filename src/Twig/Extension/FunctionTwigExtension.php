@@ -17,6 +17,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\Mime\MimeTypes;
+use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
+use Symfony\Component\Notifier\Recipient\Recipient;
+use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Twig\Environment;
 use Twig\Error\LoaderError;
@@ -82,6 +85,10 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('static_call', [$this, 'static_call']),
             new TwigFunction('static_property', [$this, 'static_property']),
 
+            new TwigFunction('mailparse', 'mailparse', ['is_safe' => ['all']]),
+            new TwigFunction('mailparse_email', [$this, 'mailparseEmail'], ['is_safe' => ['all']]),
+            new TwigFunction('mailparse_name', [$this, 'mailparseName'], ['is_safe' => ['all']]),
+
             new TwigFunction('html_attributes', 'html_attributes', ['is_safe' => ['all']]),
             new TwigFunction('render_stylesheet', [$this, 'render_stylesheet'], ['is_safe' => ['all']]),
             new TwigFunction('render_javascript', [$this, 'render_javascript'], ['is_safe' => ['all']]),
@@ -111,20 +118,25 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('synopsis', 'synopsis'),
                 new TwigFilter('closest', 'closest'),
                 new TwigFilter('distance', 'distance'),
-                new TwigFilter('color_name', 'color_name'),
                 new TwigFilter('is_json', 'is_json'),
+                new TwigFilter('is_json', 'is_json'),
+                new TwigFilter('is_linkable', [$this, 'is_linkable']),
+                new TwigFilter('is_countable', [$this, 'is_countable']),
+                new TwigFilter('is_callable', [$this, 'is_callable']),
                 new TwigFilter('is_uuidv4', 'is_uuidv4'),
                 new TwigFilter('basename', 'basename'),
                 new TwigFilter('uniq', 'array_unique'),
                 new TwigFilter('addslashes', 'addslashes'),
-                new TwigFilter('at', 'at'),
                 new TwigFilter('ceil', 'ceil'),
                 new TwigFilter('floor', 'floor'),
                 new TwigFilter('count_leaves', 'count_leaves'),
+                new TwigFilter('at', [$this, 'at']),
+                new TwigFilter('color_name', [$this, 'color_name']),
 
                 new TwigFilter('sign', 'sign'),
 
                 new TwigFilter('mailto', [$this, 'mailto'], ['is_safe' => ['all']]),
+
                 new TwigFilter('datetime', [$this, 'datetime'], ['needs_environment' => true]),
                 new TwigFilter('countdown', [$this, 'countdown'], ['needs_environment' => true, 'is_safe' => ['all']]),
                 new TwigFilter('progress', [$this, 'progress'], ['needs_environment' => true, 'is_safe' => ['all']]),
@@ -159,7 +171,10 @@ final class FunctionTwigExtension extends AbstractExtension
             ];
     }
 
-    // Used in twig environment
+    public function at(array $array, int|string $index) 
+    {
+        return $array[$index];
+    }
 
     /**
      * @param $entity
@@ -179,6 +194,18 @@ final class FunctionTwigExtension extends AbstractExtension
                 ->includeReferrer()
                 ->generateUrl(),
         ]);
+    }
+
+    public function mailparseEmail(string|EmailRecipientInterface $recipient): ?string
+    {
+        $mailparse = mailparse($recipient instanceof EmailRecipientInterface ? $recipient->getEmail() : $recipient);
+        return first(array_keys($mailparse));
+    }
+
+    public function mailparseName(string|RecipientInterface $recipient): ?string
+    {
+        $mailparse = mailparse($recipient instanceof EmailRecipientInterface ? $recipient->getEmail() : $recipient);
+        return first($mailparse);
     }
 
     public function htmlify(?HtmlizeInterface $object, array $options = [], ...$args): ?string
@@ -289,20 +316,19 @@ final class FunctionTwigExtension extends AbstractExtension
         return Type::hasType($class) ? Type::getType($class) : null;
     }
 
-    public function colorify(null|string|array|ColorizeInterface $color): null|string|array
+    public function colorify(null|string|array|ColorizeInterface $color, ?string $entry = null): null|string|array
     {
         if (!$color) {
             return $color;
         }
 
-        if ($color instanceof ColorizeInterface && $color instanceof EnumType) {
-            return $color->__colorize() ?? $color->__colorizeStatic();
-        }
         if ($color instanceof ColorizeInterface) {
             $color = $color->__colorize() ?? $color->__colorizeStatic();
+            return $color[$entry] ?? $color ?? null;
         }
 
         if (\is_array($color)) {
+
             $color = array_filter(array_map(fn($i) => $this->colorify($i), $color));
             if ($color) {
                 return array_merge(...$color);
@@ -696,22 +722,20 @@ final class FunctionTwigExtension extends AbstractExtension
 
     /**
      * @param string|null $content
-     * @param $pattern
-     * @param $gate
+     * @param string|array $pattern
+     * @param $gateLength Number of words before and after
      * @return array|string|string[]|null
      */
-    public function highlight(?string $content, $pattern, $gate = 5)
+    public function highlight(?string $content, string|array $pattern, $gateLength = -1)
     {
-        // Empty entry
-        if (null == $content) {
-            return null;
-        }
-        if (null == $pattern) {
-            return null;
-        }
+        if(!$pattern || !$content) return $content;
 
+        if(is_string($pattern)) $pattern = preg_quote(str_strip_accents(strip_tags($pattern)));
+        else $pattern = implode("|", array_map(fn($p) => preg_quote(str_strip_accents(strip_tags($p))), $pattern));
+        
         $highlightContent = '';
-        if ($gate < 0) {
+        if ($gateLength < 0) {
+
             $highlightContent = preg_replace_callback(
                 '/([^ ]*)(' . $pattern . ')([^ ]*)/im',
                 function ($matches) {
@@ -719,15 +743,17 @@ final class FunctionTwigExtension extends AbstractExtension
                         return $matches[0];
                     }
 
-                    return '<span class="highlightWord">' .
+                    return '<mark class="markdown-word">' .
                         $matches[1] .
-                        '<span class="highlightPattern">' . $matches[2] . '</span>' .
+                        '<mark class="markdown-pattern">' . $matches[2] . '</mark>' .
                         $matches[3] .
-                        '</span>';
+                        '</mark>';
                 },
                 $content
             );
-        } elseif (preg_match_all('/((?:[^ ]+ ){0,' . $gate . '})([^ ]*)(' . $pattern . ')([^ ]*)((?: [^ ]+){0,' . $gate . '})/im', $content, $matches)) {
+
+        } elseif (preg_match_all('/((?:[^ ]+ ){0,' . $gateLength . '})([^ ]*)(' . $pattern . ')([^ ]*)((?: [^ ]+){0,' . $gateLength . '})/im', $content, $matches)) {
+        
             $priorPatternGate = $matches[1][0] ?? '';
             $priorPattern = $matches[2][0] ?? '';
             $pattern = $matches[3][0] ?? ''; // (Case insensitive)
@@ -740,17 +766,17 @@ final class FunctionTwigExtension extends AbstractExtension
                 $highlightContent .= '[..] ';
             }
 
-            $highlightContent .= "<span class='highlightGate'>";
+            $highlightContent .= "<mark class='markdown-gate'>";
             $highlightContent .= $priorPatternGate;
-            $highlightContent .= "<span class='highlightWord'>";
+            $highlightContent .= "<mark class='markdown-word'>";
             $highlightContent .= $priorPattern;
-            $highlightContent .= "<span class='highlightPattern'>";
+            $highlightContent .= "<mark class='markdown-pattern'>";
             $highlightContent .= $pattern;
-            $highlightContent .= '</span>';
+            $highlightContent .= '</mark>';
             $highlightContent .= $afterPattern;
-            $highlightContent .= '</span>';
+            $highlightContent .= '</mark>';
             $highlightContent .= $afterPatternGate;
-            $highlightContent .= '</span>';
+            $highlightContent .= '</mark>';
 
             if (!str_ends_with($content, $sentence)) {
                 $highlightContent .= ' [..]';

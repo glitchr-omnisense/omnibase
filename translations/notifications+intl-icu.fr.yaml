@@ -57,6 +57,9 @@ access_restricted:
         exception: "Cette page dispose d'une exception, mais le site reste en <b>accès limité</b> pour les super-administrateurs."
         on_deny: "Le site est en <b>accès limité</b> pour les super-administrateurs. Cette page est la page de redirection automatique."
 
+loginToken:
+    check: "Un lien de connexion a été envoyé à ton adresse e-mail."
+
 maintenance:
     banner: Ce site est en cours de <b>maintenance</b>.
 launcher:

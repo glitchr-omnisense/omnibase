@@ -739,65 +739,62 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers", orphanRemoval=true, cascade={"persist", "remove"})
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers")
      */
     protected $followedThreads;
-
-    public function getFollowedThreads(): Collection
-    {
-        return $this->followedThreads;
-    }
 
     public function isFollowing(Thread $followedThread): bool
     {
         return $this->followedThreads->contains($followedThread);
     }
 
-    public function addFollowedThread(Thread $followedThread): self
+    public function getFollowedThreads(): Collection
     {
-        if (!$this->followedThreads->contains($followedThread)) {
-            $this->followedThreads[] = $followedThread;
-            $followedThread->addFollower($this);
+        return $this->followedThreads;
+    }
+
+    public function addFollowedThread(Thread $thread): self
+    {
+        if (!$this->followedThreads->contains($thread)) {
+            $this->followedThreads[] = $thread;
         }
 
         return $this;
     }
 
-    public function removeFollowedThread(Thread $followedThread): self
+    public function removeFollowedThread(Thread $thread): self
     {
-        if ($this->followedThreads->removeElement($followedThread)) {
-            $followedThread->removeFollower($this);
-        }
+        $this->followedThreads->removeElement($thread);
 
         return $this;
     }
+
 
     /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="target", orphanRemoval=true, cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="mentionee", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $mentions;
-
     public function getMentions(): Collection
     {
         return $this->mentions;
     }
 
-    public function addMention(Mention $mention): self
+    public function addMentions(Mention $mentions): self
     {
-        if (!$this->mentions->contains($mention)) {
-            $this->mentions[] = $mention;
-            $mention->setTarget($this);
+        if (!$this->mentions->contains($mentions)) {
+            $this->mentions[] = $mentions;
+            $mentions->setMentionee($this);
         }
 
         return $this;
     }
 
-    public function removeMention(Mention $mention): self
+    public function removeMentions(Mention $mentions): self
     {
-        if ($this->mentions->removeElement($mention)) {
+        if ($this->mentions->removeElement($mentions)) {
             // set the owning side to null (unless already changed)
-            if ($mention->getTarget() === $this) {
-                $mention->setTarget(null);
+            if ($mentions->getMentionee() === $this) {
+                $mentions->setMentionee(null);
             }
         }
 

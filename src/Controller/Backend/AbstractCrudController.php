@@ -309,8 +309,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $key = array_shift($k);
 
             if (($crudClassController = $this->getCrudControllerFqcn($class))) {
-                // $array = [get_parent_class($crudClassController) => urlencode($crudClassController)];
-                // dump($crudClassController, get_parent_class($crudClassController));
                 $htmlAttributes["map"][get_parent_class($class)] ?? [];
                 $htmlAttributes["map"][get_parent_class($class)][] = urlencode($crudClassController);
             }

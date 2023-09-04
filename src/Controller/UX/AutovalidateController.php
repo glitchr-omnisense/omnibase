@@ -44,7 +44,7 @@ class AutovalidateController extends AbstractController
     }
 
     /**
-     * @Route("/validation/{hashid}", name="ux_validation")
+     * @Route("/ux/validation/{hashid}", name="ux_validation")
      */
     public function Main(Request $request, string $hashid): Response
     {

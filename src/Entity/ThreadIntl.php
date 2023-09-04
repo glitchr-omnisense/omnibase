@@ -32,10 +32,6 @@ class ThreadIntl implements TranslationInterface
      * @param string|null $title
      * @return $this
      */
-    /**
-     * @param string|null $title
-     * @return $this
-     */
     public function setTitle(?string $title)
     {
         $this->title = $title;
@@ -53,10 +49,6 @@ class ThreadIntl implements TranslationInterface
         return $this->headline ?? ($fallback ? $this->title : null);
     }
 
-    /**
-     * @param string|null $headline
-     * @return $this
-     */
     /**
      * @param string|null $headline
      * @return $this
@@ -83,10 +75,6 @@ class ThreadIntl implements TranslationInterface
      * @param array $keywords
      * @return $this
      */
-    /**
-     * @param array $keywords
-     * @return $this
-     */
     public function setKeywords(array $keywords)
     {
         $this->keywords = $keywords;
@@ -108,10 +96,6 @@ class ThreadIntl implements TranslationInterface
      * @param string|null $excerpt
      * @return $this
      */
-    /**
-     * @param string|null $excerpt
-     * @return $this
-     */
     public function setExcerpt(?string $excerpt)
     {
         $this->excerpt = $excerpt;
@@ -129,10 +113,6 @@ class ThreadIntl implements TranslationInterface
         return $this->content;
     }
 
-    /**
-     * @param string|null $content
-     * @return $this
-     */
     /**
      * @param string|null $content
      * @return $this

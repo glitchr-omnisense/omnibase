@@ -103,6 +103,7 @@ abstract class AbstractCompression implements CompressionInterface
             if ($bin === false) {
                 return null;
             }
+            
         } catch (ErrorException $e) {
             return null;
         }

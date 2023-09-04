@@ -16,6 +16,7 @@ use Symfony\Component\Mime\MimeTypes;
  */
 class FileService implements FileServiceInterface
 {
+    public const USE_SHORT = Obfuscator::USE_SHORT;
     protected const CACHE_SUBDIVISION = 3;
     protected const CACHE_SUBDIVISION_LENGTH = 1;
 
@@ -227,13 +228,13 @@ class FileService implements FileServiceInterface
         $config["options"] = $config["options"] ?? [];
         $config["local_cache"] = $config["local_cache"] ?? null;
 
-        while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
+        while (($pathConfig = $this->obfuscator->decode(basename($path), FileService::USE_SHORT))) {
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        return $this->obfuscator->encode($config);
+        return $this->obfuscator->encode($config, FileService::USE_SHORT);
     }
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
@@ -244,7 +245,7 @@ class FileService implements FileServiceInterface
             $config["options"] = $config["options"] ?? [];
             $config["local_cache"] = $config["local_cache"] ?? null;
 
-            if (($pathConfig = $this->obfuscator->decode($data))) {
+            if (($pathConfig = $this->obfuscator->decode($data, FileService::USE_SHORT))) {
                 $path = $pathConfig["path"] ?? $path;
                 $config["path"] = $path;
                 $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -295,7 +296,7 @@ class FileService implements FileServiceInterface
             $data = str_replace("/", "", $data);
         }
 
-        $data = $this->obfuscator->decode($data);
+        $data = $this->obfuscator->decode($data, FileService::USE_SHORT);
 
         foreach ($data ?? [] as $key => $el) {
             $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;

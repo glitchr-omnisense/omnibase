@@ -3,6 +3,19 @@ widget_page:
   slug:
     title: "{slug}"
 
+thread:
+  in: "{0} dans `{1}`"
+  more: "See more.."
+  readingTime: "{0, plural,
+                     =0 {less than a minute}
+                     =1 {# minute}
+                     other {# minutes}
+                  }"
+  like: "I like it !"
+  unlink: "I don't like it anymore !"
+  follow: "You are now following this thread !"
+  unfollow: "You are not following this thread anymore !"
+
 thread_search:
   title: "Rechercher un contenu précis, c'est par ici.. "
   searchbar: "Rechercher.."
@@ -12,7 +25,7 @@ thread_search:
     title: "Rechercher dans le titre"
 
   no_resources: Aucune resource trouvée.
-  found: "\"{0}\" trouvé dans \"{1}\""
+  found: "`{0}` trouvé dans `{1}`"
   placeholder: "Remplir ici.."
 
 security_pending:

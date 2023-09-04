@@ -9,6 +9,7 @@ trait CacheableTrait
 {
     public function __toKey(mixed ...$variadic): string
     {
+        $variadic = array_flatten("-", $variadic);
         $variadic = array_filter($variadic);
         $variadic = array_map(function($v) {
 
@@ -30,8 +31,8 @@ trait CacheableTrait
 
         $variadic = array_flatten(".", $variadic);
         return implode(";", array_filter([
-            "class:".snake2camel(str_replace("\\", "_", static::class)),
-            "webp:".browser_supports_webp(),
+            "class-".snake2camel(str_replace("\\", "_", static::class)),
+            "webp-".browser_supports_webp(),
             ...$variadic
         ]));
     }

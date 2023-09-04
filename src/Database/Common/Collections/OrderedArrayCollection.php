@@ -40,6 +40,7 @@ class OrderedArrayCollection extends ArrayCollection
     public function applyOrdering()
     {
         if (!is_identity($this->ordering)) {
+
             $elements = parent::toArray();
             uksort($elements, fn($a, $b) => $elements[$a]->getId() <=> $elements[$b]->getId());
 
@@ -51,7 +52,8 @@ class OrderedArrayCollection extends ArrayCollection
                 $elements = array_pad($elements, count($this->ordering), null);
             }
 
-            $elements = usort_key(array_values($elements), $this->ordering);
+            $values = array_values($elements);
+            $elements = usort_key($values, $this->ordering);
             $elements = array_filter($elements, fn($e) => $e !== null);
 
             parent::clear();
