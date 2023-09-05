@@ -350,7 +350,7 @@ class MediaController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if ($extension == null || !in_array($extension, $extensions)) {
+        if ($extension === null || !in_array($extension, $extensions)) {
             return $this->redirectToRoute("ux_imageExtension", ["data" => $data, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
         }
 

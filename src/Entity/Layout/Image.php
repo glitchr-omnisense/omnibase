@@ -58,34 +58,21 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
         // Handling parameter extension
         $allowWebp = array_pop_key("webp", $routeParameters) ?? true;
-        if (array_key_exists("extension", $routeParameters)) {
+        $extension = array_pop_key("extension", $routeParameters) ?? true;
 
-            if($routeParameters["extension"] === "webp" && !$allowWebp) {
+        if($extension === "webp" && !$allowWebp) $extension = true;
+        if($extension === true) {
 
-                unset($routeParameters["extension"]);
-
-            } else if ($routeParameters["extension"] === true) {
-
-                if($allowWebp) $routeParameters["extension"] = "webp";
-                else {
-                    $routeParameters["extension"] = first($this->getMediaService()->getExtensions($this->getSource()));
-                    $routeParameters["extension"] = $this->getMediaService()->getExtension($this->getSource());
-                }
-
-            } else if ($routeParameters["extension"] === false) {
-
-                array_pop_key("extension", $routeParameters);
-            }
-
-        } else {
-
-            if($allowWebp) $routeParameters["extension"] = "webp";
+            if($allowWebp) $extension = "webp";
+            else $extension = $this->getMediaService()->getExtension($this->getSource());
         }
 
-        $routeName = (array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image");
+        if($extension) $routeParameters["extension"] = $extension;
+
+        $routeName = array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image";
         $routeParameters = array_merge($routeParameters, [
             "data" => $this->getMediaService()->obfuscate($this->getSource(), [
-                "webp" => $allowWebp,
+                "webp" => $allowWebp, // This line might be removed, extension is fixed by `$routeParameters["extension"]`   
                 "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
                 "salt" => $this->getSalt()
             ], $filters),
