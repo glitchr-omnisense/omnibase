@@ -3840,7 +3840,7 @@ namespace {
     function usort_key(array &$array, array $ordering = []): array
     {
         uksort($array, function($key1, $key2) use ($ordering) {
-            return (array_search($key1, $ordering) > array_search($key2, $ordering));
+            return (array_search($key1, $ordering) <=> array_search($key2, $ordering));
         });
 
         return $array;
