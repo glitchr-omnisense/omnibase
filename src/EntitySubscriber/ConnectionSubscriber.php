@@ -7,6 +7,7 @@ use Base\Enum\ConnectionState;
 use Base\Security\UserTracker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Event\CheckPassportEvent;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
@@ -62,9 +63,11 @@ class ConnectionSubscriber implements EventSubscriberInterface
         $passport = $event->getPassport();
         if(!$passport) return;
 
-        $user = $passport->getUser();
+        $user = null; // Passport is loading user.. so catching exception is required.
+        try { $user = $passport->getUser(); }
+        catch(UserNotFoundException $e) { }
         if (!$user instanceof User) return;
-
+        
         $connection = $this->userTracker->getCurrentConnection($user);
         $connection->markAsFailed();
 
