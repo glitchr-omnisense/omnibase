@@ -31,7 +31,7 @@ class SecurityLoginTokenType extends AbstractType
         ]);
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["allow_login_token"] = $options["allow_login_token"];  
     }

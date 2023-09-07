@@ -42,8 +42,6 @@ class BaseBundle extends AbstractBaseBundle
 {
     use SingletonTrait;
 
-    protected $container;
-    
     public function __construct()
     {
         if (!$this->hasInstance()) {
@@ -337,7 +335,6 @@ class BaseBundle extends AbstractBaseBundle
     public function build(ContainerBuilder $container): void
     {
         parent::build($container);
-        $this->container = $container;
 
         if (!self::$cache) {
             $this->warmUp();
@@ -354,6 +351,7 @@ class BaseBundle extends AbstractBaseBundle
 
         /* Register aliased repositories */
         foreach (self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
+
             $container->register($baseRepository)->addTag("doctrine.repository_service")
                 ->addArgument(new Reference('doctrine'));
 
