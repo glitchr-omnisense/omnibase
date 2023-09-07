@@ -5,7 +5,6 @@ namespace Base\Form\Type;
 use Base\Field\Type\FileType;
 use Base\Field\Type\SubmitType;
 use Base\Form\Model\ContactModel;
-use Google\Service\GrService;
 use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -25,19 +24,14 @@ class ContactType extends AbstractType
         return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $defaults = ['data_class' => ContactModel::class];
-
-        if (class_exists(GrService::class)) {
-            $defaults["captcha_protection"] = true;
-            $defaults["captcha_api"] = GrService::APIV3;
-        }
 
         $resolver->setDefaults($defaults);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('name', TextType::class);
         $builder->add('email', EmailType::class);

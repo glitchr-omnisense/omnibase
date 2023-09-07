@@ -231,7 +231,7 @@ class HtmlTagRenderer extends AbstractTagRenderer
 
     public function renderFallback(Response $response): Response
     {
-        $content = $response->getContent();
+        $content = $response->getContent() ?? "";
 
         $noscripts = $this->getHtmlContent('noscripts');
         $content = preg_replace('/<body\b[^>]*>/', '$0' . $noscripts, $content, 1);

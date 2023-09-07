@@ -18,7 +18,7 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 /**
  *
  */
-class AnnotationSubscriber implements EventSubscriberInterface
+class AnnotationSubscriber
 {
     /**
      * @var AnnotationReader
@@ -40,19 +40,6 @@ class AnnotationSubscriber implements EventSubscriberInterface
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->annotationReader = $annotationReader;
-    }
-
-    public function getSubscribedEvents(): array
-    {
-        return [
-
-            Events::loadClassMetadata,
-            Events::postLoad,
-
-            Events::preFlush, Events::onFlush, Events::postFlush,
-            Events::prePersist, Events::preUpdate, Events::preRemove,
-            Events::postPersist, Events::postUpdate, Events::postRemove,
-        ];
     }
 
     protected array $subscriberHistory = [];

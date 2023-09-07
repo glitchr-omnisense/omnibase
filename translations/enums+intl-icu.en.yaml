@@ -9,6 +9,23 @@ entity_action:
     _singular: "deletion"
     _plural: "deletions"
 
+connection_state:
+  connection_failed:
+    _singular: "fail"
+    _plural: "fails"
+
+  connection_requested:
+    _singular: "request"
+    _plural: "requests"
+
+  connection_succeeded:
+    _singular: "success"
+    _plural: "success"
+
+  connection_closed:
+    _singular: "close"
+    _plural: "close"
+    
 user_role:
   _singular: "generic"
   _plural: "generics"

@@ -68,7 +68,7 @@ final class ColorPickerType extends AbstractType
         return 'colorpickr';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'pickr' => [
@@ -221,7 +221,7 @@ final class ColorPickerType extends AbstractType
         });
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $options["pickr"]["el"] = "#" . $view->vars["id"];
 

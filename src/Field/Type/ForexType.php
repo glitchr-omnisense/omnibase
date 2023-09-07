@@ -13,9 +13,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class ForexType extends SelectType implements SelectInterface
 {
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
+
         $resolver->setDefaults([
             "class" => null,
 

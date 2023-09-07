@@ -50,6 +50,8 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function getMachineFallbacks(?string $locale = null, ?string $environment = null): ?array;
 
+    public function getScheme(?string $locale = null, ?string $environment = null): string;
+    
     public function getSubdomain(?string $locale = null, ?string $environment = null): ?string;
 
     public function getSubdomainFallback(?string $locale = null, ?string $environment = null): mixed;
@@ -68,7 +70,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function getPortFallbacks(?string $locale = null, ?string $environment = null): ?array;
 
-    public function getUrl(string $nameOrUrl, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string;
+    public function getUrl(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string;
 
     public function getAssetUrl(string $nameOrUrl, ?string $packageName = null): string;
 

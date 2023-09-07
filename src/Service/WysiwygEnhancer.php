@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Twig\Environment;
+use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use DOMDocument;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -11,15 +12,33 @@ use Symfony\Component\String\Slugger\SluggerInterface;
  */
 class WysiwygEnhancer implements WysiwygEnhancerInterface
 {
+    /**
+     * @var Environment
+     */
     protected $twig;
-    protected $slugger;
+
+    /**
+     * @var HeadingEnhancerInterface
+     */
+    protected $headingEnhancer;
+
+    /**
+     * @var SemanticEnhancerInterface
+     */
     protected $semanticEnhancer;
 
-    public function __construct(Environment $twig, SluggerInterface $slugger, SemanticEnhancerInterface $semanticEnhancer)
+    /**
+     * @var MentionEnhancerInterface
+     */
+    protected $mentionEnhancer;
+
+    public function __construct(Environment $twig, HeadingEnhancerInterface $headingEnhancer, SemanticEnhancerInterface $semanticEnhancer, MentionEnhancerInterface $mentionEnhancer)
     {
         $this->twig = $twig;
-        $this->slugger = $slugger;
+
+        $this->headingEnhancer = $headingEnhancer;
         $this->semanticEnhancer = $semanticEnhancer;
+        $this->mentionEnhancer = $mentionEnhancer;
     }
 
     public function supports(mixed $html): bool
@@ -34,69 +53,6 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         }
 
         return $this->twig->render("@Base/form/wysiwyg/quill.html.twig", ["html" => $html, "options" => $options]);
-    }
-
-    public function highlightHeadings(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
-    {
-        if ($html === null) {
-            return null;
-        }
-        if (is_array($html)) {
-            $toc = [];
-            foreach ($html as $htmlEntry) {
-                $toc[] = $this->highlightHeadings($htmlEntry, $maxLevel, $attrs);
-            }
-
-            return $toc;
-        }
-
-        $maxLevel ??= 6;
-        $encoding = mb_detect_encoding($html);
-
-        $dom = new DOMDocument('1.0', $encoding);
-        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding));
-
-        $attrs ??= [];
-        $attrs["class"] = $attrs["class"] ?? "";
-        $attrs["class"] = trim($attrs["class"] . " markdown-anchor");
-
-        for ($i = 1; $i <= $maxLevel; $i++) {
-            $hX = "h" . $i;
-            $tags = $dom->getElementsByTagName($hX);
-            foreach ($tags as $tag) {
-                $content = $tag->nodeValue;
-                $tag->nodeValue = null;
-
-                $id = strtolower($this->slugger->slug($content));
-                $tag->setAttribute("id", $id);
-
-                $template = $dom->createDocumentFragment();
-                $template->appendXML("<a " . html_attributes($attrs) . " href='#" . $id . "'>" . $content . "</a>");
-
-                $tag->appendChild($template);
-            }
-        }
-
-        $node = $dom->getElementsByTagName('body')->item(0);
-        return trim(implode(array_map([$node->ownerDocument, "saveHTML"], iterator_to_array($node->childNodes))));
-    }
-
-    public function highlightSemantics(mixed $html, null|array|string $words = null, array $attrs = []): mixed
-    {
-        if ($html === null) {
-            return null;
-        }
-
-        if (is_array($html)) {
-            $htmlRet = [];
-            foreach ($html as $htmlEntry) {
-                $htmlRet[] = $this->semanticEnhancer->highlight($htmlEntry, $words, $attrs);
-            }
-
-            return $htmlRet;
-        }
-
-        return $this->semanticEnhancer->highlight($html, $words, $attrs);
     }
 
     public function getTableOfContents(mixed $html, ?int $maxLevel = null): array
@@ -114,17 +70,61 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
             return $toc;
         }
 
-        $maxLevel ??= 6;
-        $maxLevel = max(1, $maxLevel);
-        $headlines = [];
-        preg_replace_callback("/\<[ ]*(h[1-" . $maxLevel . "])(?:[^\<\>]*)\>([^\<\>]*)\<\/[ ]*h[1-" . $maxLevel . "][ ]*\>/", function ($match) use (&$headlines) {
-            $headlines[] = [
-                "tag" => $match[1],
-                "slug" => strtolower($this->slugger->slug($match[2])),
-                "title" => $match[2]
-            ];
-        }, $html);
+        return $this->headingEnhancer->toc($html, $maxLevel);
+    }
 
-        return $headlines;
+    public function highlightHeadings(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
+    {
+        if ($html === null) {
+            return null;
+        }
+
+        if (is_array($html)) {
+            $toc = [];
+            foreach ($html as $htmlEntry) {
+                $toc[] = $this->highlightHeadings($htmlEntry, $maxLevel, $attrs);
+            }
+
+            return $toc;
+        }
+
+        return $this->headingEnhancer->highlight($html, $maxLevel, $attrs);
+    }
+
+    public function highlightSemantics(mixed $html, null|array|string $words = null, array $attrs = []): mixed
+    {
+        if ($html === null) {
+            return null;
+        }
+
+        if (is_array($html)) {
+            $htmlRet = [];
+            foreach ($html as $htmlEntry) {
+                $htmlRet[] = $this->highlightSemantics($htmlEntry, $words, $attrs);
+            }
+
+            return $htmlRet;
+        }
+
+        return $this->semanticEnhancer->highlight($html, $words, $attrs);
+    }
+
+    public function highlightMentions(mixed $html, array $attrs = []): mixed
+    {
+        if ($html === null) {
+            return null;
+        }
+
+        if (is_array($html)) {
+
+            $htmlRet = [];
+            foreach ($html as $htmlEntry) {
+                $htmlRet[] = $this->highlightMentions($htmlEntry, $attrs);
+            }
+
+            return $htmlRet;
+        }
+
+        return $this->mentionEnhancer->highlight($html, $attrs);
     }
 }

@@ -23,7 +23,7 @@ use Doctrine\Persistence\Mapping\ClassMetadata;
 use Exception;
 use InvalidArgumentException;
 
-use Base\Database\Mapping\Factory\ClassMetadataFactory;
+use Base\Database\Mapping\ClassMetadataFactory;
 use Doctrine\Persistence\Proxy;
 use LogicException;
 use RuntimeException;
@@ -127,11 +127,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
      * @return $this
      * @throws Exception
      */
-    /**
-     * @param int $policy
-     * @return $this
-     * @throws Exception
-     */
     public function setGlobalTrackingPolicy(int $policy)
     {
         $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
@@ -154,12 +149,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->trackingPolicy[$className] ?? $this->globalTrackingPolicy;
     }
 
-    /**
-     * @param $className
-     * @param int $policy
-     * @return $this
-     * @throws Exception
-     */
     /**
      * @param $className
      * @param int $policy
@@ -578,12 +567,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
      * @param $value
      * @return $this|false
      */
-    /**
-     * @param $entity
-     * @param string|array $fieldPath
-     * @param $value
-     * @return $this|false
-     */
     public function setFieldValue($entity, string|array $fieldPath, $value)
     {
         $classMetadata = $this->getClassMetadata($entity);
@@ -631,12 +614,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->hasProperty($entity, $fieldName) ? $propertyAccessor->getValue($entity, $fieldName) : null;
     }
 
-    /**
-     * @param $entity
-     * @param string $property
-     * @param $value
-     * @return $this
-     */
     /**
      * @param $entity
      * @param string $property
@@ -1209,19 +1186,6 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $classMetadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }
 
-    /**
-     * @return array|string[]
-     */
-    public function getAllClassNames()
-    {
-        $classMetadataFactory = $this->entityManager->getMetadataFactory();
-        if ($classMetadataFactory instanceof ClassMetadataFactory) {
-            return $classMetadataFactory->getAllClassNames();
-        }
-
-        return [];
-    }
-
     protected static array $completors = [];
 
     /**
@@ -1238,7 +1202,19 @@ class ClassMetadataManipulator extends AbstractLocalCache
         self::$completors[$className] = new ClassMetadataCompletor($className, []);
         return self::$completors[$className];
     }
+    
+    /**
+     * @return array|string[]
+     */
+    public function getAllClassNames()
+    {
+        $classMetadataFactory = $this->entityManager->getMetadataFactory();
+        if ($classMetadataFactory instanceof ClassMetadataFactory) {
+            return $classMetadataFactory->getAllClassNames();
+        }
 
+        return [];
+    }
 
     public function getClassMetadataCompletor(null|string|object $entityOrClassOrMetadata): ?ClassMetadataCompletor
     {

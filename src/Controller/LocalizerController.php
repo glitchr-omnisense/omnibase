@@ -48,6 +48,8 @@ class LocalizerController extends AbstractController
 
         $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
         $referrerName = $this->router->getRouteName(strval($referrer));
+	if(!$referrerName) return $this->redirect($this->router->getUrlIndex());
+
         $referrerParameters = array_filter($this->router->match(strval($referrer)), fn($a) => !str_starts_with($a, "_"), ARRAY_FILTER_USE_KEY);
         $referrer->setUrl(null);
 

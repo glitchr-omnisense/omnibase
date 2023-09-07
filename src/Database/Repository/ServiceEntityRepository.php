@@ -6,6 +6,7 @@ use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\Mapping\ClassMetadata;
 use Exception;
 
 /**
@@ -14,6 +15,11 @@ use Exception;
  */
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
+    /**
+     * @var ClassMetadata
+     */
+    protected ClassMetadata $classMetadata;
+
     /**
      * @var ClassMetadataCompletor
      */
@@ -42,6 +48,8 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         $entityManager = $this->getEntityManager();
         $classMetadataManipulator = new ClassMetadataManipulator($doctrine, $entityManager);
+        
+        $this->classMetadata = $entityManager->getClassMetadata($entityName ?? $this->getFqcnEntityName());
         $this->classMetadataCompletor = $classMetadataManipulator->getClassMetadataCompletor($entityName ?? $this->getFqcnEntityName());
 
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
@@ -49,9 +57,17 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     }
 
     /**
+     * @return ClassMetadata|null
+     */
+    public function getClassMetadata(): ?ClassMetadata
+    {
+        return $this->classMetadata;
+    }
+
+    /**
      * @return ClassMetadataCompletor|null
      */
-    public function getClassMetadataCompletor()
+    public function getClassMetadataCompletor(): ?ClassMetadataCompletor
     {
         return $this->classMetadataCompletor;
     }
@@ -104,18 +120,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [$criteria]);
     }
 
-    /**
-     * @param $entity
-     * @return void
-     */
-    public function flush($entity = null)
+    public function flush()
     {
-        $entityFqcn = self::getFqcnEntityName();
-        $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn($e) => $e instanceof $entityFqcn);
-
-        if (count($entityList) || $entity === null) {
-            $this->getEntityManager()->flush($entity);
-        }
+        $this->getEntityManager()->flush();
     }
 
     /**
@@ -123,7 +130,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
      * @return void
      * @throws Exception
      */
-    public function persist($entity)
+    public function persist($entity, bool $flush = false): void
     {
         if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
@@ -131,5 +138,23 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         }
 
         $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove($entity, bool $flush = false): void
+    {
+        if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
+            $class = (is_object($entity) ? get_class($entity) : "null");
+            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $this->_entityName . "\" entity, you passed \"" . $class . "\"");
+        }
+
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

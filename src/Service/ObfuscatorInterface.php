@@ -7,7 +7,9 @@ namespace Base\Service;
  */
 interface ObfuscatorInterface
 {
-    public function encode(array $value): string;
+    public const NO_SHORT  = false;
+    public const USE_SHORT = true;
 
-    public function decode(string $hash): ?array;
+    public function encode(array $value, bool $short = Obfuscator::NO_SHORT): string;
+    public function decode(string $hash, bool $short = Obfuscator::NO_SHORT): ?array;
 }

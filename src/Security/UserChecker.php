@@ -25,7 +25,7 @@ class UserChecker implements UserCheckerInterface
         $this->entityManager = $entityManager;
     }
 
-    public function checkPreAuth(UserInterface $user)
+    public function checkPreAuth(UserInterface $user): void
     {
         if (class_implements_interface($user, LoginRestrictionInterface::class)) {
             throw new CustomUserMessageAccountStatusException("@notifications.login.restricted", ["importance" => "danger"]);
@@ -41,7 +41,7 @@ class UserChecker implements UserCheckerInterface
         }
     }
 
-    public function checkPostAuth(UserInterface $user)
+    public function checkPostAuth(UserInterface $user): void
     {
         if (!$user instanceof User) {
             return;
@@ -51,6 +51,7 @@ class UserChecker implements UserCheckerInterface
         }
 
         if ($user->isDisabled()) {
+
             $welcomeBackToken = $user->getValidToken("welcome-back");
             if ($welcomeBackToken) {
                 $user->enable();

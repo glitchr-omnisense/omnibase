@@ -7,15 +7,14 @@ include_once("Functions.php");
 
 use Base\Database\Function\Rand;
 use DoctrineExtensions\Query\Mysql\Field;
-use ErrorException;
 use Exception;
-use ReflectionClass;
 use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
 use App\Entity\User;
 use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
 use Base\Database\Type\UTCDateTimeType;
 use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
+use Base\DependencyInjection\Compiler\Pass\CrudControllerPass;
 use Base\DependencyInjection\Compiler\Pass\TradingMarketPass;
 use Base\DependencyInjection\Compiler\Pass\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\Pass\IconProviderPass;
@@ -23,7 +22,6 @@ use Base\DependencyInjection\Compiler\Pass\ObfuscatorCompressionPass;
 use Base\DependencyInjection\Compiler\Pass\SharerPass;
 use Base\DependencyInjection\Compiler\Pass\TagRendererPass;
 use Base\DependencyInjection\Compiler\Pass\WorkflowPass;
-use Base\Traits\SingletonTrait;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,14 +32,13 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
-
-use Symfony\Component\Finder\Finder;
+use Base\Bundle\AbstractBaseBundle;
+use Base\Traits\SingletonTrait;
 
 /**
  *
  */
-class BaseBundle extends Bundle
+class BaseBundle extends AbstractBaseBundle
 {
     use SingletonTrait;
 
@@ -53,13 +50,14 @@ class BaseBundle extends Bundle
     }
 
     public static $sessionStorage = null;
+
     public const VERSION = '1.0.0';
     public const USE_CACHE = true;
 
     /**
-     * @return array|bool|float|int|string|\UnitEnum|null
+     * @return string
      */
-    public function getProjectDir()
+    public function getProjectDir(): string
     {
         return $this->container->getParameter('kernel.project_dir');
     }
@@ -67,33 +65,41 @@ class BaseBundle extends Bundle
     /**
      * @return string
      */
-    public function getPublicDir()
-    {
-        return $this->container->getParameter('kernel.project_dir') . "/public/";
-    }
-
-    /**
-     * @return string
-     */
-    public function getSourceDir()
-    {
-        return $this->container->getParameter('kernel.project_dir') . "/src/";
-    }
-
-    /**
-     * @return array|bool|float|int|string|\UnitEnum|null
-     */
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
         return $this->container->getParameter('kernel.cache_dir');
     }
 
     /**
-     * @return array|bool|float|int|string|\UnitEnum|null
+     * @return string
      */
-    public function getEnvironment()
+    public function getPublicDir(): string 
+    {
+        return $this->getProjectDir() . "/public";
+    }
+
+    /**
+     * @return string
+     */
+    public function getSourceDir(): string
+    {
+        return $this->getProjectDir() . "/src";
+    }
+
+    /**
+     * @return string
+     */
+    public function getEnvironment(): string
     {
         return $this->container->getParameter('kernel.environment');
+    }
+
+    /**
+     * @return string
+     */
+    public function getApplicationLocation(): string 
+    { 
+        return $this->getProjectDir();
     }
 
     protected bool $boot = false;
@@ -107,26 +113,29 @@ class BaseBundle extends Bundle
     }
 
     protected bool $bootDoctrine = false;
-
     public function hasDoctrine(): bool
     {
         return $this->bootDoctrine;
     }
 
+    protected static bool $firstClear = true;
+    public static function markAsFirstClear(bool $first = true) { self::$firstClear = $first; }
+    public static function isFirstClear() { return self::$firstClear; }
+
     //
     // Some subscribers are not called when modifying codes.
     // The purpose of this broken cache feature is to prevent running without these subscribers
-    protected bool $brokenCache = true; // Turn off in subscriber if everything fine.
+    protected bool $brokenCache = true; // Turned off in subscribers if everything fine.
 
     /**
      * @return bool
      */
-    public function isBroken()
+    public function isBroken(): bool
     {
         return $this->brokenCache;
     }
 
-    public function markCacheAsValid()
+    public function markCacheAsValid(): void
     {
         $this->brokenCache = false;
     }
@@ -134,10 +143,11 @@ class BaseBundle extends Bundle
     public function warmUp()
     {
         $needsWarmup = !file_exists($this->getCacheDir() . "/pools/base/bundle.php");
-        self::$cache = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter("", 0, $this->getCacheDir() . "/pools/base/fallback"));
-        self::$filePaths = self::$filePaths ?? self::$cache->getItem('base.file_paths')->get() ?? [];
-        self::$classes = self::$classes ?? self::$cache->getItem('base.classes')->get() ?? [];
-        self::$aliasList = self::$aliasList ?? self::$cache->getItem('base.alias_list')->get() ?? [];
+
+        self::$cache               = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter("", 0, $this->getCacheDir() . "/pools/base/fallback"));
+        self::$files               = self::$files               ?? self::$cache->getItem('base.files')->get() ?? [];
+        self::$classes             = self::$classes             ?? self::$cache->getItem('base.classes')->get() ?? [];
+        self::$aliasList           = self::$aliasList           ?? self::$cache->getItem('base.alias_list')->get() ?? [];
         self::$aliasRepositoryList = self::$aliasRepositoryList ?? self::$cache->getItem('base.alias_repository_list')->get() ?? [];
 
         foreach (self::$aliasList as $class => $alias) {
@@ -148,21 +158,43 @@ class BaseBundle extends Bundle
         }
 
         if ($needsWarmup) {
-            $this->setMapping("./Enum", "Base\Enum", "App\Enum");
-            $this->setMapping("./Notifier", "Base\Notifier", "App\Notifier");
 
-            $this->setMapping("./Form", "Base\Form", "App\Form");
-            $this->setMapping("./Entity", "Base\Entity", "App\Entity");
-            $this->setMapping("./Repository", "Base\Repository", "App\Repository");
+            foreach(array_reverse($this->getBundles()) as $baseBundle)
+            {
+                if($baseBundle == BaseBundle::class) continue;
 
-            $this->getAllClasses($this->getBundleLocation() . "./Database/Annotation");
-            $this->getAllClasses($this->getBundleLocation() . "./Annotations/Annotation");
+                $classRefl = new \ReflectionClass($baseBundle);
+                $classPath = dirname($classRefl->getFileName());
 
-            $this->getAllClasses($this->getBundleLocation() . "./Enum");
-            $this->getAllClasses($this->getSourceDir() . "./Enum");
+                $baseNamespace = dirname_namespace($baseBundle);
+                foreach(self::getDirectories($classPath, 1) as $namepath)
+                {
+                    $namespace = basename($namepath);
+
+                    $baseClass = $baseNamespace . "\\". $namespace;
+                    $baseClassArray = explode("\\", $baseClass);
+                    array_swap($baseClassArray, 1, 2);
+                    
+                    $baseClassSwap = implode("\\", $baseClassArray);
+                    self::setMapping($classPath . "/".$namespace     , $baseClass     , $baseClassSwap);
+                }
+            }
+
+            self::setMapping($this->getBundleLocation() . "/src/Tests"     , "Base\Tests"     , "App\Tests");
+            self::setMapping($this->getBundleLocation() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
+            self::setMapping($this->getBundleLocation() . "/src/Notifier"  , "Base\Notifier"  , "App\Notifier");
+            self::setMapping($this->getBundleLocation() . "/src/Form"      , "Base\Form"      , "App\Form");
+            self::setMapping($this->getBundleLocation() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
+            self::setMapping($this->getBundleLocation() . "/src/Repository", "Base\Repository", "App\Repository");
+
+            self::getAllClasses($this->getBundleLocation() . "/src/Database/Annotation");
+            self::getAllClasses($this->getBundleLocation() . "/src/Annotations/Annotation");
+
+            self::getAllClasses($this->getBundleLocation() . "/src/Enum");
+            self::getAllClasses($this->getApplicationLocation() . "/src/Enum");
 
             self::$cache->warmUp([
-                "base.file_paths" => self::$filePaths ?? [],
+                "base.files" => self::$files ?? [],
                 "base.classes" => self::$classes ?? [],
                 "base.alias_list" => self::$aliasList ?? [],
                 "base.alias_repository_list" => self::$aliasRepositoryList ?? []
@@ -170,7 +202,7 @@ class BaseBundle extends Bundle
         }
     }
 
-    public function boot()
+    public function boot(): void
     {
         if (!extension_loaded('imagick')) {
             throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
@@ -188,31 +220,6 @@ class BaseBundle extends Bundle
         }
 
         $this->boot = true;
-    }
-
-
-    protected static array $dumpEnabled = [];
-
-    public static function enableDump(string $scope)
-    {
-        self::$dumpEnabled[$scope] = true;
-    }
-
-    public static function disableDump(string $scope)
-    {
-        self::$dumpEnabled[$scope] = false;
-    }
-
-    /**
-     * @param $scope
-     * @param ...$variadic
-     * @return void
-     */
-    public static function dump($scope, ...$variadic)
-    {
-        if (self::$dumpEnabled[$scope] ?? false) {
-            dump(...$variadic);
-        }
     }
 
     public function bootDoctrine(): bool
@@ -247,11 +254,11 @@ class BaseBundle extends Bundle
         /**
          * Testing doctrine connection
          */
-        try {
-            $entityManagerConnection->connect();
-        } catch (Exception $e) {
-            return false;
-        }
+        //try {
+        //    $entityManagerConnection->connect();
+        //} catch (Exception $e) {
+        //    return false;
+        //}
 
         /**
          * Doctrine custom configuration
@@ -259,7 +266,7 @@ class BaseBundle extends Bundle
         // $entityManagerConfig
         //     ->setNamingStrategy(new \Base\Database\Mapping\NamingStrategy());
         // $entityManagerConfig
-        //     ->setClassMetadataFactoryName(\Base\Database\Mapping\Factory\ClassMetadataFactory::class);
+        //     ->setClassMetadataFactoryName(\Base\Database\Mapping\ClassMetadataFactory::class);
         $entityManagerConfig
             ->addFilter("trash_filter", TrashFilter::class);
         $entityManagerConfig
@@ -300,8 +307,8 @@ class BaseBundle extends Bundle
             ->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
 
         $classList = array_merge(
-            $this->getAllClasses($this->getBundleLocation() . "./Enum"),
-            $this->getAllClasses($this->getSourceDir() . "./Enum")
+            self::getAllClasses(self::getBundleLocation() . "/src/Enum"),
+            self::getAllClasses($this->getApplicationLocation() . "/src/Enum")
         );
 
         foreach ($classList as $className) {
@@ -325,10 +332,9 @@ class BaseBundle extends Bundle
         return true;
     }
 
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
-        $this->container = $container;
 
         if (!self::$cache) {
             $this->warmUp();
@@ -345,275 +351,16 @@ class BaseBundle extends Bundle
 
         /* Register aliased repositories */
         foreach (self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
+
             $container->register($baseRepository)->addTag("doctrine.repository_service")
                 ->addArgument(new Reference('doctrine'));
 
             if ($aliasedRepository) {
+                
                 $container->register($aliasedRepository)
                     ->addTag("doctrine.repository_service")
                     ->addArgument(new Reference('doctrine'));
             }
         }
-    }
-
-    /**
-     * @return string
-     */
-    public function getBundleLocation()
-    {
-        return dirname((new ReflectionClass(self::class))->getFileName()) . "/";
-    }
-
-    public function setMapping(string $location = "./", string $inputNamespace = "", string $outputNamespace = "")
-    {
-        $classList = $this->getAllClasses($this->getBundleLocation() . $location, $inputNamespace);
-
-        $aliasList = [];
-        foreach ($classList as $class) {
-            $aliasList[$inputNamespace . "\\" . $class] = $outputNamespace . "\\" . $class;
-        }
-
-        $this->setAlias($aliasList);
-    }
-
-    protected static ?array $aliasList = null;
-    protected static ?array $aliasRepositoryList = null;
-
-    /**
-     * @param $arrayOrObjectOrClass
-     * @return array|array[]|false|false[]|mixed|string|string[]
-     */
-    public function getAlias($arrayOrObjectOrClass)
-    {
-        if (!$arrayOrObjectOrClass) {
-            return $arrayOrObjectOrClass;
-        }
-        if (is_array($arrayOrObjectOrClass)) {
-            return array_map(fn($a) => $this->getAlias($a), $arrayOrObjectOrClass);
-        }
-
-        $arrayOrObjectOrClass = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
-        if (!class_exists($arrayOrObjectOrClass)) {
-            return false;
-        }
-
-        return self::$aliasList[$arrayOrObjectOrClass] ?? $arrayOrObjectOrClass;
-    }
-
-    public function hasAlias(mixed $objectOrClass): bool
-    {
-        if (!is_object($objectOrClass) && !is_string($objectOrClass)) {
-            return false;
-        }
-
-        $class = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
-        if (!class_exists($class)) {
-            return false;
-        }
-
-        return $this->getAlias($class) != $class;
-    }
-
-    /**
-     * @param $aliasRepository
-     * @return mixed
-     */
-    public function getAliasRepository($aliasRepository)
-    {
-        return self::$aliasRepositoryList[$aliasRepository] ?? $aliasRepository;
-    }
-
-    public function setAlias(array $classes)
-    {
-        foreach ($classes as $input => $output) {
-            // Autowire base repositories
-            $inputExists = false;
-            try {
-                $inputExists = class_exists($input);
-            } catch (ErrorException $e) {
-            }
-
-            $outputExists = false;
-            try {
-                $outputExists = class_exists($output);
-            } catch (ErrorException $e) {
-            }
-
-            if ($inputExists && !$outputExists && !array_key_exists($input, self::$aliasList)) {
-                class_alias($input, $output);
-
-                if (str_ends_with($input, "Repository")) {
-                    self::$aliasRepositoryList[$input] = $output;
-                } else {
-                    self::$aliasList[$input] = $output;
-                }
-            }
-        }
-    }
-
-    /**
-     * @param $class
-     * @return void
-     */
-    public function setAliasEntity($class)
-    {
-        if (is_array($class)) {
-            $classes = $class;
-            foreach ($classes as $class) {
-                $this->setAlias([
-                    "Base\\Entity\\" . $class => "App\\Entity\\" . $class,
-                    "Base\\Entity\\" . $class . "Repository" => "App\\Entity\\" . $class . "Repository"
-                ]);
-            }
-
-            return;
-        }
-
-        $this->setAlias([
-            "Base\\Entity\\" . $class => "App\\Entity\\" . $class,
-            "Base\\Entity\\" . $class . "Repository" => "App\\Entity\\" . $class . "Repository"
-        ]);
-    }
-
-    protected static ?array $classes = null;
-
-    /**
-     * @param $path
-     * @param $prefix
-     * @return array
-     */
-    public function getAllClasses($path, $prefix = ""): array
-    {
-        $fullpath = realpath($path) . " << " . $prefix;
-
-        if (array_key_exists($fullpath, self::$classes)) {
-            return self::$classes[$fullpath];
-        }
-
-        self::$classes[$fullpath] = self::$classes[$fullpath] ?? [];
-        foreach ($this->getFilePaths($path) as $filename) {
-            if (filesize($filename) == 0) {
-                continue;
-            }
-            if (str_ends_with($filename, "Interface")) {
-                continue;
-            }
-
-            self::$classes[$fullpath][] = $this->getFullNamespace($filename, $prefix) . $this->getClassname($filename);
-        }
-
-        return self::$classes[$fullpath];
-    }
-
-    /**
-     * @param $path
-     * @param $prefix
-     * @return array
-     */
-    public function getAllNamespaces($path, $prefix = ""): array
-    {
-        $namespaces = [];
-
-        $filenames = $this->getFilePaths($path);
-        foreach ($filenames as $filename) {
-            if (filesize($filename) == 0) {
-                continue;
-            }
-
-            $namespaces[] = rtrim($this->getFullNamespace($filename, $prefix), "\\");
-        }
-
-        return array_unique($namespaces);
-    }
-
-    /**
-     * @param $path
-     * @param $prefix
-     * @return array
-     */
-    public function getAllNamespacesAndClasses($path, $prefix = ""): array
-    {
-        $namespacesAndClasses = [];
-
-        $filenames = $this->getFilePaths($path);
-
-        foreach ($filenames as $filename) {
-            if (filesize($filename) == 0) {
-                continue;
-            }
-
-            $namespace = $this->getFullNamespace($filename, $prefix);
-            $className = $this->getClassname($filename);
-            if (str_ends_with($className, "Interface")) {
-                continue;
-            }
-
-            $namespacesAndClasses[] = rtrim($namespace, "\\");
-            $namespacesAndClasses[] = $namespace . $className;
-        }
-
-        return array_unique($namespacesAndClasses);
-    }
-
-    /**
-     * @param $filename
-     * @return string|null
-     */
-    public function getClassname($filename)
-    {
-        $directoriesAndFilename = explode('/', $filename);
-        $filename = array_pop($directoriesAndFilename);
-        $nameAndExtension = explode('.', $filename);
-        return array_shift($nameAndExtension);
-    }
-
-    /**
-     * @param $filename
-     * @param $prefix
-     * @return string
-     */
-    public function getFullNamespace($filename, $prefix = "")
-    {
-        $lines = file($filename);
-        $array = preg_grep('/^namespace /', $lines);
-        $namespace = array_shift($array);
-
-        $match = [];
-        if (preg_match('/^namespace (\\\\?)' . addslashes($prefix) . '(\\\\?)(.*);$/', $namespace, $match)) {
-            $array = array_pop($match);
-            if (!empty($array)) {
-                return $array . "\\";
-            }
-        }
-
-        return "";
-    }
-
-    protected static $cache = null;
-    protected static ?array $filePaths = null;
-
-    /**
-     * @param $path
-     * @return array|mixed
-     */
-    public function getFilePaths($path)
-    {
-        $path = realpath($path);
-        if (!file_exists($path)) {
-            return [];
-        }
-
-        if (array_key_exists($path, self::$filePaths)) {
-            return self::$filePaths[$path];
-        }
-
-        $finderFiles = Finder::create()->files()->in($path)->name('*.php');
-        $files = [];
-        foreach ($finderFiles as $finderFile) {
-            $files[] = $finderFile->getRealpath();
-        }
-
-        self::$filePaths[$path] = $files;
-        return $files;
     }
 }

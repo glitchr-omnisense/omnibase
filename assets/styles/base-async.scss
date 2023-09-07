@@ -19,6 +19,8 @@
     font-style: normal;
 }
 
+.user-menu-wrapper .user-details { width:100%; }
+
 main .exception
 {
     width: 100%;
@@ -195,7 +197,7 @@ main .exception
 .form-translatable .nav-link.active {
     background-color: var(--sidebar-bg) !important;
 }
-pre::before {
+pre::before, .code::before {
     background-color: #fd5e57;
     border-radius: 50%;
     box-shadow: 0 0 0 2px #fd5e57, 20px 0 0 2px #febc2e, 40px 0 0 2px #29c83f;
@@ -208,7 +210,7 @@ pre::before {
     width: 7px;
 }
 
-pre {
+pre, .code {
     margin: 1em 0.25em 1em 0.25em !important;
     padding: 0.75em 1em !important;
     line-height: 1.6em;
@@ -330,7 +332,7 @@ hr { margin: 0.5rem 0; }
 .form-collection-group .form-group { margin-bottom: 1em; }
 .form-collection-group { margin-bottom:1em;}
 .form-collection-plain { border: 0 !important; }
-textarea { min-height:150px !important; }
+
 .form-entity > .form-control { padding: 0; }
 .form-collection-items.form-control { padding: 0; }
 .form-control:not(input):not(textarea):not(select) { background-color:transparent; }
@@ -898,6 +900,11 @@ select.is-valid ~ .select2-container--bootstrap4 .select2-selection, form.was-va
     --bs-text-opacity: 1;
     color:var(--text-muted) !important;
 }
+
+.clear-both {
+    clear:both;
+}
+
 .text-danger {
     --bs-text-opacity: 1;
     color:red !important;
@@ -1035,31 +1042,26 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     border-bottom-left-radius: 0;
 }
 
-.highlightGate:empty { background-color:transparent; padding:0; }
-.highlightGate    {
+mark.markdown-gate:empty { background-color:transparent; padding:0; }
+mark.markdown-gate    {
     padding: 0em 0.25em;
 }
 
-.highlightWord:empty { background-color:transparent; padding:0; }
-.highlightWord    {
-    background-color:#C4E8AC;
+mark.markdown-word:empty { background-color:transparent; padding:0; }
+mark.markdown-word    {
+    background-color:transparent;
     padding: 0em;
     border-radius: 0.25em;
 }
 
-.highlightPattern:empty { background-color:transparent; padding:0; }
-.highlightPattern {
+mark.markdown-pattern:empty { background-color:transparent; padding:0; }
+mark.markdown-pattern {
     background-color: #FFD37F;
     padding: 0em;
     border-radius: 0.25em;
 }
 
-.ql-editor h1, .codex-editor h1,
-.ql-editor h2, .codex-editor h2,
-.ql-editor h3, .codex-editor h3,
-.ql-editor h4, .codex-editor h4,
-.ql-editor h5, .codex-editor h5,
-.ql-editor h6, .codex-editor h6
+.wysiwyg h1, .wysiwyg h2, .wysiwyg h3, .wysiwyg h4, .wysiwyg h5, .wysiwyg h6
 {
     margin-top:1em;
 }
@@ -1068,6 +1070,12 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 .fileupload input {
     padding-right: 30px;
 }
+
+.fileupload input:first-child {
+    border-top-left-radius: 4px !important;
+    border-bottom-left-radius: 4px !important;
+}
+
 .fileupload input.last {
     border-top-right-radius: 4px !important;
     border-bottom-right-radius: 4px !important;
@@ -1097,6 +1105,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     flex-basis: 125px;
 }
 
+.avatarupload { width:100px; }
 .avatarupload figure {
 
     flex-basis: unset;
@@ -1110,7 +1119,7 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
 }
 
 .imageupload figure > img {
-    object-fit: cover;
+    object-fit: contain;
     min-height: calc(120px + 5%);
     min-width: calc(120px + 5%);
 }
@@ -1145,8 +1154,6 @@ img.country-flag { margin-right:2px;vertical-align:text-top; border-radius:0.25e
     z-index:2;
     left: 85px;
     top: 0;
-    height: 30px;
-    width: 30px;
     line-height: 0.5;
     display: flex;
     justify-content: center;

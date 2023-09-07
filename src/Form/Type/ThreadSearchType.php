@@ -15,14 +15,14 @@ use Symfony\Component\Form\Extension\Core\Type\SearchType;
  */
 class ThreadSearchType extends AbstractType
 {
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => ThreadSearchModel::class
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('generic', SearchType::class, ["required" => false]);
         $builder->add('content', SearchType::class, ["required" => false]);

@@ -19,7 +19,7 @@ class FormTypeTranslateExtension extends AbstractTypeExtension
         $this->defaultEnabled = $defaultEnabled;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             "translation_domain" => false

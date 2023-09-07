@@ -134,7 +134,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         return self::$icons[static::class] ?? [];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
 
@@ -233,7 +233,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
@@ -479,24 +479,36 @@ class SelectType extends AbstractType implements DataMapperInterface
         } else {
             $dataChoices = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
         }
-        $multiple = $options["multiple"];
 
+        $multiple = $options["multiple"];
+        
         //
         // Retrieve existing entities
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
             $classRepository = $this->entityManager->getRepository($options["class"]);
             $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
             if (!$options["multiple"]) {
+
                 $dataChoices = $classRepository->cacheOneById($dataChoices);
+
             } else {
+
                 $orderBy = array_flip($dataChoices);
                 $default = count($orderBy);
 
                 $entities = [];
                 if ($dataChoices) {
-                    $dataChoices = $classRepository->cacheById($dataChoices, [])->getResult();
+                    $entities = $classRepository->cacheById($dataChoices, [])->getResult();
                 }
 
+                foreach ($dataChoices as $pos => $id) {
+                    foreach ($entities as $entity) {
+                        if ($entity->getId() == $id) {
+                            $dataChoices[$pos] = $entity;
+                        }
+                    }
+                }
+        
                 usort($dataChoices, fn($a, $b) => (is_object($a) ? ($orderBy[$a->getId()] ?? $default) : $default) <=> (is_object($b) ? ($orderBy[$b->getId()] ?? $default) : $default));
             }
         }
@@ -570,7 +582,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         }
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         /* Override options.. I couldn't done that without accessing data */
         $options["class"] = $this->formFactory->guessClass($form, $options);
@@ -666,7 +678,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "token" => $token
             ];
 
-            $hash = $this->obfuscator->encode($array);
+            $hash = $this->obfuscator->encode($array, ObfuscatorInterface::USE_SHORT);
 
             //
             // Prepare select2 options

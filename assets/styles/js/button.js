@@ -23,7 +23,7 @@ $("[type=submit]").on("click", function(e) {
         if(submitter.length == 1) { 
         
             if (submitter[0] != this) 
-                submitter.click();
+                submitter.trigger("click");
 
         } else if(id != undefined) {
             

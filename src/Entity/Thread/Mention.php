@@ -5,11 +5,13 @@ namespace Base\Entity\Thread;
 use App\Entity\User;
 use App\Entity\Thread;
 
-use Base\Repository\MentionRepository;
+use Base\Repository\Thread\MentionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Service\Model\IconizeInterface;
 use Base\Database\Annotation\Cache;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass=MentionRepository::class)
@@ -31,6 +33,14 @@ class Mention implements IconizeInterface
         return ["fa-solid fa-quote-right"];
     }
 
+    public function __construct(?User $mentionee = null, ?Thread $thread = null)
+    {
+        $this->mentioners = new ArrayCollection();
+        $this->mentionee = $mentionee;
+
+        $this->thread = $thread;
+    }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -47,37 +57,45 @@ class Mention implements IconizeInterface
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="mentions")
      * @ORM\JoinColumn(nullable=false)
      */
-    protected $target;
+    protected $mentionee;
 
-    public function getTarget(): ?User
+    public function getMentionee(): ?User
     {
-        return $this->target;
+        return $this->mentionee;
     }
 
-    public function setTarget(?User $target): self
+    public function setMentionee(?User $mentionee): self
     {
-        $this->target = $target;
+        $this->mentionee = $mentionee;
+
         return $this;
     }
-
+    
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToMany(targetEntity=User::class)
      */
-    protected $author;
+    protected $mentioners;
 
-    public function getAuthor(): ?User
+    public function getMentioners(): Collection
     {
-        return $this->author;
+        return $this->mentioners;
     }
 
-    public function setAuthor(?User $author): self
+    public function addMentioner(User $mentioner): self
     {
-        $this->author = $author;
+        if (!$this->mentioners->contains($mentioner)) {
+            $this->mentioners[] = $mentioner;
+        }
 
         return $this;
     }
 
+    public function removeMentioner(User $mentioner): self
+    {
+        $this->mentioners->removeElement($mentioner);
+
+        return $this;
+    }
     /**
      * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="mentions")
      * @ORM\JoinColumn(nullable=false)

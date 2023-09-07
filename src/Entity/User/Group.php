@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\User\GroupRepository;
+use Base\Repository\User\GroupRepository;
 
 /**
  * @ORM\Entity(repositoryClass=GroupRepository::class)
@@ -30,53 +30,6 @@ class Group implements IconizeInterface
         return ["fa-solid fa-users"];
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $name;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $icon;
-
-    /**
-     * @ORM\Column(type="string", length=7, nullable=true)
-     */
-    protected $color;
-
-    /**
-     * @ORM\Column(type="json")
-     */
-    protected $roles = [];
-
-    /**
-     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="groups")
-     */
-    protected $members;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    protected $createdAt;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="gid")
-     */
-    protected $permissions;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="gid")
-     */
-    protected $penalties;
-
     public function __construct()
     {
         $this->members = new ArrayCollection();
@@ -84,14 +37,22 @@ class Group implements IconizeInterface
         $this->penalties = new ArrayCollection();
     }
 
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    protected $id;
     public function getId(): ?int
     {
         return $this->id;
     }
 
     /**
-     * @see GroupInterface
+     * @ORM\Column(type="json")
      */
+    protected $roles = [];
+
     public function getRoles(): array
     {
         return array_unique($this->roles);
@@ -104,6 +65,10 @@ class Group implements IconizeInterface
         return $this;
     }
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $name;
     public function getName(): ?string
     {
         return $this->name;
@@ -116,9 +81,11 @@ class Group implements IconizeInterface
         return $this;
     }
 
+    
     /**
-     * @return Collection
+     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="groups")
      */
+    protected $members;
     public function getMembers(): Collection
     {
         return $this->members;
@@ -143,6 +110,10 @@ class Group implements IconizeInterface
         return $this;
     }
 
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $createdAt;
     public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
@@ -156,8 +127,10 @@ class Group implements IconizeInterface
     }
 
     /**
-     * @return Collection
+     * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="gid")
      */
+    protected $permissions;
+
     public function getPermissions(): Collection
     {
         return $this->permissions;
@@ -178,10 +151,12 @@ class Group implements IconizeInterface
 
         return $this;
     }
-
+    
     /**
-     * @return Collection
+     * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="gid")
      */
+    protected $penalties;
+
     public function getPenalties(): Collection
     {
         return $this->penalties;
@@ -203,6 +178,11 @@ class Group implements IconizeInterface
         return $this;
     }
 
+    /**
+     * @ORM\Column(type="string", length=7, nullable=true)
+     */
+    protected $color;
+
     public function getColor(): ?string
     {
         return $this->color;
@@ -214,6 +194,11 @@ class Group implements IconizeInterface
 
         return $this;
     }
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $icon;
 
     public function getIcon(): ?string
     {

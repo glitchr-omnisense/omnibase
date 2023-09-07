@@ -1,9 +1,9 @@
 admin_forwarding:
-  notice: "{0} a retransmis sa notification : \"{1}\""
+  notice: "{0} a retransmis sa notification : `{1}`"
 
 fake_test: 
   author: "TEST"
-  notice: "Cet e-mail a été automatiquement envoyé, l'auteur fait référence à une personne fictive pour les besoins du développement"
+  notice: "Cet e-mail a été automatiquement envoyé, l'auteur peut faire référence à une personne fictive pour les besoins du développement"
 
 action_text: Voir le lien
 unsubscribe:  "Pour se désabonner <a href=\"{0}\">cliquez ici</a>"
@@ -12,7 +12,7 @@ itWorks: "Ça fonctionne !"
 
 contact:
   subject: "Contact: nouveau message reçu"
-  excerpt: "Ce message a été écrit par \"{0}\"."
+  excerpt: "Ce message a été écrit par `{0}`."
   content: "<b>{0}</b>. {1}"
 
 contact_confirmation:
@@ -24,7 +24,7 @@ resetPassword:
     subject: "Réinitialiser ton mot de passe"
     content: Tu as reçu cet email car tu as demandé une réinitialisation de mot de passe.
     action_text: "Réinitialise ton mot de passe"
-    expiry: "Le lien expirera dans {0}."
+    expiry: "Le lien expirera dans {0}"
 
 register_notifyAdmins:
     subject: "Nouvel utilisateur !"
@@ -36,7 +36,14 @@ verifyEmail:
     content: "Bravo ! Tu as reçu cet email car tu t'es inscrit sur notre site.
               Clique sur le lien suivant pour confirmer ton inscription et ton adresse e-mail."
     action_text: "Confirmer ton compte"
-    expiry: "Le lien expirera dans {0}."
+    expiry: "Le lien expirera dans {0}"
+
+loginToken:
+    subject: "Lien de connexion"
+    content: "Tu as reçu cet email car tu as fait une demande de connexion par lien sur notre site.
+              Clique sur le lien suivant pour te connecter."
+    action_text: "Se connecter à ton compte"
+    expiry: "Le lien expirera dans {0}"
 
 adminApproval:
   subject: "Validation demandée"
@@ -63,6 +70,11 @@ accountGoodbye:
 
 thread:
   publish:
-    subject: "{0} : \"{1}\" vient d'être publié !"
-    content: "Cette publication programmée dont tu es l'auteur vient d'être mise en ligne. Ci-après le résumé \"{1}\""
+    subject: "`{1}` vient d'être publié !"
+    content: "<p>Cette publication programmée dont tu es l'auteur vient d'être mise en ligne.</p><p>`{1}`</p>"
     action_text: Voir la publication
+
+  mention:
+    subject: "Bonjour {0}, tu vas être ravi !"
+    content: "Ton nom vient d'être mentionné dans une nouvelle publication `{0}` !"
+    action_text: Voir la publication    

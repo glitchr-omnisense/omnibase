@@ -26,14 +26,14 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  *   @Attribute("map",       type = "array"),
  *   @Attribute("separator", type = "string"),
  *   @Attribute("keep",      type = "array"),
- *   @Attribute("lowercase", type = "bool")
+ *   @Attribute("capital",   type = "bool")
  * })
  */
 class Slugify extends AbstractAnnotation
 {
     protected $slugger;
     protected bool $unique;
-    protected bool $lowercase;
+    protected bool $capital;
     protected bool $nullable;
 
     protected ?array $keep;
@@ -52,7 +52,7 @@ class Slugify extends AbstractAnnotation
 
         $this->separator = $data['separator'] ?? '-';
         $this->keep = $data['keep'] ?? null;
-        $this->lowercase = $data['lowercase'] ?? true;
+        $this->capital = $data['capital'] ?? false;
         $this->slugger = new AsciiSlugger(
             $data['locale'] ?? null,
             $data['map'] ?? null
@@ -151,7 +151,7 @@ class Slugify extends AbstractAnnotation
             $slug = implodeByArray($posList, $slug);
         }
 
-        return $this->lowercase ? strtolower($slug) : $slug;
+        return $this->capital ? $slug : strtolower($slug);
     }
 
     /**
@@ -169,6 +169,7 @@ class Slugify extends AbstractAnnotation
         $repository = $this->getPropertyOwnerRepository($entity, $property);
         $defaultSlug = $this->slug($entity, $defaultInput);
         $slug = $defaultSlug;
+        
         if (!$slug) {
             return null;
         }
@@ -176,7 +177,10 @@ class Slugify extends AbstractAnnotation
         if (!$this->unique) {
             return $slug;
         }
-        for ($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); ++$i) {
+
+        for ($i = 2; ( $persistentEntity = $repository->findOneBy([$property => $slug]) ) || in_array($slug, $invalidSlugs); ++$i) {
+
+            if($persistentEntity === $entity ) break;
             $slug = $defaultSlug . $this->separator . $i;
         }
 
@@ -215,20 +219,21 @@ class Slugify extends AbstractAnnotation
             $oldSlug = $this->getFieldValue($oldEntity, $property);
 
             if ($slug == $oldSlug) {
-                $labelModified = !$this->referenceColumn ? null :
+                
+                $labelModified = ! $this->referenceColumn ? null :
                     $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
 
                 if ($labelModified) {
                     $slug = $this->getSlug($entity, $property);
                 }
             }
+
         } else {
             $currentSlug = $this->getFieldValue($entity, $property);
             $slug = $this->getSlug($entity, $property, $currentSlug, $invalidSlugs);
         }
 
         $this->setFieldValue($entity, $property, $slug);
-
         if ($this->getUnitOfWork()->getEntityChangeSet($entity)) {
             $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
         }

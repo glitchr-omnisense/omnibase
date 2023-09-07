@@ -23,6 +23,9 @@ user:
   address:
     _singular: "address"
     _plural: "addresses"
+  connection:
+    _singular: "connection"
+    _plural: "connections"
 
 extension:
   log:

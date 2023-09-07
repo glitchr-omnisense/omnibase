@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- *
+ * NB: Flushing object manager from within listener should be avoided, this is done already in event dispatcher if needed.
  */
 abstract class AbstractEvent extends Event implements EventInterface
 {

@@ -44,7 +44,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         return 'password2';
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["inline"] = $options["inline"];
         $view->vars["hint"] = $options["hint"];
@@ -59,7 +59,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $view->vars["required"] = $options["required"];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'inline' => true,
@@ -83,7 +83,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         });
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
 

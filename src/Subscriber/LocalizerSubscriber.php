@@ -4,13 +4,13 @@ namespace Base\Subscriber;
 
 use App\Entity\User;
 use Base\Entity\User as BaseUser;
-
+use Base\Entity\User\Notification;
+use Base\Routing\RouterInterface;
 use Base\Service\LocalizerInterface;
 
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
@@ -108,13 +108,16 @@ class LocalizerSubscriber implements EventSubscriberInterface
         // Set timezone
         //
         $this->localizer->setTimezone("UTC");
-        if (is_instanceof(User::class, BaseUser::class)) {
-            $timezone = User::getCookie("timezone") ?? "UTC";
 
-            $defaultTimezone = date_default_timezone_get();
-            if ($timezone != $defaultTimezone) {
-                $notification = new Notification("invalidTimezone", [$timezone]);
+        if (is_instanceof(User::class, BaseUser::class)) {
+
+            $timezone = User::getCookie("timezone") ?? "UTC";            
+            if (!in_array($timezone, timezone_identifiers_list())) {
+
+                $notification = new Notification("@localizer.timezone.invalid", [$timezone]);
                 $notification->send("info");
+
+                $timezone = "UTC";
             }
 
             $this->localizer->setTimezone($timezone);

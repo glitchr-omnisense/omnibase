@@ -50,6 +50,7 @@ use Base\Traits\CacheableTrait;
  * @Hierarchify(null, separator = "/" )
  * @Trasheable
  */
+
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {
     use BaseTrait;
@@ -111,7 +112,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @ORM\Column(type="integer")
      */
     protected $id;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -418,11 +418,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     {
         return $this->followers;
     }
-
+    
     public function addFollower(User $follower): self
     {
         if (!$this->followers->contains($follower)) {
             $this->followers[] = $follower;
+            $follower->addFollowedThread($this);
         }
 
         return $this;
@@ -430,7 +431,10 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 
     public function removeFollower(User $follower): self
     {
-        $this->followers->removeElement($follower);
+        if ($this->followers->removeElement($follower)) {
+            $follower->removeFollowedThread($this);
+        }
+
         return $this;
     }
 
@@ -533,7 +537,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="thread", orphanRemoval=true, cascade={"persist"})
+     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="thread", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $mentions;
 

@@ -27,8 +27,9 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
     protected $input;
     protected $output;
     protected $maxDefinition;
+    protected $normalize;
+
     private \Doctrine\ORM\EntityRepository $imageCropRepository;
-    private \Doctrine\ORM\EntityRepository $imageRepository;
 
     protected function configure(): void
     {
@@ -39,6 +40,11 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->warmup = $input->getOption('warmup');
+        $this->batch  = $input->getOption('batch');
+        $this->format = $input->getOption('format');
+        $this->input  = $input;
+        $this->output = $output;
         $this->normalize ??= $input->getOption('normalize');
 
         $this->maxDefinition ??= $input->getOption('max-definition');
@@ -60,9 +66,10 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         $this->entityName ??= str_strip($input->getOption('entity') ?? Image::class, ["App\\Entity\\", "Base\\Entity\\"]);
         $this->appEntities ??= "App\\Entity\\" . $this->entityName;
         if (!is_instanceof($this->appEntities, Image::class)) {
+
             $this->appEntities = null;
 
-            $msg = ' [ERR] Entity must inherit from "' . Image::class . '"';
+            $msg = ' [ERR] Entity must inherit from "' . Image::class . '" ';
             $output->writeln('');
             $output->writeln('<warning,bkg>' . str_blankspace(strlen($msg)));
             $output->writeln($msg);
@@ -77,7 +84,6 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             $this->baseEntities = null;
         }
 
-        $this->imageRepository = $this->entityManager->getRepository(Image::class);
         $this->imageCropRepository = $this->entityManager->getRepository(ImageCrop::class);
 
         if ($this->normalize) {
@@ -161,7 +167,9 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         if ($field != "source") {
             return parent::postProcess($class, $field, $annotation, $fileList);
         }
+
         if ($this->warmup) {
+
             $repository = $this->entityManager->getRepository($class);
             $images = $repository->findAll();
             $N = count($images);
@@ -192,21 +200,20 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 $extensions = $this->mediaService->getExtensions($file);
                 $extension = first($extensions);
 
-                $dataWebp = $this->mediaService->imagine($file, [], ["webp" => true, "local_cache" => true]);
-                $data = $this->mediaService->imagine($file, [], ["webp" => false, "local_cache" => true, "extension" => $extension]);
+                $dataWebp = $this->mediaService->image($file, ["webp" => true, "local_cache" => true], []);
+                $data = $this->mediaService->image($file, ["webp" => false, "local_cache" => true, "extension" => $extension], []);
                 if ($this->isCached($data)) {
+
                     $this->output->section()->writeln("             <warning>* Already cached main image \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\" .. (" . ($i + 1) . "/" . $N . ")</warning>", OutputInterface::VERBOSITY_VERBOSE);
+
                 } else {
+
                     $this->output->section()->writeln("             <ln>* Warming up main image \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\" .. (" . ($i + 1) . "/" . $N . ")</ln>", OutputInterface::VERBOSITY_VERBOSE);
                     $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
 
-                    if ($this->cache) {
-                        $this->mediaController->ImageWebp($dataWebp);
-                    }
-                    if ($this->cache) {
-                        $this->mediaController->Image($data, $extension);
-                    }
-
+                    $this->mediaController->ImageWebp($dataWebp);
+                    $this->mediaController->Image($data, $extension);
+                    
                     $this->ibatch++;
                 }
 
@@ -218,12 +225,8 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                         $this->output->section()->writeln("             <ln>  Warming up \"" . str_lstrip($file, $publicDir) . "\" (" . $identifier . ") .. (" . ($i + 1) . "/" . $N . ")</ln>", OutputInterface::VERBOSITY_VERBOSE);
                         $this->ibatch++;
 
-                        if ($this->cache) {
-                            $this->mediaController->ImageCrop($dataWebp, $identifier, $extension);
-                        }
-                        if ($this->cache) {
-                            $this->mediaController->ImageCrop($data, $identifier, $extension);
-                        }
+                        $this->mediaController->ImageCrop($dataWebp, $identifier, $extension);
+                        $this->mediaController->ImageCrop($data, $identifier, $extension);
                     }
 
                     $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); " . $identifier, OutputInterface::VERBOSITY_DEBUG);
@@ -282,36 +285,8 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         ));
 
         $localCache = array_pop_key("local_cache", $options);
-        $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
+        $localCache = $args["local_cache"] ?? $localCache;
 
-        return $this->mediaService->isCached($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache]);
-    }
-
-    /**
-     * @param string|null $namespace
-     * @return array
-     * @throws \Exception
-     */
-    protected function getUploaderAnnotations(?string $namespace)
-    {
-        $classes = array_filter(get_declared_classes(), function ($c) use ($namespace) {
-            return str_starts_with($c, $namespace);
-        });
-
-        $metadataClasses = [];
-        foreach ($classes as $class) {
-            $metadataClasses[$class] = $this->entityManager->getClassMetadata($class);
-        }
-
-        $annotations = [];
-        $annotationReader = AnnotationReader::getInstance();
-        foreach ($metadataClasses as $class => $classMetadata) {
-            $this->propertyAnnotations = $annotationReader->getPropertyAnnotations($classMetadata, Uploader::class);
-            if ($this->propertyAnnotations) {
-                $annotations[$class] = $this->propertyAnnotations;
-            }
-        }
-
-        return $annotations;
+        return $this->mediaService->isCached($path, ["local_cache" => $localCache], new BitmapFilter(null, $filters, $options));
     }
 }

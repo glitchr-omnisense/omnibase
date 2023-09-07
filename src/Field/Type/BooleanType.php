@@ -32,7 +32,7 @@ class BooleanType extends AbstractType
         return CheckboxType::class;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             "confirmation[onCheck]" => true,
@@ -44,7 +44,7 @@ class BooleanType extends AbstractType
         ]);
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["switch"] = $options["switch"];
         $view->vars["confirmation_check"] = $options["confirmation[onCheck]"];

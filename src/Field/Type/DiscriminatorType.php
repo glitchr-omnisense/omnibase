@@ -39,7 +39,20 @@ class DiscriminatorType extends AbstractType
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function getBlockPrefix(): string
+    {
+        return 'discriminator';
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            "exclude_root" => true,
+            "discriminator_autoload" => false
+        ]);
+    }
+
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
             $form = $event->getForm();
@@ -109,21 +122,8 @@ class DiscriminatorType extends AbstractType
         return $formattedValues;
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         //Optional: Implement SelectType + AssociationType with autoload option if option enabled
-    }
-
-    public function getBlockPrefix(): string
-    {
-        return 'discriminator';
-    }
-
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefaults([
-            "exclude_root" => true,
-            "discriminator_autoload" => false
-        ]);
     }
 }

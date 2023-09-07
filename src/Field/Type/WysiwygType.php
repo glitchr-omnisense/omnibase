@@ -3,6 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -22,10 +23,14 @@ class WysiwygType extends AbstractType
     /** @var ParameterBagInterface */
     protected $parameterBag;
 
-    public function __construct(ParameterBagInterface $parameterBag, Environment $twig)
+    /** @var TranslatorInterface */
+    protected $translator;
+
+    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig)
     {
         $this->parameterBag = $parameterBag;
         $this->twig = $twig;
+        $this->translator = $translator;
     }
 
     public function getParent(): ?string
@@ -38,14 +43,14 @@ class WysiwygType extends AbstractType
         return 'wysiwyg';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'empty_data', null,
             "webpack_entry" => "form.wysiwyg",
 
             'theme' => "snow",
-            'placeholder' => "Compose an epic..",
+            'placeholder' => $this->translator->trans("@fields.wysiwyg.placeholder"),
             'height' => "250px",
             'modules' => [
                 "syntax" => true,
@@ -89,7 +94,7 @@ class WysiwygType extends AbstractType
         return $parent->vars["attr"]["id"] ?? null;
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
 

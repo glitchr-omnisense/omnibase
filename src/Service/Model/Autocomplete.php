@@ -77,7 +77,9 @@ class Autocomplete
                 $color = $entry::__colorizeStatic();
             }
             $color = null;
+
         } elseif (class_implements_interface($class, SelectInterface::class)) {
+
             $id = $entry;
             $icon = $class::getIcon($entry, 0);
             $text = $class::getText($entry, $this->translator);
@@ -88,7 +90,9 @@ class Autocomplete
             if (class_implements_interface($entry, ColorizeInterface::class)) {
                 $color = $class::getColor($entry);
             }
+
         } else {
+            
             $icon = is_array($entry) ? ($entry[2] ?? $entry[1] ?? $entry[0]) : null;
             $text = is_array($entry) ? ($entry[1] ?? $entry[0]) : $entry;
             $id = is_array($entry) ? ($entry[0]) : $entry;
@@ -97,7 +101,7 @@ class Autocomplete
 
             $color = null;
         }
-
+        
         return
             [
                 "id" => $id ?? null,

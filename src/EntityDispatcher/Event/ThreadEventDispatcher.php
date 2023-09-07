@@ -39,17 +39,12 @@ class ThreadEventDispatcher extends AbstractEventDispatcher
          */
         $thread = $event->getObject();
 
-        // Check if scheduled
         if ($thread->isPublishedAt() > new DateTime("now") && $thread->isPublished()) {
             $this->addEvent(ThreadEvent::SCHEDULED, $thread);
         }
-
-        // Update if publishable
         if ($thread->isPublishable()) {
             $this->addEvent(ThreadEvent::PUBLISHABLE, $thread);
         }
-
-        // Update if published
         if ($thread->isPublished()) {
             $this->addEvent(ThreadEvent::PUBLISHED, $thread);
         }

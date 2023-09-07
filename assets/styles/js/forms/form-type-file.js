@@ -201,12 +201,7 @@ window.addEventListener("load.form_type", function () {
                 this.on("thumbnail", function(file, e) {
 
                     $(file.previewTemplate).find(".dz-overlay").remove();
-
-                    if (e.type == "error") {
-
-                        e.target.src = "./bundles/base/images/image.svg";
-                    
-                    } else {
+                    if (e.type != "error") {
 
                         var duplicateFile = findDuplicates(this.files, file, e);
                         if (duplicateFile) this.removeFile(duplicateFile);

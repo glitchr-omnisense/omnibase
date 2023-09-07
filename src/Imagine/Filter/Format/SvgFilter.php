@@ -16,6 +16,8 @@ class SvgFilter implements SvgFilterInterface
     protected array $filters;
     protected array $options;
 
+    public static function getStandardExtension():string { return "svg"; }
+    
     /**
      * @return array|string|null
      */

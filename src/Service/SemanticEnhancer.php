@@ -18,8 +18,8 @@ class SemanticEnhancer implements SemanticEnhancerInterface
 
     public function highlight(string|array|null $strOrArray, null|array|string $words = null, array $attributes = []): string|array|null
     {
-        if ($strOrArray === null) {
-            return null;
+        if (!$strOrArray) {
+            return $strOrArray;
         }
 
         $words ??= [];
@@ -31,7 +31,11 @@ class SemanticEnhancer implements SemanticEnhancerInterface
         }
 
         foreach ($semantics as $semantic) {
+
             foreach ($array as &$entry) {
+
+                if(!$entry) continue;
+            
                 if ($words) {
                     $entry = $semantic->highlightBy($words, $entry, $attributes);
                 } else {

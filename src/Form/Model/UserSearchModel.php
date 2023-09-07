@@ -12,5 +12,5 @@ class UserSearchModel
     /**
      * @var ?string
      */
-    public ?string $username;
+    public /*?string*/ $username;
 }

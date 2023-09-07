@@ -1,6 +1,7 @@
 lang:
     _singular: Language
     _plural: Languages
+
 country:
     _singular: Country
     _plural: Countries
@@ -8,3 +9,5 @@ country:
 timezone:
     _singular: Timezone
     _plural: Timezones
+    invalid: "Timezone `{0}` is invalid"
+

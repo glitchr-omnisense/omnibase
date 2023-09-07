@@ -54,10 +54,6 @@ class TranslationField implements FieldInterface
      * @param $autoload
      * @return $this
      */
-    /**
-     * @param $autoload
-     * @return $this
-     */
     public function autoload($autoload = true): self
     {
         $this->setFormTypeOption('autoload', $autoload);
@@ -103,10 +99,6 @@ class TranslationField implements FieldInterface
      * @param bool $isRequired
      * @return $this
      */
-    /**
-     * @param bool $isRequired
-     * @return $this
-     */
     public function setRequired(bool $isRequired = true)
     {
         $this->setCustomOption('required', $isRequired);
@@ -114,10 +106,6 @@ class TranslationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param $excludedFields
-     * @return $this
-     */
     /**
      * @param $excludedFields
      * @return $this
@@ -132,10 +120,6 @@ class TranslationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param $translationClass
-     * @return $this
-     */
     /**
      * @param $translationClass
      * @return $this

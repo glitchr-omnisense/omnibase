@@ -106,18 +106,19 @@ class CropperType extends AbstractType implements DataMapperInterface
         $resolver->setAllowedTypes("cropper", ['null', 'array']);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
             $form = $event->getForm();
+            $data = $event->getData();
             $fields = array_reverse(array_merge(array_reverse([
 
                 // Displayed variables
-                "x" => ["label" => "Left", "form_type" => NumberType::class, "min" => -1],
-                "y" => ["label" => "Top", "form_type" => NumberType::class, "min" => -1],
-                "width" => ["label" => "Width", "form_type" => NumberType::class, "min" => -1],
-                "height" => ["label" => "Height", "form_type" => NumberType::class, "min" => -1],
+                "x"      => ["label" => "Left", "form_type"   => NumberType::class, "min" => -1, "data" => $data?->GetX0() ?? 0],
+                "y"      => ["label" => "Top", "form_type"    => NumberType::class, "min" => -1, "data" => $data?->GetY0() ?? 0],
+                "width"  => ["label" => "Width", "form_type"  => NumberType::class, "min" => -1, "data" => $data?->GetWidth0() ?? 1],
+                "height" => ["label" => "Height", "form_type" => NumberType::class, "min" => -1, "data" => $data?->GetHeight0() ?? 1],
 
                 // Not implemented for the moment
                 // "rotate"  => ["label"  => "Rotate" , "form_type" => HiddenType::class],
@@ -128,12 +129,12 @@ class CropperType extends AbstractType implements DataMapperInterface
 
                 // Behind the scene
                 "is_normalized" => ["form_type" => HiddenType::class, "label" => "Is Normalized ?"],
-                "x0" => ["form_type" => HiddenType::class, "label" => "Left (normalized)"],
-                "y0" => ["form_type" => HiddenType::class, "label" => "Top (normalized)"],
-                "width0" => ["form_type" => HiddenType::class, "label" => "Width (normalized)"],
-                "height0" => ["form_type" => HiddenType::class, "label" => "Height (normalized)"],
-                "xP" => ["form_type" => HiddenType::class, "label" => "Pivot X (normalized)"],
-                "yP" => ["form_type" => HiddenType::class, "label" => "Pivot Y (normalized)"],
+                "x0"            => ["form_type" => HiddenType::class, "label" => "Left (normalized)",    "data" => $data?->GetX0() ?? 0],
+                "y0"            => ["form_type" => HiddenType::class, "label" => "Top (normalized)",     "data" => $data?->GetY0() ?? 0],
+                "width0"        => ["form_type" => HiddenType::class, "label" => "Width (normalized)",   "data" => $data?->GetWidth() ?? 1],
+                "height0"       => ["form_type" => HiddenType::class, "label" => "Height (normalized)",  "data" => $data?->GetHeight() ?? 1],
+                "xP"            => ["form_type" => HiddenType::class, "label" => "Pivot X (normalized)", "data" => $data?->GetPivotX() ?? 0],
+                "yP"            => ["form_type" => HiddenType::class, "label" => "Pivot Y (normalized)", "data" => $data?->GetPivotY() ?? 0],
 
             ]), array_reverse($options["fields"] ?? [])));
 
@@ -144,13 +145,13 @@ class CropperType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["cropper"] = json_encode($options["cropper"]);
         $view->vars["aspectRatios"] = $options["aspectRatios"];
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         // Get oldest parent form available..
         $ancestor = $view;
@@ -233,9 +234,11 @@ class CropperType extends AbstractType implements DataMapperInterface
         $fieldNames = $classMetadata->getFieldNames();
         $fieldNames[] = "is_normalized"; // Include normalization information
         foreach (iterator_to_array($forms) as $formName => $form) {
+            
             if (!in_array($formName, $fieldNames)) {
                 continue;
             }
+            
             $form->setData($this->propertyAccessor->getValue($viewData, $formName));
         }
     }
@@ -251,9 +254,11 @@ class CropperType extends AbstractType implements DataMapperInterface
         $fieldNames = $classMetadata->getFieldNames();
 
         foreach (iterator_to_array($forms) as $formName => $form) {
+
             if (!in_array($formName, $fieldNames)) {
                 continue;
             }
+
             $this->propertyAccessor->setValue($viewData, $formName, $form->getData());
         }
     }

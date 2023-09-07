@@ -53,7 +53,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     {
         $symfonyNotification = new SymfonyNotification($this->getSubject(), $this->getChannels($recipient));
         if ($this->getException()) {
-            $symfonyNotification->exception($this->getException());
+            $symfonyNotification->exception(new Exception($this->getExceptionAsString()));
         }
 
         return $symfonyNotification
@@ -551,7 +551,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
 
         // Notification variables
-        $this->importance = parent::getImportance();
+        $this->importance = self::IMPORTANCE_DEFAULT;//parent::getImportance();
         $this->setSubject("");
         $this->setTitle("");
         $this->setFooter("");
@@ -613,6 +613,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         // NB: User recipient is only added if no other recipients are found..
         $recipients = array_merge($this->getRecipients(), $recipients);
         if (empty($recipients)) {
+
             $userRecipient = $this->user?->getRecipient();
             if ($userRecipient !== null) {
                 $recipients[] = $userRecipient;
@@ -625,11 +626,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @param array $channels
-     * @param RecipientInterface ...$recipients
-     * @return $this
-     */
     /**
      * @param array $channels
      * @param RecipientInterface ...$recipients
@@ -696,8 +692,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         $content = $this->getContent();
         $footer = $this->getFooter();
 
-        $importance = $this->getImportance();
-
         $fwd = "";
         $subject = $this->getSubject();
         $from = $technicalRecipient->getEmail();
@@ -705,19 +699,28 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
         if ($this->isMarkAsAdmin()) {
             $user = $this->user ?? "User \"" . User::getIp() . "\"";
-            $fwd .= "Admin: ";
+            $fwd .= "Fwd: ";
             $title = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
             $content = $this->getContent();
         }
 
         if ($this->getNotifier()->isTest($recipient)) {
+            
             $fwd .= "Test: ";
             $email = mailparse($recipient->getEmail());
             $email = mailformat(mailparse($technicalRecipient->getEmail()), first($email));
             $to = "[" . $notifier->getTranslator()->trans("@emails.fake_test.author") . "] " . $email;
-
+           
             $footer = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
             $footer = implode(" - ", array_filter($footer));
+
+            $htmlFooter = $this->htmlParameters["footer_text"] ?? null;
+            if ($htmlFooter) {
+
+                $htmlFooter = [$htmlFooter, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
+                $htmlFooter = implode(" - ", array_filter($htmlFooter));
+                $this->htmlParameters["footer_text"] = $htmlFooter;
+            }
         }
 
         /**
@@ -732,7 +735,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             "warmup" => true, // e.g. when sending emails..
 
         ], $this->getContext([
-            "importance" => $importance,
             "title" => $title,
             "content" => $content,
             "footer_text" => $footer,
@@ -740,18 +742,22 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         ]), $this->getHtmlParameters());
 
         // Append notification attachments
+        $importance = $context["importance"] ?? $this->getImportance();
         $attachments = array_unique(array_merge($this->getAttachments(), $context["attachments"] ?? []));
-        $context["attachments"] = $attachments;
+        
+        $context["attachments"] = [];
+        foreach ($attachments as $key => $attachment) {
 
-        foreach ($attachments as $attachment) {
             if (!$attachment instanceof UploadedFile) {
                 continue;
             }
+
             $email->embed($attachment->getContent(), $attachment->getClientOriginalName());
+            $context["attachments"][] = $attachment->getClientOriginalName();
         }
 
         // Fallback: Append cid:/ like attachments
-        foreach ($context as $key => $value) {
+        foreach ($context as $value) {
             if (!$value) {
                 continue;
             }
@@ -764,8 +770,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
             list($cid, $path) = explode(":", $value);
             $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $path);
+            // NB: A short image attachment name might be generated using such obfuscator
+            //     Consequently, a modification of MediaTwigExtension would be needed
+            // $filename = $this->getMediaService()->obfuscate($path);
+            // $ext = pathinfo($path, PATHINFO_EXTENSION);
+            // $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $filename.($ext ? ".".$ext : ""));
         }
-
 
         // Render html template to get back email title..
         // I was hoping to replace content with html(), but this gets overriden by Symfony notification
@@ -790,10 +800,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             ->subject($subject)
             ->from($from)
             ->to($to)
-            ->replyTo($this->context["replyTo"] ?? $from)
             //->html($html) // DO NOT USE: Overridden by the default Symfony notification template
             ->htmlTemplate($this->htmlTemplate)
             ->context($context);
+
+        if($context["replyTo"] ?? null)
+            $email->replyTo($context["replyTo"]);
 
         return $notification;
     }
@@ -804,13 +816,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
         $fwd = "";
         $content = $this->getContent();
-        $userIdentifier = $this->user->getUserIdentifier();
+        $userIdentifier = $this->user->getIdentifier();
 
         if ($this->isMarkAsAdmin()) {
             $fwd = "Fwd: ";
             $content = $userIdentifier . " forwarded its notification: \"" . $this->getContent() . "\"";
         } elseif (in_array($recipient, $this->getRecipients()) && $this->getNotifier()->isTest($recipient)) {
-            $user = $recipient;
             $fwd = "Fwd: [TEST:" . $recipient . "] ";
             $content = $this->getContent();
         }

@@ -7,6 +7,7 @@ use Base\Service\BaseService;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\AbstractTypeExtension;
+use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
@@ -30,7 +31,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         return [FormType::class];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'bootstrap' => $this->baseService->getParameterBag("base.twig.use_bootstrap"),
@@ -38,7 +39,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         ]);
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $this->browseView($view, $form, $options);
     }
@@ -83,8 +84,13 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
             case "SubmitType":
             case "HiddenType":
                 break;
+                
+            case "RadioType":
+                self::addAttribute($view, "class", "form-radio");
+                break;
 
             default:
+    
                 self::addAttribute($view, "class", "form-control");
                 self::addRowAttribute($view, "class", "form-group");
 

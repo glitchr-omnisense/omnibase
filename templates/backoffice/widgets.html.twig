@@ -5,7 +5,7 @@
 {% block content_excerpt  %}{{ excerpt("backoffice_widgets") }}{% endblock %}
 {% block content %}
 
-{% if form.children|length > 1 %}
+{% if form is defined and form.children|length > 1 %}
     {{ form(form) }}
 {% else %}
     <div class="text-center">

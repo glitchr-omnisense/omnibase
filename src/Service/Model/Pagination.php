@@ -98,6 +98,10 @@ class Pagination implements PaginationInterface, Iterator, Countable
 
     public function count(): int
     {
+        if($this->getPage() <= 0 && $this->getPage() > $this->getTotalPages()) {
+            return 0;
+        }
+
         return $this->pageSize > 0 ? ($this->totalCount % $this->pageSize) + 1 : 0;
     }
 
@@ -108,12 +112,24 @@ class Pagination implements PaginationInterface, Iterator, Countable
 
     public function valid(): bool
     {
-        return $this->isQuery() ? $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()) : $this->pageIter == 0;
+        if($this->getPage() <= 0 && $this->getPage() > $this->getTotalPages()) {
+            return false;
+        }
+
+        if($this->isQuery()) {
+            return $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult());
+        }
+
+        return $this->pageIter == 0;
     }
 
     public function current(): mixed
     {
-        return $this->isQuery() ? $this->getResult()[$this->pageIter] ?? null : $this->getResult();
+        if($this->isQuery()) {
+            return $this->getResult()[$this->pageIter] ?? null;
+        }
+
+        return $this->getResult();
     }
 
     public function getBookmark(): mixed
@@ -285,12 +301,11 @@ class Pagination implements PaginationInterface, Iterator, Countable
      */
     public function setPage($page)
     {
-        $page = min(max(1, $page), $this->getTotalPages());
-
         if ($this->page != $page) {
             $this->page = $page;
             $this->build = true;
         }
+
         return $this;
     }
 

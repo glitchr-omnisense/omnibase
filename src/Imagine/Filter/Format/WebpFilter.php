@@ -15,6 +15,8 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 {
     protected array $filters;
 
+    public static function getStandardExtension():string { return "webp"; }
+    
     /**
      * @return array|string|null
      */
@@ -53,7 +55,7 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
             unlink_tmpfile($path);
         }
 
-        $this->path = $path . ".webp";
+        $this->path = str_rstrip($path, ".".pathinfo($path, PATHINFO_EXTENSION)) . ".webp";
         $this->filters = $filters;
 
         if (array_key_exists("quality", $options)) {

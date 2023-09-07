@@ -36,7 +36,7 @@ class RouteType extends AbstractType
         $this->localizer = $localizer;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             "capitalize" => null,

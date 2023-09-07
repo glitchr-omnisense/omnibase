@@ -14,7 +14,7 @@ class DynamicSessionStorage extends NativeSessionStorage
      *
      * {@inheritDoc}
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): void
     {
         if (isset($_SERVER['HTTP_HOST'])) {
             $domain = parse_url2($_SERVER['HTTP_HOST'])["domain"] ?? null;
@@ -27,6 +27,6 @@ class DynamicSessionStorage extends NativeSessionStorage
             }
         }
 
-        return parent::setOptions($options);
+        parent::setOptions($options);
     }
 }

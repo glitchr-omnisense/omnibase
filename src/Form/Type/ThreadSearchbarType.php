@@ -15,7 +15,7 @@ use Base\Form\Model\ThreadSearchModel;
  */
 class ThreadSearchbarType extends AbstractType
 {
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => ThreadSearchModel::class,
@@ -23,7 +23,7 @@ class ThreadSearchbarType extends AbstractType
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('parent_id', HiddenType::class);
         $builder->add('generic', SearchType::class);

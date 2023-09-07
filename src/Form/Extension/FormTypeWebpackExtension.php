@@ -3,7 +3,7 @@
 namespace Base\Form\Extension;
 
 use Base\Form\FormProxyInterface;
-use Base\Twig\Renderer\Adapter\EncoreTagRenderer;
+use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -22,14 +22,14 @@ class FormTypeWebpackExtension extends AbstractTypeExtension
     protected FormProxyInterface $formProxy;
 
     /**
-     * @var EncoreTagRenderer
+     * @var WebpackTagRenderer
      */
-    protected EncoreTagRenderer $encoreTagRenderer;
+    protected WebpackTagRenderer $webpackTagRenderer;
 
-    public function __construct(FormProxyInterface $formProxy, EncoreTagRenderer $encoreTagRenderer)
+    public function __construct(FormProxyInterface $formProxy, WebpackTagRenderer $webpackTagRenderer)
     {
         $this->formProxy = $formProxy;
-        $this->encoreTagRenderer = $encoreTagRenderer;
+        $this->webpackTagRenderer = $webpackTagRenderer;
     }
 
     /**
@@ -40,34 +40,32 @@ class FormTypeWebpackExtension extends AbstractTypeExtension
         return [FormType::class];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'webpack_entry' => null
         ]);
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $this->browseView($view, $form, $options);
     }
 
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
-        if ($options["webpack_entry"] ?? false) {
-            $this->encoreTagRenderer->markAsOptional($options["webpack_entry"], false);
-        }
+        $this->webpackTagRenderer->loadEntry($options["webpack_entry"] ?? null);
 
         foreach ($view->children as $field => $childView) {
+
             if (!$form->has($field)) {
                 continue;
             }
 
             $childForm = $form->get($field);
             $childOptions = $childForm->getConfig()->getOptions();
-            if ($childOptions["webpack_entry"] ?? false) {
-                $this->encoreTagRenderer->markAsOptional($childOptions["webpack_entry"], false);
-            }
+
+            $this->webpackTagRenderer->loadEntry($childOptions["webpack_entry"] ?? null);
 
             $this->browseView($childView, $childForm, $childOptions);
         }

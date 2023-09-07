@@ -83,11 +83,19 @@
                         <div class="text">
 
                             <h1 class="title">
+                                {% if thread|is_linkable %}
+                                <a href="{{thread.__toLink}}">
+                                {% endif %}
+                                
                                 {% set threadTitle = thread.title | highlight(model.title, -1) | default(thread.title) %}
                                 {% if depth > 1 and thread.parent() != null %}
                                     {{ '@messages.thread_search.found'|trans([thread|trans_entity, thread.parent()|linkify]) | raw }}
                                 {% else %}
                                     {{ threadTitle |raw }}
+                                {% endif %}
+    
+                                {% if thread|is_linkable %}
+                                </a>
                                 {% endif %}
                             </h1>
 
@@ -113,15 +121,10 @@
                         </div>
                     </div>
 
-                    {% if thread.excerpt %}
+                    {% set threadExcerpt = thread.excerpt | highlight(model.excerpt, -1) | default(thread.excerpt) %}
+                    {% if threadExcerpt %}
                     <hr>
-                    <div>{{ thread.excerpt | highlight(model.excerpt, -1) | default(thread.excerpt) | raw }}</div>
-                    {% endif %}
-
-                    {% set threadContent = thread.content |striptags | highlight(model.content, 25) %}
-                    {% if not threadContent is empty %}
-                    <hr>
-                    <div class="ql-editor">{{ threadContent|raw }}</div>
+                    <div>{{ threadExcerpt | raw }}</div>
                     {% endif %}
 
                     <p>

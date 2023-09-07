@@ -7,6 +7,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Base\Service\ObfuscatorInterface;
 
 /**
  *
@@ -43,7 +44,7 @@ class ImageType extends FileType
         $resolver->setAllowedTypes("cropper", ['null', 'array']);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         parent::buildForm($builder, $options);
 
@@ -52,7 +53,7 @@ class ImageType extends FileType
         }
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         parent::buildView($view, $form, $options);
 
@@ -66,7 +67,7 @@ class ImageType extends FileType
         $view->vars["cropper"] = null;
         if (is_array($options["cropper"])) {
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $data = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]));
+            $data = $this->obfuscator->encode(array_merge($options["dropzone"], ["token" => $token]), ObfuscatorInterface::USE_SHORT);
             $view->vars["ajax"] = $this->router->generate("ux_dropzone", ["data" => $data]);
 
             if (!array_key_exists('viewMode', $options["cropper"])) {

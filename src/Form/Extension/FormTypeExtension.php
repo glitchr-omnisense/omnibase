@@ -54,7 +54,7 @@ class FormTypeExtension extends AbstractTypeExtension
         return [FormType::class];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'form2' => $this->parameterBag->get('base.twig.use_form2'),
@@ -63,7 +63,6 @@ class FormTypeExtension extends AbstractTypeExtension
             'form_flow_id' => '_flow_token',
             'validation_entity' => null,
             'use_model' => false,
-            'submit_on_enter' => true,
             'translation_domain' => "fields"
         ]);
 
@@ -77,10 +76,8 @@ class FormTypeExtension extends AbstractTypeExtension
         });
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
-        $this->submitOnEnter($view, $form, $options);
-
         $this->browseView($view, $form, $options);
     }
 
@@ -166,17 +163,6 @@ class FormTypeExtension extends AbstractTypeExtension
         }
     }
 
-    public function submitOnEnter(FormView $view, FormInterface $form, array $options)
-    {
-        $submitOnEnter = $options['submit_on_enter'] ?? null;
-        if ($submitOnEnter || !$form->isRoot()) {
-            return;
-        }
-
-        $view->vars['attr'] ??= [];
-        $view->vars['attr']['disabled'] = '';
-    }
-
     public function markDbProperties(FormView $view, FormInterface $form, array $options)
     {
         $dataClass = $options['class'] ?? $form->getConfig()->getDataClass();
@@ -219,7 +205,7 @@ class FormTypeExtension extends AbstractTypeExtension
         }
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         // if (!$options["form_flow"]) return;
         // if (!$builder->getForm()->isRoot()) return;

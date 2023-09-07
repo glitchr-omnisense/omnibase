@@ -115,7 +115,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
      * @return void
      * @throws \Exception
      */
-    public function validate($value, Constraint $constraint)
+    public function validate($value, Constraint $constraint): void
     {
         $entity = $value;
         $fields = (array)$constraint->fields;

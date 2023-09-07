@@ -75,7 +75,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'label' => false,
@@ -105,7 +105,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
 
@@ -224,7 +224,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars["locale"] = $options["locale"];
         $view->vars["single_locale"] = $options["single_locale"];

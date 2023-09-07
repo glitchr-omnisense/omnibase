@@ -107,9 +107,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeParameters = array_filter($routeParameters, fn($p) => $p !== null);
 
         $routeUrl = null;
+        
         if (!str_ends_with($routeName, "." . self::$router->getLocaleLang())) {
             try {
-                $routeUrl = sanitize_url(parent::generate($routeName . "." . self::$router->getLocaleLang(), $routeParameters, $referenceType));
+                $routeUrl = sanitize_url(parent::generate($routeName . "." . self::$router->getLocaleLang(), array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
             } catch (InvalidParameterException|RouteNotFoundException $_) {
                 $e = $_;
             }
@@ -117,7 +118,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         if (!$routeUrl) {
             try {
-                $routeUrl = sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType));
+                $routeUrl = sanitize_url(parent::generate($routeName, array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
             } catch (InvalidParameterException|RouteNotFoundException $_) {
                 $e = $_;
             }
@@ -134,7 +135,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             if (!str_ends_with($routeDefaultName, "." . self::$router->getLocaleLang())) {
                 try {
-                    $routeUrl = sanitize_url(parent::generate($routeDefaultName . "." . self::$router->getLocaleLang(), $routeParameters, $referenceType));
+                    $routeUrl = sanitize_url(parent::generate($routeDefaultName . "." . self::$router->getLocaleLang(), array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
                 } catch (InvalidParameterException|RouteNotFoundException $_) {
                 }
             }
@@ -142,7 +143,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         if (!$routeUrl) {
             try {
-                $routeUrl = sanitize_url(parent::generate($routeDefaultName, array_filter($routeParameters), $referenceType));
+                $routeUrl = sanitize_url(parent::generate($routeDefaultName, array_filter($routeParameters, fn($p) => $p !== null), $referenceType));
             } catch (InvalidParameterException|RouteNotFoundException $_) {
                 throw $e;
             }
@@ -186,6 +187,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
+        $referenceType = array_key_exists("_host", $parameters) && $parameters["_host"] !== null ? self::ABSOLUTE_URL : $referenceType;
+
         //
         // Prevent to generate custom route with Symfony internal route.
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
@@ -230,8 +233,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         //
         // Try to compute subgroup (if not found compute base)
         try {
+
             $routeUrl = $this->resolveUrl($name, $parameters, $referenceType);
+
         } catch (Exception $e) {
+
             if (str_starts_with($name, "app_")) {
                 $name = "base_" . substr($name, 4);
                 try {
@@ -239,6 +245,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 } catch (Exception $_) {
                     throw $e;
                 }
+
             } elseif ($name == $routeDefaultName || $routeDefaultName === null) {
                 throw $e;
             }

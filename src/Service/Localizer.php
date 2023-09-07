@@ -52,9 +52,6 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function markAsChanged()
     {
         $this->localeHasChanged = true;

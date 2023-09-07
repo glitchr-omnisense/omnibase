@@ -155,7 +155,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['href'] = $options["href"];
         $view->vars['html'] = $options["html"];

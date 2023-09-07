@@ -10,6 +10,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormView;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Util\StringUtil;
 
 /**
@@ -22,29 +24,23 @@ class SecurityLoginType extends AbstractType
         return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => SecurityLoginModel::class,
             'identifier' => null, // to pass variable from controller to Type
-            'allow_extra_fields' => true
+            'allow_extra_fields' => true,
+            'allow_login_token' => false
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
-        // $this->builder->getForm()->addStep($options, function (FormBuilderInterface $builder, array $options) {
+        $view->vars["allow_login_token"] = $options["allow_login_token"];  
+    }
 
-        //     $builder->add('excel', FileType::class, [
-        //             'label' => "Fichier Excel",
-        //             'attr'  => [
-        //                 'id' => "inputExcel",  // used in Symfony kernel
-        //             ]
-        //         ]);
-        // });
-
-        // $this->builder->getForm()->addConfirmStep($options);
-
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
         $builder
             ->add('identifier', TextType::class, [
                 'attr' => [

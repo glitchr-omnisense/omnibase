@@ -35,6 +35,14 @@ interface LocalizerInterface
 
     public static function getAvailableLocales(): array;
 
+    public static function markAsLate();
+
+    public function markAsChanged();
+
+    public function setCountry(string $countryCode): self;
+
+    public function setTimezone(string $timezone): self;
+
     public function getLocale(?string $locale = null): string;
 
     public function setLocale(string $locale);

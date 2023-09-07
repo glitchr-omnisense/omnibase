@@ -12,15 +12,15 @@ class UserEditModel
     /**
      * @var ?string
      */
-    public ?string $avatar;
+    public /*?string*/ $avatar;
 
     /**
      * @var ?string
      */
-    public ?string $username;
+    public /*?string*/ $username;
 
     /**
      * @var ?string
      */
-    public ?string $email;
+    public /*?string*/ $email;
 }

@@ -6,20 +6,16 @@ use Base\Database\Entity\EntityExtension;
 
 use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Enum\EntityAction;
-use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
+
 use Doctrine\Common\EventArgs;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Events;
 use LogicException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
-/**
- *
- */
-class ExtensionSubscriber implements EventSubscriberInterface
+class ExtensionSubscriber
 {
     /**
      * @var EntityManagerInterface
@@ -31,27 +27,10 @@ class ExtensionSubscriber implements EventSubscriberInterface
      */
     protected EntityExtension $entityExtension;
 
-    /**
-     * @var PropertyAccessorInterface
-     */
-    protected PropertyAccessorInterface $propertyAccessor;
-
-    /**
-     * @return string[]
-     */
-    public function getSubscribedEvents(): array
-    {
-        return [
-            Events::onFlush, Events::postPersist, Events::loadClassMetadata
-        ];
-    }
-
     public function __construct(EntityManagerInterface $entityManager, EntityExtension $entityExtension)
     {
         $this->entityManager = $entityManager;
         $this->entityExtension = $entityExtension;
-
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)

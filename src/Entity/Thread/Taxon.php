@@ -59,7 +59,6 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
 
         $this->threads = new ArrayCollection();
         $this->children = new ArrayCollection();
-        $this->isVisible = true;
     }
 
     /**
@@ -167,7 +166,6 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @ORM\OneToMany(targetEntity=Taxon::class, mappedBy="parent", orphanRemoval=true, cascade={"persist"}))
      */
     protected $children;
-
     public function getChildren(): Collection
     {
         return $this->children;
@@ -246,43 +244,6 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     public function removeConnex(self $connex): self
     {
         $this->connexes->removeElement($connex);
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    protected $isVisible;
-
-    public function isVisible(): bool
-    {
-        return $this->isVisible;
-    }
-
-    /**
-     * @param bool $isVisible
-     * @return $this
-     */
-    /**
-     * @param bool $isVisible
-     * @return $this
-     */
-    public function markAsVisible(bool $isVisible)
-    {
-        return $this->setIsVisible($isVisible);
-    }
-
-    /**
-     * @param bool $isVisible
-     * @return $this
-     */
-    /**
-     * @param bool $isVisible
-     * @return $this
-     */
-    public function setIsVisible(bool $isVisible)
-    {
-        $this->isVisible = $isVisible;
         return $this;
     }
 }

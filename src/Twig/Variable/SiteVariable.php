@@ -2,6 +2,7 @@
 
 namespace Base\Twig\Variable;
 
+use Symfony\Component\Routing\Router;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LauncherInterface;
@@ -9,7 +10,6 @@ use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
-use Symfony\Component\Routing\Router;
 
 /**
  *
@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Router;
 class SiteVariable
 {
     /**
-     * @var Router
+     * @var RouterInterface
      */
     protected $router;
     /**
@@ -92,7 +92,8 @@ class SiteVariable
      */
     public function route()
     {
-        return explode('.', $this->router->getRouteName())[0] ?? null;
+        $routeName = $this->router->getRouteName();
+        return $routeName ? (explode('.', $this->router->getRouteName())[0] ?? null) : null;
     }
 
     /**

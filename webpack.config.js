@@ -3,6 +3,12 @@ const Encore = require('@symfony/webpack-encore');
 const WebpackBar = require('webpackbar');
 const MediaQueryPlugin = require('@glitchr/media-query-plugin');
 
+// Manually configure the runtime environment if not already configured yet by the "encore" command.
+// It's useful when you use tools that rely on webpack.config.js file.
+if (!Encore.isRuntimeEnvironmentConfigured()) {
+    Encore.configureRuntimeEnvironment(process.env.NODE_ENV || 'dev');
+}
+
 Encore.addPlugin(new WebpackBar())
 
     .setOutputPath('./src/Resources/public/')
@@ -24,7 +30,7 @@ Encore.addPlugin(new WebpackBar())
     .copyFiles({from: './assets/styles/images/flags/', to: 'images/flags/[path][name].[ext]', pattern: /\.svg$/})
     .copyFiles({from: './assets/styles/fonts', to: 'fonts/[path][name].[ext]'})
     .copyFiles({from: './assets/styles/images/bundles/', to: 'images/bundles/[path][name].[ext]'})
-    .copyFiles({from: './assets/styles/images/', to: 'images/[path][name].[ext]', pattern: /\.svg$/})
+    .copyFiles({from: './assets/styles/images/', to: 'images/[path][name].[ext]', pattern: /\.(svg|webp|jpg|png|gif)$/})
 
     .disableSingleRuntimeChunk()
 
@@ -79,3 +85,5 @@ Encore.addPlugin(new WebpackBar())
 ;
 
 module.exports = Encore.getWebpackConfig();
+module.exports.watchOptions = { };
+module.exports.snapshot = { managedPaths: [/^(.+?[\\/]node_modules)[\\/]((?!.*)).*[\\/]*/] };

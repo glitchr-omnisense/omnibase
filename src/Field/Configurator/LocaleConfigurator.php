@@ -2,12 +2,13 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Field\LocaleField;
+use Base\Service\Localizer;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
-use EasyCorp\Bundle\EasyAdminBundle\Field\LocaleField;
 use InvalidArgumentException;
 use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\Intl\Locales;
@@ -41,6 +42,7 @@ class LocaleConfigurator implements FieldConfiguratorInterface
             throw new InvalidArgumentException(sprintf('The "%s" value used as the locale code of the "%s" field is not a valid ICU locale code.', $localeCode, $field->getProperty()));
         }
 
+        $field->setValue(Localizer::__toLocaleCountry($localeCode));
         $field->setFormattedValue($localeName);
     }
 

@@ -32,6 +32,11 @@ class TimeMachineSnapshotCommand extends Command
      */
     protected $flysystem;
 
+    /**
+     * @var string
+     */
+    protected $environment;
+
     public function __construct(
         LocalizerInterface     $localizer,
         TranslatorInterface    $translator,
@@ -41,16 +46,21 @@ class TimeMachineSnapshotCommand extends Command
         FlysystemInterface     $flysystem
     )
     {
-        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
+        $this->environment = $parameterBag->get("kernel.environment");
         $this->timeMachine = $timeMachine;
         $this->flysystem = $flysystem;
+
+        parent::__construct($localizer, $translator, $entityManager, $parameterBag);
     }
 
     protected function configure(): void
     {
         $this->addArgument('storages', InputArgument::IS_ARRAY, 'What storages do you want to backup?');
+
         $this->addOption('cycle', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
-        $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', null);
+        $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', $this->environment);
+        $this->addOption('database', null, InputOption::VALUE_OPTIONAL, 'Which database do you want to backup?', null);
+        $this->addOption('userlog', null, InputOption::VALUE_NONE, 'Save user info too?', null);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -58,12 +68,22 @@ class TimeMachineSnapshotCommand extends Command
         $this->timeMachine->setCommandOutput($output);
 
         $storages = $input->getArgument('storages') ?? [];
-        $prefix = $input->getOption('prefix') ?? null;
-        $cycle = $input->getOption('cycle') ?? -1;
+        $database = $input->getOption('database') ?? null;
+        $prefix   = $input->getOption('prefix') ?? null;
+        $userlog  = $input->getOption('userlog') ?? null;
+        $cycle    = $input->getOption('cycle') ?? -1;
 
+        if($userlog) {
+            $output->section()->writeln("<info>User configuration will be included in the backup</info>\n");
+        } else {
+            $output->section()->writeln("<warning>User configuration will not be included in the backup</warning> (use `--userlog` option to include it)\n");
+        }
+        
         $output->section()->writeln("<info>Available database connection(s)</info>:");
-        foreach ($this->timeMachine->getDatabaseList() as $connectionName => $database) {
-            $output->section()->writeln(" * <info>" . $connectionName . "</info> (" . get_class($database) . ")");
+        foreach ($this->timeMachine->getDatabaseList() as $connectionName => $connection) {
+
+            $selected = $connectionName == $database ? " <warning><-- selected</warning> " : "";
+            $output->section()->writeln("* <info>" . $connectionName . "</info> (" . get_class($connection) . ")".$selected);
         }
 
         $output->section()->writeln("");
@@ -83,16 +103,30 @@ class TimeMachineSnapshotCommand extends Command
 
         $output->section()->writeln("");
 
+        $prefixStr = $prefix ? "prefixed by \"".$prefix."\"" : "";
+
         $index = 0;
-        foreach ($this->timeMachine->getSnapshots($storages, null, $cycle) as $storageName => $snapshot) {
-            $output->section()->writeln("<info>Available snapshot(s) in</info>: " . $storageName, OutputInterface::VERBOSITY_VERBOSE);
+        $snapshotsByCycle = $this->timeMachine->findByCycle($storages, $prefix, $cycle);
+        if (!$snapshotsByCycle) {
+            $output->section()->writeln("* No snapshot ".$prefixStr." found", OutputInterface::VERBOSITY_VERBOSE);
+        }
+
+        foreach ($snapshotsByCycle as $storageName => $snapshots) {
 
             $public = $this->flysystem->getPublic("/", $storageName);
-            if (!$snapshot) {
-                $output->section()->writeln("* No snapshot found", OutputInterface::VERBOSITY_VERBOSE);
+            $output->section()->writeln("<info>Available snapshot(s)</info> ".$prefixStr." <info>in</info> " . $storageName, OutputInterface::VERBOSITY_VERBOSE);
+            if(count($snapshots) == 0) { 
+                $output->section()->writeln("<warning>[No previous history found]</warning>", OutputInterface::VERBOSITY_VERBOSE);
             }
-            foreach ($snapshot as $file) {
-                $output->section()->writeln("* [<info>" . $index++ . "</info>] " . $public . $file, OutputInterface::VERBOSITY_VERBOSE);
+
+            foreach($snapshots as $date => $snapshot) {
+
+                $date = \DateTime::createFromFormat("Ymd", $date);
+                if($date) $output->section()->writeln("<warning>[".date("D, M j, Y", $date->getTimestamp())."]</warning>", OutputInterface::VERBOSITY_VERBOSE);
+                
+                foreach ($snapshot as $file) {
+                    $output->section()->writeln("* [<info>" . $index++ . "</info>] " . $public . $file, OutputInterface::VERBOSITY_VERBOSE);
+                }
             }
 
             $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);

@@ -5,7 +5,7 @@ namespace Base\Subscriber;
 use App\Enum\UserRole;
 use Base\Routing\RouterInterface;
 use Base\Service\ParameterBag;
-use Base\Twig\Renderer\Adapter\EncoreTagRenderer;
+use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -26,9 +26,9 @@ class TwigSubscriber implements EventSubscriberInterface
     protected $htmlTagRenderer;
 
     /**
-     * @var EncoreTagRenderer
+     * @var WebpackTagRenderer
      */
-    protected $encoreTagRenderer;
+    protected $webpackTagRenderer;
 
     /**
      * @var ParameterBag
@@ -50,9 +50,9 @@ class TwigSubscriber implements EventSubscriberInterface
     /** * @var bool */
     protected ?bool $autoAppend;
 
-    public function __construct(HtmlTagRenderer $htmlTagRenderer, EncoreTagRenderer $encoreTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
+    public function __construct(HtmlTagRenderer $htmlTagRenderer, WebpackTagRenderer $webpackTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
     {
-        $this->encoreTagRenderer = $encoreTagRenderer;
+        $this->webpackTagRenderer = $webpackTagRenderer;
 
         $this->htmlTagRenderer = $htmlTagRenderer;
 
@@ -117,25 +117,30 @@ class TwigSubscriber implements EventSubscriberInterface
         // Permission based entries
         foreach (UserRole::getPermittedValues() as $role) {
             $tag = "security-" . strtolower(str_lstrip($role, "ROLE_"));
-            if (!$this->encoreTagRenderer->hasEntry($tag)) {
+            if (!$this->webpackTagRenderer->hasEntry($tag)) {
                 continue;
             }
 
             if ($this->authorizationChecker->isGranted($role)) {
-                $this->encoreTagRenderer->addTag($tag);
+                $this->webpackTagRenderer->addTag($tag);
             }
         }
 
         //
         // Breakpoint based entries
         foreach ($this->parameterBag->get("base.twig.breakpoints") ?? [] as $breakpoint) {
-            $this->encoreTagRenderer->addBreakpoint($breakpoint["name"], $breakpoint["media"] ?? "all");
+            $this->webpackTagRenderer->addBreakpoint($breakpoint["name"], $breakpoint["media"] ?? "all");
         }
 
         //
+        // Webpack "form.editor" entry is used when rendering wysiwyg blocks
+        // This loading might maybe be improved by loading the entry on-the-fly when needed only
+        $this->webpackTagRenderer->markAsOptional("form.editor", false);
+
+        //
         // Alternative entries
-        $this->encoreTagRenderer->addAlternative("async");
-        $this->encoreTagRenderer->addAlternative("defer");
+        $this->webpackTagRenderer->addAlternative("async");
+        $this->webpackTagRenderer->addAlternative("defer");
     }
 
     /**
@@ -156,7 +161,7 @@ class TwigSubscriber implements EventSubscriberInterface
         }
 
         // Encore rest rendering
-        $response = $this->encoreTagRenderer->renderFallback($response);
+        $response = $this->webpackTagRenderer->renderFallback($response);
 
         // Html rest rendering
         $response = $this->htmlTagRenderer->renderFallback($response);

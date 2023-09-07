@@ -8,3 +8,4 @@ country:
 timezone:
     _singular: Fuseau horaire
     _plural: Fuseaux horaires
+    invalid: "Fuseau horaire `{0}` invalide"

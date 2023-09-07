@@ -13,6 +13,10 @@
 
         <service id="Base\Security\Session\DynamicSessionStorageFactory" public="true" parent="session.storage.factory.native" />
 
+        <service id="Base\Security\AccessTokenHandler">
+            <argument type="service" id="Base\Repository\User\TokenRepository" />
+        </service>
+
         <service id="Base\Service\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
@@ -91,7 +95,7 @@
         <service id="Base\Subscriber\TwigSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="twig.html_renderer" />
-            <argument type="service" id="twig.encore_renderer" />
+            <argument type="service" id="twig.webpack_renderer" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
@@ -163,9 +167,9 @@
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="localizer" />
         </service>
-        <service id="Base\CacheWarmer\WebpackEntrypointCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
+        <service id="Base\CacheWarmer\WebpackCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="twig.encore_renderer" />
+            <argument type="service" id="twig.webpack_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup[_default]" on-invalid="null" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
@@ -176,10 +180,6 @@
         <service id="Base\CacheWarmer\MetadataCacheWarmer" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.database.metadata_manipulator" />
-        </service>
-        <service id="Base\CacheWarmer\ImageCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
-            <tag name="kernel.cache_warmer" />
-            <argument type="service" id="console" />
         </service>
 
         <service id="Base\Service\BaseService" public="true">
@@ -406,27 +406,46 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
-        <service id="Base\DatabaseSubscriber\EnumSubscriber"><tag name="doctrine.event_subscriber" /></service>
+        <service id="Base\DatabaseSubscriber\EnumSubscriber">
+            <tag name="doctrine.event_listener" event="postGenerateSchema" />
+        </service>
+
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_subscriber" priority="2048" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="2048" />
+            <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
+            <tag name="doctrine.event_listener" event="preFlush" priority="2048" />
+            <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
+            <tag name="doctrine.event_listener" event="postFlush" priority="2048" />
+            <tag name="doctrine.event_listener" event="prePersist" priority="2048" />
+            <tag name="doctrine.event_listener" event="preUpdate" priority="2048" />
+            <tag name="doctrine.event_listener" event="preRemove" priority="2048" />
+            <tag name="doctrine.event_listener" event="postPersist" priority="2048" />
+            <tag name="doctrine.event_listener" event="postUpdate" priority="2048" />
+            <tag name="doctrine.event_listener" event="postRemove" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.annotation_reader" />
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_subscriber" priority="2048" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="2048" />
+            <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
+            <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
+
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\DatabaseSubscriber\TrackingPolicySubscriber">
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
         <service id="Base\EntitySubscriber\ExtensionSubscriber">
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_listener" event="onFlush" />
+            <tag name="doctrine.event_listener" event="postPersist" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" />
+
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.entity_extension" />
         </service>
@@ -447,19 +466,35 @@
             <argument type="service" id="localizer" />
         </service>
 
-        <service id="Base\Service\SemanticEnhancer"   public="true">
+        <service id="Base\Service\SemanticEnhancer" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
+        </service>
+
+        <service id="Base\Service\MentionEnhancer" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="App\Repository\Thread\MentionRepository" />
+            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="obfuscator" />
+        </service>
+
+        <service id="Base\Service\HeadingEnhancer" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="slugger" />
         </service>
 
         <service id="Base\Service\EditorEnhancer" parent="Base\Service\WysiwygEnhancer" public="true">
             <tag name="twig.runtime" />
         </service>
+
         <service id="Base\Service\WysiwygEnhancer" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="twig" />
-            <argument type="service" id="slugger" />
+            <argument type="service" id="heading_enhancer" />
             <argument type="service" id="semantic_enhancer" />
+            <argument type="service" id="mention_enhancer" />
         </service>
 
         <service id="Base\Service\Model\Obfuscator\AbstractCompression"></service>
@@ -551,7 +586,7 @@
         </service>
 
         <service id="Base\Database\Mapping\NamingStrategy"  public="true" />
-        <service id="Base\Database\Mapping\Factory\ClassMetadataFactory"  public="true"/>
+        <service id="Base\Database\Mapping\ClassMetadataFactory"  public="true"/>
         <service id="Base\Database\Entity\EntityHydrator"  public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -662,7 +697,7 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
         </service>
-        <service id="Base\Twig\Renderer\Adapter\EncoreTagRenderer" parent="Base\Twig\Renderer\AbstractTagRenderer" public="true" >
+        <service id="Base\Twig\Renderer\Adapter\WebpackTagRenderer" parent="Base\Twig\Renderer\AbstractTagRenderer" public="true" >
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup_collection" on-invalid="null" />
@@ -671,7 +706,7 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
           </service>
 
-        <service id="Base\Twig\Extension\EncoreTwigExtension"><tag name="twig.extension" priority="-1" /></service>
+        <service id="Base\Twig\Extension\WebpackTwigExtension"><tag name="twig.extension" priority="-1" /></service>
         <service id="Base\Twig\Extension\HtmlTwigExtension"><tag name="twig.extension" />
             <argument type="service" id="twig.html_renderer" />
             <argument type="service" id="wysiwyg_enhancer" />
@@ -711,7 +746,7 @@
         </service>
          <service id="Base\Form\Extension\FormTypeWebpackExtension"><tag name="form.type_extension" />
             <argument type="service" id="form.proxy" />
-            <argument type="service" id="twig.encore_renderer" />
+            <argument type="service" id="twig.webpack_renderer" />
         </service>
         <service id="Base\Form\Extension\FormTypeCollectionExtension"         ><tag name="form.type_extension" />
             <argument type="service" id="base.service" />
@@ -741,9 +776,8 @@
             <tag name="notifier.channel" channel="browser+" />
             <argument type="service" id="request_stack" />
         </service>
-        <service id="Base\Notifier\Channel\EmailPlusChannel">
+        <service id="Base\Notifier\Channel\EmailPlusChannel" parent="notifier.channel.email">
             <tag name="notifier.channel" channel="email+" />
-            <argument type="service" id="mailer.default_transport" on-invalid="null" />
         </service>
 
         <!--
@@ -783,11 +817,26 @@
             <argument type="service" id="App\Repository\UserRepository" />
         </service>
 
-        <service id="Base\Security\UserChecker"           >
+        <service id="Base\Security\UserTracker">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="router" />
+            <argument type="service" id="Base\Repository\User\ConnectionRepository" />
+        </service>
+        
+        <service id="Base\EntitySubscriber\ConnectionSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="Base\Security\UserTracker" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="Base\Security\UserProvider"           />
+        <service id="Base\Security\UserChecker">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+        <service id="Base\Security\UserProvider">
+            <argument type="service" id="Base\Security\UserTracker" />
+        </service>
+
         <service id="Base\Security\RescueFormAuthenticator" parent="Base\Security\LoginFormAuthenticator"/>
         <service id="Base\Security\LoginFormAuthenticator">
             <argument type="service" id="referrer" />
@@ -815,7 +864,6 @@
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
-            <argument type="service" id="translator" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="referrer" />
             <argument type="service" id="setting_bag" />
@@ -856,10 +904,20 @@
         </service>
 
         <service id="Base\EntityDispatcher\Event\UserEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_listener" event="prePersist" />
+            <tag name="doctrine.event_listener" event="postPersist" />
+            <tag name="doctrine.event_listener" event="preUpdate" />
+            <tag name="doctrine.event_listener" event="postUpdate" />
+            <tag name="doctrine.event_listener" event="preRemove" />
+            <tag name="doctrine.event_listener" event="postRemove" />
         </service>
         <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_listener" event="prePersist" />
+            <tag name="doctrine.event_listener" event="postPersist" />
+            <tag name="doctrine.event_listener" event="preUpdate" />
+            <tag name="doctrine.event_listener" event="postUpdate" />
+            <tag name="doctrine.event_listener" event="preRemove" />
+            <tag name="doctrine.event_listener" event="postRemove" />
         </service>
         <service id="Base\EntityDispatcher\AbstractEventDispatcher" abstract="true">
             <argument type="service" id="event_dispatcher" />
@@ -870,8 +928,13 @@
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <tag name="doctrine.event_listener" event="prePersist" />
+            <tag name="doctrine.event_listener" event="preUpdate" />
+            <tag name="doctrine.event_listener" event="onFlush" />
+
+            <argument type="service" id="mention_enhancer" />
         </service>
+        
         <service id="Base\EntitySubscriber\UserSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.notifier" />
@@ -971,13 +1034,12 @@
 
         <service id="Base\Field\Type\WysiwygType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
             <argument type="service" id="twig" />
-            <argument type="service" id="router" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="obfuscator" />
         </service>
         <service id="Base\Field\Type\EditorType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
             <argument type="service" id="twig" />
             <argument type="service" id="router" />
             <argument type="service" id="security.csrf.token_manager" />
@@ -986,7 +1048,7 @@
 
         <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="trading_market" /></service>
         <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="twig" /></service>
-        <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="twig" /></service>
+        <service id="Base\Field\Type\StockType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
@@ -1028,9 +1090,19 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="slugger" />
+            <argument type="service" id="base.service.image" />
             <argument type="service" id="flysystem" />
             <argument type="service" id="translator" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="base.paginator" />
             <argument type="service" id="obfuscator" />
+
+            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="App\Repository\ThreadRepository" />
+            <argument type="service" id="Base\Repository\Thread\TagRepository" />
+
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\UX\AutocompleteController">
@@ -1054,6 +1126,19 @@
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="validator" />
+        </service>
+
+        <service id="Base\Controller\Api\ThreadController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="translator" />
+
+            <argument type="service" id="App\Repository\ThreadRepository" />
+            <argument type="service" id="App\Repository\Thread\LikeRepository" />
+
         </service>
 
         <service id="Base\Field\Type\QuadrantType"><tag name="form.type" /><argument type="service" id="twig" /></service>
@@ -1254,6 +1339,7 @@
 
         <service id="Base\Controller\Backend\Crud\UserCrudController"              parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\AddressCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\User\ConnectionCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\GroupCrudController"        parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\NotificationCrudController" parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\User\PermissionCrudController"   parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>

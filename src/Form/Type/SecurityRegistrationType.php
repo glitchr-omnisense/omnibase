@@ -19,19 +19,19 @@ use Symfony\Component\Form\Util\StringUtil;
  */
 class SecurityRegistrationType extends AbstractType
 {
-    public function configureOptions(OptionsResolver $resolver)
+    public function getBlockPrefix(): string
+    {
+        return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => SecurityRegistrationModel::class
         ]);
     }
 
-    public function getBlockPrefix(): string
-    {
-        return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
-    }
-
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('email', EmailType::class)

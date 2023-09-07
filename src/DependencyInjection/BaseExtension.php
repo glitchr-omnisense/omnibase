@@ -15,18 +15,20 @@ use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Base\Controller\Backend\AbstractCrudController;
+
+use Base\Bundle\AbstractBaseExtension;
 
 /**
  *
  */
-class BaseExtension extends Extension
+class BaseExtension extends AbstractBaseExtension
 {
     /**
      * {@inheritdoc}
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         //
         // Load service declaration (includes services, controllers,..)
@@ -52,38 +54,22 @@ class BaseExtension extends Extension
         ));
 
         $container->registerForAutoconfiguration(AbstractIconAdapter::class)->addTag('base.service.icon');
-        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_subscriber');
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
         $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
         $container->registerForAutoconfiguration(AbstractLocalCacheInterface::class)->addTag('base.simple_cache');
-
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('currency.api');
         $container->registerForAutoconfiguration(CompressionInterface::class)->addTag('obfuscator.compressor');
-
         $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
         $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
-    }
 
-    /**
-     * @param ContainerBuilder $container
-     * @param array $config
-     * @param $globalKey
-     * @return void
-     */
-    public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = '')
-    {
-        foreach ($config as $key => $value) {
-            if (!empty($globalKey)) {
-                $key = $globalKey . '.' . $key;
-            }
-
-            if (is_array($value)) {
-                $this->setConfiguration($container, $value, $key);
-            } else {
-                $container->setParameter($key, $value);
-            }
-        }
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "preUpdate"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postUpdate"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "prePersist"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postPersist"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "preRemove"]);
+        $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postRemove"]);
+        
     }
 }

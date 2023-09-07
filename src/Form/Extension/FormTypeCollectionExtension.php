@@ -48,7 +48,7 @@ class FormTypeCollectionExtension extends AbstractTypeExtension
         return [FormType::class];
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $this->browseView($view, $form, $options);
     }

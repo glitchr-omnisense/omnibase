@@ -2,7 +2,6 @@
 
 namespace Base\Service;
 
-use Base\Controller\UX\MediaController;
 use Base\Routing\AdvancedRouter;
 use Base\Routing\RouterInterface;
 use finfo;
@@ -17,6 +16,7 @@ use Symfony\Component\Mime\MimeTypes;
  */
 class FileService implements FileServiceInterface
 {
+    public const USE_SHORT = Obfuscator::USE_SHORT;
     protected const CACHE_SUBDIVISION = 3;
     protected const CACHE_SUBDIVISION_LENGTH = 1;
 
@@ -51,11 +51,6 @@ class FileService implements FileServiceInterface
     /** * @var string */
     protected string $publicDir;
 
-    /**
-     * @var MediaController|null
-     */
-    protected ?MediaController $mediaController = null;
-
     public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
         $this->twig = $twig;
@@ -66,20 +61,6 @@ class FileService implements FileServiceInterface
         $this->publicDir = $flysystem->getPublicDir();
 
         $this->mimeTypes = new MimeTypes();
-    }
-
-    /**
-     * @param MediaController $mediaController
-     * @return $this
-     */
-    /**
-     * @param MediaController $mediaController
-     * @return $this
-     */
-    public function setController(MediaController $mediaController)
-    {
-        $this->mediaController = $mediaController;
-        return $this;
     }
 
     /**
@@ -153,14 +134,17 @@ class FileService implements FileServiceInterface
 
         // Attempt to guess mimetype using MimeTypes class
         try {
+            
             return $this->mimeTypes->guessMimeType($fileOrContentsOrArray);
+
         } catch (InvalidArgumentException $e) {
 
-            if(is_string($fileOrContentsOrArray) && !is_binary($fileOrContentsOrArray))
+            if(is_string($fileOrContentsOrArray) && !is_binary($fileOrContentsOrArray) && is_url($fileOrContentsOrArray))
                 $fileOrContentsOrArray = $this->router->getUrl($fileOrContentsOrArray, [], AdvancedRouter::ABSOLUTE_URL);
 
             // Attempt to read based on custom mime_content_content method
-            $mimeType = mime_content_type2($fileOrContentsOrArray);
+            try { $mimeType = mime_content_type2($fileOrContentsOrArray); }
+            catch (\ErrorException $e) { $mimeType = "application/x-empty"; }
             if ($mimeType && $mimeType !== "application/x-empty") {
                 return $mimeType;
             }
@@ -244,13 +228,13 @@ class FileService implements FileServiceInterface
         $config["options"] = $config["options"] ?? [];
         $config["local_cache"] = $config["local_cache"] ?? null;
 
-        while (($pathConfig = $this->obfuscator->decode(basename($path)))) {
+        while (($pathConfig = $this->obfuscator->decode(basename($path), FileService::USE_SHORT))) {
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        return $this->obfuscator->encode($config);
+        return $this->obfuscator->encode($config, FileService::USE_SHORT);
     }
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
@@ -261,7 +245,7 @@ class FileService implements FileServiceInterface
             $config["options"] = $config["options"] ?? [];
             $config["local_cache"] = $config["local_cache"] ?? null;
 
-            if (($pathConfig = $this->obfuscator->decode($data))) {
+            if (($pathConfig = $this->obfuscator->decode($data, FileService::USE_SHORT))) {
                 $path = $pathConfig["path"] ?? $path;
                 $config["path"] = $path;
                 $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -274,16 +258,12 @@ class FileService implements FileServiceInterface
 
         $extension = array_pop_key("extension", $config);
         if ($extension !== null) {
-            $extension = first($this->getExtensions($path));
-        }
-        if ($extension !== null) {
             $proxyRouteParameters["extension"] = $extension;
         }
 
         $host = array_pop_key("_host", $config); // Use custom _host if found
         $referenceType = array_pop_key("reference_type", $config); // Get reference type
-
-
+        
         $data = $this->obfuscate($path, $config);
         if (!$data) {
             return null;
@@ -292,6 +272,7 @@ class FileService implements FileServiceInterface
         if ($host !== null) {
             $proxyRouteParameters["_host"] = $host;
         }
+
         $proxyRouteParameters["data"] = $data;
 
         $variadic = [$proxyRoute, $proxyRouteParameters];
@@ -315,7 +296,7 @@ class FileService implements FileServiceInterface
             $data = str_replace("/", "", $data);
         }
 
-        $data = $this->obfuscator->decode($data);
+        $data = $this->obfuscator->decode($data, FileService::USE_SHORT);
 
         foreach ($data ?? [] as $key => $el) {
             $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;

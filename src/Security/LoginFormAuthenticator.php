@@ -5,6 +5,7 @@ namespace Base\Security;
 use App\Entity\User;
 use App\Enum\UserRole;
 use App\Repository\UserRepository;
+use Base\Entity\User\Connection;
 use Base\Routing\RouterInterface;
 use Base\Service\ReferrerInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -83,7 +84,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
-        $this->referrer->setUrl($request->getUri());
+        if(!$this->referrer->getUrl()) $this->referrer->setUrl($request->getUri());
 
         $route = $this->authorizationChecker->isGranted("EXCEPTION_ACCESS") ? RescueFormAuthenticator::LOGIN_ROUTE : static::LOGIN_ROUTE;
         return new RedirectResponse($this->router->generate($route));
@@ -126,8 +127,10 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     {
         // Update client information
         if (($user = $token->getUser())) {
+
             $permittedRoles = UserRole::getPermittedValues();
             foreach ($user->getRoles() as $role) {
+
                 if (!in_array($role, $permittedRoles)) {
                     $user->removeRole($role);
                 }
@@ -147,6 +150,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         if ($targetPath->getUrl() && $targetPath->sameSite() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath)) {
             return $this->router->redirect($targetPath->getUrl());
         }
+
         $defaultTargetPath = $request->getSession()->get('_security.' . $this->router->getRouteFirewall()->getName() . '.target_path');
         return $this->router->redirect($defaultTargetPath ?? $this->router->getBaseDir());
     }

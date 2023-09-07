@@ -22,7 +22,7 @@ class RoleType extends AbstractType
         return 'role';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             "capitalize" => true,

@@ -3,6 +3,7 @@
 namespace Base\Controller\Backend;
 
 use App\Entity\User as User;
+use App\Entity\User\Connection as UserConnection;
 use App\Entity\User\Group as UserGroup;
 use App\Entity\User\Notification as UserNotification;
 use App\Entity\User\Permission as UserPermission;
@@ -69,6 +70,7 @@ use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
 use Base\Backend\Config\Action;
 use Base\Backend\Config\Actions;
+use Base\Backend\Config\MenuAfterItem;
 use Base\Controller\Backend\Crud\Layout\Widget\SlotCrudController;
 use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
 use Base\Entity\Layout\Semantic;
@@ -83,6 +85,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\RequestStack;
+
+use Base\BaseBundle;
+use Base\Wikidoc\WikidocBundle;
+
+use Base\Wikidoc\Entity\AdminDocument;
+use Base\Wikidoc\Entity\DevDocument;
+use Base\Wikidoc\Entity\UserDocument;
 
 /**
  * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice")
@@ -211,10 +220,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      * @param Extension $extension
      * @return $this
      */
-    /**
-     * @param Extension $extension
-     * @return $this
-     */
     public function setExtension(Extension $extension): static
     {
         $this->extension = $extension;
@@ -230,6 +235,42 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function index(): Response
     {
         return $this->render('backoffice/index.html.twig');
+    }
+
+    /**
+     * @Route({"fr": "/manuel/{slug}", "en": "/manual/{slug}"}, name="_manual")
+     *
+     * @Iconize({"fa-solid fa-life-ring"})
+     *
+     * @IsGranted("IS_AUTHENTICATED_FULLY")
+     */
+    public function Manual(?string $slug = null): Response
+    {
+        if(!BaseBundle::hasBundle(WikidocBundle::class)) {
+            return $this->redirect("backoffice");
+        }
+
+        $documentRepository = $this->entityManager->getRepository(AdminDocument::class);
+        $documents = $documentRepository->cacheByParentEmpty([], ["priority" => "DESC"])->getResult();
+        
+        if($slug != null) $selectedDocument = $documentRepository->cacheOneBySlug($slug);
+        else $selectedDocument = first($documents);
+
+        $currentIndex = first(array_keys(array_column_object($documents, 'id'), $selectedDocument->getId()));
+        $previousDocument = $documents[$currentIndex-1] ?? null;
+        $nextDocument = $documents[$currentIndex+1] ?? null;
+
+        if($slug !== null && $slug == first($documents)?->getSlug()) {
+            return $this->redirectToRoute("backoffice_manual");
+        }
+
+        return $this->render('@Wikidoc/backoffice/manual.html.twig', [
+            "selected_document" => $selectedDocument,
+            "previous_document" => $previousDocument,
+            "next_document" => $nextDocument,
+            
+            "documents" => $documents
+        ]);
     }
 
     /**
@@ -541,27 +582,39 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return $menu;
     }
 
-    public function configureMenuItems(): iterable
+    public function configureMenuBeforeItems(): iterable
     {
         $menu = [];
-        $menu[] = MenuItem::section();
-        $menu[] = MenuItem::linkToRoute("backoffice", [], "Home");
         $menu[] = MenuItem::linkToRoute("backoffice_apikey");
         $menu[] = MenuItem::linkToRoute("backoffice_settings");
         $menu[] = MenuItem::linkToRoute("backoffice_widgets");
-        $menu[] = MenuItem::linkToRoute("app_index", [], 'Back to website', 'fa-solid fa-fw fa-door-open');
 
+        return $menu;
+    }
+
+    public function configureMenuItems(): iterable
+    {
+        $menu = [];
         $menu[] = MenuItem::section('BUSINESS CARD');
         if (UserRole::class != \Base\Enum\UserRole::class) {
             $menu = $this->addRoles($menu, UserRole::class);
         }
 
-//        if ($this->isGranted('ROLE_EDITOR')) {
-//
-//            $menu[] = MenuItem::section('SUPPORT');
-//            $menu[] = MenuItem::linkToRoute("backoffice_manual", [], 'User manual', 'fa-solid fa-fw fa-book');
-//            $menu[] = MenuItem::linkToRoute("backoffice_manual_developer", [], 'Developers', 'fa-solid fa-fw fa-life-ring');
-//        }
+
+        return $menu;
+    }
+
+    public function configureMenuAfterItems(): iterable
+    {
+        $menu = [];
+
+        $menu[] = MenuItem::linkToRoute("backoffice", [], "Home");
+        if ($this->isGranted('ROLE_EDITOR') && \Base\BaseBundle::hasBundle("wikidoc")) {
+
+            $menu[] = MenuAfterItem::linkToRoute("backoffice_manual", [], 'User manual', 'fa-solid fa-fw fa-life-ring');
+            // $menu[] = MenuAfterItem::linkToRoute("backoffice_manual_developer", [], 'Developers', 'fa-solid fa-fw fa-book');
+        }
+        $menu[] = MenuItem::linkToRoute("app_index", [], 'Back to website', 'fa-solid fa-fw fa-door-open');
 
         return $menu;
     }
@@ -675,12 +728,23 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', "fa-solid fa-users-viewfinder", 2));
             $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
                 WidgetItem::linkToCrud(User::class),
+                WidgetItem::linkToCrud(UserConnection::class),
                 WidgetItem::linkToCrud(UserGroup::class),
                 WidgetItem::linkToCrud(UserNotification::class),
                 WidgetItem::linkToCrud(UserPermission::class),
                 WidgetItem::linkToCrud(UserPenalty::class),
                 WidgetItem::linkToCrud(UserToken::class),
             ]);
+
+            if(BaseBundle::hasBundle(WikidocBundle::class)) {
+
+                $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('DOCUMENTATION', 'fa-solid fa-life-ring'));
+                $widgets = $this->addWidgetItem($widgets, 'DOCUMENTATION', [
+                    WidgetItem::linkToCrud(AdminDocument::class),
+                    WidgetItem::linkToCrud(DevDocument::class),
+                    WidgetItem::linkToCrud(UserDocument::class),
+                ]);
+            }
         }
 
         return $widgets;

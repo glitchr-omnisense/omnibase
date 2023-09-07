@@ -311,7 +311,7 @@ class AdvancedRouter extends Router implements RouterInterface
         return $this->router->getContext();
     }
 
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
         $this->router->setContext($context);
     }
@@ -666,7 +666,10 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function getRouteHash(string $routeNameOrUrl): string
     {
-        return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localizer->getLocaleLang();
+        $context = cast_to_array($this->getContext());
+        array_pop_key("parameters", $context);
+ 
+        return $routeNameOrUrl . ";" . serialize($context) . ";" . $this->localizer->getLocaleLang();
     }
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
@@ -696,7 +699,6 @@ class AdvancedRouter extends Router implements RouterInterface
         $routeName = $this->getRouteName($url);
 
         if (!$routeName) {
-            exit(1);
             throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
         }
 

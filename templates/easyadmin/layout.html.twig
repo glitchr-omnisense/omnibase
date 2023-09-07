@@ -160,12 +160,12 @@
                                     <div class="dropdown user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
                                         <a class="user-details" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
                                             {% set logo = ea_extra.logo(ea.crud.getCurrentPage() ?? null) %}
-                                            <img class="user-avatar" alt="avatar" data-src="{{ logo|thumbnail(250,250) }}" />
+                                            <div class="img-fluid"><img class="user-avatar" alt="avatar" data-src="{{ logo|thumbnail(250,250) }}" /></div>
 
                                             {% if ea.userMenu.isNameDisplayed %}
                                             <div class="dashboard-menu">
                                                 <div class="dashboard-title">{{ ea.dashboardTitle|striptags }}</div>
-                                                <div class="user-name">{{ ea.userMenu.name }}</div>
+                                                <div class="user-name">{{ ea.userMenu.name|str_shorten(15) }}</div>
                                             </div>
                                             {% endif %}
                                         </a>
@@ -178,8 +178,9 @@
                             </header>
 
                             {% block main_menu_wrapper %}
-                                {{ include(ea.templatePath('main_menu')) }}
+                            {{ include(ea.templatePath('main_menu')) }}
                             {% endblock main_menu_wrapper %}
+
                         {% endblock sidebar %}
 
                         <div id="sidebar-resizer-handler" class="resizer-handler resizer-handler-left"></div>

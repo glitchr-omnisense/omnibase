@@ -9,6 +9,7 @@ use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
 use Base\Entity\Extension\Log;
+use Base\Entity\User\Connection;
 
 use App\Entity\User\Token;
 use App\Entity\User\Group;
@@ -24,7 +25,6 @@ use Doctrine\Common\Collections\Collection;
 
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Intl\Timezones;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Base\Validator\Constraints as AssertBase;
@@ -52,6 +52,9 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use App\Enum\UserRole;
 use App\Enum\UserState;
+use Base\Service\Model\AutocompleteInterface;
+use Base\Traits\CookieTrait;
+use Base\Traits\UserInfoTrait;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -64,10 +67,15 @@ use App\Enum\UserState;
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
  */
-class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface
+class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
 {
     use BaseTrait;
+    use UserInfoTrait;
 
+    public function __autocomplete(): string { return $this->__toString(); }
+    public function __autocompleteData(): array { return []; }
+
+    public function __toString() { return $this->getEmail() ?? $this->getId(); }
     public function __iconize(): ?array
     {
         return array_map(fn($r) => UserRole::getIcon($r, 0), array_filter($this->getRoles()));
@@ -78,44 +86,30 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return ["fa-solid fa-user"];
     }
 
-    public const __COOKIE_IDENTIFIER__ = "USER/INFO";
-    public const __DEFAULT_IDENTIFIER__ = "email";
-
-    /**
-     * @param $role
-     * @return bool
-     * @throws Exception
-     */
-    public function isGranted($role): bool
+    public static $userIdentifier = "email";
+    public static function getUserIdentifierField(): string
     {
-        return $this->getService()->isGranted($role, $this);
+        return static::$userIdentifier;
     }
-
-    public function killSession()
-    {
-        $this->logout();
-    }
-
-    public static $identifier = self::__DEFAULT_IDENTIFIER__;
 
     public function getUserIdentifier(): string
     {
-        $identifier = null;
+        $userIdentifier = null;
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isReadable($this, self::$identifier)) {
-            $identifier = $accessor->getValue($this, self::$identifier);
+        if ($accessor->isReadable($this, static::$userIdentifier)) {
+            $userIdentifier = $accessor->getValue($this, static::$userIdentifier);
         }
 
-        if ($accessor->isReadable($this, self::__DEFAULT_IDENTIFIER__) && !$identifier) {
-            $identifier = $accessor->getValue($this, self::$identifier);
+        if ($accessor->isReadable($this, static::$userIdentifier) && !$userIdentifier) {
+            $userIdentifier = $accessor->getValue($this, static::$userIdentifier);
         }
 
-        if ($identifier === null) {
+        if ($userIdentifier === null) {
             throw new Exception("User identifier is NULL. Is this user initialized or database persistent ?");
         }
 
-        return $identifier;
+        return $userIdentifier;
     }
 
     /**
@@ -131,11 +125,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @return string
      * @throws Exception
      */
-    public function __toString()
-    {
-        return $this->getUserIdentifier();
-    }
-
     public function __construct(?string $email = null)
     {
         $this->email = $email;
@@ -150,6 +139,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->notifications = new ArrayCollection();
         $this->groups = new ArrayCollection();
         $this->penalties = new ArrayCollection();
+
+        $this->connections = new ArrayCollection();
 
         $this->threads = new ArrayCollection();
         $this->followedThreads = new ArrayCollection();
@@ -172,7 +163,15 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return new Recipient($email, $phone, $locale, $timezone);
     }
 
-    public function logout(?string $domain)
+    /**
+     * @param $role
+     * @return bool
+     * @throws Exception
+     */
+    public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
+
+    public function killSession() { $this->logout(); }
+    public function logout()
     {
         $token = $this->getTokenStorage()->getToken();
         if ($token === null || $token->getUser() !== $this) {
@@ -182,61 +181,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             setcookie("REMEMBERME", '', time() - 1);
             setcookie("REMEMBERME", '', time() - 1, "/", $this->getRouter()->getDomain());
         }
-    }
-
-    /**
-     * @param string|null $key
-     * @return array|mixed|string|null
-     */
-    public static function getCookie(string $key = null)
-    {
-        $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
-        if (array_key_exists("timezone", $cookie)) {
-            $timezone = Timezones::getCountryCode($cookie["timezone"]);
-            if (!array_key_exists("country", $cookie) || $timezone != $cookie["country"]) {
-                $cookie["country"] = Timezones::getCountryCode($cookie["timezone"]);
-                User::setCookie("country", $cookie["country"]);
-            }
-        }
-
-        if (!isset($cookie)) {
-            return null;
-        }
-        if (empty($key)) {
-            return $cookie;
-        }
-
-        return $cookie[$key] ?? null;
-    }
-
-    /**
-     * @param string $key
-     * @param $value
-     * @param int $lifetime
-     * @return void
-     */
-    public static function setCookie(string $key, $value, int $lifetime = 0)
-    {
-        $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
-        $cookie = array_merge($cookie, [$key => $value]);
-
-        setcookie(self::__COOKIE_IDENTIFIER__, json_encode($cookie), $lifetime > 0 ? time() + $lifetime : 0, "/", parse_url2(get_url())["domain"] ?? "");
-    }
-
-    public static function getBrowser(): ?string
-    {
-        return $_SERVER['HTTP_USER_AGENT'] ?? null;
-    }
-
-    public static function getIp(): ?string
-    {
-        $keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
-        foreach ($keys as $k) {
-            if (!empty($_SERVER[$k]) && filter_var($_SERVER[$k], FILTER_VALIDATE_IP)) {
-                return $_SERVER[$k];
-            }
-        }
-        return null;
     }
 
     /**
@@ -412,34 +356,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    protected $timezone;
-
-    public function getCountryCode(): string
-    {
-        return Timezones::getCountryCode($this->getTimezone());
-    }
-
-    public function getTimezone(): string
-    {
-        return $this->timezone ?? "UTC";
-    }
-
-    public function setTimezone(string $timezone = null): self
-    {
-        if (empty($timezone)) {
-            $timezone = $this->timezone ?? null;
-        }
-        $this->timezone = $timezone ?? User::getCookie("timezone") ?? null;
-        if (!in_array($this->timezone, timezone_identifiers_list())) {
-            $this->timezone = "UTC";
-        }
-
-        return $this;
-    }
-
-    /**
      * @var string Plain password should be empty unless you want to change it
      * @Assert\NotCompromisedPassword
      * @AssertBase\Password(min_strength=4, min_length=8)
@@ -457,14 +373,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->updatedAt = new DateTime("now"); // Plain password is not an ORM variable..
     }
 
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         $this->plainPassword = null;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -826,60 +739,62 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers", orphanRemoval=true, cascade={"persist", "remove"})
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers")
      */
     protected $followedThreads;
+
+    public function isFollowing(Thread $followedThread): bool
+    {
+        return $this->followedThreads->contains($followedThread);
+    }
 
     public function getFollowedThreads(): Collection
     {
         return $this->followedThreads;
     }
 
-    public function addFollowedThread(Thread $followedThread): self
+    public function addFollowedThread(Thread $thread): self
     {
-        if (!$this->followedThreads->contains($followedThread)) {
-            $this->followedThreads[] = $followedThread;
-            $followedThread->addFollower($this);
+        if (!$this->followedThreads->contains($thread)) {
+            $this->followedThreads[] = $thread;
         }
 
         return $this;
     }
 
-    public function removeFollowedThread(Thread $followedThread): self
+    public function removeFollowedThread(Thread $thread): self
     {
-        if ($this->followedThreads->removeElement($followedThread)) {
-            $followedThread->removeFollower($this);
-        }
+        $this->followedThreads->removeElement($thread);
 
         return $this;
     }
+
 
     /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="target", orphanRemoval=true, cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="mentionee", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $mentions;
-
     public function getMentions(): Collection
     {
         return $this->mentions;
     }
 
-    public function addMention(Mention $mention): self
+    public function addMentions(Mention $mentions): self
     {
-        if (!$this->mentions->contains($mention)) {
-            $this->mentions[] = $mention;
-            $mention->setTarget($this);
+        if (!$this->mentions->contains($mentions)) {
+            $this->mentions[] = $mentions;
+            $mentions->setMentionee($this);
         }
 
         return $this;
     }
 
-    public function removeMention(Mention $mention): self
+    public function removeMentions(Mention $mentions): self
     {
-        if ($this->mentions->removeElement($mention)) {
+        if ($this->mentions->removeElement($mentions)) {
             // set the owning side to null (unless already changed)
-            if ($mention->getTarget() === $this) {
-                $mention->setTarget(null);
+            if ($mentions->getMentionee() === $this) {
+                $mentions->setMentionee(null);
             }
         }
 
@@ -1205,6 +1120,40 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             // set the owning side to null (unless already changed)
             if ($address->getUser() === $this) {
                 $address->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @ORM\OneToMany(targetEntity=Connection::class, mappedBy="user", orphanRemoval=true)
+     */
+    protected $connections;
+    public function getConnections(): Collection
+    {
+        return $this->connections;
+    }
+
+    public function addConnection(Connection $connection): self
+    {
+        $this->connections[] = $connection;
+
+        if (!$this->connections->contains($connection)) {
+            $this->connections[] = $connection;
+            $connection->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConnection(Connection $connection): self
+    {
+        if ($this->connections->removeElement($connection)) {
+            
+            // set the owning side to null (unless already changed)
+            if ($connection->getUser() === $this) {
+                $connection->setUser(null);
             }
         }
 

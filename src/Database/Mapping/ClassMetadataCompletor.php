@@ -44,11 +44,6 @@ class ClassMetadataCompletor
      * @param mixed $value
      * @return $this
      */
-    /**
-     * @param string $name
-     * @param mixed $value
-     * @return $this
-     */
     public function __set(string $name, mixed $value)
     {
         $this->payload["class"] ??= $this->className; // Useful when looking inside cache directory for debugging.....

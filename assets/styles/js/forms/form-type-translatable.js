@@ -1,3 +1,6 @@
+
+import Tab from 'bootstrap/js/dist/tab';
+
 window.addEventListener("load.form_type", function () {
 
     const isEmpty = (value) => value == undefined || !value.trim().length;

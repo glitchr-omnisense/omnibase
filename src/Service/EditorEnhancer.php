@@ -17,7 +17,27 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         if (is_string($json)) {
             $json = json_decode($json);
         }
+
         return $this->twig->render("@Base/form/wysiwyg/editor_js.html.twig", ["json" => $json, "options" => $options]);
+    }
+
+    public function getTableOfContents(mixed $json, ?int $maxLevel = null): array
+    {
+        if (is_string($json)) {
+            $json = json_decode($json);
+        }
+
+        $headlines = [];
+
+        foreach ($json->blocks ?? [] as $block) {
+
+            if ($block->type != "header") continue;
+            
+            $block->data->text = "<h".$block->data->level.">".strip_tags($block->data->text)."</h".$block->data->level.">";
+            $headlines = array_merge($headlines, $this->headingEnhancer->toc($block->data->text, $maxLevel));
+        }
+
+        return $headlines;
     }
 
     public function highlightHeadings(mixed $json, ?int $maxLevel = null, array $attrs = []): mixed
@@ -26,18 +46,13 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
             $json = json_decode($json);
         }
 
-        $attrs ??= [];
-        $attrs["class"] = $attrs["class"] ?? "";
-        $attrs["class"] = trim($attrs["class"] . " markdown-anchor");
-
-        $maxLevel ??= 6;
         foreach ($json->blocks ?? [] as $block) {
-            if ($block->type == "header" && $block->data->level < $maxLevel) {
-                $text = $block->data->text;
-                $id = $this->slugger->slug(str_strip_nonprintable(strip_tags($text)));
-
-                $block->data->text = "<a id='" . $id . "' " . html_attributes($attrs) . " href='#" . $id . "'>" . strip_tags($text) . "</a>";
-            }
+            
+            if ($block->type != "header") continue;
+    
+            $block->data->text = "<h".$block->data->level.">".strip_tags($block->data->text)."</h".$block->data->level.">";
+            $block->data->text = $this->headingEnhancer->highlight($block->data->text, $maxLevel, $attrs);
+            $block->data->text = str_strip($block->data->text, "<h".$block->data->level.">", "</h".$block->data->level.">");
         }
 
         return $json;
@@ -53,37 +68,28 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         $attrs["class"] = $attrs["class"] ?? "";
         $attrs["class"] = trim($attrs["class"] . " markdown-semantic");
 
-        foreach ($json->blocks ?? [] as $block) {
-            if ($block->type == "paragraph") {
-                $block->data->text = $this->semanticEnhancer->highlight($block->data->text, $words, $attrs);
-            }
+        foreach (json_leaves($json) as &$block) {
+            $block = $this->semanticEnhancer->highlight($block, $words, $attrs);
         }
 
         return $json;
     }
 
-    public function getTableOfContents(mixed $json, ?int $maxLevel = null): array
-    {
+    public function highlightMentions(mixed $json, array $attrs = []): mixed
+    {    
         if (is_string($json)) {
-            $json = json_decode($json);
+            $json = json_decode($json, true);
         }
 
-        $headlines = [];
+        $attrs ??= [];
+        $attrs["class"] = $attrs["class"] ?? "";
+        $attrs["class"] = trim($attrs["class"] . " markdown-mention");
 
-        $maxLevel ??= 6;
-        foreach ($json->blocks ?? [] as $block) {
-            if ($block->type == "header" && $block->data->level < $maxLevel) {
-                $text = $block->data->text;
-                $id = $this->slugger->slug(str_strip_nonprintable(strip_tags($text)));
-
-                $headlines[] = [
-                    "tag" => "h" . $block->data->level,
-                    "slug" => $id,
-                    "title" => str_strip_nonprintable(strip_tags($text))
-                ];
-            }
+        foreach (json_leaves($json) as &$block) {
+            $block = $this->mentionEnhancer->highlight($block, $attrs);
         }
-
-        return $headlines;
+        
+        return $json;
     }
+
 }

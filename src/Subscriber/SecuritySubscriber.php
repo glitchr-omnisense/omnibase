@@ -7,7 +7,6 @@ use App\Repository\UserRepository;
 use Base\Service\LocalizerInterface;
 use Base\Service\ReferrerInterface;
 use App\Entity\User;
-
 use Base\Security\LoginFormAuthenticator;
 
 use DateTime;
@@ -30,7 +29,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
@@ -45,73 +43,67 @@ class SecuritySubscriber implements EventSubscriberInterface
     /**
      * @var RequestStack
      */
-    private RequestStack $requestStack;
+    protected RequestStack $requestStack;
 
     /**
      * @var TokenStorageInterface
      */
-    private TokenStorageInterface $tokenStorage;
+    protected TokenStorageInterface $tokenStorage;
 
     /**
      * @var RouterInterface
      */
-    private RouterInterface $router;
+    protected RouterInterface $router;
 
     /**
      * @var UserRepository
      */
-    private UserRepository $userRepository;
+    protected UserRepository $userRepository;
 
     /**
      * @var AuthorizationChecker
      */
-    private AuthorizationChecker $authorizationChecker;
+    protected AuthorizationChecker $authorizationChecker;
 
     /**
      * @var LauncherInterface
      */
-    private LauncherInterface $launcher;
+    protected LauncherInterface $launcher;
 
     /**
      * @var MaintenanceProviderInterface
      */
-    private MaintenanceProviderInterface $maintenanceProvider;
+    protected MaintenanceProviderInterface $maintenanceProvider;
 
     /**
      * @var ?Profiler
      */
-    private ?Profiler $profiler;
+    protected ?Profiler $profiler;
 
     /**
      * @var ReferrerInterface
      */
-    private ReferrerInterface $referrer;
+    protected ReferrerInterface $referrer;
 
     /**
      * @var ParameterBagInterface
      */
-    private ParameterBagInterface $parameterBag;
+    protected ParameterBagInterface $parameterBag;
 
     /**
      * @var SettingBagInterface
      */
-    private SettingBagInterface $settingBag;
+    protected SettingBagInterface $settingBag;
 
     /**
      * @var LocalizerInterface
      */
-    private LocalizerInterface $localizer;
-
-    /**
-     * @var TranslatorInterface
-     */
-    private TranslatorInterface $translator;
+    protected LocalizerInterface $localizer;
 
     public function __construct(
         UserRepository               $userRepository,
         AuthorizationChecker         $authorizationChecker,
         TokenStorageInterface        $tokenStorage,
-        TranslatorInterface          $translator,
         RequestStack                 $requestStack,
         ReferrerInterface            $referrer,
         SettingBagInterface          $settingBag,
@@ -125,7 +117,6 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
-        $this->translator = $translator;
         $this->router = $router;
 
         $this->localizer = $localizer;
@@ -295,7 +286,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->referrer->setUrl($event->getRequest()->getUri());
             $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
 
-            $this->userRepository->flush($user);
+            $this->userRepository->flush();
             $event->stopPropagation();
 
             return;
@@ -333,10 +324,10 @@ class SecuritySubscriber implements EventSubscriberInterface
         if (!$user->isApproved()) {
             if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
                 $user->approve();
-                $this->userRepository->flush($user);
+                $this->userRepository->flush();
             } elseif ($this->parameterBag->get("base.user.autoapprove")) {
                 $user->approve();
-                $this->userRepository->flush($user);
+                $this->userRepository->flush();
             } elseif ($this->router->isSecured()) {
                 $this->router->redirectEvent($event, "security_pendingForApproval", [], 302, ["exceptions" => $exceptions]);
             }
@@ -364,13 +355,13 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         if (!($user->isActive())) {
             $user->poke(new DateTime("now"));
-            $this->userRepository->flush($user);
+            $this->userRepository->flush();
         }
     }
 
     public function onLoginFailure(LoginFailureEvent $event)
     {
-	$message = "@notifications.login.failed";
+	    $message = "@notifications.login.failed";
         $importance = "danger";
 
         if (($exception = $event->getException())) {
@@ -397,10 +388,14 @@ class SecuritySubscriber implements EventSubscriberInterface
          */
         $user = $event->getUser();
         if ($user instanceof BaseUser) {
+
             if (!$user->isPersistent()) {
+            
                 $notification = new Notification("login.social", [$user]);
                 $notification->send("success");
+            
             } elseif ($user->isVerified()) {
+
                 $isAuthenticated = $this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') || $this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED');
                 if (!$isAuthenticated) {
                     $title = "@notifications.login.success.alien";

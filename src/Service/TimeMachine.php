@@ -64,12 +64,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     protected $output;
 
     protected string $cacheDir;
-    protected int $snapshotLimit;
 
-    /**
-     * @param OutputInterface $output
-     * @return $this
-     */
     /**
      * @param OutputInterface $output
      * @return $this
@@ -97,10 +92,6 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
          * @param $signal
          * @return void
          */
-        /**
-         * @param $signal
-         * @return void
-         */
         function signal_handler($signal)
         {
             switch ($signal) {
@@ -110,14 +101,19 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
     }
 
+    /**
+     * @var string
+     */
+    protected string $environment;
+
     public function __construct(Flysystem $flysystem, Registry $doctrine, ParameterBagInterface $parameterBag)
     {
         //
         // Common variables
-        $this->cacheDir = $parameterBag->get("kernel.cache_dir");
-        $this->compression = $parameterBag->get("base.time_machine.compression");
-        $this->snapshotLimit = $parameterBag->get("base.time_machine.snapshot_limit");
-
+        $this->cacheDir      = $parameterBag->get("kernel.cache_dir");
+        $this->compression   = $parameterBag->get("base.time_machine.compression");
+        $this->environment   = $parameterBag->get("kernel.environment"); 
+       
         //
         // Prepare filesystem configuration
         $config = ["type" => "local", "root" => $this->getCacheDir()];
@@ -191,47 +187,42 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $this->databases = $databases;
         $this->compressors = $compressors;
 
-        $this->maxCycle = 3;
-        $this->timeLimit = "+30d";
+        $this->maxCycle = $parameterBag->get("base.time_machine.max_cycle");
+        $this->timeLimit = $parameterBag->get("base.time_machine.time_limit");
     }
 
     protected int $maxCycle;
-
-    public function getMaxCycle(): ?string
+    public function getMaxCycle(): ?int
     {
         return $this->maxCycle;
     }
 
     /**
-     * @param string|null $maxCycle
+     * @param int $maxCycle
      * @return $this
      */
-    /**
-     * @param string|null $maxCycle
-     * @return $this
-     */
-    public function setMaxCycle(?string $maxCycle)
+    public function setMaxCycle(int $maxCycle)
     {
         $this->maxCycle = $maxCycle;
         return $this;
     }
 
-    protected string $timeLimit;
+    protected mixed $timeLimit;
 
-    public function getTimeLimit(): ?string
+    public function getTimeLimit(): ?DateTime
     {
-        return $this->timeLimit;
+        if(is_string($this->timeLimit) && str_starts_with($this->timeLimit, "+")) {
+            $this->timeLimit[0] = "-";
+        }
+        
+        return cast_datetime($this->timeLimit);
     }
 
     /**
-     * @param string|null $timeLimit
+     * @param int|null $timeLimit
      * @return $this
      */
-    /**
-     * @param string|null $timeLimit
-     * @return $this
-     */
-    public function setTimeLimit(?string $timeLimit)
+    public function setTimeLimit(null|string|DateTime|int $timeLimit)
     {
         $this->timeLimit = $timeLimit;
         return $this;
@@ -300,14 +291,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @param int $cycle
      * @return array|null
      */
-    public function getSnapshot(int $id, int|array $storageNames, ?string $prefix = null, int $cycle = -1)
+    public function findOneBy(int $id, int|array $storageNames, ?string $prefix = null, int $cycle = -1)
     {
-        $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
+        $snapshots = $this->findBy($storageNames, $prefix, $cycle);
         if ($id >= count_leaves($snapshots)) {
             throw new LogicException("Unknown ID #" . $id . " provided.");
         }
 
-        $prefix = $prefix ?? "backup";
+        $prefix = $prefix ?? $this->environment;
 
         $i = 0;
 
@@ -332,15 +323,17 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @param $cycle
      * @return array
      */
-    public function getSnapshots(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
+    public function findBy(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
     {
         $snapshots = [];
-        $prefix = $prefix ?? "backup";
+        $prefix = $prefix ?? $this->environment;
 
         $storageNames = array_flip($storageNames);
         foreach (array_intersect_key($this->getStorageList(), $storageNames) as $storageName => $filesystem) {
+
             $snapshots[$storageName] = [];
             foreach ($filesystem->listContents("/") as $content) {
+
                 if ($content->type() != "file") {
                     continue;
                 }
@@ -355,28 +348,57 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             }
 
             // Properly sort array
-            $matches = [];
-            sort($snapshots[$storageName]);
-
-            $mask = [];
-            foreach ($snapshots[$storageName] as $snapshot) {
-                $mask[] = preg_match('/' . preg_quote($prefix) . '\-[0-9]+\-[0-9]+.\w/', basename($snapshot));
+            foreach($snapshots[$storageName] as &$snapshot) {
+                $snapshot = str_replace("-","_",$snapshot);
             }
 
-            $snapshots[$storageName] = array_reverseByMask($snapshots[$storageName], $mask);
-            $snapshots[$storageName] = array_reverse($snapshots[$storageName]);
+            natsort($snapshots[$storageName]);
+            $snapshots[$storageName] = array_values($snapshots[$storageName]);
+            foreach($snapshots[$storageName] as &$snapshot) {
+                $snapshot = str_replace("_","-",$snapshot);
+            }
         }
 
         return $snapshots;
     }
 
+    public function findByCycle(int|array $storageNames = [], ?string $prefix = null, $cycle = -1): array
+    {
+        $snapshotByCycles = [];
+        foreach($this->findBy($storageNames, $prefix, $cycle) as $storageName => $files) {
+
+            $snapshotByCycles[$storageName] ??= [];
+
+            foreach($files as $file) {
+
+                $date = null;
+                $matches = [];
+                if(preg_match('/' . preg_quote($prefix) . '\-([0-9]+)\.\w+/', basename($file), $matches)) {
+                    $date = $matches[1];
+                } else if(preg_match('/' . preg_quote($prefix) . '\-([0-9]+)\-([0-9]{1,3})\.\w+/', basename($file), $matches)) {
+                    $date = $matches[1];
+                } 
+                
+                if($date !== null) {
+
+                    $snapshotByCycles[$storageName][$date] ??= [];
+                    $snapshotByCycles[$storageName][$date][] = $file;
+                }
+            }
+        }
+
+        return $snapshotByCycles;
+    }
+
     public function getLastCycle(array $files, ?string $prefix = null): int
     {
+        $prefix = $prefix ?? "";
+        
         $matches = [];
         $lastCycle = 0;
-        if (preg_match('/' . preg_quote($prefix) . '\-([0-9]*)\.\w/', basename(end($files)), $matches)) {
+        if (preg_match('/' . preg_quote($prefix) . '\-([0-9]{1,3})\.\w+/', basename(end($files)), $matches)) {
             $lastCycle = intval($matches[1]);
-        } elseif (preg_match('/' . preg_quote($prefix) . '\.\w/', basename(end($files)), $matches)) {
+        } else if (preg_match('/' . preg_quote($prefix) . '\-([0-9]+)\.\w+/', basename(end($files)), $matches)) {
             $lastCycle = 1;
         }
 
@@ -396,17 +418,19 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @throws FilesystemException
      * @throws FilesystemTypeNotSupported
      */
-    public function backup(null|string|array $databases, int|array $storageNames = [], ?string $prefix = null, int $cycle = -1)
+    public function backup(null|string|array $databases, int|array $storageNames = [], bool $userInfo = false, ?string $prefix = null, int $cycle = -1)
     {
-        $prefix = $prefix ?? "backup";
-        $this->output?->section()->writeln("<info>Backup procedure started:</info> " . $prefix);
+        $prefix = $prefix ?? $this->environment;
+        $this->output?->section()->writeln("<info>Backup procedure started for </info> \"" . $prefix. "\"");
 
         // Remove too old backup
-        $dateLimit = new DateTime($this->timeLimit);
-        $snapshots = $this->getSnapshots($storageNames, $prefix);
+        $dateLimit = $this->getTimeLimit();
+        $snapshots = $this->findBy($storageNames, $prefix);
         foreach ($snapshots as $storageName => $files) {
+
             $filesystem = $this->filesystems->get($storageName);
-            foreach ($files as $file) {
+            foreach ($files as $id => $file) {
+
                 $matches = [];
                 $dateTime = null;
                 if (preg_match('/' . preg_quote($prefix) . '-([0-9]*)/', $file, $matches)) {
@@ -416,32 +440,76 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
                 if ($dateTime && $dateTime < $dateLimit) {
                     $this->output?->section()->writeln("- Too old version found (older than " . $this->timeLimit . "), deleting <warning>" . $file . "</warning>");
                     $filesystem->delete($file);
+                    unset($files[$id]);
                 }
             }
+
+            $snapshots[$storageName] = array_values($files);
         }
 
         // Find today versions
-        $snapshots = $this->getSnapshots($storageNames, $prefix, $cycle);
+        $snapshots = $this->findBy($storageNames, $prefix, $cycle);
         if (!$snapshots) {
             throw new LogicException("No valid storage selected.");
         }
 
-        // Prepare Backup filesystem
+        //
+        // Remove too old cycles
+        foreach ($snapshots as $storageName => $files) {
+
+            $filesystem = $this->filesystems->get($storageName);
+            $lastCycle = $this->getLastCycle($files);
+
+            $date = null;
+            $snapshotByCycles = [];
+            foreach($files as $file) {
+
+                $matches = [];
+                if(preg_match('/' . preg_quote($prefix) . '\-([0-9]+)\.\w+/', basename($file), $matches)) {
+                    $date = $matches[1];
+                } else if($date !== null) {
+                    $snapshotByCycles[$date] ??= [];
+                    $snapshotByCycles[$date][] = $file;
+                }
+            }
+
+            // Remove today cycles
+            $cycles = $snapshotByCycles[(new DateTime())->format('Ymd')] ?? [];
+            for ($i = 0, $Ncycles = count($cycles), $N = $Ncycles - $this->getMaxCycle() + 1; $i < $N && $this->getMaxCycle() > 0; $i++) {
+
+                $this->output?->section()->writeln("- Too many cycles found (limit at ".$this->getMaxCycle()."), deleting <warning>" . $cycles[$i] . "</warning>");
+                $filesystem->delete($cycles[$i]);
+            }
+        }
+
+        // Prepare backup
         $destinations = [];
+
+	// Remove files from -1d
+	$yesterdayPrefix = $prefix . "-" . (new DateTime("-1 day"))->format('Ymd');
+        $outputDir = $this->getCacheDir() . "/" . $yesterdayPrefix;
+        if (is_dir($outputDir)) {
+            rrmdir($outputDir);
+        }
+        $output = $this->getCacheDir() . "/" . $yesterdayPrefix."tar";
+        if (file_exists($output)) {
+            unlink($output);
+        }
+        $output = $this->getCacheDir() . "/" . $yesterdayPrefix."tar.gz";
+        if (file_exists($output)) {
+            unlink($output);
+        }
 
         $prefix = $prefix . "-" . (new DateTime())->format('Ymd');
         foreach ($snapshots as $storageName => $files) {
+
             //
             // Remote older version
             $filesystem = $this->filesystems->get($storageName);
-            for ($i = 0; $i < max(count($files) - $this->getMaxCycle(), 0); $i++) {
-                $this->output?->section()->writeln("- Too many versions found, deleting <warning>" . $files[$i] . "</warning>");
-                $filesystem->delete($files[$i]);
-            }
+            $lastCycle = $this->getLastCycle($files, $prefix);
 
             //
             // Compute next version
-            $lastCycle = $this->getLastCycle($files);
             $cycle = $cycle < 0 ? $lastCycle + 1 : min($cycle, $lastCycle + 1);
             $file = $cycle > 1 ? $prefix . "-" . $cycle . ".tar" : $prefix . ".tar";
 
@@ -452,11 +520,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $this->output?->section()->writeln("<info>- Temporary working directory:</info> " . $this->getCacheDir() . "/" . $prefix);
         if ($databases) {
             $databases = is_string($databases) ? [$databases] : $databases;
-            $this->output?->section()->writeln("<info>- Backing databases:</info> " . implode(", ", $databases));
+            $this->output?->section()->writeln("<info>- Backing database(s):</info> " . implode(", ", $databases));
 
             foreach ($databases as $database) {
                 parent::makeBackup()->run($database, [new Destination("local", $prefix . "/databases/" . $database . ".sql")], "null");
             }
+        } else {
+
+            $this->output?->section()->writeln("<warning>- No database backed up..</warning> please provide `--database` option");
         }
 
         // Prepare backup directory
@@ -464,24 +535,38 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             mkdir($this->getCacheDir() . "/" . $prefix, 0755);
         }
 
+        // Save some user info
+        if($userInfo) {
+            $this->extractUserInfo($this->getCacheDir() . "/" . $prefix . "/.user.log");
+        }
+
         // Compress and transfer
-        $output = $this->buildArchive($this->getCacheDir() . "/" . $prefix . "/application.tar", getcwd(), [$this->cacheDir]);
+        $output = $this->buildArchive($this->getCacheDir() . "/" . $prefix . "/application.tar", getcwd(), [$this->cacheDir], false, false);
         $output = $this->buildCompressedArchive($this->getCacheDir() . "/" . $prefix . ".tar", $this->getCacheDir() . "/" . $prefix);
+        $outputDir = $this->getCacheDir() . "/" . $prefix;
+        if (is_dir($outputDir)) {
+            rrmdir($outputDir);
+        }
 
         foreach ($destinations as $id => $destination) {
+
             $filesystem = $this->filesystems->get($destination->destinationFilesystem());
 
             $compressor = $this->compressors->get($this->compression);
             $path = $compressor->getCompressedPath($destination->destinationPath());
-            $prefix = $this->flysystem->prefixPath($path, $destination->destinationFilesystem());
+            $location = $this->flysystem->prefixPath($path, $destination->destinationFilesystem());
 
             if ($stream = fopen($output, 'r')) {
+
+                $this->output?->section()->writeln("<info>- Sending \"".$location."\"..</info> to \"".$destination->destinationFilesystem()."\" ongoing. Please wait..");
                 $filesystem->writeStream($path, $stream);
                 fclose($stream);
             }
 
-            $this->output?->section()->writeln("<info>- Application backup #" . ($id + 1) . "</info> in \"" . $destination->destinationFilesystem() . "\": " . $prefix);
+            $this->output?->section()->writeln("<info>- Application backup #" . ($id + 1) . "</info> in \"" . $destination->destinationFilesystem() . "\": " . $location);
         }
+
+        $this->output?->section()->writeln("<info>- Data backup saved..</info> That's all folks !");
 
         if (file_exists($output)) {
             unlink($output);
@@ -507,9 +592,9 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      */
     public function restore(int $id, bool $restoreDatabase, bool $restoreApplication, int|array $storageNames = [], ?string $prefix = null, int $cycle = -1)
     {
-        $prefix = $prefix ?? "backup";
+        $prefix = $prefix ?? $this->environment;
 
-        list($storageName, $file) = $this->getSnapshot($id, $storageNames, $prefix, $cycle);
+        list($storageName, $file) = $this->findOneBy($id, $storageNames, $prefix, $cycle);
         if (!$storageName) {
             throw new LogicException("No snapshot found among the list of storages provided: \"" . implode(",", $storageNames) . "\"");
         }
@@ -602,12 +687,37 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return $outputDir;
     }
 
-    public function buildCompressedArchive(string $output, string $directory, array $excludes = []): ?string
+    public function buildCompressedArchive(string $output, string $directory, array $excludes = [], bool $verbose = true): ?string
     {
-        return $this->buildArchive($output, $directory, $excludes, true);
+        return $this->buildArchive($output, $directory, $excludes, true, $verbose);
     }
 
-    public function buildArchive(string $output, string $directory, array $excludes = [], bool $compression = false): ?string
+    public function extractUserInfo(string $output): ?string
+    {
+        // Prepare tarball archive
+        $output = str_replace(getcwd(), ".", $output);
+
+        list($_, $ret) = [[], false];
+        exec(sprintf('echo "[CMD] date" > %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('date >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('echo "" >> %s', escapeshellarg($output)), $_, $ret);
+        
+        exec(sprintf('echo "[CMD] hostname" >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('hostname >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('echo "" >> %s', escapeshellarg($output)), $_, $ret);
+
+        exec(sprintf('echo "[CMD] env" >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('env >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('echo "" >> %s', escapeshellarg($output)), $_, $ret);
+
+        exec(sprintf('echo "[CMD] last" >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('last >> %s', escapeshellarg($output)), $_, $ret);
+        exec(sprintf('echo "" >> %s', escapeshellarg($output)), $_, $ret);
+
+        return $ret == 0 ? $output : null;
+    }
+
+    public function buildArchive(string $output, string $directory, array $excludes = [], bool $compression = false, bool $verbose = true): ?string
     {
         // Prepare tarball archive
         $output = str_replace(getcwd(), ".", $output);
@@ -619,21 +729,22 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             $exclusions .= "--exclude='" . $exclude . "'";
         }
 
-        $this->output?->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output));
+        if($verbose) $this->output?->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output). " (temporary working directory: ".escapeshellarg($directory).")");
 
         list($_, $ret) = [[], false];
-        exec(sprintf('tar %s --directory=%s -cf %s %s', $exclusions, escapeshellarg($directory), escapeshellarg($output), '.'), $_);
+        exec(sprintf('tar %s --directory=%s -cf %s %s', $exclusions, escapeshellarg($directory), escapeshellarg($output), '.'), $_, $ret);
 
         // Compress tarball
         if ($compression) {
+
             if ($ret) {
-                throw new LogicException("Failed to create tarball: " . $output);
+                throw new LogicException("Failed to create tarball: " . $output."; ".$_);
             }
 
             $compressor = $this->compressors->get($this->compression);
             $compressedOutput = $compressor->getCompressedPath($output);
 
-            $this->output?->section()->writeln("<info>- Compressing.. </info> ./" . basename($compressedOutput));
+            if($verbose) $this->output?->section()->writeln("<info>- Compressing.. </info> ./" . basename($compressedOutput));
             $command = $compressor->getCompressCommandLine($output);
 
             list($_, $ret) = [[], false];

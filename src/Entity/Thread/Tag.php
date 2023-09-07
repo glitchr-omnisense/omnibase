@@ -106,6 +106,22 @@ class Tag implements TranslatableInterface, IconizeInterface
     }
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    protected $priority;
+
+    public function getPriority(): ?int
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(?int $priority): self
+    {
+        $this->priority = $priority;
+        return $this;
+    }
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      * @Uploader(storage="local.storage", max_size="2MB", mime_types={"image/*"}, missable=true)
      * @AssertBase\File(max_size="2MB", mime_types={"image/*"}, groups={"new", "edit"})
@@ -130,10 +146,6 @@ class Tag implements TranslatableInterface, IconizeInterface
         return Uploader::get($this, "icon");
     }
 
-    /**
-     * @param $icon
-     * @return $this
-     */
     /**
      * @param $icon
      * @return $this

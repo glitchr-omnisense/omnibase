@@ -42,11 +42,13 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
+        // Check if filters have to be applied
         $filters = array_pop_key("filters", $routeParameters) ?? [];
         if ($this->getSource() === null) {
             return null;
         }
 
+        // Handling cropping and thumbnail
         $thumbnail = array_pop_key("thumbnail", $routeParameters);
         $identifier = array_pop_key("crop", $routeParameters);
         if (is_array($thumbnail)) {
@@ -54,19 +56,23 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
             $identifier ??= implode("x", array_slice($thumbnail, 0, 2)); // Set cropper using thumbnail information if not cropper not defined
         }
 
+        // Handling parameter extension
+        $allowWebp = array_pop_key("webp", $routeParameters) ?? true;
+        $extension = array_pop_key("extension", $routeParameters) ?? true;
 
-        if (array_key_exists("extension", $routeParameters)) {
-            if ($routeParameters["extension"] === true) {
-                $routeParameters["extension"] = first($this->getMediaService()->getExtensions($this->getSource()));
-                $routeParameters["extension"] = $this->getMediaService()->getExtension($this->getSource());
-            } elseif ($routeParameters["extension"] === false) {
-                array_pop_key("extension", $routeParameters);
-            }
+        if($extension === "webp" && !$allowWebp) $extension = true;
+        if($extension === true) {
+
+            if($allowWebp) $extension = "webp";
+            else $extension = $this->getMediaService()->getExtension($this->getSource());
         }
 
-        $routeName = (array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image");
+        if($extension) $routeParameters["extension"] = $extension;
+
+        $routeName = array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image";
         $routeParameters = array_merge($routeParameters, [
             "data" => $this->getMediaService()->obfuscate($this->getSource(), [
+                "webp" => $allowWebp, // This line might be removed, extension is fixed by `$routeParameters["extension"]`   
                 "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
                 "salt" => $this->getSalt()
             ], $filters),

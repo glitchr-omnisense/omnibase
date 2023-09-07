@@ -26,7 +26,6 @@ class Notifier extends BaseNotifier implements NotifierInterface
         }
 
         $notification->setContext([
-            "importance" => "high",
             "markdown" => false,
             "exception" => null,
 
@@ -77,11 +76,11 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification->addRecipient($adminRecipient);
         $notification->setHtmlParameters([
 
-            "importance" => "high",
             "replyTo" => $contactModel->getRecipient(),
             "subject" => $this->translator->trans("@emails.contact.subject"),
             "excerpt" => $this->translator->trans("@emails.contact.excerpt", [$contactModel->name]),
             "content" => $this->translator->trans("@emails.contact.content", [$contactModel->subject, $contactModel->message]),
+            "attachments" => $contactModel->attachments
         ]);
 
         return $notification;
@@ -101,6 +100,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.contact_confirmation.subject", [$contactModel->name]),
             "excerpt" => $this->translator->trans("@emails.contact_confirmation.excerpt"),
             "content" => $this->translator->trans("@emails.contact_confirmation.content", [$contactModel->subject, $contactModel->message]),
+            "attachments" => $contactModel->attachments
         ]);
 
         return $notification;
@@ -133,7 +133,12 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function userApprovalRequest(User $user)
     {
         $notification = new Notification("adminApproval.required");
-        $notification->setUser($user);
+        
+        $name = $this->settingBag->getScalar("base.settings.mail.name");
+        $email = $this->settingBag->getScalar("base.settings.mail.contact");
+
+        $adminRecipient = new Recipient(mailformat([], $name, $email));
+        $notification->addRecipient($adminRecipient);
 
         $notification->setHtmlTemplate("email.html.twig");
         $notification->setHtmlParameters([
@@ -218,6 +223,37 @@ class Notifier extends BaseNotifier implements NotifierInterface
             $notification->addHtmlParameter(
                 "footer_text",
                 $this->translator->trans("@emails.verifyEmail.expiry", [
+                    $this->translator->transTime($token->getRemainingTime())
+                ])
+            );
+        }
+
+        return $notification;
+    }
+
+    /**
+     * @param User $user
+     * @param Token $token
+     * @return Notification
+     */
+    public function loginToken(User $user, Token $token)
+    {
+        $notification = new Notification("loginToken.check");
+        $notification->setUser($user);
+
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
+            "subject" => $this->translator->trans("@emails.loginToken.subject"),
+            "content" => $this->translator->trans("@emails.loginToken.content"),
+            "action_text" => $this->translator->trans("@emails.loginToken.action_text"),
+            "action_url" => $this->router->getUrl("security_loginWithToken", ["token" => $token->get()]),
+        ]);
+
+        if ($token->getLifetime() > 0 && $token->getLifetime() <= 3600 * 24 * 365) {
+
+            $notification->addHtmlParameter(
+                "footer_text",
+                $this->translator->trans("@emails.loginToken.expiry", [
                     $this->translator->transTime($token->getRemainingTime())
                 ])
             );

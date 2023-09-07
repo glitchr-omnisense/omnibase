@@ -14,28 +14,28 @@ class ContactModel extends AbstractModel
 {
     public function getRecipient(): ?Recipient
     {
-        return new Recipient(mailformat([], $this->name, $this->email));
+        return new Recipient(mailformat([], $this->name ?? "", $this->email ?? ""));
     }
 
     /**
      * @var ?string
      */
-    public ?string $name;
+    public /*?string*/ $name;
 
     /**
      * @var ?string
      */
-    public ?string $email;
+    public /*?string*/ $email;
 
     /**
      * @var ?string
      */
-    public ?string $subject;
+    public /*?string*/ $subject;
 
     /**
      * @var ?string
      */
-    public ?string $message;
+    public /*?string*/ $message;
 
     /**
      * @var array

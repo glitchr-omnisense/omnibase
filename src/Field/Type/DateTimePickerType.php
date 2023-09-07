@@ -33,8 +33,18 @@ class DateTimePickerType extends AbstractType
         $this->localizer = $localizer;
         $this->twig = $twig;
     }
+    
+    public function getParent(): ?string
+    {
+        return DateTimeType::class;
+    }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function getBlockPrefix(): string
+    {
+        return 'datetimepicker';
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
 
@@ -55,17 +65,7 @@ class DateTimePickerType extends AbstractType
         ]);
     }
 
-    public function getParent(): ?string
-    {
-        return DateTimeType::class;
-    }
-
-    public function getBlockPrefix(): string
-    {
-        return 'datetimepicker';
-    }
-
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         //
         // Datetime picker Options

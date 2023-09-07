@@ -40,7 +40,7 @@ final class HtmlTwigExtension extends AbstractExtension
      * @param int|null $maxLevel
      * @return string
      */
-    public function renderWysiwyg(?string $htmlOrJson, array $options = [], ?int $maxLevel = null)
+    public function renderWysiwyg(?string $htmlOrJson, array $options = [])
     {
         if ($this->editorEnhancer->supports($htmlOrJson)) {
             $enhancer = $this->editorEnhancer;
@@ -50,14 +50,16 @@ final class HtmlTwigExtension extends AbstractExtension
             throw new \RuntimeException('Unsupported wysiwyg input');
         }
 
-        $applySemantics = array_pop_key('semantics', $options);
+        $htmlOrJson = $enhancer->highlightMentions($htmlOrJson);
+        
+        $applySemantics = array_pop_key('semantics', $options) ?? false;
         if ($applySemantics) {
             $htmlOrJson = $enhancer->highlightSemantics($htmlOrJson);
         }
 
-        $applyHeadings = array_pop_key('headings', $options);
-        if ($applyHeadings) {
-            $htmlOrJson = $enhancer->highlightHeadings($htmlOrJson, $maxLevel);
+        $maxHeadings = array_pop_key('headings', $options) ?? 0;
+        if ($maxHeadings) {
+            $htmlOrJson = $enhancer->highlightHeadings($htmlOrJson, $maxHeadings === true ? null : $maxHeadings);
         }
 
         return $enhancer->render($htmlOrJson, ['attr' => $options['row_attr'] ?? []]);

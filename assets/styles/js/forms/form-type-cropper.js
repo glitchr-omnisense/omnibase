@@ -127,7 +127,6 @@ window.addEventListener("load.form_type", function () {
                     $("#"+id+"_width" ).val(isEmpty ? naturalWidth  : Math.round( width0 <= 1 ?  width0 * naturalWidth  : width0 ));
                     $("#"+id+"_height").val(isEmpty ? naturalHeight : Math.round(height0 <= 1 ? height0 * naturalHeight : height0));
 
-
                     //
                     // Extract data out of fields
                     cropperOptions["data"] = extractData();
@@ -143,19 +142,10 @@ window.addEventListener("load.form_type", function () {
                     $("#"+id+"_rotate").off("input.cropper").on("input.cropper", updateCropper);
 
                     var aspectRatioButtons = $("#"+id+"_actions button[data-aspect-ratio]");
-                        aspectRatioButtons.each(function() {
-
-                            var labelId = $(this).data("labelledby");
-                            var label = $("#" + labelId).val();
-
-                            var aspectRatio = $(this).data("labelledby-value");
-                            if (aspectRatio === label)
-                                cropper.setAspectRatio($(this).data("aspect-ratio"));
-                        });
-
                         aspectRatioButtons.off("click.cropper").on("click.cropper", function() { // Do not inline ("this")
 
-                            cropper.setAspectRatio(parseFloat($(this).data("aspect-ratio")));
+                            cropper.setAspectRatio(parseFloat($(this).data("aspect-ratio")).toFixed(2));
+
                             var offset = positions[$(quadrant).val()] || "center center";
                             var data = cropper.getData();
 
@@ -212,6 +202,18 @@ window.addEventListener("load.form_type", function () {
 
                             cropper.setData(data);
                         });
+
+                        if(cropperOptions["data"]["width"] != naturalWidth && cropperOptions["data"]["height"] != naturalHeight) {
+
+                            aspectRatioButtons.each(function() {
+
+                                var labelId = $(this).data("labelledby");
+                                var label = $("#" + labelId).val();
+
+                                var aspectRatio = $(this).data("labelledby-value");
+                                if (aspectRatio === label) this.click();
+                            });
+                        }
 
                     // $("#"+id+"_x"     ).removeAttr("disabled");
                     // $("#"+id+"_y"     ).removeAttr("disabled");

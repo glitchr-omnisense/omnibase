@@ -209,11 +209,15 @@ final class MediaTwigExtension extends AbstractExtension
      * @param mixed $urlOrPath
      * @return string|null
      */
-    public function linkify(mixed $urlOrPath)
+    public function linkify(mixed $urlOrLinkableObject)
     {
-        $url = $urlOrPath;
-        if ($urlOrPath instanceof LinkableInterface) {
-            $url = $urlOrPath->__toLink();
+        $url = $urlOrLinkableObject;
+        if (is_object($urlOrLinkableObject)) {
+            
+            if (!$urlOrLinkableObject instanceof LinkableInterface) 
+                throw new \LogicException("Object \"".get_class($urlOrLinkableObject)."\" received doesn't implement \"".LinkableInterface::class."\"");
+            
+            $url = $urlOrLinkableObject->__toLink();
         }
 
         return is_object($url) ? null : (is_string($url) ? $url : null);
@@ -281,6 +285,12 @@ final class MediaTwigExtension extends AbstractExtension
         $prefix = str_rstrip($path, [implode('/', tail($url)), '/']);
         $email = $options['email'] ?? $context['email'] ?? null;
 
+        // NB: A short image attachment name might be generated using such obfuscator
+        //     Consequently, a modification of Nofitication.php would be needed too
+        //     (How to handle @Public and other namespace might be required.. to be checked)
+        // $src = $this->getMediaService()->obfuscate($src);
+        // $ext = pathinfo($path, PATHINFO_EXTENSION);
+        // $src = $src.($ext ? ".".$ext : "");
         return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : str_lstrip($path, [
             $prefix,
             $this->projectDir . '/public',

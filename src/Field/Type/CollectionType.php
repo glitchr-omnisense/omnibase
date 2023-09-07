@@ -58,7 +58,7 @@ class CollectionType extends AbstractType
         return 'collection2';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'form2' => false,
@@ -122,7 +122,7 @@ class CollectionType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($options['allow_add'] && $options['prototype']) {
             $prototypeOptions = $options['entry_options'];
@@ -187,7 +187,7 @@ class CollectionType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         //
         // Set controller url
@@ -211,7 +211,7 @@ class CollectionType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['length'] = $options["length"];
 

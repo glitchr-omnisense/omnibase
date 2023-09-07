@@ -135,6 +135,16 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 });
         }
 
+        // Issue with action-delete rendering happening from EA 4.7.4
+        if (Action::DELETE === $actionName) {
+
+            $cssClass = \in_array($pageName, [Crud::PAGE_DETAIL, Crud::PAGE_EDIT], true) ? 'btn btn-secondary pr-0 text-danger' : 'text-danger';
+            
+            return Action::new(Action::DELETE, t('action.delete', domain: 'EasyAdminBundle'), Crud::PAGE_INDEX === $pageName ? null : 'fa fa-fw fa-trash-o')
+                ->linkToCrudAction(Action::DELETE)
+                ->setCssClass($cssClass.' action-'.Action::DELETE);
+        }
+
         return parent::createBuiltInAction($pageName, $actionName);
     }
 

@@ -194,7 +194,7 @@ final class Cache extends AbstractAnnotation
                 continue;
             }
 
-            $value = $propertyAccessor->getValue($target, $property);
+            $propertyAccessor->getValue($target, $property); // readout value
             $this->payload($event, $classMetadata, $target, $property);
         }
     }

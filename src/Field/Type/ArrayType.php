@@ -152,7 +152,7 @@ class ArrayType extends CollectionType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($options['associative']) {
             $this->buildFormAssociativeArray($builder, $options);
@@ -170,7 +170,7 @@ class ArrayType extends CollectionType
         return preg_match_all('/\{[0-9]*\}/i', $pattern);
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         parent::finishView($view, $form, $options);
 

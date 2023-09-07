@@ -91,6 +91,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         // Add additional @Namespace variables
         $paths = $baseService->getParameterBag('base.twig.paths') ?? [];
         foreach ($paths as $entry) {
+            
             $namespace = $entry['namespace'] ?? self::MAIN_NAMESPACE;
 
             $path = $entry['path'] ?? null;

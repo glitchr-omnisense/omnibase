@@ -21,14 +21,14 @@ class UserProfileType extends AbstractType
         return "_base_" . StringUtil::fqcnToBlockPrefix(static::class) ?: '';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => UserProfileModel::class
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('avatar', AvatarType::class, ["required" => false, "cropper" => []]);
         $builder->add('email', EmailType::class, ["required" => false]);

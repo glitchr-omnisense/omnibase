@@ -75,7 +75,7 @@ class DropzoneController extends AbstractController
      */
     public function Main(Request $request, $data = null): Response
     {
-        $config = $this->obfuscator->decode($data);
+        $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         $token = $config["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("dropzone", $token)) {
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
@@ -179,7 +179,7 @@ class DropzoneController extends AbstractController
      */
     public function Preview(string $data, string $uuid): Response
     {
-        $config = $this->obfuscator->decode($data);
+        $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         $token = $config["token"] ?? null;
         if (!$token) {
             throw new InvalidCsrfTokenException();
@@ -221,7 +221,7 @@ class DropzoneController extends AbstractController
      */
     public function Delete(string $data, string $uuid): Response
     {
-        $config = $this->obfuscator->decode($data);
+        $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
         $token = $config["token"] ?? null;
         if (!$token) {
             throw new InvalidCsrfTokenException();

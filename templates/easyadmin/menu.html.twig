@@ -28,7 +28,17 @@
 {% endmacro %}
 
 <nav id="main-menu">
-    {% block main_menu_before %}{% endblock %}
+    
+    {% block main_menu_before %}
+        <ul class="menu menu-before">
+        {% for menuItem in ea.mainMenuBefore.items %}
+            <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.hasSubItems ? 'has-submenu' }} {{ ea.mainMenu.isSelected(menuItem) or ea.isActive(menuItem.linkUrl) ? 'active' }} {{ ea.mainMenu.isExpanded(menuItem) ? 'expanded' }}">
+                {{ _self.render_menu_item(menuItem, ea.getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea.getTranslationDomain())|raw }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endblock main_menu_before %}
+
     <ul class="menu">
         {% block main_menu %}
             {% for menuItem in ea.mainMenu.items %}
@@ -56,6 +66,15 @@
         {% endblock main_menu %}
     </ul>
 
-    {% block main_menu_after %}{% endblock %}
+    {% block main_menu_after %}
+    <ul class="menu menu-after">
+    {% for menuItem in ea.mainMenuAfter.items %}
+        <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ ea.mainMenu.isSelected(menuItem) or ea.isActive(menuItem.linkUrl) ? 'active' }}">
+            {{ _self.render_menu_item(menuItem, ea.getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea.getTranslationDomain())|raw }}
+        </li>
+    {% endfor %}
+    </ul>
+    {% endblock main_menu_after %}
+    
 </nav>
 

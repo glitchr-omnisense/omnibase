@@ -85,6 +85,9 @@ adminApproval:
     verifyFirst: "You need to verify first your email address"
     alreadySent: "You already asked administrators for approval, please be patient."
 
+loginToken:
+    check: "A credential link has been sent to your email."
+
 verifyEmail:
     title: Please confirm your email!
     invalidToken: "Invalid token. We cannot confirm your email address. Please resend a request"

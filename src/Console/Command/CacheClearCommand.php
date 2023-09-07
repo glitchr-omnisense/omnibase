@@ -2,6 +2,7 @@
 
 namespace Base\Console\Command;
 
+use Base\BaseBundle;
 use Base\Traits\CacheClearTrait;
 use Base\Console\Command;
 use Base\Notifier\Notifier;
@@ -18,6 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use Base\Routing\RouterInterface;
+use Symfony\Component\Console\Input\InputDefinition;
 
 /**
  *
@@ -113,7 +115,9 @@ EOF
             $this->checkExtensions($io);
 
             $this->testFile = $this->cacheDir . "/.test";
+
             $this->testFileExists = file_exists($this->testFile);
+            BaseBundle::markAsFirstClear(!$this->testFileExists);
         }
 
         $noWarmup = $input->getOption('no-warmup');
@@ -125,6 +129,7 @@ EOF
         }
 
         $this->cacheClearCommand->setApplication($this->getApplication());
+
         $ret = $this->cacheClearCommand->execute($input, $output);
 
         if (!$noExtension) {

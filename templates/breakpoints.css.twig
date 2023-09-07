@@ -1,4 +1,4 @@
-{% cache "breakpoints" %}
+{% cache "breakpoints_"~(breakpoints|map(b => "#{b.name}")|join('_')) %}
 body:before {
     display: none;
     visibility: hidden;
@@ -7,7 +7,7 @@ body:before {
 {%- for breakpoint in breakpoints -%}
 @media {{ (breakpoint.media ?? "all")|raw }} {
     body:before {
-        content: "{{ breakpoint.name }}";
+        content: "{{ breakpoint.name|raw}}";
     }
 }
 {%- endfor -%}

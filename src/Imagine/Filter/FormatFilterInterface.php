@@ -10,6 +10,8 @@ use Imagine\Image\ImageInterface;
  */
 interface FormatFilterInterface extends FilterInterface
 {
+    public static function getStandardExtension(): string;
+    
     public function getPath(): ?string;
 
     /**

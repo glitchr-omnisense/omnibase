@@ -10,7 +10,7 @@ paginator:
     page: "Page {0}"
 
 page:
-    empty: This page is empty !
+    empty: This page is empty.
 
 phone:
     "Phone: {0}"
