@@ -1,4 +1,4 @@
-<audio src="{{ sources|first }}" {{ html_attributes(attr) }} controls preload>
+<audio src="{{ sources|first }}" {{ html_attributes(attr) }} controls>
     {% for source in sources %}
     <source src="{{ source }}" type="{{ source|mimetype }}">
     {% endfor %}
