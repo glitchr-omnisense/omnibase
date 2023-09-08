@@ -334,6 +334,7 @@ class BaseBundle extends AbstractBaseBundle
 
     public function build(ContainerBuilder $container): void
     {
+	$this->container = $container;
         parent::build($container);
 
         if (!self::$cache) {
