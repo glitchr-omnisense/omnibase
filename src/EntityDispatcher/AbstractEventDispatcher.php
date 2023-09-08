@@ -148,7 +148,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         if(!$collection instanceof PersistentCollection) return [];
         if(!$collection->isDirty()) return [];
 
-        return $entity->getOwners()->getDeleteDiff();
+        return $collection->getOwner()->getDeleteDiff();
     }
 
     public function getAssociationInsertDiff($entity, $field): array
@@ -157,7 +157,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         if(!$collection instanceof PersistentCollection) return [];
         if(!$collection->isDirty()) return [];
 
-        return $entity->getOwners()->getInsertDiff();
+        return $collection->getOwner()->getInsertDiff();
     }
 
     public function prePersist(LifecycleEventArgs $event)
@@ -173,8 +173,6 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function preUpdate(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
-        $this->getAssociationChangeSet($object);
-
         if ($object == null || !$this->supports($object)) {
             return;
         }

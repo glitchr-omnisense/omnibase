@@ -7,16 +7,16 @@ import "./styles/js/button";
 
 import Popover from 'bootstrap/js/dist/popover';
 $(window).off("load.popover");
-$(window).on("load.popover", function() { $('[data-toggle="popover"]').popover({html:true}) });
+$(window).on("load.popover", function() { $('[data-toggle="popover"]').each(function() { $(this).popover({"html": $(this).data("html") ?? false}); }); });
 $(window).off("onbeforeunload.popover");
-$(window).on("onbeforeunload.popover",function() { $("div[id^='popover']").hide().remove(); });
+$(window).on("onbeforeunload.popover",function() { $('[data-toggle="popover"]').hide().remove(); });
 
 import Tooltip from 'bootstrap/js/dist/tooltip';
 $(window).off("load.tooltip");
-$(window).on("load.tooltip", function() { $('[data-toggle="tooltip"]').tooltip({html:true}) });
+$(window).on("load.tooltip", function() { $('[data-toggle="tooltip"]').each(function() { $(this).tooltip({"html": $(this).data("html") ?? false}); }); });
 
 $(window).off("onbeforeunload.tooltip");
-$(window).on("onbeforeunload.tooltip",function() { $("div[id^='tooltip']").hide().remove(); });
+$(window).on("onbeforeunload.tooltip",function() { $('[data-toggle="tooltip"]').hide().remove(); });
 
 $(".copy-clipboard").off("click");
 $(".copy-clipboard").on("click", function () {
