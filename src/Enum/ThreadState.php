@@ -47,7 +47,7 @@ class ThreadState extends EnumType implements IconizeInterface, ColorizeInterfac
         return [
             self::PUBLISH => ["#198754"],
             self::DRAFT => ["#b02a37"],
-            self::FUTURE => ["#e0a800"],
+            self::FUTURE => ["#97ccdd"],
             self::SECRET => ["#e0a800"],
             self::ARCHIVE => ["#198754"],
             self::PASSWORD => ["#e0a800"],
