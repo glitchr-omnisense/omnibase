@@ -334,8 +334,8 @@ class BaseBundle extends AbstractBaseBundle
 
     public function build(ContainerBuilder $container): void
     {
-	$this->container = $container;
         parent::build($container);
+	$this->container = $container;
 
         if (!self::$cache) {
             $this->warmUp();
