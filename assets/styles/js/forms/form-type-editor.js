@@ -48,32 +48,74 @@ $(window).on("DOMContentLoaded.edjs", function() {
         $(this).removeAttr("edjs");
         $(this).attr("id", $(this).attr("id") ?? "editorjs-"+randid(10));
 
-        edjs(undefined, $(this).attr("id"), $(this).data("edjs"));
+        edjs(undefined, $(this).attr("id"), this.dataset.edjs);
     });
 });
 
-function edjs(id, holder, data = {}, options = {}, endpointByFile = undefined, endpointByUrl = undefined)
+function edjs(inputEl, holderId, value = {}, options = {})
 {
+    $("#"+holderId)[0].innerHTML = ""; // delete existing editorjs instance
+
+    var options  = {};
+    if(inputEl) JSON.parse(inputEl.getAttribute("data-editor-options")) || {};
+
+    var endpointByFile    = undefined;
+    if(inputEl) inputEl.getAttribute("data-editor-upload-file") || undefined;
+    var endpointByUrl     = undefined;
+    if(inputEl) inputEl.getAttribute("data-editor-upload-url")  || undefined;
+
+    var endpointByUser    = undefined;
+    if(inputEl) inputEl.getAttribute("data-editor-endpoint-user")    || undefined;
+    var endpointByThread  = undefined;
+    if(inputEl) inputEl.getAttribute("data-editor-endpoint-thread")  || undefined;
+    var endpointByKeyword = undefined;
+    if(inputEl) inputEl.getAttribute("data-editor-endpoint-keyword") || undefined;
+
+    var data = json_decode(value);
     if (data) Object.assign(options, {data:data});
 
+    var onSave = (savedData) => { $("#"+holderId).val(JSON.stringify(savedData)); }
     Object.assign(options, {
-        readOnly: (id == undefined),
-        tools: {    
+        readOnly: (inputEl == undefined),
+        tools: {
+
+            warning: Warning,
+
             header: {
                 class: Header,
-                inlineToolbar: ['link'],
-                config: {
-                placeholder: 'Title...'
-                }
+                inlineToolbar: ['link', 'mention'],
             },
+
             paragraph: {
+
                 class: Paragraph,
                 inlineToolbar: true,
             },
+
+            // collaborative: {
+            //     class: YTool,
+            //     inlineToolbar: true,
+            // }, 
             
+            mention: { 
+
+                class: Mention,
+                config: {
+
+                    typingDelay:1000,
+                    endpoints: {
+                        'arobase': endpointByUser,
+                        'hashtag': endpointByKeyword,
+                        'dollar': endpointByThread
+                    },
+                }
+            },
+            
+            imageTune: ImageToolTune,
             image: {
                 class: ImageTool,
-                config: {
+                tunes: [ 'imageTune' ],
+                config: { 
                     accept: 'image/*',
                     endpoints: {
                         byFile: endpointByFile,
@@ -82,50 +124,56 @@ function edjs(id, holder, data = {}, options = {}, endpointByFile = undefined, e
                 }
             },
 
-            warning: Warning,
             alert: Alert,
             underline: Underline,
             code: CodeTool,
-            Marker: {
+            marker: {
                 class: Marker,
                 shortcut: 'CMD+SHIFT+M',
             },
+
             list: {
                 class: NestedList,
                 inlineToolbar: true,
             },
+
+            quote: {
+                class: Quote,
+                inlineToolbar: true,
+            },
+
             checklist: {
                 class: Checklist,
                 inlineToolbar: true,
             },
-            paragraph: {
-                class: Paragraph,
-                inlineToolbar: true,
-            },
+
             table: {
                 class: Table,
             },
+
             inlineCode: {
                 class: InlineCode,
-                shortcut: 'CMD+SHIFT+M',
+                shortcut: 'CMD+SHIFT+I',
             },
+
+            embed: Embed,
         }
     });
 
     Object.assign(options, {
-        holder: holder, 
 
-        onChange:() => { 
-            
-            editor.save().then((savedData) =>{
-                $("#"+id).val(JSON.stringify(savedData));
-            }).catch((error) =>{
-                console.log("Failed to save editor modification.. ", error)
-            })
-        }
+        holder  : holderId, 
+        onReady : () => { 
+            if(data == undefined && value != '') editor.blocks.renderFromHTML(value);
+            if(inputEl != undefined) new Undo({ editor }); 
+        },
+        onChange: () => { if(!options.readOnly ?? true) readeditor.save().then(onSave); }
     });
 
     var editor = new EditorJs(options);
+    if(options.readOnly ?? false) {
+        $("#"+holderId).addClass("read-only");
+    }
 }
 
 window.addEventListener("load.form_type", function (el) {
@@ -136,118 +184,6 @@ window.addEventListener("load.form_type", function (el) {
         var value = $("#"+id).val();
 
         var editorId = id+"_editor";
-        $("#"+editorId)[0].innerHTML = ""; // delete existing editorjs instance
-
-        var options  = JSON.parse(el.getAttribute("data-editor-options")) || {};
-
-        var endpointByFile    = el.getAttribute("data-editor-upload-file") || undefined;
-        var endpointByUrl     = el.getAttribute("data-editor-upload-url")  || undefined;
-
-        var endpointByUser    = el.getAttribute("data-editor-endpoint-user")    || undefined;
-        var endpointByThread  = el.getAttribute("data-editor-endpoint-thread")  || undefined;
-        var endpointByKeyword = el.getAttribute("data-editor-endpoint-keyword") || undefined;
- 
-        var data = json_decode(value);
-        if (data) Object.assign(options, {data:data});
-
-        var onSave = (savedData) => { $("#"+id).val(JSON.stringify(savedData)); }
-        Object.assign(options, {
-            tools: {
-
-                warning: Warning,
-
-                header: {
-                    class: Header,
-                    inlineToolbar: ['link', 'mention'],
-                },
-
-                paragraph: {
-
-                    class: Paragraph,
-                    inlineToolbar: true,
-                },
-
-                // collaborative: {
-                //     class: YTool,
-                //     inlineToolbar: true,
-                // }, 
-
-                mention: { 
-
-                    class: Mention,
-                    config: {
-
-                        typingDelay:1000,
-                        endpoints: {
-                            'arobase': endpointByUser,
-                            'hashtag': endpointByKeyword,
-                            'dollar': endpointByThread
-                        },
-                    }
-                },
-                
-                imageTune: ImageToolTune,
-                image: {
-                    class: ImageTool,
-                    tunes: [ 'imageTune' ],
-                    config: { 
-                        accept: 'image/*',
-                        endpoints: {
-                            byFile: endpointByFile,
-                            byUrl: endpointByUrl
-                        },
-                    }
-                },
-
-                alert: Alert,
-                underline: Underline,
-                code: CodeTool,
-                marker: {
-                    class: Marker,
-                    shortcut: 'CMD+SHIFT+M',
-                },
-
-                list: {
-                    class: NestedList,
-                    inlineToolbar: true,
-                },
-
-                quote: {
-                    class: Quote,
-                    inlineToolbar: true,
-                },
-
-                checklist: {
-                    class: Checklist,
-                    inlineToolbar: true,
-                },
-
-                table: {
-                    class: Table,
-                },
-
-                inlineCode: {
-                    class: InlineCode,
-                    shortcut: 'CMD+SHIFT+I',
-                },
-
-                embed: Embed,
-            }
-        });
-
-        Object.assign(options, {
-
-            holder  : editorId, 
-            onReady : () => { 
-                if(data == undefined && value != '') editor.blocks.renderFromHTML(value);
-                new Undo({ editor }); 
-            },
-            onChange: () => { editor.save().then(onSave); }
-        });
-
-        var editor = new EditorJs(options);
-        if(options.readOnly ?? false) {
-            $(el).addClass("read-only");
-        }
+        edjs(el, editorId, value);
     }));
 });

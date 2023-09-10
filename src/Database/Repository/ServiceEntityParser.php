@@ -210,7 +210,7 @@ class ServiceEntityParser
      * @param array|null $selectAs
      * @return Query|null
      */
-    protected function __findRandomlyBy(array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
+    protected function __findRandomlyBy(array $criteria = [], ?array $orderBy = null, ?int $limit = null, ?int $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
         return $this->__findBy($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs);
     }
@@ -228,9 +228,9 @@ class ServiceEntityParser
      * @return float|int|mixed|string|null
      * @throws NonUniqueResultException
      */
-    protected function __findOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
+    protected function __findOneBy(array $criteria = [], ?array $orderBy = null, ?int $offset = null, ?array $groupBy = null, ?array $selectAs = null)
     {
-        $results = $this->__findBy($criteria, $orderBy, 1, null, $groupBy, $selectAs);
+        $results = $this->__findBy($criteria, $orderBy, 1, $offset, $groupBy, $selectAs);
         return $results->getOneOrNullResult();
     }
 
@@ -243,7 +243,7 @@ class ServiceEntityParser
      */
     protected function __findLastOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
-        return $this->__findOneBy($criteria, array_merge($orderBy, ['id' => 'DESC']), $groupBy, $selectAs) ?? null;
+        return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), null, $groupBy, $selectAs) ?? null;
     }
 
     protected function __findLastBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
@@ -252,23 +252,22 @@ class ServiceEntityParser
         return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, null, $groupBy, $selectAs) ?? null;
     }
 
-    protected function __findAtMostBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
+    protected function __findAtMostBy(array $criteria = [], ?array $orderBy = null, ?int $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
         $limit = array_pop_key("special:atMost", $criteria);
-        return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
+        return $this->__findBy($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs);
     }
 
     protected function __findPreviousBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
-        $orderBy["id"] = "DESC";
         $limit = array_pop_key("special:prev", $criteria);
-        return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
+        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, -1, $groupBy, $selectAs);
     }
 
     protected function __findNextBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
-        $limit = array_pop_key("special:prev", $criteria);
-        return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
+        $limit = array_pop_key("special:next", $criteria);
+        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'ASC']), $limit, 1, $groupBy, $selectAs);
     }
 
     /**
@@ -280,8 +279,11 @@ class ServiceEntityParser
      */
     protected function __findPreviousOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
-        $orderBy["id"] = "DESC";
-        return $this->__findOneBy($criteria, $orderBy, $groupBy, $selectAs);
+        // dump($criteria, $orderBy, $groupBy, $selectAs);
+        // dump($this->__findBy   ($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), null, null, $groupBy, $selectAs)->GetResult());
+        // dump($this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), null, null, $groupBy, $selectAs));
+        // exit(1);
+        return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, $selectAs);
     }
 
     /**

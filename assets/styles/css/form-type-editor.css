@@ -22,7 +22,7 @@
     z-index:11;
 }
 
-.read-only .image-tool--filled .cdx-button { display:none; }
+.read-only .cdx-button { display:none; }
 .ce-inline-toolbar, .ce-toolbar
 {
     color:#222;

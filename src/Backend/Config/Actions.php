@@ -31,7 +31,9 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
     public static function new(...$args)
     {
         $dto = new ActionConfigDto();
-        return new static($dto, ...$args);
+        $test = new static($dto, ...$args);
+
+        return $test;
     }
 
     /**
@@ -81,6 +83,8 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
+
+                    if($entity == null) return "";
                     $prevEntity = null;
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
@@ -103,13 +107,16 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
+
+                    if($entity == null) return "";
+
                     try {
                         $linkToEntity = $entity instanceof LinkableInterface ? $entity->__toLink() : "";
                     } catch (Exception $e) {
                         $linkToEntity = "";
                     }
 
-                    return $linkToEntity;
+                    return $linkToEntity ?? "";
                 });
         }
 
@@ -120,6 +127,8 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
+
+                    if($entity == null) return "";
                     $nextEntity = null;
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
@@ -154,13 +163,6 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
      * @param string|null $actionIcon
      * @param callable|null $callable
      * @return $this|Actions
-     */
-    /**
-     * @param string $pageName
-     * @param EaAction|string $actionNameOrObject
-     * @param string|null $actionIcon
-     * @param callable|null $callable
-     * @return $this
      */
     public function add(string $pageName, EaAction|string $actionNameOrObject, ?string $actionIcon = null, callable $callable = null)
     {
