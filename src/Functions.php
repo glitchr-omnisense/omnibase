@@ -4168,8 +4168,9 @@ namespace {
         return $datetime->setTimestamp($timestamp - $delta);
     }
 
-    function is_length_safe(string $directory): bool
+    function is_length_safe(?string $directory): bool
     {
+        if(!$directory) return true;
         $maxPathLength = constant("PHP_MAXPATHLEN");
         return strlen($directory) <= $maxPathLength;
     }

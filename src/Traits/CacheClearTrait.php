@@ -2,6 +2,7 @@
 
 namespace Base\Traits;
 
+use Base\Console\Command\CacheClearCommand;
 use Base\Database\Mapping\ClassMetadataFactory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -136,10 +137,9 @@ trait CacheClearTrait
 
     //
     // Run second cache clear command
-    protected function doubleCacheClearCheck(SymfonyStyle $io): void
+    protected function doubleCacheClearCheck(SymfonyStyle $io)
     {
-        file_put_contents($this->testFile, "Hello World !");
-        if (!$this->testFileExists) {
+        if (CacheClearCommand::isFirstClear()) {
             $io->warning('Cache requires to run a second `cache:clear` to account for custom bundle features.');
         }
     }

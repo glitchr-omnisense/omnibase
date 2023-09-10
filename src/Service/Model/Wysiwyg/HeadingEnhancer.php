@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Service;
+namespace Base\Service\Model\Wysiwyg;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMDocument;
@@ -70,7 +70,7 @@ class HeadingEnhancer implements HeadingEnhancerInterface
         return $headlines;
     }
 
-    public function highlight(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
+    public function enhance(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
     {
         if ($html === null) {
             return null;
@@ -79,7 +79,7 @@ class HeadingEnhancer implements HeadingEnhancerInterface
         if (is_array($html)) {
             $toc = [];
             foreach ($html as $htmlEntry) {
-                $toc[] = $this->highlight($htmlEntry, $maxLevel, $attrs);
+                $toc[] = $this->enhance($htmlEntry, $maxLevel, $attrs);
             }
 
             return $toc;

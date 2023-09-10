@@ -521,17 +521,6 @@ form.was-validated select:invalid ~ .select2-selection, .form-control.is-invalid
     border-bottom: 1px solid lightgrey;
 }
 
-.bs-tooltip-auto[data-popper-placement^="right"], .bs-tooltip-end
-{
-    padding:0.6em 0.5em;
-    margin:-2px 0 !important;
-}
-.bs-tooltip-auto[data-popper-placement^="left"], .bs-tooltip-end
-{
-    padding:0.6em 0.5em;
-    margin:-2px 0 !important;
-}
-
 .form-collection-items .accordion-item .form-cropper-fields > div > span { min-width: 110px; text-align:right; }
 .form-collection-items .accordion-item .form-cropper-fields > div input { flex-grow: 1; }
 .form-collection-items .accordion-item .form-cropper-fields > div {

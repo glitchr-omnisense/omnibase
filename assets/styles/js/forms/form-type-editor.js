@@ -54,27 +54,24 @@ $(window).on("DOMContentLoaded.edjs", function() {
 
 function edjs(inputEl, holderId, value = {}, options = {})
 {
-    $("#"+holderId)[0].innerHTML = ""; // delete existing editorjs instance
+    var holder = $("#"+holderId)[0] || undefined;
+    if(holder == undefined) return;
+
+    holder.innerHTML = ""; // delete existing editorjs instance
 
     var options  = {};
-    if(inputEl) JSON.parse(inputEl.getAttribute("data-editor-options")) || {};
+    if(holder) JSON.parse(holder.getAttribute("data-editor-options")) || {};
 
-    var endpointByFile    = undefined;
-    if(inputEl) inputEl.getAttribute("data-editor-upload-file") || undefined;
-    var endpointByUrl     = undefined;
-    if(inputEl) inputEl.getAttribute("data-editor-upload-url")  || undefined;
-
-    var endpointByUser    = undefined;
-    if(inputEl) inputEl.getAttribute("data-editor-endpoint-user")    || undefined;
-    var endpointByThread  = undefined;
-    if(inputEl) inputEl.getAttribute("data-editor-endpoint-thread")  || undefined;
-    var endpointByKeyword = undefined;
-    if(inputEl) inputEl.getAttribute("data-editor-endpoint-keyword") || undefined;
-
+    var endpointByFile    = holder.getAttribute("data-editor-upload-file") || undefined;
+    var endpointByUrl     = holder.getAttribute("data-editor-upload-url")  || undefined;
+    var endpointByUser    = holder.getAttribute("data-editor-endpoint-user")    || undefined;
+    var endpointByThread  = holder.getAttribute("data-editor-endpoint-thread")  || undefined;
+    var endpointByKeyword = holder.getAttribute("data-editor-endpoint-keyword") || undefined;
+    
     var data = json_decode(value);
     if (data) Object.assign(options, {data:data});
 
-    var onSave = (savedData) => { $("#"+holderId).val(JSON.stringify(savedData)); }
+    var onSave = (savedData) => { if(inputEl != undefined) $(inputEl).val(JSON.stringify(savedData)); }
     Object.assign(options, {
         readOnly: (inputEl == undefined),
         tools: {
@@ -167,7 +164,7 @@ function edjs(inputEl, holderId, value = {}, options = {})
             if(data == undefined && value != '') editor.blocks.renderFromHTML(value);
             if(inputEl != undefined) new Undo({ editor }); 
         },
-        onChange: () => { if(!options.readOnly ?? true) readeditor.save().then(onSave); }
+        onChange: () => { if(!options.readOnly) editor.save().then(onSave); }
     });
 
     var editor = new EditorJs(options);
@@ -183,7 +180,8 @@ window.addEventListener("load.form_type", function (el) {
         var id    = el.getAttribute("data-editor-field");
         var value = $("#"+id).val();
 
+        var input = $("#"+id);
         var editorId = id+"_editor";
-        edjs(el, editorId, value);
+        edjs(input, editorId, value);
     }));
 });

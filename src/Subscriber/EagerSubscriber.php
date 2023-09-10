@@ -33,7 +33,8 @@ class EagerSubscriber implements EventSubscriberInterface
     }
 
     public function onCommand()
-    {
+    { 
+        // Make sure base service is loaded very early.. 
     }
 
     public function onValidCache(KernelEvent $e)

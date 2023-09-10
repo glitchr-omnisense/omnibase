@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Service;
+namespace Base\Service\Model\Wysiwyg;
 
 use Base\Repository\Layout\SemanticRepository;
 
@@ -16,7 +16,7 @@ class SemanticEnhancer implements SemanticEnhancerInterface
         $this->semanticRepository = $semanticRepository;
     }
 
-    public function highlight(string|array|null $strOrArray, null|array|string $words = null, array $attributes = []): string|array|null
+    public function enhance(string|array|null $strOrArray, null|array|string $words = null, array $attributes = []): string|array|null
     {
         if (!$strOrArray) {
             return $strOrArray;
@@ -37,9 +37,9 @@ class SemanticEnhancer implements SemanticEnhancerInterface
                 if(!$entry) continue;
             
                 if ($words) {
-                    $entry = $semantic->highlightBy($words, $entry, $attributes);
+                    $entry = $semantic->enhanceBy($words, $entry, $attributes);
                 } else {
-                    $entry = $semantic->highlight($entry, $attributes);
+                    $entry = $semantic->enhance($entry, $attributes);
                 }
             }
         }

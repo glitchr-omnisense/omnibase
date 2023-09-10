@@ -2,10 +2,12 @@
 
 namespace Base\Service;
 
+use Base\Imagine\FilterInterface;
+use Base\Service\Model\Wysiwyg\HeadingEnhancerInterface;
+use Base\Service\Model\Wysiwyg\MentionEnhancerInterface;
+use Base\Service\Model\Wysiwyg\SemanticEnhancerInterface;
+use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
 use Base\Twig\Environment;
-use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
-use DOMDocument;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
  *
@@ -32,13 +34,24 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
      */
     protected $mentionEnhancer;
 
-    public function __construct(Environment $twig, HeadingEnhancerInterface $headingEnhancer, SemanticEnhancerInterface $semanticEnhancer, MentionEnhancerInterface $mentionEnhancer)
+    /**
+     * @var MediaEnhancerInterface
+     */
+    protected $mediaEnhancer;
+
+    public function __construct(
+        Environment $twig, 
+        HeadingEnhancerInterface $headingEnhancer, 
+        SemanticEnhancerInterface $semanticEnhancer, 
+        MentionEnhancerInterface $mentionEnhancer, 
+        MediaEnhancerInterface $mediaEnhancer)
     {
         $this->twig = $twig;
 
         $this->headingEnhancer = $headingEnhancer;
         $this->semanticEnhancer = $semanticEnhancer;
         $this->mentionEnhancer = $mentionEnhancer;
+        $this->mediaEnhancer = $mediaEnhancer;
     }
 
     public function supports(mixed $html): bool
@@ -73,7 +86,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         return $this->headingEnhancer->toc($html, $maxLevel);
     }
 
-    public function highlightHeadings(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
+    public function enhanceHeadings(mixed $html, ?int $maxLevel = null, array $attrs = []): mixed
     {
         if ($html === null) {
             return null;
@@ -82,16 +95,16 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         if (is_array($html)) {
             $toc = [];
             foreach ($html as $htmlEntry) {
-                $toc[] = $this->highlightHeadings($htmlEntry, $maxLevel, $attrs);
+                $toc[] = $this->enhanceHeadings($htmlEntry, $maxLevel, $attrs);
             }
 
             return $toc;
         }
 
-        return $this->headingEnhancer->highlight($html, $maxLevel, $attrs);
+        return $this->headingEnhancer->enhance($html, $maxLevel, $attrs);
     }
 
-    public function highlightSemantics(mixed $html, null|array|string $words = null, array $attrs = []): mixed
+    public function enhanceSemantics(mixed $html, null|array|string $words = null, array $attrs = []): mixed
     {
         if ($html === null) {
             return null;
@@ -100,16 +113,16 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         if (is_array($html)) {
             $htmlRet = [];
             foreach ($html as $htmlEntry) {
-                $htmlRet[] = $this->highlightSemantics($htmlEntry, $words, $attrs);
+                $htmlRet[] = $this->enhanceSemantics($htmlEntry, $words, $attrs);
             }
 
             return $htmlRet;
         }
 
-        return $this->semanticEnhancer->highlight($html, $words, $attrs);
+        return $this->semanticEnhancer->enhance($html, $words, $attrs);
     }
 
-    public function highlightMentions(mixed $html, array $attrs = []): mixed
+    public function enhanceMentions(mixed $html, array $attrs = []): mixed
     {
         if ($html === null) {
             return null;
@@ -119,12 +132,31 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
 
             $htmlRet = [];
             foreach ($html as $htmlEntry) {
-                $htmlRet[] = $this->highlightMentions($htmlEntry, $attrs);
+                $htmlRet[] = $this->enhanceMentions($htmlEntry, $attrs);
             }
 
             return $htmlRet;
         }
 
-        return $this->mentionEnhancer->highlight($html, $attrs);
+        return $this->mentionEnhancer->enhance($html, $attrs);
+    }
+
+    public function enhanceMedia(mixed $html, array $config = [], FilterInterface|array $filters = [], array $attrs = []): mixed
+    {
+        if ($html === null) {
+            return null;
+        }
+
+        if (is_array($html)) {
+
+            $htmlRet = [];
+            foreach ($html as $htmlEntry) {
+                $htmlRet[] = $this->enhanceMedia($htmlEntry, $config, $filters, $attrs);
+            }
+
+            return $htmlRet;
+        }
+
+        return $this->mentionEnhancer->enhance($html, $config, $filters, $attrs);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Service\SemanticEnhancer;
-use Base\Service\SemanticEnhancerInterface;
+use Base\Service\Model\Wysiwyg\SemanticEnhancer;
+use Base\Service\Model\Wysiwyg\SemanticEnhancerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 

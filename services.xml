@@ -466,12 +466,12 @@
             <argument type="service" id="localizer" />
         </service>
 
-        <service id="Base\Service\SemanticEnhancer" public="true">
+        <service id="Base\Service\Model\Wysiwyg\SemanticEnhancer" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
         </service>
 
-        <service id="Base\Service\MentionEnhancer" public="true">
+        <service id="Base\Service\Model\Wysiwyg\MentionEnhancer" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="App\Repository\Thread\MentionRepository" />
             <argument type="service" id="App\Repository\UserRepository" />
@@ -479,7 +479,12 @@
             <argument type="service" id="obfuscator" />
         </service>
 
-        <service id="Base\Service\HeadingEnhancer" public="true">
+        <service id="Base\Service\Model\Wysiwyg\MediaEnhancer" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="base.service.image" />
+        </service>
+
+        <service id="Base\Service\Model\Wysiwyg\HeadingEnhancer" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="slugger" />
@@ -495,6 +500,7 @@
             <argument type="service" id="heading_enhancer" />
             <argument type="service" id="semantic_enhancer" />
             <argument type="service" id="mention_enhancer" />
+            <argument type="service" id="media_enhancer" />
         </service>
 
         <service id="Base\Service\Model\Obfuscator\AbstractCompression"></service>

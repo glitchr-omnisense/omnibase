@@ -19,11 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use Base\Routing\RouterInterface;
-use Symfony\Component\Console\Input\InputDefinition;
 
-/**
- *
- */
 #[AsCommand(name: 'cache:clear', aliases: [], description: '')]
 class CacheClearCommand extends Command
 {
@@ -34,9 +30,7 @@ class CacheClearCommand extends Command
     /** @var string */
     protected string $cacheDir;
     /** @var string */
-    protected string $testFile;
-    /** @var string */
-    protected string $testFileExists;
+    public static string $testFile;
 
     /**
      * @var SymfonyCacheClearCommand
@@ -80,6 +74,9 @@ class CacheClearCommand extends Command
 
         $this->projectDir = $projectDir;
         $this->cacheDir = $cacheDir;
+
+        self::$testFile = $this->cacheDir . ".txt";
+        self::markAsFirstClear(!file_exists(self::$testFile));
     }
 
     protected function configure(): void
@@ -102,22 +99,24 @@ EOF
             );
     }
 
+    public function getTestFile(): string { return self::$testFile; }
+    public static function markAsFirstClear(bool $first = true) { if($first) file_put_contents(self::$testFile, 0); }
+    public static function applicationNotStarted(): bool { return self::getNClears() < 1; }
+    public static function isFirstClear(): bool { return self::getNClears() < 2; }
+    public static function getNClears(): int { return file_exists(self::$testFile) ? intval(file_get_contents(self::$testFile)) : 0; }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $noExtension = $input->getOption('no-extension') ?? true;
+        $this->cacheClearCommand->setApplication($this->getApplication());
 
+        $noExtension = $input->getOption('no-extension') ?? true;
         if (!$noExtension) {
             $this->phpConfigCheck($io);
             $this->diskAndMemoryCheck($io);
             $this->customFeatureWarnings($io);
             $this->checkCache($io);
             $this->checkExtensions($io);
-
-            $this->testFile = $this->cacheDir . "/.test";
-
-            $this->testFileExists = file_exists($this->testFile);
-            BaseBundle::markAsFirstClear(!$this->testFileExists);
         }
 
         $noWarmup = $input->getOption('no-warmup');
@@ -128,26 +127,16 @@ EOF
             $io->write("\n // Optional cache warmers disabled.", true);
         }
 
-        $this->cacheClearCommand->setApplication($this->getApplication());
-
         $ret = $this->cacheClearCommand->execute($input, $output);
-
+        self::markAsFirstClear(!file_exists(self::$testFile));
+        file_put_contents(self::$testFile, self::getNClears()+1);
+        
         if (!$noExtension) {
-            $this->webpackCheck($io);
+
             $this->doubleCacheClearCheck($io);
+            $this->webpackCheck($io);
             $this->generateSymlinks($io);
             $this->technicalSupportCheck($io);
-        }
-
-        if ($noWarmup) {
-            $io->warning("Warm up is disabled.");
-        } elseif ($noOptionalWarmers) {
-            $environment = $this->parameterBag->get("kernel.environment");
-            if (str_starts_with($environment, "prod")) {
-                $io->warning("Optional warmers disabled !");
-            } else {
-                $io->note("Optional warmers disabled !");
-            }
         }
 
         return $ret;

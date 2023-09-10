@@ -9,6 +9,7 @@ use Base\Entity\User as BaseUser;
 use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
 use Base\BaseBundle;
+use Base\Console\Command\CacheClearCommand;
 use Base\Routing\RouterInterface;
 use Base\Service\ReferrerInterface;
 use Doctrine\DBAL\Exception as DoctrineException;
@@ -24,7 +25,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use ErrorException;
 use InvalidArgumentException;
-
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -70,6 +73,9 @@ class IntegritySubscriber implements EventSubscriberInterface
      */
     private ?string $secret;
 
+    /**
+     * @var ReferrerInterface
+     */
     protected ReferrerInterface $referrer;
 
     public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, RouterInterface $router, ReferrerInterface $referrer, string $secret = null)
@@ -89,17 +95,46 @@ class IntegritySubscriber implements EventSubscriberInterface
     {
         return
             [
-                KernelEvents::EXCEPTION => ['onException'],
+                KernelEvents::EXCEPTION => ['onException', 7],
                 RequestEvent::class => ['onKernelRequest', 7],
+                ConsoleEvents::COMMAND => ['onCommand', 2048],
+                RequestEvent::class => ['onEarlyKernelRequest', 2048]
             ];
+    }
+
+    public function checkCacheReady()
+    {
+        if(CacheClearCommand::applicationNotStarted()) {
+            throw new RuntimeException("Application integrity compromised, cache clear not started yet.", 0);
+        }
+    
+        if(CacheClearCommand::isFirstClear()) {
+            throw new RuntimeException("Application integrity compromised, double cache clear required.", 0);
+        }
+    }
+
+    public function onCommand(ConsoleEvent $event)
+    { 
+        $command = $event->getCommand();
+        if(!$command instanceof CacheClearCommand) {
+            $this->checkCacheReady();
+        }
+    }
+
+    public function onEarlyKernelRequest()
+    { 
+        $this->checkCacheReady();
     }
 
     public function onException(ExceptionEvent $event)
     {
         $throwable = $event->getThrowable();
+
         $instanceOf = ($throwable instanceof TypeError || $throwable instanceof DoctrineException ||
             $throwable instanceof ErrorException || $throwable instanceof InvalidArgumentException ||
             $throwable instanceof EntityNotFoundException);
+
+        $this->checkCacheReady();
 
         if ($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace())) {
             throw new RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);

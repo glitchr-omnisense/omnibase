@@ -3,6 +3,7 @@
 namespace Base\Twig\Renderer\Adapter;
 
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
+use Base\Service\BaseService;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\SimpleCacheTrait;
@@ -271,6 +272,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
     protected function refreshCacheIfNeeded()
     {
         if ($this->debug) {
+
             foreach ($this->entrypoints as $id => $entrypoint) {
                 $entrypointJsonPath = read_property($entrypoint, 'entrypointJsonPath');
                 $entrypointHash = hash_file('md5', $entrypointJsonPath);

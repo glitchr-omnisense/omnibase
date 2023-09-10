@@ -174,7 +174,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
      * @param array $attributes
      * @return string
      */
-    public function highlight(string $text, array $attributes = [])
+    public function enhance(string $text, array $attributes = [])
     {
         return $this->doHighlight($text, $this->getKeywords(), $attributes);
     }
@@ -185,7 +185,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
      * @param array $attributes
      * @return string
      */
-    public function highlightBy(string $text, array|string $keywords, array $attributes)
+    public function enhanceBy(string $text, array|string $keywords, array $attributes)
     {
         $keywords = array_filter(is_array($keywords) ? $keywords : [$keywords], fn($k) => $this->match($k));
 

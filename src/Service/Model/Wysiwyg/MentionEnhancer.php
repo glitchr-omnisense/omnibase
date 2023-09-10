@@ -1,12 +1,13 @@
 <?php
 
-namespace Base\Service;
+namespace Base\Service\Model\Wysiwyg;
 
 use App\Entity\User;
 use Base\Entity\Thread;
 use Base\Repository\Thread\MentionRepository;
 use Base\Repository\UserRepository;
 use Base\Service\Model\LinkableInterface;
+use Base\Service\ObfuscatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMDocument;
 
@@ -91,7 +92,7 @@ class MentionEnhancer implements MentionEnhancerInterface
         return $mentionees ? $this->userRepository->cacheById($mentionees)->getResult() : [];        
     }
 
-    public function highlight(string|array|null $strOrArray, array $attributes = []): string|array|null
+    public function enhance(string|array|null $strOrArray, array $attributes = []): string|array|null
     {
         if (!$strOrArray) {
             return $strOrArray;

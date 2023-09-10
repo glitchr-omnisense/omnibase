@@ -33,7 +33,9 @@ use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
+use Base\Console\Command\CacheClearCommand;
 use Base\Traits\SingletonTrait;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  *
@@ -42,6 +44,9 @@ class BaseBundle extends AbstractBaseBundle
 {
     use SingletonTrait;
 
+    public const VERSION = '1.0.0';
+    public const USE_CACHE = true;
+
     public function __construct()
     {
         if (!$this->hasInstance()) {
@@ -49,14 +54,6 @@ class BaseBundle extends AbstractBaseBundle
         }
     }
 
-    public static $sessionStorage = null;
-
-    public const VERSION = '1.0.0';
-    public const USE_CACHE = true;
-
-    /**
-     * @return string
-     */
     public function getProjectDir(): string
     {
         return $this->container->getParameter('kernel.project_dir');
@@ -117,10 +114,6 @@ class BaseBundle extends AbstractBaseBundle
     {
         return $this->bootDoctrine;
     }
-
-    protected static bool $firstClear = true;
-    public static function markAsFirstClear(bool $first = true) { self::$firstClear = $first; }
-    public static function isFirstClear() { return self::$firstClear; }
 
     //
     // Some subscribers are not called when modifying codes.
@@ -220,6 +213,7 @@ class BaseBundle extends AbstractBaseBundle
         }
 
         $this->boot = true;
+        CacheClearCommand::$testFile ??= $this->getCacheDir().".txt";
     }
 
     public function bootDoctrine(): bool
@@ -332,10 +326,11 @@ class BaseBundle extends AbstractBaseBundle
         return true;
     }
 
+    public function isBuilt() { return $this->container !== null; }
     public function build(ContainerBuilder $container): void
     {
         parent::build($container);
-	$this->container = $container;
+	    $this->container = $container;
 
         if (!self::$cache) {
             $this->warmUp();

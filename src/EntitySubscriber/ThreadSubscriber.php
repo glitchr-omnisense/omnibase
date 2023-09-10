@@ -9,7 +9,7 @@ use Base\Entity\User\Notification;
 use Base\EntityDispatcher\Event\ThreadEvent;
 use Base\Enum\ThreadState;
 use Base\Repository\Thread\MentionRepository;
-use Base\Service\MentionEnhancerInterface;
+use Base\Service\Model\Wysiwyg\MentionEnhancerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
