@@ -241,15 +241,21 @@ class ServiceEntityParser
      * @param array|null $selectAs
      * @return float|int|mixed|string|null
      */
-    protected function __findLastOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
+    protected function __findLastOneBy(array $criteria = [], ?array $orderBy = null, ?array $offset = null, ?array $groupBy = null, ?array $selectAs = null)
     {
-        return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), null, $groupBy, $selectAs) ?? null;
+        foreach($orderBy ?? [] as $field => $order)
+            $orderBy[$field] = ($order == "DESC") ? "ASC" : "DESC";
+
+        return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $offset, $groupBy, $selectAs) ?? null;
     }
 
-    protected function __findLastBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
+    protected function __findLastBy(array $criteria = [], ?array $orderBy = null, ?array $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
+        foreach($orderBy ?? [] as $field => $order)
+            $orderBy[$field] = ($order == "DESC") ? "ASC" : "DESC";
+
         $limit = array_unshift($criteria);
-        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, null, $groupBy, $selectAs) ?? null;
+        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, $offset, $groupBy, $selectAs) ?? null;
     }
 
     protected function __findAtMostBy(array $criteria = [], ?array $orderBy = null, ?int $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
@@ -258,32 +264,17 @@ class ServiceEntityParser
         return $this->__findBy($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs);
     }
 
-    protected function __findPreviousBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
+    protected function __findPreviousBy(array $criteria = [], ?array $orderBy = null, ?array $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
-        $limit = array_pop_key("special:prev", $criteria);
-        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, -1, $groupBy, $selectAs);
-    }
+        foreach($orderBy ?? [] as $field => $order) // Flipping previous order provided..
+            $orderBy[$field] = ($order == "DESC") ? "ASC" : "DESC";
 
-    protected function __findNextBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
-    {
-        $limit = array_pop_key("special:next", $criteria);
-        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'ASC']), $limit, 1, $groupBy, $selectAs);
-    }
-
-    /**
-     * @param array $criteria
-     * @param array|null $orderBy
-     * @param array|null $groupBy
-     * @param array|null $selectAs
-     * @return float|int|mixed|string|null
-     */
-    protected function __findPreviousOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
-    {
-        // dump($criteria, $orderBy, $groupBy, $selectAs);
-        // dump($this->__findBy   ($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), null, null, $groupBy, $selectAs)->GetResult());
-        // dump($this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), null, null, $groupBy, $selectAs));
-        // exit(1);
-        return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, $selectAs);
+        $limit = array_pop_key("special:prev", $criteria) ?? 1;
+        $specialKeys = array_pop_key("special:prevKeys", $criteria) ?? [];
+        foreach($specialKeys ?? [] as $field)
+            $orderBy[$field] = "DESC";
+        
+        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, $offset, $groupBy, $selectAs);
     }
 
     /**
@@ -293,9 +284,31 @@ class ServiceEntityParser
      * @param array|null $selectAs
      * @return float|int|mixed|string|null
      */
-    protected function __findNextOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
+     protected function __findPreviousOneBy(array $criteria = [], ?array $orderBy = null, ?array $offset = null, ?array $groupBy = null, ?array $selectAs = null)
+     {
+        return $this->__findPreviousBy($criteria, $orderBy, $offset, $groupBy, $selectAs)->GetOneOrNullResult();
+     }
+ 
+    protected function __findNextBy(array $criteria = [], ?array $orderBy = null, ?array $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
-        return $this->__findOneBy($criteria, $orderBy, $groupBy, $selectAs);
+        $limit = array_pop_key("special:next", $criteria) ?? 1;
+        $specialKeys = array_pop_key("special:nextKeys", $criteria) ?? [];
+        foreach($specialKeys ?? [] as $field)
+            $orderBy[$field] = "ASC";
+
+        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'ASC']), $limit, $offset, $groupBy, $selectAs);
+    }
+
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param array|null $groupBy
+     * @param array|null $selectAs
+     * @return float|int|mixed|string|null
+     */
+    protected function __findNextOneBy(array $criteria = [], ?array $orderBy = null, ?array $offset = null, ?array $groupBy = null, ?array $selectAs = null)
+    {
+        return $this->__findNextBy($criteria, $orderBy, $offset, $groupBy, $selectAs)->GetOneOrNullResult();
     }
 
     /**
@@ -702,11 +715,30 @@ class ServiceEntityParser
 
         // Handle special cases
         if (in_array($special, [self::getSpecial(self::SPECIAL_NEXTONE), self::getSpecial(self::SPECIAL_NEXT)])) {
-            $id = $this->addCriteria("id", array_shift($arguments));
-            $this->addCustomOption($id, self::OPTION_GREATER);
+            
+            $specialArgs = array_shift($arguments);
+            if(is_int($specialArgs)) $specialArgs = ["id" => $specialArgs];
+            if(!is_array($specialArgs)) {
+                throw new Exception("Warning /!\ Array expected for getting result on `findNext|findNextOne` special instruction");
+            }
+
+            $magicExtra["nextKeys"] = array_keys($specialArgs ?? []);
+            foreach($specialArgs as $_fieldName => $_arg) {
+                $this->addCustomOption($this->addCriteria($_fieldName, $_arg), self::OPTION_GREATER);
+            }
+
         } elseif (in_array($special, [self::getSpecial(self::SPECIAL_PREVONE), self::getSpecial(self::SPECIAL_PREV)])) {
-            $id = $this->addCriteria("id", array_shift($arguments));
-            $this->addCustomOption($id, self::OPTION_LOWER);
+
+            $specialArgs = array_shift($arguments);
+            if(is_int($specialArgs)) $specialArgs = ["id" => $specialArgs];
+            if(!is_array($specialArgs)) {
+                throw new Exception("Warning /!\ Array expected for getting result on `findPrevious|findPreviousOne` special instruction");
+            }
+
+            $magicExtra["prevKeys"] = array_keys($specialArgs);
+            foreach($specialArgs as $_fieldName => $_arg) {
+                $this->addCustomOption($this->addCriteria($_fieldName, $_arg), self::OPTION_LOWER);
+            }
         }
 
         if ($this->eagerly !== false) {

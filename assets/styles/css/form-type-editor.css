@@ -51,3 +51,8 @@ ul.cdx-nested-list { padding-left: 2rem; }
 
 .codex-editor__redactor { padding:2em 0em; }
 .form-editor-codex { padding:0em; margin:0; }
+
+@media all and (max-width: 470px)                  
+{
+    .read-only .ce-block__content, .read-only .ce-toolbar__content { max-width:calc(100% - 10px); }
+}
