@@ -62,10 +62,10 @@ class UserTracker
         return $uniqid;
     }
 
-    public function getCurrentConnection(?User $user = NULL): ?Connection
+    public function getCurrentConnection(?User $user = NULL, bool $allowNewConnection = true): ?Connection
     {
         $connection = $this->connectionRepository->findOneByUniqidAndUser($this->getUniqid(), ["user" => $user]);
-        if ($connection == NULL && $user != NULL) $connection = $this->createNewConnection($user);
+        if ($connection == NULL && $user != NULL && $allowNewConnection) $connection = $this->createNewConnection($user);
 
         return $connection;
     }

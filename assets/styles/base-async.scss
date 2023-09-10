@@ -144,6 +144,7 @@ main .exception
 
 @media all and (max-width: 470px) {
     
+    .login-btn { flex-direction: column; }
     .ql-editor img
     {
         margin: auto auto 1em auto;

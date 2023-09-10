@@ -48,7 +48,7 @@
             {{ form_rest(form) }}
         </div>
 
-        <div class="col d-flex  flex-column justify-content-center">
+        <div class="col d-flex justify-content-center login-btn">
             {% if form.vars.allow_login_token %}
             <a class="btn btn-lg btn-success" href="{{ path('security_loginByToken') }}">{{ '@forms.login.byToken'|trans }}</button>
             {% endif %}

@@ -91,9 +91,9 @@ class ConnectionSubscriber implements EventSubscriberInterface
         $user = $token ? $token->getUser() : null;
         if (!$user instanceof User) return;
 
-        $connection = $this->userTracker->getCurrentConnection($user);
-        $connection->markAsLogout();
-
+        $connection = $this->userTracker->getCurrentConnection($user, false);
+        if($connection) $connection->markAsLogout();
+        
         $this->entityManager->flush();
     }
 }
