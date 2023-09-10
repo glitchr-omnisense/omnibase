@@ -181,18 +181,26 @@ class SpamChecker implements SpamCheckerInterface
                     return $enum[SpamScore::NOT_SPAM];
                 }
 
-                $response = $this->client->request('POST', $endpoint, $options);
+                $response = null;
+                try { 
+                    $response = $this->client->request('POST', $endpoint, $options);
+                } catch(\Exception $e) {
+                    $score = $enum[SpamScore::NOT_SPAM];
+                }
 
-                $headers = $response->getHeaders();
-                if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) {
-                    $score = $enum[SpamScore::BLATANT_SPAM];
-                } else {
-                    $content = $response->getContent();
-                    if (isset($headers['x-akismet-debug-help'][0])) {
-                        throw new RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
+                if($response) {
+
+                    $headers = $response->getHeaders();
+                    if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) {
+                        $score = $enum[SpamScore::BLATANT_SPAM];
+                    } else {
+                        $content = $response->getContent();
+                        if (isset($headers['x-akismet-debug-help'][0])) {
+                            throw new RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
+                        }
+
+                        $score = ($content === "true" ? $enum[SpamScore::MAYBE_SPAM] : $enum[SpamScore::NOT_SPAM]);
                     }
-
-                    $score = ($content === "true" ? $enum[SpamScore::MAYBE_SPAM] : $enum[SpamScore::NOT_SPAM]);
                 }
 
                 return $score;
