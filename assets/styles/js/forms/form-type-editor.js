@@ -162,9 +162,13 @@ function edjs(inputEl, holderId, value = {}, options = {})
         holder  : holderId, 
         onReady : () => { 
             if(data == undefined && value != '') editor.blocks.renderFromHTML(value);
-            if(inputEl != undefined) new Undo({ editor }); 
+            // if(inputEl != undefined) new Undo({ editor }); // issue 
         },
-        onChange: () => { if(!options.readOnly) editor.save().then(onSave); }
+        onChange: async (api, event) => {
+
+            if(options.readOnly) return;
+            editor.save().then(onSave); 
+        }
     });
 
     var editor = new EditorJs(options);
@@ -178,9 +182,10 @@ window.addEventListener("load.form_type", function (el) {
     document.querySelectorAll("[data-editor-field]").forEach((function (el) {
 
         var id    = el.getAttribute("data-editor-field");
-        var value = $("#"+id).val();
 
         var input = $("#"+id);
+        var value = $("#"+id).val();
+
         var editorId = id+"_editor";
         edjs(input, editorId, value);
     }));
