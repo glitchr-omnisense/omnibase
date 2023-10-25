@@ -17,7 +17,7 @@ import Paragraph from 'editorjs-paragraph';
 import Mention from 'editorjs-mention';
 import {ImageTool, ImageToolTune} from 'editorjs-image';
 
-import YTool from 'y-editorjs';
+// import YTool from 'y-editorjs';
 
 function json_decode(str) {
     try {

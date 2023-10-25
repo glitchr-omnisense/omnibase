@@ -784,7 +784,7 @@ body.ea-edit .content-header, body.ea-new .content-header {
 .content-body:first-child { padding-top:0em; }
 
 .ea .content-body:last-child { padding-bottom: 2.5em; }
-.ea .content-body { margin:auto; }
+.ea .content-body { margin:auto; width: calc(100% - 2em); }
 
 .ea-index .content-body
 {
