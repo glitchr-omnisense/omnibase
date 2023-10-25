@@ -10,7 +10,7 @@ import InlineCode from '@editorjs/inline-code';
 import Underline from '@editorjs/underline';
 import CodeTool from 'editorjs-code-highlight';
 import Quote from '@editorjs/quote';
-import Undo from 'editorjs-undo';
+// import Undo from 'editorjs-undo';
 
 import Header from 'editorjs-header';
 import Paragraph from 'editorjs-paragraph';

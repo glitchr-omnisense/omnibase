@@ -34,7 +34,7 @@
 
                             <div class="row">
                                 {% if tab_name is defined and tab_name %}
-                                    {% for field in form|filter(field => not ea_crud_form.form_panels|filter((panel_config, form_panel) => form_panel == field.vars.ea_crud_form.form_panel) and field.vars.ea_crud_form.form_tab == tab_name) %}
+                                    {% for field in form|filter(field => not ea_crud_form.form_fieldsets|filter((panel_config, form_panel) => form_panel == field.vars.ea_crud_form.form_panel) and field.vars.ea_crud_form.form_tab == tab_name) %}
                                         {{ form_row(field) }}
                                     {% endfor %}
                                 {% endif %}
@@ -51,7 +51,7 @@
 {% endblock ea_crud_widget %}
 
 {% block ea_crud_widget_panels %}
-    {% for panel_name, panel_config in ea_crud_form.form_panels|filter(panel_config => not panel_config.form_tab or panel_config.form_tab == tab_name) %}
+    {% for panel_name, panel_config in ea_crud_form.form_fieldsets|filter(panel_config => not panel_config.form_tab or panel_config.form_tab == tab_name) %}
         {% set panel_has_header = panel_config.label|default(false) or panel_config.icon|default(false) or panel_config.help|default(false) %}
 
         {% set collapsible = panel_config.collapsible %}

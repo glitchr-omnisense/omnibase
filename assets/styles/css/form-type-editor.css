@@ -47,7 +47,7 @@
 .read-only .cdx-block { max-width: 100%; }
 
 .ce-block { margin: 0.8em 0; }
-ul.cdx-nested-list { padding-left: 2rem; }
+.cdx-nested-list { padding-left: 2rem !important ; }
 
 .codex-editor__redactor { padding:2em 0em; }
 .form-editor-codex { padding:0em; margin:0; }
