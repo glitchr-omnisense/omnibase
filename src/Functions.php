@@ -1055,16 +1055,16 @@ namespace {
         if ($nChr > $length + strlen($separator)) {
             switch ($position) {
                 case SHORTEN_FRONT:
-                    return ltrim($separator) . substr($haystack, $nChr, $length + 1);
+                    return ltrim($separator) . mb_substr($haystack, $nChr, $length + 1);
 
                 case SHORTEN_MIDDLE:
-                    return substr($haystack, 0, $length / 2) . $separator . substr($haystack, $nChr - $length / 2, $length / 2 + 1);
+                    return mb_substr($haystack, 0, $length / 2) . $separator . mb_substr($haystack, $nChr - $length / 2, $length / 2 + 1);
 
                 case SHORTEN_BACK:
                 case SHORTEN_BACK_SHRINK:
                 case SHORTEN_BACK_EXTEND:
                     if ($position == SHORTEN_BACK_SHRINK) {
-                        $pos = strrpos(substr($haystack, 0, $length), ".");
+                        $pos = strrpos(mb_substr($haystack, 0, $length), ".");
                         if ($pos === false) {
                             return "";
                         }
@@ -1073,13 +1073,13 @@ namespace {
                     }
 
                     if ($position == SHORTEN_BACK_EXTEND) {
-                        $pos = strpos(substr($haystack, $length), ".");
+                        $pos = strpos(mb_substr($haystack, $length), ".");
                         if ($pos !== false) {
                             $length += $pos + 1;
                         }
                     }
 
-                    return substr($haystack, 0, $length) . rtrim($separator);
+                    return mb_substr($haystack, 0, $length) . rtrim($separator);
             }
         }
 

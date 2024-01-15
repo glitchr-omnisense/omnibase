@@ -27,7 +27,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text"><i class="fa-fw fa-solid fa-key"></i></span>
             </div>
-            {{ form_widget(form.password, {attr:{ placeholder:'@forms.login.password'|trans}}) }}
+            {{ form_widget(form.password, {attr: {placeholder:'@forms.login.password'|trans, oninput:"this.value.trim() === '' ? document.getElementById('btn-link-token').classList.remove('disabled') : document.getElementById('btn-link-token').classList.add('disabled');"}}) }}
 
         </div>
         </div>
@@ -50,7 +50,7 @@
 
         <div class="col d-flex justify-content-center login-btn">
             {% if form.vars.allow_login_token %}
-            <a class="btn btn-lg btn-success" href="{{ path('security_loginByToken') }}">{{ '@forms.login.byToken'|trans }}</button>
+            <a id="btn-link-token" class="btn btn-lg btn-success" href="{{ path('security_loginByToken') }}">{{ '@forms.login.byToken'|trans }}</button>
             {% endif %}
             <button class="btn btn-lg btn-primary" type="submit">{{ '@forms.login.submit'|trans }}</button>
         </div>
