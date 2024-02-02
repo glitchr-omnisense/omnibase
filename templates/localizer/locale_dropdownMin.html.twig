@@ -9,7 +9,7 @@
     {% for locale in available_locales %}
         {% set current = (locale == current_locale) ? "active" : null %}
         <li><a href="{{ path("_switch_locale", {_locale: locale|lang}) }}" {{ html_attributes({"class": "dropdown-item "~current}) }}>
-            <img class="country-flag" width="100%" height="100%" alt="{{locale|country}}" src="{{asset('bundles/base/images/flags/'~(locale|country)~'.svg')}}"> {{ locale|lang_name|capitalize }}
+            <img class="country-flag" alt="{{locale|country}}" src="{{asset('bundles/base/images/flags/'~(locale|country)~'.svg')}}"> {{ locale|lang_name|capitalize }}
         </a></li>
     {% endfor %}
     </ul>
