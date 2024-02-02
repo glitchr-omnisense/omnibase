@@ -602,11 +602,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @param RecipientInterface ...$recipients
      * @return $this
      */
-    /**
-     * @param string|null $importance
-     * @param RecipientInterface ...$recipients
-     * @return $this
-     */
     public function send(string $importance = null, RecipientInterface ...$recipients)
     {
         $this->setImportance($importance ?? self::IMPORTANCE_DEFAULT);
@@ -812,7 +807,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             object_hydrate($attachment, ["name" => $newFilename, "filename" => $newFilename]);
             $search[] = "cid:".$filename;
             $replacement[] = "cid:".$newFilename;
-            
         }
         
         $context["html"] = str_replace($search, $replacement, $context["html"]);
