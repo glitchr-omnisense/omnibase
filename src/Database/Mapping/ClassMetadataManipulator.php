@@ -194,7 +194,8 @@ class ClassMetadataManipulator extends AbstractLocalCache
         try {
             $doctrineType = Type::getType($type);
         } catch (Exception $e) {
-            throw new LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e);
+//            throw new LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e);
+              return null;
         }
 
         return $doctrineType;

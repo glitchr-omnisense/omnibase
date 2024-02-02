@@ -22,73 +22,81 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         $this->context = $context;
         [$matchHost, $staticRoutes, $regexpList, $dynamicRoutes, $checkCondition] = $compiledRoutes;
 
-        //
-        // NB: Static routes using multiple host, or domains might be screened.. imo
-        $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];
-        $replacementChars = array_pad([], count($reservedChars), "_");
-        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".static_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
-        $staticRoutes = self::$router->getCache()->get($cacheKey, function () use (&$staticRoutes) {
-            foreach ($staticRoutes as &$staticRoute) {
-                $host = $staticRoute[0][1];
-                if (!$host) {
-                    continue;
+        if (self::$router?->useAdvancedFeatures()) {
+
+
+            //
+            // NB: Static routes using multiple host, or domains might be screened.. imo
+            $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];
+            $replacementChars = array_pad([], count($reservedChars), "_");
+            $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".static_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
+            $staticRoutes = self::$router->getCache()->get($cacheKey, function () use (&$staticRoutes) {
+                foreach ($staticRoutes as &$staticRoute) {
+                    $host = $staticRoute[0][1];
+                    if (!$host) {
+                        continue;
+                    }
+
+                    $ipFallback = array_key_exists("ip", parse_url2(self::$router->getHostFallback()));
+                    if ($ipFallback && (str_contains($host, "\\\\\\{_machine\\\\\\}") || str_contains($host, "\\\\\\{_subdomain\\\\\\}"))) {
+                        throw new Exception("IP address provided. This is incompatible with some routes using `machine` and `subdomain` features.");
+                    }
+                    if (!self::$router->getDomainFallback() && str_contains($host, "\\\\\\{_domain\\\\\\}")) {
+                        throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
+                    }
+
+                    $machine = self::$router->getMachine() ?? null;
+                    $subdomain = self::$router->getSubdomain() ?? null;
+                    $domain = self::$router->getDomain() ?? null;
+                    $port = self::$router->getPort() ?? null;
+
+                    $machine = $machine ? preg_quote($machine) : $machine;
+                    $subdomain = $subdomain ? preg_quote($subdomain) : $subdomain;
+                    $domain = $domain ? preg_quote($domain) : $domain;
+
+                    $search = ["\\\\\\{_machine\\\\\\}\.", "\\\\\\{_subdomain\\\\\\}\.", "\\\\\\{_domain\\\\\\}", ":\\\\\\{_port\\\\\\}"];
+                    $replace = [$machine ? $machine . "." : "", $subdomain ? $subdomain . "." : "", preg_quote($domain), $port == 80 || $port == 443 || !$port ? "" : ":" . $port];
+
+                    $staticRoute[0][1] = str_replace($search, $replace, $host);
                 }
 
-                $ipFallback = array_key_exists("ip", parse_url2(self::$router->getHostFallback()));
-                if ($ipFallback && (str_contains($host, "\\\\\\{_machine\\\\\\}") || str_contains($host, "\\\\\\{_subdomain\\\\\\}"))) {
-                    throw new Exception("IP address provided. This is incompatible with some routes using `machine` and `subdomain` features.");
-                }
-                if (!self::$router->getDomainFallback() && str_contains($host, "\\\\\\{_domain\\\\\\}")) {
-                    throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
-                }
+                return $staticRoutes;
+            });
 
-                $machine = self::$router->getMachine() ?? null;
-                $subdomain = self::$router->getSubdomain() ?? null;
-                $domain = self::$router->getDomain() ?? null;
-                $port = self::$router->getPort() ?? null;
+            $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".dynamic_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
+            [$regexpList, $dynamicRoutes] = self::$router->getCache()->get($cacheKey, function () use (&$regexpList, &$dynamicRoutes) {
+                
+                foreach ($regexpList as &$regexp) {
 
-                $machine = $machine ? preg_quote($machine) : $machine;
-                $subdomain = $subdomain ? preg_quote($subdomain) : $subdomain;
-                $domain = $domain ? preg_quote($domain) : $domain;
+                    $ipFallback = self::$router->getHostFallback() ? array_key_exists("ip", parse_url2(self::$router->getHostFallback())) : false;
+                    if ($ipFallback && (str_contains($regexp, "\\\\\\{_machine\\\\\\}") || str_contains($regexp, "\\\\\\{_subdomain\\\\\\}"))) {
+                        throw new Exception("IP address provided. This is incompatible with some routes using `machine` and `subdomain` features.");
+                    }
+    
+                    if (!self::$router->getDomainFallback() && str_contains($regexp, "\\\\\\{_domain\\\\\\}")) {
+                        throw new Exception("Domain fallback required but not provided.");
+                    }
 
-                $search = ["\\\\\\{_machine\\\\\\}\.", "\\\\\\{_subdomain\\\\\\}\.", "\\\\\\{_domain\\\\\\}", ":\\\\\\{_port\\\\\\}"];
-                $replace = [$machine ? $machine . "." : "", $subdomain ? $subdomain . "." : "", preg_quote($domain), $port == 80 || $port == 443 || !$port ? "" : ":" . $port];
+                    $machine = self::$router->getMachine() ?? null;
+                    $subdomain = self::$router->getSubdomain() ?? null;
+                    $domain = self::$router->getDomain() ?? null;
+                    $port = self::$router->getPort() ?? null;
 
-                $staticRoute[0][1] = str_replace($search, $replace, $host);
-            }
+                    $machine = $machine ? preg_quote($machine) : $machine;
+                    $subdomain = $subdomain ? preg_quote($subdomain) : $subdomain;
+                    $domain = $domain ? preg_quote($domain) : $domain;
 
-            return $staticRoutes;
-        });
-
-        $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".dynamic_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
-        [$regexpList, $dynamicRoutes] = self::$router->getCache()->get($cacheKey, function () use (&$regexpList, &$dynamicRoutes) {
-            foreach ($regexpList as $offset => &$regexp) {
-                $ipFallback = array_key_exists("ip", parse_url2(self::$router->getHostFallback()));
-                if ($ipFallback && (str_contains($regexp, "\\\\\\{_machine\\\\\\}") || str_contains($regexp, "\\\\\\{_subdomain\\\\\\}"))) {
-                    throw new Exception("IP address provided. This is incompatible with some routes using `machine` and `subdomain` features.");
-                }
-                if (!self::$router->getDomainFallback() && str_contains($regexp, "\\\\\\{_domain\\\\\\}")) {
-                    throw new Exception("Domain fallback not provided. This is incompatible with some routes using `domain` features.");
+                    $search = ["\\\\\\{_machine\\\\\\}\.", "\\\\\\{_subdomain\\\\\\}\.", "\\\\\\{_domain\\\\\\}", "\:\\\\\\{_port\\\\\\}"];
+                    $replace = [$machine ? $machine . "\." : "", $subdomain ? $subdomain . "\." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : "\:" . $port];
+                    $regexp = str_replace($search, $replace, $regexp);
                 }
 
-                $machine = self::$router->getMachine() ?? null;
-                $subdomain = self::$router->getSubdomain() ?? null;
-                $domain = self::$router->getDomain() ?? null;
-                $port = self::$router->getPort() ?? null;
+                return $this->recomputeDynamicRoutes($regexpList, $dynamicRoutes);
+            });
+            
+            $compiledRoutes = [$matchHost, $staticRoutes, $regexpList, $dynamicRoutes, $checkCondition];
+        }
 
-                $machine = $machine ? preg_quote($machine) : $machine;
-                $subdomain = $subdomain ? preg_quote($subdomain) : $subdomain;
-                $domain = $domain ? preg_quote($domain) : $domain;
-
-                $search = ["\\\\\\{_machine\\\\\\}\.", "\\\\\\{_subdomain\\\\\\}\.", "\\\\\\{_domain\\\\\\}", "\:\\\\\\{_port\\\\\\}"];
-                $replace = [$machine ? $machine . "\." : "", $subdomain ? $subdomain . "\." : "", $domain, $port == 80 || $port == 443 || !$port ? "" : "\:" . $port];
-                $regexp = str_replace($search, $replace, $regexp);
-            }
-
-            return $this->recomputeDynamicRoutes($regexpList, $dynamicRoutes);
-        });
-
-        $compiledRoutes = [$matchHost, $staticRoutes, $regexpList, $dynamicRoutes, $checkCondition];
         return parent::__construct($compiledRoutes, $context);
     }
 
@@ -181,6 +189,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     public function match(string $pathinfo): array
     {
         if (self::$router?->useAdvancedFeatures()) {
+
             $parse = parse_url2($pathinfo);
             if (!$parse || !array_key_exists("host", $parse)) {
                 $parse = parse_url2(get_url()) ?? [];
@@ -193,22 +202,19 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
             $pathinfo = parse_url2($pathinfo)["path"] ?? "";
         }
-
+        
         //
         // Prevent to match custom route with Symfony internal route.
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
+
         try {
             $match = parent::match($pathinfo);
         } catch (Exception $e) {
             $match = [];
         }
 
-        if (!self::$router?->useAdvancedFeatures()) {
-            return $match;
-        }
-
         if (empty($match) || ($match["_controller"] ?? null) == RedirectController::class . "::urlRedirectAction") {
-            $match = parent::match($pathinfo . "/");
+            $match = parent::match($pathinfo);
         }
 
         return $match;

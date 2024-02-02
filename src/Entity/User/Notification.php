@@ -36,7 +36,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\User\NotificationRepository;
+use Base\Repository\User\NotificationRepository;
+use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -601,11 +602,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @param RecipientInterface ...$recipients
      * @return $this
      */
-    /**
-     * @param string|null $importance
-     * @param RecipientInterface ...$recipients
-     * @return $this
-     */
     public function send(string $importance = null, RecipientInterface ...$recipients)
     {
         $this->setImportance($importance ?? self::IMPORTANCE_DEFAULT);
@@ -674,13 +670,14 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return null;
     }
 
+
     public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
     {
         $notifier = $this->getNotifier();
         $notification = EmailMessage::fromNotification($this, $recipient);
 
         /**
-         * @var EmailRecipientInterface $notifier
+         * @var EmailRecipientInterface $technicalRecipient
          */
 
         $technicalRecipient = $notifier->getTechnicalRecipient();
@@ -739,7 +736,17 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             "content" => $content,
             "footer_text" => $footer,
             "recipient" => $recipient
-        ]), $this->getHtmlParameters());
+        ]));
+        
+        if(array_key_exists("email", $this->htmlParameters)) {
+            throw new UnexpectedValueException("`email` is a reserved key. Cannot pass it through html parameters.");
+        }
+
+        $htmlParameters = array_merge(
+            $context, 
+            $this->htmlParameters,
+            ["email" => new WrappedTemplatedEmail($this->getTwig(), $email)]
+        );
 
         // Append notification attachments
         $importance = $context["importance"] ?? $this->getImportance();
@@ -758,6 +765,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
         // Fallback: Append cid:/ like attachments
         foreach ($context as $value) {
+
             if (!$value) {
                 continue;
             }
@@ -769,39 +777,48 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             }
 
             list($cid, $path) = explode(":", $value);
-            $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $path);
-            // NB: A short image attachment name might be generated using such obfuscator
-            //     Consequently, a modification of MediaTwigExtension would be needed
-            // $filename = $this->getMediaService()->obfuscate($path);
-            // $ext = pathinfo($path, PATHINFO_EXTENSION);
-            // $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $filename.($ext ? ".".$ext : ""));
+            $email->embed(fopen($this->getProjectDir() . "/" . $path, 'rb'), $path /* replace by alias */);
         }
 
-        // Render html template to get back email title..
-        // I was hoping to replace content with html(), but this gets overriden by Symfony notification
         try {
-            $htmlTemplate = $this->getTwig()->render($this->htmlTemplate, $context);
+            $context["html"] = $this->getTwig()->render($this->htmlTemplate, $htmlParameters);
         } catch (LoaderError $e) {
-            $htmlTemplate = $this->getTwig()->render("@Base/notifier/email.html.twig", $context);
+            $context["html"] = $this->getTwig()->render("@Base/notifier/email.html.twig", $htmlParameters);
         } catch (RuntimeException $e) {
-            throw new UnexpectedValueException("Template \"$this->htmlTemplate\" not found.", 500, $e);
+            throw new UnexpectedValueException("Failed to render template \"$this->htmlTemplate\". See below", 500, $e);
         }
 
-        if (preg_match('/<title>(.*)<\/title>/ims', $htmlTemplate, $matches)) {
+        if (preg_match('/<title>(.*)<\/title>/ims', $context["html"], $matches)) {
             $subject = html_entity_decode(trim($matches[1]));
         }
 
         $subject ??= $this->getSubject();
         $subject = $fwd . $subject;
+        
+        // Alias cid://
+        $search = [];
+        $replacement = [];
+        foreach ($email->getAttachments() as $key => $attachment) {
 
+            $ext = pathinfo($attachment->GetName(), PATHINFO_EXTENSION);
+            $newFilename = rand_str(6) . ($ext ? ".".$ext : "");
+
+            $filename = $attachment->getFilename();
+            object_hydrate($attachment, ["name" => $newFilename, "filename" => $newFilename]);
+            $search[] = "cid:".$filename;
+            $replacement[] = "cid:".$newFilename;
+        }
+        
+        $context["html"] = str_replace($search, $replacement, $context["html"]);
+
+        // Priority
         $priority = [self::IMPORTANCE_HIGH, self::IMPORTANCE_MEDIUM, self::IMPORTANCE_LOW];
         $email
             ->importance(in_array($importance, $priority) ? $importance : "")
             ->subject($subject)
             ->from($from)
             ->to($to)
-            //->html($html) // DO NOT USE: Overridden by the default Symfony notification template
-            ->htmlTemplate($this->htmlTemplate)
+            ->htmlTemplate("@Base/notifier/raw.html.twig")
             ->context($context);
 
         if($context["replyTo"] ?? null)

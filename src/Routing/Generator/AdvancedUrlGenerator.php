@@ -29,6 +29,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     public function __construct(array $compiledRoutes, RequestContext $context, LoggerInterface $logger = null, string $defaultLocale = null)
     {
+        $this->context = $context;
+
         //
         // NB: Static routes using multiple host, or domains might be screened.. imo
 
@@ -54,6 +56,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         });
 
         parent::__construct($compiledRoutes, $context, $logger, $defaultLocale);
+
         $this->compiledRoutes = $compiledRoutes;
     }
 
