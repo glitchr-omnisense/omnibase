@@ -88,11 +88,12 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                     $prevEntity = null;
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
+                    $cacheable = $entityRepository->getClassMetadata()->cache;
                     if ($entityRepository instanceof ServiceEntityRepository) {
                         if (get_parent_class($entity) !== false) {
-                            $prevEntity = $entityRepository->cachePreviousOneByClassOf($entity->getId(), get_class($entity));
+                            $prevEntity = $entityRepository->{$cacheable ? "cachePreviousOneByClassOf" : "findPreviousOneByClassOf"}($entity->getId(), get_class($entity));
                         } else {
-                            $prevEntity = $entityRepository->cachePreviousOne($entity->getId());
+                            $prevEntity = $entityRepository->{$cacheable ? "cachePreviousOne" : "findPreviousOne"}($entity->getId());
                         }
                     }
 
@@ -132,11 +133,13 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                     $nextEntity = null;
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
+                    $cacheable = $entityRepository->getClassMetadata()->cache;
+                    
                     if ($entityRepository instanceof ServiceEntityRepository) {
                         if (get_parent_class($entity) !== false) {
-                            $nextEntity = $entityRepository->cacheNextOneByClassOf($entity->getId(), get_class($entity));
+                            $nextEntity = $entityRepository->{$cacheable ? "cacheNextOneByClassOf" : "findNextOneByClassOf"}($entity->getId(), get_class($entity));
                         } else {
-                            $nextEntity = $entityRepository->cacheNextOneBy($entity->getId());
+                            $nextEntity = $entityRepository->{$cacheable ? "cacheNextOneBy" : "findNextOneBy"}($entity->getId());
                         }
                     }
 
