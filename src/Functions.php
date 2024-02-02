@@ -75,7 +75,7 @@ namespace {
      */
     function is_json(mixed $stringOrObject)
     {
-        if (is_string($stringOrObject)) {
+        if (is_string($stringOrObject) && str_contains($stringOrObject, "{") && str_contains($stringOrObject, "}")) {
             json_decode($stringOrObject);
             return json_last_error() === JSON_ERROR_NONE;
         }
@@ -3588,14 +3588,15 @@ namespace {
      * @return array
      * @throws Exception
      */
-    function cast_to_array(object $object)
+    function cast_to_array(object $object, bool $keepChildObjects = true)
     {
-        return array_transforms(function($k, $v): array {
+        return array_transforms(function($k, $v) use ($keepChildObjects): ?array {
             
             $k = str_lstrip($k, ["+", "*"]);
             $k = explode("\x00", $k);
             $k = last($k);
 
+            if(!$keepChildObjects && is_object($v)) return null;
             return [$k, $v];
         
         }, (array) $object);
