@@ -93,10 +93,6 @@ h2 a, h3 a, h4 a { color: var(--form-panel-header-color); }
     color: var(--sidebar-menu-active-item-color);
 }
 
-.content-panel h1
-{
-    color: var(--sidebar-menu-active-item-color);
-}
 
 ul.sidebar-menu a, .user-menu-wrapper a.user-details, .user-menu-wrapper a.user-details:hover {
     color: var(--sidebar-menu-color);
@@ -408,16 +404,12 @@ form fieldset legend { font-size: 11pt; }
 .datagrid .lightbox-association img { filter: blur(2px); }
 .datagrid .lightbox-association:hover img { filter: blur(0px); }
 .datagrid .lightbox-association:hover span { visibility:hidden; }
-.datagrid .lightbox-association span
-{
-font-weight: bold;
-position: absolute;
-color: var(--gray-600);
+.datagrid .lightbox-association span {
+    font-weight: bold;
+    position: absolute;
+    color: var(--gray-600);
 }
 
-#main-menu .menu .menu-header, #main-menu .menu .menu-header > a {
-    color: var(--sidebar-menu-active-item-color);
-}
 .hide { visibility:hidden; }
 
 .content-header-icon a { color: var(--sidebar-logo-color); }
@@ -431,13 +423,12 @@ color: var(--gray-600);
 .content-header-title span { color: var(--sidebar-menu-icon-color); }
 
 .menu-item-label {
-position:relative;
+    position:relative;
 }
 
 .dropdown-user-details .img-fluid { margin-right: 10px; }
-.user-menu-wrapper .dropdown-menu .dropdown-user-details img.user-avatar
-{
-object-fit: cover;
+.user-menu-wrapper .dropdown-menu .dropdown-user-details img.user-avatar {
+    object-fit: cover;
 }
 
 .ea-sidebar-width-compact #header-logo { visibility:hidden; }
@@ -512,7 +503,6 @@ list-style: none;
 .form-entity > div { margin-bottom: 0em; }
 
 #main-menu .menu .menu-item:hover:not(.active) a .menu-item-label {  font-weight:400; }
-#main-menu .menu .menu-item:hover > a .menu-item-label { color: var(--sidebar-menu-active-item-color); }
 #main-menu .menu .menu-header { margin-bottom:2px;}
 #main-menu .menu .menu-item .submenu-toggler { flex-grow: 1;}
 #main-menu .menu .menu-item .submenu-toggle-icon { position:relative; right: 6px; }
@@ -663,7 +653,8 @@ a.dropdown-appearance-button
     color: var(--sidebar-menu-icon-color);
 }
 
-#main-menu .menu .menu-item:hover > a .menu-item-label { color:var(--sidebar-menu-icon-color); }
+#main-menu .menu .menu-item { margin: 2px 0; }
+#main-menu .menu .menu-item:hover > a .menu-item-label { color:var(--sidebar-menu-active-item-color); }
 
 body {
     color: var(--button-color);
@@ -1291,6 +1282,7 @@ body.ea-sidebar-width-compact #main-menu .menu .menu-item .menu-item-label
 {
     flex: auto;
     padding: 0 1em;
+    margin: 2px 0;
 }
 body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover,
 body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover .menu-item-contents {
@@ -1299,7 +1291,6 @@ body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover .menu-item-conte
 }
 fieldset h3 {
     white-space: nowrap;
-    color: var(--sidebar-menu-active-item-color);
     font-size: 20px;
     font-weight: 700;
 }
@@ -1407,7 +1398,6 @@ fieldset .sidebar-menu li {
 #main-menu .menu .submenu a:hover { color: var(--sidebar-menu-submenu-color); }
 
 ul.sidebar-menu a{ color: var(--sidebar-menu-color); }
-ul.sidebar-menu a:hover { color: var(--sidebar-menu-submenu-color); }
 
 .field-avatar .image-avatar i, img.image-avatar
 {
@@ -1424,7 +1414,7 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-submenu-color); }
 {
     white-space: nowrap;
 }
-ul.sidebar-menu a:hover { color: var(--sidebar-menu-active-item-color); }
+ul.sidebar-menu a:hover { color: var(--sidebar-menu-icon-color); }
 .user-menu-wrapper .dropdown-menu .dropdown-user-details .user-avatar {
     margin: 0 0.25em;
 }
