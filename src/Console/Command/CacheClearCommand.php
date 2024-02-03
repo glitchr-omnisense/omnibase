@@ -114,9 +114,9 @@ EOF
         if (!$noExtension) {
             $this->phpConfigCheck($io);
             $this->diskAndMemoryCheck($io);
-            $this->customFeatureWarnings($io);
             $this->checkCache($io);
             $this->checkExtensions($io);
+            $this->customFeatureWarnings($io);
         }
 
         $noWarmup = $input->getOption('no-warmup');

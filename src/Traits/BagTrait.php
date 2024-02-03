@@ -35,6 +35,7 @@ trait BagTrait
         if (array_key_exists("_self", $bag)) {
             return $bag["_self"];
         }
+
         return array_transforms(function ($k, $v, $c): ?array {
             if ($k == "_self") {
                 return null;

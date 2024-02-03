@@ -7,6 +7,7 @@ use Base\Database\Mapping\ClassMetadataFactory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
+use Symfony\Component\Console\Helper\Table;
 
 /**
  *
@@ -34,23 +35,30 @@ trait CacheClearTrait
 
     protected function customFeatureWarnings(SymfonyStyle $io): void
     {
+        $io->write("", true);
+
+        $useCustomLoader = $this->parameterBag->get("base.twig.use_custom");
+        $useCustomReader = $this->parameterBag->get("base.metadata.use_custom");
         $useCustomRouter = $this->parameterBag->get("base.router.use_custom");
         $useMailer = $this->parameterBag->get("base.notifier.mailer");
-        $useCustomLoader = $this->parameterBag->get("base.twig.use_custom");
-        $useCustomReader = $this->parameterBag->get("base.annotations.use_custom");
         $useSettingBag = $this->parameterBag->get("base.parameter_bag.use_setting_bag");
         $useHotParameterBag = $this->parameterBag->get("base.parameter_bag.use_hot_bag");
         $useCustomDbFeatures = $this->parameterBag->get("base.database.use_custom");
 
-        //
-        // Router fallback information
-        if ($useCustomRouter === null) {
-            $io->warning("Advanced router option is not configured in `base.yaml`" . PHP_EOL . "(configure 'base.router.use_custom' boolean to remove this message).");
-        } elseif ($useCustomRouter) {
-            $io->write(" - Advanced router option is <info>'base.router.use_custom'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        } else {
-            $io->write(" - Advanced router option is <info>'base.router.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        }
+        $table = new Table($io);
+        $table
+            ->setHeaders(['Base components', 'Option paths', 'Status'])
+            ->setRows([
+                ['Twig loader', 'base.twig.use_custom', $useCustomLoader ? "<info>✓</info>" : "<error>✗</error>"],
+                ['Metadata reader', 'base.metadata.use_custom',  $useCustomReader ? "<info>✓</info>" : "<error>✗</error>"],
+                ['Setting bag', 'base.parameter_bag.use_setting_bag',  $useSettingBag ? "<info>✓</info>" : "<error>✗</error>"],
+                ['Hot parameter bag', 'base.parameter_bag.use_hot_bag',  $useHotParameterBag ? "<info>✓</info>" : "<error>✗</error>"],
+                ['Custom router', 'base.router.use_custom',  $useCustomRouter ? "<info>✓</info>" : "<error>✗</error>"],
+                ['Custom database', 'base.database.use_custom',  $useCustomDbFeatures ? "<info>✓</info>" : "<error>✗</error>"],
+                ['Mail notification', 'base.notifier.mail',  $useMailer ? "<info>✓</info>" : "<error>✗</error>"]
+            ])
+        ;
+        $table->render();
 
         if ($useCustomRouter === true) {
             if ($this->parameterBag->get("base.router.fallback_warning") && !$this->router->getHostFallback()) {
@@ -61,66 +69,6 @@ trait CacheClearTrait
         if ($this->parameterBag->get("base.database.fallback_warning") && !$this->entityManager->getMetadataFactory() instanceof ClassMetadataFactory) {
             $io->warning("Custom ClassMetadataFactory is configured. No fallback configured in `base.yaml`" . PHP_EOL . "(configure 'doctrine.orm.class_metadata_factory_name' to remove this message or disable `base.database.fallback_warning` warning).");
         }
-
-        //
-        // Twig custom loader
-        if ($useCustomLoader === null) {
-            $io->warning("Advanced twig loader option is not configured in `base.yaml`" . PHP_EOL . "(configure 'base.twig.use_custom' boolean to remove this message).");
-        } elseif ($useCustomLoader) {
-            $io->write(" - Advanced twig loader <info>'base.twig.use_custom'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        } else {
-            $io->write(" - Advanced twig loader <info>'base.twig.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        }
-
-        //
-        // Annotation reader
-        if ($useCustomReader === null) {
-            $io->warning("Advanced annotation reader option is not configured in `base.yaml`" . PHP_EOL . "(configure 'base.annotations.use_custom' boolean to remove this message).");
-        } elseif ($useCustomReader) {
-            $io->write(" - Advanced annotation reader option <info>'base.annotations.use_custom'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        } else {
-            $io->write(" - Advanced annotation reader option <info>'base.annotations.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        }
-
-        //
-        // Setting bag
-        if ($useSettingBag === null) {
-            $io->warning("Setting bag is not configured in `base.yaml`" . PHP_EOL . "(configure 'base.parameter_bag.use_setting_bag' boolean to remove this message).");
-        } elseif ($useSettingBag) {
-            $io->write(" - Setting bag <info>'base.parameter_bag.use_setting_bag'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        } else {
-            $io->write(" - Setting bag <info>'base.parameter_bag.use_setting_bag'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        }
-
-        if ($useMailer === null) {
-            $io->warning("Mailer is disabled in `base.yaml`" . PHP_EOL . "(configure 'base.notifier.mailer' boolean to remove this message).");
-        } elseif ($useMailer) {
-            $io->write(" - Mailer <info>'base.notifier.mailer'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        } else {
-            $io->write(" - Mailer <info>'base.notifier.mailer'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        }
-
-        //
-        // Hot parameter bag
-        if ($useHotParameterBag === null) {
-            $io->warning("Hot parameter feature is not configured in `base.yaml`" . PHP_EOL . "(configure 'base.parameter_bag.use_hot_bag' boolean to remove this message).");
-        } elseif ($useHotParameterBag) {
-            $io->write(" - Hot parameter bag option <info>'base.parameter_bag_use_hot_bag'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        } else {
-            $io->write(" - Hot parameter bag option <info>'base.parameter_bag_use_hot_bag'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        }
-
-        //
-        // Doctrine features
-        if ($useCustomDbFeatures === null) {
-            $io->warning("Custom DB features are not configured in `base.yaml`" . PHP_EOL . "(configure 'base.database.use_custom' boolean to remove this message).");
-        } elseif ($useCustomDbFeatures) {
-            $io->write(" - Custom DB features <info>'base.database.use_custom'</info> is SET.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        } else {
-            $io->write(" - Custom DB features <info>'base.database.use_custom'</info> is NOT set.", true, SymfonyStyle::VERBOSITY_VERBOSE);
-        }
-
-        $io->write("", true, SymfonyStyle::VERBOSITY_VERBOSE);
     }
 
     //

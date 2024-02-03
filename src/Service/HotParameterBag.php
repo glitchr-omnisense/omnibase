@@ -40,7 +40,17 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
         return array_merge(parent::all(), $this->hotBag);
     }
 
-    public function get(string $path = "", array $bag = null, bool $useHotBag = true): array|bool|string|int|float|null
+    public function has(string $path, ?array &$bag = null, bool $useHotBag = true): bool
+    {
+        if($bag && parent::has($path, $bag))
+            return true;
+        if($useHotBag && parent::has($path, $this->hotBag))
+            return true;
+
+        return parent::has($path);
+    }
+
+    public function get(string $path = "", ?array &$bag = null, bool $useHotBag = true): array|bool|string|int|float|null
     {
         if (!parent::get("base.parameter_bag.use_hot_bag") ?? false) {
             $useHotBag = false;
@@ -48,8 +58,15 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
             throw new RuntimeException("Parameter bag is not Hot'N'Ready. (Did you call it before its related subscriber ?)");
         }
 
-        $hotParameter = $useHotBag ? parent::get($path, $this->hotBag) : null;
-        return $hotParameter ?? parent::get($path, $bag);
+        $parameterBag = null;
+        if(!$parameterBag && $bag) 
+            $parameterBag = parent::get($path, $bag);
+        if(!$parameterBag && $useHotBag)
+            $parameterBag = parent::get($path, $this->hotBag);
+        if(!$parameterBag && $useHotBag)
+            $parameterBag = parent::get($path);
+
+        return $parameterBag;
     }
 
     public function isReady(): bool
@@ -57,10 +74,6 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
         return $this->isReady;
     }
 
-    /**
-     * @param bool $ready
-     * @return $this
-     */
     /**
      * @param bool $ready
      * @return $this
