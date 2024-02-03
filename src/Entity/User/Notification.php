@@ -330,10 +330,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @param bool $markAsAdmin
      * @return $this
      */
-    /**
-     * @param bool $markAsAdmin
-     * @return $this
-     */
     public function markAsAdmin(bool $markAsAdmin = true)
     {
         $this->markAsAdmin = $markAsAdmin;
@@ -357,11 +353,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this->context;
     }
 
-    /**
-     * @param string $key
-     * @param $value
-     * @return $this
-     */
     /**
      * @param string $key
      * @param $value
@@ -463,21 +454,12 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @param $value
      * @return $this
      */
-    /**
-     * @param string $key
-     * @param $value
-     * @return $this
-     */
     public function addHtmlParameter(string $key, $value)
     {
         $this->htmlParameters[$key] = $value;
         return $this;
     }
 
-    /**
-     * @param string $key
-     * @return $this
-     */
     /**
      * @param string $key
      * @return $this
@@ -501,10 +483,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @param string $excerpt
      * @return $this
      */
-    /**
-     * @param string $excerpt
-     * @return $this
-     */
     public function setExcerpt(string $excerpt)
     {
         $this->context["excerpt"] = $excerpt;
@@ -519,10 +497,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this->context["footer_text"] ?? "";
     }
 
-    /**
-     * @param string $footer
-     * @return $this
-     */
     /**
      * @param string $footer
      * @return $this
@@ -648,10 +622,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @param string $importance
-     * @return $this
-     */
     /**
      * @param string $importance
      * @return $this
