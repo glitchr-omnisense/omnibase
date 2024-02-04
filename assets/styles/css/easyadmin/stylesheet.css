@@ -74,6 +74,7 @@ h2 a, h3 a, h4 a { color: var(--form-panel-header-color); }
     display:inline-flex; 
     flex-wrap: wrap;
 
+    margin-bottom: 1.5em;
     width:100%;
 }
 
@@ -653,7 +654,7 @@ a.dropdown-appearance-button
     color: var(--sidebar-menu-icon-color);
 }
 
-#main-menu .menu .menu-item { margin: 2px 0; }
+#main-menu .menu .menu-item { margin: 2px; }
 #main-menu .menu .menu-item:hover > a .menu-item-label { color:var(--sidebar-menu-active-item-color); }
 
 body {
@@ -774,12 +775,12 @@ body.ea-edit .content-header, body.ea-new .content-header {
 .ea-index .content-body { padding-top:2.5em;}
 .content-body:first-child { padding-top:0em; }
 
-.ea .content-body:last-child { padding-bottom: 2.5em; }
+.ea .content-body:last-child { margin-bottom: 2.5em; }
 .ea .content-body { margin:auto; width: calc(100% - 2em); }
 
 .ea-index .content-body
 {
-    margin:0 2em;
+    margin:0 0 0 3em;
     width:100%;
 }
 
@@ -911,7 +912,6 @@ body.ea-edit .content-header, body.ea-new .content-header {
     font-size:14pt !important;
     position:relative;
 }
-
 .ea-detail .thumbnail-avatar, .ea-detail .thumbnail-image {
 
     overflow:hidden;
@@ -942,7 +942,12 @@ body.ea-edit .content-header, body.ea-new .content-header {
 .form-collection-item:last-child { border-bottom: 1px solid var(--content-top-border-color); }
 .ea-detail .user-avatar i, .ea-detail .thumbnail-avatar i, .ea-detail .thumbnail-image i { font-size:150pt; }
 
-.list-pagination { padding: 15px 0 15px 15px; }
+.list-pagination 
+{ 
+    padding: 15px 0 15px 15px;
+    background: var(--sidebar-bg);
+    border-top: 1px solid var(--sidebar-border-color);
+}
 
 .main-content {
     max-width: calc(100vw - var(--sidebar-max-width));
@@ -955,6 +960,7 @@ body.ea-edit .content-header, body.ea-new .content-header {
 {
     margin-top:45px;
 }
+.content-panel-footer.without-border { border:0; }
 .content-panel-footer { width: calc(100vw - var(--sidebar-max-width) - var(--lg-content-padding-right) - var(--lg-content-padding-left)); }
 .dropdown-locale
 {
@@ -1070,7 +1076,7 @@ body > .modal-backdrop { display:block !important; }
     height:100vh;
     position: sticky;
     top: 0;
-    padding-bottom:2em;
+    padding-bottom:1em;
 }
 ul.sidebar-menu {
 
@@ -1246,6 +1252,29 @@ fieldset .sidebar-menu { margin:0.25em 0em 0.25em 0; }
 .content-header-icon i {
     font-size:2em;
 }
+
+.ea-index .content-body
+{
+    border-radius: var(--border-radius);
+}
+
+[id*='ea_form_fieldset_'].form-control
+{
+    border:0;
+}
+
+.datagrid tbody tr:hover td, .datagrid tbody tr:hover th { background-color: transparent; }
+.datagrid tbody tr:hover td, .datagrid tbody tr:nth-child(even):hover td {
+    background-color: #222;
+}
+
+.datagrid tbody tr:nth-child(even) td {
+    background-color: var(--sidebar-bg);
+    color: #fff;
+}
+  
+.datagrid thead { background-color:var(--sidebar-bg); }
+.datagrid thead th { background-color: transparent; }
 .datagrid .ea-lightbox-thumbnail img
 {
     border:0;
@@ -1288,7 +1317,9 @@ body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover,
 body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover .menu-item-contents {
 
     background: var(--sidebar-bg);
+    color: var(--sidebar-menu-active-item-color);
 }
+
 fieldset h3 {
     white-space: nowrap;
     font-size: 20px;
@@ -1315,7 +1346,6 @@ fieldset {
 
 .content-panel-body.with-background, .content-panel-body.without-footer, .content-panel-footer {
     padding: 18px 25px;
-    border: var(--border-width) var(--border-style) var(--content-top-border-color);
     width:100%;
 }
 

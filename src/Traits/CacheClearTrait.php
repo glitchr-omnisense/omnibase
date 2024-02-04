@@ -47,7 +47,7 @@ trait CacheClearTrait
 
         $table = new Table($io);
         $table
-            ->setHeaders(['Base components', 'Option paths', 'Status'])
+            ->setHeaders(['Base components', 'Option paths', ''])
             ->setRows([
                 ['Twig loader', 'base.twig.use_custom', $useCustomLoader ? "<info>✓</info>" : "<error>✗</error>"],
                 ['Metadata reader', 'base.metadata.use_custom',  $useCustomReader ? "<info>✓</info>" : "<error>✗</error>"],

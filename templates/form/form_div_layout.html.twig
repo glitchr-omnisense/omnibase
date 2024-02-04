@@ -31,20 +31,22 @@
     {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_inherited ?? false) ? "fa-solid fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
 
     {% set label     = form_label(form, null, {'label_html': true}) %}
-
     {% set labelTrim = (label|trim(" ")|trim("&nbsp;")) %}
 
-    {% if badges is not empty or labelTrim is not empty %}
+    {% set fieldset = "ea_form_fieldset_open" in form.vars.block_prefixes or "ea_form_fieldset_close" in form.vars.block_prefixes %}
+    {% if (badges is not empty or labelTrim is not empty) and not fieldset %}
     <div class="label-wrapper">
         {% if labelTrim is not empty %}
 
             {{- label|raw -}}
+            
             {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value.id is defined %}
             <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id })}}" target='_blank'>
                 <i class="fa-solid fa-external-link-square-alt"></i>
             </a>{% endif %}
 
             {{- form_help(form) -}}
+
         {% else %}
             <label>&nbsp;</label>
         {% endif %}
@@ -744,7 +746,7 @@
         {%- set row_attr = row_attr|merge({'class': 'field-association' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
         <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
             {% if row_group %}
-                {%- set attr = attr|merge({'class': 'form-collection  form-group-row ' ~ (not form.vars.group ? "form-collection-plain") ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+                {%- set attr = attr|merge({'class': 'form-collection form-group-row ' ~ (not form.vars.group ? "form-collection-plain") ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
                 {{ form_label(form)}}
                 <div {{ block('widget_attributes') }}>
                     {{ form_widget(formChild) }}
@@ -761,15 +763,7 @@
         {%- set attr = attr|merge({'class': (hiddenOnly ? "hidden" : "") ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
         {% if group %}
-            {# {% set label = form_label(form) %} #}
-            {# {% if label is empty %} #}
             {{ form_widget(form, {attr: attr}) }}
-            {# {% else %}
-                <fieldset>
-                    <legend>{{ label|raw }}</legend>
-                    {{ form_widget(form, {attr: attr}) }}
-                </fieldset>
-            {% endif %} #}
         {% else %}
 
             <div class="form-association form-group">
