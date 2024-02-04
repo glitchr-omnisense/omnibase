@@ -17,3 +17,30 @@
 {
     position:fixed;
 }
+
+.wrapper .spinner:not(.loaded):before,
+.content-wrapper .spinner:not(.loaded):before
+{ 
+    left: calc(50%);
+}
+
+.main-content .content-top
+{
+    position: relative;
+    z-index: 1000;
+}
+
+fieldset .sidebar-menu {
+    margin: 0;
+    padding: 0;
+}
+
+fieldset 
+{
+    margin:20px;
+}
+
+.ea .row:not(form) > .col
+{
+    padding:0;
+}

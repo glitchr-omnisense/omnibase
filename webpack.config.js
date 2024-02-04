@@ -23,7 +23,6 @@ Encore.addPlugin(new WebpackBar())
     .copyFiles({from: './node_modules/@fortawesome/fontawesome-free/metadata/', pattern: /icons.yml$/, to: 'metadata/[name].[ext]'})
     .copyFiles({from: './node_modules/@fortawesome/fontawesome-free/webfonts/', to: 'fonts/[name].[hash].[ext]'})
 
-    .copyFiles({from: './node_modules/bootstrap-icons/font/fonts', to: 'fonts/[name].[ext]'})
     .copyFiles({from: './node_modules/@fortawesome/fontawesome-free/webfonts/', to: 'fonts/[name].[hash].[ext]'})
     .copyFiles({from: './node_modules/country-flag-icons/3x2/', to: 'images/flags/[path][name].[ext]', pattern: /\.svg$/})
 
@@ -60,12 +59,13 @@ Encore.addPlugin(new WebpackBar())
 
     .enableSassLoader()
     .enablePostCssLoader()
-
+    
     .addLoader({
         test: /\.scss$/,
         use: [
             MediaQueryPlugin.loader,
-            'postcss-loader'
+            'postcss-loader',
+            'sass-loader'
         ]
     })
 
