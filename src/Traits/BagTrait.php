@@ -59,9 +59,10 @@ trait BagTrait
         $bag = $value;
     }
 
-    protected static function normalize(?string $path, array $bag): array
+    protected static function normalize(?string $path, ?array $bag): array
     {
         $values = [];
+        if(!$bag) return $values;
 
         // Generate default structure
         $array = &$values;

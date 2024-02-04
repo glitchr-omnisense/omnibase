@@ -15,9 +15,8 @@ interface HotParameterBagInterface extends ParameterBagInterface
      */
     public function add(array $parameters);
 
-    public function get(string $path = "", array &$bag = null, bool $useHotBag = true): array|bool|string|int|float|null;
-
-    public function has(string $path, array &$bag = null, bool $useHotBag = true): bool;
+    public function get(string $path = "", ?array $bag = null, bool $useHotBag = true): array|bool|string|int|float|null;
+    public function has(string $path, ?array $bag = null, bool $useHotBag = true): bool;
 
     /**
      * @param bool $ready

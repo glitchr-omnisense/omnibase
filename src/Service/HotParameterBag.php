@@ -20,10 +20,6 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
      * @param array $parameters
      * @return $this|void
      */
-    /**
-     * @param array $parameters
-     * @return $this
-     */
     public function add(array $parameters)
     {
         try {
@@ -40,7 +36,7 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
         return array_merge(parent::all(), $this->hotBag);
     }
 
-    public function has(string $path, ?array &$bag = null, bool $useHotBag = true): bool
+    public function has(string $path, ?array $bag = null, bool $useHotBag = true): bool
     {
         if($bag && parent::has($path, $bag))
             return true;
@@ -50,7 +46,7 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
         return parent::has($path);
     }
 
-    public function get(string $path = "", ?array &$bag = null, bool $useHotBag = true): array|bool|string|int|float|null
+    public function get(string $path = "", ?array $bag = null, bool $useHotBag = true): array|bool|string|int|float|null
     {
         if (!parent::get("base.parameter_bag.use_hot_bag") ?? false) {
             $useHotBag = false;
