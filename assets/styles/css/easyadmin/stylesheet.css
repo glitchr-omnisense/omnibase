@@ -1275,14 +1275,14 @@ fieldset .sidebar-menu { margin:0.25em 0em 0.25em 0; }
     border:0;
 }
 
-.datagrid tbody tr:hover td, .datagrid tbody tr:hover th { background-color: transparent; }
-.datagrid tbody tr:hover td, .datagrid tbody tr:nth-child(even):hover td {
-    background-color: #222;
-}
+.datagrid tbody tr:nth-child(odd):hover td, .datagrid tbody tr:hover th { background-color: var(--secondary-bg); }
+.datagrid tbody tr:nth-child(odd) td {
+    background-color: transparent;
+} 
 
+.datagrid tbody tr:nth-child(even):hover td { background-color: var(--secondary-bg);; }
 .datagrid tbody tr:nth-child(even) td {
     background-color: var(--sidebar-bg);
-    color: #fff;
 }
   
 .datagrid thead { background-color:var(--sidebar-bg); }

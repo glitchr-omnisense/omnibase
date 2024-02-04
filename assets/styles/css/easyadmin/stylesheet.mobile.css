@@ -24,6 +24,11 @@
     left: calc(50%);
 }
 
+.ea .page-wrapper > .row:not(form)
+{
+    margin-bottom:2.5em;
+}
+
 .main-content .content-top
 {
     position: relative;
