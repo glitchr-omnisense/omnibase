@@ -106,7 +106,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
                 $_label = $this->translator->transEntity($label) . " #" . (((int)$i) + 1);
                 if (is_stringeable($label)) {
-                    $_label .= " : " . ((string)$label);
+                    $_label .= " : " . ((string) $label);
                 }
                 return $_label;
             },

@@ -4,7 +4,7 @@ namespace Base\Backend\Factory;
 
 use Base\Routing\RouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
-use EasyCorp\Bundle\EasyAdminBundle\Menu\MenuItemMatcherInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Menu\MenuItemMatcher;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -20,10 +20,10 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
      */
     protected RouterInterface $router;
 
-    public function __construct(AdminContextProvider $adminContextProvider, AuthorizationCheckerInterface $authChecker, LogoutUrlGenerator $logoutUrlGenerator, AdminUrlGenerator $adminUrlGenerator, MenuItemMatcherInterface $menuItemMatcher, RouterInterface $router)
+    public function __construct(...$params)
     {
-        parent::__construct($adminContextProvider, $authChecker, $logoutUrlGenerator, $adminUrlGenerator, $menuItemMatcher);
-        $this->router = $router;
+        $this->router = array_pop($params);
+        parent::__construct(...$params);
     }
 
     protected function generateMenuItemUrl(MenuItemDto $menuItemDto): string
