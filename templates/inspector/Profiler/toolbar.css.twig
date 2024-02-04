@@ -6,7 +6,11 @@
     z-index: inherit;
 }
 
-.sf-toolbar-block:hover .sf-toolbar-info { position:fixed; }
+.sf-toolbar-block:hover .sf-toolbar-info 
+{ 
+  position:fixed;
+  left: auto !important;
+}
 
 .sf-toolbarreset .hide-button {
   z-index: 20000;
@@ -216,6 +220,8 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
   background-color: #FFFA;
 }
 
+.sf-toolbarreset { background-color:#222; }
+.sf-minitoolbar svg, .sf-minitoolbar img { color:inherit; }
 .sf-minitoolbar button
 {
   height:auto;

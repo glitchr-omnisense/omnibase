@@ -49,7 +49,7 @@
 .ce-block { margin: 0.8em 0; }
 .cdx-nested-list { padding-left: 2rem !important ; }
 
-.codex-editor__redactor { padding:2em 0em; }
+.codex-editor__redactor { padding:2em 0em !important; }
 .form-editor-codex { padding:0em; margin:0; }
 
 @media all and (max-width: 470px)                  
