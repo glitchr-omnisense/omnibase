@@ -213,8 +213,10 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
             $match = [];
         }
 
-        if (empty($match) || ($match["_controller"] ?? null) == RedirectController::class . "::urlRedirectAction") {
-            $match = parent::match($pathinfo);
+        if (empty($match)) {
+            $match = parent::match($pathinfo."/");
+        } elseif (($match["_controller"] ?? null) == RedirectController::class . "::urlRedirectAction") {
+            $match = parent::match($match["path"]);
         }
 
         return $match;
