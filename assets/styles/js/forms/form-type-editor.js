@@ -72,6 +72,7 @@ function edjs(inputEl, holderId, value = {}, options = {})
     if (data) Object.assign(options, {data:data});
 
     var onSave = (savedData) => { if(inputEl != undefined) $(inputEl).val(JSON.stringify(savedData)); }
+
     Object.assign(options, {
         readOnly: (inputEl == undefined),
         tools: {
