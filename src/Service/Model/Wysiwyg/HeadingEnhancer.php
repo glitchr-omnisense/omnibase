@@ -56,8 +56,8 @@ class HeadingEnhancer implements HeadingEnhancerInterface
             $tags = $dom->getElementsByTagName($tagName);
             foreach ($tags as $tag) {
     
-                $content = trim(str_strip_nonprintable(strip_tags($tag->nodeValue)));
-                $content = str_replace("&nbsp;", " ", $content);
+                $content = str_replace("&nbsp;", " ", $tag->nodeValue);
+                $content = trim(str_strip_nonprintable(strip_tags($content)));
                 $id = strtolower($this->slugger->slug($content));
                 $headlines[] = [
                     "tag" => $tagName,
@@ -102,8 +102,8 @@ class HeadingEnhancer implements HeadingEnhancerInterface
             $tags = $dom->getElementsByTagName($tagName);
             foreach ($tags as $tag) {
     
-                $content = trim(str_strip_nonprintable(strip_tags($tag->nodeValue)));
-                $content = str_replace("&nbsp;", " ", $content);
+                $content = str_replace("&nbsp;", " ", $tag->nodeValue);
+                $content = trim(str_strip_nonprintable(strip_tags($content)));
                 $tag->nodeValue = null;
 
                 $id = strtolower($this->slugger->slug($content));
