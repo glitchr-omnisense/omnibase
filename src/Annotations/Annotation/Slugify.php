@@ -4,31 +4,25 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
+
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Slugify
- * package Base\Annotations\Annotation\Slugify.
+ * package Base\Metadata\Extension\Slugify
  *
  * @Annotation
- *
+ * @NamedArgumentConstructor
  * @Target({"PROPERTY"})
- *
- * @Attributes({
- *
- *   @Attribute("reference", type = "string"),
- *   @Attribute("sync",      type = "bool"),
- *   @Attribute("unique",    type = "bool"),
- *   @Attribute("nullable",  type = "bool"),
- *   @Attribute("locale",    type = "string"),
- *   @Attribute("map",       type = "array"),
- *   @Attribute("separator", type = "string"),
- *   @Attribute("keep",      type = "array"),
- *   @Attribute("capital",   type = "bool")
- * })
  */
+
+ #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Slugify extends AbstractAnnotation
 {
     protected $slugger;
@@ -42,21 +36,27 @@ class Slugify extends AbstractAnnotation
     protected string $separator;
     protected ?string $referenceColumn;
 
-    public function __construct(array $data)
+    public function __construct(
+        ?string $reference = null, 
+        bool $unique = true, 
+        bool $sync = false, 
+        bool $nullable = false, 
+        string $separator = "-", 
+        array $keep = [],
+        bool $capital = false,
+        ?string $locale = null,
+        ?array $map = null)
     {
-        $this->referenceColumn = $data['reference'] ?? null;
+        $this->referenceColumn = $reference;
 
-        $this->unique = $data['unique'] ?? true;
-        $this->sync = $data['sync'] ?? false;
-        $this->nullable = $data['nullable'] ?? false;
+        $this->unique = $unique;
+        $this->sync = $sync;
+        $this->nullable = $nullable;
 
-        $this->separator = $data['separator'] ?? '-';
-        $this->keep = $data['keep'] ?? null;
-        $this->capital = $data['capital'] ?? false;
-        $this->slugger = new AsciiSlugger(
-            $data['locale'] ?? null,
-            $data['map'] ?? null
-        );
+        $this->separator = $separator;
+        $this->keep = $keep;
+        $this->capital = $capital;
+        $this->slugger = new AsciiSlugger($locale,$map);
     }
 
     /**

@@ -5,25 +5,20 @@ namespace Base\Annotations\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 use Exception;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"PROPERTY"})
- * @Attributes({
- *   @Attribute("reference", type = "string"),
- *   @Attribute("type",      type = "string"),
- *   @Attribute("updatable", type = "bool"),
- *   @Attribute("unique",    type = "bool"),
- *
- *   @Attribute("locale",    type = "string"),
- *   @Attribute("map",       type = "array"),
- *   @Attribute("separator", type = "string"),
- *   @Attribute("lowercase", type = "bool")
- * })
  */
+
+ #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Countify extends AbstractAnnotation
 {
     protected ?string $referenceColumn;
@@ -35,11 +30,11 @@ class Countify extends AbstractAnnotation
     public const COUNT_SENTENCES = "sentences";
     public const COUNT_BLOCKS = "blocks";
 
-    public function __construct(array $data)
+    public function __construct(?string $reference = null, string $type = "")
     {
-        $this->referenceColumn = $data['reference'] ?? null;
+        $this->referenceColumn = $reference;
 
-        switch ($data["type"] ?? "") {
+        switch ($type) {
             default:
             case self::COUNT_CHARS:
                 $this->type = self::COUNT_CHARS;

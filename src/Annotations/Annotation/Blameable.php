@@ -4,20 +4,21 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * Class Blameable
- * package Base\Annotations\Annotation\Blameable
+ * package Base\AnnotationReader\Abstract\Blameable
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "PROPERTY"})
- * @Attributes({
- *   @Attribute("on", type = "array"),
- *   @Attribute("fields", type = "array"),
- *   @Attribute("impersonator", type = "bool")
- * })
  */
+
+ #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
 class Blameable extends AbstractAnnotation
 {
     private array $fields;
@@ -25,11 +26,11 @@ class Blameable extends AbstractAnnotation
 
     protected bool $impersonator;
 
-    public function __construct(array $data)
+    public function __construct(string|array $on = [], array $fields = [], bool $impersonator = false)
     {
-        $this->context = array_map("mb_strtolower", $data['on']);
-        $this->fields = $data['fields'] ?? [];
-        $this->impersonator = $data['impersonator'] ?? false;
+        $this->context = array_map("mb_strtolower", is_string($on) ? [$on] : $on);
+        $this->fields = $fields;
+        $this->impersonator = $impersonator;
     }
 
     public function getContext(): array

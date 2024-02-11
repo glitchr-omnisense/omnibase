@@ -4,15 +4,19 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 use Base\Database\Entity\EntityExtensionInterface;
+
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("verbosity", type = "string"),
- * })
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS)]
 class Logging extends AbstractAnnotation implements EntityExtensionInterface
 {
     /**
@@ -20,9 +24,9 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
      */
     protected ?bool $verbosity;
 
-    public function __construct(array $data = [])
+    public function __construct(?string $verbosity = null)
     {
-        $this->verbosity = $data['verbosity'] ?? null;
+        $this->verbosity = $verbosity;
     }
 
     /**

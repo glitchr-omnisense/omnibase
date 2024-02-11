@@ -2,30 +2,32 @@
 
 namespace Base\Database\Annotation;
 
-use Attribute;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\Event\LifecycleEventArgs as BaseLifecycleEventArgs;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Caching to an entity or a collection.
  *
  * @Annotation
- * @NamedArgumentConstructor()
- * @Target({"CLASS","PROPERTY"})
+ * @NamedArgumentConstructor
+ * @Target({"CLASS", "PROPERTY"})
  */
-#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
-final class Cache extends AbstractAnnotation
+
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
+class Cache extends AbstractAnnotation
 {
     /**
-     * @Enum({"READ_ONLY", "NONSTRICT_READ_WRITE", "READ_WRITE"})
      * @var string The concurrency strategy.
+     * @Enum({"READ_ONLY", "NONSTRICT_READ_WRITE", "READ_WRITE"})
      */
     public string $usage = self::READ_ONLY;
+    
     public const READ_ONLY = "READ_ONLY";
     public const NONSTRICT_READ_WRITE = "NONSTRICT_READ_WRITE";
     public const READ_WRITE = "READ_WRITE";

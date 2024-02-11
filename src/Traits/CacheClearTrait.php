@@ -38,7 +38,7 @@ trait CacheClearTrait
         $io->write("", true);
 
         $useCustomLoader = $this->parameterBag->get("base.twig.use_custom");
-        $useCustomReader = $this->parameterBag->get("base.metadata.use_custom");
+        $useCustomReader = $this->parameterBag->get("base.annotations.use_custom");
         $useCustomRouter = $this->parameterBag->get("base.router.use_custom");
         $useMailer = $this->parameterBag->get("base.notifier.mailer");
         $useSettingBag = $this->parameterBag->get("base.parameter_bag.use_setting_bag");
@@ -50,7 +50,7 @@ trait CacheClearTrait
             ->setHeaders(['Base components', 'Option paths', ''])
             ->setRows([
                 ['Twig loader', 'base.twig.use_custom', $useCustomLoader ? "<info>✓</info>" : "<error>✗</error>"],
-                ['Metadata reader', 'base.metadata.use_custom',  $useCustomReader ? "<info>✓</info>" : "<error>✗</error>"],
+                ['Annotation reader', 'base.annotations.use_custom',  $useCustomReader ? "<info>✓</info>" : "<error>✗</error>"],
                 ['Setting bag', 'base.parameter_bag.use_setting_bag',  $useSettingBag ? "<info>✓</info>" : "<error>✗</error>"],
                 ['Hot parameter bag', 'base.parameter_bag.use_hot_bag',  $useHotParameterBag ? "<info>✓</info>" : "<error>✗</error>"],
                 ['Custom router', 'base.router.use_custom',  $useCustomRouter ? "<info>✓</info>" : "<error>✗</error>"],

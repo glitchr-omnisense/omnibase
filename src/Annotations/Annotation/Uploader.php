@@ -4,12 +4,16 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+
 use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
 use Base\Validator\Constraints\File as ConstraintsFile;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use League\Flysystem\FilesystemException;
@@ -19,24 +23,20 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+
 use function is_file;
 
 /**
  * Class Uploader
- * package Base\Annotations\Annotation\Uploader
+ * package Base\Metadata\Extension\Uploader
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "PROPERTY"})
- * @Attributes({
- *   @Attribute("storage",    type = "string"),
- *   @Attribute("pool",       type = "string"),
- *   @Attribute("missable",   type = "boolean"),
- *   @Attribute("fetch",      type = "boolean"),
- *   @Attribute("max_size",   type = "string"),
- *   @Attribute("mime_types", type = "array"),
- *   @Attribute("formats",    type = "array")
- * })
  */
+
+ #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
 class Uploader extends AbstractAnnotation
 {
     protected string $storage;
@@ -49,18 +49,25 @@ class Uploader extends AbstractAnnotation
     protected array $mimeTypes;
     protected int $maxSize;
 
-    public function __construct(array $data)
+    public function __construct(
+        string $pool = "default", 
+        ?string $max_size = null, 
+        ?string $storage = null, 
+        bool $missable = false, 
+        bool $fetch = false,
+        array $config = [], 
+        array $mime_types = [], 
+        array $formats = [])
     {
-        $this->pool = (!empty($data["pool"] ?? null) ? $data["pool"] : "default");
+        $this->pool = $pool;
+        $this->storage = $storage;
+        $this->missable = $missable;
+        $this->fetch = $fetch;
+        $this->config = $config;
+        $this->mimeTypes = $mime_types;
+        $this->formats = $formats;
 
-        $this->storage = $data["storage"] ?? null;
-        $this->missable = $data["missable"] ?? false;
-        $this->fetch = $data["fetch"] ?? false;
-        $this->config = $data["config"] ?? [];
-        $this->mimeTypes = $data["mime_types"] ?? [];
-        $this->formats = $data["formats"] ?? [];
-
-        $this->maxSize = str2dec($data["max_size"] ?? 8 * UploadedFile::getMaxFilesize()) / 8;
+        $this->maxSize = str2dec($max_size ?? (8 * UploadedFile::getMaxFilesize()) ) / 8;
     }
 
     protected array $ancestorEntity = [];

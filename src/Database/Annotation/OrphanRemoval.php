@@ -6,25 +6,34 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Attribute;
+use Doctrine\Common\Annotations\Annotation\Attributes;
+use Doctrine\Common\Annotations\Annotation\Target;
+
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "PROPERTY"})
  * @Attributes({
  *   @Attribute("column" , type = "string"),
  *   @Attribute("value" , type = "bool")
  * })
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
 class OrphanRemoval extends AbstractAnnotation
 {
     /** @Required */
-    private string $column;
-    private bool $value;
+    protected string $column;
+    protected bool $value;
 
-    public function __construct(array $data)
+    public function __construct(string $column = "", bool $value = true)
     {
-        $this->column = $data["column"] ?? "";
-        $this->value = $data["value"] ?? true;
+        $this->column = $column;
+        $this->value = $value;
     }
 
     /**

@@ -11,21 +11,24 @@ use Base\Enum\EntityAction;
 use DateTime;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
+
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("field", type = "string"),
- * })
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS)]
 class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
 {
-    public $deletedAt;
-
-    public function __construct(array $data = [])
+    public string $deletedAt;
+    public function __construct(string $field = "deletedAt")
     {
-        $this->deletedAt = $data["field"] ?? "deletedAt";
+        $this->deletedAt = $field;
     }
 
     /**

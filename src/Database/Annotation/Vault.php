@@ -12,33 +12,46 @@ use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 use Symfony\Component\Cache\Marshaller\SodiumMarshaller;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+
 use function is_file;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("vault", type = "array"),
- *   @Attribute("fields", type = "array"),
- *   @Attribute("unique", type = "array")
- * })
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS)]
 class Vault extends AbstractAnnotation
 {
+    /**
+     * @var string
+     */
     public string $vault;
+
+    /**
+     * @var array
+     */
     public array $fields;
+
+    /**
+     * @var array
+     */
     public array $unique;
 
-    public function __construct(array $data = [])
+    public function __construct(string $vault = "vault", array $fields = [], array $unique = [])
     {
-        $this->vault = $data["vault"] ?? "vault";
-        $this->fields = $data["fields"] ?? [];
-        $this->unique = $data["unique"] ?? [];
+        $this->vault = $vault;
+        $this->fields = $fields;
+        $this->unique = $unique;
     }
 
     /**

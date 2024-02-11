@@ -4,20 +4,28 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
+
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+
 /**
  * Class Iconize
- * package Base\Annotations\Annotation\Iconize
+ * package Base\Metadata\Extension\Iconize
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"METHOD"})
  */
+
+ #[\Attribute(\Attribute::TARGET_METHOD)]
 class Iconize extends AbstractAnnotation
 {
     protected array $icons;
 
-    public function __construct(array $data)
+    public function __construct(array|string $icons = [])
     {
-        $icons = $data["value"] ?? [];
+        $icons = $icons;
         $this->icons = !is_array($icons) ? [$icons] : $icons;
     }
 

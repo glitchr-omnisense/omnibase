@@ -8,7 +8,10 @@ use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Base\Enum\EntityAction;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\ArrayType;
@@ -23,11 +26,11 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"PROPERTY"})
- * @Attributes({
- *   @Attribute("order", type = "string"),
- * })
  */
+
+#[\Attribute(\Attribute::TARGET_PROPERTY)]
 class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 {
     public const ASC = "ASC";
@@ -35,9 +38,9 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
     public string $order;
 
-    public function __construct(array $data = [])
+    public function __construct(string $order = self::ASC)
     {
-        $this->order = $data['order'] ?? self::ASC;
+        $this->order = $order;
     }
 
     /**
@@ -61,9 +64,9 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 return false;
             }
 
-            $siblingAnnotations = $this->getAnnotationReader()->getDefaultPropertyAnnotations($object->getName(), OrderBy::class);
+            $siblingAnnotations = $this->getAnnotationReader()->getPropertyAnnotations($object->getName(), OrderBy::class);
             if (array_key_exists($targetValue, $siblingAnnotations)) {
-                throw new Exception("@OrderBy annotation is in conflict with @OrderColum for \"" . $object->getName() . "::$targetValue\"");
+                throw new Exception("@OrderBy metadata is in conflict with @OrderColum for \"" . $object->getName() . "::$targetValue\"");
             }
         }
 

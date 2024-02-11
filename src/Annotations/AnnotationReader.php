@@ -135,7 +135,7 @@ class AnnotationReader extends AbstractLocalCache
      */
     protected ?DoctrineAnnotationReader $reader = null;
 
-    public function getDefaultReader(): DoctrineAnnotationReader
+    public function getDoctrineReader(): DoctrineAnnotationReader
     {
         return $this->reader;
     }
@@ -258,7 +258,6 @@ class AnnotationReader extends AbstractLocalCache
     protected array $classAncestors = [];
     protected array $classHierarchies = [];
 
-    protected array $familyAnnotations = [];
     protected array $classAnnotations = [];
     protected array $methodAnnotations = [];
     protected array $propertyAnnotations = [];
@@ -377,8 +376,24 @@ class AnnotationReader extends AbstractLocalCache
         $reflClass = new ReflectionClass($className);
 
         $annotationTargets = [];
-        if (preg_match_all('/@Target\(\{(.*)\}\)/', $reflClass->getDocComment(), $matches, PREG_SET_ORDER)) {
-            $annotationTargets = json_decode(mb_strtolower("[" . end($matches)[1] . "]"));
+        $reflClass = new ReflectionClass($className);
+        if(!empty($reflClass->getAttributes())) {
+
+            foreach($reflClass->getAttributes() as $attribute) {
+                
+                if($attribute->getName() != "Attribute") continue;
+                
+                $targets = $attribute->getArguments()[0] ?? 0;
+                if($targets & \Attribute::TARGET_CLASS) $annotationTargets[] = "class";
+                if($targets & \Attribute::TARGET_METHOD) $annotationTargets[] = "method";
+                if($targets & \Attribute::TARGET_PROPERTY) $annotationTargets[] = "property";
+            }
+            
+        } else {
+
+            if (preg_match_all('/@Target\(\{(.*)\}\)/', $reflClass->getDocComment(), $matches, PREG_SET_ORDER)) {
+                $annotationTargets = json_decode(mb_strtolower("[" . end($matches)[1] . "]"));
+            }
         }
 
         foreach ($annotationTargets as $target) {
@@ -390,6 +405,7 @@ class AnnotationReader extends AbstractLocalCache
 
                     // Not used at this time by the custom AnnotationReader
                     $this->annotationTargets[$className][] = "annotation";
+                    $this->annotationTargets[$className][] = "attribute";
                     $this->annotationTargets[$className][] = "function";
                     break;
 
@@ -512,11 +528,11 @@ class AnnotationReader extends AbstractLocalCache
      * @param $annotationNames
      * @return array
      */
-    public function getDefaultClassAnnotations($classNameOrMetadataOrRefl, $annotationNames = null)
+    public function getDoctrineClassAnnotations($classNameOrMetadataOrRefl, $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
-        $annotations = $this->getDefaultReader()->getClassAnnotations($reflClass);
+        $annotations = $this->getDoctrineReader()->getClassAnnotations($reflClass);
         $annotationNames = $this->normalizeNames($annotationNames, false);
 
         return array_filter($annotations, fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames));
@@ -532,9 +548,21 @@ class AnnotationReader extends AbstractLocalCache
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
         if (!array_key_exists($reflClass->name, $this->classAnnotations)) {
-            // Compute the class annotations
+
             $this->classAnnotations[$reflClass->name] = [];
-            foreach ($this->getDefaultReader()->getClassAnnotations($reflClass) as $annotation) {
+            
+            foreach($reflClass->getAttributes() as $attribute) {
+
+                $annotation = $attribute->newInstance();
+                if (!is_serializable($annotation)) {
+                    throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                }
+
+                $this->classAnnotations[$reflClass->name][] = $annotation;
+            }
+
+            // Compute the class annotations
+            foreach ($this->getDoctrineReader()->getClassAnnotations($reflClass) as $annotation) {
                 if (!is_serializable($annotation)) {
                     throw new Exception("Annotation \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                 }
@@ -579,7 +607,7 @@ class AnnotationReader extends AbstractLocalCache
      * @param mixed|null $annotationNames
      * @return array
      */
-    public function getDefaultMethodAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null)
+    public function getDoctrineMethodAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
@@ -588,7 +616,7 @@ class AnnotationReader extends AbstractLocalCache
 
         foreach ($reflClass->getMethods() as $reflMethod) {
             $annotations[$reflMethod->getName()] = array_filter(
-                $this->getDefaultReader()->getMethodAnnotations($reflMethod),
+                $this->getDoctrineReader()->getMethodAnnotations($reflMethod),
                 fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames)
             );
         }
@@ -606,11 +634,23 @@ class AnnotationReader extends AbstractLocalCache
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
         if (!array_key_exists($reflClass->name, $this->methodAnnotations)) {
+
             // Compute the class annotations
             $this->methodAnnotations[$reflClass->name] = [];
             foreach ($reflClass->getMethods() as $reflMethod) {
+
                 $this->methodAnnotations[$reflClass->name][$reflMethod->name] = [];
-                foreach ($this->getDefaultReader()->getMethodAnnotations($reflMethod) as $annotation) {
+                foreach($reflMethod->getAttributes() as $attribute) {
+
+                    $annotation = $attribute->newInstance();
+                    if (!is_serializable($annotation)) {
+                        throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                    }
+
+                    $this->methodAnnotations[$reflClass->name][$reflMethod->name][] = $annotation;
+                }
+
+                foreach ($this->getDoctrineReader()->getMethodAnnotations($reflMethod) as $annotation) {
                     if (!is_serializable($annotation)) {
                         throw new Exception("Annotation \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                     }
@@ -658,7 +698,7 @@ class AnnotationReader extends AbstractLocalCache
      * @param mixed|null $annotationNames
      * @return array
      */
-    public function getDefaultPropertyAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null)
+    public function getDoctrinePropertyAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
@@ -667,7 +707,7 @@ class AnnotationReader extends AbstractLocalCache
 
         foreach ($reflClass->getProperties() as $reflProperty) {
             $annotations[$reflProperty->getName()] = array_filter(
-                $this->getDefaultReader()->getPropertyAnnotations($reflProperty),
+                $this->getDoctrineReader()->getPropertyAnnotations($reflProperty),
                 fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames)
             );
         }
@@ -688,8 +728,20 @@ class AnnotationReader extends AbstractLocalCache
             // Force to get all known annotations when buffering
             $this->propertyAnnotations[$reflClass->name] = [];
             foreach ($reflClass->getProperties() as $reflProperty) {
+
                 $this->propertyAnnotations[$reflClass->name][$reflProperty->name] = [];
-                foreach ($this->getDefaultReader()->getPropertyAnnotations($reflProperty) as $annotation) {
+                foreach($reflProperty->getAttributes() as $attribute) {
+
+                    $annotation = $attribute->newInstance();
+                    if (!is_serializable($annotation)) {
+                        throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                    }
+
+                    $this->propertyAnnotations[$reflClass->name][$reflProperty->name][] = $annotation;
+                }
+
+                foreach ($this->getDoctrineReader()->getPropertyAnnotations($reflProperty) as $annotation) {
+
                     if (!is_serializable($annotation)) {
                         throw new Exception("Annotation \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                     }
@@ -754,7 +806,7 @@ class AnnotationReader extends AbstractLocalCache
      * @return array|array[]
      * @throws Exception
      */
-    public function getDefaultAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $annotationTargets = []): array
+    public function getDoctrineAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $annotationTargets = []): array
     {
         if ($classNameOrMetadataOrRefl == null) {
             return [];
@@ -768,19 +820,19 @@ class AnnotationReader extends AbstractLocalCache
         // Get class annotations
         if (in_array(self::TARGET_CLASS, $annotationTargets)) {
             $annotations[self::TARGET_CLASS][$reflClass->getName()] =
-                $this->getDefaultClassAnnotations($reflClass, $annotationNames);
+                $this->getDoctrineClassAnnotations($reflClass, $annotationNames);
         }
 
         // Get method annotations
         if (in_array(self::TARGET_METHOD, $annotationTargets)) {
             $annotations[self::TARGET_METHOD][$reflClass->getName()] =
-                $this->getDefaultMethodAnnotations($reflClass, $annotationNames);
+                $this->getDoctrineMethodAnnotations($reflClass, $annotationNames);
         }
 
         // Get properties annotations
         if (in_array(self::TARGET_PROPERTY, $annotationTargets)) {
             $annotations[self::TARGET_PROPERTY][$reflClass->getName()] =
-                $this->getDefaultPropertyAnnotations($reflClass, $annotationNames);
+                $this->getDoctrinePropertyAnnotations($reflClass, $annotationNames);
         }
 
         return $annotations;

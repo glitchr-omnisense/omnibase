@@ -6,25 +6,27 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "PROPERTY"})
- * @Attributes({
- *   @Attribute("column" , type = "string"),
- *   @Attribute("value" , type = "array")
- * })
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
 class Cascade extends AbstractAnnotation
 {
     /** @Required */
     private string $column;
     private array $value;
 
-    public function __construct(array $data)
+    public function __construct(string $column = "", array $value = [])
     {
-        $this->column = $data["column"] ?? "";
-        $this->value = $data["value"] ?? "";
+        $this->column = $column;
+        $this->value = $value;
     }
 
     /**
@@ -52,7 +54,7 @@ class Cascade extends AbstractAnnotation
         }
 
         if (!property_exists($classMetadata->getName(), $column)) {
-            throw new Exception("Invalid column property \"$column\" provided in annotation of class " . $classMetadata->getName());
+            throw new Exception("Invalid column property \"$column\" provided in metadata of class " . $classMetadata->getName());
         }
 
         $associationMapping = $classMetadata->getAssociationMapping($column);

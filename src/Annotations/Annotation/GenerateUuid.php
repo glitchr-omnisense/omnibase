@@ -4,22 +4,26 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 use Exception;
+
 use Symfony\Component\Uid\Uuid;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class GenerateUuid
- * package Base\Annotations\Annotation\GenerateUuid
+ * package Base\Metadata\Extension\GenerateUuid
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"PROPERTY"})
- * @Attributes({
- *   @Attribute("version", type = "integer"),
- *   @Attribute("namespace", type = "string"),
- * })
  */
+
+ #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class GenerateUuid extends AbstractAnnotation
 {
     private mixed $version;
@@ -37,15 +41,14 @@ class GenerateUuid extends AbstractAnnotation
 
     protected mixed $namespace;
 
-    public function __construct(array $data)
+    public function __construct(int $version = self::V4_RANDOM, ?string $namespace = null)
     {
         // Determine version
-        $version = $data['version'] ?? self::V4_RANDOM;
         $versionValid = ($version >= self::V1_MAC && $version <= self::V6_SORTABLE);
         $this->version = ($versionValid) ? $version : self::V4_RANDOM;
 
         // Determine namespace
-        $this->namespace = $data['namespace'] ?? null;
+        $this->namespace = $namespace;
         if ($this->version == self::V3_MD5 || $this->version == self::V5_SHA1) {
             if (!$this->namespace) {
                 throw new Exception("Namespace required for UUID v" . $this->version);

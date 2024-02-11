@@ -3,15 +3,66 @@
 namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
+
 use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 use function is_string;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
+
+use Symfony\Component\ExpressionLanguage\Expression;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "METHOD"})
  */
+
+#[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_FUNCTION)]
 class IsGranted extends AbstractAnnotation
 {
+    /**
+     * @param array|string $data
+     * @param mixed|null $subject
+     * @param string|null $message
+     * @param int|null $statusCode
+     */
+    public function __construct(
+        /**
+         * Sets the first argument that will be passed to isGranted().
+         */
+        array|string|Expression $attributes,
+
+        /**
+         * Sets the second argument passed to isGranted().
+         *
+         * @var array<string|Expression>|string|Expression|null
+         */
+        array|string|Expression|null $subject = null,
+
+        /**
+         * The message of the exception - has a nice default if not set.
+         */
+        ?string $message = null,
+
+        /**
+         * If set, will throw HttpKernel's HttpException with the given $statusCode.
+         * If null, Security\Core's AccessDeniedException will be used.
+         */
+        ?int $statusCode = null,
+    ) {
+
+        $attributes = is_string($attributes) ? [$attributes] : $attributes;
+        if (!$attributes) {
+            throw new MissingConstructorArgumentsException("Attribute parameter missing", 500);
+        }
+
+        $this->setSubject($subject);
+        $this->setMessage($message);
+        $this->setStatusCode($statusCode);
+        $this->setAttributes($attributes);
+    }
+    
     /**
      * Sets the first argument that will be passed to isGranted().
      *
@@ -42,36 +93,6 @@ class IsGranted extends AbstractAnnotation
      * @var int|null
      */
     protected ?int $statusCode;
-
-    /**
-     * @param array|string $data
-     * @param mixed|null $subject
-     * @param string|null $message
-     * @param int|null $statusCode
-     */
-    public function __construct(
-        array|string $data = [],
-        mixed        $subject = null,
-        string       $message = null,
-        ?int         $statusCode = null
-    )
-    {
-        $values = [];
-        if (is_string($data)) {
-            $values['attributes'] = $data;
-        } else {
-            $values = $data;
-        }
-
-        if (!array_key_exists("value", $values)) {
-            throw new MissingConstructorArgumentsException("Attribute parameter missing", 500);
-        }
-
-        $this->setSubject($values['subject'] ?? $subject);
-        $this->setMessage($values['message'] ?? $message);
-        $this->setStatusCode($values['statusCode'] ?? $statusCode);
-        $this->setAttributes($values['value'] ?? null);
-    }
 
     /**
      * @param string $target

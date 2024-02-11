@@ -159,7 +159,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
             // Get icon from controller annotation
             $reflClass = $this->annotationReader->getReflClass($class);
-            $annotations = $this->annotationReader->getDefaultMethodAnnotations($reflClass)[$method] ?? [];
+            $annotations = $this->annotationReader->getDoctrineMethodAnnotations($reflClass)[$method] ?? [];
 
             $position = array_class_last(Iconize::class, $annotations);
             $iconize = $position !== false ? $annotations[$position] : null;

@@ -8,26 +8,28 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "PROPERTY"})
- * @Attributes({
- *   @Attribute("column",     type = "string"),
- *   @Attribute("alias" ,     type = "string")
- * })
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
 class ColumnAlias extends AbstractAnnotation
 {
     public mixed $alias;
     public mixed $column;
 
-    public function __construct(array $data)
+    public function __construct(string $column = "", string $alias = "")
     {
-        $this->alias = $data["alias"] ?? "";
-        $this->column = $data["column"] ?? "";
+        $this->column = $column;
+        $this->alias = $alias;
     }
 
     /**
@@ -50,9 +52,9 @@ class ColumnAlias extends AbstractAnnotation
         }
 
         if (!property_exists($classMetadata->getName(), $alias)) {
-            throw new Exception("Invalid alias property \"$alias\" provided in annotation of class " . $classMetadata->getName());
+            throw new Exception("Invalid alias property \"$alias\" provided in metadata of class " . $classMetadata->getName());
         } elseif (!property_exists($classMetadata->getName(), $this->column)) {
-            throw new Exception("Invalid column property \"$this->column\" provided in annotation of class " . $classMetadata->getName());
+            throw new Exception("Invalid column property \"$this->column\" provided in metadata of class " . $classMetadata->getName());
         } elseif ($classMetadata->hasAssociation($alias)) {
             throw new Exception("Alias variable \"$alias\" cannot be used, association mapping already found.");
         } elseif ($classMetadata->hasField($alias)) {

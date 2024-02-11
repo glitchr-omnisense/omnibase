@@ -8,20 +8,21 @@ use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
+
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Timestamp
- * package Base\Annotations\Annotation\Timestamp
+ * package Base\Metadata\Extension\Timestamp
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "PROPERTY"})
- * @Attributes({
- *   @Attribute("on", type = "array"),
- *   @Attribute("fields", type = "array"),
- *   @Attribute("value", type = "datetime"),
- *   @Attribute("immutable", type = "bool")
- * })
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
 class Timestamp extends AbstractAnnotation
 {
     private array $fields;
@@ -34,12 +35,12 @@ class Timestamp extends AbstractAnnotation
      */
     private $value;
 
-    public function __construct(array $data)
+    public function __construct(string|array $on = [], bool $immutable = false, array $fields = [], string $value = "")
     {
-        $this->context = array_map("mb_strtolower", $data['on']);
-        $this->immutable = $data['immutable'] ?? false;
-        $this->fields = $data['fields'] ?? [];
-        $this->value = $data['value'] ?? "";
+        $this->context = array_map("mb_strtolower", is_string($on) ? [$on] : $on);
+        $this->immutable = $immutable;
+        $this->fields = $fields;
+        $this->value = $value;
     }
 
     public function getContext(): array

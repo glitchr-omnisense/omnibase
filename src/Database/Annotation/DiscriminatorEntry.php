@@ -4,25 +4,27 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Base\Wikidoc\Entity\Abstract\AbstractDocument;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("value", type = "string")
- * })
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS)]
 class DiscriminatorEntry extends AbstractAnnotation
 {
     /** @Required */
-    private ?string $value;
+    protected ?string $value;
 
-    public function __construct(array $data)
+    public function __construct(?string $value = null)
     {
-        $this->value = $data['value'] ?? null;
+        $this->value = $value ?? null;
     }
 
     public function getValue(object|string $object_or_class): string
@@ -69,10 +71,10 @@ class DiscriminatorEntry extends AbstractAnnotation
         $parentNamespace = null;
         if ($parentClassName = get_parent_class($className)) {
             $parentNamespace = explodeByArray("\\Entity\\", $parentClassName)[1] ?? null;
-            $parentAnnotations = $this->getAnnotationReader()->getAnnotations($parentClassName, $this);
-            $parentAnnotations = $parentAnnotations[AnnotationReader::TARGET_CLASS][$parentClassName];
-            if (($parentAnnotation = $parentAnnotations ? end($parentAnnotations) : null)) {
-                $parentValue = $parentAnnotation->getValue($parentClassName);
+            $parentMetadata = $this->getAnnotationReader()->getAnnotations($parentClassName, $this);
+            $parentMetadata = $parentMetadata[AnnotationReader::TARGET_CLASS][$parentClassName];
+            if (($parentAttribute = $parentMetadata ? end($parentMetadata) : null)) {
+                $parentValue = $parentAttribute->getValue($parentClassName);
                 $parentValue = in_array($parentValue, ["abstract", "common"]) ? null : $parentValue;
             }
         }
@@ -126,14 +128,14 @@ class DiscriminatorEntry extends AbstractAnnotation
         // Recompute the map discriminator
         $discriminatorValues = [];
         foreach ($classMetadata->discriminatorMap as $className) {
-            $annotations = $this->getAnnotationReader()->getAnnotations($className, $this);
-            $annotations = $annotations[AnnotationReader::TARGET_CLASS][$className];
-            $annotation = $annotations ? end($annotations) : null;
-            if ($annotation === null) {
-                throw new Exception("@DiscriminatorEntry annotation not found for \"" . $className . "\". Have you doom the cache ?");
+            $metadata = $this->getAnnotationReader()->getAnnotations($className, $this);
+            $metadata = $metadata[AnnotationReader::TARGET_CLASS][$className];
+            $metadata = $metadata ? end($metadata) : null;
+            if ($metadata === null) {
+                throw new Exception("@DiscriminatorEntry metadata not found for \"" . $className . "\". Have you doom the cache ?");
             }
 
-            $discriminatorValues[$className] = $annotation->getValue($className);
+            $discriminatorValues[$className] = $metadata->getValue($className);
         }
 
         $classMetadata->discriminatorMap = array_flip($discriminatorValues);

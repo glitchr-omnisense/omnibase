@@ -4,21 +4,24 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 
-use DateTime;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+
 /**
  * Class Timezone
- * package Base\Annotations\Annotation\Timezone
+ * package Base\Metadata\Extension\Timezone
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"PROPERTY"})
- * @Attributes({
- *   @Attribute("on", type = "array"),
- * })
  */
+
+ #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Timezone extends AbstractAnnotation
 {
     public const DEFAULT_TIMEZONE = "UTC";
@@ -29,10 +32,10 @@ class Timezone extends AbstractAnnotation
      */
     private string $value;
 
-    public function __construct(array $data)
+    public function __construct(string|array $on = [], string $value = "")
     {
-        $this->context = array_map("mb_strtolower", $data['on']);
-        $this->value = $data['value'] ?? "";
+        $this->context = array_map("mb_strtolower", is_string($on) ? [$on] : $on);
+        $this->value = $value;
     }
 
     public function getContext(): array

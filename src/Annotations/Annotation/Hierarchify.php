@@ -4,38 +4,39 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\Mapping\ClassMetadata;
+
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Hierarchify
- * package Base\Annotations\Annotation\Hierarchify.
+ * package Base\Metadata\Extension\Hierarchify.
  *
  * @Annotation
- *
+ * @NamedArgumentConstructor
  * @Target({"CLASS"})
- *
- * @Attributes({
- *
- *   @Attribute("hierarchy", type = "array"),
- *   @Attribute("separator", type = "string")
- * })
  */
+
+ #[\Attribute(\Attribute::TARGET_CLASS)]
 class Hierarchify extends AbstractAnnotation
 {
     /**
-     * @var array|null
+     * @var array|string|null
      */
-    public ?array $hierarchy;
+    public array|string|null $hierarchy;
 
     /**
      * @var string|null
      */
     public ?string $separator;
 
-    public function __construct(array $data)
+    public function __construct(string|array $hierarchy = null, ?string $separator = null)
     {
-        $this->hierarchy = $data['hierarchy'] ?? null;
-        $this->separator = $data['separator'] ?? null;
+        $this->hierarchy = is_string($hierarchy) ? [$hierarchy] : [];
+        $this->separator = $separator ?? null;
     }
 
     /**
@@ -52,7 +53,7 @@ class Hierarchify extends AbstractAnnotation
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
     {
         if (!method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree') && !$this->parent_method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree')) {
-            throw new \Exception("Did you forgot to use \"Base\Annotations\Traits\HierarchifyTrait\" in $classMetadata->customRepositoryClassName ?");
+            throw new \Exception("Did you forgot to use \"Base\Metadata\Traits\HierarchifyTrait\" in $classMetadata->customRepositoryClassName ?");
         }
 
         $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);

@@ -4,55 +4,77 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 
 use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+
 /**
  * Class Hashify
- * package Base\Annotations\Annotation\Hashify
+ * package Base\Metadata\Extension\Hashify
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"PROPERTY"})
- * @Attributes({
- *   @Attribute("reference",        type = "string"),
- *   @Attribute("random",           type = "bool"),
- *   @Attribute("algorithm",        type = "string"),
- *   @Attribute("hash_algorithm",   type = "string"),
- *   @Attribute("migrate_from",     type = "array"),
- *   @Attribute("key_length",       type = "integer"),
- *   @Attribute("ignore_case",      type = "bool"),
- *   @Attribute("encode_as_base64", type = "bool"),
- *   @Attribute("iterations",       type = "integer"),
- *   @Attribute("cost",             type = "int"),
- *   @Attribute("memory_cost",      type = "int"),
- *   @Attribute("time_cost",        type = "int"),
- *
- *   @Attribute("plain", type = "string"),
- *   @Attribute("nullable", type = "bool")
- * })
  */
+
+ #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Hashify extends AbstractAnnotation
 {
-    protected array $data;
-    protected mixed $nullable;
-    protected $reference;
-
-    public bool $random;
     public ?string $referenceColumn;
+    public bool $random;
+    public string $algorithm;
+    public string $hashAlgorithm;
+    public string $plain;
+    public bool $nullable;
+    public array $migrateFrom;
+    public int $keyLength;
+    public bool $ignoreCase;
+    public bool $encodeAsBase64;
+    public int $iterations;
+    public ?int $cost;
+    public ?int $memoryCost;
+    public ?int $timeCost;
 
-    public function __construct(array $data)
+    public function __construct(
+        ?string $reference = null, 
+        bool $random = false, 
+        string $algorithm = "auto",
+        string $hash_algorithm = "sha512", 
+        bool $nullable = false,
+        array $migrateFrom = [],
+        int $key_length = 40,
+        bool $ignore_case = false,
+        bool $encore_as_base64 = true,
+        int $iterations = 5000,
+        ?int $cost = null,
+        ?int $memory_cost = null,
+        ?int $time_cost = null
+    )
     {
-        $this->data = $data;
-        $this->nullable = $data["nullable"] ?? false;
-        $this->random = $data["random"] ?? false;
-        $this->referenceColumn = $data["reference"] ?? null;
+        $this->random = $random;
+        $this->referenceColumn = $reference;
+        $this->algorithm = $algorithm;
+        $this->hashAlgorithm = $hash_algorithm;
+        $this->nullable = $nullable;
+        $this->migrateFrom = $migrateFrom;
+        $this->keyLength = $key_length;
+        $this->ignoreCase = $ignore_case;
+        $this->encodeAsBase64 = $encore_as_base64;
+        $this->iterations = $iterations;
+        $this->cost = $cost;
+        $this->memoryCost = $memory_cost;
+        $this->timeCost = $time_cost;
     }
 
     /**
@@ -77,16 +99,16 @@ class Hashify extends AbstractAnnotation
     public function getMessageHasher($entity)
     {
         $hasherFactory = new PasswordHasherFactory([ClassUtils::getClass($entity) => [
-            "algorithm" => $this->data["algorithm"] ?? "auto",
-            "hash_algorithm" => $this->data["hash_algorithm"] ?? "sha512",
-            "migrate_from" => $this->data["migrate_from"] ?? [],
-            "key_length" => $this->data["key_length"] ?? 40,
-            "ignore_case" => $this->data["ignore_case"] ?? false,
-            "encode_as_base64" => $this->data["encode_as_base64"] ?? true,
-            "iterations" => $this->data["iterations"] ?? 5000,
-            "cost" => $this->data["cost"] ?? null,
-            "memory_cost" => $this->data["memory_cost"] ?? null,
-            "time_cost" => $this->data["time_cost"] ?? null
+            "algorithm" => $this->algorithm,
+            "hash_algorithm" => $this->hashAlgorithm,
+            "migrate_from" => $this->migrateFrom,
+            "key_length" => $this->keyLength,
+            "ignore_case" => $this->ignoreCase,
+            "encode_as_base64" => $this->encodeAsBase64,
+            "iterations" => $this->iterations,
+            "cost" => $this->cost,
+            "memory_cost" => $this->memoryCost,
+            "time_cost" => $this->timeCost
         ]]);
 
         return $hasherFactory->getPasswordHasher(ClassUtils::getClass($entity)) ?? null;
@@ -171,7 +193,7 @@ class Hashify extends AbstractAnnotation
     private function erasePlainMessage($entity)
     {
         if (!$this->referenceColumn) {
-            throw new Exception("Attribute \"plain\" missing for @Hashify in " . ClassUtils::getClass($entity));
+            throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
         }
 
         return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));

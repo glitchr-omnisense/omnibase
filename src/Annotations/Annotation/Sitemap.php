@@ -4,11 +4,19 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Attribute;
+use Doctrine\Common\Annotations\Annotation\Attributes;
+use Doctrine\Common\Annotations\Annotation\Target;
+
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+
 /**
  * Class Sitemap
- * package Base\Annotations\Annotation\Sitemap
+ * package Base\Metadata\Extension\Sitemap
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"METHOD"})
  * @Attributes({
  *   @Attribute("group", type = "string"),
@@ -17,9 +25,23 @@ use Base\Annotations\AbstractAnnotation;
  *   @Attribute("lastmod", type = "string")
  * })
  */
+
+ #[\Attribute(\Attribute::TARGET_METHOD)]
 class Sitemap extends AbstractAnnotation
 {
     protected static array $urls = [];
+    protected string $lastMod;
+    protected string $changeFreq;
+    protected float $priority;
+
+    public function __construct(?string $group = null, float $priority = 0.5, string $changefreq = "daily", ?string $lastmod = null)
+    {
+        $this->group = $group;
+
+        $this->lastMod = $lastmod ?? date("Y-m-d H:m:s");
+        $this->changeFreq = $changefreq;
+        $this->priority = $priority;
+    }
 
     /**
      * @return array
@@ -39,8 +61,6 @@ class Sitemap extends AbstractAnnotation
         return $this->group;
     }
 
-    protected string $lastMod;
-
     /**
      * @return mixed|string
      */
@@ -48,8 +68,6 @@ class Sitemap extends AbstractAnnotation
     {
         return $this->lastMod;
     }
-
-    protected string $changeFreq;
 
     /**
      * @return mixed|string
@@ -59,23 +77,12 @@ class Sitemap extends AbstractAnnotation
         return $this->changeFreq;
     }
 
-    protected float $priority;
-
     /**
      * @return float|mixed
      */
     public function getPriority()
     {
         return $this->priority;
-    }
-
-    public function __construct(array $data)
-    {
-        $this->group = $data["group"] ?? null;
-
-        $this->lastMod = $data["lastmod"] ?? date("Y-m-d H:m:s");
-        $this->changeFreq = $data["changefreq"] ?? "daily";
-        $this->priority = $data["priority"] ?? 0.5;
     }
 
     /**

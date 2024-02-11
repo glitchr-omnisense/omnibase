@@ -2,19 +2,21 @@
 
 namespace Base\Annotations\Annotation;
 
-use Attribute;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+use Doctrine\Common\Metadata\Extension\NamedArgumentConstructor;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
- * Annotation class for @Route().
+ * Attribute class for @Route().
  *
  * @Annotation
  * @NamedArgumentConstructor
  * @Target({"CLASS", "METHOD"})
  *
  */
-#[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class Route extends \Symfony\Component\Routing\Annotation\Route
+
+#[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
+class Route extends \Symfony\Component\Routing\Attribute\Route
 {
     public function __construct(
         string|array    $path = null,
