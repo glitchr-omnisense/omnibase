@@ -39,18 +39,15 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\NotificationRepository;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 
-/**
- * @ORM\Entity(repositoryClass=NotificationRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- *
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- * @DiscriminatorEntry( value = "common" )
- */
+#[ORM\Entity(repositoryClass: NotificationRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[ORM\DiscriminatorColumn( name: "class", type: "string" )]
+#[DiscriminatorEntry( value: "common" )]
 class Notification extends SymfonyNotification implements BaseNotificationInterface, SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface, IconizeInterface
 {
     use BaseTrait;
 
-    public function __toPrune(?RecipientInterface $recipient = null): SymfonyNotification
+    public function __toPrune(?RecipientInterface $recipient = null, ): SymfonyNotification
     {
         $symfonyNotification = new SymfonyNotification($this->getSubject(), $this->getChannels($recipient));
         if ($this->getException()) {
@@ -82,11 +79,9 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     public const IMPORTANCE_NOTICE = "notice";
     public const IMPORTANCE_DANGER = "danger";
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -94,10 +89,8 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this->id;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="notifications", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity:User::class, inversedBy:"notifications", cascade:["persist", "remove"])]
+    #[ORM\JoinColumn(nullable:false)]
     protected $user;
 
     public function getUser(): ?User
@@ -162,9 +155,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type:"json")]
     protected $channels = [];
 
     public function getChannels(?RecipientInterface $recipient = null): array
@@ -178,9 +169,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $importance;
 
     public function getImportance(): string
@@ -194,9 +183,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $subject;
 
     public function getSubject(): string
@@ -210,9 +197,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type:"text")]
     protected $content;
 
     public function getContent(): string
@@ -227,9 +212,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $title;
 
     public function getTitle(): string
@@ -244,9 +227,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type:"boolean")]
     protected $isRead = false;
 
     public function isRead(): bool
@@ -260,10 +241,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @param bool $isRead
-     * @return $this
-     */
     /**
      * @param bool $isRead
      * @return $this
@@ -287,9 +264,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
     }
 
-    /**
-     * @ORM\Column(type="datetime", nullable="true")
-     */
+    #[ORM\Column(type:"datetime", nullable:"true")]
     protected $sentAt = null;
 
     public function getSentAt(): ?DateTimeInterface
@@ -303,9 +278,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type:"text")]
     protected $backtrace = ""; // Internal use only (code line might be changing..)
 
     public function getBacktrace(): string
@@ -313,9 +286,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this->backtrace;
     }
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type:"boolean")]
     protected $markAsAdmin = false;
 
     /**
@@ -413,11 +384,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @param array $htmlParameters
      * @return $this
      */
-    /**
-     * @param string|null $htmlTemplate
-     * @param array $htmlParameters
-     * @return $this
-     */
     public function setHtmlTemplate(?string $htmlTemplate, array $htmlParameters = [])
     {
         $this->htmlTemplate = $htmlTemplate;
@@ -435,10 +401,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this->htmlParameters;
     }
 
-    /**
-     * @param array $htmlParameters
-     * @return $this
-     */
     /**
      * @param array $htmlParameters
      * @return $this

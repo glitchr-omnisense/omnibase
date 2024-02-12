@@ -10,15 +10,11 @@ use Base\Repository\Layout\Attribute\Common\AbstractActionRepository;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=AbstractActionRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- *
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- * @DiscriminatorEntry(value="abstract_action")
- */
+#[ORM\Entity(repositoryClass: AbstractActionRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[ORM\DiscriminatorColumn( name : "context", type : "string" )]
+#[DiscriminatorEntry(value:"abstract_action")]
 abstract class AbstractAction extends AbstractAttribute implements ActionInterface
 {
     public static function __iconizeStatic(): ?array
@@ -31,10 +27,8 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
         return $this->adapter?->apply($this->getValue(), $subject) ?? $subject;
     }
 
-    /**
-     * @ORM\Column(type="array")
-     * @Associate(metadata="class")
-     */
+    #[ORM\Column(type: "array")]
+    #[Associate(metadata: "class")]
     protected $value;
 
     /**
@@ -55,9 +49,7 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $class;
 
     public function getClass(): ?string

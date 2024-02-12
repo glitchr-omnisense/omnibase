@@ -7,9 +7,6 @@ use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 
 use Base\Validator\ConstraintEntityValidator;
 
-/**
- *
- */
 class StringCaseEntityValidator extends ConstraintEntityValidator
 {
     /**

@@ -3,10 +3,15 @@
 namespace Base\Validator\Constraints;
 
 use Base\Validator\Constraint;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  */
+
+#[\Attribute]
 class Password extends Constraint
 {
     public const MIN_LENGTH_FALLBACK = 8;
@@ -78,28 +83,27 @@ class Password extends Constraint
         return $this->length;
     }
 
-    public function __construct(array $options = [], array $groups = null, mixed $payload = null)
+    public function __construct(
+        bool $uppercase = true, 
+        bool $lowercase = true, 
+        bool $numbers = true,
+        bool $specials = true,
+        bool $length = true,
+        int $min_strength = self::MIN_STRENGTH_FALLBACK,
+        int $min_length = self::MIN_LENGTH_FALLBACK,
+
+        array $options = [], array $groups = null, mixed $payload = null)
     {
-        $this->uppercase = $options["uppercase"] ?? true;
-        unset($options["uppercase"]);
-        $this->lowercase = $options["lowercase"] ?? true;
-        unset($options["lowercase"]);
-        $this->numbers = $options["numbers"] ?? true;
-        unset($options["numbers"]);
-
-        $this->specials = $options["specials"] ?? true;
-        unset($options["specials"]);
-
-        $this->length = $options["length"] ?? true;
-        unset($options["length"]);
+        $this->uppercase = $uppercase;
+        $this->lowercase = $lowercase;
+        $this->numbers = $numbers;
+        $this->specials = $specials;
+        $this->length = $length;
 
         $this->maxStrength = (int)$this->lowercase + (int)$this->uppercase + (int)$this->numbers + (int)$this->specials;
-        $this->minStrength = min($this->maxStrength, $options["min_strength"] ?? self::MIN_STRENGTH_FALLBACK);
-        unset($options["min_strength"]);
+        $this->minStrength = min($this->maxStrength, $min_strength);
+        $this->minLength = $min_length;
 
-        $this->minLength = $options["min_length"] ?? self::MIN_LENGTH_FALLBACK;
-        unset($options["min_length"]);
-
-        parent::__construct($options ?? [], $groups, $payload);
+        parent::__construct($options, $groups, $payload);
     }
 }

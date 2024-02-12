@@ -12,7 +12,7 @@ use Base\Annotations\Annotation\Iconize;
 use Base\Entity\User\Notification;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -40,9 +40,7 @@ class SettingsController extends AbstractController
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * @Route("/members/qr/totp", name="qr_code_totp")
-     */
+    #[Route("/members/qr/totp", name: "qr_code_totp")]
     public function displayTotpQrCode(TokenStorageInterface $tokenStorage, TotpAuthenticatorInterface $totpAuthenticator): Response
     {
         $user = $tokenStorage->getToken()->getUser();
@@ -69,19 +67,15 @@ class SettingsController extends AbstractController
         return new Response($result->getString(), 200, ['Content-Type' => 'image/png']);
     }
 
-    /**
-     * @Route("/settings", name="user_settings")
-     * @Iconize("fa-solid fa-fw fa-user-cog")
-     */
+    #[Route("/settings", name: "user_settings")]
+    #[Iconize("fa-solid fa-fw fa-user-cog")]
     public function Settings()
     {
         $user = $this->getUser();
         return $this->render('client/user/settings.html.twig', ['user' => $user]);
     }
 
-    /**
-     * @Route("/settings/2fa", name="user_settings_2fa")
-     */
+    #[Route("/settings/2fa", name: "user_settings_2fa")]
     public function TwoFactorAuthentification(Request $request)
     {
         $newUser = new User();
@@ -128,9 +122,7 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/settings/2fa/qr-code", name="user_settings_2fa_qrcode")
-     */
+    #[Route("/settings/2fa/qr-code", name: "user_settings_2fa_qrcode")]
     public function TwoFactorAuthentification_QrCode()
     {
         $user = $this->getUser();

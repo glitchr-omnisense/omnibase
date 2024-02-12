@@ -12,7 +12,7 @@ use Base\Service\FileService;
 use Base\Service\Flysystem;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\MediaService;
@@ -21,7 +21,7 @@ use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
-/** @Route("", name="ux_", priority=-1) */
+#[Route("", name:"ux_", priority:-1)]
 class MediaController extends AbstractController
 {
     use BaseTrait;
@@ -90,9 +90,7 @@ class MediaController extends AbstractController
         return parent::redirectToRoute($route . $cacheless, $parameters, $status);
     }
 
-    /**
-     * @Route("/contents/{data}", name="serve", requirements={"data"=".+"})
-     */
+    #[Route("/contents/{data}", name: "serve", requirements: ["data" => ".+"])]
     public function Serve($data): Response
     {
         $config = $this->fileService->resolve($data);
@@ -113,20 +111,16 @@ class MediaController extends AbstractController
         return $this->fileService->serveContents($contents, 200, $options);
     }
 
-    /**
-     * @Route("/images/cacheless/cropper/{identifier}/{data}/image.{extension}", name="imageCropExtension_cacheless", requirements={"data"=".+"})
-     * @Route("/images/cacheless/cropper/{identifier}/{data}", name="imageCrop_cacheless", requirements={"data"=".+"})
-     */
+    #[Route("/images/cacheless/cropper/{identifier}/{data}/image.{extension}", name: "imageCropExtension_cacheless", requirements: ["data" => ".+"])]
+    #[Route("/images/cacheless/cropper/{identifier}/{data}", name: "imageCrop_cacheless", requirements: ["data" => ".+"])]
     public function ImageCropCacheless($data, string $identifier, string $extension = null): Response
     {
         $this->localCache = false;
         return $this->ImageCrop($data, $identifier, $extension);
     }
 
-    /**
-     * @Route("/images/cropper/{identifier}/{data}/image.{extension}", name="imageCropExtension", requirements={"data"=".+"})
-     * @Route("/images/cropper/{identifier}/{data}", name="imageCrop", requirements={"data"=".+"})
-     */
+    #[Route("/images/cropper/{identifier}/{data}/image.{extension}", name: "imageCropExtension", requirements: ["data" => ".+"])]
+    #[Route("/images/cropper/{identifier}/{data}", name: "imageCrop", requirements: ["data" => ".+"])]
     public function ImageCrop($data, string $identifier, string $extension = null): Response
     {
         //
@@ -232,39 +226,30 @@ class MediaController extends AbstractController
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
-    /**
-     * @Route("/images/cacheless/{data}/image.webp", name="imageWebp_cacheless", requirements={"data"=".+"})
-     */
+    #[Route("/images/cacheless/{data}/image.webp", name: "imageWebp_cacheless", requirements: ["data" => ".+"])]
     public function ImageWebpCacheless($data): Response
     {
         $this->localCache = false;
         return $this->ImageWebp($data);
     }
 
-    /**
-     * @Route("/images/debug/{data}/image.{extension}", name="debug_imageExtension", requirements={"data"=".+"})
-     * @Route("/images/debug/{data}", name="debug_image", requirements={"data"=".+"})
-     * @IsGranted("ROLE_EDITOR")
-     */
+    #[Route("/images/debug/{data}/image.{extension}", name: "debug_imageExtension", requirements: ["data" => ".+"])]
+    #[Route("/images/debug/{data}", name: "debug_image", requirements: ["data" => ".+"])]
+    #[IsGranted("ROLE_EDITOR")]
     public function ImageDebug($data, string $extension = null): Response
     {
         return $this->Image($data, $extension, true);
     }
 
-    /**
-     * @Route("/images/cacheless/{data}/image.{extension}", name="imageExtension_cacheless", requirements={"data"=".+"})
-     * @Route("/images/cacheless/{data}", name="image_cacheless", requirements={"data"=".+"})
-     */
+    #[Route("/images/cacheless/{data}/image.{extension}", name: "imageExtension_cacheless", requirements: ["data" => ".+"])]
+    #[Route("/images/cacheless/{data}", name: "image_cacheless", requirements: ["data" => ".+"])]
     public function ImageCacheless($data, string $extension = null): Response
     {
         $this->localCache = false;
         return $this->Image($data, $extension);
     }
 
-
-    /**
-     * @Route("/images/{data}/image.webp", name="imageWebp", requirements={"data"=".+"})
-     */
+    #[Route("/images/{data}/image.webp", name: "imageWebp", requirements: ["data" => ".+"])]
     public function ImageWebp($data): Response
     {
         $config = $this->mediaService->resolve($data);
@@ -300,9 +285,7 @@ class MediaController extends AbstractController
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
-    /**
-     * @Route("/images/{data}/image.svg", name="imageSvg", requirements={"data"=".+"})
-     */
+    #[Route("/images/{data}/image.svg", name: "imageSvg", requirements: ["data" => ".+"])]
     public function ImageSvg($data): Response
     {
         $config = $this->mediaService->resolve($data);
@@ -329,10 +312,8 @@ class MediaController extends AbstractController
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
-    /**
-     * @Route("/images/{data}/image.{extension}", name="imageExtension", requirements={"data"=".+"})
-     * @Route("/images/{data}", name="image", requirements={"data"=".+"})
-     */
+    #[Route("/images/{data}/image.{extension}", name: "imageExtension", requirements: ["data" => ".+"])]
+    #[Route("/images/{data}", name: "image", requirements: ["data" => ".+"])]
     public function Image($data, string $extension = null, bool $debug = false): Response
     {
         //

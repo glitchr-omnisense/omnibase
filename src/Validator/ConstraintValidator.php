@@ -8,9 +8,6 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
 use UnexpectedValueException;
 
-/**
- * @Annotation
- */
 abstract class ConstraintValidator extends \Symfony\Component\Validator\ConstraintValidator
 {
     use BaseTrait;

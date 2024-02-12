@@ -19,17 +19,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=AbstractAdapterRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- *
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "type", type = "string" )
- * @DiscriminatorEntry
- *
- * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
- */
+#[ORM\Entity(repositoryClass:AbstractAdapterRepository::class)]
+#[ORM\InheritanceType("JOINED")]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[ORM\DiscriminatorColumn( name: "type", type: "string" )]
+#[DiscriminatorEntry]
+#[AssertBase\UniqueEntity(fields:["code"], groups:["new", "edit"])]
 abstract class AbstractAdapter implements AttributeAdapterInterface, AutocompleteInterface, TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
@@ -71,11 +66,9 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
         $this->setIcon(get_called_class()::__iconizeStatic()[0]);
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
     protected $id;
 
     public function getId(): ?int
@@ -83,9 +76,7 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
         return $this->id;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=AbstractAttribute::class, mappedBy="adapter")
-     */
+    #[ORM\OneToMany(targetEntity:AbstractAttribute::class, mappedBy:"adapter")]
     protected $attributes;
 
     public function getAttributes(): Collection
@@ -115,11 +106,9 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, unique=true)
-     * @AssertBase\NotBlank(groups={"new", "edit"})
-     * @Slugify(separator="-")
-     */
+    #[ORM\Column(type:"string", length:255, unique:true)]
+    #[AssertBase\NotBlank(groups:["new", "edit"])]
+    #[Slugify(separator:"-")]
     protected $code;
 
     public function getCode(): ?string
@@ -133,9 +122,7 @@ abstract class AbstractAdapter implements AttributeAdapterInterface, Autocomplet
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $icon;
 
     public function getIcon(): ?string

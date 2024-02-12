@@ -15,7 +15,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Slugify
- * package Base\Metadata\Extension\Slugify
+ * package Base\Annotations\Annotation\Slugify
  *
  * @Annotation
  * @NamedArgumentConstructor

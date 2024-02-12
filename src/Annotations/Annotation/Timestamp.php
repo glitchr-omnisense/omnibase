@@ -15,7 +15,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Timestamp
- * package Base\Metadata\Extension\Timestamp
+ * package Base\Annotations\Annotation\Timestamp
  *
  * @Annotation
  * @NamedArgumentConstructor

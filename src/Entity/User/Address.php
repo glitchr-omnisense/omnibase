@@ -11,15 +11,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\AddressRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=AddressRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- *
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass: AddressRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[ORM\DiscriminatorColumn( name: "class", type: "string" )]
+#[DiscriminatorEntry]
 class Address implements IconizeInterface, HtmlizeInterface
 {
     use BaseTrait;
@@ -56,11 +53,9 @@ class Address implements IconizeInterface, HtmlizeInterface
         $this->name = $name;
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     /**
@@ -71,9 +66,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $name;
 
     public function getName(): ?string
@@ -89,9 +82,7 @@ class Address implements IconizeInterface, HtmlizeInterface
     }
 
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $country;
 
     public function getCountry(): ?string
@@ -105,9 +96,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $state;
 
     public function getState(): ?string
@@ -121,9 +110,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $city;
 
     public function getCity(): ?string
@@ -137,9 +124,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $zipCode;
 
     public function getZipCode(): ?string
@@ -154,9 +139,7 @@ class Address implements IconizeInterface, HtmlizeInterface
     }
 
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $streetAddress;
 
     public function getStreetAddress(): ?string
@@ -170,9 +153,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $affix;
 
     public function getAffix(): ?string
@@ -187,9 +168,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=15, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:15, nullable:true)]
     protected $phone;
 
     public function getPhone(): ?string
@@ -203,9 +182,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=15, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:15, nullable:true)]
     protected $fax;
 
     public function getFax(): ?string
@@ -219,9 +196,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $additional;
 
     public function getAdditional(): ?string
@@ -236,9 +211,7 @@ class Address implements IconizeInterface, HtmlizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="addresses")
-     */
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy:"addresses")]
     protected $user;
 
     public function getUser(): ?User

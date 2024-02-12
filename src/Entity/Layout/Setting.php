@@ -12,10 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\SettingRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=SettingRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- */
+#[ORM\Entity(repositoryClass:SettingRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 class Setting implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
@@ -53,11 +51,9 @@ class Setting implements TranslatableInterface, IconizeInterface
         $this->translate($locale)->setValue($value);
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -65,11 +61,9 @@ class Setting implements TranslatableInterface, IconizeInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @AssertBase\NotBlank(groups={"new", "edit"})
-     * @Slugify(reference="translations.label", separator=".", keep={"_"})
-     */
+    #[ORM\Column(type:"string", length:255)]
+    #[AssertBase\NotBlank(groups:["new", "edit"])]
+    #[Slugify(reference:"translations.label", separator:".", keep:["_"])]
     protected $path;
 
     public function getPath(): string
@@ -81,19 +75,13 @@ class Setting implements TranslatableInterface, IconizeInterface
      * @param string $path
      * @return $this
      */
-    /**
-     * @param string $path
-     * @return $this
-     */
     public function setPath(string $path)
     {
         $this->path = $path;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type:"boolean")]
     protected $locked;
 
     public function isLocked(): bool
@@ -120,19 +108,13 @@ class Setting implements TranslatableInterface, IconizeInterface
      * @param bool $locked
      * @return $this
      */
-    /**
-     * @param bool $locked
-     * @return $this
-     */
     public function setLocked(bool $locked)
     {
         $this->locked = $locked;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, unique=true, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, unique:true, nullable:true)]
     protected $bag;
 
     public function getBag(): ?string
@@ -140,10 +122,6 @@ class Setting implements TranslatableInterface, IconizeInterface
         return $this->bag;
     }
 
-    /**
-     * @param string|null $bag
-     * @return $this
-     */
     /**
      * @param string|null $bag
      * @return $this

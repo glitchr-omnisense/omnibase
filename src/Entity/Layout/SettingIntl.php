@@ -13,10 +13,8 @@ use Base\Database\Traits\VaultTrait;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 
-/**
- * @ORM\Entity()
- * @Vault(fields={"value"})
- */
+#[ORM\Entity]
+#[Vault(fields:["value"])]
 class SettingIntl implements TranslationInterface
 {
     use TranslationTrait {
@@ -29,9 +27,7 @@ class SettingIntl implements TranslationInterface
         return $this->value === null;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $label = null;
 
     public function getLabel(): ?string
@@ -43,19 +39,13 @@ class SettingIntl implements TranslationInterface
      * @param string|null $label
      * @return $this
      */
-    /**
-     * @param string|null $label
-     * @return $this
-     */
     public function setLabel(?string $label)
     {
         $this->label = $label;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $help = null;
 
     public function getHelp(): ?string
@@ -67,21 +57,15 @@ class SettingIntl implements TranslationInterface
      * @param string|null $help
      * @return $this
      */
-    /**
-     * @param string|null $help
-     * @return $this
-     */
     public function setHelp(?string $help)
     {
         $this->help = $help;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="array")
-     * @Uploader(storage="local.storage", max_size="2MB", missable=true)
-     * @Associate(metadata="class")
-     */
+    #[ORM\Column(type:"array")]
+    #[Uploader(storage:"local.storage", max_size:"2MB", missable:true)]
+    #[Associate(metadata:"class")]
     protected $value = null;
 
     /**
@@ -106,19 +90,13 @@ class SettingIntl implements TranslationInterface
      * @param $value
      * @return $this
      */
-    /**
-     * @param $value
-     * @return $this
-     */
     public function setValue($value)
     {
         $this->value = $value;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $class = null;
 
     public function getClass(): ?string
@@ -126,10 +104,6 @@ class SettingIntl implements TranslationInterface
         return $this->class;
     }
 
-    /**
-     * @param string|null $class
-     * @return $this
-     */
     /**
      * @param string|null $class
      * @return $this

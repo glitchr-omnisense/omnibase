@@ -9,14 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractRuleRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=AbstractRuleRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- *
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- * @DiscriminatorEntry(value="abstract_rule")
- */
+#[ORM\Entity(repositoryClass:AbstractRuleRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[ORM\DiscriminatorColumn( name : "context", type : "string" )]
+#[DiscriminatorEntry(value:"abstract_rule")]
 abstract class AbstractRule extends AbstractAttribute implements RuleInterface
 {
     public static function __iconizeStatic(): ?array
@@ -29,10 +26,8 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
         return $this->adapter?->compliesWith($this->getValue(), $subject) ?? true;
     }
 
-    /**
-     * @ORM\Column(type="array")
-     * @Associate(metadata="class")
-     */
+    #[ORM\Column(type:"array")]
+    #[Associate(metadata:"class")]
     protected $value;
 
     /**
@@ -47,19 +42,13 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
      * @param $value
      * @return $this
      */
-    /**
-     * @param $value
-     * @return $this
-     */
     public function setValue($value)
     {
         $this->value = $value;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $class;
 
     public function getClass(): ?string
@@ -67,10 +56,6 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
         return $this->class;
     }
 
-    /**
-     * @param string|null $class
-     * @return $this
-     */
     /**
      * @param string|null $class
      * @return $this

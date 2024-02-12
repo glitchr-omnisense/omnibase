@@ -2,9 +2,13 @@
 
 namespace Base\Validator;
 
+use Doctrine\Common\Annotations\Annotation;
+
 /**
  * @Annotation
  */
+
+#[\Attribute]
 class Constraint extends \Symfony\Component\Validator\Constraint
 {
     public $message = "";

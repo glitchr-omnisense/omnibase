@@ -15,12 +15,9 @@ use Base\Repository\Layout\Widget\Set\MenuRepository;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=MenuRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
-
+#[ORM\Entity(repositoryClass:MenuRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry]
 class Menu extends Widget implements IconizeInterface, SetInterface
 {
     public function __iconize(): ?array
@@ -38,10 +35,8 @@ class Menu extends Widget implements IconizeInterface, SetInterface
         $this->items = new ArrayCollection();
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Widget::class, cascade={"persist"})
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity:Widget::class, cascade:["persist"])]
+    #[OrderColumn]
     protected $items;
     public function getItems(): Collection
     {

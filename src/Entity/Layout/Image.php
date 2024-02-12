@@ -19,18 +19,15 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\Layout\ImageRepository;
+use Base\Repository\Layout\ImageRepository;
 use Base\Enum\Quadrant\Quadrant8;
 use Base\Service\Model\SaltInterface;
 
-/**
- * @ORM\Entity(repositoryClass=ImageRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "type", type = "string" )
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass:ImageRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[ORM\DiscriminatorColumn( name: "type", type: "string" )]
+#[DiscriminatorEntry]
 class Image implements IconizeInterface, ImageInterface, SaltInterface
 {
     use BaseTrait;
@@ -108,11 +105,9 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         $this->setSource($src);
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
     protected $id;
 
     public function getId(): ?int
@@ -120,10 +115,8 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(type="text")
-     * @Uploader(storage="local.storage", max_size="32MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
-     */
+    #[ORM\Column(type:"text")]
+    #[Uploader(storage:"local.storage", max_size:"32MB", mime_types:["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"])]
     protected $source;
 
     /**
@@ -144,10 +137,6 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return Uploader::get($this, "source");
     }
 
-    /**
-     * @param $source
-     * @return $this
-     */
     /**
      * @param $source
      * @return $this
@@ -214,18 +203,12 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
      * @param $source
      * @return $this
      */
-    /**
-     * @param $source
-     * @return $this
-     */
     public function set($source): self
     {
         return $this->setSource($source);
     }
 
-    /**
-     * @ORM\Column(type="quadrant8")
-     */
+    #[ORM\Column(type: "quadrant8")]
     protected $quadrant = Quadrant::O;
 
     public function getQuadrant(): string
@@ -244,9 +227,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity:ImageCrop::class, mappedBy:"image", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $crops;
 
     public function getCrops(): Collection

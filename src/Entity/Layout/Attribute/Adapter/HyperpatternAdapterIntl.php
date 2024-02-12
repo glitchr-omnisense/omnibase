@@ -5,14 +5,10 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapterIntl;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class HyperpatternAdapterIntl extends AbstractAdapterIntl
 {
-    /**
-     * @ORM\Column(type="array")
-     */
+    #[ORM\Column(type: "array")]
     protected $placeholder;
 
     public function getPlaceholder(): ?array

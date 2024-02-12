@@ -6,9 +6,6 @@ use Base\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
-/**
- *
- */
 class PasswordValidator extends ConstraintValidator
 {
     /**

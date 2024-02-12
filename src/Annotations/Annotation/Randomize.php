@@ -14,7 +14,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Randomize
- * package Base\Metadata\Extension\Randomize
+ * package Base\Annotations\Annotation\Randomize
  *
  * @Annotation
  * @NamedArgumentConstructor

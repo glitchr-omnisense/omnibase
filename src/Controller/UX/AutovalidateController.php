@@ -6,16 +6,14 @@ use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Hashids\Hashids;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Route(priority = -1)
- * */
+#[Route(priority: -1)]
 class AutovalidateController extends AbstractController
 {
     use BaseTrait;
@@ -43,9 +41,7 @@ class AutovalidateController extends AbstractController
         return $hex ? unserialize(hex2bin($hex)) : [];
     }
 
-    /**
-     * @Route("/ux/validation/{hashid}", name="ux_validation")
-     */
+    #[Route("/ux/validation/{hashid}", name:"ux_validation")]
     public function Main(Request $request, string $hashid): Response
     {
         $dict = $this->decode($hashid);

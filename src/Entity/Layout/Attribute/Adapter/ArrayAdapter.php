@@ -10,11 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\ArrayAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=ArrayAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "array" )
- */
+#[ORM\Entity(repositoryClass:ArrayAdapterRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry(value: "array")]
 class ArrayAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -28,9 +26,7 @@ class ArrayAdapter extends AbstractAdapter
         $this->setLength($length);
     }
 
-    /**
-     * @ORM\Column(type="integer", nullable = true)
-     */
+    #[ORM\Column(type: "integer", nullable: true)]
     protected $length;
 
     public function getLength(): ?int
@@ -38,10 +34,6 @@ class ArrayAdapter extends AbstractAdapter
         return $this->length;
     }
 
-    /**
-     * @param int|null $length
-     * @return $this
-     */
     /**
      * @param int|null $length
      * @return $this

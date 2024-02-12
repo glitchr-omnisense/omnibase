@@ -15,10 +15,8 @@ use Exception;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=SemanticRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- */
+#[ORM\Entity(repositoryClass: SemanticRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
 class Semantic implements TranslatableInterface, IconizeInterface
 {
     use BaseTrait;
@@ -46,11 +44,9 @@ class Semantic implements TranslatableInterface, IconizeInterface
         $this->setLabel($label);
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -58,9 +54,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $routeName;
 
     public function getRouteName(): ?string
@@ -74,9 +68,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="array", nullable=true)
-     */
+    #[ORM\Column(type:"array", nullable:true)]
     protected $routeParameters;
 
     public function getRouteParameters(): ?array

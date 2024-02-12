@@ -8,17 +8,12 @@ use Base\Database\Annotation\OrderColumn;
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 
-/**
- * @ORM\Entity()
- */
-
+#[ORM\Entity]
 class TagIntl implements TranslationInterface
 {
     use TranslationTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $label;
     public function getLabel(): ?string
     {
@@ -31,10 +26,8 @@ class TagIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="json")
-     * @OrderColumn
-     */
+    #[ORM\Column(type:"json")]
+    #[OrderColumn]
     protected $keywords = [];
 
     public function getKeywords(): array
@@ -52,9 +45,7 @@ class TagIntl implements TranslationInterface
         return $this;
     }
     
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $description;
     public function getDescription(): ?string
     {

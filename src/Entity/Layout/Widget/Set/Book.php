@@ -15,11 +15,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\Set\BookRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=BookRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass:BookRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry]
 class Book extends Widget implements IconizeInterface, SetInterface
 {
     public function __iconize(): ?array
@@ -37,10 +35,8 @@ class Book extends Widget implements IconizeInterface, SetInterface
         parent::__construct($title);
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Page::class, orphanRemoval=true, cascade={"persist"})
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity:Page::class, orphanRemoval:true, cascade:["persist"])]
+    #[OrderColumn]
     protected $pages;
     public function getPages(): Collection
     {

@@ -17,7 +17,7 @@ use Base\Service\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,9 +28,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-/**
- * @Route(priority = -1, name="ux_editorjs_")
- * */
+#[ Route(priority: -1, name: "ux_editorjs_") ]
 class EditorController extends AbstractController
 {
     use BaseTrait;
@@ -131,9 +129,7 @@ class EditorController extends AbstractController
         $this->paginator = $paginator;
     }
 
-    /**
-     * @Route("/ux/editorjs/user/{data}/{page}", name="endpointByUser")
-     */
+    #[Route("/ux/editorjs/user/{data}/{page}", name:"endpointByUser")]
     public function EndpointByUser(Request $request, $data = null, array $fields = [], $page = 1): Response
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
@@ -192,9 +188,7 @@ class EditorController extends AbstractController
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
-    /**
-     * @Route("/ux/editorjs/keyword/{data}/{page}", name="endpointByKeyword")
-     */
+    #[Route("/ux/editorjs/keyword/{data}/{page}", name:"endpointByKeyword")]
     public function EndpointByKeyword(Request $request, $data = null, array $fields = ["slug"], $page = 1): Response
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
@@ -252,9 +246,7 @@ class EditorController extends AbstractController
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
-    /**
-     * @Route("/ux/editorjs/thread/{data}/{page}", name="endpointByThread")
-     */
+    #[Route("/ux/editorjs/thread/{data}/{page}", name:"endpointByThread")]
     public function EndpointByThread(Request $request, $data = null, array $fields = [], $page = 1): Response
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
@@ -312,9 +304,7 @@ class EditorController extends AbstractController
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
-    /**
-     * @Route("/ux/editorjs/{data}", name="uploadByFile")
-     */
+    #[Route("/ux/editorjs/{data}", name:"uploadByFile")]
     public function UploadByFile(Request $request, $data = null): Response
     {
         $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
@@ -380,9 +370,7 @@ class EditorController extends AbstractController
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
-    /**
-     * @Route("/ux/editorjs/{data}/fetch", name="uploadByUrl")
-     */
+    #[Route("/ux/editorjs/{data}/fetch", name:"uploadByUrl")]
     public function UploadByUrl(Request $request, $data = null): Response
     {
         $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);

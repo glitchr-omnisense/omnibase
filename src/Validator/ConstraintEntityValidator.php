@@ -14,9 +14,6 @@ use function get_class;
 use function is_array;
 use function is_string;
 
-/**
- * @Annotation
- */
 abstract class ConstraintEntityValidator extends ConstraintValidator
 {
     /**

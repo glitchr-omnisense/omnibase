@@ -10,9 +10,12 @@ use Base\Form\Type\ThreadSearchType;
 use Base\Repository\ThreadIntlRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ *
+ */
 class SearchController extends AbstractController
 {
     protected FormProxyInterface $formProxy;
@@ -26,9 +29,7 @@ class SearchController extends AbstractController
         $this->threadIntlRepository = $entityManager->getRepository(ThreadIntl::class);
     }
 
-    /**
-     * @Route({"en": "/search", "fr": "/rechercher"}, name="thread_search")
-     */
+    #[Route(["en" => "/search", "fr" => "/rechercher"], name: "thread_search")]
     public function Main(Request $request)
     {
         $formProcessor = $this->formProxy->createProcessor("thread:search", ThreadSearchType::class, []);

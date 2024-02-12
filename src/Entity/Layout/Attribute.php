@@ -12,11 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\AttributeRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=AttributeRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass: AttributeRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry]
 class Attribute extends AbstractAttribute implements TranslatableInterface
 {
     use TranslatableTrait;

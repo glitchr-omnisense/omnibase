@@ -16,11 +16,9 @@ use Base\Repository\Layout\Widget\Set\AttachmentBoxRepository;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=AttachmentBoxRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass:AttachmentBoxRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry]
 class AttachmentBox extends Widget implements IconizeInterface
 {
     public function __iconize(): ?array
@@ -38,10 +36,8 @@ class AttachmentBox extends Widget implements IconizeInterface
         parent::__construct($title);
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Attachment::class, orphanRemoval=true, cascade={"persist"})
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity:Attachment::class, orphanRemoval:true, cascade:["persist"])]
+    #[OrderColumn]
     protected $attachments;
     public function getAttachments(): Collection
     {

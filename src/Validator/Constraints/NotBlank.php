@@ -6,13 +6,20 @@ use Base\Validator\Constraint;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
 use function is_callable;
 
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+
 /**
  * Constraint for the Unique Entity validator.
  *
  * @Annotation
- * @Target({"CLASS", "PROPERTY", "METHOD", "ANNOTATION"})
+ * @NamedArgumentConstructor
+ * @Target({"CLASS", "PROPERTY", "METHOD"})
  *
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD)]
 class NotBlank extends Constraint
 {
     public $message = '@validators.not_blank';

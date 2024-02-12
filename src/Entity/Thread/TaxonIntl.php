@@ -8,16 +8,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class TaxonIntl implements TranslationInterface
 {
     use TranslationTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $label;
 
     public function getLabel(): ?string
@@ -32,9 +28,7 @@ class TaxonIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $description;
 
     public function getDescription(): ?string
@@ -49,10 +43,8 @@ class TaxonIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="array")
-     * @OrderColumn
-     */
+    #[ORM\Column(type:"array")]
+    #[OrderColumn]
     protected $keywords = [];
 
     public function getKeywords(): array
@@ -60,10 +52,6 @@ class TaxonIntl implements TranslationInterface
         return $this->keywords ?? [];
     }
 
-    /**
-     * @param array $keywords
-     * @return $this
-     */
     /**
      * @param array $keywords
      * @return $this

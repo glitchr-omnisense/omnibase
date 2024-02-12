@@ -3,14 +3,20 @@
 namespace Base\Validator\Constraints;
 
 use Base\Validator\ConstraintEntity;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Constraint for the StringCase Entity validator.
  *
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "ANNOTATION"})
  *
  */
+
+#[\Attribute(\Attribute::TARGET_CLASS)]
 class UniqueEntity extends ConstraintEntity
 {
     public const NOT_UNIQUE_ERROR = '23bd9dbf-6b9b-41cd-a99e-4844bcf3077f';

@@ -10,11 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\ScalarAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=ScalarAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "scalar" )
- */
+#[ORM\Entity(repositoryClass: ScalarAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "scalar")]
 class ScalarAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -50,9 +48,7 @@ class ScalarAdapter extends AbstractAdapter
         $this->maximum = max($minimum, $maximum);
     }
 
-    /**
-     * @ORM\Column(type="integer", nullable = true)
-     */
+    #[ORM\Column(type: "integer", nullable: true)]
     protected $unit;
 
     public function getUnit(): ?int
@@ -64,30 +60,19 @@ class ScalarAdapter extends AbstractAdapter
      * @param int|null $unit
      * @return $this
      */
-    /**
-     * @param int|null $unit
-     * @return $this
-     */
     public function setUnit(?int $unit)
     {
         $this->unit = $unit;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="integer", nullable = true)
-     */
+    #[ORM\Column(type: "integer", nullable: true)]
     protected $minimum;
-
     public function getMinimum(): ?int
     {
         return $this->minimum;
     }
 
-    /**
-     * @param int|null $minimum
-     * @return $this
-     */
     /**
      * @param int|null $minimum
      * @return $this
@@ -98,9 +83,7 @@ class ScalarAdapter extends AbstractAdapter
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="integer", nullable = true)
-     */
+    #[ORM\Column(type: "integer", nullable: true)]
     protected $maximum;
 
     public function getMaximum(): ?int
@@ -108,10 +91,6 @@ class ScalarAdapter extends AbstractAdapter
         return $this->maximum;
     }
 
-    /**
-     * @param int|null $maximum
-     * @return $this
-     */
     /**
      * @param int|null $maximum
      * @return $this

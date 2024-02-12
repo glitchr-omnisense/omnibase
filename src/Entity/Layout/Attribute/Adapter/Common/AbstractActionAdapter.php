@@ -8,11 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\Cache;
 use InvalidArgumentException;
 
-/**
- * @ORM\Entity(repositoryClass=AbstractActionAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "abstract_action" )
- */
+#[ORM\Entity(repositoryClass:AbstractActionAdapterRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry(value: "abstract_action" )]
 abstract class AbstractActionAdapter extends AbstractAdapter implements ActionAdapterInterface
 {
     public static function __iconizeStatic(): ?array

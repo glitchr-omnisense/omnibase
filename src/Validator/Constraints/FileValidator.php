@@ -3,15 +3,11 @@
 namespace Base\Validator\Constraints;
 
 use Base\Validator\Constraints\File as ConstraintsFile;
-use Base\Validator\Constraints\FileSize;
 use Base\Validator\ConstraintValidator;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
-/**
- *
- */
 class FileValidator extends ConstraintValidator
 {
     /**
@@ -30,7 +26,7 @@ class FileValidator extends ConstraintValidator
         }
 
         if (!$constraint instanceof ConstraintsFile) {
-            throw new UnexpectedTypeException($constraint, FileSize::class);
+            throw new UnexpectedTypeException($constraint, ConstraintsFile::class);
         }
 
         $mimeTypes = $constraint->getAllowedMimeTypes();

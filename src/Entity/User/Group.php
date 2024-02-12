@@ -14,10 +14,8 @@ use Base\Database\Annotation\Cache;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\GroupRepository;
 
-/**
- * @ORM\Entity(repositoryClass=GroupRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- */
+#[ORM\Entity(repositoryClass:GroupRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 class Group implements IconizeInterface
 {
     public function __iconize(): ?array
@@ -37,20 +35,16 @@ class Group implements IconizeInterface
         $this->penalties = new ArrayCollection();
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type:"json")]
     protected $roles = [];
 
     public function getRoles(): array
@@ -65,9 +59,7 @@ class Group implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $name;
     public function getName(): ?string
     {
@@ -82,9 +74,7 @@ class Group implements IconizeInterface
     }
 
     
-    /**
-     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="groups")
-     */
+    #[ORM\ManyToMany(targetEntity:User::class, mappedBy:"groups")]
     protected $members;
     public function getMembers(): Collection
     {
@@ -110,9 +100,7 @@ class Group implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type:"datetime")]
     protected $createdAt;
     public function getCreatedAt(): ?DateTimeInterface
     {
@@ -126,9 +114,7 @@ class Group implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="gid")
-     */
+    #[ORM\ManyToMany(targetEntity:Permission::class, inversedBy:"gid")]
     protected $permissions;
 
     public function getPermissions(): Collection
@@ -152,9 +138,7 @@ class Group implements IconizeInterface
         return $this;
     }
     
-    /**
-     * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="gid")
-     */
+    #[ORM\ManyToMany(targetEntity:Penalty::class, inversedBy:"gid")]
     protected $penalties;
 
     public function getPenalties(): Collection
@@ -178,9 +162,7 @@ class Group implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=7, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:7, nullable:true)]
     protected $color;
 
     public function getColor(): ?string
@@ -195,9 +177,7 @@ class Group implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $icon;
 
     public function getIcon(): ?string

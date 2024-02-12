@@ -6,9 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 use Base\Entity\Layout\WidgetIntl;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class LinkIntl extends WidgetIntl
 {
     public function getTitle(): ?string

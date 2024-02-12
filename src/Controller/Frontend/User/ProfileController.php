@@ -10,7 +10,7 @@ use Base\Enum\UserRole;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -42,9 +42,7 @@ class ProfileController extends AbstractController
         $this->userRepository = $entityManager->getRepository(User::class);
     }
 
-    /**
-     * @Route("/profile/{id}/edit/", name="user_profileEdit")
-     */
+    #[Route("/profile/{id}/edit/", name: "user_profileEdit")]
     public function Edit(Request $request, int $id = -1)
     {
         if ($id > 0) {
@@ -80,10 +78,8 @@ class ProfileController extends AbstractController
             ->getResponse();
     }
 
-    /**
-     * @Route("/profile/{id}", name="user_profile")
-     * @Iconize("fa-solid fa-fw fa-id-card")
-     */
+    #[Route("/profile/{id}", name: "user_profile")]
+    #[Iconize("fa-solid fa-fw fa-id-card")]
     public function Show(int $id = -1)
     {
         if ($id > 0) {

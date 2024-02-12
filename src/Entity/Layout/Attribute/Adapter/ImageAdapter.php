@@ -10,12 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\ImageAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=ImageAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "image" )
- */
-
+#[ORM\Entity(repositoryClass: ImageAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "image" )]
 class ImageAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array

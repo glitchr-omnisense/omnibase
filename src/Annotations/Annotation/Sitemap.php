@@ -13,7 +13,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Sitemap
- * package Base\Metadata\Extension\Sitemap
+ * package Base\Annotations\Annotation\Sitemap
  *
  * @Annotation
  * @NamedArgumentConstructor

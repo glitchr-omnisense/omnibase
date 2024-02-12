@@ -10,7 +10,7 @@ use Base\Notifier\Notifier;
 use Base\Notifier\NotifierInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -34,9 +34,7 @@ class ContactController extends AbstractController
         $this->notifier = $notifier;
     }
 
-    /**
-     * @Route("/contact", name="base_contact")
-     */
+    #[Route("/contact", name:"base_contact")]
     public function Contact(Request $request, array $options = []): Response
     {
         $user = $this->getUser();

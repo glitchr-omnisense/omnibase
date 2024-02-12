@@ -39,17 +39,14 @@ use DateTime;
 
 use Base\Traits\CacheableTrait;
 
-/**
- * @ORM\Entity(repositoryClass=ThreadRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- * @DiscriminatorEntry( value = "common" )
- *
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @Hierarchify(null, separator = "/" )
- * @Trasheable
- */
+#[ORM\Entity(repositoryClass:ThreadRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[ORM\DiscriminatorColumn( name: "class", type: "string" )]
+#[DiscriminatorEntry( value: "common" )]
+
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[Hierarchify(null, separator: "/" )]
+#[Trasheable]
 
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {
@@ -106,22 +103,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         $this->slug = $slug;
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     *
-     * @ORM\Column(type="string", unique=true)
-     * @GenerateUuid(version=4)
-     */
+    #[ORM\Column(type:"string", unique:true)]
+    #[GenerateUuid(version:4)]
     protected $uuid;
 
     /**
@@ -132,10 +124,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->uuid;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="children")
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     */
+    #[ORM\ManyToOne(targetEntity:Thread::class, inversedBy:"children")]
+    #[ORM\JoinColumn(onDelete:"SET NULL")]
     protected $parent;
 
     public function getParent(): ?self
@@ -154,9 +144,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))
-     */
+    #[ORM\OneToMany(targetEntity:Thread::class, mappedBy:"parent", cascade:["persist"])]
     protected $children;
 
     public function getChildren(): Collection
@@ -186,9 +174,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Thread::class)
-     */
+    #[ORM\ManyToMany(targetEntity:Thread::class)]
     protected $connexes;
 
     public function getConnexes(): Collection
@@ -196,10 +182,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->connexes;
     }
 
-    /**
-     * @param $connex
-     * @return $this
-     */
     /**
      * @param $connex
      * @return $this
@@ -217,20 +199,14 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @param $connex
      * @return $this
      */
-    /**
-     * @param $connex
-     * @return $this
-     */
     public function removeConnex($connex): self
     {
         $this->connexes->removeElement($connex);
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, unique=true)
-     * @Slugify(reference="title")
-     */
+    #[ORM\Column(type:"string", length:255, unique:true)]
+    #[Slugify(reference:"title")]
     protected $slug;
 
     public function getSlug(): ?string
@@ -244,10 +220,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="thread_state")
-     * @AssertBase\NotBlank(groups={"new", "edit"})
-     */
+    #[ORM\Column(type:"thread_state")]
+    #[AssertBase\NotBlank(groups:["new", "edit"])]
     protected $state;
 
     /**
@@ -258,10 +232,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->state;
     }
 
-    /**
-     * @param $state
-     * @return $this
-     */
     /**
      * @param $state
      * @return $this
@@ -333,10 +303,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->state == ThreadState::FUTURE && $this->getPublishTime() < 0;
     }
 
-    /**
-     * @ORM\Column(type="workflow_state")
-     * @AssertBase\NotBlank(groups={"new", "edit"})
-     */
+    #[ORM\Column(type:"workflow_state")]
+    #[AssertBase\NotBlank(groups:["new", "edit"])]
     protected $workflow;
 
     /**
@@ -359,20 +327,14 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @param $workflow
      * @return $this
      */
-    /**
-     * @param $workflow
-     * @return $this
-     */
     public function setWorkflow($workflow): self
     {
         $this->workflow = $workflow;
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="threads")
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy:"threads")]
+    #[OrderColumn]
     protected $owners;
 
     /**
@@ -409,9 +371,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="followedThreads")
-     */
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: "followedThreads")]
     protected $followers;
 
     public function getFollowers(): Collection
@@ -438,10 +398,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Tag::class, inversedBy="threads", cascade={"persist"})
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy:"threads", cascade:["persist"])]
+    #[OrderColumn]
     protected $tags;
 
     /**
@@ -479,10 +437,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Taxon::class, inversedBy="threads", cascade={"persist"})
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity:Taxon::class, inversedBy:"threads", cascade:["persist"])]
+    #[OrderColumn]
     protected $taxa;
 
     public function getTaxa(): Collection
@@ -495,10 +451,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->getTaxa();
     }
 
-    /**
-     * @param $taxon
-     * @return $this
-     */
     /**
      * @param $taxon
      * @return $this
@@ -516,19 +468,13 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * @param $taxon
      * @return $this
      */
-    /**
-     * @param $taxon
-     * @return $this
-     */
     public function removeTaxon($taxon): self
     {
         $this->taxa->removeElement($taxon);
         return $this;
     }
 
-    /**
-     * @ColumnAlias(column="taxa")
-     */
+    #[ColumnAlias(column: "taxa")]
     protected $taxons;
 
     public function getTaxons(): Collection
@@ -536,9 +482,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->taxons;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="thread", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity: Mention::class, mappedBy:"thread", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $mentions;
 
     public function getMentions(): Collection
@@ -568,9 +512,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Like::class, mappedBy="thread", orphanRemoval=true, cascade={"persist"})
-     */
+    #[ORM\OneToMany(targetEntity: Like::class, mappedBy:"thread", orphanRemoval:true, cascade:["persist"])]
     protected $likes;
 
     public function getLikes(): Collection
@@ -622,10 +564,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return false;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on="create")
-     */
+    #[ORM\Column(type:"datetime")]
+    #[Timestamp(on:"create")]
     protected $createdAt;
 
     public function getCreatedAt(): ?DateTimeInterface
@@ -633,10 +573,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this->createdAt;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on={"update", "create"})
-     */
+    #[ORM\Column(type:"datetime")]
+    #[Timestamp(on:["update", "create"])]
     protected $updatedAt;
 
     public function getUpdatedAt(): ?DateTimeInterface
@@ -650,9 +588,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type:"datetime", nullable:true)]
     protected $publishedAt;
 
     public function getPublishedAt(): ?DateTimeInterface

@@ -4,9 +4,6 @@ namespace Base\Entity\Layout\Attribute\Common;
 
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 
-/**
- *
- */
 interface AttributeInterface
 {
     public function get(?string $locale = null): mixed;

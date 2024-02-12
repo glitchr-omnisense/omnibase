@@ -10,15 +10,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractAttributeRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=AbstractAttributeRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- *
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- * @DiscriminatorEntry(value="abstract")
- */
+#[ORM\Entity(repositoryClass:AbstractAttributeRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[ORM\DiscriminatorColumn( name : "context", type : "string" )]
+#[DiscriminatorEntry(value:"abstract")]
+
 abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
 {
     public function __iconize(): ?array
@@ -44,11 +41,9 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
         $this->setAdapter($adapter);
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -56,10 +51,8 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=AbstractAdapter::class, inversedBy="attributes")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity:AbstractAdapter::class, inversedBy:"attributes")]
+    #[ORM\JoinColumn(nullable:false)]
     protected $adapter;
 
     public function getAdapter(): ?AbstractAdapter

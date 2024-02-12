@@ -10,11 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\TextAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=TextAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "text" )
- */
+#[ORM\Entity(repositoryClass :TextAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry( value: "text" )]
 class TextAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -37,9 +35,7 @@ class TextAdapter extends AbstractAdapter
         return $value;
     }
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
+    #[ORM\Column(type: "integer", nullable: true)]
     protected $length;
 
     public function getLength(): ?int
@@ -47,10 +43,6 @@ class TextAdapter extends AbstractAdapter
         return $this->length;
     }
 
-    /**
-     * @param int|null $length
-     * @return $this
-     */
     /**
      * @param int|null $length
      * @return $this

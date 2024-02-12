@@ -16,11 +16,9 @@ use Base\Repository\Layout\Widget\Set\LinksetRepository;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=LinksetRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass: LinksetRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry]
 class Linkset extends Widget implements IconizeInterface, SetInterface
 {
     public function __iconize(): ?array
@@ -38,10 +36,8 @@ class Linkset extends Widget implements IconizeInterface, SetInterface
         parent::__construct($title);
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Hyperlink::class, orphanRemoval=true, cascade={"persist"})
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity:Hyperlink::class, orphanRemoval:true, cascade:["persist"])]
+    #[OrderColumn]
     protected $hyperlinks;
     public function getHyperlinks(): Collection
     {

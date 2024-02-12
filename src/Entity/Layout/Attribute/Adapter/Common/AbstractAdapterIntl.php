@@ -7,16 +7,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class AbstractAdapterIntl implements TranslationInterface
 {
     use TranslationTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: "string", length: 255)]
     protected $label;
 
     public function getLabel(): ?string
@@ -34,9 +30,7 @@ class AbstractAdapterIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: "text", nullable: true)]
     protected $help;
 
     public function getHelp(): ?string

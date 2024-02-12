@@ -7,15 +7,10 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\ColumnAlias;
 use Base\Entity\Layout\WidgetIntl;
 
-/**
- * @ORM\Entity()
- */
-
+#[ORM\Entity]
 class SlotIntl extends WidgetIntl
 {
-    /**
-     * @ColumnAlias(column = "title")
-     */
+    #[ColumnAlias(column: "title")]
     protected $label;
     public function getLabel(): ?string
     {
@@ -27,9 +22,7 @@ class SlotIntl extends WidgetIntl
         return $this;
     }
 
-    /**
-     * @ColumnAlias(column = "excerpt")
-     */
+    #[ColumnAlias(column: "excerpt")]
     protected $help;
     public function getHelp(): ?string
     {

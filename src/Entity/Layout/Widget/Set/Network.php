@@ -16,11 +16,10 @@ use Base\Repository\Layout\Widget\Set\NetworkRepository;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=NetworkRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass:NetworkRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry]
+
 class Network extends Widget implements IconizeInterface, SetInterface
 {
     public function __iconize(): ?array
@@ -38,10 +37,8 @@ class Network extends Widget implements IconizeInterface, SetInterface
         parent::__construct($title);
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Route::class, orphanRemoval=true, cascade={"persist"})
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity:Route::class, orphanRemoval:true, cascade:["persist"])]
+    #[OrderColumn]
     protected $routes;
     public function getRoutes(): Collection
     {

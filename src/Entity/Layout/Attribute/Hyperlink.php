@@ -16,11 +16,9 @@ use Base\Repository\Layout\Attribute\HyperlinkRepository;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=HyperlinkRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass: HyperlinkRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry]
 class Hyperlink extends AbstractAttribute implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
@@ -51,9 +49,7 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
         return "<b>" . ($this->adapter ?? "Hyperlink") . " #" . $this->getId() . "</b> " . $value;
     }
 
-    /**
-     * @ColumnAlias(column = "adapter")
-     */
+    #[ColumnAlias(column: "adapter")]
     protected $hyperpattern;
 
     public function getHyperpattern(): ?HyperpatternAdapter

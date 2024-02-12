@@ -2,9 +2,6 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
-/**
- *
- */
 interface RuleAdapterInterface extends AttributeAdapterInterface
 {
     public function supports(mixed $value): bool;

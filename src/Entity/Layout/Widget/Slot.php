@@ -14,11 +14,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\SlotRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=SlotRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass: SlotRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry]
 class Slot extends Widget implements TranslatableInterface, IconizeInterface
 {
     public function __iconize(): ?array
@@ -48,11 +46,9 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
         $this->setHelp($help);
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, unique=true, nullable=false)
-     * @AssertBase\NotBlank(groups={"new", "edit"})
-     * @Slugify(reference="translations.title", separator=".", keep={"_"})
-     */
+    #[ORM\Column(type:"string", length:255, unique:true, nullable:false)]
+    #[AssertBase\NotBlank(groups:["new", "edit"])]
+    #[Slugify(reference:"translations.title", separator:".", keep:["_"])]
     protected $path;
 
     public function getPath(): string
@@ -66,10 +62,8 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Widget::class, cascade={"persist"})
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     */
+    #[ORM\ManyToOne(targetEntity:Widget::class, cascade:["persist"])]
+    #[ORM\JoinColumn(onDelete:"SET NULL")]
     protected $widget;
 
     public function getWidget(): ?Widget

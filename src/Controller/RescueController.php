@@ -10,7 +10,7 @@ use Base\Form\Type\SecurityLoginType;
 use Base\Service\ReferrerInterface;
 use Base\Service\MediaServiceInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 use Base\Service\SettingBagInterface;
@@ -66,9 +66,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
         $this->formProxy = $formProxy;
     }
 
-    /**
-     * @Route({"fr": "/rescue-request", "en": "/rescue-request"}, name="backoffice_rescue", priority=-1)
-     */
+    #[Route(["fr" => "/rescue-request", "en" => "/rescue-request"], name: "backoffice_rescue", priority: -1)]
     public function index(): Response
     {
         return $this->redirectToRoute("security_rescue");
@@ -92,10 +90,10 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
 
     /**
      * Link to this controller to start the "connect" process
-     *
-     * @Route("/rescue", name="security_rescue")
-     * @Iconize({"fa-solid fa-lock", "fa-solid fa-unlock"})
      */
+
+    #[Route("/rescue", name: "security_rescue")]
+    #[Iconize(["fa-solid fa-lock", "fa-solid fa-unlock"])]
     public function LoginRescue(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // Last username entered by the user

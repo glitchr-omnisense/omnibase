@@ -13,7 +13,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Hierarchify
- * package Base\Metadata\Extension\Hierarchify.
+ * package Base\Annotations\Annotation\Hierarchify.
  *
  * @Annotation
  * @NamedArgumentConstructor

@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 use Base\Entity\User\Token;
@@ -118,10 +118,8 @@ class SecurityController extends AbstractController
         $this->tokenRepository = $tokenRepository;
     }
 
-    /**
-     * @Route("/login", name="security_login")
-     * @Iconize("fa-solid fa-fw fa-arrow-right-to-bracket")
-     */
+    #[Route("/login", name: "security_login")]
+    #[Iconize("fa-solid fa-fw fa-arrow-right-to-bracket")]
     public function Login(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // In case of maintenance, still allow some users to login
@@ -164,10 +162,8 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/logout", name="security_logout")
-     * @Iconize("fa-solid fa-fw fa-right-from-bracket")
-     */
+    #[Route("/logout", name: "security_logout")]
+    #[Iconize("fa-solid fa-fw fa-right-from-bracket")]
     public function Logout(Request $request, ReferrerInterface $referrer)
     {
         // If user is found.. go to the logout request page
@@ -203,18 +199,14 @@ class SecurityController extends AbstractController
         return $this->redirect($returnUrl);
     }
 
-    /**
-     * @Route("/logout-request", name="security_logoutRequest")
-     */
+    #[Route("/logout-request", name: "security_logoutRequest")]
     public function LogoutRequest()
     {
         throw new Exception("This page should not be displayed.. Firewall should take over during logout process. Please check your configuration..");
     }
 
-    /**
-     * @Route("/login/token/{token}", name="security_loginWithToken")
-     * @Iconize("fa-solid fa-fw fa-arrow-right-to-bracket")
-     */
+    #[Route("/login/token/{token}", name: "security_loginWithToken")]
+    #[Iconize("fa-solid fa-fw fa-arrow-right-to-bracket")]
     public function LoginTokenRequest(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ?string $token = null): Response
     {
         if(!$this->parameterBag->get("base.user.login_with_token")) {
@@ -268,9 +260,7 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/register", name="security_register")
-     */
+    #[Route("/register", name: "security_register")]
     public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response
     {
         // If already connected..
@@ -324,10 +314,8 @@ class SecurityController extends AbstractController
         return $formProcessor->getResponse();
     }
 
-    /**
-     * @Route("/verify-email", name="security_verifyEmail")
-     * @IsGranted("ROLE_USER")
-     */
+    #[Route("/verify-email", name: "security_verifyEmail")]
+    #[IsGranted("ROLE_USER")]
     public function VerifyEmailRequest()
     {
         // Check if accound is already verified..
@@ -360,9 +348,7 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('user_profile');
     }
 
-    /**
-     * @Route("/verify-email/{token}", name="security_verifyEmailWithToken")
-     */
+    #[Route("/verify-email/{token}", name: "security_verifyEmailWithToken")]
     public function VerifyEmailResponse(Request $request, UserAuthenticatorInterface $userAuthenticator, LoginFormAuthenticator $authenticator, string $token): Response
     {
         $token = $this->tokenRepository->findOneByValueAndName($token, "verify-email");
@@ -409,9 +395,7 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('user_profile');
     }
 
-    /**
-     * @Route("/admin-approval", name="security_adminApproval")
-     */
+    #[Route("/admin-approval", name: "security_adminApproval")]
     public function AdminApprovalRequest(Request $request)
     {
         $user = $this->getUser();
@@ -437,9 +421,7 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('user_profile');
     }
 
-    /**
-     * @Route("/account-goodbye", name="security_accountGoodbye")
-     */
+    #[Route("/account-goodbye", name: "security_accountGoodbye")]
     public function DisableAccountRequest(Request $request)
     {
         $user = $this->getUser();
@@ -458,9 +440,7 @@ class SecurityController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/welcome-back/{token}", name="security_accountWelcomeBackWithToken")
-     */
+    #[Route("/welcome-back/{token}", name: "security_accountWelcomeBackWithToken")]
     public function EnableAccountRequest(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
         $welcomeBackToken = $this->tokenRepository->findOneByValueAndName($token, "welcome-back");
@@ -493,9 +473,9 @@ class SecurityController extends AbstractController
 
     /**
      * Display & process form to request a password reset.
-     *
-     * @Route("/reset-password", name="security_resetPassword")
      */
+    
+    #[Route("/reset-password", name: "security_resetPassword")]
     public function ResetPasswordRequest(Request $request): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent()) {
@@ -535,9 +515,9 @@ class SecurityController extends AbstractController
 
     /**
      * Validates and process the reset URL that the user clicked in their email.
-     *
-     * @Route("/reset-password/{token}", name="security_resetPasswordWithToken")
      */
+    
+    #[Route("/reset-password/{token}", name: "security_resetPasswordWithToken")]
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent()) {
@@ -586,9 +566,9 @@ class SecurityController extends AbstractController
 
     /**
      * Link to this controller to start the maintenance
-     *
-     * @Route("/m", name="security_maintenance")
      */
+    
+    #[Route("/m", name: "security_maintenance")]
     public function Maintenance(MaintenanceProviderInterface $maintenanceProvider): Response
     {
         return $this->render('security/maintenance.html.twig', [
@@ -599,9 +579,7 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route({"fr": "/est/bientot/en/ligne", "en":"/is/coming/soon"}, name="security_launch")
-     */
+    #[Route(["fr" => "/est/bientot/en/ligne", "en" => "/is/coming/soon"], name: "security_launch")]
     public function Launch(LauncherInterface $launcher): Response
     {
         return $this->render('security/launchdate.html.twig', [
@@ -610,18 +588,14 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route({"fr": "/est/bientot/disponible", "en": "/is/soon/available"}, name="security_pending")
-     */
+    #[Route(["fr" => "/est/bientot/disponible", "en" => "/is/soon/available"], name: "security_pending")]
     public function Pending(): Response
     {
         return $this->render('security/pending.html.twig');
     }
 
-    /**
-     * @Route({"fr": "/en/attente/de/validation", "en": "/waiting/for/approval"}, name="security_pendingForApproval")
-     * @IsGranted("ROLE_USER")
-     */
+    #[Route(["fr" => "/en/attente/de/validation", "en" => "/waiting/for/approval"], name: "security_pendingForApproval")]
+    #[IsGranted("ROLE_USER")]
     public function PendingForApproval(): Response
     {
         if ($this->getUser()->isApproved()) {

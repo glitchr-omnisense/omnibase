@@ -2,9 +2,6 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
-/**
- *
- */
 interface AttributeAdapterInterface
 {
     public static function getType(): string;

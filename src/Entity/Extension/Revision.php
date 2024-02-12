@@ -11,11 +11,9 @@ use Base\Repository\Extension\RevisionRepository;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=RevisionRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry(value="revision")
- */
+#[ORM\Entity(repositoryClass:RevisionRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry(value:"revision")]
 class Revision extends AbstractExtension
 {
     public static function __iconizeStatic(): ?array
@@ -23,10 +21,8 @@ class Revision extends AbstractExtension
         return ["fa-solid fa-sort-numeric-down"];
     }
 
-    /**
-     * @ORM\Column(type="integer")
-     * @Hashify(random=true)
-     */
+    #[ORM\Column(type: "integer")]
+    #[Hashify(random: true)]
     protected $hash;
 
     /**

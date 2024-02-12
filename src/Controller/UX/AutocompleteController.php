@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exchanger\Exception\ChainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,9 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Route(priority = -1)
- * */
+#[Route(priority: -1)]
 class AutocompleteController extends AbstractController
 {
     use BaseTrait;
@@ -78,9 +76,7 @@ class AutocompleteController extends AbstractController
         $this->requestStack = $requestStack;
     }
 
-    /**
-     * @Route("/ux/autocomplete/{data}", name="ux_autocomplete")
-     */
+    #[Route("/ux/autocomplete/{data}", name:"ux_autocomplete")]
     public function Main(Request $request, string $data): Response
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
@@ -197,9 +193,7 @@ class AutocompleteController extends AbstractController
     }
 
 
-    /**
-     * @Route("/ux/autocomplete/currency/{source}/{target}/{data}", name="ux_autocomplete_forex")
-     */
+    #[Route("/ux/autocomplete/currency/{source}/{target}/{data}", name:"ux_autocomplete_forex")]
     public function Forex(Request $request, string $source, string $target, string $data, ?Profiler $profiler = null): Response
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
@@ -231,9 +225,7 @@ class AutocompleteController extends AbstractController
     }
 
 
-    /**
-     * @Route("/ux/autocomplete/{provider}/{pageSize}/{data}", name="ux_autocomplete_icons")
-     */
+    #[Route("/ux/autocomplete/{provider}/{pageSize}/{data}", name:"ux_autocomplete_icons")]
     public function Icons(Request $request, string $provider, int $pageSize, string $data, ?Profiler $profiler = null): Response
     {
         $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");

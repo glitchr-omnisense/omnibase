@@ -42,7 +42,7 @@ use Base\Repository\Layout\Widget\SlotRepository;
 use Base\Repository\Layout\WidgetRepository;
 use Base\Service\Translator;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -93,9 +93,10 @@ use Base\Wikidoc\Entity\AdminDocument;
 use Base\Wikidoc\Entity\DevDocument;
 use Base\Wikidoc\Entity\UserDocument;
 
-/**
- * @Route({"fr": "/bureau", "en": "/backoffice"}, name="backoffice")
- */
+#[Route(path: [
+    'fr' => '/bureau',
+    'en' => '/backoffice'
+], name: 'backoffice')]
 class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
     use WidgetTrait;
@@ -226,24 +227,20 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return $this;
     }
 
-    /**
+    /*
      * Link to this controller to start the "connect" process
-     *
-     * @Route("", name="")
-     * @Iconize({"fa-solid fa-fw fa-toolbox", "fa-solid fa-fw fa-home"})
      */
+
+    #[Route("", name: "")]
+    #[Iconize(["fa-solid fa-fw fa-toolbox", "fa-solid fa-fw fa-home"])]
     public function index(): Response
     {
         return $this->render('backoffice/index.html.twig');
     }
 
-    /**
-     * @Route({"fr": "/manuel/{slug}", "en": "/manual/{slug}"}, name="_manual")
-     *
-     * @Iconize({"fa-solid fa-life-ring"})
-     *
-     * @IsGranted("IS_AUTHENTICATED_FULLY")
-     */
+    #[Route(["fr" => "/manuel/{slug}", "en" => "/manual/{slug}"], name: "_manual")]
+    #[Iconize(["fa-solid fa-life-ring"])]
+    #[IsGranted("IS_AUTHENTICATED_FULLY")]
     public function Manual(?string $slug = null): Response
     {
         if(!BaseBundle::hasBundle(WikidocBundle::class)) {
@@ -273,11 +270,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ]);
     }
 
-    /**
-     * @Route({"fr": "/clef-api", "en": "/api-key"}, name="_apikey")
-     * @Iconize({"fa-solid fa-fw fa-fingerprint", "fa-solid fa-fw fa-key"})
-     * @IsGranted("IS_AUTHENTICATED_FULLY")
-     */
+    #[Route(["fr" => "/clef-api", "en" => "/api-key"], name: "_apikey")]
+    #[Iconize(["fa-solid fa-fw fa-fingerprint", "fa-solid fa-fw fa-key"])]
+    #[IsGranted("IS_AUTHENTICATED_FULLY")]
     public function ApiKey(Request $request, array $fields = []): Response
     {
         $this->settingBag->clearAll(); // Clear cache
@@ -355,10 +350,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     /**
      * Link to this controller to start the "connect" process
-     *
-     * @Route({"fr": "/parametres", "en": "/settings"}, name="_settings")
-     * @Iconize("fa-solid fa-fw fa-tools")
      */
+    
+    #[Route(["fr" => "/parametres", "en" => "/settings"], name: "_settings")]
+    #[Iconize("fa-solid fa-fw fa-tools")]
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_reverse(array_merge(array_reverse([
@@ -433,10 +428,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     /**
      * Link to this controller to start the "connect" process
-     *
-     * @Route({"fr": "/personnaliser", "en": "/widgets"}, name="_widgets")
-     * @Iconize("fa-solid fa-fw fa-th-large")
      */
+
+    #[Route(["fr" => "/personnaliser", "en" => "/widgets"], name: "_widgets")]
+    #[Iconize("fa-solid fa-fw fa-th-large")]
     public function Widgets(Request $request, array $widgetSlots = []): Response
     {
         $data = $this->widgetRepository->findAll();

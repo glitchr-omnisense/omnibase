@@ -9,17 +9,13 @@ use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 use Base\Traits\BaseTrait;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class ShortIntl implements TranslationInterface
 {
     use BaseTrait;
     use TranslationTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $label;
 
     public function getLabel(): ?string
@@ -31,20 +27,14 @@ class ShortIntl implements TranslationInterface
      * @param string|null $label
      * @return $this
      */
-    /**
-     * @param string|null $label
-     * @return $this
-     */
     public function setLabel(?string $label)
     {
         $this->label = $label;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text")
-     * @Assert\Url
-     */
+    #[ORM\Column(type:"text")]
+    #[Assert\Url]
     protected $url = null;
 
     public function getUrl(): ?string
@@ -52,10 +42,6 @@ class ShortIntl implements TranslationInterface
         return $this->url;
     }
 
-    /**
-     * @param string $url
-     * @return $this
-     */
     /**
      * @param string $url
      * @return $this

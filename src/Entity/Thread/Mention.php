@@ -13,14 +13,13 @@ use Base\Database\Annotation\Cache;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
-/**
- * @ORM\Entity(repositoryClass=MentionRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\InheritanceType( "JOINED" )
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- * @DiscriminatorEntry( value = "abstract" )
- */
+#[ORM\Entity(repositoryClass: MentionRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+
+#[ORM\InheritanceType("JOINED")]
+#[ORM\DiscriminatorColumn(name: "class", type: "string")]
+#[DiscriminatorEntry(value: "abstract")]
+
 class Mention implements IconizeInterface
 {
     public function __iconize(): ?array
@@ -41,11 +40,9 @@ class Mention implements IconizeInterface
         $this->thread = $thread;
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
     protected $id;
 
     public function getId(): ?int
@@ -53,10 +50,8 @@ class Mention implements IconizeInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="mentions")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity:User::class, inversedBy:"mentions")]
+    #[ORM\JoinColumn(nullable:false)]
     protected $mentionee;
 
     public function getMentionee(): ?User
@@ -71,9 +66,7 @@ class Mention implements IconizeInterface
         return $this;
     }
     
-    /**
-     * @ORM\ManyToMany(targetEntity=User::class)
-     */
+    #[ORM\ManyToMany(targetEntity: User::class)]
     protected $mentioners;
 
     public function getMentioners(): Collection
@@ -96,10 +89,9 @@ class Mention implements IconizeInterface
 
         return $this;
     }
-    /**
-     * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="mentions")
-     * @ORM\JoinColumn(nullable=false)
-     */
+
+    #[ORM\ManyToOne(targetEntity:Thread::class, inversedBy:"mentions")]
+    #[ORM\JoinColumn(nullable:false)]
     protected $thread;
 
     public function getThread(): ?Thread

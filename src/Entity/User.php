@@ -53,20 +53,17 @@ use App\Repository\UserRepository;
 use App\Enum\UserRole;
 use App\Enum\UserState;
 use Base\Service\Model\AutocompleteInterface;
-use Base\Traits\CookieTrait;
+
 use Base\Traits\UserInfoTrait;
 
-/**
- * @ORM\Entity(repositoryClass=UserRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- *
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- * @DiscriminatorEntry( value = "common" )
- *
- * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
- */
+#[ORM\Entity(repositoryClass:UserRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+
+#[ORM\DiscriminatorColumn( name: "class", type: "string" )]
+#[DiscriminatorEntry( value: "common" )]
+
+#[AssertBase\UniqueEntity(fields:["email"], groups:["new", "edit"])]
 class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
 {
     use BaseTrait;
@@ -183,11 +180,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         }
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -199,19 +194,13 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @param $id
      * @return $this
      */
-    /**
-     * @param $id
-     * @return $this
-     */
     public function setId($id): self
     {
         $this->id = $id;
         return $this;
     }
 
-    /**
-     * @ORM\Column(name="secret", type="string", nullable=true)
-     */
+    #[ORM\Column(name:"secret", type:"string", nullable:true)]
     protected $secret;
 
     public const TOTP_LENGTH = 6;
@@ -247,20 +236,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @param $secret
      * @return $this
      */
-    /**
-     * @param $secret
-     * @return $this
-     */
     public function setSecret($secret): self
     {
         $this->secret = $secret;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, unique=true)
-     * @Assert\Email(groups={"new", "edit"})
-     */
+    #[ORM\Column(type:"string", length:255, unique:true)]
+    #[Assert\Email(groups:["new", "edit"])]
     protected $email;
 
     public function getEmail(): ?string
@@ -275,9 +258,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=15, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:15, nullable:true)]
     protected $phone;
 
     public function getPhone(): ?string
@@ -291,11 +272,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", max_size="5MB", mime_types={"image/*"}, fetch=true)
-     * @AssertBase\File(max_size="5MB", mime_types={"image/*"})
-     */
+    #[ORM\Column(type:"text", nullable:true)]
+    #[Uploader(storage:"local.storage", max_size:"5MB", mime_types:["image/*"], fetch:true)]
+    #[AssertBase\File(max_size:"5MB", mime_types:["image/*"])]
     protected $avatar;
 
     /**
@@ -320,20 +299,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @param $avatar
      * @return $this
      */
-    /**
-     * @param $avatar
-     * @return $this
-     */
     public function setAvatar($avatar)
     {
         $this->avatar = $avatar;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=16, nullable=true)
-     * @Assert\Locale(canonicalize = true)
-     */
+    #[ORM\Column(type:"string", length:16, nullable:true)]
+    #[Assert\Locale(canonicalize: true)]
     protected $locale;
 
     public function getLocale(): ?string
@@ -357,9 +330,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @var string Plain password should be empty unless you want to change it
-     * @Assert\NotCompromisedPassword
-     * @AssertBase\Password(min_strength=4, min_length=8)
      */
+    #[Assert\NotCompromisedPassword]
+    #[AssertBase\Password(min_strength:4, min_length:8)]
     protected $plainPassword;
 
     public function getPlainPassword(): ?string
@@ -389,10 +362,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @var string The hashed password
-     * @ORM\Column(type="string", nullable=true)
-     * @Assert\NotBlank(groups={"new", "edit"}, allowNull=true)
-     * @Hashify(reference="plainPassword", algorithm="auto")
      */
+    #[ORM\Column(type:"string", nullable:true)]
+    #[Assert\NotBlank(groups:["new", "edit"], allowNull:true)]
+    #[Hashify(reference:"plainPassword", algorithm:"auto")]
     protected $password;
 
     public function getPassword(): ?string
@@ -407,11 +380,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="user_role")
-     * @Assert\NotBlank(groups={"new", "edit"})
-     * @OrderColumn
-     */
+    #[ORM\Column(type: "user_role")]
+    #[Assert\NotBlank(groups: ["new", "edit"])]
+    #[OrderColumn]
     protected $roles = [];
 
     public function isSocial(): bool
@@ -443,10 +414,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user")
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     */
+    #[ORM\OneToMany(targetEntity:Log::class, mappedBy:"user")]
+    #[ORM\JoinColumn(onDelete:"SET NULL")]
     protected $logs;
 
     public function getLogs(): Collection
@@ -476,9 +445,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="members", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\ManyToMany(targetEntity: Group::class, inversedBy:"members", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $groups;
 
     public function getGroups(): Collection
@@ -502,9 +469,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\ManyToMany(targetEntity: Permission::class, inversedBy:"uid", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $permissions;
 
     public function getPermissions(): Collection
@@ -527,9 +492,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\ManyToMany(targetEntity: Penalty::class, inversedBy: "uid", orphanRemoval: true, cascade:["persist", "remove"])]
     protected $penalties;
 
     public function getPenalties(): Collection
@@ -553,9 +516,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Notification::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity:Notification::class, mappedBy:"user", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $notifications;
 
     /**
@@ -605,9 +566,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return false;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Token::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity:Token::class, mappedBy:"user", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $tokens;
 
     public function getExpiredTokens(): Collection
@@ -709,9 +668,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="owners")
-     */
+    #[ORM\ManyToMany(targetEntity: Thread::class, mappedBy:"owners")]
     protected $threads;
 
     public function getThreads(): Collection
@@ -738,9 +695,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers")
-     */
+    #[ORM\ManyToMany(targetEntity: Thread::class, mappedBy: "followers")]
     protected $followedThreads;
 
     public function isFollowing(Thread $followedThread): bool
@@ -770,9 +725,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
 
-    /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="mentionee", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity:Mention::class, mappedBy:"mentionee", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $mentions;
     public function getMentions(): Collection
     {
@@ -801,9 +754,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Like::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity:Like::class, mappedBy:"user", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $likes;
 
     public function getLikes(): Collection
@@ -834,9 +785,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
 
-    /**
-     * @ORM\Column(type="user_state")
-     */
+    #[ORM\Column(type:"user_state")]
     protected $states = [];
 
     public function getStates(): array
@@ -912,10 +861,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return in_array(UserState::VERIFIED, $this->states);
     }
 
-    /**
-     * @param bool $newState
-     * @return $this
-     */
     /**
      * @param bool $newState
      * @return $this
@@ -1031,10 +976,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on="create")
-     */
+    #[ORM\Column(type:"datetime")]
+    #[Timestamp(on:"create")]
     protected $createdAt;
 
     public function getCreatedAt(): ?DateTimeInterface
@@ -1042,10 +985,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->createdAt;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on={"create", "update"})
-     */
+    #[ORM\Column(type:"datetime")]
+    #[Timestamp(on:["create", "update"])]
     protected $updatedAt;
 
     public function getUpdatedAt(): ?DateTimeInterface
@@ -1053,9 +994,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->updatedAt;
     }
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type:"datetime", nullable:true)]
     protected $activeAt;
 
     public function getActiveAt(): ?DateTimeInterface
@@ -1089,9 +1028,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->getActiveAt() && $this->getActiveAt() > new DateTime($this->getOnlineDelay() . ' seconds ago');
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Address::class, mappedBy="user")
-     */
+    #[ORM\OneToMany(targetEntity:Address::class, mappedBy:"user")]
     protected $addresses;
 
     public function getAddresses(): Collection
@@ -1126,9 +1063,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Connection::class, mappedBy="user", orphanRemoval=true)
-     */
+    #[ORM\OneToMany(targetEntity:Connection::class, mappedBy:"user", orphanRemoval:true)]
     protected $connections;
     public function getConnections(): Collection
     {

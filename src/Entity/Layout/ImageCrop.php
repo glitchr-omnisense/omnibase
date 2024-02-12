@@ -12,10 +12,8 @@ use Base\Repository\Layout\ImageCropRepository;
 use Base\Service\Model\SaltInterface;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=ImageCropRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- */
+#[ORM\Entity(repositoryClass:ImageCropRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 class ImageCrop implements LinkableInterface, SaltInterface
 {
     use BaseTrait;
@@ -100,21 +98,16 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return true;
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
-
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Image::class, inversedBy="crops")
-     */
+    #[ORM\ManyToOne(targetEntity:Image::class, inversedBy:"crops")]
     protected $image;
 
     public function getImage(): ?Image
@@ -128,9 +121,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $label;
 
     public function getLabel(): ?string
@@ -145,10 +136,8 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Slugify(reference="label", unique=false, keep={":"}, nullable=true, sync=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
+    #[Slugify(reference:"label", unique:false, keep:[":"], nullable:true, sync:true)]
     protected $slug;
 
     public function getSlug(): ?string
@@ -195,9 +184,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         ];
     }
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type:"float")]
     protected $x0;
 
     public function getX(?int $width = null): ?int
@@ -216,9 +203,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type:"float")]
     protected $y0;
 
     public function getY(?int $height = null): ?int
@@ -237,9 +222,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type:"float")]
     protected $xP;
 
     /**
@@ -262,9 +245,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type:"float")]
     protected $yP;
 
     /**
@@ -287,9 +268,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type:"float")]
     protected $width0;
 
     public function getNaturalWidth(): ?int
@@ -313,9 +292,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type:"float")]
     protected $height0;
 
     public function getNaturalHeight(): ?int
@@ -340,9 +317,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
     }
 
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type:"float")]
     protected $scaleX;
 
     public function getScaleX(): ?float
@@ -356,9 +331,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type:"float")]
     protected $scaleY;
 
     public function getScaleY(): ?float
@@ -372,9 +345,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: "integer")]
     protected $rotate;
 
     public function getRotate(): ?int

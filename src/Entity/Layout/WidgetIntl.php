@@ -7,17 +7,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 
-/**
- * @ORM\Entity()
- */
-
+#[ORM\Entity]
 class WidgetIntl implements TranslationInterface
 {
     use TranslationTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $title;
     public function getTitle(): ?string
     {
@@ -29,9 +24,7 @@ class WidgetIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $headline;
     public function getHeadline(): ?string
     {
@@ -43,9 +36,7 @@ class WidgetIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $excerpt;
     public function getExcerpt(): ?string
     {
@@ -57,9 +48,7 @@ class WidgetIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $content;
     public function getContent(): ?string
     {

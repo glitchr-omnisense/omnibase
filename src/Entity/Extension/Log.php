@@ -15,11 +15,9 @@ use Base\Repository\Extension\LogRepository;
 use Base\Database\Annotation\Cache;
 use Throwable;
 
-/**
- * @ORM\Entity(repositoryClass=LogRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry(value="log")
- */
+#[ORM\Entity(repositoryClass: LogRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "log")]
 class Log extends AbstractExtension
 {
     public static function __iconizeStatic(): ?array
@@ -64,16 +62,9 @@ class Log extends AbstractExtension
         return true;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="logs")
-     */
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "logs")]
     protected $user;
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
+    public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): self
     {
         $this->user = $user;
@@ -85,9 +76,7 @@ class Log extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $event;
 
     /**
@@ -98,9 +87,7 @@ class Log extends AbstractExtension
         return $this->event;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $priority;
 
     /**
@@ -111,9 +98,7 @@ class Log extends AbstractExtension
         return $this->priority;
     }
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type:"text")]
     protected $pretty;
 
     /**
@@ -124,9 +109,7 @@ class Log extends AbstractExtension
         return $this->pretty;
     }
 
-    /**
-     * @ORM\Column(type="string", length=20)
-     */
+    #[ORM\Column(type:"string", length:20)]
     protected $ip;
 
     /**
@@ -137,9 +120,7 @@ class Log extends AbstractExtension
         return $this->ip;
     }
 
-    /**
-     * @ORM\Column(type="string", length=5, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:5, nullable:true)]
     protected $locale;
 
     /**
@@ -150,9 +131,7 @@ class Log extends AbstractExtension
         return $this->locale;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $method;
 
     /**
@@ -163,9 +142,7 @@ class Log extends AbstractExtension
         return $this->method;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $requestUri;
 
     /**
@@ -176,9 +153,7 @@ class Log extends AbstractExtension
         return $this->requestUri;
     }
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: "integer")]
     protected $statusCode;
 
     /**
@@ -189,9 +164,7 @@ class Log extends AbstractExtension
         return $this->statusCode;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $agent;
 
     /**
@@ -202,9 +175,7 @@ class Log extends AbstractExtension
         return $this->agent;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $extra;
 
     /**
@@ -215,9 +186,7 @@ class Log extends AbstractExtension
         return $this->extra;
     }
 
-    /**
-     * @ORM\Column(type="log_level")
-     */
+    #[ORM\Column(type: "log_level")]
     protected $level;
 
     /**

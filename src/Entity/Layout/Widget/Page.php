@@ -15,13 +15,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=PageRepository::class)
- * @DiscriminatorEntry
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
- */
+#[ORM\Entity(repositoryClass:PageRepository::class)]
+#[DiscriminatorEntry]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[AssertBase\UniqueEntity(fields:["slug"], groups:["new", "edit"])]
 class Page extends Widget implements IconizeInterface, LinkableInterface
 {
     public function __iconize(): ?array
@@ -55,11 +52,9 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
         $this->setSlug($slug);
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, unique=true)
-     * @Slugify(reference="translations.title")
-     * @AssertBase\NotBlank(groups={"new", "edit"})
-     */
+    #[ORM\Column(type:"string", length:255, unique:true)]
+    #[Slugify(reference:"translations.title")]
+    #[AssertBase\NotBlank(groups:["new", "edit"])]
     protected $slug;
 
     public function getSlug(): ?string

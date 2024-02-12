@@ -6,15 +6,12 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Repository\Layout\Attribute\Adapter\Common\AbstractScopeAdapterRepository;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Attribute\Adapter\Common\ScopeAdapterRepository;
 use Base\Database\Annotation\Cache;
 use InvalidArgumentException;
 
-/**
- * @ORM\Entity(repositoryClass=AbstractScopeAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "abstract_scope" )
- */
+#[ORM\Entity(repositoryClass: AbstractScopeAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "abstract_scope" )]
 abstract class AbstractScopeAdapter extends AbstractAdapter implements ScopeAdapterInterface
 {
     public static function __iconizeStatic(): ?array

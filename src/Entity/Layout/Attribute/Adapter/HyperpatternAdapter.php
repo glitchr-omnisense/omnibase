@@ -10,11 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\HyperpatternAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=HyperpatternAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "hyperpattern" )
- */
+#[ORM\Entity(repositoryClass: HyperpatternAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "hyperpattern" )]
 class HyperpatternAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -47,9 +45,7 @@ class HyperpatternAdapter extends AbstractAdapter
         $this->setPattern($pattern);
     }
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type: "text")]
     protected $pattern;
 
     public function getPattern(): string
@@ -57,10 +53,6 @@ class HyperpatternAdapter extends AbstractAdapter
         return $this->pattern;
     }
 
-    /**
-     * @param string $pattern
-     * @return $this
-     */
     /**
      * @param string $pattern
      * @return $this

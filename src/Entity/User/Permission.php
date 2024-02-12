@@ -11,9 +11,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\PermissionRepository;
 
-/**
- * @ORM\Entity(repositoryClass=PermissionRepository::class)
- */
+#[ORM\Entity(repositoryClass:PermissionRepository::class)]
 class Permission implements IconizeInterface
 {
     public function __iconize(): ?array
@@ -26,41 +24,27 @@ class Permission implements IconizeInterface
         return ["fa-solid fa-lock"];
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $tag;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="permissions")
-     */
+    #[ORM\ManyToMany(targetEntity:User::class, mappedBy:"permissions")]
     protected $uid;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="permissions")
-     */
+    #[ORM\ManyToMany(targetEntity:Group::class, mappedBy:"permissions")]
     protected $gid;
 
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type:"json")]
     protected $empower = [];
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $icon;
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type:"text")]
     protected $description;
 
     public function __construct()

@@ -5,7 +5,7 @@ namespace Base\Controller\Frontend\Layout;
 use Base\Repository\Layout\Widget\AttachmentRepository;
 use Base\Repository\Layout\Widget\PageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Http\Discovery\Exception\NotFoundException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -27,9 +27,7 @@ class WidgetController extends AbstractController
         $this->attachmentRepository = $attachmentRepository;
     }
 
-    /**
-     * @Route("/page/{slug}", name="widget_page")
-     */
+    #[Route("/page/{slug}", name: "widget_page")]
     public function Page($slug): Response
     {
         $page = $this->pageRepository->findOneBySlug($slug);
@@ -40,9 +38,7 @@ class WidgetController extends AbstractController
         return $this->render("widget/page.html.twig", ["page" => $page]);
     }
 
-    /**
-     * @Route("/attachment/{slug}", name="widget_attachment")
-     */
+    #[Route("/attachment/{slug}", name: "widget_attachment")]
     public function Attachment($slug): BinaryFileResponse
     {
         $attachment = $this->attachmentRepository->findOneBySlug($slug);

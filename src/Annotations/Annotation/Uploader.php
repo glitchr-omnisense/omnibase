@@ -29,7 +29,7 @@ use function is_file;
 
 /**
  * Class Uploader
- * package Base\Metadata\Extension\Uploader
+ * package Base\Annotations\Annotation\Uploader
  *
  * @Annotation
  * @NamedArgumentConstructor

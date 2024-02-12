@@ -12,9 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\PenaltyRepository;
 
-/**
- * @ORM\Entity(repositoryClass=PenaltyRepository::class)
- */
+#[ORM\Entity(repositoryClass: PenaltyRepository::class)]
 class Penalty implements IconizeInterface
 {
     public function __iconize(): ?array
@@ -27,41 +25,27 @@ class Penalty implements IconizeInterface
         return ["fa-solid fa-exclamation-triangle"];
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="penalties")
-     */
+    #[ORM\ManyToMany(targetEntity:User::class, mappedBy:"penalties")]
     protected $uid;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="penalties")
-     */
+    #[ORM\ManyToMany(targetEntity:Group::class, mappedBy:"penalties")]
     protected $gid;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $type;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type:"datetime", nullable:true)]
     protected $duration;
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type:"text")]
     protected $extra;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: "datetime")]
     protected $createdAt;
 
     public function __construct()

@@ -2,9 +2,6 @@
 
 namespace Base\Entity\Layout;
 
-/**
- *
- */
 interface ImageCropInterface
 {
     public function getPivotX();

@@ -10,11 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\PercentAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=PercentAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "percent" )
- */
+#[ORM\Entity(repositoryClass: PercentAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "percent")]
 class PercentAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -44,20 +42,13 @@ class PercentAdapter extends AbstractAdapter
         $this->setScale($scale);
     }
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: "integer")]
     protected $epsilon;
-
     public function getPrecision(): int
     {
         return $this->epsilon;
     }
 
-    /**
-     * @param int $epsilon
-     * @return $this
-     */
     /**
      * @param int $epsilon
      * @return $this
@@ -68,20 +59,13 @@ class PercentAdapter extends AbstractAdapter
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: "integer")]
     protected $scale;
-
     public function getScale(): int
     {
         return $this->scale;
     }
 
-    /**
-     * @param int $scale
-     * @return $this
-     */
     /**
      * @param int $scale
      * @return $this

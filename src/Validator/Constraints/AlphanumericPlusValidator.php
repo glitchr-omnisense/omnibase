@@ -7,9 +7,6 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
-/**
- *
- */
 class AlphanumericPlusValidator extends ConstraintValidator
 {
     /**

@@ -10,11 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\NumberAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=NumberAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "number" )
- */
+#[ORM\Entity(repositoryClass: NumberAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "number" )]
 class NumberAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -47,9 +45,7 @@ class NumberAdapter extends AbstractAdapter
         $this->setMaximum($maximum);
     }
 
-    /**
-     * @ORM\Column(type="integer", nullable = true)
-     */
+    #[ORM\Column(type: "integer", nullable: true)]
     protected $minimum;
 
     public function getMinimum(): ?int
@@ -61,19 +57,13 @@ class NumberAdapter extends AbstractAdapter
      * @param int|null $minimum
      * @return $this
      */
-    /**
-     * @param int|null $minimum
-     * @return $this
-     */
     public function setMinimum(?int $minimum)
     {
         $this->minimum = $minimum;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="integer", nullable = true)
-     */
+    #[ORM\Column(type: "integer", nullable: true)]
     protected $maximum;
 
     public function getMaximum(): ?int
@@ -81,10 +71,6 @@ class NumberAdapter extends AbstractAdapter
         return $this->maximum;
     }
 
-    /**
-     * @param int|null $maximum
-     * @return $this
-     */
     /**
      * @param int|null $maximum
      * @return $this

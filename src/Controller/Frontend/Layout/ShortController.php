@@ -18,7 +18,11 @@ class ShortController extends AbstractController
      * @var ShortRepository
      */
     protected $shortRepository;
-    private RouterInterface $router;
+
+    /**
+     * @var RouterInterface
+     */
+    protected RouterInterface $router;
 
     public function __construct(RouterInterface $router, ShortRepository $shortRepository)
     {
@@ -26,10 +30,8 @@ class ShortController extends AbstractController
         $this->shortRepository = $shortRepository;
     }
 
-    /**
-     * @Route("/{slug}", name="short_redirect", subdomain="s", priority=1)
-     * @Route("/{slug}/{_locale}", name="short_redirectByLocale", subdomain="s", priority=1)
-     */
+    #[Route("/{slug}", name: "short_redirect", subdomain: "s", priority: 1)]
+    #[Route("/{slug}/{_locale}", name: "short_redirectByLocale", subdomain: "s", priority: 1)]
     public function Main(string $slug): Response
     {
         /**

@@ -16,10 +16,8 @@ use Base\Repository\Layout\ShortRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=ShortRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- */
+#[ORM\Entity(repositoryClass: ShortRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 class Short implements TranslatableInterface, IconizeInterface, LinkableInterface
 {
     use TranslatableTrait;
@@ -60,11 +58,9 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
         $this->setLabel($label);
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -72,12 +68,9 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Randomize
-     *
-     * @Slugify(separator="-")
-     */
+    #[ORM\Column(type:"string", length:255)]
+    #[Randomize]
+    #[Slugify(separator:"-")]
     protected $slug;
 
     public function getSlug(): ?string
@@ -85,10 +78,6 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
         return $this->slug;
     }
 
-    /**
-     * @param string|null $slug
-     * @return $this
-     */
     /**
      * @param string|null $slug
      * @return $this

@@ -10,17 +10,13 @@ use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadIntlRepository;
 
-/**
- * @ORM\Entity(repositoryClass=ThreadIntlRepository::class)
- */
+#[ORM\Entity(repositoryClass: ThreadIntlRepository::class)]
 class ThreadIntl implements TranslationInterface
 {
     use BaseTrait;
     use TranslationTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $title;
 
     public function getTitle(): ?string
@@ -39,9 +35,7 @@ class ThreadIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $headline;
 
     public function getHeadline(bool $fallback = false): ?string
@@ -60,10 +54,8 @@ class ThreadIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="array")
-     * @OrderColumn
-     */
+    #[ORM\Column(type:"array")]
+    #[OrderColumn]
     protected $keywords = [];
 
     public function getKeywords(): array
@@ -82,9 +74,7 @@ class ThreadIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $excerpt;
 
     public function getExcerpt(): ?string
@@ -103,9 +93,7 @@ class ThreadIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $content;
 
     public function getContent(): ?string

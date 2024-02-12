@@ -9,17 +9,13 @@ use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 use Base\Traits\BaseTrait;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class SemanticIntl implements TranslationInterface
 {
     use BaseTrait;
     use TranslationTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $label;
 
     public function getLabel(): ?string
@@ -37,10 +33,8 @@ class SemanticIntl implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="json")
-     * @OrderColumn
-     */
+    #[ORM\Column(type:"json")]
+    #[OrderColumn]
     protected $keywords = [];
 
     public function getKeywords(): array

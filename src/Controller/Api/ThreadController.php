@@ -7,7 +7,7 @@ use Base\Enum\ThreadState;
 use Base\Repository\Thread\LikeRepository;
 use Base\Repository\ThreadRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,9 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-/**
- * @Route("/api", name="api_")
- */
+#[Route("/api", name: "api_")]
 class ThreadController extends AbstractController
 {
     /**
@@ -52,9 +50,7 @@ class ThreadController extends AbstractController
         $this->likeRepository = $likeRepository;
     }
 
-    /**
-     * @Route("/thread/{slug}/publish", name="thread_publish")
-     */
+    #[Route("/thread/{slug}/publish", name:"thread_publish")]
     public function Publish(string $slug): Response
     {
         $thread = $this->threadRepository->cacheOneBySlug($slug);
@@ -77,9 +73,7 @@ class ThreadController extends AbstractController
         ]));
     }
 
-    /**
-     * @Route("/thread/{slug}/hide", name="thread_hide")
-     */
+    #[Route("/thread/{slug}/hide", name:"thread_hide")]
     public function Hide(string $slug): Response
     {
         $thread = $this->threadRepository->cacheOneBySlug($slug);
@@ -102,9 +96,7 @@ class ThreadController extends AbstractController
         ]));
     }
 
-    /**
-     * @Route("/thread/{slug}/follow", name="thread_follow")
-     */
+    #[Route("/thread/{slug}/follow", name:"thread_follow")]
     public function Follow(string $slug): Response
     {
         $thread = $this->threadRepository->cacheOneBySlug($slug);
@@ -127,9 +119,7 @@ class ThreadController extends AbstractController
         ]));
     }
 
-    /**
-     * @Route("/thread/{slug}/unfollow", name="thread_unfollow")
-     */
+    #[Route("/thread/{slug}/unfollow", name:"thread_unfollow")]
     public function Unfollow(string $slug): Response
     {
         $thread = $this->threadRepository->cacheOneBySlug($slug);
@@ -153,9 +143,7 @@ class ThreadController extends AbstractController
     }
 
 
-    /**
-     * @Route("/thread/{slug}/like", name="thread_like")
-     */
+    #[Route("/thread/{slug}/like", name:"thread_like")]
     public function Like($slug): Response
     {
         $thread = $this->threadRepository->findOneBySlug($slug);
@@ -184,9 +172,7 @@ class ThreadController extends AbstractController
         ]));
     }
 
-    /**
-     * @Route("/thread/{slug}/unlike", name="thread_unlike")
-     */
+    #[Route("/thread/{slug}/unlike", name:"thread_unlike")]
     public function Unlike($slug): Response
     {
         $thread = $this->threadRepository->findOneBySlug($slug);

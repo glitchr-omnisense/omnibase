@@ -8,13 +8,11 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\CountryAdapterRepository;
 use Base\Database\Annotation\Cache;
+use Base\Field\Type\CountryType;
 
-/**
- * @ORM\Entity(repositoryClass=CountryAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "country" )
- */
-
+#[ORM\Entity(repositoryClass: CountryAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "country" )]
 class CountryAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array

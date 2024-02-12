@@ -14,7 +14,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Timezone
- * package Base\Metadata\Extension\Timezone
+ * package Base\Annotations\Annotation\Timezone
  *
  * @Annotation
  * @NamedArgumentConstructor

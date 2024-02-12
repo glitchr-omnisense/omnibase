@@ -13,9 +13,7 @@ use Base\Validator\Constraints as AssertBase;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class AttributeIntl implements TranslationInterface
 {
     use TranslationTrait {
@@ -27,12 +25,10 @@ class AttributeIntl implements TranslationInterface
         return $this->_isEmpty([], fn($n, $v) => is_array($v) && array_filter($v) === []);
     }
 
-    /**
-     * @ORM\Column(type="array")
-     * @AssertBase\File(max_size="2MB", groups={"new", "edit"})
-     * @Uploader(storage="local.storage", max_size="2MB", missable=true)
-     * @Associate(metadata="class")
-     */
+    #[ORM\Column(type:"array")]
+    #[AssertBase\File(max_size:"2MB", groups:["new", "edit"])]
+    #[Uploader(storage:"local.storage", max_size:"2MB", missable:true)]
+    #[Associate(metadata:"class")]
     protected $value;
 
     /**
@@ -57,19 +53,13 @@ class AttributeIntl implements TranslationInterface
      * @param $value
      * @return $this
      */
-    /**
-     * @param $value
-     * @return $this
-     */
     public function setValue($value)
     {
         $this->value = $value;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $class;
 
     public function getClass(): ?string
@@ -77,10 +67,6 @@ class AttributeIntl implements TranslationInterface
         return $this->class;
     }
 
-    /**
-     * @param string|null $class
-     * @return $this
-     */
     /**
      * @param string|null $class
      * @return $this

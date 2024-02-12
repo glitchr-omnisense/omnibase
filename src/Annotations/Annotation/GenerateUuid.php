@@ -16,7 +16,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class GenerateUuid
- * package Base\Metadata\Extension\GenerateUuid
+ * package Base\Annotations\Annotation\GenerateUuid
  *
  * @Annotation
  * @NamedArgumentConstructor

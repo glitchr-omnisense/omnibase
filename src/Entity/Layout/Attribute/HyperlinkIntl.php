@@ -6,9 +6,7 @@ use Base\Database\Traits\TranslationTrait;
 use Base\Database\TranslationInterface;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class HyperlinkIntl implements TranslationInterface
 {
     use TranslationTrait;
@@ -32,9 +30,7 @@ class HyperlinkIntl implements TranslationInterface
         return true;
     }
 
-    /**
-     * @ORM\Column(type="array")
-     */
+    #[ORM\Column(type:"array")]
     protected $value;
 
     public function getValue(): array
@@ -42,10 +38,6 @@ class HyperlinkIntl implements TranslationInterface
         return $this->value !== null && !is_array($this->value) ? [$this->value] : $this->value ?? [];
     }
 
-    /**
-     * @param $value
-     * @return $this
-     */
     /**
      * @param $value
      * @return $this

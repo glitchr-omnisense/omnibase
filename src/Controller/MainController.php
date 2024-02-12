@@ -5,7 +5,7 @@ namespace Base\Controller;
 use Base\BaseBundle;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
 
@@ -13,9 +13,7 @@ use  Base\Service\BaseService;
 use  Base\Service\SettingBag;
 use function dirname;
 
-/**
- * @Route(priority = -1)
- * */
+#[Route(priority: -1)]
 class MainController extends AbstractController
 {
     protected BaseService $service;
@@ -29,9 +27,9 @@ class MainController extends AbstractController
 
     /**
      * Controller example
-     *
-     * @Route("/", name="app_welcome")
      */
+    
+    #[Route("/", name: "app_welcome")]
     public function Index(): Response
     {
         $version = Kernel::VERSION;

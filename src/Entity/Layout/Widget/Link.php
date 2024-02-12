@@ -13,11 +13,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\LinkRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=LinkRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass:LinkRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry]
 class Link extends Widget implements IconizeInterface, LinkableInterface
 {
     public function __iconize(): ?array
@@ -53,10 +51,8 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
         }
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Hyperlink::class, cascade={"persist"})
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: Hyperlink::class, cascade:["persist"])]
+    #[ORM\JoinColumn(nullable: false)]
     protected $hyperlink;
 
     public function getHyperlink(): ?Hyperlink
@@ -64,10 +60,6 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
         return $this->hyperlink;
     }
 
-    /**
-     * @param Hyperlink $hyperlink
-     * @return $this
-     */
     /**
      * @param Hyperlink $hyperlink
      * @return $this

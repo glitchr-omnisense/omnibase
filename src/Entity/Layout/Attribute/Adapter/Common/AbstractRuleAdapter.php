@@ -9,11 +9,9 @@ use Base\Repository\Layout\Attribute\Adapter\Common\AbstractRuleAdapterRepositor
 use Base\Database\Annotation\Cache;
 use InvalidArgumentException;
 
-/**
- * @ORM\Entity(repositoryClass=AbstractRuleAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "abstract_rule" )
- */
+#[ORM\Entity(repositoryClass: AbstractRuleAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry(value: "abstract_rule")]
 abstract class AbstractRuleAdapter extends AbstractAdapter implements RuleAdapterInterface
 {
     public static function __iconizeStatic(): ?array

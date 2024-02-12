@@ -9,11 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\OrderingRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=OrderingRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry(value="ordering")
- */
+#[ORM\Entity(repositoryClass: OrderingRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value:"ordering")]
 class Ordering extends AbstractExtension
 {
     public static function __iconizeStatic(): ?array

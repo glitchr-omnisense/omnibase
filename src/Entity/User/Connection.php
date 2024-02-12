@@ -11,10 +11,8 @@ use Base\Database\Annotation\Cache;
 use Base\Service\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=ConnectionRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- */
+#[ORM\Entity(repositoryClass:ConnectionRepository::class)]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 class Connection implements IconizeInterface
 {
     public function __iconize(): ?array
@@ -40,20 +38,16 @@ class Connection implements IconizeInterface
         $this->loginAttempts = 0;
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(type="string", length=23)
-     */
+    #[ORM\Column(type:"string", length:23)]
     private $uniqid;
     public function getUniqid(): ?string
     {
@@ -67,10 +61,8 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="connections")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity:User::class, inversedBy:"connections")]
+    #[ORM\JoinColumn(nullable:false)]
     protected $user;
     public function getUser(): ?User
     {
@@ -84,10 +76,8 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @Blameable(on={"create", "update"}, impersonator=true)
-     */
+    #[ORM\ManyToOne(targetEntity:User::class)]
+    #[Blameable(on:["create", "update"], impersonator:true)]
     protected $impersonator;
     public function getImpersonator(): ?User
     {
@@ -101,9 +91,7 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type:"integer")]
     protected $loginAttempts;
     public function getLoginAttempts(): ?string
     {
@@ -116,13 +104,16 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="connection_state")
-     */
+    #[ORM\Column(type:"connection_state")]
     protected $state;
     public function getState(): ?string
     {
         return $this->state;
+    }
+
+    public function isValid(): bool
+    {
+        return $this->state == ConnectionState::SUCCEEDED;
     }
 
     public function markAsSucceeded(): self
@@ -144,9 +135,7 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type:"json")]
     protected $ipList = [];
     public function getIpList(): ?array
     {
@@ -171,9 +160,7 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type:"text", nullable:true)]
     protected $agent;
     public function getAgent(): ?string
     {
@@ -186,9 +173,7 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=16, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:16, nullable:true)]
     protected $locale;
     public function getLocale(): ?string
     {
@@ -201,9 +186,7 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type:"json")]
     protected $timezones = [];
     public function getTimezones(): ?array
     {
@@ -229,9 +212,7 @@ class Connection implements IconizeInterface
         return $this;
     }
     
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type:"json")]
     protected $hostnames = [];
     public function getHostnames(): ?array
     {
@@ -257,10 +238,8 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on="create")
-     */
+    #[ORM\Column(type:"datetime")]
+    #[Timestamp(on:"create")]
     protected $createdAt;
     public function getCreatedAt(): ?\DateTimeInterface
     {
@@ -274,10 +253,8 @@ class Connection implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on={"create", "update"})
-     */
+    #[ORM\Column(type:"datetime")]
+    #[Timestamp(on:["create", "update"])]
     protected $updatedAt;
     public function getUpdatedAt(): ?\DateTimeInterface
     {

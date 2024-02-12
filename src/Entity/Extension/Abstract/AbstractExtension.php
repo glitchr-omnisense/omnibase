@@ -13,14 +13,12 @@ use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=AbstractExtensionRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- * @DiscriminatorEntry( value = "abstract" )
- */
+#[ORM\Entity(repositoryClass: AbstractExtensionRepository::class)]
+#[ORM\InheritanceType("JOINED")]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+
+#[ORM\DiscriminatorColumn(name: "class", type: "string")]
+#[DiscriminatorEntry(value: "abstract")]
 abstract class AbstractExtension implements AbstractExtensionInterface, IconizeInterface
 {
     use BaseTrait;
@@ -35,26 +33,15 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
         return ["fa-solid fa-external-link"];
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
     protected $id;
+    public function getId() { return $this->id; }
 
-    /**
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @Blameable(on={"create", "update"}, impersonator=true)
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[Blameable(on: ["create", "update"], impersonator: true)]
+    #[ORM\JoinColumn(onDelete: "SET NULL")]
     protected $impersonator;
 
     public function getImpersonator(): ?User
@@ -62,11 +49,9 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
         return $this->impersonator;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     * @Blameable(on={"create", "update"})
-     */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(onDelete: "SET NULL")]
+    #[Blameable(on: ["create", "update"])]
     protected $initiator;
 
     public function getInitiator(): ?User
@@ -74,23 +59,10 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
         return $this->initiator;
     }
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
+    #[ORM\Column(type:"integer", nullable:true)]
     protected $entityId;
+    public function getEntityId() { return $this->entityId; }
 
-    /**
-     * @return mixed
-     */
-    public function getEntityId()
-    {
-        return $this->entityId;
-    }
-
-    /**
-     * @param mixed $entityOrId
-     * @return $this
-     */
     /**
      * @param mixed $entityOrId
      * @return $this
@@ -106,9 +78,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: "string", length: 255)]
     protected $entityClass;
 
     /**
@@ -123,19 +93,13 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @param object|string $entity
      * @return $this
      */
-    /**
-     * @param object|string $entity
-     * @return $this
-     */
     public function setEntityClass(object|string $entity)
     {
         $this->entityClass = is_object($entity) ? get_class($entity) : $entity;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="entity_action")
-     */
+    #[ORM\Column(type: "entity_action")]
     protected $action;
 
     /**
@@ -150,19 +114,13 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @param string $action
      * @return $this
      */
-    /**
-     * @param string $action
-     * @return $this
-     */
     public function setAction(string $action)
     {
         $this->action = $action;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="array", nullable=true)
-     */
+    #[ORM\Column(type:"array", nullable:true)]
     protected $entityData = [];
 
     /**
@@ -182,20 +140,14 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      * @param array $entityData
      * @return $this
      */
-    /**
-     * @param array $entityData
-     * @return $this
-     */
     public function setEntityData(array $entityData)
     {
         $this->entityData = $entityData;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on="create")
-     */
+    #[ORM\Column(type: "datetime")]
+    #[Timestamp(on: "create")]
     protected $createdAt;
 
     public function getCreatedAt(): ?DateTimeInterface

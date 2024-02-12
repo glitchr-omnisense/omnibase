@@ -5,9 +5,13 @@ namespace Base\Validator;
 use function is_array;
 use function is_string;
 
+use Doctrine\Common\Annotations\Annotation;
+
 /**
  * @Annotation
  */
+
+#[\Attribute]
 abstract class ConstraintEntity extends Constraint
 {
     public $fields = [];

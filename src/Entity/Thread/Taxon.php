@@ -21,15 +21,11 @@ use Base\Repository\Thread\TaxonRepository;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 
-/**
- * @ORM\Entity(repositoryClass=TaxonRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- *
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- * @DiscriminatorEntry( value = "abstract" )
- */
+#[ORM\Entity(repositoryClass: TaxonRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations:"ALL")]
+#[ORM\DiscriminatorColumn(name: "class", type: "string")]
+#[DiscriminatorEntry(value: "abstract")]
 class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
 {
     use TranslatableTrait;
@@ -61,11 +57,9 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->children = new ArrayCollection();
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -73,10 +67,8 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(length=255, unique=true)
-     * @Slugify(reference="translations.label")
-     */
+    #[ORM\Column(length:255, unique:true)]
+    #[Slugify(reference:"translations.label")]
     protected $slug;
 
     public function getSlug(): ?string
@@ -90,10 +82,8 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", max_size="2MB", mime_types={"image/*"})
-     */
+    #[ORM\Column(type:"text", nullable:true)]
+    #[Uploader(storage:"local.storage", max_size:"2MB", mime_types:["image/*"])]
     protected $icon;
 
     /**
@@ -118,20 +108,14 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @param $icon
      * @return $this
      */
-    /**
-     * @param $icon
-     * @return $this
-     */
     public function setIcon($icon)
     {
         $this->icon = $icon;
         return $this;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Taxon::class, inversedBy="children")
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     */
+    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy:"children")]
+    #[ORM\JoinColumn(onDelete: "SET NULL")]
     protected $parent;
 
     public function getParent(): ?self
@@ -162,9 +146,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this;
     }
 
-    /**
-     * @ORM\OneToMany(targetEntity=Taxon::class, mappedBy="parent", orphanRemoval=true, cascade={"persist"}))
-     */
+    #[ORM\OneToMany(targetEntity: Taxon::class, mappedBy: "parent", orphanRemoval: true, cascade:["persist"])]
     protected $children;
     public function getChildren(): Collection
     {
@@ -193,9 +175,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="taxa")
-     */
+    #[ORM\ManyToMany(targetEntity:Thread::class, mappedBy:"taxa")]
     protected $threads;
 
     public function getThreads(): Collection
@@ -222,9 +202,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Taxon::class)
-     */
+    #[ORM\ManyToMany(targetEntity:Taxon::class)]
     protected $connexes;
 
     public function getConnexes(): Collection

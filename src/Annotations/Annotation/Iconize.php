@@ -11,7 +11,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Iconize
- * package Base\Metadata\Extension\Iconize
+ * package Base\Annotations\Annotation\Iconize
  *
  * @Annotation
  * @NamedArgumentConstructor

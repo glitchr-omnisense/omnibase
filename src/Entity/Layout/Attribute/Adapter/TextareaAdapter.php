@@ -10,12 +10,9 @@ use Base\Repository\Layout\Attribute\Adapter\TextareaAdapterRepository;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=TextareaAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "textarea" )
- */
-
+#[ORM\Entity(repositoryClass: TextareaAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry(value: "textarea" )]
 class TextareaAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array

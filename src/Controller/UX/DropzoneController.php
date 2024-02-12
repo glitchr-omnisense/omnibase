@@ -5,7 +5,7 @@ namespace Base\Controller\UX;
 use Base\Service\ObfuscatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,9 +16,7 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Route(priority = -1)
- * */
+#[Route(priority: -1)]
 class DropzoneController extends AbstractController
 {
     public const CACHE_DURATION = 24 * 3600;
@@ -70,9 +68,9 @@ class DropzoneController extends AbstractController
 
     /**
      * Controller example
-     *
-     * @Route("/ux/dropzone/{data}", name="ux_dropzone")
      */
+
+    #[Route("/ux/dropzone/{data}", name:"ux_dropzone")]
     public function Main(Request $request, $data = null): Response
     {
         $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
@@ -174,9 +172,9 @@ class DropzoneController extends AbstractController
 
     /**
      * Controller example
-     *
-     * @Route("/ux/dropzone/{data}/{uuid}", name="ux_dropzone_preview")
      */
+    
+    #[Route("/ux/dropzone/{data}/{uuid}", name:"ux_dropzone_preview")]
     public function Preview(string $data, string $uuid): Response
     {
         $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
@@ -216,9 +214,9 @@ class DropzoneController extends AbstractController
 
     /**
      * Controller example
-     *
-     * @Route("/ux/dropzone/{data}/{uuid}/delete", name="ux_dropzone_delete")
      */
+    
+    #[Route("/ux/dropzone/{data}/{uuid}/delete", name:"ux_dropzone_delete")]
     public function Delete(string $data, string $uuid): Response
     {
         $config = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);

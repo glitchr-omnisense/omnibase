@@ -2,7 +2,7 @@
 
 namespace Base\Annotations\Annotation;
 
-use Doctrine\Common\Metadata\Extension\NamedArgumentConstructor;
+use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 

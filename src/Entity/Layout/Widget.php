@@ -25,14 +25,12 @@ use Base\Annotations\Annotation\Timestamp;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 
-/**
- * @ORM\Entity(repositoryClass=WidgetRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "type", type = "string" )
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass:WidgetRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
+
+#[ORM\DiscriminatorColumn(name: "type", type: "string")]
+#[DiscriminatorEntry]
 class Widget implements TranslatableInterface, IconizeInterface, CacheableInterface
 {
     use BaseTrait;
@@ -94,21 +92,15 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
      * @param string|null $template
      * @return $this
      */
-    /**
-     * @param string|null $template
-     * @return $this
-     */
     public function setTemplate(?string $template)
     {
         $this->template = $template;
         return $this;
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -116,11 +108,8 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         return $this->id;
     }
 
-    /**
-     *
-     * @ORM\Column(type="string", unique=true)
-     * @GenerateUuid(version=4)
-     */
+    #[ORM\Column(type:"string", unique:true)]
+    #[GenerateUuid(version:4)]
     protected $uuid;
 
     /**
@@ -131,11 +120,9 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         return $this->uuid;
     }
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", max_size="1024KB", mime_types={"image/*"})
-     * @AssertBase\File(max_size="1024KB", mime_types={"image/*"}, groups={"new", "edit"})
-     */
+    #[ORM\Column(type:"text", nullable:true)]
+    #[Uploader(storage:"local.storage", max_size:"1024KB", mime_types:["image/*"])]
+    #[AssertBase\File(max_size:"1024KB", mime_types:["image/*"], groups:["new", "edit"])]
     protected $thumbnail;
 
     /**
@@ -166,11 +153,9 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         return $this;
     }
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Widget::class)
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     * @OrderColumn
-     */
+    #[ORM\ManyToMany(targetEntity:Widget::class)]
+    #[ORM\JoinColumn(onDelete:"SET NULL")]
+    #[OrderColumn]
     protected $connexes;
 
     public function getConnexes(): Collection
@@ -193,10 +178,8 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     * @Timestamp(on="create")
-     */
+    #[ORM\Column(type:"datetime", nullable:true)]
+    #Timestamp(on:"create")]
     protected $createdAt;
 
     public function getCreatedAt(): ?DateTimeInterface
@@ -204,10 +187,8 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         return $this->createdAt;
     }
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     * @Timestamp(on={"update", "create"})
-     */
+    #[ORM\Column(type:"datetime", nullable:true)]
+    #[Timestamp(on:["update", "create"])]
     protected $updatedAt;
 
     public function getUpdatedAt(): ?DateTimeInterface

@@ -10,13 +10,10 @@ use Base\Form\Model\UserSearchModel;
 use Base\Form\Type\UserSearchType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 
-/**
- *
- */
 class SearchController extends AbstractController
 {
     protected FormProxyInterface $formProxy;
@@ -30,9 +27,7 @@ class SearchController extends AbstractController
         $this->userRepository = $entityManager->getRepository(User::class);
     }
 
-    /**
-     * @Route("/search/user", name="user_search")
-     */
+    #[Route("/search/user", name:"user_search")]
     public function Main(Request $request, ?FormInterface $formSearch = null)
     {
         $formSearch = $formSearch ?? $this->formProxy->get("user:search") ?? $this->createForm(UserSearchType::class, new UserSearchModel());

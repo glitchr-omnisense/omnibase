@@ -10,12 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\DateTimeAdapterRepository;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=DateTimeAdapterRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry( value = "datetime" )
- */
-
+#[ORM\Entity(repositoryClass: DateTimeAdapterRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations:"ALL")]
+#[DiscriminatorEntry(value: "datetime" )]
 class DateTimeAdapter extends AbstractAdapter
 {
     public static function __iconizeStatic(): ?array

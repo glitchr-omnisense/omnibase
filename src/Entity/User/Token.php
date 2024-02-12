@@ -15,9 +15,7 @@ use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\TokenRepository;
 
-/**
- * @ORM\Entity(repositoryClass=TokenRepository::class)
- */
+#[ORM\Entity(repositoryClass:TokenRepository::class)]
 class Token implements IconizeInterface
 {
     use BaseTrait;
@@ -82,10 +80,6 @@ class Token implements IconizeInterface
      * @param string $hash
      * @return $this
      */
-    /**
-     * @param string $hash
-     * @return $this
-     */
     public function decode(string $hash)
     {
         $hex = $this->hashIds->decodeHex($hash);
@@ -126,11 +120,9 @@ class Token implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -138,10 +130,8 @@ class Token implements IconizeInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="tokens")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity:User::class, inversedBy:"tokens")]
+    #[ORM\JoinColumn(nullable:false)]
     protected $user;
 
     public function getUser(): ?User
@@ -161,10 +151,8 @@ class Token implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Slugify(separator="-", unique=false)
-     */
+    #[ORM\Column(type:"string", length:255)]
+    #[Slugify(separator:"-", unique:false)]
     protected $name;
 
     public function getName(): ?string
@@ -178,9 +166,7 @@ class Token implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $value;
 
     public function get(): ?string
@@ -219,10 +205,8 @@ class Token implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on="create")
-     */
+    #[ORM\Column(type:"datetime")]
+    #[Timestamp(on:"create")]
     protected $createdAt;
 
     public function getCreatedAt(): ?DateTimeInterface
@@ -236,9 +220,7 @@ class Token implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type:"datetime", nullable:true)]
     protected $expireAt;
 
     public function getExpireAt(): ?DateTimeInterface
@@ -306,9 +288,7 @@ class Token implements IconizeInterface
     }
 
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type:"datetime", nullable:true)]
     protected $allowAt;
 
     public function getAllowAt(): ?DateTimeInterface
@@ -355,9 +335,7 @@ class Token implements IconizeInterface
         return $this->getAllowAt() != $this->getCreatedAt();
     }
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type:"boolean")]
     protected $isRevoked;
 
     public function revoke(): self
@@ -380,9 +358,7 @@ class Token implements IconizeInterface
         return $this;
     }
     
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type:"boolean")]
     protected $isLogginable;
 
     public function isLogginable(): bool

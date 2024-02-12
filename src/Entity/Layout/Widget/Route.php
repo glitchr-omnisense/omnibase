@@ -12,11 +12,9 @@ use Exception;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=RouteRepository::class)
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- * @DiscriminatorEntry
- */
+#[ORM\Entity(repositoryClass: RouteRepository::class)]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[DiscriminatorEntry]
 class Route extends Widget implements IconizeInterface, LinkableInterface
 {
     public function __iconize(): ?array
@@ -51,9 +49,7 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         $this->routeParameters = $routeParameters;
     }
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type: "text")]
     protected $routeName;
 
     public function getRouteName(): ?string
@@ -67,9 +63,7 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="array", nullable=true)
-     */
+    #[ORM\Column(type: "array", nullable: true)]
     protected $routeParameters;
 
     public function getRouteParameters(): ?array

@@ -5,7 +5,7 @@ namespace Base\Entity\Thread;
 use App\Entity\User;
 use App\Entity\Thread;
 
-use App\Repository\Thread\LikeRepository;
+use Base\Repository\Thread\LikeRepository;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\DiscriminatorEntry;
@@ -13,14 +13,11 @@ use Base\Service\Model\IconizeInterface;
 
 use Base\Database\Annotation\Cache;
 
-/**
- * @ORM\Entity(repositoryClass=LikeRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
- *
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- * @DiscriminatorEntry( value = "abstract" )
- */
+#[ORM\Entity(repositoryClass:LikeRepository::class)]
+#[ORM\InheritanceType( "JOINED" )]
+#[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
+#[ORM\DiscriminatorColumn( name: "class", type: "string" )]
+#[DiscriminatorEntry( value: "abstract" )]
 class Like implements IconizeInterface
 {
     public function __iconize(): ?array
@@ -39,11 +36,9 @@ class Like implements IconizeInterface
         $this->icon = "fa-solid fa-thumbs-up";
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type:"integer")]
     protected $id;
 
     public function getId(): ?int
@@ -51,10 +46,8 @@ class Like implements IconizeInterface
         return $this->id;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="likes")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity:User::class, inversedBy:"likes")]
+    #[ORM\JoinColumn(nullable:false)]
     protected $user;
 
     public function getUser(): ?User
@@ -69,10 +62,8 @@ class Like implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="likes")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity:Thread::class, inversedBy:"likes")]
+    #[ORM\JoinColumn(nullable:false)]
     protected $thread;
 
     public function getThread(): ?Thread
@@ -87,9 +78,7 @@ class Like implements IconizeInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type:"string", length:255)]
     protected $icon;
 
     public function getIcon(): ?string

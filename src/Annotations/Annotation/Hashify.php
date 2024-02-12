@@ -21,7 +21,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Hashify
- * package Base\Metadata\Extension\Hashify
+ * package Base\Annotations\Annotation\Hashify
  *
  * @Annotation
  * @NamedArgumentConstructor
