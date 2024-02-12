@@ -3,13 +3,14 @@
 namespace Base\Cache;
 
 use Base\Cache\Abstract\AbstractLocalCache;
+use Symfony\Contracts\Cache\CacheInterface;
 
 /**
  *
  */
 final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterface
 {
-    public function warmUp(string $cacheDir): array
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         return [];
     }
@@ -21,16 +22,7 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
     {
         return
             PHP_MAJOR_VERSION === 8 &&
-            null !== (new ReflectionClass(CacheInterface::class))->getMethod('get')->getReturnType();
-    }
-
-    public static function getMemoryCache(): CacheInterface
-    {
-        if (!self::$memcache) {
-            self::$memcache = self::useSimpleCacheVersion3() ? new Memory\SimpleCache3() : new Memory\SimpleCache1();
-        }
-
-        return self::$memcache;
+            null !== (new \ReflectionClass(CacheInterface::class))->getMethod('get')->getReturnType();
     }
 
     //

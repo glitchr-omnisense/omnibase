@@ -23,12 +23,12 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     protected int $maxLength = 0;
     protected ?string $encoding;
 
-    public function warmUp(string $cacheDir): array
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         return [];
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir)
+    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir, ?string $buildDir = null)
     {
         $this->uuid = $parameterBag->get("base.obfuscator.uuid") ?? Uuid::NAMESPACE_URL;
 
@@ -37,7 +37,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         $this->level = $parameterBag->get("base.obfuscator.level");
         $this->encoding = $parameterBag->get("base.obfuscator.encoding");
 
-        parent::__construct($cacheDir);
+        parent::__construct($cacheDir, $buildDir);
     }
 
     public function addCompression(CompressionInterface $compression): self

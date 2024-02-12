@@ -53,7 +53,8 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         ?EntrypointLookupCollectionInterface $entrypointLookupCollection,
         Packages                             $packages,
         string                               $publicDir,
-        string                               $cacheDir
+        string                               $cacheDir,
+        string                               $buildDir = null
     )
     {
         $this->entrypointLookupCollection = $entrypointLookupCollection;
@@ -72,7 +73,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $this->getCacheFile())));
 
         $this->debug = $parameterBag->get('kernel.debug');
-        $this->warmUp($cacheDir);
+        $this->warmUp($cacheDir, $buildDir);
     }
 
     /**
@@ -83,7 +84,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         return $this->cacheDir . '/pools/simple/fs/' . str_replace(['\\', '/'], ['__', '_'], static::class);
     }
 
-    public function warmUp(string $cacheDir): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
     {
         $this->entrypoints = $this->getCache('/Entrypoints', $this->entrypoints ?? []);
         $this->entrypointHashes = $this->getCache('/Entrypoints/Hashes', $this->entrypointHashes ?? []);

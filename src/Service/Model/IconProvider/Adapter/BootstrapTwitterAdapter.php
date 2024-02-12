@@ -26,12 +26,12 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
     /** @var ?string */
     protected ?string $stylesheet;
 
-    public function __construct(string $metadata, string $cacheDir, ?string $stylesheet = null)
+    public function __construct(string $metadata, string $cacheDir, ?string $buildDir = null, ?string $stylesheet = null)
     {
         $this->metadata = $metadata;
         $this->stylesheet = $stylesheet;
 
-        parent::__construct($cacheDir);
+        parent::__construct($cacheDir, $buildDir);
     }
 
     public function getAssets(): array
@@ -53,9 +53,9 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         return count(array_filter(explode(" ", $icon), fn($id) => $id == $this->getName()));
     }
 
-    public function warmUp(string $cacheDir): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
     {
-        parent::warmUp($cacheDir);
+        parent::warmUp($cacheDir, $buildDir);
 
         $this->version = $this->getCache("/Version", function () {
             if (!preg_match('/.*\/([0-9.]*(?:[-_]{1}[a-zA-Z0-9]*)?)\//', $this->metadata ?? "", $matches)) {

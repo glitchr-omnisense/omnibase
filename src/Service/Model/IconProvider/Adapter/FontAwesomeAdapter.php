@@ -23,13 +23,13 @@ class FontAwesomeAdapter extends AbstractIconAdapter
     /** @var ?string */
     protected ?string $javascript;
 
-    public function __construct(string $metadata, string $cacheDir, ?string $javascript = null, ?string $stylesheet = null)
+    public function __construct(string $metadata, string $cacheDir, ?string $buildDir = null, ?string $javascript = null, ?string $stylesheet = null)
     {
         $this->metadata = $metadata;
         $this->javascript = $javascript;
         $this->stylesheet = $stylesheet;
 
-        parent::__construct($cacheDir);
+        parent::__construct($cacheDir, $buildDir);
     }
 
     public static function getName(): string
@@ -50,9 +50,9 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         ]);
     }
 
-    public function warmUp(string $cacheDir): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
     {
-        parent::warmUp($cacheDir);
+        parent::warmUp($cacheDir, $buildDir);
 
         $this->version = $this->getCache("/Version", function () {
             $version = null;

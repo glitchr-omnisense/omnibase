@@ -6,16 +6,11 @@ use Base\Entity\Layout\SettingIntl;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- *
- */
 trait VaultTrait
 {
     use BaseTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $vault = null;
 
     public function getVault(): ?string

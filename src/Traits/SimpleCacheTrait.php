@@ -13,7 +13,7 @@ use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
  */
 trait SimpleCacheTrait
 {
-    public function __construct(string $cacheDir)
+    public function __construct(string $cacheDir, ?string $buildDir = null)
     {
         $phpCacheFile = $cacheDir . "/pools/simple/php/" . str_replace(['\\', '/'], ['__', '_'], static::class) . ".php";
         $fsCacheFile = $cacheDir . "/pools/simple/fs/" . str_replace(['\\', '/'], ['__', '_'], static::class);
@@ -21,7 +21,7 @@ trait SimpleCacheTrait
         $phpArrayAdapter = new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $fsCacheFile));
         $this->setCache($phpArrayAdapter);
 
-        $this->warmUp($cacheDir);
+        $this->warmUp($cacheDir, $buildDir);
     }
 
     protected function getCacheKey(string $realClassName): string
@@ -90,14 +90,6 @@ trait SimpleCacheTrait
      * @return $this
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    /**
-     * @param CacheItemPoolInterface|string $cacheOrKey
-     * @param mixed|null $value
-     * @param int|DateInterval|null $ttl
-     * @param bool $deferred
-     * @return $this
-     * @throws InvalidArgumentException
-     */
     public function setCache(CacheItemPoolInterface|string $cacheOrKey, mixed $value = null, int|DateInterval|null $ttl = null, bool $deferred = false)
     {
         if ($cacheOrKey instanceof CacheItemPoolInterface) {
@@ -119,9 +111,6 @@ trait SimpleCacheTrait
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */

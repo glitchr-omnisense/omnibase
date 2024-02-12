@@ -129,10 +129,6 @@ trait TranslatableTrait
      * @param TranslationInterface $translation
      * @return $this
      */
-    /**
-     * @param TranslationInterface $translation
-     * @return $this
-     */
     public function addTranslation(TranslationInterface $translation)
     {
         $this->getTranslations()->set(Localizer::normalizeLocale($translation->getLocale()), $translation);

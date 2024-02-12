@@ -63,7 +63,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      */
     protected ParameterBagInterface $parameterBag;
 
-    public function warmUp(string $cacheDir): array
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $this->all();
         $this->allRaw();

@@ -23,13 +23,13 @@ class IconCacheWarmer extends AbstractLocalCacheWarmer
         parent::__construct($iconProvider, $cacheDir);
     }
 
-    protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter): bool
+    protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter, ?string $buildDir = null): bool
     {
-        $ret = parent::doWarmUp($cacheDir, $arrayAdapter);
+        $ret = parent::doWarmUp($cacheDir, $arrayAdapter, $buildDir);
 
         foreach ($this->adapters as $adapter) {
             $adapter->setCache($arrayAdapter);
-            $ret &= $adapter->warmUp($cacheDir);
+            $ret &= $adapter->warmUp($cacheDir, $buildDir);
         }
 
         return $ret;

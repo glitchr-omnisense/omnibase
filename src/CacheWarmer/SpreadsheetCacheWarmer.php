@@ -31,7 +31,7 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
      * @param $cacheDir
      * @return array|string[]
      */
-    public function warmUp($cacheDir): array
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         if ($this->shellVerbosity > 0 && 'cli' == php_sapi_name()) {
             echo ' // Warming up cache... PHP Spreadsheet' . PHP_EOL . PHP_EOL;

@@ -37,13 +37,13 @@ class TradingMarket implements TradingMarketInterface
      */
     protected $simpleCache;
 
-    public function __construct(HttpClientInterface $httpClient, string $cacheDir)
+    public function __construct(HttpClientInterface $httpClient, string $cacheDir, ?string $buildDir = null)
     {
         $this->httpClient = new Psr18Client($httpClient);
         $this->simpleCache = new Psr16Cache(new FilesystemAdapter("swap", 0, $cacheDir));
     }
 
-    public function warmUp(string $cacheDir)
+    public function warmUp(string $cacheDir, ?string $buildDir = null)
     {
     }
 

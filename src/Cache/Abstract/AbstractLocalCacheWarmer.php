@@ -37,7 +37,7 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
         return false;
     }
 
-    protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter): bool
+    protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter, ?string $buildDir = null): bool
     {
         if (!BaseBundle::USE_CACHE) {
             return false;
@@ -55,7 +55,7 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
         }
 
         $this->simpleCache?->setCache($arrayAdapter);
-        $this->simpleCache?->warmUp($cacheDir);
+        $this->simpleCache?->warmUp($cacheDir, $buildDir);
 
         return true;
     }

@@ -59,16 +59,18 @@ class ClassMetadataManipulator extends AbstractLocalCache
     protected array $globalExcludedFields;
 
     protected static ?string $cacheDir = null;
+    protected static ?string $buildDir = null;
 
-    public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, ?string $cacheDir = null, array $globalExcludedFields = ['id', 'translatable', 'locale'])
+    public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, ?string $cacheDir = null, ?string $buildDir = null, array $globalExcludedFields = ['id', 'translatable', 'locale'])
     {
         $this->doctrine = $doctrine;
         $this->entityManager = $entityManager;
         $this->globalExcludedFields = $globalExcludedFields;
 
-        self::$cacheDir = self::$cacheDir ?? $cacheDir;
+        self::$cacheDir ??= $cacheDir;
+        self::$buildDir ??= $buildDir ?? self::$cacheDir;
         if ($cacheDir) {
-            parent::__construct(self::$cacheDir);
+            parent::__construct(self::$cacheDir, self::$buildDir);
         }
     }
 
@@ -194,8 +196,8 @@ class ClassMetadataManipulator extends AbstractLocalCache
         try {
             $doctrineType = Type::getType($type);
         } catch (Exception $e) {
-//            throw new LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e);
-              return null;
+            // throw new LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e);
+            return null;
         }
 
         return $doctrineType;
@@ -1223,7 +1225,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $classMetadata ? $this->getCompletorFor($classMetadata->name) : null;
     }
 
-    public function warmUp(string $cacheDir): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
     {
         self::$completors = $this->getCache("/Completors", function () {
             foreach ($this->getAllClassNames() as $className) {

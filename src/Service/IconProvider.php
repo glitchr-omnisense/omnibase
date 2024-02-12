@@ -34,17 +34,17 @@ class IconProvider extends AbstractLocalCache
      */
     protected RouterInterface $router;
 
-    public function __construct(AnnotationReader $annotationReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir)
+    public function __construct(AnnotationReader $annotationReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir, ?string $buildDir = null)
     {
         $this->annotationReader = $annotationReader;
         $this->mediaService = $mediaService;
         $this->localizer = $localizer;
         $this->router = $router;
 
-        parent::__construct($cacheDir);
+        parent::__construct($cacheDir, $buildDir);
     }
 
-    public function warmUp(string $cacheDir): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
     {
         $this->routeIcons = $this->getCache("/RouteIcons", function () {
             return array_transforms(function ($route, $controller): ?array {

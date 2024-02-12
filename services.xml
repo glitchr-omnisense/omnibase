@@ -355,9 +355,6 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-
-            <argument type="service" id="annotation_reader" />
-            <argument type="service" id="router" />
         </service>
 
         <service id="Base\Controller\RescueController">

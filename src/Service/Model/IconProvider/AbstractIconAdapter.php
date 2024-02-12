@@ -13,15 +13,15 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
 {
     protected string $metadata;
 
-    public function __construct(string $cacheDir)
+    public function __construct(string $cacheDir, ?string $buildDir = null)
     {
         $phpCacheFile = $cacheDir . "/pools/simple/php/" . str_replace(['\\', '/'], ['__', '_'], IconProvider::class) . ".php";
 
         $this->setCache(new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter("", 0, str_rstrip($phpCacheFile, ".php"))));
-        $this->warmUp($cacheDir);
+        $this->warmUp($cacheDir, $buildDir);
     }
 
-    public function warmUp(string $cacheDir): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
     {
         $this->contents = $this->getCache("/Contents", function () {
             if (!file_exists($this->metadata)) {

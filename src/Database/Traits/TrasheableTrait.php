@@ -6,15 +6,10 @@ use Base\Annotations\Annotation\Timestamp;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- *
- */
 trait TrasheableTrait
 {
-    /**
-     * @ORM\Column(type="datetime", nullable="true")
-     * @Timestamp(on="remove")
-     */
+    #[ORM\Column(type:"datetime", nullable:"true")]
+    #[Timestamp(on:"remove")]
     protected $deletedAt;
 
     /**

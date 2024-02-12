@@ -2,7 +2,7 @@
 
 namespace Base\Database\Mapping;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\ORM\Mapping\Table;
 use Exception;
 use ReflectionClass;
@@ -15,7 +15,13 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     public const TABLE_NAME_SIZE = 64;
     public const TABLE_I18N_SUFFIX = "Intl";
 
-    private array $uniqueTableName = [];
+    protected array $uniqueTableName = [];
+
+    protected ?DoctrineAnnotationReader $annotationReader;
+    public function __construct()
+    {
+        $this->annotationReader = new DoctrineAnnotationReader();
+    }
 
     /**
      * @param $className
@@ -24,7 +30,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      */
     public function classToTableName($className): string
     {
-        $className = !is_string($className) ? get_class($className) : $className;
+        $className = is_object($className) ? get_class($className) : $className;
         $className = class_exists($className)
             ? (new ReflectionClass($className))->getName()
             : $className;
@@ -32,11 +38,33 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
         $tableName = array_search($className, $this->uniqueTableName);
 
         //
-        // Search for a table name in class annotation
+        // Search for a table name in class metadata
         if (class_exists($className)) {
             if (!$tableName) {
-                $annotationReader = new AnnotationReader();
-                $annotations = $annotationReader->getClassAnnotations(new ReflectionClass($className));
+
+                $reflClass = new ReflectionClass($className);
+                
+                // Attributes
+                $annotations = [];
+                foreach($reflClass->getAttributes() as $attribute) {
+    
+                    $annotation = $attribute->newInstance();
+                    if (!is_serializable($annotation)) {
+                        throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                    }
+    
+                    $annotations[] = $annotation;
+                }
+
+                while ($annotation = array_pop($annotations)) {
+                    if ($annotation instanceof Table && !empty($annotation->name)) {
+                        $tableName = $annotation->name;
+                        break;
+                    }
+                }
+
+                // Doctrine annotations
+                $annotations = $this->annotationReader->getClassAnnotations($reflClass);
                 while ($annotation = array_pop($annotations)) {
                     if ($annotation instanceof Table && !empty($annotation->name)) {
                         $tableName = $annotation->name;
@@ -86,6 +114,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
             throw new Exception("Table name will be truncated for \"" . $className . "\"");
         }
 
+        // dump($className, $tableName, $this->uniqueTableName);
         if (str_contains($className, "\\Entity\\") && array_key_exists($tableName, $this->uniqueTableName) && $className != $this->uniqueTableName[$tableName]) {
             throw new Exception("Ambiguous table name \"" . $tableName . "\" found between \"" . $this->uniqueTableName[$tableName] . "\" and \"" . $className . "\"");
         }
