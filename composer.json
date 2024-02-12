@@ -43,7 +43,7 @@
         "symfony/twig-bundle": "^6.0",
         "symfony/workflow": "^6.0",
 
-        "scheb/2fa": "^6.0",
+        "scheb/2fa": "^7.0",
         "twig/twig": "^3.0",
         "twig/cache-extra": "^3.0",
         "twig/extra-bundle": "^3.0",
