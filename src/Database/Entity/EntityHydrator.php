@@ -566,8 +566,6 @@ class EntityHydrator implements EntityHydratorInterface
             $association->set($key, $value);
         }
 
-        // $association = $associationNormalized;
-
         // Fix identification in owning side definition
         $isOwningSide = $mapping["isOwningSide"];
         if (!$isOwningSide) {

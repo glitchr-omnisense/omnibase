@@ -130,9 +130,6 @@ EOF
         $ret = $this->cacheClearCommand->execute($input, $output);
         self::markAsFirstClear(!file_exists(self::$testFile));
         file_put_contents(self::$testFile, self::getNClears()+1);
-        // $ret = $this->cacheClearCommand->execute($input, $output);
-        // self::markAsFirstClear(!file_exists(self::$testFile));
-        // file_put_contents(self::$testFile, self::getNClears()+1);
         
         if (!$noExtension) {
 

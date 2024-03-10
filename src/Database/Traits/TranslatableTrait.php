@@ -24,6 +24,7 @@ use Base\Service\BaseService;
 use Base\Service\Localizer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Proxy\Proxy;
 use Exception;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -291,22 +292,29 @@ trait TranslatableTrait
         $property = snake2camel($property);
         $entity = $this;
 
-        //
-        // Setter method in called class
-        if (method_exists($entity, "set" . mb_ucfirst($property))) {
-            return $entity->{"set" . mb_ucfirst($property)}($value);
-        } elseif (property_exists($this, $property)) {
-            if (!$accessor->isWritable($this, $property)) {
-                throw new AccessException("Property \"$property\" not writable in " . get_class($this));
-            }
+        // Special case for proxies..
+        if(str_starts_with(get_class($entity), "Proxies\\__CG__")) {
 
-            $accessor->setValue($this, $property, $value);
+            write_property($entity, $property, $value);
             return $this;
         }
 
         //
-        // Proxy setter method for current locale
-        $entityIntl = $this->translate();
+        // Setter method in called class
+        if (method_exists($entity, "set" . mb_ucfirst($property))) {
+            return $entity->{"set" . mb_ucfirst($property)}($value);
+        } elseif (property_exists($entity, $property)) {
+            if (!$accessor->isWritable($entity, $property)) {
+                throw new AccessException("Property \"$property\" not writable in " . get_class($entity));
+            }
+
+            $accessor->setValue($entity, $property, $value);
+            return $this;
+        }
+
+        //
+        // Setter method for current locale
+        $entityIntl = $entity->translate();
         if (method_exists($entityIntl, "set" . mb_ucfirst($property))) {
             return $entityIntl->{"set" . mb_ucfirst($property)}($value);
         } elseif (property_exists($entityIntl, $property)) {
@@ -323,7 +331,7 @@ trait TranslatableTrait
             return $this;
         }
 
-        throw new AccessException("Can't get a way to write property \"$property\" in class \"" . get_class($this) . "\" or its corresponding translation class \"" . $this->getTranslationEntityClass() . "\".");
+        throw new AccessException("Can't get a way to write property \"$property\" in class \"" . get_class($entity) . "\" or its corresponding translation class \"" . $entity->getTranslationEntityClass() . "\".");
     }
 
     /**
@@ -350,7 +358,7 @@ trait TranslatableTrait
         //
         // Proxy getter method for current locale
         $defaultLocale = BaseService::getLocalizer()->getDefaultLocale();
-        $entityIntl = $this->translate();
+        $entityIntl = $entity->translate();
 
         $value = null;
         if (method_exists($entityIntl, $property)) {
@@ -373,7 +381,7 @@ trait TranslatableTrait
             return $value;
         }
 
-        $entityIntl = $this->translate($defaultLocale);
+        $entityIntl = $entity->translate($defaultLocale);
         if (method_exists($entityIntl, $property)) {
             return $entityIntl->{$property}();
         } elseif (method_exists($entityIntl, "get" . mb_ucfirst($property))) {
@@ -387,6 +395,6 @@ trait TranslatableTrait
             return null;
         }
 
-        throw new AccessException("Can't get a way to read property \"$property\" in class \"" . get_class($this) . "\" or its corresponding translation class \"" . $this->getTranslationEntityClass() . "\".");
+        throw new AccessException("Can't get a way to read property \"$property\" in class \"" . get_class($entity) . "\" or its corresponding translation class \"" . $entity->getTranslationEntityClass() . "\".");
     }
 }

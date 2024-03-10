@@ -136,14 +136,7 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
      */
     protected function getShortName(string $className): string
     {
-        // if (strpos($className, '\\') === false) {
-        //     return strtolower($className);
-        // }
-
-        // $parts = explode('\\', $className);
-
-        // return strtolower(end($parts));
-
+        
         return $className;
     }
 

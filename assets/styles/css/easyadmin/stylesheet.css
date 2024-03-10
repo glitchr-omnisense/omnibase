@@ -6,7 +6,7 @@
     --font-family-base: var(--font-family-system);
     --select2-bg: var(--gray-100);
     --font-size-base:15px;
-    --sidebar-max-width:300px;
+    --sidebar-max-width:280px;
 }
 .ea-dark-scheme {
     --sidebar-menu-active-item-color: var(--button-primary-bg);

@@ -321,7 +321,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $fields = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
-        return AnnotationReader::getInstance()->getEntityHydrator()->hydrate($classname, array_merge($fields, $associations));
+        return object_hydrate(new $classname, array_merge($fields, $associations));
     }
 
     /**

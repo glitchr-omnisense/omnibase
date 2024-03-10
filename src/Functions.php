@@ -1356,6 +1356,14 @@ namespace {
         return $reflProperty->getValue($object);
     }
 
+    function write_property(object $object, string $property, $value): mixed
+    {
+        $reflProperty = new ReflectionProperty(get_class($object), $property);
+        $reflProperty->setAccessible(true);
+
+        return $reflProperty->setValue($object, $value);
+    }
+
     /**
      * @param string|array|null $path
      * @param $suffix

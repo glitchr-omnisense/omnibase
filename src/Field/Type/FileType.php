@@ -214,7 +214,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
                     "required" => $options["required"] && (!$options["allow_url"] && $data === null) && ($options["cropper"] ?? null) === null,
                     "multiple" => $options["multiple"],
-                    "constraints" => [new File(["max_size" => $maxFilesize, "mime_types" => $mimeTypes])],
+                    "constraints" => [new File($maxFilesize, $mimeTypes)],
                     "disabled" => !$options["allow_reupload"] && $data !== null
                 ]);
             }

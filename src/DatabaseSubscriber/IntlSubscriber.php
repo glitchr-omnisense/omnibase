@@ -124,6 +124,7 @@ class IntlSubscriber
 
         if ($entity instanceof TranslationInterface) {
             if ($entity->isEmpty()) {
+
                 $translatable = $entity->getTranslatable();
                 if ($translatable) {
                     $translatable->removeTranslation($entity);
@@ -133,6 +134,7 @@ class IntlSubscriber
                 if ($this->entityManager->contains($entity)) {
                     $this->entityManager->remove($entity);
                 }
+
             } else {
                 $uow->cancelOrphanRemoval($entity);
             }

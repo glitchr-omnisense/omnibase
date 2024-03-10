@@ -51,7 +51,7 @@ trait TranslationTrait
      * @return $this
      */
     public function setTranslatable(?TranslatableInterface $translatable)
-    {
+    {        
         $this->translatable = $translatable;
         return $this;
     }
