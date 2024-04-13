@@ -454,9 +454,8 @@ class SelectType extends AbstractType implements DataMapperInterface
      * @param Traversable $forms
      * @return void
      */
-    public function mapDataToForms($viewData, Traversable $forms)
-    { /* done in buildView due to select2 extend */
-    }
+    public function mapDataToForms($viewData, Traversable $forms): void
+    { /* done in buildView due to select2 extend */ }
 
     /**
      * @param Traversable $forms
@@ -464,7 +463,7 @@ class SelectType extends AbstractType implements DataMapperInterface
      * @return void
      * @throws MappingException
      */
-    public function mapFormsToData(Traversable $forms, &$viewData)
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $choiceType = current(iterator_to_array($forms));
         if ($this->classMetadataManipulator->isCollectionOwner($choiceType) === false) {

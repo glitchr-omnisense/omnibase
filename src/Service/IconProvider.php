@@ -44,34 +44,34 @@ class IconProvider extends AbstractLocalCache
         parent::__construct($cacheDir, $buildDir);
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $this->routeIcons = $this->getCache("/RouteIcons", function () {
             return array_transforms(function ($route, $controller): ?array {
                 $controller = $controller->getDefault("_controller");
                 if (!$controller) {
-                    return null;
+                    return [];
                 }
 
                 try {
                     list($class, $method) = explode("::", $controller);
                 } catch (ErrorException $e) {
-                    return null;
+                    return [];
                 }
                 if (!class_exists($class)) {
-                    return null;
+                    return [];
                 }
 
                 $iconAnnotations = $this->annotationReader->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
                 if (!$iconAnnotations) {
-                    return null;
+                    return [];
                 }
 
                 return [$route, end($iconAnnotations)->getIcons()];
             }, $this->router->getRouteCollection()->all());
         });
 
-        return true;
+        return [];
     }
 
     protected ?array $routeIcons = null;

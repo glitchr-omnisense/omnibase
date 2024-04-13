@@ -18,17 +18,15 @@ class HotParameterBag extends ParameterBag implements HotParameterBagInterface
 
     /**
      * @param array $parameters
-     * @return $this|void
+     * @return void
      */
-    public function add(array $parameters)
+    public function add(array $parameters): void
     {
         try {
             parent::add($parameters);
         } catch (Exception $e) {
             $this->hotBag = array_merge($this->hotBag, $parameters);
         }
-
-        return $this;
     }
 
     public function all(): array

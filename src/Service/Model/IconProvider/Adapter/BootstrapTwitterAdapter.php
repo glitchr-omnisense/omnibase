@@ -53,7 +53,7 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         return count(array_filter(explode(" ", $icon), fn($id) => $id == $this->getName()));
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         parent::warmUp($cacheDir, $buildDir);
 
@@ -65,7 +65,7 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
             return $matches[1] ?? "";
         });
 
-        return true;
+        return [];
     }
 
     public function getChoices(string $term = ""): array

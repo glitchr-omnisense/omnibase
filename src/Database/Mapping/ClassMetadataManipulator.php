@@ -1225,7 +1225,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $classMetadata ? $this->getCompletorFor($classMetadata->name) : null;
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         self::$completors = $this->getCache("/Completors", function () {
             foreach ($this->getAllClassNames() as $className) {
@@ -1235,7 +1235,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             return self::$completors;
         });
 
-        return true;
+        return [];
     }
 
     public function saveCompletors()

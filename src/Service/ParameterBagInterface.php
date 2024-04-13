@@ -17,7 +17,7 @@ interface ParameterBagInterface extends \Symfony\Component\DependencyInjection\P
      * @param array|null $bag
      * @return mixed
      */
-    public function set(string $path, array|bool|string|int|float|UnitEnum|null $value, ?array &$bag = null);
+    public function set(string $path, array|bool|string|int|float|UnitEnum|null $value, ?array &$bag = null): void;
 
     public function has(string $path, ?array $bag = null): bool;
 }

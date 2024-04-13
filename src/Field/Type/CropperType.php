@@ -224,7 +224,7 @@ class CropperType extends AbstractType implements DataMapperInterface
      * @param Traversable $forms
      * @return void
      */
-    public function mapDataToForms($viewData, Traversable $forms)
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
         if ($viewData === null) {
             return;
@@ -248,7 +248,7 @@ class CropperType extends AbstractType implements DataMapperInterface
      * @param $viewData
      * @return void
      */
-    public function mapFormsToData(Traversable $forms, &$viewData)
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));
         $fieldNames = $classMetadata->getFieldNames();

@@ -29,7 +29,7 @@ class IconCacheWarmer extends AbstractLocalCacheWarmer
 
         foreach ($this->adapters as $adapter) {
             $adapter->setCache($arrayAdapter);
-            $ret &= $adapter->warmUp($cacheDir, $buildDir);
+            $ret &= $adapter->warmUp($cacheDir, $buildDir) === [];
         }
 
         return $ret;

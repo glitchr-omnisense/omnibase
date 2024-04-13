@@ -84,7 +84,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         return $this->cacheDir . '/pools/simple/fs/' . str_replace(['\\', '/'], ['__', '_'], static::class);
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $this->entrypoints = $this->getCache('/Entrypoints', $this->entrypoints ?? []);
         $this->entrypointHashes = $this->getCache('/Entrypoints/Hashes', $this->entrypointHashes ?? []);
@@ -93,7 +93,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         $this->renderedLinkTags = $this->getCache('/Link', $this->renderedLinkTags ?? []);
         $this->renderedScriptTags = $this->getCache('/Script', $this->renderedScriptTags ?? []);
 
-        return true;
+        return [];
     }
 
     protected array $entrypoints = [];

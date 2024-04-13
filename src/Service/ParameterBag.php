@@ -31,9 +31,9 @@ class ParameterBag extends ContainerBag implements ParameterBagInterface
      * @param $path
      * @param $value
      * @param array|null $bag
-     * @return mixed|void
-     */
-    public function set(string $path, $value, array &$bag = null)
+     * @return void
+     **/
+    public function set(string $path, $value, array &$bag = null): void
     {
         $this->write($path, $value, $bag);
     }
