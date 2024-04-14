@@ -21,10 +21,10 @@ class UTCDateTimeType extends DateTimeType
     /**
      * @param $value
      * @param AbstractPlatform $platform
-     * @return mixed
+     * @return ?string
      * @throws ConversionException
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): ?string
     {
         if ($value instanceof DateTime) {
             $value->setTimezone(self::getUtc());
@@ -36,10 +36,10 @@ class UTCDateTimeType extends DateTimeType
     /**
      * @param $value
      * @param AbstractPlatform $platform
-     * @return mixed
+     * @return ?string
      * @throws ConversionException
      */
-    public function convertToPHPValue($value, AbstractPlatform $platform): mixed
+    public function convertToPHPValue($value, AbstractPlatform $platform): ?DateTime
     {
         if (null === $value || $value instanceof DateTime) {
             return $value;
