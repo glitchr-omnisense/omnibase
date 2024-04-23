@@ -68,7 +68,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    #[ORM\Column(type:"array", nullable:true)]
+    #[ORM\Column(type:"json", nullable:true)]
     protected $routeParameters;
 
     public function getRouteParameters(): ?array

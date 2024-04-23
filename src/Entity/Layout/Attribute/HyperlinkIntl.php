@@ -30,7 +30,7 @@ class HyperlinkIntl implements TranslationInterface
         return true;
     }
 
-    #[ORM\Column(type:"array")]
+    #[ORM\Column(type:"json")]
     protected $value;
 
     public function getValue(): array

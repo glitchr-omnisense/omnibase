@@ -25,7 +25,7 @@ class AttributeIntl implements TranslationInterface
         return $this->_isEmpty([], fn($n, $v) => is_array($v) && array_filter($v) === []);
     }
 
-    #[ORM\Column(type:"array")]
+    #[ORM\Column(type:"json")]
     #[AssertBase\File(max_size:"2MB", groups:["new", "edit"])]
     #[Uploader(storage:"local.storage", max_size:"2MB", missable:true)]
     #[Associate(metadata:"class")]

@@ -43,7 +43,7 @@ class TaxonIntl implements TranslationInterface
         return $this;
     }
 
-    #[ORM\Column(type:"array")]
+    #[ORM\Column(type:"json")]
     #[OrderColumn]
     protected $keywords = [];
 

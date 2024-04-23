@@ -120,7 +120,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
         return $this;
     }
 
-    #[ORM\Column(type:"array", nullable:true)]
+    #[ORM\Column(type:"json", nullable:true)]
     protected $entityData = [];
 
     /**

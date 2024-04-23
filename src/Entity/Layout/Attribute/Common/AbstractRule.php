@@ -26,7 +26,7 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
         return $this->adapter?->compliesWith($this->getValue(), $subject) ?? true;
     }
 
-    #[ORM\Column(type:"array")]
+    #[ORM\Column(type:"json")]
     #[Associate(metadata:"class")]
     protected $value;
 
