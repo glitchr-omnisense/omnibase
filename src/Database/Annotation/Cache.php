@@ -5,7 +5,6 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\Event\LifecycleEventArgs as BaseLifecycleEventArgs;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Doctrine\Common\Annotations\Annotation;
@@ -57,25 +56,25 @@ class Cache extends AbstractAnnotation
 
         switch ($associations) {
             case self::ONE_TO_ONE:
-                $this->associations = ClassMetadataInfo::ONE_TO_ONE;
+                $this->associations = ClassMetadata::ONE_TO_ONE;
                 break;
             case self::MANY_TO_ONE:
-                $this->associations = ClassMetadataInfo::MANY_TO_ONE;
+                $this->associations = ClassMetadata::MANY_TO_ONE;
                 break;
             case self::ONE_TO_MANY:
-                $this->associations = ClassMetadataInfo::ONE_TO_MANY;
+                $this->associations = ClassMetadata::ONE_TO_MANY;
                 break;
             case self::MANY_TO_MANY:
-                $this->associations = ClassMetadataInfo::MANY_TO_MANY;
+                $this->associations = ClassMetadata::MANY_TO_MANY;
                 break;
             case self::TO_MANY:
-                $this->associations = ClassMetadataInfo::ONE_TO_MANY + ClassMetadataInfo::MANY_TO_MANY;
+                $this->associations = ClassMetadata::ONE_TO_MANY + ClassMetadata::MANY_TO_MANY;
                 break;
             case self::TO_ONE:
-                $this->associations = ClassMetadataInfo::ONE_TO_ONE + ClassMetadataInfo::MANY_TO_ONE;
+                $this->associations = ClassMetadata::ONE_TO_ONE + ClassMetadata::MANY_TO_ONE;
                 break;
             case self::ALL:
-                $this->associations = ClassMetadataInfo::ONE_TO_ONE + ClassMetadataInfo::MANY_TO_ONE + ClassMetadataInfo::ONE_TO_MANY + ClassMetadataInfo::MANY_TO_MANY;
+                $this->associations = ClassMetadata::ONE_TO_ONE + ClassMetadata::MANY_TO_ONE + ClassMetadata::ONE_TO_MANY + ClassMetadata::MANY_TO_MANY;
                 break;
 
             default:

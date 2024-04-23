@@ -6,7 +6,7 @@ use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 /**
@@ -59,7 +59,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     /**
      * @return ClassMetadata|null
      */
-    public function getClassMetadata(): ?ClassMetadata
+    public function getClassMetadata(): ClassMetadata
     {
         return $this->classMetadata;
     }
@@ -115,7 +115,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [$criteria, $orderBy]);
     }
 
-    public function count(array $criteria): int
+    public function count(array $criteria = []): int
     {
         return $this->__call(__METHOD__, [$criteria]);
     }

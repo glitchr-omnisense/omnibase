@@ -63,7 +63,7 @@ class QuadrantType extends AbstractType implements DataMapperInterface
      * @param Traversable $forms
      * @return void
      */
-    public function mapDataToForms($viewData, Traversable $forms)
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
     }
 
@@ -72,7 +72,7 @@ class QuadrantType extends AbstractType implements DataMapperInterface
      * @param $viewData
      * @return void
      */
-    public function mapFormsToData(Traversable $forms, &$viewData)
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $windType = current(iterator_to_array($forms));
         $viewData = $windType->getData() ?? Quadrant::O;

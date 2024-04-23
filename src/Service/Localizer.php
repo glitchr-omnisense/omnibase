@@ -69,13 +69,13 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     protected static ?string $defaultLocale = null;
     protected static ?array $fallbackLocales = null;
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         self::$locales = $this->getCache("/Localize/Locales", self::getLocales());
         self::$fallbackLocales = self::$fallbackLocales ?? self::normalizeLocale($this->translator->getFallbackLocales());
         self::$defaultLocale = self::$defaultLocale ?? self::normalizeLocale($this->parameterBag->get("kernel.default_locale"));
 
-        return true;
+        return [];
     }
 
     /**

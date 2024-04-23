@@ -88,7 +88,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
      * @param RequestContext $context
      * @return mixed
      */
-    public function setContext(RequestContext $context);
+    public function setContext(RequestContext $context): void;
 
     public function getGenerator(): UrlGeneratorInterface;
 

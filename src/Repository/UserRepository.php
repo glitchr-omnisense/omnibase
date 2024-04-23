@@ -34,10 +34,18 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $user;
     }
 
-    public function refreshUser(UserInterface $user): ?UserInterface
+    public function refreshUser(UserInterface $user): UserInterface
     {
         $user = $this->cacheOneByEmail($user->getEmail());
-        return $user?->isKicked() ? null : $user;
+        if (!$user instanceof User) {
+            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+        }
+
+        if ($user?->isKicked()) {
+            throw new UnsupportedUserException('You have been kicked..');
+        }
+
+        return $user;
     }
 
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void

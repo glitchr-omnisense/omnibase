@@ -876,7 +876,7 @@ class AnnotationReader extends AbstractLocalCache
         return $annotationTargets;
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $this->annotationTargets = $this->getCache("/Targets") ?? [];
         $this->classHierarchies = $this->getCache("/Hierarchies") ?? [];
@@ -906,7 +906,7 @@ class AnnotationReader extends AbstractLocalCache
             $this->commitCache();
         });
 
-        return true;
+        return [];
     }
 
     /**
