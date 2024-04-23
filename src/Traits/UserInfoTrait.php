@@ -3,6 +3,7 @@
 namespace Base\Traits;
 
 use Symfony\Component\Intl\Timezones;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  *
@@ -66,9 +67,7 @@ trait UserInfoTrait
         return null;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $timezone;
     public function getCountryCode(): string
     {
