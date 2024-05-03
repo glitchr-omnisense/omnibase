@@ -298,7 +298,7 @@ class BaseBundle extends AbstractBaseBundle
         $entityManagerConnection
             ->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
         $entityManagerConnection
-            ->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
+            ->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'json');
 
         $classList = array_merge(
             self::getAllClasses(self::getBundleLocation() . "/src/Enum"),

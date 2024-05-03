@@ -12,7 +12,6 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class IntlSubscriber
@@ -200,20 +199,20 @@ class IntlSubscriber
                 $classMetadata->cache = $classMetadata->cache ?? null;
                 $classMetadata->cache = [
                     'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
 
                 $classMetadata->associationMappings['translations']['cache'] = $classMetadata->cache ?? null;
                 $classMetadata->associationMappings['translations']['cache'] = [
                     'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
             }
         } else {
             $classMetadata->cache = $classMetadata->cache ?? null;
             $classMetadata->cache = [
                 'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
             ];
 
             $classMetadata->mapOneToMany([
@@ -221,10 +220,10 @@ class IntlSubscriber
                 'mappedBy' => 'translatable',
                 'cache' => [
                     'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translations',
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ],
                 'indexBy' => TranslatableWalker::LOCALE,
-                'cascade' => ['persist', 'merge', 'remove'],
+                'cascade' => ['persist', 'refresh', 'remove'],
                 'fetch' => $this->convertFetchString('LAZY'),
                 'targetEntity' => $targetEntity,
                 'orphanRemoval' => true,
@@ -244,13 +243,13 @@ class IntlSubscriber
                 $classMetadata->associationMappings['translatable']['sourceEntity'] = $classMetadata->getName();
                 $classMetadata->cache = [
                     'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ];
             }
         } else {
             $classMetadata->cache = [
                 'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
             ];
 
             $classMetadata->mapManyToOne([
@@ -258,7 +257,7 @@ class IntlSubscriber
                 'inversedBy' => 'translations',
                 'cache' => BaseBundle::USE_CACHE ? [
                     'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translatable',
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ] : null,
                 'cascade' => ['persist', 'merge'],
                 'fetch' => $this->convertFetchString('LAZY'),

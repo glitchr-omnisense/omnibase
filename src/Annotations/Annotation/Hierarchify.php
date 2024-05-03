@@ -57,6 +57,7 @@ class Hierarchify extends AbstractAnnotation
         }
 
         $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);
+        dump($classMetadataCompletor);
         $classMetadataCompletor->entityHierarchy ??= $this->hierarchy;
         $classMetadataCompletor->entityHierarchySeparator ??= $this->separator;
     }

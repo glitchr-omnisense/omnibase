@@ -136,7 +136,6 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
      */
     protected function getShortName(string $className): string
     {
-        
         return $className;
     }
 
