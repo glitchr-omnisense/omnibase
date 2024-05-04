@@ -78,10 +78,6 @@ class HtmlTagRenderer extends AbstractTagRenderer
      * @param string $location
      * @return $this
      */
-    /**
-     * @param string $location
-     * @return $this
-     */
     public function removeHtmlContent(string $location)
     {
         if (array_key_exists($location, $this->htmlContent)) {
@@ -91,12 +87,6 @@ class HtmlTagRenderer extends AbstractTagRenderer
         return $this;
     }
 
-    /**
-     * @param string $location
-     * @param $contentOrArrayOrFile
-     * @param array $options
-     * @return $this
-     */
     /**
      * @param string $location
      * @param $contentOrArrayOrFile

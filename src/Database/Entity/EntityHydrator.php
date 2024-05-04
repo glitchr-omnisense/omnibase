@@ -11,7 +11,7 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
-use Doctrine\DBAL\Types\ArrayType;
+use Doctrine\DBAL\Types\JsonType;
 
 use Base\Service\Localizer;
 use Doctrine\ORM\Exception\ORMException;
@@ -323,7 +323,7 @@ class EntityHydrator implements EntityHydratorInterface
             //
             // Default values for the specific array cases
             $doctrineType = $this->classMetadataManipulator->getDoctrineType($fieldMapping["type"]);
-            if (is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, SetType::class)) {
+            if (is_instanceof($doctrineType, JsonType::class) || is_instanceof($doctrineType, SetType::class)) {
                 $this->setPropertyValue($entity, $fieldName, [], $reflEntity);
             }
 

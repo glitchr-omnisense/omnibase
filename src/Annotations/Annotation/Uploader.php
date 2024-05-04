@@ -224,6 +224,7 @@ class Uploader extends AbstractAnnotation
         }
 
         if (is_array($field)) {
+
             $pathList = [];
             foreach ($field as $uuidOrFile) {
                 $uuidOrFile = is_string($uuidOrFile) && !str_contains($uuidOrFile, "://") && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;

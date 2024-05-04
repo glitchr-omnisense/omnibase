@@ -190,26 +190,9 @@ class IntlSubscriber
     private function mapTranslatable(ClassMetadata $classMetadata): void
     {
         $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslationEntityClass')->invoke(null);
-        if ($classMetadata->hasAssociation('translations')) {
-            $mapping = $classMetadata->getAssociationMapping('translations');
-            if (is_subclass_of($targetEntity, $mapping['targetEntity'] ?? null)) {
-                $classMetadata->associationMappings['translations']['targetEntity'] = $targetEntity;
-                $classMetadata->associationMappings['translations']['sourceEntity'] = $classMetadata->getName();
+        
+        if (!$classMetadata->hasAssociation('translations')) {
 
-                $classMetadata->cache = $classMetadata->cache ?? null;
-                $classMetadata->cache = [
-                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
-                ];
-
-                $classMetadata->associationMappings['translations']['cache'] = $classMetadata->cache ?? null;
-                $classMetadata->associationMappings['translations']['cache'] = [
-                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
-                ];
-            }
-        } else {
-            $classMetadata->cache = $classMetadata->cache ?? null;
             $classMetadata->cache = [
                 'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                 'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
@@ -236,17 +219,8 @@ class IntlSubscriber
         $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslatableEntityClass')->invoke(null);
         $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
 
-        if ($classMetadata->hasAssociation('translatable')) {
-            $mapping = $classMetadata->getAssociationMapping('translatable');
-            if (is_subclass_of($targetEntity, $mapping['targetEntity'] ?? null)) {
-                $classMetadata->associationMappings['translatable']['targetEntity'] = $targetEntity;
-                $classMetadata->associationMappings['translatable']['sourceEntity'] = $classMetadata->getName();
-                $classMetadata->cache = [
-                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
-                ];
-            }
-        } else {
+        if (!$classMetadata->hasAssociation('translatable')) {
+
             $classMetadata->cache = [
                 'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                 'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
@@ -259,7 +233,7 @@ class IntlSubscriber
                     'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translatable',
                     'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ] : null,
-                'cascade' => ['persist', 'merge'],
+                'cascade' => ['persist', 'refresh'],
                 'fetch' => $this->convertFetchString('LAZY'),
                 'joinColumns' => [[
                     'name' => TranslatableWalker::FOREIGN_KEY,

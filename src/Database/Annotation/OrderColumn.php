@@ -14,7 +14,6 @@ use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Base\Enum\EntityAction;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\ArrayType;
 use Doctrine\DBAL\Types\JsonType;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -56,7 +55,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             $type = $this->getClassMetadataManipulator()->getTypeOfField($object, $targetValue);
             $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
 
-            $isArray = is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, JsonType::class);
+            $isArray = is_instanceof($doctrineType, JsonType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
             $isSet = is_instanceof($doctrineType, SetType::class);
 

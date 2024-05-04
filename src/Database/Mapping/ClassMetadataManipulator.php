@@ -15,15 +15,15 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\Mapping\ClassMetadata;
 use Exception;
 use InvalidArgumentException;
 
 use Base\Database\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\Mapping\FieldMapping;
 use Doctrine\Persistence\Proxy;
 use LogicException;
 use RuntimeException;
@@ -131,7 +131,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
      */
     public function setGlobalTrackingPolicy(int $policy)
     {
-        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
+        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadata::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadata::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadata::CHANGETRACKING_NOTIFY];
         if (!in_array($policy, $trackingPolicies)) {
             throw new Exception("Invalid global tracking policy \"$policy\" provided");
         }
@@ -159,7 +159,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
      */
     public function setTrackingPolicy($className, int $policy)
     {
-        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
+        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadata::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadata::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadata::CHANGETRACKING_NOTIFY];
         if (!in_array($policy, $trackingPolicies)) {
             throw new Exception("Invalid tracking policy \"$policy\" provided for \"$className\"");
         }
@@ -261,7 +261,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     /**
      * @param string|object|null $entityOrClassOrMetadata
-     * @return \Doctrine\ORM\Mapping\ClassMetadata|ClassMetadataInfo|ClassMetadata|null
+     * @return \Doctrine\ORM\Mapping\ClassMetadata|ClassMetadata|ClassMetadata|null
      */
     public function getClassMetadata(null|string|object $entityOrClassOrMetadata)
     {
@@ -271,7 +271,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         if ($entityOrClassOrMetadata instanceof PersistentCollection) {
             return $entityOrClassOrMetadata->getTypeClass();
         }
-        if ($entityOrClassOrMetadata instanceof ClassMetadataInfo) {
+        if ($entityOrClassOrMetadata instanceof ClassMetadata) {
             return $entityOrClassOrMetadata;
         }
 
@@ -444,7 +444,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             $entityOrClassOrMetadata = $classMetadata->getAssociationTargetClass($assocName);
 
             if ($classMetadata->isSingleValuedAssociation($assocName)) {
-                $nullable = ($classMetadata instanceof ClassMetadataInfo) && isset($classMetadata->discriminatorColumn['nullable']) && $classMetadata->discriminatorColumn['nullable'];
+                $nullable = ($classMetadata instanceof ClassMetadata) && isset($classMetadata->discriminatorColumn['nullable']) && $classMetadata->discriminatorColumn['nullable'];
                 $fields[$assocName] = [
                     'type' => AssociationType::class,
                     'data_class' => $entityOrClassOrMetadata,
@@ -724,8 +724,8 @@ class ClassMetadataManipulator extends AbstractLocalCache
     public function getDeclaringEntity(null|string|object $entityOrClassOrMetadata, $fieldPath)
     {
         $fieldMapping = $this->getFieldMapping($entityOrClassOrMetadata, $fieldPath);
-        if (array_key_exists("declared", $fieldMapping)) {
-            return $fieldMapping["declared"];
+        if ($fieldMapping != null && $fieldMapping->declared) {
+            return $fieldMapping->declared;
         }
 
         if (($dot = strpos($fieldPath, ".")) > 0) {
@@ -840,7 +840,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->fetchEntityMapping($entityName, $fieldPath)["targetEntity"] ?? null;
     }
 
-    public function fetchEntityMapping(string $entityName, array|string $fieldPath): ?array
+    public function fetchEntityMapping(string $entityName, array|string $fieldPath): ?FieldMapping
     {
         $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
         $fieldName = head($fieldPath);
@@ -1022,7 +1022,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return false;
     }
 
-    public function getFieldMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
+    public function getFieldMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?FieldMapping
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
@@ -1032,7 +1032,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->fetchEntityMapping($classMetadata->getName(), $fieldName);
     }
 
-    public function getAssociationMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
+    public function getAssociationMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?AssociationMapping
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
@@ -1130,42 +1130,42 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function isToOneSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true);
+        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadata::ONE_TO_ONE, ClassMetadata::MANY_TO_ONE], true);
     }
 
     public function isToManySide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
+        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadata::ONE_TO_MANY, ClassMetadata::MANY_TO_MANY], true);
     }
 
     public function isManyToSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true);
+        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadata::MANY_TO_ONE, ClassMetadata::MANY_TO_MANY], true);
     }
 
     public function isOneToSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true);
+        return in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadata::ONE_TO_MANY, ClassMetadata::ONE_TO_ONE], true);
     }
 
     public function isManyToMany(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::MANY_TO_MANY;
+        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadata::MANY_TO_MANY;
     }
 
     public function isOneToMany(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::ONE_TO_MANY;
+        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadata::ONE_TO_MANY;
     }
 
     public function isManyToOne(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::MANY_TO_ONE;
+        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadata::MANY_TO_ONE;
     }
 
     public function isOneToOne(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
-        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadataInfo::ONE_TO_ONE;
+        return $this->getAssociationType($entityOrClassOrMetadata, $fieldName) === ClassMetadata::ONE_TO_ONE;
     }
 
     /**

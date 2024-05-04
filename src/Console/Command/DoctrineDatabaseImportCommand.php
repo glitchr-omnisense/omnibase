@@ -20,7 +20,7 @@ use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
@@ -97,7 +97,7 @@ class DoctrineDatabaseImportCommand extends Command
         $this->notifier = $notifier;
 
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->classMetadataManipulator->setGlobalTrackingPolicy(ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT);
+        $this->classMetadataManipulator->setGlobalTrackingPolicy(ClassMetadata::CHANGETRACKING_DEFERRED_EXPLICIT);
         $this->serializer = new Serializer([], [
             new XmlEncoder(),
             new CsvEncoder(),
@@ -146,7 +146,7 @@ class DoctrineDatabaseImportCommand extends Command
                     throw new Exception("Field \"" . $subFieldName . "\" is expected to be an association.");
                 }
 
-                $isToManySide = in_array($entityMapping["type"], [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
+                $isToManySide = in_array($entityMapping["type"], [ClassMetadata::ONE_TO_MANY, ClassMetadata::MANY_TO_MANY], true);
                 if (!is_array($entry)) {
                     $entry = [$propertyName => $entry];
                 } elseif ($isToManySide) {
@@ -446,7 +446,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                                         if ($this->classMetadataManipulator->hasAssociation($targetName, $fieldName)) {
                                             $targetRepository = $this->entityManager->getRepository($mapping["targetEntity"]);
-                                            $isToOneSide = in_array($mapping["type"], [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true);
+                                            $isToOneSide = in_array($mapping["type"], [ClassMetadata::ONE_TO_ONE, ClassMetadata::MANY_TO_ONE], true);
 
                                             $v = array_filter($v);
                                             if (empty($v)) {

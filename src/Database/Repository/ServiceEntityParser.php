@@ -14,7 +14,6 @@ use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\PersistentCollection;
@@ -1875,7 +1874,7 @@ class ServiceEntityParser
         }
 
         foreach ($classMetadata->getAssociationMappings() as $associationMapping) {
-            if ($associationMapping["fetch"] == ClassMetadataInfo::FETCH_EAGER) {
+            if ($associationMapping["fetch"] == ClassMetadata::FETCH_EAGER) {
                 continue;
             }
             $aliasExpr = $aliasRoot . "." . $associationMapping["fieldName"];
@@ -1985,7 +1984,9 @@ class ServiceEntityParser
         } // @TODO, if groupBy is used, cache is disabled.. id column not stored for some reasons.
 
         $query->useQueryCache($this->cacheable);
-        $query->setCacheRegion($this->classMetadata->cache["region"] ?? null);
+	if($this->classMetadata->cache !== null && array_key_exists("region", $this->classMetadata->cache)) {
+            $query->setCacheRegion($this->classMetadata->cache["region"]);
+        }
 
         //
         // Apply custom output walker to all entities (some join may relates to translatable entities)
