@@ -27,6 +27,7 @@
         "doctrine/annotations": "^2.0",
         "doctrine/doctrine-bundle": "^2.0",
         "easycorp/easyadmin-bundle": "^4.10",
+        "api-platform/api-pack": "^1.0",
         "endroid/qr-code": "^4.0",
         "enshrined/svg-sanitize": "*",
         "florianv/swap": "^4.0",
