@@ -152,7 +152,6 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('array_flatten', [$this, 'array_flatten']),
                 new TwigFilter('less_than', [$this, 'less_than']),
                 new TwigFilter('greater_than', [$this, 'greater_than']),
-                new TwigFilter('filter', [CoreExtension::class, 'arrayFilter'], ['needs_environment' => true]),
                 new TwigFilter('transforms', [$this, 'transforms'], ['needs_environment' => true]),
                 new TwigFilter('pad', [$this, 'pad']),
                 new TwigFilter('mb_ucfirst', 'mb_ucfirst'),

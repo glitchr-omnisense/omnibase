@@ -37,7 +37,7 @@ class AdminRouterSubscriber extends \EasyCorp\Bundle\EasyAdminBundle\EventListen
         }
 
         $entityFqcn = $request->query->get(EA::CRUD_CONTROLLER_FQCN);
-        if(class_exists($entityFqcn)) $request->query->set(EA::CRUD_CONTROLLER_FQCN, $entityFqcn);
+        if($entityFqcn && class_exists($entityFqcn)) $request->query->set(EA::CRUD_CONTROLLER_FQCN, $entityFqcn);
         else {
 
             $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();

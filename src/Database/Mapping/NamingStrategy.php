@@ -30,15 +30,15 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      */
     public function classToTableName($className): string
     {
+        if(!$className) return "";
+
         $tableName = null;
         $className = is_object($className) ? get_class($className) : $className;
-        $className = class_exists($className)
-            ? (new ReflectionClass($className))->getName()
-            : $className;
+        $className = $className && class_exists($className) ? (new ReflectionClass($className))->getName() : $className;
 
         //
         // Search for a table name in class metadata
-        if (class_exists($className)) {
+        if ($className && class_exists($className)) {
 
             $reflClass = new ReflectionClass($className);
             
@@ -80,38 +80,41 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
             // Strip first occurence of \Entity\
             $entityNamespace = "Entity\\";
-            $pos = strpos($tableName, $entityNamespace);
+            $pos = $tableName ? strpos($tableName, $entityNamespace) : false;
             if ($pos !== false) $tableName = substr_replace($tableName, "", $pos, strlen($entityNamespace));
 
             // Defaulting case
             if (empty($tableName)) {
 
                 $tableName = $className;
-                if (strrpos($tableName, '\\') !== false) {
+                if ($tableName && strrpos($tableName, '\\') !== false) {
 
                     $tableName = lcfirst(substr($className, strrpos($className, '\\') + 1));
                 }
             }
 
             // Turn from namespace into camel string..
-            $tableName = str_replace("\\", "", $tableName);
-            $tableName = explode("_", camel2snake($tableName));
-            $tableName = array_unique($tableName);
+            if($tableName) {
 
-            $tableName = snake2camel(implode("_", $tableName));
-            $tableName = lcfirst($tableName);
+                $tableName = str_replace("\\", "", $tableName);
+                $tableName = explode("_", camel2snake($tableName));
+                $tableName = array_unique($tableName);
 
-            // Handle I18n case
-            $tableName = preg_replace('/' . self::TABLE_I18N_SUFFIX . '$/', self::TABLE_I18N_SUFFIX, $tableName);
+                $tableName = snake2camel(implode("_", $tableName));
+                $tableName = lcfirst($tableName);
+
+                // Handle I18n case
+                $tableName = preg_replace('/' . self::TABLE_I18N_SUFFIX . '$/', self::TABLE_I18N_SUFFIX, $tableName);
+            }
         }
 
         //
         // Make sure there is no ambiguity or issue related to SQL server
-        if (strlen($tableName) > self::TABLE_NAME_SIZE) {
+        if ($tableName && strlen($tableName) > self::TABLE_NAME_SIZE) {
             throw new Exception("Table name will be truncated for \"" . $className . "\"");
         }
 
-        return $tableName;
+        return $tableName ?? $className;
     }
 
     /**

@@ -55,6 +55,7 @@ use App\Enum\UserState;
 use Base\Service\Model\AutocompleteInterface;
 
 use Base\Traits\UserInfoTrait;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass:UserRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -64,6 +65,8 @@ use Base\Traits\UserInfoTrait;
 #[DiscriminatorEntry( value: "common" )]
 
 #[AssertBase\UniqueEntity(fields:["email"], groups:["new", "edit"])]
+#[ApiResource]
+
 class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
 {
     use BaseTrait;

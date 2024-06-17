@@ -38,6 +38,7 @@ use Base\Repository\ThreadRepository;
 use DateTime;
 
 use Base\Traits\CacheableTrait;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass:ThreadRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -47,6 +48,7 @@ use Base\Traits\CacheableTrait;
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 #[Hierarchify(null, separator: "/" )]
 #[Trasheable]
+#[ApiResource]
 
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {
