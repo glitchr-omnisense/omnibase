@@ -3,7 +3,6 @@
 namespace Base\Twig\Renderer\Adapter;
 
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
-use Base\Service\BaseService;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\SimpleCacheTrait;
@@ -14,6 +13,7 @@ use Symfony\Component\Asset\Packages;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Process\Process;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookup;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
@@ -29,12 +29,14 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
 {
     use SimpleCacheTrait;
 
-    protected Packages $packages;
-
     /**
      * @var ?EntrypointLookupCollectionInterface
      */
     protected ?EntrypointLookupCollectionInterface $entrypointLookupCollection;
+
+    protected Packages $packages;
+
+    protected Process $clearProcess;
 
     protected string $publicDir;
 
@@ -74,6 +76,9 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
 
         $this->debug = $parameterBag->get('kernel.debug');
         $this->warmUp($cacheDir, $buildDir);
+
+        $this->clearProcess = new Process(['php', 'bin/console', 'cache:clear']);
+        $this->clearProcess->setWorkingDirectory( $parameterBag->get('kernel.project_dir'));
     }
 
     /**
@@ -281,7 +286,12 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
                 $this->entrypointHashes[$entrypointJsonPath] ??= $entrypointHash;
                 if (!is_cli() && $entrypointHash != $this->entrypointHashes[$entrypointJsonPath]) {
                     $this->entrypointHashes[$entrypointJsonPath] = $entrypointHash;
-                    throw new \RuntimeException("Entrypoint '" . $id . "' got modified.. please refresh your cache");
+
+                    if($this->parameterBag->get("base.autoclear")) $this->clearProcess->mustRun();
+                    else {
+
+                        throw new \RuntimeException("Entrypoint '" . $id . "' got modified.. please refresh your cache");
+                    }
                 }
             }
         }

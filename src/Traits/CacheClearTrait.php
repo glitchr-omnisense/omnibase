@@ -8,6 +8,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Process\Process;
 
 /**
  *
@@ -85,11 +86,23 @@ trait CacheClearTrait
 
     //
     // Run second cache clear command
-    protected function doubleCacheClearCheck(SymfonyStyle $io)
+    protected function doubleCacheClear(SymfonyStyle $io)
     {
-        if (CacheClearCommand::isFirstClear()) {
-            $io->warning('Cache requires to run a second `cache:clear` to account for custom bundle features.');
+        $autoClear = $this->parameterBag->get("base.autoclear");
+        if (CacheClearCommand::isFirstClear() && $autoClear) {
+
+        //    $io->warning('Automatic `cache:clear` is now running to account for base bundle features.');
+        //    $clearProcess = new Process(['php', 'bin/console', 'cache:clear']);
+        //    $clearProcess->setWorkingDirectory($this->projectDir);
+        //    $clearProcess->mustRun();
         }
+
+        if (CacheClearCommand::isFirstClear()) {
+            $io->warning('Cache requires to run a second `cache:clear` to account for base bundle features.');
+            return true;
+        }
+
+        return false;
     }
 
     //

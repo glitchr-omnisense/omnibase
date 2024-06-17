@@ -19,6 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use Base\Routing\RouterInterface;
+use Symfony\Component\Process\Process;
 
 #[AsCommand(name: 'cache:clear', aliases: [], description: '')]
 class CacheClearCommand extends Command
@@ -133,7 +134,7 @@ EOF
         
         if (!$noExtension) {
 
-            $this->doubleCacheClearCheck($io);
+            $this->doubleCacheClear($io);
             $this->webpackCheck($io);
             $this->generateSymlinks($io);
             $this->technicalSupportCheck($io);
