@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Type\EnumType;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
@@ -26,6 +26,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Extension\AbstractExtension;
+use Twig\Extension\CoreExtension;
 use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -151,7 +152,7 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('array_flatten', [$this, 'array_flatten']),
                 new TwigFilter('less_than', [$this, 'less_than']),
                 new TwigFilter('greater_than', [$this, 'greater_than']),
-                new TwigFilter('filter', [$this, 'filter'], ['needs_environment' => true]),
+                new TwigFilter('filter', [CoreExtension::class, 'arrayFilter'], ['needs_environment' => true]),
                 new TwigFilter('transforms', [$this, 'transforms'], ['needs_environment' => true]),
                 new TwigFilter('pad', [$this, 'pad']),
                 new TwigFilter('mb_ucfirst', 'mb_ucfirst'),
@@ -336,24 +337,6 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         return null;
-    }
-
-    /**
-     * @param Environment $env
-     * @param $array
-     * @param $arrow
-     * @return array|\CallbackFilterIterator
-     * @throws RuntimeError
-     */
-    public function filter(Environment $env, $array = [], $arrow = null)
-    {
-        if (null === $arrow) {
-            $arrow = function ($el) {
-                return null !== $el && false !== $el && '' !== $el;
-            };
-        }
-
-        return twig_array_filter($env, $array, $arrow);
     }
 
     /**

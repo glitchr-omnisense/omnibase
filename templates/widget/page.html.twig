@@ -7,7 +7,7 @@
     <p>{{ page.excerpt|raw }}</p>
     <div>
         {% if is_granted("ROLE_ADMIN") %}
-        <a class="btn btn-outline-primary" href="{{app.ea.crudify(page)}}" target="_blank">
+        <a class="btn btn-outline-primary" href="{{app.admin.crudify(page)}}" target="_blank">
             <i class="fa-solid fa-pencil-alt"></i> {{ '@EasyAdminBundle.action.edit'|trans|raw }}
         </a>
         {% endif %}

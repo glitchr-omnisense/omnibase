@@ -164,7 +164,7 @@ class AdvancedRouter extends Router implements RouterInterface
         return $this->debug;
     }
 
-    public function isBackend(mixed $request = null): bool
+    public function isAdmin(mixed $request = null): bool
     {
         return $this->isEasyAdmin($request) || $this->isProfiler($request);
     }

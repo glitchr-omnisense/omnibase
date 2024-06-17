@@ -98,7 +98,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function isDebug(): bool;
 
-    public function isBackend(mixed $request = null): bool;
+    public function isAdmin(mixed $request = null): bool;
 
     public function hasFirewall(?string $routeUrl = null): ?bool;
 

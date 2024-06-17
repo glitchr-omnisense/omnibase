@@ -90,11 +90,11 @@ security_maintenance:
             }"
   progress: "Progression {0}%"
 
-backoffice:
-  title: "Backoffice"
+admin:
+  title: "Admin"
   excerpt: ""
 
-backoffice_settings:
+admin_settings:
   title: "Settings"
   excerpt: "Configurable elements"
 
@@ -103,7 +103,7 @@ backoffice_settings:
   failed: "Failed to update website settings."
   valid: Check and save parameters
 
-backoffice_widgets:
+admin_widgets:
   title: "Widgets"
   excerpt: "Widget slot connected to website template"
   valid: Update widget slots
@@ -112,7 +112,7 @@ backoffice_widgets:
   success: "Widgets have been successfully updated"
   failed: "Failed to update website widgets."
 
-backoffice_apikey:
+admin_apikey:
   title: "API Keys"
   excerpt: "Sensitive information allowing to connect external API"
   empty: "There are no API keys to configure !"

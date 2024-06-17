@@ -22,11 +22,10 @@
         <service id="Base\Twig\AppVariable" decorates="twig.app_variable" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id=".inner"/>
-            <argument type="service" id="twig.ea_variable" />
             <argument type="service" id="twig.random_variable" />
             <argument type="service" id="twig.site_variable" />
             <argument type="service" id="twig.email_variable" />
-            <argument type="service" id="twig.backoffice_variable" />
+            <argument type="service" id="twig.admin_variable" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="referrer" />
@@ -71,9 +70,17 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\Backend\Factory\MenuFactory"                      parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"         decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"><argument type="service" id="router" /></service>
-        <service id="Base\Backend\Factory\AdminContextFactory"              parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory" decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"><argument type="service" id="ea_extension" /></service>
-        <service id="Base\Backend\Field\Configurator\CommonPreConfigurator" parent="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator" decorates="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator"><argument type="service" id="translator" /></service>
+        <service id="Base\Admin\EventListener\AdminRouterSubscriber"      parent="EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber"      decorates="EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber">
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+        
+        <service id="Base\Admin\Router\AdminUrlGenerator"                 parent="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator"                 decorates="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+        <service id="Base\Admin\Factory\MenuFactory"                      parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"                      decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"><argument type="service" id="router" /></service>
+        <service id="Base\Admin\Factory\AdminContextFactory"              parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"              decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"><argument type="service" id="ea_extension" /></service>
+        <service id="Base\Admin\Field\Configurator\CommonPreConfigurator" parent="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator" decorates="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator"><argument type="service" id="translator" /></service>
 
         <service id="Base\Console\Command\CacheClearCommand" parent="Base\Console\Command" decorates="console.command.cache_clear">
             <tag name="console.command" />

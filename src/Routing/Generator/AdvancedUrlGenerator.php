@@ -96,7 +96,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                         if (!$routeParameter) {
                             continue;
                         }
-                        $routeParameters[$key] = str_replace($search, $replace, $routeParameter);
+
+                        if (is_string($routeParameter)) {
+                            $routeParameters[$key] = str_replace($search, $replace, $routeParameter);
+                        } else {
+                            $routeParameters[$key] = $routeParameter;
+                        }
                     }
                 }
 

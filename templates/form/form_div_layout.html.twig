@@ -849,7 +849,7 @@
 
     {% set href = form.vars.href ?? null %}
     {% if is_granted("ROLE_ADMIN") %}
-        {% set href = href ?? (form.vars.value == "" ? null : app.ea.crudify(form.vars.value)) %}
+        {% set href = href ?? (form.vars.value == "" ? null : app.admin.crudify(form.vars.value)) %}
         {% if href is iterable %}
             {% set href = form.vars.value ? (href[get_class(form.vars.value)] ?? null) : null %}
         {% endif %}

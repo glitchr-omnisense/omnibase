@@ -33,8 +33,8 @@ locale:
         _singular: Country
         _plural: Countries
 
-backoffice:
-    title: "Go to backoffice"
+admin:
+    title: "Go to admin"
 
 profile:
     title: "See my profile"

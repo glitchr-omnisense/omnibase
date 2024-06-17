@@ -35,7 +35,7 @@ notifier:
     no_loopback: "Le debugging est activé, mais la boucle locale ne l'est pas: les utilisateurs peuvent recevoir leurs emails."
     no_debug: "Le debugging est désactivé, mais la boucle locale est activée ! Les emails seront tous redirigés vers l'adresse technique: {0})"
 
-backoffice:
+admin:
     update: "Les mises à jour ont bien été prises en compte"
 
 impersonator:

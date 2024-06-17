@@ -107,8 +107,7 @@
         <service id="twig.random_variable"     alias="Base\Twig\Variable\RandomVariable" />
         <service id="twig.site_variable"       alias="Base\Twig\Variable\SiteVariable" />
         <service id="twig.email_variable"      alias="Base\Twig\Variable\EmailVariable" />
-        <service id="twig.backoffice_variable" alias="Base\Twig\Variable\BackofficeVariable" />
-        <service id="twig.ea_variable"         alias="Base\Twig\Variable\EasyAdminVariable" />
+        <service id="twig.admin_variable"      alias="Base\Twig\Variable\AdminVariable" />
 
         <service id="base.service.image" alias="Base\Service\MediaService" />
         <service id="Base\Service\MediaServiceInterface" alias="base.service.image"/>
@@ -116,7 +115,7 @@
         <service id="form.proxy"     alias="Base\Form\FormProxy" />
         <service id="Base\Form\FormProxyInterface" alias="form.proxy"/>
 
-        <service id="ea_extension" alias="Base\Backend\Config\Extension" />
+        <service id="ea_extension" alias="Base\Admin\Config\Extension" />
 
     </services>
 </container>

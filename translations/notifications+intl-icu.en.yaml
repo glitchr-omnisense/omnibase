@@ -30,7 +30,7 @@ login:
     failed : "Invalid login credentials"
 
 
-backoffice:
+admin:
     update: Updates have been saved.
 
 kickout: "Sorry {0}, but you have been kicked out !"

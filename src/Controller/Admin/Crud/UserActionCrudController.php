@@ -1,0 +1,59 @@
+<?php
+
+namespace Base\Controller\Admin\Crud;
+
+use Base\Controller\Admin\AbstractCrudController;
+use Base\Controller\Admin\AbstractDashboardController;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
+/**
+ *
+ */
+class UserActionCrudController extends AbstractCrudController
+{
+    /**
+     * @var EntityManager
+     * */
+    protected $entityManager;
+
+    public static function getPreferredIcon(): ?string
+    {
+        return null;
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters->add("roles");
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $batchActionApprove = Action::new('batchActionApprove', '@' . AbstractDashboardController::TRANSLATION_DASHBOARD . '.action.batch_approve', 'fa-solid fa-user-check')
+            ->linkToCrudAction('batchActionApprove')
+            ->addCssClass('btn btn-primary text-success');
+
+        return parent::configureActions($actions)
+            ->addBatchAction($batchActionApprove)
+            ->setPermission($batchActionApprove, 'ROLE_EDITOR');
+    }
+
+    /**
+     * @param BatchActionDto $batchActionDto
+     * @return RedirectResponse
+     */
+    public function batchActionApprove(BatchActionDto $batchActionDto)
+    {
+        foreach ($batchActionDto->getEntityIds() as $id) {
+            $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
+            $user->approve();
+
+            $this->entityManager->flush($user);
+        }
+
+        return $this->redirect($batchActionDto->getReferrerUrl());
+    }
+}

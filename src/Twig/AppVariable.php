@@ -9,8 +9,7 @@ use Base\Service\ReferrerInterface;
 use Base\Service\SettingBag;
 use Base\Service\SettingBagInterface;
 use Base\Traits\ProxyTrait;
-use Base\Twig\Variable\BackofficeVariable;
-use Base\Twig\Variable\EasyAdminVariable;
+use Base\Twig\Variable\AdminVariable;
 use Base\Twig\Variable\EmailVariable;
 use Base\Twig\Variable\RandomVariable;
 use Base\Twig\Variable\SiteVariable;
@@ -33,25 +32,22 @@ class AppVariable
 
     public ParameterBagInterface $parameterBag;
 
-    public EasyAdminVariable $ea;
-
     public SiteVariable $site;
 
     public RandomVariable $random;
 
     public EmailVariable $email;
 
-    public BackofficeVariable $backoffice;
+    public AdminVariable $admin;
 
     public LocalizerInterface $localizer;
 
     public function __construct(
         \Symfony\Bridge\Twig\AppVariable $appVariable,
-        EasyAdminVariable                $ea,
         RandomVariable                   $random,
         SiteVariable                     $site,
         EmailVariable                    $email,
-        BackofficeVariable               $backoffice,
+        AdminVariable                    $admin,
         SettingBag                       $settingBag,
         ParameterBagInterface            $parameterBag,
         ReferrerInterface                $referrer,
@@ -65,11 +61,10 @@ class AppVariable
         $this->parameterBag = $parameterBag;
         $this->localizer = $localizer;
 
-        $this->backoffice = $backoffice;
+        $this->admin = $admin;
         $this->random = $random;
         $this->site = $site;
         $this->email = $email;
-        $this->ea = $ea;
 
         $this->setProxy($appVariable);
     }

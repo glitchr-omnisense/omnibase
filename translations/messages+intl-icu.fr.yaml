@@ -33,7 +33,7 @@ locale:
         _singular: Pays
         _plural: Pays
 
-backoffice:
+admin:
     title: "Administration"
 
 profile:
