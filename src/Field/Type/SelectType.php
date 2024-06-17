@@ -535,8 +535,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $mappedBy = $viewData->getMapping()->mappedBy;
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
-                        dump($entry);
-                        exit(1);
                         $this->propertyAccessor->setValue($entry, $mappedBy, null);
                     } elseif ($owningSide->contains($viewData->getOwner())) {
                         $owningSide->removeElement($viewData->getOwner());
