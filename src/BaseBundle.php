@@ -295,7 +295,6 @@ class BaseBundle extends AbstractBaseBundle
         /**
          * Doctrine custom types: (priority to \App namespace)
          */
-
         $entityManagerConnection
             ->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
         $entityManagerConnection

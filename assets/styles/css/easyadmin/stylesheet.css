@@ -332,11 +332,17 @@ fieldset>legend
 .d-inline .dropdown-menu { margin-top: 10px; }
 .d-inline .dropdown-menu
 {
-transform:translate3d(39px, 10px, 0px);
+    transform:translate3d(39px, 10px, 0px);
 }
 
 .ea-dark-scheme .ql-html { filter: invert(100%); }
 .ea-dark-scheme .ql-toolbar.ql-toolbar-html-only { background-color: #f8fafc33; }
+
+.mark, mark
+{
+    background-color: var(--sidebar-menu-icon-color);
+    padding:2px;
+}
 
 .locale-dropdown .dropdown-toggle:focus { box-shadow:none;}
 .locale-dropdown .dropdown-toggle i { margin:0; }

@@ -61,7 +61,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
         $clone->setCacheable(false);
         $clone->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [CountWalker::class]);
         $clone->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
-        $clone->setFirstResult(null)->setMaxResults(null);
+        // $clone->setFirstResult(null)->setMaxResults(null);
 
         return $clone;
     }

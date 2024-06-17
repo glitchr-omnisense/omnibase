@@ -57,7 +57,6 @@ class OrderedArrayCollection extends ArrayCollection
             }
 
             $this->ordering = array_keys(parent::toArray());
-            dump("ORDERING", $this);
         }
 
         return $this;

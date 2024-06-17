@@ -129,6 +129,7 @@ abstract class EnumType extends Type implements SelectInterface
         return in_array($value, self::getPermittedValues($inheritance, true));
     }
 
+    // @todo: Put this function in @ordercolumn
     public static function getOrderingKeys(array $array): array
     {
         $permittedValues = self::getPermittedValues();

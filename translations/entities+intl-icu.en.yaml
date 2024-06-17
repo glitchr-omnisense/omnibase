@@ -65,9 +65,9 @@ layout:
   image_crop:
     _singular: "image crop"
     _plural: "image crops"
-  short:
-    _singular: "short"
-    _plural: "shorts"
+  shlink:
+    _singular: "short url"
+    _plural: "short urls"
   semantic:
     _singular: "semantic"
     _plural: "semantics"

@@ -145,8 +145,6 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
     }
 
     /**
-     * Gets the lower-case short name of a class.
-     *
      * @psalm-param class-string $className
      */
     protected function getShortName(string $className): string

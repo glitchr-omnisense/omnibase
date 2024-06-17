@@ -34,7 +34,7 @@ class ShlinkIntl implements TranslationInterface
     }
 
     #[ORM\Column(type:"text")]
-    #[Assert\Url]
+    #[Assert\Url(requireTld: true)]
     protected $url = null;
 
     public function getUrl(): ?string

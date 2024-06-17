@@ -409,7 +409,7 @@
         </service>
 
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="2048" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="4096" />
             <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
             <tag name="doctrine.event_listener" event="preFlush" priority="2048" />
             <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
