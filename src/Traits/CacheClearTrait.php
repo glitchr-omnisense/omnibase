@@ -91,7 +91,7 @@ trait CacheClearTrait
         $autoClear = $this->parameterBag->get("base.autoclear");
         if (CacheClearCommand::isFirstClear() && $autoClear) {
 
-           $io->warning('Automatic `cache:clear` is now running to account for base bundle features.');
+           $io->warning('Automatic double `cache:clear` is now running to account for base bundle features.');
            $clearProcess = new Process(['php', 'bin/console', 'cache:clear']);
            $clearProcess->setWorkingDirectory($this->projectDir);
            $clearProcess->mustRun();
