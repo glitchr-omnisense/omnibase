@@ -10,12 +10,13 @@ use Base\Exception\MissingDiscriminatorMapException;
 use Base\Exception\MissingDiscriminatorValueException;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Common\Proxy\Proxy;
 use Doctrine\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Exception;
 use ReflectionException;
 
 use Doctrine\ORM\Mapping\ClassMetadataFactory as DoctrineClassMetadataFactory;
+use Doctrine\Persistence\Mapping\ReflectionService;
+use Doctrine\Persistence\Proxy;
 
 class ClassMetadataFactory extends DoctrineClassMetadataFactory
 {
@@ -38,6 +39,20 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
         return $driver->getAllClassNames();
     }
 
+    protected $uniqueTableName = [];
+    protected function initializeReflection(ClassMetadataInterface $class, ReflectionService $reflService): void
+    {
+        parent::initializeReflection($class, $reflService);
+
+        $className = $class->getName();
+        $tableName = $class->getTableName();
+        
+        if (str_contains($className, "\\Entity\\") && array_key_exists($tableName, $this->uniqueTableName) && $className != $this->uniqueTableName[$tableName]) {
+            throw new Exception("Ambiguous table name \"" . $tableName . "\" found between \"" . $this->uniqueTableName[$tableName] . "\" and \"" . $className . "\"");
+        }
+        
+        $this->uniqueTableName[$tableName] = $className;
+    }
 
     /**
      * Populates the discriminator value of the given metadata (if not set) by iterating over discriminator

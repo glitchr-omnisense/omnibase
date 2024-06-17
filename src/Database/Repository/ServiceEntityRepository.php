@@ -120,9 +120,15 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [$criteria]);
     }
 
-    public function flush()
+    public function flush(bool $autoclear = true)
     {
         $this->getEntityManager()->flush();
+        if($autoclear) $this->clear();
+    }
+
+    public function clear()
+    {
+        $this->getEntityManager()->clear();
     }
 
     /**

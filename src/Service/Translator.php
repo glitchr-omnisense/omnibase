@@ -17,7 +17,7 @@ class Translator implements TranslatorInterface
     public const PARSE_NAMESPACE = "namespace";
 
     public const DOMAIN_DEFAULT = "messages";
-    public const DOMAIN_BACKEND = "backoffice";
+    public const DOMAIN_BACKEND = "admin";
     public const DOMAIN_ENTITY = "entities";
     public const DOMAIN_ENUM = "enums";
 

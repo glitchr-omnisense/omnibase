@@ -27,7 +27,7 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
         return $this->adapter?->apply($this->getValue(), $subject) ?? $subject;
     }
 
-    #[ORM\Column(type: "array")]
+    #[ORM\Column(type: "json")]
     #[Associate(metadata: "class")]
     protected $value;
 

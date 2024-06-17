@@ -10,15 +10,16 @@ use Base\Service\Model\Currency\CurrencyApiInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Service\Model\Obfuscator\CompressionInterface;
-use Base\Twig\TagRendererInterface;
+use Base\Twig\Renderer\TagRendererInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\Workflow\WorkflowInterface;
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 
 use Base\Bundle\AbstractBaseExtension;
+use Base\Service\Model\Sharer\SharerAdapterInterface;
 
 /**
  *

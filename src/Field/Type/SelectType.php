@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
@@ -25,6 +25,7 @@ use Exception;
 use Generator;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Doctrine\ORM\Mapping\ToManyOwningSideMapping;
 
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
@@ -484,6 +485,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         //
         // Retrieve existing entities
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
+
             $classRepository = $this->entityManager->getRepository($options["class"]);
             $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
             if (!$options["multiple"]) {
@@ -512,12 +514,13 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
         }
 
+        dump($viewData);
         $options["multiple"] = $multiple !== null ? $multiple : null;
         $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
         if ($viewData instanceof PersistentCollection) {
-            $mappedBy = $viewData->getMapping()["mappedBy"];
-            $isOwningSide = $viewData->getMapping()["isOwningSide"];
+
+            $isOwningSide = $viewData->getMapping() instanceof ToManyOwningSideMapping;
             $oldData = $viewData->toArray();
 
             $mapping = $viewData->getMapping();
@@ -525,10 +528,15 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $dataChoices = [$dataChoices];
             }
 
-            foreach (array_diff_object($oldData, $dataChoices) as $entry) {
-                if (!$isOwningSide && $mappedBy) {
+            if (!$isOwningSide) {
+                
+                foreach (array_diff_object($oldData, $dataChoices) as $entry) {
+
+                    $mappedBy = $viewData->getMapping()->mappedBy;
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
+                        dump($entry);
+                        exit(1);
                         $this->propertyAccessor->setValue($entry, $mappedBy, null);
                     } elseif ($owningSide->contains($viewData->getOwner())) {
                         $owningSide->removeElement($viewData->getOwner());
@@ -537,14 +545,18 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
 
             if ($this->entityManager->getCache()) {
+
                 $mapping = $viewData->getMapping(); // Evict caches and collection caches.
+
                 foreach (array_unique_object(array_union($oldData, $dataChoices)) as $data) {
+
                     $this->entityManager->getCache()->evictEntity(get_class($data), $data->getId());
-                    if ($mapping["inversedBy"]) {
-                        $this->entityManager->getCache()->evictCollection(get_class($data), $mapping["inversedBy"], $data->getId());
+
+                    if ($mapping->inversedBy) {
+                        $this->entityManager->getCache()->evictCollection(get_class($data), $mapping->inversedBy, $data->getId());
                     }
                     if (!$isOwningSide && $mappedBy) {
-                        $this->entityManager->getCache()->evictCollection($mapping["targetEntity"], $mappedBy, $viewData->getOwner());
+                        $this->entityManager->getCache()->evictCollection($mapping->targetEntity, $mappedBy, $viewData->getOwner());
                     }
                 }
             }
@@ -562,6 +574,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     }
                 }
             }
+
         } elseif ($viewData instanceof Collection) {
             $viewData->clear();
             if (!is_iterable($dataChoices)) {

@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\Routing\Route;
 use App\Entity\User;
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\RouterInterface;
@@ -211,12 +211,12 @@ class BaseService implements RuntimeExtensionInterface
     /**
      * @return array
      */
-    public function getBackoffice()
+    public function getAdmin()
     {
         return [
-            "title" => $this->getSettingBag()->getScalar("base.settings.title.backoffice"),
-            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.backoffice"),
-            "logo" => $this->getSettingBag()->getScalar("base.settings.logo.backoffice")
+            "title" => $this->getSettingBag()->getScalar("base.settings.title.admin"),
+            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.admin"),
+            "logo" => $this->getSettingBag()->getScalar("base.settings.logo.admin")
         ];
     }
 

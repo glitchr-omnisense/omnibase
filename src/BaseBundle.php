@@ -198,10 +198,11 @@ class BaseBundle extends AbstractBaseBundle
     public function boot(): void
     {
         if (!extension_loaded('imagick')) {
-            throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
+           throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
         }
+        
         if (!extension_loaded('igbinary')) {
-            throw new EnvNotFoundException('Application requires `igbinary`, but it is not enabled.');
+           throw new EnvNotFoundException('Application requires `igbinary`, but it is not enabled.');
         }
 
         if (!self::$cache) {

@@ -23,10 +23,14 @@ use Exception;
 use InvalidArgumentException;
 
 use Base\Database\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\Mapping\AssociationMapping;
 use Doctrine\ORM\Mapping\FieldMapping;
 use Doctrine\Persistence\Proxy;
-use LogicException;
 use RuntimeException;
+
+use Doctrine\ORM\Mapping\OwningSideMapping;
+use Doctrine\ORM\Mapping\InverseSideMapping;
+
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -891,6 +895,8 @@ class ClassMetadataManipulator extends AbstractLocalCache
         }
 
         foreach ($classMetadata->associationMappings as $fieldName => $associationMapping) {
+
+            if (!$associationMapping instanceof OwningSideMapping) continue;
             if (($associationMapping["mappedBy"] ?? null) == $mappedBy) {
                 return $fieldName;
             }
@@ -907,6 +913,8 @@ class ClassMetadataManipulator extends AbstractLocalCache
         }
 
         foreach ($classMetadata->associationMappings as $fieldName => $associationMapping) {
+
+            if (!$associationMapping instanceof InverseSideMapping) continue;
             if ($associationMapping["inversedBy"] ?? null == $inversedBy) {
                 return $fieldName;
             }
@@ -1071,7 +1079,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->hasAssociation($entityOrClassOrMetadata, "translations");
     }
 
-    public function getTranslationMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
+    public function getTranslationMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?FieldMapping
     {
         if ($this->hasAssociation($entityOrClassOrMetadata, "translations")) {
             return $this->getMapping($this->getClassMetadata($entityOrClassOrMetadata)->getAssociationMapping("translations")["targetEntity"], $fieldName);
@@ -1080,7 +1088,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return null;
     }
 
-    public function getMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array
+    public function getMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): null|FieldMapping|AssociationMapping
     {
         if ($this->hasAssociation($entityOrClassOrMetadata, $fieldName)) {
             return $this->getAssociationMapping($entityOrClassOrMetadata, $fieldName);

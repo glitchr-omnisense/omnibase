@@ -15,7 +15,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Entity\User\Notification;
 use Base\Routing\RouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
@@ -62,7 +62,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
      */
     public function postEntityUpdate($entity)
     {
-        $notification = new Notification("backoffice.update");
+        $notification = new Notification("admin.update");
         $notification->send("success");
     }
 
@@ -73,7 +73,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
     protected function getUrl(Request $request)
     {
         $request->overrideGlobals();
-
+        
         $queryString = $request->getQueryString() ? "?" . $request->getQueryString() : "";
         return explode("?", $request->getRequestUri())[0] . $queryString;
     }
@@ -87,6 +87,9 @@ class EasyAdminSubscriber implements EventSubscriberInterface
             return;
         }
         if (!$this->router->isEasyAdmin()) {
+            return;
+        }
+        if($this->adminContextProvider->getContext() == null) {
             return;
         }
 

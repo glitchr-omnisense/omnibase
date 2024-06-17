@@ -36,7 +36,6 @@ class DoctrineArrayUpgradeCommand extends Command
     {
         $schemaManager = $this->getEntityManager()->GetConnection()->createSchemaManager();
         $tables = $schemaManager->listTables();
-
         foreach ($tables as $table) {
             $this->convertArrayFieldsToJson($table, $output);
         }
@@ -50,18 +49,22 @@ class DoctrineArrayUpgradeCommand extends Command
     {
         $tableName = $table->getName();
         $columns = $table->getColumns();
-
         foreach ($columns as $column) {
+
             /** @var Column $column */
-            if (Type::getTypeRegistry()->lookupName($column->getType()) === 'array') {
+            $isArray = Type::getTypeRegistry()->lookupName($column->getType()) === 'array';
+            $isArrayType = $column->getComment() == "(DC2Type:array)";
+            $isJson = Type::getTypeRegistry()->lookupName($column->getType()) === 'json';
+            $isJsonType = $column->getComment() == "(DC2Type:json)";
+            if ($isJson || $isJsonType || $isArray || $isArrayType) {
+                
                 $columnName = $column->getName();
                 try {
                     $this->convertArrayColumnToJson($tableName, $columnName, $output);
-                    // After converting the column data to JSON, alter the column type
-                    $this->alterColumnToJson($tableName, $columnName, $output);
+                    if($isArray) $this->alterColumnToJson($tableName, $columnName, $output);
                 } catch (\Exception $e) {
                     // Handle the exception gracefully
-                    $output->writeln("Error converting $columnName in $tableName: " . $e->getMessage());
+                    $output->writeln("Error converting `$columnName` in `$tableName`: " . $e->getMessage());
                 }
             }
         }
@@ -76,10 +79,13 @@ class DoctrineArrayUpgradeCommand extends Command
 
         $statement = $query->executeQuery();
         $rows = $statement->fetchAllAssociative();
-
         foreach ($rows as $row) {
+
             $value = $row[$columnName];
-            if ($value !== null) {
+            if($value == "") $unserializedValue = [];
+            else if (is_json($value)) continue;
+            else if ($value !== null) {
+
                 // Try to unserialize the value
                 $unserializedValue = unserialize($value);
                 if ($unserializedValue === false && $value !== 'b:0;') {
@@ -91,7 +97,6 @@ class DoctrineArrayUpgradeCommand extends Command
 
             // Update the value to JSON format
             $jsonValue = json_encode($unserializedValue);
-
             $connection->executeStatement("UPDATE $tableName SET $columnName = :jsonValue WHERE id = :id", [
                 'jsonValue' => $jsonValue,
                 'id' => $row['id'],
@@ -108,7 +113,7 @@ class DoctrineArrayUpgradeCommand extends Command
         try {
             $connection->executeStatement("ALTER TABLE $tableName MODIFY $columnName JSON");
             $output->writeln("Altered $columnName in $tableName to JSON format.");
-            $output->writeln("--> You can now change annotations/attributes column information in entities.");
+            $output->writeln("--> You can now change annotations/attributes column information in entities to `json`.");
         } catch (\Exception $e) {
             // Handle the exception gracefully
             $output->writeln("Error altering $columnName in $tableName: " . $e->getMessage());

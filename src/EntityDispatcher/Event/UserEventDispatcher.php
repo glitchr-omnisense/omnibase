@@ -26,7 +26,7 @@ class UserEventDispatcher extends AbstractEventDispatcher
     {
         $user = $event->getObject();
         $oldUser = $this->entityHydrator->getOriginalEntity($event);
-
+    
         if ($user->isApproved() && !$oldUser->isApproved()) {
             $this->addEvent(UserEvent::APPROVAL, $user);
         }

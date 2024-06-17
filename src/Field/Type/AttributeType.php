@@ -38,6 +38,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractRuleAdapter;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 
 use Base\Twig\Environment;
+use Doctrine\ORM\Mapping\InverseSideMapping;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
 
@@ -337,13 +338,11 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 }
             }
 
-            if ($viewData instanceof PersistentCollection) {
+            if ($viewData instanceof PersistentCollection && $viewData->getMapping() instanceof InverseSideMapping) {
+
                 $mappedBy = $viewData->getMapping()["mappedBy"];
-                $isOwningSide = $viewData->getMapping()["isOwningSide"];
-                if (!$isOwningSide) {
-                    foreach ($viewData as $entry) {
-                        $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
-                    }
+                foreach ($viewData as $entry) {
+                    $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                 }
             }
         }

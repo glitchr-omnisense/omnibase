@@ -35,13 +35,6 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 
-// @TODO
-// IN CASE A VARIANT IS ADDED WHILE THE MAIN ARTICLE IS ALREADY IN DATABASE, DOCTRINE IS RETURNING THIS EXCEPTION (ACKNOWLEDGE)
-//   [Doctrine\ORM\ORMInvalidArgumentException]
-//   A new entity was found through the relationship 'Base\Entity\Thread#parent' that was not configured to cascade persist operations for entity: Heronry. To solve t
-//   his issue: Either explicitly call EntityManager#persist() on this unknown entity or configure cascade persist this association in the mapping for example @ManyTo
-//   One(..,cascade={"persist"}).
-
 /**
  *
  */

@@ -34,8 +34,8 @@ class TranslationCrudCommand extends Command
         $crudRestriction = $input->getOption('crud') ?? "";
         $cruds = array_filter(
             array_merge(
-                BaseBundle::getInstance()->getAllClasses($baseLocation . "/Controller/Backend/Crud"),
-                BaseBundle::getInstance()->getAllClasses("./src/Controller/Backend/Crud"),
+                BaseBundle::getInstance()->getAllClasses($baseLocation . "/Controller/Admin/Crud"),
+                BaseBundle::getInstance()->getAllClasses("./src/Controller/Admin/Crud"),
             ),
             fn($c) => !($c instanceof EaCrudController)
         );

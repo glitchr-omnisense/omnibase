@@ -19,6 +19,11 @@ class BaseConfiguration extends AbstractBaseConfiguration
         $treeBuilder = $this->getTreeBuilder();
         $treeBuilder->getRootNode()
         ->children()
+            ->booleanNode('autoclear')
+                ->info('Automatically clear cache in case of integrity issue')
+                ->defaultValue(true)
+            ->end()
+
             ->arrayNode('database')->addDefaultsIfNotSet()
             ->children()
 

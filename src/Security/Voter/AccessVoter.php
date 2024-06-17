@@ -74,7 +74,7 @@ class AccessVoter extends Voter
         $this->maintenanceProvider = $maintenanceProvider;
         $this->launcher = $launcher;
 
-        $this->urlExceptions = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
+        $this->urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocaleLang());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocale());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocaleLang());

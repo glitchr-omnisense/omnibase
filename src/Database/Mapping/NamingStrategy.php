@@ -30,46 +30,43 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      */
     public function classToTableName($className): string
     {
+        $tableName = null;
         $className = is_object($className) ? get_class($className) : $className;
         $className = class_exists($className)
             ? (new ReflectionClass($className))->getName()
             : $className;
 
-        $tableName = array_search($className, $this->uniqueTableName);
-
         //
         // Search for a table name in class metadata
         if (class_exists($className)) {
-            if (!$tableName) {
 
-                $reflClass = new ReflectionClass($className);
-                
-                // Attributes
-                $annotations = [];
-                foreach($reflClass->getAttributes() as $attribute) {
-    
-                    $annotation = $attribute->newInstance();
-                    if (!is_serializable($annotation)) {
-                        throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
-                    }
-    
-                    $annotations[] = $annotation;
+            $reflClass = new ReflectionClass($className);
+            
+            // Attributes
+            $annotations = [];
+            foreach($reflClass->getAttributes() as $attribute) {
+
+                $annotation = $attribute->newInstance();
+                if (!is_serializable($annotation)) {
+                    throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                 }
 
-                while ($annotation = array_pop($annotations)) {
-                    if ($annotation instanceof Table && !empty($annotation->name)) {
-                        $tableName = $annotation->name;
-                        break;
-                    }
-                }
+                $annotations[] = $annotation;
+            }
 
-                // Doctrine annotations
-                $annotations = $this->annotationReader->getClassAnnotations($reflClass);
-                while ($annotation = array_pop($annotations)) {
-                    if ($annotation instanceof Table && !empty($annotation->name)) {
-                        $tableName = $annotation->name;
-                        break;
-                    }
+            while ($annotation = array_pop($annotations)) {
+                if ($annotation instanceof Table && !empty($annotation->name)) {
+                    $tableName = $annotation->name;
+                    break;
+                }
+            }
+
+            // Doctrine annotations
+            $annotations = $this->annotationReader->getClassAnnotations($reflClass);
+            while ($annotation = array_pop($annotations)) {
+                if ($annotation instanceof Table && !empty($annotation->name)) {
+                    $tableName = $annotation->name;
+                    break;
                 }
             }
         }
@@ -113,13 +110,6 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
         if (strlen($tableName) > self::TABLE_NAME_SIZE) {
             throw new Exception("Table name will be truncated for \"" . $className . "\"");
         }
-
-        // dump($className, $tableName, $this->uniqueTableName);
-        if (str_contains($className, "\\Entity\\") && array_key_exists($tableName, $this->uniqueTableName) && $className != $this->uniqueTableName[$tableName]) {
-            throw new Exception("Ambiguous table name \"" . $tableName . "\" found between \"" . $this->uniqueTableName[$tableName] . "\" and \"" . $className . "\"");
-        }
-
-        $this->uniqueTableName[$tableName] = $className;
 
         return $tableName;
     }

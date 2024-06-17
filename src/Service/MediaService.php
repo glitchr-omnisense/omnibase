@@ -515,8 +515,8 @@ class MediaService extends FileService implements MediaServiceInterface
 
         // NB: Encode path using hash only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over
-        // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        // $pathCache    = path_suffix($pathRelative, $pathExtras  );
+        $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+        $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
         //
         // Compute a response.. (if cache not found)
@@ -595,8 +595,8 @@ class MediaService extends FileService implements MediaServiceInterface
 
         // Encode path using hashid only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over. Lines below make sure suffix is applied including filter operations
-        // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        // $pathCache    = path_suffix($pathRelative, $pathExtras  );
+        $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+        $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
         if (!$pathRelative) {
 
@@ -660,8 +660,8 @@ class MediaService extends FileService implements MediaServiceInterface
 
         //
         // GD does not support other palette than RGB..
-        //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
-        //   cmyk2rgb($pathPublic); // Not working yet..
+        // if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
+        //   cmyk2rgb($pathPublic); // @TODO: Not working yet.. to be investivated
         try {
             $image = $imagine->open($path);
         } catch (Exception $e) {

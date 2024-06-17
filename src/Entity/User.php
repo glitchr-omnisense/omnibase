@@ -384,7 +384,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     #[Assert\NotBlank(groups: ["new", "edit"])]
     #[OrderColumn]
     protected $roles = [];
-
     public function isSocial(): bool
     {
         return in_array(UserRole::SOCIAL, $this->roles);

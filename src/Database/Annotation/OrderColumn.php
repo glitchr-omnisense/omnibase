@@ -81,7 +81,12 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
     public static function has(string $className, ?string $property = null): bool
     {
-        return isset(self::$orderedColumns[$className]) && in_array($property, self::$orderedColumns[$className]);
+        if( array_key_exists($className, self::$orderedColumns) ) {
+
+            return $property === null || in_array($property, self::$orderedColumns[$className]);
+        }
+
+        return false;
     }
 
     protected array $ordering = [];
@@ -91,13 +96,18 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
      * @return array
      * @throws Exception
      */
-    public function getOrderedColumns(mixed $entity)
+    public function getOrderedColumns(mixed $entity, ?string $property = null): array
     {
         $orderedColumns = [];
-        foreach (self::$orderedColumns as $column) {
-            list($className, $_) = explode("::", $column);
+        foreach ($this->get() as $column) {
+
+            list($className, $classProperty) = explode("::", $column);
+            if($property !== null && $property != $classProperty) continue;
+
             if (is_instanceof($entity, $className)) {
-                $orderedColumns[] = $column;
+
+                $orderedColumns[$className] ??= [];
+                $orderedColumns[$className][] = $classProperty;
             }
         }
 
@@ -120,44 +130,29 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $orderingRepository = $this->getRepository(Ordering::class);
 
-        $className = array_transforms(function ($k, $e) use ($property): ?array {
-            list($c, $p) = explode("::", $e);
-            return $p === $property ? [$k, $c] : null;
-        }, $this->getOrderedColumns($entity));
+        $className = first(array_keys($this->getOrderedColumns($entity, $property)));
+        if ($className === null) { return; }
 
-        $className = first($className);
-        if ($className === null) {
-            return;
-        }
-
-        try {
-            $entityValue = $classMetadata->getFieldValue($entity, $property);
-        } catch (Exception $e) {
-            return;
-        }
+        try { $entityValue = $classMetadata->getFieldValue($entity, $property) ?? []; }
+        catch (Exception $e) { return; }
 
         $shift = 0;
         $orderedIndexes = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
         $orderedIndexes = $orderedIndexes?->getEntityData()[$property] ?? [];
         $orderedIndexes = array_transforms(function ($k, $v) use (&$shift): ?array {
+
             if (is_int($v)) {
                 return [$k - $shift, $v];
             }
 
             $shift++;
             return null;
+
         }, array_values($orderedIndexes));
-
-        if (!$entityValue) {
-            $entityValue = [];
-        }
-        $nEntries = $entityValue instanceof Collection ? $entityValue->count() : count($entityValue ?? []);
-        while (count($orderedIndexes) < $nEntries) {
-            $orderedIndexes[] = count($orderedIndexes);
-        }
-
+        
         if (is_array($entityValue)) {
-            $entityValue = array_flip(array_transforms(fn($k, $v): array => [$entityValue[$k], $v], $orderedIndexes));
+            
+            if($orderedIndexes) $entityValue = array_flip(array_transforms(fn($k, $v): array => [$entityValue[$k], $v], $orderedIndexes));
             ksort($entityValue);
 
             if ($this->order == "DESC") {
@@ -165,12 +160,14 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             }
 
             $propertyAccessor->setValue($entity, $property, $entityValue);
+
         } elseif ($entityValue instanceof PersistentCollection && $entityValue->getOwner() == $entity) {
+
             $orderedIndexes = $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes;
 
             $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
             $reflProp->setAccessible(true);
-            $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap() ?? [], $orderedIndexes));
+            $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue ?? [], $orderedIndexes));
         }
     }
 

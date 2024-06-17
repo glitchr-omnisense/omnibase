@@ -15,7 +15,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Entity\Layout\Semantic;
 use Base\Entity\Layout\Setting;
-use Base\Entity\Layout\Short;
+use Base\Entity\Layout\Shlink;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Thread;
 use Base\Entity\Thread\Tag;
@@ -201,7 +201,7 @@ trait TranslatableTrait
     /**
      * @param string $method
      * @param array $arguments
-     * @return Product|Variant|Store|Artist|Merchant|Attribute|AbstractAdapter|Hyperlink|Semantic|Setting|Short|Widget|Thread|Tag|Taxon|mixed|null
+     * @return Product|Variant|Store|Artist|Merchant|Attribute|AbstractAdapter|Hyperlink|Semantic|Setting|Shlink|Widget|Thread|Tag|Taxon|mixed|null
      * @throws Exception
      */
     public function __call(string $method, array $arguments)

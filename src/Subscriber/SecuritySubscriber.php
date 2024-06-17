@@ -230,7 +230,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             if (!in_array($this->router->getRouteName(), $routeRestriction)) {
                 if ($specialGrant) {
                     // If not let them know that this page is locked for others
-                    if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isBackend()) {
+                    if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isAdmin()) {
                         $notification = new Notification("access_restricted." . $restrictionType . ".message");
                         $notification->send("warning");
                     }
@@ -349,6 +349,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if (!($user = $token->getUser())) {
             return;
         }
+
         if (!$user instanceof BaseUser) {
             return;
         }

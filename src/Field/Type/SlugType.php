@@ -78,17 +78,20 @@ final class SlugType extends AbstractType implements AutovalidateInterface
         $dataClass = $form->getParent()->getConfig()->getDataClass();
         if ($dataClass && $this->classMetadataManipulator->hasField($dataClass, $form->getName())) {
             $fieldMapping = $this->classMetadataManipulator->getFieldMapping($dataClass, $form->getName());
-            $isNullable = $fieldMapping["nullable"] ?? false;
+            $isNullable = $fieldMapping->nullable ?? false;
             $view->vars["required"] = $options["required"] || !$isNullable;
         }
 
         // Check if path is reacheable..
         if ($options["target"] !== null && str_starts_with($options["target"], ".")) {
+            
             $view->vars["ancestor"] = $view->parent;
 
             $target = $form->getParent();
             $targetPath = substr($options["target"], 1);
+
         } else {
+
             // Get oldest parent form available..
             $ancestor = $view;
             while ($ancestor->parent !== null) {
@@ -106,7 +109,12 @@ final class SlugType extends AbstractType implements AutovalidateInterface
         }
 
         $targetPath = $targetPath ? explode(".", $targetPath) : null;
+        if(!$target) {
+            throw new Exception("Target field not found in `".$form->getName()."`.");
+        }
+
         foreach ($targetPath ?? [] as $path) {
+
             if (!$target->has($path)) {
                 throw new Exception("Child form \"$path\" related to view data \"" . get_class($target->getViewData()) . "\" not found in " . get_class($form->getConfig()->getType()->getInnerType()) . " (complete path: \"" . $options["target"] . "\")");
             }

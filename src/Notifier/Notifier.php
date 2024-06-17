@@ -145,7 +145,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.adminApproval.subject", [$user]),
             "content" => $this->translator->trans("@emails.adminApproval.content", [$user, $user->getId()]),
             "action_text" => $this->translator->trans("@emails.adminApproval.action_text"),
-            "action_url" => $this->router->getUrl("backoffice")
+            "action_url" => $this->router->getUrl("admin")
         ]);
 
         return $notification;

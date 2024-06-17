@@ -74,10 +74,15 @@ namespace {
      * @return bool
      */
     function is_json(mixed $stringOrObject)
-    {
-        if (is_string($stringOrObject) && str_contains($stringOrObject, "{") && str_contains($stringOrObject, "}")) {
-            json_decode($stringOrObject);
-            return json_last_error() === JSON_ERROR_NONE;
+    {        
+        if (is_string($stringOrObject)) {
+            
+            $isDict = str_contains($stringOrObject, "{") && str_contains($stringOrObject, "}");
+            $isArray = str_contains($stringOrObject, "[") && str_contains($stringOrObject, "]");
+            if($isDict || $isArray) {
+                json_decode($stringOrObject);
+                return json_last_error() === JSON_ERROR_NONE;
+            }
         }
 
         if (is_object($stringOrObject)) {

@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Field\CountryField;
 use Base\Field\SelectField;
 use Doctrine\Common\Collections\ArrayCollection;
