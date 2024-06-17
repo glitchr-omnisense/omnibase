@@ -22,13 +22,9 @@ class EnumSubscriber
 
         /** @var Column $column */
         foreach ($columns as $column) {
-
             
-            $enum = $column->getType();
-            $column->setComment(trim(sprintf('%s (%s)', $column->getComment(), implode(',', $enum::getPermittedValues()))));
-
-            // $type = $column->getType() instanceof SetType ? "set" : "enum";
-            // $column->setComment(trim(sprintf('(DC2Type:%s,%s)', $type, $column->getType()->getName())));
+            $enum = $column->getType()->getName();
+            $column->setComment(trim(sprintf('(DC2Type:%s)', $enum)));
         }
     }
 }
