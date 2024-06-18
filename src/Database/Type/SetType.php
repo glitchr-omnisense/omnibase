@@ -10,10 +10,6 @@ use Doctrine\DBAL\Platforms\SqlitePlatform;
  */
 abstract class SetType extends EnumType
 {
-    public function getName(): string
-    {
-        return "set,".self::getStaticName();
-    }
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         if ($platform instanceof SqlitePlatform) {

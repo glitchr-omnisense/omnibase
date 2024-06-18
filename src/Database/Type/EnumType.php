@@ -233,11 +233,6 @@ abstract class EnumType extends Type implements SelectInterface
         return $values;
     }
 
-    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-    {
-        return true;
-    }
-
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         if ($platform instanceof SqlitePlatform) {

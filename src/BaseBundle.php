@@ -309,17 +309,13 @@ class BaseBundle extends AbstractBaseBundle
 
         foreach ($classList as $className) {
 
-            $type = is_instanceof($className, SetType::class) ? "set" : "enum";
-            if (Type::hasType($type.",".$className::getStaticName())) {
-                Type::overrideType($type.",".$className::getStaticName(), $className);
-            } else {
-                Type::addType($type.",".$className::getStaticName(), $className);
+            if(!Type::hasType($className::getStaticName())) {
+                Type::addType($className::getStaticName(), $className);
             }
 
-            if (Type::hasType($className::getStaticName())) {
-                Type::overrideType($className::getStaticName(), $className);
-            } else {
-                Type::addType($className::getStaticName(), $className);
+            $type = Type::getType($className::getStaticName());
+            if($type == $className) {
+                throw new EnvNotFoundException('Doctrine type `'.$className::getStaticName().'` already exists, conflict detected between '. $className." and ". get_class($type));
             }
         }
 
