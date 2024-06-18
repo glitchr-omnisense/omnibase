@@ -24,14 +24,34 @@ trait CacheClearTrait
     {
         $Xdebug = extension_loaded('xdebug') ? '<info>✓</info>' : '<error>✗</error>';
         $Blackfire = extension_loaded('blackfire') ? '<info>✓</info>' : '<error>✗</error>';
-        $APCu = extension_loaded('apc') && ini_get('apc.enabled') ? '<info>✓</info>' : '<error>✗</error>';
+
+        $igbinary = extension_loaded('igbinary') ? '<info>✓</info>' : '<error>✗</error>';
+        $imagick = extension_loaded('imagick') ? '<info>✓</info>' : '<error>✗</error>';
+
         $OPcache = extension_loaded('Zend OPcache') ? '<info>✓</info>' : '<error>✗</error>';
+        $APCu = extension_loaded('apc') && ini_get('apc.enabled') ? '<info>✓</info>' : '<error>✗</error>';
+        if(extension_loaded('Zend OPcache') && !(extension_loaded('apc') && ini_get('apc.enabled'))){
+            $APCu = null;
+        }
+
+        if(extension_loaded('apc') && ini_get('apc.enabled') && !extension_loaded('Zend OPcache')){
+            $OPcache = null;
+        }
 
         $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver extensions might differ)", true);
         $io->write("        [" . $Xdebug . "] Xdebug; ");
-        $io->write("        [" . $APCu . "] APCu", true);
-        $io->write("        [" . $Blackfire . "] Blackfire; ");
-        $io->write("     [" . $OPcache . "] OPcache", true);
+        $io->write("        [" . $Blackfire . "] Blackfire ", true);
+        $io->write("        [" . $imagick . "] Imagick;");
+        $io->write("        [" . $igbinary . "] Igbinary", true);
+
+        if($OPcache) {
+            $io->write("        [" . $OPcache . "] OPcache");
+            if($APCu) $io->write(";");
+
+        }
+
+        if($APCu) $io->write("        [" . $APCu . "] APCu");
+        $io->write("", true);
     }
 
     protected function customFeatureWarnings(SymfonyStyle $io): void
