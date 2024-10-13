@@ -9,15 +9,14 @@
 {% for link in paginator_previousOnes(pagination, path, path_parameters) %}
 {{ link|raw }}{% if not loop.last %}, {% endif %}
 {% endfor %}
-</span>{% apply spaceless %}
+</span>
+<span class="paginator-current">{% if pagination.getPage() > 0 %}
 
-{% endapply %}<span class="paginator-current">{% if pagination.getPage() > 0 %}{% apply spaceless %}
+    {%- if pagination.getPage() > 1 -%}, {%- endif -%}
+    {{- pagination.getPage() -}}
+    {%- if pagination.getTotalPages() > 1 and pagination.getPage() != pagination.getTotalPages() -%}, {%- endif -%}
 
-    {% endapply %}{% if pagination.getPage() > 1 %}, {% endif %}{% apply spaceless %}
-    {% endapply %}{{ pagination.getPage() }}{% apply spaceless %}
-    {% endapply %}{% if pagination.getTotalPages() > 1 and pagination.getPage() != pagination.getTotalPages() %}, {% endif %}{% apply spaceless %}
-
-{% endapply %}{% endif %}</span>
+{%- endif -%}</span>
 
 <span class="paginator-forward">
 {% for link in paginator_nextOnes(pagination, path, path_parameters) %}

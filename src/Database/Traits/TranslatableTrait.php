@@ -208,7 +208,7 @@ trait TranslatableTrait
     {
         $className = get_class($this);
         $translationClassName = $this->getTranslationEntityClass();
-        $parentClass = get_parent_class();
+        $parentClass = get_parent_class($this);
 
         //
         // Call magic setter

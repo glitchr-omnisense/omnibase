@@ -94,9 +94,9 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('render_stylesheet', [$this, 'render_stylesheet'], ['is_safe' => ['all']]),
             new TwigFunction('render_javascript', [$this, 'render_javascript'], ['is_safe' => ['all']]),
 
-            new TwigFunction('str_starts_with', 'str_starts_with'),
-            new TwigFunction('str_ends_with', 'str_ends_with'),
-            new TwigFunction('empty', 'empty'),
+            new TwigFunction('str_starts_with', fn(string $haystack, string $needle): bool => str_starts_with($haystack, $needle)),
+            new TwigFunction('str_ends_with', fn(string $haystack, string $needle): bool => str_starts_with($haystack, $needle)),
+            new TwigFunction('empty', fn( mixed $var): bool => empty($var)),
             new TwigFunction('property_accessor', [$this, 'property_accessor']),
             new TwigFunction('cast', 'cast'),
 

@@ -6,6 +6,7 @@ use Base\Service\HotParameterBag;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
 use PDOException;
+use Doctrine\DBAL\Exception as DBALException;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -61,7 +62,7 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
 
         $allRaw = [];
         try { $allRaw = $this->settingBag->allRaw(true, true); } 
-        catch (PDOException $e) { return; }
+        catch (DBALException $e) { return; }
 
         array_map_recursive(function ($setting) {
 
