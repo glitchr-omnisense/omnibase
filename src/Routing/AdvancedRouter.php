@@ -30,7 +30,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  *
  */
-class AdvancedRouter extends Router implements RouterInterface
+class AdvancedRouter implements RouterInterface
 {
     /**
      * @var Router

@@ -35,14 +35,12 @@
     {{ include('@EasyAdmin/includes/_encore_script_tags.html.twig', { assets: ea_field_assets.webpackEncoreAssets }, with_context = false) }}
 {% endblock %}
 
-{% block content_title %}
-    {%- apply spaceless -%}
+{%- block content_title -%}
         {% set custom_page_title = ea.crud.customPageTitle('index', null, ea.i18n.translationParameters) %}
         {{ custom_page_title is null
             ? ea.crud.defaultPageTitle('index', null, ea.i18n.translationParameters)|trans|raw
             : custom_page_title|trans|raw }}
-    {%- endapply -%}
-{% endblock %}
+{%- endblock -%}
 
 {% set has_batch_actions = batch_actions|length > 0 %}
 {% block page_actions %}
