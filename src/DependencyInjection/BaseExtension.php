@@ -16,7 +16,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\Workflow\WorkflowInterface;
-use Base\Controller\Admin\AbstractCrudController;
 
 use Base\Bundle\AbstractBaseExtension;
 use Base\Service\Model\Sharer\SharerAdapterInterface;

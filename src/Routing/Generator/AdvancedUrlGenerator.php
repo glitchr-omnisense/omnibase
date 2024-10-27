@@ -242,9 +242,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             return sanitize_url($routeUrl);
         }
 
-        throw new RouteNotFoundException("No route found for $routeName, matching with any of the candidate routes: ". implode(", ", $routes));
+        throw new RouteNotFoundException("No valid route found for `$routeName`. Candidate routes are ". implode(", ", array_keys($routes)). "(please check mandatory variables?)");
     }
-
 
     public function groups(?string $routeName): array
     {

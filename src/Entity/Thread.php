@@ -48,7 +48,8 @@ use ApiPlatform\Metadata\ApiResource;
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 #[Hierarchify(null, separator: "/" )]
 #[Trasheable]
-// #[ApiResource]
+
+#[ApiResource]
 
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {

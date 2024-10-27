@@ -76,7 +76,14 @@ trait SimpleCacheTrait
             if ($fallback === null) {
                 return null;
             }
-            $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $ttl, $deferred);
+
+            try {
+
+                $this->setCache($key, is_callable($fallback) ? $fallback() : $fallback, $ttl, $deferred);
+
+            } catch (\Exception $e) {
+                return null;
+            }
         }
 
         return $this->cache?->getItem($this->getCacheKey(static::class . $key))->get();

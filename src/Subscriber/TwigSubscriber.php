@@ -67,7 +67,6 @@ class TwigSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            // ConsoleEvents::COMMAND => ['onConsoleCommand'],
             KernelEvents::REQUEST => ['onKernelRequest', 8],
             KernelEvents::RESPONSE => ['onKernelResponse'],
             KernelEvents::EXCEPTION => ['onKernelException'],
@@ -101,7 +100,7 @@ class TwigSubscriber implements EventSubscriberInterface
             return false;
         }
 
-        return true;
+        return $event->getResponse()->getStatusCode() == 200;
     }
 
     protected $exceptionTriggered = false;
