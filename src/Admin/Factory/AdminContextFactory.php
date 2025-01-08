@@ -33,8 +33,10 @@ class AdminContextFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\Admin
         return $this->extension;
     }
 
-    public function create(Request $request, DashboardControllerInterface $dashboardController, ?CrudControllerInterface $crudController): AdminContext
+    public function create(Request $request, DashboardControllerInterface $dashboardController, ?CrudControllerInterface $crudController, ?string $actionName = null): AdminContext
     {
+        // actionName ?
+        
         $crudAction = $request->query->get(EA::CRUD_ACTION);
         $validPageNames = [Crud::PAGE_INDEX, Crud::PAGE_DETAIL, Crud::PAGE_EDIT, Crud::PAGE_NEW];
         $pageName = in_array($crudAction, $validPageNames, true) ? $crudAction : null;

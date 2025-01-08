@@ -24,7 +24,6 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
         if (self::$router?->useAdvancedFeatures()) {
 
-
             //
             // NB: Static routes using multiple host, or domains might be screened.. imo
             $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];

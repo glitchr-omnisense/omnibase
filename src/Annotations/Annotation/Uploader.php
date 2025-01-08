@@ -74,7 +74,7 @@ class Uploader extends AbstractAnnotation
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
-        if (!$this->getEntityManager()->contains($entity)) {
+        if (!$this->getObjectManager()->contains($entity)) {
             return;
         }
 

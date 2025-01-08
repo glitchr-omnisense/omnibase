@@ -76,7 +76,7 @@ class Slugify extends AbstractAnnotation
      */
     public function getInvalidSlugs($event, $entity, $property)
     {
-        $uow = $event->getEntityManager()->getUnitOfWork();
+        $uow = $event->getObjectManager()->getUnitOfWork();
 
         $candidateEntities = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity2) {

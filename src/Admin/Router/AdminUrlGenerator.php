@@ -3,11 +3,11 @@
 namespace Base\Admin\Router;
 
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\AdminContextProviderInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Router\AdminRouteGeneratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
-use EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Registry\CrudControllerRegistry;
+use EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistryInterface;
 
 class AdminUrlGenerator extends \EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator
 {
@@ -15,11 +15,16 @@ class AdminUrlGenerator extends \EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrl
      * @EntityManagerInterface
      */
     protected EntityManagerInterface $entityManager;
-
-    public function __construct(AdminContextProvider $adminContextProvider, UrlGeneratorInterface $urlGenerator, DashboardControllerRegistry $dashboardControllerRegistry, CrudControllerRegistry $registry, EntityManagerInterface $entityManager)
+        
+    public function __construct(
+        AdminContextProviderInterface $adminContextProvider, 
+        UrlGeneratorInterface $urlGenerator, 
+        DashboardControllerRegistryInterface $dashboardControllerRegistry, 
+        AdminRouteGeneratorInterface $adminRouteGenerator, 
+        EntityManagerInterface $entityManager)
     {
+        parent::__construct($adminContextProvider, $urlGenerator, $dashboardControllerRegistry, $adminRouteGenerator);
         $this->entityManager = $entityManager;
-        parent::__construct($adminContextProvider, $urlGenerator, $dashboardControllerRegistry);
     }
 
     protected function setRouteParameter(string $paramName, $paramValue): void

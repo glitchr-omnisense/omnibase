@@ -183,6 +183,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         $integrity &= $this->checkDoctrineIntegrity();
 
         if (!$integrity) {
+
             if ($token) {
                 $user = $token->getUser();
                 $notification = new Notification("integrity", [$user]);

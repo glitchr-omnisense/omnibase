@@ -249,7 +249,7 @@ namespace {
     {
         foreach ($_COOKIE as $name => $value)
         {
-                unsetcookie($name, $domain);
+            unsetcookie($name, $domain);
         }
     }
 
@@ -384,8 +384,8 @@ namespace {
             $parse = array_key_removes($parse, "subdomain");
         }
 
-        $urlButQuery = explode("?", $url)[0] ?? "";
         $parse["path"] = str_rstrip($parse["path"] ?? "", "/");
+        $parse["path"] = $parse["base_dir"].$parse["path"];
 
         return compose_url(
             $parse["scheme"] ?? null,
@@ -428,10 +428,12 @@ namespace {
         if($queryInPath) $query = $query ? $queryInPath."&".$query : $queryInPath;
             $query = $query ? "?" . $query : null;
 
-        if($path != null && str_ends_with($path, "/")) $path = null;
+        if($path != null && $path != "/" && str_ends_with($path, "/")) $path = null;
         $pathToQuerySlash = ($path != null && !str_ends_with($path, "/") && !empty($query) ? "/" : "");
 
-        $url = $scheme . $machine . $subdomain . $domain . $port . $user . $password . $path . $pathToQuerySlash . $query;
+        $fragment = $fragment and !str_starts_with($fragment, "#") ? "#".$fragment : null;
+        
+        $url = $scheme . $machine . $subdomain . $domain . $port . $user . $password . $path . $pathToQuerySlash . $query. $fragment;
         return $url ?: "/";
     }
 

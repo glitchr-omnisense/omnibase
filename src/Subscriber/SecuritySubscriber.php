@@ -371,15 +371,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $message = $exception->getMessage() ?? $message;
                 $importance = $exception->getMessageData()["importance"] ?? $importance;
             }
-
-            // Deeper exception that might require killing cookies
-            if($exception->getPrevious()) {
-                unsetcookies();
-            }
         }
-
-        $notification = new Notification($message);
-        $notification->send($importance);
     }
 
     public function onLoginSuccess(LoginSuccessEvent $event)
