@@ -38,10 +38,4 @@ class AdminUrlGenerator extends \EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrl
 
         parent::setRouteParameter($paramName, $paramValue);
     }
-
-
-    public function generateUrl(): string
-    {
-        return parent::generateUrl();
-    }
 }

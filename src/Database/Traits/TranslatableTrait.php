@@ -206,10 +206,11 @@ trait TranslatableTrait
      */
     public function __call(string $method, array $arguments)
     {
-        $className = get_class($this);
+        $className = self::class;
         $translationClassName = $this->getTranslationEntityClass();
-        $parentClass = get_parent_class($this);
+        $parentClass = get_parent_class(self::class);
 
+        dump(self::class, static::class, get_class($this), $className, $parentClass, $method);
         //
         // Call magic setter
         if (str_starts_with($method, "set")) {
@@ -218,10 +219,11 @@ trait TranslatableTrait
             if (empty($arguments)) {
                 throw new AccessException("Missing argument for setter property \"$property\" in " . $className);
             }
-
+            dump($property);
             try {
                 return $this->__set($property, ...$arguments);
             } catch (AccessException $e) {
+                dump($e);
                 // Parent fallback setter
                 if ($parentClass && method_exists($parentClass, "__set")) {
                     return parent::__set($property, ...$arguments);
@@ -249,6 +251,7 @@ trait TranslatableTrait
         //
         // Call magic getter
         if ($property) {
+
             try {
                 return $this->__get($property);
             } catch (AccessException $e) {
@@ -257,6 +260,7 @@ trait TranslatableTrait
                     return parent::__get($property);
                 }
             }
+
         } elseif ($translationClassName && method_exists($translationClassName, $method)) {
             return $this->translate()->$method(...$arguments);
         }
@@ -264,7 +268,7 @@ trait TranslatableTrait
         //
         // Parent fallback for magic __call
         if ($parentClass && method_exists($parentClass, "__call")) {
-            return parent::__call($method, $arguments);
+	        return $parentClass::__call($method, $arguments);
         }
 
         if (!method_exists($className, $method)) {

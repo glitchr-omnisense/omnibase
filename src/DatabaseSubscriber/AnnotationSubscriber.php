@@ -118,60 +118,71 @@ class AnnotationSubscriber
     public function preFlush(PreFlushEventArgs $event)
     {
         $uow = $event->getObjectManager()->getUnitOfWork();
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+            $this->entityInsertionBuffer[] = $entity;
+        }
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+            $this->entityUpdateBuffer[] = $entity;
+        }
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+            $this->entityDeletionBuffer[] = $entity;
+        }
 
-        foreach ($uow->getIdentityMap() as $class => $entities) {
-            foreach ($entities as $entity) {
-                $className = get_class($entity);
-                $classMetadata = $this->entityManager->getClassMetadata($className);
+        $entities = array_merge($this->entityInsertionBuffer, $this->entityUpdateBuffer, $this->entityDeletionBuffer);
+        foreach ($entities as $entity) {
 
-                if (in_array($className, $this->subscriberHistory)) {
-                    return;
-                }
-                $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
+            $className = get_class($entity);
+            $classMetadata = $this->entityManager->getClassMetadata($className);
 
-                $annotations = $this->annotationReader->getAnnotations($className);
+            if (in_array($className, $this->subscriberHistory)) {
+                return;
+            }
 
-                $changeSet = $uow->getEntityChangeSet($entity);
-                $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
-                foreach ($propertyAnnotations as $property => $_) {
-                    if (!array_key_exists($property, $changeSet)) {
-                        continue;
-                    }
+            $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
+            $annotations = $this->annotationReader->getAnnotations($className);
 
-                    foreach ($_ as $annotation) {
-                        if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
-                            continue;
-                        }
-
-                        if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
-                            continue;
-                        }
-
-                        if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity)) {
-                            continue;
-                        }
-
-                        $annotation->preFlush($event, $classMetadata, $entity, $property);
-                    }
+            $changeSet = $uow->getEntityChangeSet($entity);
+            if(empty($changeSet) && !$entity->getId()) $changeSet = cast_to_array($entity);
+            
+            $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+            foreach ($propertyAnnotations as $property => $_) {
+                if (!array_key_exists($property, $changeSet)) {
+                    continue;
                 }
 
-                $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
-                foreach ($classAnnotations as $annotation) {
+                foreach ($_ as $annotation) {
                     if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                         continue;
                     }
 
-                    if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
                         continue;
                     }
 
-                    if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity)) {
+                    if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity)) {
                         continue;
                     }
 
-                    $annotation->preFlush($event, $classMetadata, $entity);
-                    $this->entityCandidateBuffer[] = $entity;
+                    $annotation->preFlush($event, $classMetadata, $entity, $property);
                 }
+            }
+
+            $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+            foreach ($classAnnotations as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+
+                if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+
+                if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $entity)) {
+                    continue;
+                }
+
+                $annotation->preFlush($event, $classMetadata, $entity);
+                $this->entityCandidateBuffer[] = $entity;
             }
         }
     }
@@ -205,10 +216,12 @@ class AnnotationSubscriber
             $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
             $annotations = $this->annotationReader->getAnnotations($className);
-
             $changeSet = $uow->getEntityChangeSet($entity);
+            if(empty($changeSet) && !$entity->getId()) $changeSet = cast_to_array($entity);
+
             $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
             foreach ($propertyAnnotations as $property => $_) {
+
                 if (!array_key_exists($property, $changeSet)) {
                     continue;
                 }
@@ -266,6 +279,8 @@ class AnnotationSubscriber
             $annotations = $this->annotationReader->getAnnotations($className);
 
             $changeSet = $uow->getEntityChangeSet($entity);
+            if(empty($changeSet) && !$entity->getId()) $changeSet = cast_to_array($entity);
+            
             $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
             foreach ($propertyAnnotations as $property => $_) {
                 if (!array_key_exists($property, $changeSet)) {

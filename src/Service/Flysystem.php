@@ -76,7 +76,7 @@ class Flysystem extends LazyFactory implements FlysystemInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function createStorage(string $source, ?string $storageName = null)
+    public function createStorage(string $source, ?string $storageName = null): \League\Flysystem\FilesystemOperator
     {
         if ($storageName === null) {
             $storageName = $source;

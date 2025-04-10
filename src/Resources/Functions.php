@@ -23,6 +23,16 @@ namespace {
         throw new RuntimeException("bcmath is not installed");
     }
 
+    function strip_duplicates($input) {
+        
+        // Split pascal case
+        preg_match_all('/[A-Z][a-z]+/', $input, $matches);
+        $tokens = $matches[0];
+
+        $uniqueTokens = array_unique($tokens);
+        return implode('', $uniqueTokens);
+    }
+    
     function get_root_class(object|string $object_or_class): string|false
     {
         $class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
@@ -645,6 +655,10 @@ namespace {
     }
 
 
+    /**
+     * @param ?string $url
+     * @return bool
+     */
     function is_url(?string $url): bool
     {
         return filter_var($url, FILTER_VALIDATE_URL);
@@ -668,6 +682,25 @@ namespace {
     function snake2camel(string $input, string $separator = "_")
     {
         return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input))));
+    }
+
+    /**
+     * @param string $input
+     * @return array|false|string|string[]|null
+     */
+    function camel2kebab(string $input) 
+    { 
+        return camel2snake($input, "-");
+    }
+
+    /**
+     * @param string $input
+     * @param string $separator
+     * @return string
+     */
+    function kebab2camel(string $input)
+    {
+        return snake2camel($input, "-");
     }
 
     /**

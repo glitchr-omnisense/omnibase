@@ -418,14 +418,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param $value
      * @param string|null $locale
      * @param $useCache
-     * @return $this|mixed
-     * @throws Exception
-     */
-    /**
-     * @param string $path
-     * @param $value
-     * @param string|null $locale
-     * @param $useCache
      * @return $this
      * @throws \Psr\Cache\InvalidArgumentException
      */
@@ -441,18 +433,14 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
         if ($this->entityManager->getCache()) {
             $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+            foreach($setting->getTranslations() as $translation)
+                $this->entityManager->getCache()->evictEntity(get_class($setting)::getTranslationEntityClass(), $translation->getId());
         }
 
         $this->entityManager->flush();
         return $this;
     }
 
-    /**
-     * @param string $path
-     * @param string|null $label
-     * @param string|null $locale
-     * @return $this
-     */
     /**
      * @param string $path
      * @param string|null $label
@@ -472,12 +460,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
-    /**
-     * @param string $path
-     * @param string|null $help
-     * @param string|null $locale
-     * @return $this
-     */
     /**
      * @param string $path
      * @param string|null $help

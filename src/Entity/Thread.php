@@ -50,7 +50,6 @@ use ApiPlatform\Metadata\ApiResource;
 #[Trasheable]
 
 #[ApiResource]
-
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {
     use BaseTrait;

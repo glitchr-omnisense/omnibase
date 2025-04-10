@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 
 use function is_file;
 
@@ -74,7 +75,7 @@ class Uploader extends AbstractAnnotation
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
-        if (!$this->getObjectManager()->contains($entity)) {
+        if (!$event->getObjectManager()->contains($entity)) {
             return;
         }
 
@@ -400,9 +401,10 @@ class Uploader extends AbstractAnnotation
         $newList = is_array($new) ? $new : [$new];
         $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
 
-        // This list contains non is_stringeable element. (e.g. in case of a generic use)
+        // This list may contain non-stringeable elements. (e.g. in case of a generic use, using classes)
         // These elements are not meant to be uploaded
         if (count($newList) != count($newListStringable)) {
+
             return false;
         }
 
@@ -411,7 +413,7 @@ class Uploader extends AbstractAnnotation
         $oldList = is_array($old) ? $old : [$old];
         //$oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
 
-        // No change in the list.. (NB: Not good approach in case of UOW manipulation)
+        // No change in the list.. (NB: perhaps not a good approach in case of UOW manipulation)
         $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File);
         if ($potentialMemoryLeak && $newList !== $oldList) {
             throw new Exception(File::class . " instance found the old list of " . get_class($entity) . "::" . $fieldName . "\n Did you called unit of work change set ? Please process file manually");
@@ -565,7 +567,7 @@ class Uploader extends AbstractAnnotation
      * @throws InvalidMimeTypeException
      * @throws InvalidSizeException
      */
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         try {
             $this->uploadFiles($entity, null, $property);
@@ -597,7 +599,6 @@ class Uploader extends AbstractAnnotation
             $old = self::getFieldValue($oldEntity, $property);
 
             self::setFieldValue($entity, $property, $old);
-            //throw $e;
         }
 
         $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);

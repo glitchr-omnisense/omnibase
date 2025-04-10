@@ -2,31 +2,20 @@
 
 namespace Base\Admin\EventListener;
 
-use App\Entity\Article\Article;
-use App\Entity\Article\CommentReply;
-use App\Entity\User;
 use Base\Controller\Admin\AbstractCrudController;
-use Base\Entity\User as EntityUser;
 use Doctrine\ORM\EntityManager;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\CrudControllerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory;
-use EasyCorp\Bundle\EasyAdminBundle\Factory\ControllerFactory;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
-
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
-use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class AdminRouterSubscriber extends \EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber
 {
     protected EntityManager $entityManager;
-    public function __construct(AdminContextFactory $adminContextFactory, ControllerFactory $controllerFactory, ControllerResolverInterface $controllerResolver, UrlGeneratorInterface $urlGenerator, RequestMatcherInterface $requestMatcher, EntityManagerInterface $entityManager)
+    public function __construct(...$args)
     {
-        $this->entityManager = $entityManager;
-        parent::__construct($adminContextFactory, $controllerFactory, $controllerResolver, $urlGenerator, $requestMatcher);
+        $this->entityManager = array_pop($args);
+        parent::__construct(...$args);
     }
 
     protected function getCrudControllerInstance(Request $request): ?CrudControllerInterface

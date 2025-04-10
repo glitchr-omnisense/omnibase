@@ -11,11 +11,17 @@
             "email": "marco.meyer@glitchr.io"
         }
     ],
+
     "autoload": {
         "psr-4": {
             "Base\\": "./src"
-        }
+        },
+        "files": [
+            "src/Resources/Functions.php",
+            "src/Resources/Aliases.php"
+        ]
     },
+
     "autoload-dev": {
         "psr-4": {
             "Tests\\Base\\": "./Tests"

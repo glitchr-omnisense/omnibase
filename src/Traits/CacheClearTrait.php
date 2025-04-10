@@ -22,37 +22,78 @@ trait CacheClearTrait
 
     protected function checkExtensions(SymfonyStyle $io): void
     {
-        $Xdebug = extension_loaded('xdebug') ? '<info>✓</info>' : '<error>✗</error>';
-        $Blackfire = extension_loaded('blackfire') ? '<info>✓</info>' : '<error>✗</error>';
-
-        $igbinary = extension_loaded('igbinary') ? '<info>✓</info>' : '<error>✗</error>';
-        $imagick = extension_loaded('imagick') ? '<info>✓</info>' : '<error>✗</error>';
-
-        $OPcache = extension_loaded('Zend OPcache') ? '<info>✓</info>' : '<error>✗</error>';
-        $APCu = extension_loaded('apc') && ini_get('apc.enabled') ? '<info>✓</info>' : '<error>✗</error>';
-        if(extension_loaded('Zend OPcache') && !(extension_loaded('apc') && ini_get('apc.enabled'))){
-            $APCu = null;
-        }
-
-        if(extension_loaded('apc') && ini_get('apc.enabled') && !extension_loaded('Zend OPcache')){
-            $OPcache = null;
-        }
-
+        $extensions = [
+            'xdebug' => 'Xdebug',
+            'blackfire' => 'Blackfire',
+            'git2' => 'Git',
+            'amqp' => 'AMQP',
+            'Zend OPcache' => 'OPcache',
+            'apcu' => 'APCu',
+            'igbinary' => 'Igbinary',
+            'imagick' => 'Imagick',
+            'gd' => 'GD',
+        ];
+    
         $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver extensions might differ)", true);
-        $io->write("        [" . $Xdebug . "] Xdebug; ");
-        $io->write("        [" . $Blackfire . "] Blackfire ", true);
-        $io->write("        [" . $imagick . "] Imagick;");
-        $io->write("        [" . $igbinary . "] Igbinary", true);
 
-        if($OPcache) {
-            $io->write("        [" . $OPcache . "] OPcache");
-            if($APCu) $io->write(";");
+        
+        $currentLineCount = 0;
+        $lineBreakCount = (int) ceil(sqrt(count($extensions))); 
+        $maxLength = max(array_map('strlen', $extensions));
+
+        foreach ($extensions as $extension => $name) {
+            // Default check if the extension is loaded
+            $isLoaded = extension_loaded($extension);
+    
+            switch ($extension) {
+                case 'apcu':
+                    $isLoaded = $isLoaded && ini_get('apc.enabled');
+                    break;
+    
+                case 'gd':
+                    $isLoaded = $isLoaded && function_exists('gd_info') && gd_info();
+                    break;
+    
+                case 'xdebug':
+                    $isLoaded = $isLoaded && ini_get('xdebug.mode') !== '';
+                    break;
+    
+                case 'blackfire':
+                    $isLoaded = $isLoaded && getenv('BLACKFIRE_SERVER_ID') && getenv('BLACKFIRE_SERVER_TOKEN');
+                    break;
+    
+                case 'Zend OPcache':
+                    $isLoaded = $isLoaded && ini_get('opcache.enable') == 1;
+                    break;
+    
+                case 'amqp':
+                    $isLoaded = $isLoaded && class_exists('AMQPConnection');
+                    break;
+    
+                case 'imagick':
+                    $isLoaded = $isLoaded && class_exists('Imagick');
+                    break;
+    
+                case 'igbinary':
+                    $isLoaded = $isLoaded && function_exists('igbinary_serialize');
+                    break;
+    
+                default:
+                    // No special handling required for other extensions
+                    break;
+            }
+    
+            // Determine the status and output the result
+            $status = $isLoaded ? '<info>✓</info>' : '<error>✗</error>';
+
+            // Pad the extension name to align it based on the max length
+            $paddedName = str_pad($name, $maxLength);
+
+            // Output the result with aligned names
+            $io->write("        [$status] $paddedName\t", ++$currentLineCount % $lineBreakCount == 0);
 
         }
-
-        if($APCu) $io->write("        [" . $APCu . "] APCu");
-        $io->write("", true);
-    }
+    }    
 
     protected function customFeatureWarnings(SymfonyStyle $io): void
     {

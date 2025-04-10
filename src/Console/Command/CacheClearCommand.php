@@ -2,7 +2,6 @@
 
 namespace Base\Console\Command;
 
-use Base\BaseBundle;
 use Base\Traits\CacheClearTrait;
 use Base\Console\Command;
 use Base\Notifier\Notifier;
@@ -19,7 +18,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use Base\Routing\RouterInterface;
-use Symfony\Component\Process\Process;
 
 #[AsCommand(name: 'cache:clear', aliases: [], description: '')]
 class CacheClearCommand extends Command

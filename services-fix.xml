@@ -7,6 +7,8 @@
 
         <defaults />
 
+        <service id="BackupManager\Manager"    public="true" />
+
         <!-- NOTIFIER FIX -->
         <service id="Symfony\Component\Notifier\Channel\ChannelPolicyInterface"  alias="notifier.channel_policy"/>
 
@@ -60,14 +62,10 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Registry\CrudControllerRegistry" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider"    public="true">
-            <argument type="service" id="request_stack" />
-        </service>
-
-        <service id="BackupManager\Manager"    public="true" />
         <service id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider"    public="true">
             <argument type="service" id="request_stack" />
         </service>

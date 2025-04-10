@@ -3,7 +3,6 @@
 namespace Base;
 
 $_SERVER["APP_TIMER"] = microtime(true);
-include_once("Functions.php");
 
 use Base\Database\Function\Rand;
 use DoctrineExtensions\Query\Mysql\Field;

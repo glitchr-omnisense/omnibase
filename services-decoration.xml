@@ -74,10 +74,11 @@
             <tag name="kernel.event_subscriber"/>
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
-        
+
         <service id="Base\Admin\Router\AdminUrlGenerator"                 parent="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator"                 decorates="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator">
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
+        <service id="Base\Admin\Router\AdminRouteGenerator"               parent="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator"               decorates="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator" />
         <service id="Base\Admin\Factory\MenuFactory"                      parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"                      decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"><argument type="service" id="router" /></service>
         <service id="Base\Admin\Factory\AdminContextFactory"              parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"              decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"><argument type="service" id="ea_extension" /></service>
         <service id="Base\Admin\Field\Configurator\CommonPreConfigurator" parent="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator" decorates="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator"><argument type="service" id="translator" /></service>

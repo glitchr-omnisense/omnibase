@@ -8,8 +8,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Base\Admin\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\CrudControllerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\DashboardControllerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\MenuFactoryInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Router\AdminRouteGeneratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
-use EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Registry\CrudControllerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -20,13 +21,20 @@ use function in_array;
  */
 class AdminContextFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory
 {
-    protected Extension $extension;
-
-    public function __construct(string $cacheDir, ?TokenStorageInterface $tokenStorage, MenuFactory $menuFactory, CrudControllerRegistry $crudControllers, EntityFactory $entityFactory, Extension $extension)
-    {
-        parent::__construct($cacheDir, $tokenStorage, $menuFactory, $crudControllers, $entityFactory);
+    public function __construct(
+        string $buildDir, 
+        ?TokenStorageInterface $tokenStorage, 
+        MenuFactoryInterface $menuFactory, 
+        CrudControllerRegistry $crudControllers, 
+        EntityFactory $entityFactory, 
+        AdminRouteGeneratorInterface $adminRouteGenerator,
+        Extension $extension
+    ) {
+        parent::__construct($buildDir, $tokenStorage, $menuFactory, $crudControllers, $entityFactory, $adminRouteGenerator);
         $this->extension = $extension;
     }
+
+    protected Extension $extension;
 
     public function getExtension(): Extension
     {
@@ -35,8 +43,6 @@ class AdminContextFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\Admin
 
     public function create(Request $request, DashboardControllerInterface $dashboardController, ?CrudControllerInterface $crudController, ?string $actionName = null): AdminContext
     {
-        // actionName ?
-        
         $crudAction = $request->query->get(EA::CRUD_ACTION);
         $validPageNames = [Crud::PAGE_INDEX, Crud::PAGE_DETAIL, Crud::PAGE_EDIT, Crud::PAGE_NEW];
         $pageName = in_array($crudAction, $validPageNames, true) ? $crudAction : null;

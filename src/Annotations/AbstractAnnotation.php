@@ -49,14 +49,6 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
 
     /**
-     * @return mixed
-     */
-    public static function getService()
-    {
-        return AnnotationReader::getInstance()->getService();
-    }
-
-    /**
      * @return string
      */
     public static function getProjectDir(): string
