@@ -6,14 +6,12 @@ $_SERVER["APP_TIMER"] = microtime(true);
 
 use Base\Database\Function\Rand;
 use DoctrineExtensions\Query\Mysql\Field;
-use Exception;
 use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
 use App\Entity\User;
 use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
 use Base\Database\Type\UTCDateTimeType;
 use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
-use Base\DependencyInjection\Compiler\Pass\CrudControllerPass;
 use Base\DependencyInjection\Compiler\Pass\TradingMarketPass;
 use Base\DependencyInjection\Compiler\Pass\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\Pass\IconProviderPass;
@@ -23,7 +21,6 @@ use Base\DependencyInjection\Compiler\Pass\TagRendererPass;
 use Base\DependencyInjection\Compiler\Pass\WorkflowPass;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
@@ -33,9 +30,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
-use Base\Database\Type\SetType;
 use Base\Traits\SingletonTrait;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  *
@@ -91,14 +86,6 @@ class BaseBundle extends AbstractBaseBundle
         return $this->container->getParameter('kernel.environment');
     }
 
-    /**
-     * @return string
-     */
-    public function getApplicationLocation(): string 
-    { 
-        return $this->getProjectDir();
-    }
-
     protected bool $boot = false;
 
     /**
@@ -136,6 +123,7 @@ class BaseBundle extends AbstractBaseBundle
     public function warmUp()
     {
         $needsWarmup = !file_exists($this->getCacheDir() . "/pools/base/bundle.php");
+        // generateStubs();
 
         self::$cache               = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter("", 0, $this->getCacheDir() . "/pools/base/fallback"));
         self::$files               = self::$files               ?? self::$cache->getItem('base.files')->get() ?? [];
@@ -173,18 +161,18 @@ class BaseBundle extends AbstractBaseBundle
                 }
             }
 
-            self::setMapping($this->getBundleLocation() . "/src/Tests"     , "Base\Tests"     , "App\Tests");
-            self::setMapping($this->getBundleLocation() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
-            self::setMapping($this->getBundleLocation() . "/src/Notifier"  , "Base\Notifier"  , "App\Notifier");
-            self::setMapping($this->getBundleLocation() . "/src/Form"      , "Base\Form"      , "App\Form");
-            self::setMapping($this->getBundleLocation() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
-            self::setMapping($this->getBundleLocation() . "/src/Repository", "Base\Repository", "App\Repository");
+            self::setMapping($this->getBundleDir() . "/src/Tests"     , "Base\Tests"     , "App\Tests");
+            self::setMapping($this->getBundleDir() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
+            self::setMapping($this->getBundleDir() . "/src/Notifier"  , "Base\Notifier"  , "App\Notifier");
+            self::setMapping($this->getBundleDir() . "/src/Form"      , "Base\Form"      , "App\Form");
+            self::setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
+            self::setMapping($this->getBundleDir() . "/src/Repository", "Base\Repository", "App\Repository");
 
-            self::getAllClasses($this->getBundleLocation() . "/src/Database/Annotation");
-            self::getAllClasses($this->getBundleLocation() . "/src/Annotations/Annotation");
+            self::getAllClasses($this->getBundleDir() . "/src/Database/Annotation");
+            self::getAllClasses($this->getBundleDir() . "/src/Annotations/Annotation");
 
-            self::getAllClasses($this->getBundleLocation() . "/src/Enum");
-            self::getAllClasses($this->getApplicationLocation() . "/src/Enum");
+            self::getAllClasses($this->getBundleDir() . "/src/Enum");
+            self::getAllClasses($this->getProjectDir() . "/src/Enum");
 
             self::$cache->warmUp([
                 "base.files" => self::$files ?? [],
@@ -239,29 +227,10 @@ class BaseBundle extends AbstractBaseBundle
         Type::overrideType('datetime', UTCDateTimeType::class);
         Type::overrideType('datetimetz', UTCDateTimeType::class);
 
-        /**
-         * @var EntityManagerInterface $this
-         */
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
         $entityManagerConfig = $entityManager->getConfiguration();
         $entityManagerConnection = $entityManager->getConnection();
 
-        /**
-         * Testing doctrine connection
-         */
-        //try {
-        //    $entityManagerConnection->connect();
-        //} catch (Exception $e) {
-        //    return false;
-        //}
-
-        /**
-         * Doctrine custom configuration
-         */
-        // $entityManagerConfig
-        //     ->setNamingStrategy(new \Base\Database\Mapping\NamingStrategy());
-        // $entityManagerConfig
-        //     ->setClassMetadataFactoryName(\Base\Database\Mapping\ClassMetadataFactory::class);
         $entityManagerConfig
             ->addFilter("trash_filter", TrashFilter::class);
         $entityManagerConfig
@@ -302,8 +271,8 @@ class BaseBundle extends AbstractBaseBundle
             ->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'json');
 
         $classList = array_merge(
-            self::getAllClasses(self::getBundleLocation() . "/src/Enum"),
-            self::getAllClasses($this->getApplicationLocation() . "/src/Enum")
+            self::getAllClasses(self::getBundleDir() . "/src/Enum"),
+            self::getAllClasses($this->getProjectDir() . "/src/Enum")
         );
 
         foreach ($classList as $className) {

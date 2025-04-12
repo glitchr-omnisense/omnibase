@@ -25,26 +25,9 @@ abstract class AbstractBaseBundle extends Bundle
     /**
      * @return string
      */
-    public static function getBundleLocation()
+    public static function getBundleDir()
     {
         return dirname((new ReflectionClass(static::class))->getFileName(), 2);
-    }
-    
-    protected static array $dumpEnabled = [];
-
-    public static function enableDump (string $scope) { self::$dumpEnabled[$scope] = true; }
-    public static function disableDump(string $scope) { self::$dumpEnabled[$scope] = false; }
-
-    /**
-     * @param $scope
-     * @param ...$variadic
-     * @return void
-     */
-    public static function dump($scope, ...$variadic)
-    {
-        if (self::$dumpEnabled[$scope] ?? false) {
-            dump(...$variadic);
-        }
     }
 
     protected static ?array $bundles = null;
@@ -54,7 +37,7 @@ abstract class AbstractBaseBundle extends Bundle
 
             self::$bundles = array_filter(
                 self::getDeclaredClasses("Base", 2), 
-                fn($v) => str_ends_with($v, "Bundle") && $v != self::class && $v != BaseBundle::class
+                fn($v) => str_ends_with($v, "Bundle") && $v != self::class
             );
         }
 
@@ -167,9 +150,9 @@ abstract class AbstractBaseBundle extends Bundle
             } catch (ErrorException $e) {
             }
 
-            if ($inputExists && !$outputExists && !array_key_exists($input, self::$aliasList)) {
-                class_alias($input, $output);
+            if ($inputExists && !$outputExists && !array_key_exists($input, self::$aliasList ?? [])) {
 
+                class_alias($input, $output);
                 if (str_ends_with($input, "Repository")) {
                     self::$aliasRepositoryList[$input] = $output;
                 } else {
@@ -214,7 +197,7 @@ abstract class AbstractBaseBundle extends Bundle
     public static function getAllClasses(string $path, string $prefix = "", int $level = -1): array
     {
         $fullpath = realpath($path) . " " . $prefix ." (".$level.")";
-        if (!array_key_exists($fullpath, self::$classes)) {
+        if (!array_key_exists($fullpath, self::$classes ?? [])) {
         
             self::$classes[$fullpath] = self::$classes[$fullpath] ?? [];
             foreach (self::getFiles($path, $level) as $filename) {
@@ -247,7 +230,7 @@ abstract class AbstractBaseBundle extends Bundle
     public static function getAllNamespaces(string $path, string $prefix = "", int $level = -1): array
     {    
         $fullpath = realpath($path) . " " . $prefix ." (".$level.")";
-        if (!array_key_exists($fullpath, self::$namespaces)) {
+        if (!array_key_exists($fullpath, self::$namespaces ?? [])) {
 
             self::$namespaces[$fullpath] = self::$namespaces[$fullpath] ?? [];
             foreach (self::getFiles($path, $level) as $filename) {
@@ -324,7 +307,7 @@ abstract class AbstractBaseBundle extends Bundle
             return [];
         }
 
-        if (array_key_exists($path, self::$files)) {
+        if (array_key_exists($path, self::$files ?? [])) {
             return self::$files[$path];
         }
 
@@ -361,7 +344,7 @@ abstract class AbstractBaseBundle extends Bundle
             return [];
         }
 
-        if (array_key_exists($path, self::$files)) {
+        if (array_key_exists($path, self::$files ?? [])) {
             return self::$files[$path];
         }
 

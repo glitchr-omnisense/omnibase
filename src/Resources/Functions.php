@@ -1978,18 +1978,20 @@ namespace {
         return (php_sapi_name() == "cli");
     }
 
-    function mb_lcfirst(array|string $str, ?string $encoding = null): array|string
-    {
-        if (is_array($str)) {
-            $array = [];
-            foreach ($str as $s) {
-                $array[] = mb_lcfirst($s, $encoding);
+    if(!function_exists('mb_ucfirst')) { 
+        function mb_lcfirst(array|string $str, ?string $encoding = null): array|string
+        {
+            if (is_array($str)) {
+                $array = [];
+                foreach ($str as $s) {
+                    $array[] = mb_lcfirst($s, $encoding);
+                }
+
+                return $array;
             }
 
-            return $array;
+            return mb_strtolower(mb_substr($str, 0, 1, $encoding), $encoding) . mb_substr($str, 1, null, $encoding);
         }
-
-        return mb_strtolower(mb_substr($str, 0, 1, $encoding), $encoding) . mb_substr($str, 1, null, $encoding);
     }
 
     function mb_lcwords(array|string $str, ?string $encoding = null, string $separators = " '\t\r\n\f\v"): array|string
@@ -2009,18 +2011,20 @@ namespace {
         }, explodeByArray(is_array($separators) ? $separators : str_split($separators), $str, true)));
     }
 
-    function mb_ucfirst(array|string $str, ?string $encoding = null): array|string
-    {
-        if (is_array($str)) {
-            $array = [];
-            foreach ($str as $s) {
-                $array[] = mb_ucfirst($s, $encoding);
+    if(!function_exists('mb_ucfirst')) { 
+        function mb_ucfirst(array|string $str, ?string $encoding = null): array|string
+        {
+            if (is_array($str)) {
+                $array = [];
+                foreach ($str as $s) {
+                    $array[] = mb_ucfirst($s, $encoding);
+                }
+
+                return $array;
             }
 
-            return $array;
+            return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding) . mb_substr($str, 1, null, $encoding);
         }
-
-        return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding) . mb_substr($str, 1, null, $encoding);
     }
 
     function mb_ucwords(array|string $str, ?string $encoding = null, string $separators = " '\t\r\n\f\v"): array|string

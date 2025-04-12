@@ -50,10 +50,7 @@ class Tag implements TranslatableInterface, IconizeInterface
 
     public function __construct(?string $label = null, ?string $slug = null)
     {
-        dump("-----");
         $this->setLabel($label);
-        dump("-----");
-        exit(1);
         $this->slug = $slug;
 
         $this->threads = new ArrayCollection();

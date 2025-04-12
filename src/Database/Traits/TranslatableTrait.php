@@ -210,7 +210,6 @@ trait TranslatableTrait
         $translationClassName = $this->getTranslationEntityClass();
         $parentClass = get_parent_class(self::class);
 
-        dump(self::class, static::class, get_class($this), $className, $parentClass, $method);
         //
         // Call magic setter
         if (str_starts_with($method, "set")) {
@@ -219,11 +218,10 @@ trait TranslatableTrait
             if (empty($arguments)) {
                 throw new AccessException("Missing argument for setter property \"$property\" in " . $className);
             }
-            dump($property);
+
             try {
                 return $this->__set($property, ...$arguments);
             } catch (AccessException $e) {
-                dump($e);
                 // Parent fallback setter
                 if ($parentClass && method_exists($parentClass, "__set")) {
                     return parent::__set($property, ...$arguments);
