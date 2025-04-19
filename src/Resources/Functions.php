@@ -305,22 +305,38 @@ namespace {
         }
     }
 
-    function start_timer()
+    /**
+     * @return float|int
+     */
+    function benchmark_start()
     {
         $_SERVER["APP_TIMER"] = microtime(true);
     }
 
-    /**
-     * @return float|int
-     */
-    function get_lap() // ms
+    function benchmark_lap() // ms
     {
         if (!array_key_exists("APP_TIMER", $_SERVER)) {
-            return 0;
+            benchmark_start();
         }
+
         return 1000 * (microtime(true) - $_SERVER["APP_TIMER"]);
     }
 
+    function benchmark($memory_footprint = true)
+    {
+        $lap_time = benchmark_lap();
+        printf("⏱️  Lap: %.3f ms ", $lap_time);
+
+        if (!$memory_footprint) {
+            printf(PHP_EOL);
+            return;
+        }
+
+        $memory_usage = memory_get_usage(true) / (1024 * 1024);
+        $memory_peak  = memory_get_peak_usage(true) / (1024 * 1024);
+        printf("| 💾 Memory: %.3f MB | 📈 Peak: %.3f MB".PHP_EOL, $memory_usage, $memory_peak);
+    }
+    
     function get_url(?string $scheme = null, ?string $http_host = null, ?string $request_uri = null): ?string
     {
         $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"] ?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
@@ -2455,6 +2471,34 @@ namespace {
         return $dirname . $info['filename'] . ($extension ? "." . $extension : "");
     }
 
+    function relative_path(string $from, string $to): string
+    {
+        // Normalize paths
+        $from = str_replace('\\', '/', realpath($from) ?: $from);
+        $to   = str_replace('\\', '/', realpath($to)   ?: $to);
+    
+        $fromParts = explode('/', rtrim($from, '/'));
+        $toParts   = explode('/', rtrim($to, '/'));
+    
+        // Find length of common path
+        $length = min(count($fromParts), count($toParts));
+        $commonLength = 0;
+        for ($i = 0; $i < $length; $i++) {
+            if ($fromParts[$i] !== $toParts[$i]) {
+                break;
+            }
+            $commonLength++;
+        }
+    
+        // Go up from $to to the common base
+        $relParts = array_fill(0, count($toParts) - $commonLength, '..');
+    
+        // Append remaining parts from $from
+        $relParts = array_merge($relParts, array_slice($fromParts, $commonLength));
+
+        return implode('/', $relParts);
+    }
+
     function pathinfo_relationship(string $path): ?string
     {
         if (is_multiligne($path)) {
@@ -2702,6 +2746,8 @@ namespace {
      */
     function is_emptydir($dir): bool
     {
+        if(!is_dir($dir)) return false;
+         
         $handle = opendir($dir);
         while (false !== ($entry = readdir($handle))) {
             if ($entry != "." && $entry != "..") {

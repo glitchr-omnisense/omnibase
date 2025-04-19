@@ -201,7 +201,6 @@ trait TranslatableTrait
     /**
      * @param string $method
      * @param array $arguments
-     * @return Product|Variant|Store|Artist|Merchant|Attribute|AbstractAdapter|Hyperlink|Semantic|Setting|Shlink|Widget|Thread|Tag|Taxon|mixed|null
      * @throws Exception
      */
     public function __call(string $method, array $arguments)
@@ -209,7 +208,7 @@ trait TranslatableTrait
         $className = self::class;
         $translationClassName = $this->getTranslationEntityClass();
         $parentClass = get_parent_class(self::class);
-
+        
         //
         // Call magic setter
         if (str_starts_with($method, "set")) {
@@ -342,7 +341,7 @@ trait TranslatableTrait
      * @throws Exception
      */
     public function __get($property)
-    {
+    {        
         $accessor = PropertyAccess::createPropertyAccessor();
         $property = snake2camel($property);
 
@@ -398,5 +397,56 @@ trait TranslatableTrait
         }
 
         throw new AccessException("Can't get a way to read property \"$property\" in class \"" . get_class($entity) . "\" or its corresponding translation class \"" . $entity->getTranslationEntityClass() . "\".");
+    }
+
+    public function __isset($property): bool
+    {
+        $accessor = PropertyAccess::createPropertyAccessor();
+        $property = snake2camel($property);
+
+        $entity = $this;
+
+        // Check if getter method exists in entity
+        if (method_exists($entity, $property) || method_exists($entity, "get" . mb_ucfirst($property))) {
+            return true;
+        }
+
+        // Check if property exists and is readable in entity
+        if (property_exists($entity, $property) && $accessor->isReadable($entity, $property)) {
+            return true;
+        }
+
+        // Proxy: check translation entity for current locale
+        $entityIntl = $entity->translate();
+
+        if (method_exists($entityIntl, $property) || method_exists($entityIntl, "get" . mb_ucfirst($property))) {
+            return true;
+        }
+
+        if (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
+            return true;
+        }
+
+        // If still not found and current locale isn't default, try fallback to default locale
+        $defaultLocale = BaseService::getLocalizer()->getDefaultLocale();
+        if ($entityIntl->getLocale() !== $defaultLocale) {
+            $entityIntl = $entity->translate($defaultLocale);
+
+            if (method_exists($entityIntl, $property) || method_exists($entityIntl, "get" . mb_ucfirst($property))) {
+                return true;
+            }
+
+            if (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
+                return true;
+            }
+        }
+
+        // Special case for EasyAdmin-like variables
+        if (str_starts_with($property, "ea_")) {
+            return false;
+        }
+
+        // Not found anywhere
+        return false;
     }
 }

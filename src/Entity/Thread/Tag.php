@@ -52,7 +52,8 @@ class Tag implements TranslatableInterface, IconizeInterface
     {
         $this->setLabel($label);
         $this->slug = $slug;
-
+        $this->priority = 0;
+        
         $this->threads = new ArrayCollection();
     }
 
@@ -68,7 +69,7 @@ class Tag implements TranslatableInterface, IconizeInterface
     }
 
     #[ORM\Column(length:255, unique:true)]
-    #[Slugify(reference:"translations.label")]
+    #[Slugify(reference: "translations.label")]
     protected $slug;
 
     public function getSlug(): ?string

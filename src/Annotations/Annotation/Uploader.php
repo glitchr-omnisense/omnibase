@@ -401,10 +401,9 @@ class Uploader extends AbstractAnnotation
         $newList = is_array($new) ? $new : [$new];
         $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
 
-        // This list may contain non-stringeable elements. (e.g. in case of a generic use, using classes)
+        // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // These elements are not meant to be uploaded
         if (count($newList) != count($newListStringable)) {
-
             return false;
         }
 
@@ -413,7 +412,7 @@ class Uploader extends AbstractAnnotation
         $oldList = is_array($old) ? $old : [$old];
         //$oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
 
-        // No change in the list.. (NB: perhaps not a good approach in case of UOW manipulation)
+        // No change in the list.. (NB: Not good approach in case of UOW manipulation)
         $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File);
         if ($potentialMemoryLeak && $newList !== $oldList) {
             throw new Exception(File::class . " instance found the old list of " . get_class($entity) . "::" . $fieldName . "\n Did you called unit of work change set ? Please process file manually");
@@ -446,6 +445,7 @@ class Uploader extends AbstractAnnotation
         $fileList = []; // Field value can be an array or just a single path
         $uploadList = array_values(array_intersect($newList, $oldList));
         foreach (array_union($uploadList, array_diff($newList, $oldList)) as $index => $entry) {
+
             //
             // In case of string casting, and UploadedFile might be returned as a string..
             $file = is_string($entry) && !str_contains($entry, "://") && is_file($entry) ? new File($entry) : $entry;

@@ -234,6 +234,7 @@ trait CacheClearTrait
         }
 
         foreach ($storageNames as $storageName) {
+
             if (!$this->flysystem->hasStorage($storageName . ".public")) {
                 continue;
             }
@@ -246,17 +247,31 @@ trait CacheClearTrait
                 continue;
             }
 
-            if (is_link($publicPath) || file_exists($publicPath)) {
-                if (is_link($publicPath)) {
+            if (is_link($publicPath)) {
+                unlink($publicPath);
+            }
+
+            if (file_exists($publicPath)) {
+                
+                if (is_dir($publicPath)) {
+                    if (is_emptydir($publicPath)) {
+                        
+                        try { rmdir($publicPath); }
+                        catch(\Exception $exception) { 
+                            exit("Directory \"$publicPath\" exists, but you don't have the permissions.");
+                        }
+
+                    } else {
+                        exit("Directory \"$publicPath\" exists and is not empty.\n");
+                    }
+                } elseif (is_file($publicPath)) {
                     unlink($publicPath);
-                } elseif (is_emptydir($publicPath)) {
-                    rmdir($publicPath);
                 } else {
-                    exit("Public path \"$publicPath\" already exists but it is not a symlink\n");
+                    exit("Cannot safely remove \"$publicPath\" — unknown file type.\n");
                 }
             }
 
-            symlink($realPath, $publicPath);
+            symlink(relative_path($realPath, dirname($publicPath)), $publicPath);
         }
     }
 }

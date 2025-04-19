@@ -394,7 +394,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getFieldValue($entity, string $property)
     {
-        return self::getClassMetadataManipulator()->getFieldValue($entity, $property);
+	return self::getClassMetadataManipulator()->getFieldValue($entity, $property);
     }
 
     /**
