@@ -325,18 +325,37 @@ namespace {
     function benchmark($memory_footprint = true)
     {
         $lap_time = benchmark_lap();
-        printf("⏱️  Lap: %.3f ms ", $lap_time);
+        $s = sprintf("⏱️  Lap: %.2f ms ", $lap_time);
 
-        if (!$memory_footprint) {
-            printf(PHP_EOL);
-            return;
+        if ($memory_footprint) {
+
+            $memory_usage = format_bytes(memory_get_usage(true));
+            $memory_peak  = format_bytes(memory_get_peak_usage(true));
+
+            $s .= sprintf("| 💾 Memory: %.2f MB | 📈 Peak: %.2f MB", $memory_usage, $memory_peak);
         }
-
-        $memory_usage = memory_get_usage(true) / (1024 * 1024);
-        $memory_peak  = memory_get_peak_usage(true) / (1024 * 1024);
-        printf("| 💾 Memory: %.3f MB | 📈 Peak: %.3f MB".PHP_EOL, $memory_usage, $memory_peak);
+                
+        return $s;
     }
     
+    function print_benchmark(): void
+    {
+        echo benchmark() . PHP_EOL;
+    }
+
+    function format_bytes($bytes, $precision = 2): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        $bytes = max($bytes, 0);
+        $pow   = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow   = min($pow, count($units) - 1);
+
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+
     function get_url(?string $scheme = null, ?string $http_host = null, ?string $request_uri = null): ?string
     {
         $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"] ?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
@@ -1050,6 +1069,11 @@ namespace {
         ));
     }
 
+    function project_dir()
+    {
+        return dirname(__DIR__,5);
+    }
+
     /**
      * @param string|null $file
      * @param string|null $class
@@ -1064,7 +1088,7 @@ namespace {
         foreach ($debug_backtrace as $key => $trace) {
             $entry = "";
             if (array_key_exists("file", $trace)) {
-                $entry = $trace["file"] . ":" . $trace["line"];
+                $entry = "./".relative_path($trace["file"], project_dir()) . ":" . $trace["line"];
             }
 
             $entry .= " >> " .

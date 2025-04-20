@@ -2,7 +2,11 @@
 
 namespace Base;
 
-$_SERVER["APP_TIMER"] = microtime(true);
+if(!isset($_SERVER["APP_TIMER"])) {
+    $_SERVER["APP_TIMER"] = microtime(true);
+}
+
+use Symfony\Component\VarDumper\VarDumper;
 
 use Base\Database\Function\Rand;
 use DoctrineExtensions\Query\Mysql\Field;
@@ -202,7 +206,26 @@ class BaseBundle extends AbstractBaseBundle
         }
 
         $this->boot = true;
+        $this->bootVarDumper();
         CacheClearCommand::$testFile ??= $this->getCacheDir().".txt";
+    }
+
+    public function bootVarDumper(): bool
+    {
+        benchmark_start();
+        VarDumper::setHandler(function ($var)
+        {
+            static $startTime = null;
+            if ($startTime === null) {
+                $startTime = microtime(true);
+            }
+
+            (new \Base\Resources\Dumper())->dump(
+                (new \Symfony\Component\VarDumper\Cloner\VarCloner())->cloneVar($var)
+            );
+        });
+
+        return true;
     }
 
     public function bootDoctrine(): bool
