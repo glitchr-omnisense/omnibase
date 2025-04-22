@@ -6,8 +6,6 @@ if(!isset($_SERVER["APP_TIMER"])) {
     $_SERVER["APP_TIMER"] = microtime(true);
 }
 
-use Symfony\Component\VarDumper\VarDumper;
-
 use Base\Database\Function\Rand;
 use DoctrineExtensions\Query\Mysql\Field;
 use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
@@ -34,6 +32,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
+use Base\DependencyInjection\Compiler\Pass\DoctrineEnumSubscriberPass;
 use Base\Traits\SingletonTrait;
 
 /**
@@ -127,7 +126,6 @@ class BaseBundle extends AbstractBaseBundle
     public function warmUp()
     {
         $needsWarmup = !file_exists($this->getCacheDir() . "/pools/base/bundle.php");
-        // generateStubs();
 
         self::$cache               = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter("", 0, $this->getCacheDir() . "/pools/base/fallback"));
         self::$files               = self::$files               ?? self::$cache->getItem('base.files')->get() ?? [];
@@ -213,7 +211,11 @@ class BaseBundle extends AbstractBaseBundle
     public function bootVarDumper(): bool
     {
         benchmark_start();
-        VarDumper::setHandler(function ($var)
+
+        if (!class_exists(\Symfony\Component\VarDumper\VarDumper::class)) return false;
+        if (is_cli()) return false;
+
+        \Symfony\Component\VarDumper\VarDumper::setHandler(function ($var)
         {
             static $startTime = null;
             if ($startTime === null) {
@@ -334,6 +336,7 @@ class BaseBundle extends AbstractBaseBundle
         }
 
         $container->addCompilerPass(new AnnotationPass());
+        $container->addCompilerPass(new DoctrineEnumSubscriberPass());
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());
@@ -346,13 +349,13 @@ class BaseBundle extends AbstractBaseBundle
         foreach (self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
 
             $container->register($baseRepository)->addTag("doctrine.repository_service")
-                ->addArgument(new Reference('doctrine'));
+            ->addArgument(new Reference('doctrine'));
 
             if ($aliasedRepository) {
-                
-                $container->register($aliasedRepository)
-                    ->addTag("doctrine.repository_service")
-                    ->addArgument(new Reference('doctrine'));
+            
+            $container->register($aliasedRepository)
+                ->addTag("doctrine.repository_service")
+                ->addArgument(new Reference('doctrine'));
             }
         }
     }

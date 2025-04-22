@@ -157,6 +157,7 @@
 
         <service id="Base\Cache\Abstract\AbstractLocalCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
         <service id="Base\Cache\Abstract\AbstractLocalCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
+        <service id="Base\Cache\StubCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
 
         <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
         <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
@@ -404,10 +405,7 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
-        <service id="Base\DatabaseSubscriber\EnumSubscriber">
-            <tag name="doctrine.event_listener" event="postGenerateSchema" />
-        </service>
-
+        <service id="Base\DatabaseSubscriber\EnumSubscriber"/>
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_listener" event="loadClassMetadata" priority="4096" />
             <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
@@ -1320,13 +1318,18 @@
         <service id="Base\Serializer\Encoder\AcoEncoder"><tag name="serializer.encoder" /></service>
         <service id="Base\Serializer\Encoder\ExcelEncoder"><tag name="serializer.encoder" /></service>
 
-        <service id="Base\Inspector\DataCollector">
+        <service id="Base\Inspector\BundleDataCollector">
             <tag name="data_collector" id="base" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
             <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Inspector\LocalizerDataCollector">
+            <tag name="data_collector" id="locale" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Controller\Admin\Crud\ThreadCrudController"         parent="Base\Controller\Admin\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>

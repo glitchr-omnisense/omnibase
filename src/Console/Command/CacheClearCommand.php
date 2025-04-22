@@ -136,6 +136,7 @@ EOF
             $this->webpackCheck($io);
             $this->generateSymlinks($io);
             $this->technicalSupportCheck($io);
+            $this->clearOPCache($io);
         }
 
         return $ret;

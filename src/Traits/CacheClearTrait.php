@@ -145,6 +145,13 @@ trait CacheClearTrait
         }
     }
 
+    protected function clearOPCache(SymfonyStyle $io): void
+    {
+        if (extension_loaded('Zend OPcache')) {
+            \opcache_reset();
+        }
+    }
+
     //
     // Run second cache clear command
     protected function doubleCacheClear(SymfonyStyle $io)

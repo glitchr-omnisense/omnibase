@@ -97,8 +97,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             $routeCandidates[] = $routeDefaultName;
         }
-    
-        return array_filter(array_transforms(fn($k, $routeName): array => [$routeName, self::$router->getRoute($routeName)], $routeGroups));
+
+        $routes = array_filter(array_transforms(fn($k, $routeName): array => [$routeName, self::$router->getRoute($routeName)], $routeGroups));
+        ksort($routes);
+
+        return $routes;
     }
 
     public function resolveParameters(?array $routeParameters = null): ?array
@@ -217,6 +220,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routes = $this->resolveCandidates($routeName, $routeParameters, $referenceType);
         foreach($routes as $routeName => $route) {
 
+            
             try {
                 $routeUrl = parent::generate($routeName, $routeParameters, $referenceType);
             } catch(\Exception $_) {
@@ -238,7 +242,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 
                 $cache->save(self::$router->getCacheRoutes()->set($this->cachedRoutes));
             }
-
+            
             return sanitize_url($routeUrl);
         }
 

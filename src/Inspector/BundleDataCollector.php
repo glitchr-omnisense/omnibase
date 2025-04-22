@@ -2,6 +2,7 @@
 
 namespace Base\Inspector;
 
+use ApiPlatform\Symfony\Bundle\ApiPlatformBundle;
 use Base\BaseBundle;
 use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
@@ -26,7 +27,7 @@ use Symfony\Component\Routing\RouterInterface;
 /**
  *
  */
-class DataCollector extends AbstractDataCollector
+class BundleDataCollector extends AbstractDataCollector
 {
     /** @var AdminContextProvider */
     private AdminContextProvider $adminContextProvider;
@@ -61,7 +62,7 @@ class DataCollector extends AbstractDataCollector
 
     public static function getTemplate(): ?string
     {
-        return '@Base/inspector/data_collector.html.twig';
+        return '@Base/inspector/bundle_data_collector.html.twig';
     }
 
     public function getData(): array

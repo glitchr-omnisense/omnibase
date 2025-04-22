@@ -3,11 +3,20 @@
 namespace Base\DatabaseSubscriber;
 
 use Base\Database\Type\EnumType;
+use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
+use Doctrine\ORM\Events;
 
-class EnumSubscriber
+class EnumSubscriber implements EventSubscriber
 {
+    public function getSubscribedEvents(): array
+    {
+        return [
+            "postGenerateSchema"
+        ];
+    }
+
     public function postGenerateSchema(GenerateSchemaEventArgs $eventArgs)
     {
         $columns = [];
@@ -23,7 +32,7 @@ class EnumSubscriber
         /** @var Column $column */
         foreach ($columns as $column) {
             
-            $enum = $column->getType()->getName();
+            $enum = $column->getType()->lookupName($column->getType());
             $column->setComment(trim(sprintf('(DC2Type:%s)', $enum)));
         }
     }

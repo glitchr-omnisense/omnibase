@@ -17,8 +17,7 @@
             "Base\\": "./src"
         },
         "files": [
-            "src/Resources/Functions.php",
-            "src/Resources/Aliases.php"
+            "src/Resources/Functions.php"
         ]
     },
 

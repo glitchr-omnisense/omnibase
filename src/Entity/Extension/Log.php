@@ -25,7 +25,7 @@ class Log extends AbstractExtension
         return ["fa-solid fa-info-circle"];
     }
 
-    public function __construct(array $listener, Request $request = null)
+    public function __construct(array $listener, ?Request $request = null)
     {
         if (!array_key_exists("event", $listener)) {
             throw new Exception("Array key \"event\" missing in dispatcher entry");

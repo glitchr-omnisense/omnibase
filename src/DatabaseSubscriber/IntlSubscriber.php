@@ -185,6 +185,8 @@ class IntlSubscriber
             case 'LAZY':
                 return ClassMetadata::FETCH_LAZY;
         }
+
+        return ClassMetadata::FETCH_LAZY;
     }
 
     private function mapTranslatable(ClassMetadata $classMetadata): void

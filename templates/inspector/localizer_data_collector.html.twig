@@ -1,0 +1,54 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+
+        {% set icon %}
+            {{ include('@Base/inspector/localizer_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}
+        {% endset %}
+
+        {%- set text -%}
+            <div class="sf-toolbar-info-group">
+                <div class="sf-toolbar-info-piece">
+                <b>Locale:</b>
+                <span class="sf-toolbar-status">{{ data['locale']|default('N/A') }}</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                <b>Timezone:</b>
+                <span class="sf-toolbar-status">{{ data['timezone']|default('N/A') }}</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                <b>Current Configuration:</b>
+                <span class="sf-toolbar-status">
+                Lang: {{ data['lang']|default('N/A') }},
+                Country: {{ data['country']|default('N/A') }},
+                Timezone: {{ data['timezone']|default('N/A') }}
+                </span>
+                </div>
+            </div>
+        {%- endset -%}
+
+        {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { 'link': true }) }}
+        <span class="sf-toolbar-block sf-toolbar-block-base sf-toolbar-status-normal sf-toolbar-block-spacer"></span>
+{% endblock %}
+
+{% block menu %}
+    <span class="label">
+        <span class="icon">{{ include('@Base/inspector/localizer_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}</span>
+        <strong>Localizer</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+
+    {% for title, data in collector.data %}
+        {% if not (title starts with '_') %}
+            <h2>{{ title|raw }}</h2>
+            {% if data is not iterable or data is empty %}
+                <div class="empty"><p>No specific information available.</p></div>
+            {% else %}
+                {{ include('@WebProfiler/Profiler/table.html.twig', {data:data}, with_context = false) }}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+{% endblock %}

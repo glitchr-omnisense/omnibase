@@ -11,7 +11,7 @@ class Dumper extends \Symfony\Component\VarDumper\Dumper\HtmlDumper
             $attr["file"] = \relative_path($attr["file"], $attr["project_dir"]);
             unset($attr["project_dir"]);
         }
-
+        
         return parent::style($style, $value, $attr);
     }
 

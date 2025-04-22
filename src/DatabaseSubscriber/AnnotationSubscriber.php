@@ -40,8 +40,6 @@ class AnnotationSubscriber
         $this->annotationReader = $annotationReader;
     }
 
-    protected array $subscriberHistory = [];
-
     public function loadClassMetadata(LoadClassMetadataEventArgs $event)
     {
         // needs to be booted to be aware of custom doctrine types.
@@ -51,11 +49,6 @@ class AnnotationSubscriber
 
         $className = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
-
-        if (in_array($className, $this->subscriberHistory)) {
-            return;
-        }
-        $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
         $annotations = $this->annotationReader->getAnnotations($className);
 
@@ -133,12 +126,6 @@ class AnnotationSubscriber
 
             $className = get_class($entity);
             $classMetadata = $this->entityManager->getClassMetadata($className);
-
-            if (in_array($className, $this->subscriberHistory)) {
-                return;
-            }
-
-            $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
             $annotations = $this->annotationReader->getAnnotations($className);
 
             $changeSet = $uow->getEntityChangeSet($entity);
@@ -210,11 +197,6 @@ class AnnotationSubscriber
             $className = get_class($entity);
             $classMetadata = $this->entityManager->getClassMetadata($className);
 
-            if (in_array($className, $this->subscriberHistory)) {
-                return;
-            }
-            $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
-
             $annotations = $this->annotationReader->getAnnotations($className);
             $changeSet = $uow->getEntityChangeSet($entity);
             if(empty($changeSet) && !$entity->getId()) $changeSet = cast_to_array($entity);
@@ -270,11 +252,6 @@ class AnnotationSubscriber
         foreach ($entities as $entity) {
             $className = get_class($entity);
             $classMetadata = $this->entityManager->getClassMetadata($className);
-
-            if (in_array($className, $this->subscriberHistory)) {
-                return;
-            }
-            $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
             $annotations = $this->annotationReader->getAnnotations($className);
 
@@ -340,11 +317,6 @@ class AnnotationSubscriber
 
         $className = get_class($entity);
         $classMetadata = $this->entityManager->getClassMetadata($className);
-
-        if (in_array($className, $this->subscriberHistory)) {
-            return;
-        }
-        $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
         $annotations = $this->annotationReader->getAnnotations($className);
 
