@@ -8,7 +8,6 @@ use ErrorException;
 
 use Symfony\Component\Finder\Finder;
 
-use Base\BaseBundle;
 use Base\Traits\SingletonTrait;
 
 abstract class AbstractBaseBundle extends Bundle
@@ -30,13 +29,18 @@ abstract class AbstractBaseBundle extends Bundle
         return dirname((new ReflectionClass(static::class))->getFileName(), 2);
     }
 
+    public static function getProjectDir(): string
+    {
+        return dirname(self::getBundleDir(), 3);
+    }
+
     protected static ?array $bundles = null;
-    public static function getBundles()
+    public function getBundles()
     {
         if(self::$bundles === null) {
 
             self::$bundles = array_filter(
-                self::getDeclaredClasses("Base", 2), 
+                $this->getDeclaredClasses("Base", 2), 
                 fn($v) => str_ends_with($v, "Bundle") && $v != self::class
             );
         }
@@ -44,15 +48,15 @@ abstract class AbstractBaseBundle extends Bundle
         return self::$bundles;
     }
 
-    public static function hasBundle(string $bundleName)
+    public function hasBundle(string $bundleName)
     {
-        $bundles = self::getBundles();
+        $bundles = $this->getBundles();
         $bundleNames = array_map(fn($c) => camel2snake(str_rstrip(basename_namespace($c), "Bundle")), $bundles);
 
         return in_array($bundleName, $bundles) || in_array($bundleName, $bundleNames);
     }
 
-    public static function getDeclaredClasses(string $namespace = "", int $level = -1)
+    public function getDeclaredClasses(string $namespace = "", int $level = -1)
     {
         $namespace .= '\\';
         return array_values(array_unique(array_filter(get_declared_classes(), function($item) use ($namespace, $level) 
@@ -64,7 +68,7 @@ abstract class AbstractBaseBundle extends Bundle
         })));
     }
 
-    public static function getDeclaredNamespaces(string $namespace = "", int $level = 1)
+    public function getDeclaredNamespaces(string $namespace = "", int $level = 1)
     {
         $namespace .= '\\';
         return array_values(array_unique(array_transforms(function($k, $v) use ($namespace,$level) : ?array{
@@ -75,16 +79,51 @@ abstract class AbstractBaseBundle extends Bundle
         }, get_declared_classes())));
     }
 
-    public static function setMapping(string $path, string $inputNamespace = "", string $outputNamespace = "")
+    public function setMapping(string $path, string $inputNamespace = "", string $outputNamespace = "")
     {
-        $classList = self::getAllClasses($path, $inputNamespace);
+        // $this->generateStub($path, $inputNamespace, $outputNamespace);
 
+        $classList = $this->getAllClasses($path, $inputNamespace);
+    
         $aliasList = [];
         foreach ($classList as $class) {
             $aliasList[$inputNamespace . "\\" . $class] = str_rstrip($outputNamespace, "\\"). "\\" . $class;
         }
 
-        self::setAlias($aliasList);
+        // $this->setAlias($aliasList);
+    }
+
+    public function generateStub(string $path, string $inputNamespace = "", string $outputNamespace = ""): void
+    {
+        $output = $this->getProjectDir()."/var/stubs";
+        if (!is_dir($output)) {
+            mkdir($output, 0777, true);
+        }
+
+        foreach ($this->getAllClasses($path, $inputNamespace) as $rootClass) {
+
+            $outputClass = $outputNamespace . "\\" . $rootClass;
+            $inputClass  = $inputNamespace  . "\\" . $rootClass;
+            if (class_exists($outputClass, false)) {
+                if (!is_subclass_of($outputClass, $inputClass)) {
+                    throw new \LogicException("According to the base convention, $outputClass must extend $inputClass.");
+                }
+                continue;
+            }
+
+            $outputClassPath = str_replace('\\', '/', $outputClass);
+            $stubPath = $output . '/' . $outputClassPath . '.php';
+            
+            $namespace = str_replace('/', '\\', dirname($outputClassPath));
+            
+            $stubCode = "<?php\n\nnamespace " . $namespace . ";\n\n";
+            $stubCode .= "if (!class_exists('$outputClass')) {\n";
+            $stubCode .= "    class " . basename($outputClassPath) . " extends \\" . $inputClass . " {}\n";
+            $stubCode .= "}\n";
+
+            @mkdir(dirname($stubPath), 0777, true);
+            file_put_contents($stubPath, $stubCode);
+        }
     }
 
     protected static ?array $aliasList = null;
@@ -94,13 +133,13 @@ abstract class AbstractBaseBundle extends Bundle
      * @param $arrayOrObjectOrClass
      * @return array|array[]|false|false[]|mixed|string|string[]
      */
-    public static function getAlias($arrayOrObjectOrClass)
+    public function getAlias($arrayOrObjectOrClass)
     {
         if (!$arrayOrObjectOrClass) {
             return $arrayOrObjectOrClass;
         }
         if (is_array($arrayOrObjectOrClass)) {
-            return array_map(fn($a) => self::getAlias($a), $arrayOrObjectOrClass);
+            return array_map(fn($a) => $this->getAlias($a), $arrayOrObjectOrClass);
         }
 
         $arrayOrObjectOrClass = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
@@ -111,7 +150,7 @@ abstract class AbstractBaseBundle extends Bundle
         return self::$aliasList[$arrayOrObjectOrClass] ?? $arrayOrObjectOrClass;
     }
 
-    public static function hasAlias(mixed $objectOrClass): bool
+    public function hasAlias(mixed $objectOrClass): bool
     {
         if (!is_object($objectOrClass) && !is_string($objectOrClass)) {
             return false;
@@ -122,33 +161,29 @@ abstract class AbstractBaseBundle extends Bundle
             return false;
         }
 
-        return self::getAlias($class) != $class;
+        return $this->getAlias($class) != $class;
     }
 
     /**
      * @param $aliasRepository
      * @return mixed
      */
-    public static function getAliasRepository($aliasRepository)
+    public function getAliasRepository($aliasRepository)
     {
         return self::$aliasRepositoryList[$aliasRepository] ?? $aliasRepository;
     }
 
-    public static function setAlias(array $classes)
+    public function setAlias(array $classes)
     {
         foreach ($classes as $input => $output) {
             // Autowire base repositories
             $inputExists = false;
-            try {
-                $inputExists = class_exists($input);
-            } catch (ErrorException $e) {
-            }
+            try { $inputExists = class_exists($input); }
+            catch (ErrorException $e) { }
 
             $outputExists = false;
-            try {
-                $outputExists = class_exists($output);
-            } catch (ErrorException $e) {
-            }
+            try { $outputExists = class_exists($output); }
+            catch (ErrorException $e) { }
 
             if ($inputExists && !$outputExists && !array_key_exists($input, self::$aliasList ?? [])) {
 
@@ -166,12 +201,12 @@ abstract class AbstractBaseBundle extends Bundle
      * @param $class
      * @return void
      */
-    public static function setAliasEntity($class)
+    public function setAliasEntity($class)
     {
         if (is_array($class)) {
             $classes = $class;
             foreach ($classes as $class) {
-                self::setAlias([
+                $this->setAlias([
                     "Base\\Entity\\" . $class => "App\\Entity\\" . $class,
                     "Base\\Entity\\" . $class . "Repository" => "App\\Entity\\" . $class . "Repository"
                 ]);
@@ -180,7 +215,7 @@ abstract class AbstractBaseBundle extends Bundle
             return;
         }
 
-        self::setAlias([
+        $this->setAlias([
             "Base\\Entity\\" . $class => "App\\Entity\\" . $class,
             "Base\\Entity\\" . $class . "Repository" => "App\\Entity\\" . $class . "Repository"
         ]);
@@ -227,18 +262,18 @@ abstract class AbstractBaseBundle extends Bundle
      * @param $level
      * @return array
      */
-    public static function getAllNamespaces(string $path, string $prefix = "", int $level = -1): array
+    public function getAllNamespaces(string $path, string $prefix = "", int $level = -1): array
     {    
         $fullpath = realpath($path) . " " . $prefix ." (".$level.")";
         if (!array_key_exists($fullpath, self::$namespaces ?? [])) {
 
             self::$namespaces[$fullpath] = self::$namespaces[$fullpath] ?? [];
-            foreach (self::getFiles($path, $level) as $filename) {
+            foreach ($this->getFiles($path, $level) as $filename) {
                 if (filesize($filename) == 0) {
                     continue;
                 }
 
-                self::$namespaces[$fullpath][] = rtrim(self::getFullNamespace($filename, $prefix), "\\");
+                self::$namespaces[$fullpath][] = rtrim($this->getFullNamespace($filename, $prefix), "\\");
             }
 
             self::$namespaces[$fullpath] = array_unique(self::$namespaces[$fullpath]);
@@ -253,9 +288,9 @@ abstract class AbstractBaseBundle extends Bundle
      * @param $level
      * @return array
      */
-    public static function getAllNamespacesAndClasses(string $path, string $prefix = "", int $level = -1): array
+    public function getAllNamespacesAndClasses(string $path, string $prefix = "", int $level = -1): array
     {
-        return array_merge(self::getAllNamespaces($path, $prefix, $level), self::getAllClasses($path, $prefix, $level));
+        return array_merge($this->getAllNamespaces($path, $prefix, $level), $this->getAllClasses($path, $prefix, $level));
     }
 
     /**
@@ -337,7 +372,7 @@ abstract class AbstractBaseBundle extends Bundle
      * @param $level
      * @return array|mixed
      */
-    public static function getDirectories(string $path, int $level = -1)
+    public function getDirectories(string $path, int $level = -1)
     {
         $path = realpath($path);
         if (!is_dir($path)) {

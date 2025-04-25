@@ -156,7 +156,7 @@ class IntegritySubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if (BaseBundle::getInstance()->isBroken() && $event->isMainRequest()) {
+        if (BaseBundle::getInstance()->isInvalid() && $event->isMainRequest()) {
             $this->clearProcess->mustRun();
             throw new RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?");
         }

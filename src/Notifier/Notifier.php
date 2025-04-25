@@ -2,9 +2,9 @@
 
 namespace Base\Notifier;
 
-use Base\Entity\User;
-use Base\Entity\User\Notification;
-use Base\Entity\User\Token;
+use App\Entity\User;
+use App\Entity\User\Notification;
+use App\Entity\User\Token;
 use Base\Form\Model\ContactModel;
 use Base\Notifier\Abstract\BaseNotifier;
 use Base\Notifier\Recipient\Recipient;

@@ -52,11 +52,6 @@ class BaseBundle extends AbstractBaseBundle
         }
     }
 
-    public function getProjectDir(): string
-    {
-        return $this->container->getParameter('kernel.project_dir');
-    }
-
     /**
      * @return string
      */
@@ -94,33 +89,33 @@ class BaseBundle extends AbstractBaseBundle
     /**
      * @return bool
      */
-    public function hasBooted()
+    public function isBooted()
     {
         return $this->boot;
     }
 
-    protected bool $bootDoctrine = false;
-    public function hasDoctrine(): bool
+    protected bool $doctrineReadiness = false;
+    public function isDoctrineReady(): bool
     {
-        return $this->bootDoctrine;
+        return $this->doctrineReadiness;
     }
 
     //
     // Some subscribers are not called when modifying codes.
     // The purpose of this broken cache feature is to prevent running without these subscribers
-    protected bool $brokenCache = true; // Turned off in subscribers if everything fine.
+    protected bool $invalidCache = true; // Turned off in subscribers if everything fine.
 
     /**
      * @return bool
      */
-    public function isBroken(): bool
+    public function isInvalid(): bool
     {
-        return $this->brokenCache;
+        return $this->invalidCache;
     }
 
     public function markCacheAsValid(): void
     {
-        $this->brokenCache = false;
+        $this->invalidCache = false;
     }
 
     public function warmUp()
@@ -159,16 +154,20 @@ class BaseBundle extends AbstractBaseBundle
                     array_swap($baseClassArray, 1, 2);
                     
                     $baseClassSwap = implode("\\", $baseClassArray);
-                    self::setMapping($classPath . "/".$namespace     , $baseClass     , $baseClassSwap);
+                    $this->setMapping($classPath . "/".$namespace     , $baseClass     , $baseClassSwap);
                 }
             }
 
-            self::setMapping($this->getBundleDir() . "/src/Tests"     , "Base\Tests"     , "App\Tests");
-            self::setMapping($this->getBundleDir() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
-            self::setMapping($this->getBundleDir() . "/src/Notifier"  , "Base\Notifier"  , "App\Notifier");
-            self::setMapping($this->getBundleDir() . "/src/Form"      , "Base\Form"      , "App\Form");
-            self::setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
-            self::setMapping($this->getBundleDir() . "/src/Repository", "Base\Repository", "App\Repository");
+            $this->setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
+            $this->setMapping($this->getBundleDir() . "/src/Repository", "Base\Repository", "App\Repository");
+            $this->setMapping($this->getBundleDir() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
+
+            $this->setMapping($this->getBundleDir() . "/src/Tests"     , "Base\Tests"     , "App\Tests");
+            $this->setMapping($this->getBundleDir() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
+            $this->setMapping($this->getBundleDir() . "/src/Notifier"  , "Base\Notifier"  , "App\Notifier");
+            $this->setMapping($this->getBundleDir() . "/src/Form"      , "Base\Form"      , "App\Form");
+            $this->setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
+            $this->setMapping($this->getBundleDir() . "/src/Repository", "Base\Repository", "App\Repository");
 
             self::getAllClasses($this->getBundleDir() . "/src/Database/Annotation");
             self::getAllClasses($this->getBundleDir() . "/src/Annotations/Annotation");
@@ -200,15 +199,15 @@ class BaseBundle extends AbstractBaseBundle
         }
 
         if ($this->container->getParameter("base.database.use_custom")) {
-            $this->bootDoctrine = $this->bootDoctrine();
+            $this->doctrineReadiness = $this->boot_Doctrine();
         }
 
         $this->boot = true;
-        $this->bootVarDumper();
+        $this->boot_VarDumper();
         CacheClearCommand::$testFile ??= $this->getCacheDir().".txt";
     }
 
-    public function bootVarDumper(): bool
+    public function boot_VarDumper(): bool
     {
         benchmark_start();
 
@@ -230,7 +229,7 @@ class BaseBundle extends AbstractBaseBundle
         return true;
     }
 
-    public function bootDoctrine(): bool
+    public function boot_Doctrine(): bool
     {
         /**
          * Turn all DateTime into UTC timezone in database

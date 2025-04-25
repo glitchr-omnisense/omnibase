@@ -4,9 +4,9 @@ namespace Base\Notifier\Abstract;
 
 use App\Entity\User;
 use BadMethodCallException;
-use Base\Entity\User\Notification;
+use App\Entity\User\Notification;
+use App\Notifier\Recipient\Recipient;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
-use Base\Notifier\Recipient\Recipient;
 use Base\Notifier\Recipient\TimezoneRecipientInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
@@ -19,6 +19,7 @@ use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Notifier\Notification\Notification as SymfonyNotification;
+use Symfony\Component\Notifier\Notifier as SymfonyNotifier;
 use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
 use Twig\Environment;
 
@@ -250,13 +251,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
     public function getAdminRecipient($i = 0): ?RecipientInterface
     {
         $this->initializeAdminRecipients();
-        return $this->notifier->getAdminRecipients()[$i] ?? null;
+
+        return $this->notifier instanceof SymfonyNotifier ? $this->notifier->getAdminRecipients()[$i] : null;
     }
 
     public function getAdminRecipients(): array
     {
         $this->initializeAdminRecipients();
-        return $this->notifier->getAdminRecipients();
+        return $this->notifier instanceof SymfonyNotifier ? $this->notifier->getAdminRecipients() : null;
     }
 
     /**
@@ -297,12 +299,12 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $adminUsers;
     }
 
-    public function getTechnicalRecipient(): RecipientInterface
+    public function getTechnicalRecipient(): Recipient
     {
         $defaultMail = mailparse($this->technicalRecipient->getEmail());
 
         $mail = $this->settingBag->getScalar("base.settings.mail");
-        if (!$mail) {
+        if (!$mail && $this->getAdminRecipient() instanceof EmailRecipientInterface) {
             $mail = $this->getAdminRecipient()?->getEmail();
         }
         if (!$mail) {
@@ -331,7 +333,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         }
 
         $phone = $this->settingBag->getScalar("base.settings.phone");
-        if (!$phone) {
+        if (!$phone && $this->getAdminRecipient() instanceof SmsRecipientInterface) {
             $phone = $this->getAdminRecipient()?->getPhone();
         }
         if (!$phone) {
@@ -359,7 +361,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
      * @param Notification|null $notification
      * @return $this
      */
-    public function markAsAdmin(bool $markAsAdmin, Notification $notification = null)
+    public function markAsAdmin(bool $markAsAdmin, ?Notification $notification = null)
     {
         $this->markAsAdmin = $markAsAdmin;
 

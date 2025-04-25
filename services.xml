@@ -157,7 +157,6 @@
 
         <service id="Base\Cache\Abstract\AbstractLocalCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
         <service id="Base\Cache\Abstract\AbstractLocalCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
-        <service id="Base\Cache\StubCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
 
         <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
         <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
@@ -279,6 +278,11 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
+        <service id="Base\Console\Command\NotifierMailTestCommand"                   parent="Base\Console\Command">
+            <tag name="console.command" />
+            <argument type="service" id="base.notifier" />
+            <argument type="service" id="App\Repository\UserRepository" />
+        </service>
         <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command">
             <tag name="console.command" />
             <argument type="service" id="time_machine" />

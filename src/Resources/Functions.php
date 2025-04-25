@@ -23,6 +23,19 @@ namespace {
         throw new RuntimeException("bcmath is not installed");
     }
 
+    function extract_instanceof(string $type, &...$args): array
+    {
+        $instances = [];
+        foreach ($args as $key => &$arg) {
+            if ($arg instanceof $type) {
+                $instances[] = $arg;
+                unset($arg);
+            }
+        }
+
+        return $instances;
+    }
+
     function strip_duplicates($input) {
         
         // Split pascal case
@@ -996,7 +1009,7 @@ namespace {
     {
         foreach ($args as $object) {
             if (!$object) {
-                dump("Object passed is null");
+                dump("Object passed to class_synopsis() is null");
                 return;
             }
             $objectID = (is_object($object)) ? "Object: 0x" . spl_object_hash($object) . "\n" : "";

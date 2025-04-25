@@ -43,7 +43,7 @@ class AnnotationSubscriber
     public function loadClassMetadata(LoadClassMetadataEventArgs $event)
     {
         // needs to be booted to be aware of custom doctrine types.
-        if (!BaseBundle::getInstance()->hasBooted()) {
+        if (!BaseBundle::getInstance()->isBooted()) {
             return;
         }
 

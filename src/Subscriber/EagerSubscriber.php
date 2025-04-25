@@ -54,7 +54,7 @@ class EagerSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if (!BaseBundle::getInstance()->hasDoctrine()) {
+        if (!BaseBundle::getInstance()->isDoctrineReady()) {
             $e->setResponse($this->baseService->redirect($this->baseService->getRouteName("/")));
             $e->stopPropagation();
         }
