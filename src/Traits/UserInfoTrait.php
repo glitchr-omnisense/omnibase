@@ -16,7 +16,7 @@ trait UserInfoTrait
      * @param string|null $key
      * @return array|mixed|string|null
      */
-    public static function getCookie(string $key = null)
+    public static function getCookie(?string $key = null)
     {
         $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
         if (array_key_exists("timezone", $cookie)) {
@@ -79,7 +79,7 @@ trait UserInfoTrait
         return $this->timezone ?? "UTC";
     }
 
-    public function setTimezone(string $timezone = null): self
+    public function setTimezone(?string $timezone = null): self
     {
         if (empty($timezone)) {
             $timezone = $this->timezone ?? null;

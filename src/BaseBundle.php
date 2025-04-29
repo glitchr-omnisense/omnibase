@@ -6,12 +6,7 @@ if(!isset($_SERVER["APP_TIMER"])) {
     $_SERVER["APP_TIMER"] = microtime(true);
 }
 
-use Base\Database\Function\Rand;
-use DoctrineExtensions\Query\Mysql\Field;
-use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
 use App\Entity\User;
-use Base\Database\Filter\TrashFilter;
-use Base\Database\Filter\VaultFilter;
 use Base\Database\Type\UTCDateTimeType;
 use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
 use Base\DependencyInjection\Compiler\Pass\TradingMarketPass;
@@ -22,7 +17,6 @@ use Base\DependencyInjection\Compiler\Pass\SharerPass;
 use Base\DependencyInjection\Compiler\Pass\TagRendererPass;
 use Base\DependencyInjection\Compiler\Pass\WorkflowPass;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Query;
 
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
@@ -32,9 +26,9 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
-use Base\DependencyInjection\Compiler\Pass\DoctrineAliasesPass;
-use Base\DependencyInjection\Compiler\Pass\DoctrineEnumPass;
-use Base\DependencyInjection\Compiler\Pass\DoctrinePass;
+use Base\DependencyInjection\Compiler\Pass\DoctrineEnumSubscriberPass;
+use Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass;
+use Base\DependencyInjection\Compiler\Pass\EasyAdminCrudPass;
 use Base\Traits\SingletonTrait;
 
 /**
@@ -123,19 +117,16 @@ class BaseBundle extends AbstractBaseBundle
     public function warmUp()
     {
         $needsWarmup = !file_exists($this->getCacheDir() . "/pools/base/bundle.php");
-
         self::$cache               = new PhpArrayAdapter($this->getCacheDir() . "/pools/base/bundle.php", new FilesystemAdapter("", 0, $this->getCacheDir() . "/pools/base/fallback"));
         self::$files               = self::$files               ?? self::$cache->getItem('base.files')->get() ?? [];
         self::$classes             = self::$classes             ?? self::$cache->getItem('base.classes')->get() ?? [];
         self::$aliasList           = self::$aliasList           ?? self::$cache->getItem('base.alias_list')->get() ?? [];
         self::$aliasRepositoryList = self::$aliasRepositoryList ?? self::$cache->getItem('base.alias_repository_list')->get() ?? [];
 
-        dump("WARMUP");
         foreach (self::$aliasList as $class => $alias) {
             class_alias($class, $alias);
         }
         foreach (self::$aliasRepositoryList as $class => $alias) {
-            dump("Registering repository: $class");
             class_alias($class, $alias);
         }
 
@@ -172,13 +163,13 @@ class BaseBundle extends AbstractBaseBundle
             $this->setMapping($this->getBundleDir() . "/src/Form"      , "Base\Form"      , "App\Form");
             $this->setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
             $this->setMapping($this->getBundleDir() . "/src/Repository", "Base\Repository", "App\Repository");
-
+            
             self::getAllClasses($this->getBundleDir() . "/src/Database/Annotation");
             self::getAllClasses($this->getBundleDir() . "/src/Annotations/Annotation");
-
+            
             self::getAllClasses($this->getBundleDir() . "/src/Enum");
             self::getAllClasses($this->getProjectDir() . "/src/Enum");
-
+            
             self::$cache->warmUp([
                 "base.files" => self::$files ?? [],
                 "base.classes" => self::$classes ?? [],
@@ -190,6 +181,7 @@ class BaseBundle extends AbstractBaseBundle
 
     public function boot(): void
     {
+
         if (!extension_loaded('imagick')) {
            throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
         }
@@ -206,15 +198,12 @@ class BaseBundle extends AbstractBaseBundle
             $this->doctrineReadiness = $this->boot_Doctrine();
         }
 
-        $this->boot = true;
-        $this->boot_VarDumper();
         CacheClearCommand::$testFile ??= $this->getCacheDir().".txt";
+        $this->boot = true;
     }
 
     public function boot_VarDumper(): bool
     {
-        benchmark_start();
-
         if (!class_exists(\Symfony\Component\VarDumper\VarDumper::class)) return false;
         if (is_cli()) return false;
 
@@ -235,73 +224,20 @@ class BaseBundle extends AbstractBaseBundle
 
     public function boot_Doctrine(): bool
     {
-        /**
-         * Turn all DateTime into UTC timezone in database
-         */
-
         // Start session here to access client information
         $timezone = null;
-        if (method_exists(User::class, "getCookie")) {
-            $timezone = User::getCookie("timezone");
-        }
-        if (!in_array($timezone, timezone_identifiers_list())) {
-            $timezone = "UTC";
-        }
+        if (method_exists(User::class, "getCookie")) $timezone = User::getCookie("timezone");
+        if (!in_array($timezone, timezone_identifiers_list())) $timezone = "UTC";
 
         // Set default time to UTC everywhere
         date_default_timezone_set($timezone);
-
         Type::overrideType('date', UTCDateTimeType::class);
         Type::overrideType('datetime', UTCDateTimeType::class);
         Type::overrideType('datetimetz', UTCDateTimeType::class);
 
-        $entityManager = $this->container->get('doctrine.orm.entity_manager');
-        $entityManagerConfig = $entityManager->getConfiguration();
-        $entityManagerConnection = $entityManager->getConnection();
-
-        $entityManagerConfig
-            ->addFilter("trash_filter", TrashFilter::class);
-        $entityManagerConfig
-            ->addFilter("vault_filter", VaultFilter::class);
-        $entityManagerConfig
-            ->addCustomNumericFunction("rand", Rand::class);
-
-        if (class_exists(Field::class)) {
-            $entityManagerConfig
-                ->addCustomNumericFunction("FIELD", Field::class);
-        }
-
-        if (class_exists(DqlFunctions\JsonExtract::class)) {
-            $entityManagerConfig
-                ->addCustomStringFunction(DqlFunctions\JsonExtract::FUNCTION_NAME, DqlFunctions\JsonExtract::class);
-        }
-        if (class_exists(DqlFunctions\JsonSearch::class)) {
-            $entityManagerConfig
-                ->addCustomStringFunction(DqlFunctions\JsonSearch::FUNCTION_NAME, DqlFunctions\JsonSearch::class);
-        }
-        if (class_exists(DqlFunctions\JsonContains::class)) {
-            $entityManagerConfig
-                ->addCustomStringFunction(DqlFunctions\JsonContains::FUNCTION_NAME, DqlFunctions\JsonContains::class);
-        }
-
-        $entityManagerConfig->setDefaultQueryHint(
-            Query::HINT_CUSTOM_TREE_WALKERS,
-            [/* No default tree walker for the moment */]
-        );
-
-        /**
-         * Doctrine custom types: (priority to \App namespace)
-         */
-
-        $entityManagerConnection
-            ->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
-        $entityManagerConnection
-            ->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'json');
-
         $classList = array_merge(
             self::getAllClasses(self::getBundleDir() . "/src/Enum"),
-            self::getAllClasses($this->getProjectDir() . "/src/Enum"),
-            self::getAllClasses($this->getProjectDir() . "/stubs/Enum")
+            self::getAllClasses($this->getProjectDir() . "/src/Enum")
         );
 
         foreach ($classList as $className) {
@@ -316,15 +252,9 @@ class BaseBundle extends AbstractBaseBundle
             }
         }
 
-        /**
-         * Doctrine filters
-         */
-        $entityManager->getFilters()
-            ->enable("trash_filter");
-
-        $entityManager->getFilters()
-            ->enable("vault_filter")
-            ->setEnvironment($this->getEnvironment());
+        $entityManager = $this->container->get('doctrine.orm.entity_manager'); 
+        $entityManager->getFilters()->enable("trash_filter");
+        $entityManager->getFilters()->enable("vault_filter")->setEnvironment($this->getEnvironment());
 
         return true;
     }
@@ -340,8 +270,9 @@ class BaseBundle extends AbstractBaseBundle
         }
 
         $container->addCompilerPass(new AnnotationPass());
-        $container->addCompilerPass(new DoctrineEnumPass());
-        $container->addCompilerPass(new DoctrineAliasesPass());
+        $container->addCompilerPass(new DoctrineEnumSubscriberPass());
+        $container->addCompilerPass(new DoctrineConfigurationPass());
+        $container->addCompilerPass(new EasyAdminCrudPass());
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());
@@ -352,15 +283,15 @@ class BaseBundle extends AbstractBaseBundle
 
         /* Register aliased repositories */
         foreach (self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
-            dump("Registering repository: $baseRepository");
-            $container->register($baseRepository, $baseRepository)
-            ->addTag("doctrine.repository_service")
-            ->addArgument(new Reference('doctrine'));
+            
+            $container->register($baseRepository)
+                      ->addTag("doctrine.repository_service")
+                      ->addArgument(new Reference('doctrine'));
 
             if ($aliasedRepository) {
-                $container->register($aliasedRepository, $aliasedRepository)
-                    ->addTag("doctrine.repository_service")
-                    ->addArgument(new Reference('doctrine'));
+                $container->register($aliasedRepository)
+                          ->addTag("doctrine.repository_service")
+                          ->addArgument(new Reference('doctrine'));
             }
         }
     }

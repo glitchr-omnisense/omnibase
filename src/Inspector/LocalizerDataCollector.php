@@ -3,7 +3,6 @@
 namespace Base\Inspector;
 
 use Base\Service\LocalizerInterface;
-use Base\Service\TradingMarketInterface;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -42,7 +41,7 @@ class LocalizerDataCollector extends AbstractDataCollector
         return $this->localizer->getLocale();
     }
 
-    public function collect(Request $request, Response $response, $exception = null)
+    public function collect(Request $request, Response $response, $exception = null): void
     {       
         $this->data["locales"] = $this->localizer->getAvailableLocales();
 

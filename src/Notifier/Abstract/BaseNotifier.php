@@ -429,7 +429,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     public function getDefaultChannels(string $importance)
     {
-        return BaseService::getNotifier()->getPolicy()->getChannels($importance);
+        return $this->getPolicy()->getChannels($importance);
     }
 
     /**

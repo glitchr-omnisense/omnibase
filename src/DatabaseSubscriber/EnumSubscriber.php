@@ -6,21 +6,21 @@ use Base\Database\Type\EnumType;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
-use Doctrine\ORM\Events;
+use Doctrine\ORM\Tools\ToolEvents;
 
 class EnumSubscriber implements EventSubscriber
 {
     public function getSubscribedEvents(): array
     {
         return [
-            "postGenerateSchema"
+            ToolEvents::postGenerateSchema,
         ];
     }
 
     public function postGenerateSchema(GenerateSchemaEventArgs $eventArgs)
     {
         $columns = [];
-
+        
         foreach ($eventArgs->getSchema()->getTables() as $table) {
             foreach ($table->getColumns() as $column) {
                 if ($column->getType() instanceof EnumType) {
