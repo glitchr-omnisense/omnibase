@@ -32,6 +32,8 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
+use Base\DependencyInjection\Compiler\Pass\DoctrineAliasesPass;
+use Base\DependencyInjection\Compiler\Pass\DoctrineEnumPass;
 use Base\DependencyInjection\Compiler\Pass\DoctrinePass;
 use Base\Traits\SingletonTrait;
 
@@ -128,10 +130,12 @@ class BaseBundle extends AbstractBaseBundle
         self::$aliasList           = self::$aliasList           ?? self::$cache->getItem('base.alias_list')->get() ?? [];
         self::$aliasRepositoryList = self::$aliasRepositoryList ?? self::$cache->getItem('base.alias_repository_list')->get() ?? [];
 
+        dump("WARMUP");
         foreach (self::$aliasList as $class => $alias) {
             class_alias($class, $alias);
         }
         foreach (self::$aliasRepositoryList as $class => $alias) {
+            dump("Registering repository: $class");
             class_alias($class, $alias);
         }
 
@@ -336,7 +340,8 @@ class BaseBundle extends AbstractBaseBundle
         }
 
         $container->addCompilerPass(new AnnotationPass());
-        $container->addCompilerPass(new DoctrinePass());
+        $container->addCompilerPass(new DoctrineEnumPass());
+        $container->addCompilerPass(new DoctrineAliasesPass());
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());
@@ -347,13 +352,13 @@ class BaseBundle extends AbstractBaseBundle
 
         /* Register aliased repositories */
         foreach (self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
-
-            $container->register($baseRepository)->addTag("doctrine.repository_service")
+            dump("Registering repository: $baseRepository");
+            $container->register($baseRepository, $baseRepository)
+            ->addTag("doctrine.repository_service")
             ->addArgument(new Reference('doctrine'));
 
             if ($aliasedRepository) {
-
-                $container->register($aliasedRepository)
+                $container->register($aliasedRepository, $aliasedRepository)
                     ->addTag("doctrine.repository_service")
                     ->addArgument(new Reference('doctrine'));
             }

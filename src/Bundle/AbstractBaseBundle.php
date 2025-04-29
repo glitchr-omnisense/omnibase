@@ -186,7 +186,8 @@ abstract class AbstractBaseBundle extends Bundle
 
             if ($inputExists && !$outputExists && !array_key_exists($input, self::$aliasList ?? [])) {
 
-                // class_alias($input, $output);
+                class_alias($input, $output);
+                dump("$input => $output");
                 if (str_ends_with($input, "Repository")) {
                     self::$aliasRepositoryList[$input] = $output;
                 } else {
