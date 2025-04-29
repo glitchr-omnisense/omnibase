@@ -2,8 +2,8 @@
 
 namespace Base\Notifier\Abstract;
 
-use App\Entity\User\Notification;
-use App\Notifier\Recipient\Recipient;
+use Base\Entity\User\Notification;
+use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\NotifierInterface;
 use Twig\Environment;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;

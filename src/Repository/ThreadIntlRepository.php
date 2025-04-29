@@ -12,7 +12,6 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method ThreadIntl[]    findAll()
  * @method ThreadIntl[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
-
 class ThreadIntlRepository extends ServiceEntityRepository
 {
 }

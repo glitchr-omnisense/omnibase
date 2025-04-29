@@ -2,8 +2,8 @@
 
 namespace Base\Notifier;
 
-use App\Entity\User;
-use App\Entity\User\Notification;
+use Base\Entity\User;
+use Base\Entity\User\Notification;
 use Base\Notifier\Abstract\BaseNotifierInterface;
 
 /**

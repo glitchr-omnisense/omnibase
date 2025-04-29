@@ -32,7 +32,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
-use Base\DependencyInjection\Compiler\Pass\DoctrineEnumSubscriberPass;
+use Base\DependencyInjection\Compiler\Pass\DoctrinePass;
 use Base\Traits\SingletonTrait;
 
 /**
@@ -296,7 +296,8 @@ class BaseBundle extends AbstractBaseBundle
 
         $classList = array_merge(
             self::getAllClasses(self::getBundleDir() . "/src/Enum"),
-            self::getAllClasses($this->getProjectDir() . "/src/Enum")
+            self::getAllClasses($this->getProjectDir() . "/src/Enum"),
+            self::getAllClasses($this->getProjectDir() . "/stubs/Enum")
         );
 
         foreach ($classList as $className) {
@@ -335,7 +336,7 @@ class BaseBundle extends AbstractBaseBundle
         }
 
         $container->addCompilerPass(new AnnotationPass());
-        $container->addCompilerPass(new DoctrineEnumSubscriberPass());
+        $container->addCompilerPass(new DoctrinePass());
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());
@@ -351,10 +352,10 @@ class BaseBundle extends AbstractBaseBundle
             ->addArgument(new Reference('doctrine'));
 
             if ($aliasedRepository) {
-            
-            $container->register($aliasedRepository)
-                ->addTag("doctrine.repository_service")
-                ->addArgument(new Reference('doctrine'));
+
+                $container->register($aliasedRepository)
+                    ->addTag("doctrine.repository_service")
+                    ->addArgument(new Reference('doctrine'));
             }
         }
     }

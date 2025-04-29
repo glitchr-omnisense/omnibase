@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 /**
  *
  */
-class UserActionCrudController extends AbstractCrudController
+abstract class UserActionCrudController extends AbstractCrudController
 {
     /**
      * @var EntityManager

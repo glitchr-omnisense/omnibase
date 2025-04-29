@@ -123,11 +123,14 @@ class DiscriminatorEntry extends AbstractAnnotation
         return empty($classMetadata->parentClasses) && count($classMetadata->discriminatorMap) > 0;
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, ?string $target = null, ?string $targetValue = null)
     {
+        // dump("DiscriminatorEntry::loadClassMetadata() called for " . $classMetadata->getName());
+
         // Recompute the map discriminator
         $discriminatorValues = [];
         foreach ($classMetadata->discriminatorMap as $className) {
+
             $metadata = $this->getAnnotationReader()->getAnnotations($className, $this);
             $metadata = $metadata[AnnotationReader::TARGET_CLASS][$className];
             $metadata = $metadata ? end($metadata) : null;
@@ -143,5 +146,8 @@ class DiscriminatorEntry extends AbstractAnnotation
         if ($classMetadata->discriminatorValue === null) {
             throw new Exception("Missing discriminator entry in " . $classMetadata->getName());
         }
+
+        // dump($classMetadata->discriminatorMap);
+        // dump($classMetadata->discriminatorValue);
     }
 }

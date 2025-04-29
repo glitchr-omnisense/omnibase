@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 /**
  *
  */
-class ThreadActionCrudController extends AbstractCrudController
+abstract class ThreadActionCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string
     {

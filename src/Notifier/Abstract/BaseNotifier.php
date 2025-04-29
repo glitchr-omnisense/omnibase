@@ -2,10 +2,10 @@
 
 namespace Base\Notifier\Abstract;
 
-use App\Entity\User;
+use Base\Entity\User;
 use BadMethodCallException;
-use App\Entity\User\Notification;
-use App\Notifier\Recipient\Recipient;
+use Base\Entity\User\Notification;
+use Base\Notifier\Recipient\Recipient;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\TimezoneRecipientInterface;
 use Base\Routing\RouterInterface;
@@ -215,7 +215,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this->technicalLoopback;
     }
 
-    public function isTest(RecipientInterface $recipient): bool
+    public function isTest(Recipient $recipient): bool
     {
         if ($this->technicalLoopback) {
             return true;
@@ -252,7 +252,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         $this->initializeAdminRecipients();
 
-        return $this->notifier instanceof SymfonyNotifier ? $this->notifier->getAdminRecipients()[$i] : null;
+        return $this->notifier instanceof SymfonyNotifier ? $this->notifier->getAdminRecipients()[$i] ?? null : null;
     }
 
     public function getAdminRecipients(): array

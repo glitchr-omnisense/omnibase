@@ -81,8 +81,6 @@ abstract class AbstractBaseBundle extends Bundle
 
     public function setMapping(string $path, string $inputNamespace = "", string $outputNamespace = "")
     {
-        // $this->generateStub($path, $inputNamespace, $outputNamespace);
-
         $classList = $this->getAllClasses($path, $inputNamespace);
     
         $aliasList = [];
@@ -90,7 +88,7 @@ abstract class AbstractBaseBundle extends Bundle
             $aliasList[$inputNamespace . "\\" . $class] = str_rstrip($outputNamespace, "\\"). "\\" . $class;
         }
 
-        // $this->setAlias($aliasList);
+        $this->setAlias($aliasList);
     }
 
     public function generateStub(string $path, string $inputNamespace = "", string $outputNamespace = ""): void
@@ -176,6 +174,7 @@ abstract class AbstractBaseBundle extends Bundle
     public function setAlias(array $classes)
     {
         foreach ($classes as $input => $output) {
+            
             // Autowire base repositories
             $inputExists = false;
             try { $inputExists = class_exists($input); }
@@ -187,7 +186,7 @@ abstract class AbstractBaseBundle extends Bundle
 
             if ($inputExists && !$outputExists && !array_key_exists($input, self::$aliasList ?? [])) {
 
-                class_alias($input, $output);
+                // class_alias($input, $output);
                 if (str_ends_with($input, "Repository")) {
                     self::$aliasRepositoryList[$input] = $output;
                 } else {
