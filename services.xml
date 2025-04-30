@@ -19,7 +19,7 @@
 
         <service id="Base\Service\Referrer" public="true">
             <argument type="service" id="request_stack" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
         </service>
 
         <service id="Base\Controller\MainController">
@@ -51,7 +51,7 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="localizer" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="referrer" />
             <argument type="service" id="translator" />
         </service>
@@ -79,26 +79,26 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="Base\Repository\Layout\ShlinkRepository" />
         </service>
 
         <service id="Base\Subscriber\RouterSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="security.authorization_checker" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="setting_bag" />
         </service>
 
-        <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="router" /></service>
+        <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="advanced_router" /></service>
         <service id="Base\Subscriber\TwigSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="twig.html_renderer" />
             <argument type="service" id="twig.webpack_renderer" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
         <service id="Base\Subscriber\HotParameterBagSubscriber">
@@ -107,9 +107,22 @@
             <argument type="service" id="setting_bag" />
         </service>
 
+        <service id="Base\Routing\AdvancedRouter" >
+            <tag name="twig.runtime" />
+            <argument type="service" id="router" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="security.firewall.map" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="localizer" />
+            <argument type="service" id="twig.extension.assets" />
+            <argument type="service" id="cache.adapter" />
+            <bind key="$debug">%kernel.debug%</bind>
+            <bind key="$environment">%kernel.environment%</bind>
+        </service>
+
         <service id="Base\Subscriber\EasyAdminSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
@@ -118,7 +131,7 @@
             <tag name="kernel.event_subscriber" />
             <tag name="twig.runtime" />
             <argument type="service" id="security.token_storage" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="translator" />
             <argument type="service" id="twig" />
             <argument type="service" id="App\Repository\UserRepository" />
@@ -149,7 +162,7 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
             <argument type="service" id="localizer" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="twig" />
             <argument type="service" id="setting_bag" />
             <bind key="$debug">%kernel.debug%</bind>
@@ -202,7 +215,7 @@
             <argument type="service" id="base.service.image" />
             <argument type="service" id="base.service.icon" />
             <argument type="service" id="translator" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
@@ -218,7 +231,7 @@
         <service id="Base\Cache\SimpleCache" parent="Base\Cache\Abstract\AbstractLocalCache" public="true" />
 
         <service id="Base\Service\MaintenanceProvider" public="true">
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
@@ -227,7 +240,7 @@
         </service>
 
         <service id="Base\Service\Launcher" public="true">
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="security.authorization_checker" />
@@ -235,12 +248,12 @@
         </service>
 
         <service id="Base\Service\Paginator" public="true">
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Service\Breadgrinder" public="true">
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="translator" />
             <argument type="service" id="parameter_bag" />
         </service>
@@ -256,7 +269,7 @@
         <service id="Base\Form\Extension\FormTypeSpamExtension" >
             <tag name="form.type_extension" />
             <argument type="service" id="spam_checker" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
         </service>
 
         <!-- Commands -->
@@ -352,7 +365,7 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="error_handler.error_renderer.html" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="base.service" />
             <argument type="service" id="profiler" on-invalid="null" />
         </service>
@@ -368,7 +381,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="twig" />
@@ -385,7 +398,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="App\Repository\UserRepository" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="form.proxy" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
@@ -396,7 +409,7 @@
         <service id="Base\Subscriber\LocalizerSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="localizer" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="security.token_storage" />
         </service>
 
@@ -466,7 +479,7 @@
         <service id="Base\Service\Sitemapper" public="true">
             <argument type="service" id="twig" />
             <argument type="service" id="base.annotation_reader" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="localizer" />
         </service>
 
@@ -525,7 +538,7 @@
         <service id="Base\Service\FileService"  public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="twig" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="obfuscator" />
             <argument type="service" id="flysystem" />
         </service>
@@ -567,7 +580,7 @@
             <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="localizer" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
@@ -610,7 +623,7 @@
 
         <service id="Base\Annotations\AnnotationReader" public="true">
             <argument type="service" id="event_dispatcher" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="flysystem" />
@@ -626,13 +639,13 @@
 
          <service id="Base\Security\Voter\AdminVoter">
             <tag name="security.voter" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
         </service>
 
          <service id="Base\Security\Voter\AccessVoter">
             <tag name="security.voter" />
             <argument type="service" id="request_stack" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="security.firewall.map" />
@@ -655,7 +668,7 @@
 
         <service id="Base\Twig\Variable\SiteVariable" public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="sitemap" />
             <argument type="service" id="translator" />
             <argument type="service" id="localizer" />
@@ -679,7 +692,7 @@
 
         <service id="Base\Twig\Extension\MediaTwigExtension" public="true">
             <tag name="twig.extension" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="Base\Controller\UX\MediaController" />
             <bind key="$projectDir">%kernel.project_dir%</bind>
@@ -705,7 +718,7 @@
             <tag name="twig.runtime" />
             <tag name="twig.tag_renderer" />
             <argument type="service" id="request_stack" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
         </service>
         <service id="Base\Twig\Renderer\Adapter\WebpackTagRenderer" parent="Base\Twig\Renderer\AbstractTagRenderer" public="true" >
             <tag name="twig.runtime" />
@@ -747,7 +760,7 @@
         <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
         <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
         <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="form.factory" />
@@ -828,7 +841,7 @@
         <service id="Base\Security\UserTracker">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="request_stack" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="Base\Repository\User\ConnectionRepository" />
         </service>
         
@@ -849,7 +862,7 @@
         <service id="Base\Security\LoginFormAuthenticator">
             <argument type="service" id="referrer" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="security.authorization_checker" />
         </service>
 
@@ -876,7 +889,7 @@
             <argument type="service" id="referrer" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="localizer" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="base.service.maintenance" />
             <argument type="service" id="base.service.launcher" />
@@ -886,7 +899,7 @@
         <service id="Base\Subscriber\ReferrerSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="referrer" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="parameter_bag" />
         </service>
 
@@ -896,7 +909,7 @@
             <argument type="service" id="translator" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="doctrine" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="referrer" />
             
             <bind key="$projectDir">%kernel.project_dir%</bind>
@@ -949,7 +962,7 @@
             <argument type="service" id="base.notifier" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="security.token_storage" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
         </service>
 
         <service id="Base\Form\Type\LayoutSettingListType">
@@ -986,7 +999,7 @@
 
         <service id="Base\Field\Type\RouteType">
             <tag name="form.type" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="localizer" />
         </service>
 
@@ -1003,7 +1016,7 @@
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="obfuscator" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
         </service>
 
         <service id="Base\Field\Type\ForexType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
@@ -1050,7 +1063,7 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
             <argument type="service" id="twig" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="obfuscator" />
         </service>
@@ -1170,7 +1183,7 @@
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="form.factory" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="obfuscator" />
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
@@ -1188,7 +1201,7 @@
             <tag name="ea.field_configurator" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
         </service>
 
         <service id="Base\Field\Configurator\NumberConfigurator">
@@ -1296,7 +1309,7 @@
             <argument type="service" id="translator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="base.service.icon" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="twig" />
@@ -1317,7 +1330,7 @@
             <argument type="service" id="ea_extension" />
             <argument type="service" id="base.service.file" />
             <argument type="service" id="setting_bag" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="translator" />
         </service>
 
@@ -1329,7 +1342,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="base.service" />
         </service>
 

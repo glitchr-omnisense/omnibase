@@ -33,24 +33,10 @@
             <argument type="service" id="localizer" />
         </service>
 
-        <service id="Base\Routing\RouterInterface" alias="Base\Routing\AdvancedRouter"/>
-        <service id="Base\Routing\AdvancedRouter" decorates="router">
-            <tag name="twig.runtime" />
-            <argument type="service" id=".inner" />
-            <argument type="service" id="request_stack" />
-            <argument type="service" id="security.firewall.map" />
-            <argument type="service" id="parameter_bag" />
-            <argument type="service" id="localizer" />
-            <argument type="service" id="twig.extension.assets" />
-            <argument type="service" id="cache.adapter" />
-            <bind key="$debug">%kernel.debug%</bind>
-            <bind key="$environment">%kernel.environment%</bind>
-        </service>
-
         <service id="Base\Twig\Loader\FilesystemLoader" decorates="twig.loader.native_filesystem">
             <tag name="twig.loader" priority="1" />
             <argument type="service" id=".inner" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="twig" />
             <argument type="service" id="twig.app_variable" />
             <argument type="service" id="twig.random_variable" />
@@ -66,7 +52,7 @@
         <service id="Base\Twig\Environment" parent="twig" decorates="twig">
             <argument type="service" id="request_stack" />
             <argument type="service" id="localizer" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <argument type="service" id="parameter_bag" />
         </service>
 
@@ -79,16 +65,22 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
         <service id="Base\Admin\Router\AdminRouteGenerator"               parent="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator"               decorates="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator" />
-        <service id="Base\Admin\Factory\MenuFactory"                      parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"                      decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"><argument type="service" id="router" /></service>
-        <service id="Base\Admin\Factory\AdminContextFactory"              parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"              decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"><argument type="service" id="ea_extension" /></service>
-        <service id="Base\Admin\Field\Configurator\CommonPreConfigurator" parent="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator" decorates="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator"><argument type="service" id="translator" /></service>
+        <service id="Base\Admin\Factory\MenuFactory"                      parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"                      decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory">
+            <argument type="service" id="advanced_router" />
+        </service>
+        <service id="Base\Admin\Factory\AdminContextFactory"              parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"              decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory">
+            <argument type="service" id="ea_extension" />
+        </service>
+        <service id="Base\Admin\Field\Configurator\CommonPreConfigurator" parent="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator" decorates="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator">
+            <argument type="service" id="translator" />
+        </service>
 
         <service id="Base\Console\Command\CacheClearCommand" parent="Base\Console\Command" decorates="console.command.cache_clear">
             <tag name="console.command" />
             <argument type="service" id=".inner"/>
             <argument type="service" id="flysystem" />
             <argument type="service" id="base.notifier" />
-            <argument type="service" id="router" />
+            <argument type="service" id="advanced_router" />
             <bind key="$projectDir">%kernel.project_dir%</bind>
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>

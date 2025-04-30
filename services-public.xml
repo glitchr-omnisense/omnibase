@@ -14,6 +14,9 @@
         <service id="console" alias="Base\Console\Console" />
         <service id="Base\Console\ConsoleInterface" alias="console"/>
 
+        <service id="advanced_router" alias="Base\Routing\AdvancedRouter"/>
+        <service id="Base\Routing\RouterInterface" alias="advanced_router"/>
+
         <service id="trading_market" alias="Base\Service\TradingMarket" />
         <service id="Base\Service\TradingMarketInterface" alias="trading_market"/>
 
