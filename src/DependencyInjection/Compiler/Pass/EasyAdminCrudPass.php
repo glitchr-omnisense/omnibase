@@ -11,7 +11,7 @@ class EasyAdminCrudPass implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         // Define the directory to scan for CRUD controllers
-        $directory = __DIR__ . '/../../../Controller/Admin/Crud';
+        $directory = dirname(__FILE__, 4) . '/Controller/Admin/Crud';
 
         // Use Symfony Finder to locate PHP files in the directory
         $finder = new Finder();

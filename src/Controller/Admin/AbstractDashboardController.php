@@ -240,7 +240,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     #[IsGranted("IS_AUTHENTICATED_FULLY")]
     public function Manual(?string $slug = null): Response
     {
-        if(!BaseBundle::hasBundle(WikidocBundle::class)) {
+        if(!BaseBundle::getInstance()->hasBundle(WikidocBundle::class)) {
             return $this->redirect("admin");
         }
 
