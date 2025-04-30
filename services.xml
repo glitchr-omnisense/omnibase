@@ -1337,5 +1337,6 @@
             <tag name="data_collector" id="locale" />
             <argument type="service" id="localizer" />
         </service>
+        
     </services>
 </container>
