@@ -12,7 +12,7 @@
 namespace Base\Form\Extension;
 
 use Base\Enum\SpamScore;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Model\SpamProtectionInterface;
 
 use Base\Service\SpamChecker;
@@ -35,14 +35,14 @@ class FormTypeSpamExtension extends AbstractTypeExtension
     protected SpamChecker $spamChecker;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /** @var bool */
     private bool $defaultEnabled;
 
-    public function __construct(SpamChecker $spamChecker, RouterInterface $router, bool $defaultEnabled = true)
+    public function __construct(SpamChecker $spamChecker, AdvancedRouterInterface $router, bool $defaultEnabled = true)
     {
         $this->spamChecker = $spamChecker;
         $this->defaultEnabled = $defaultEnabled;

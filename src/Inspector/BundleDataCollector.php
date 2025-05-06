@@ -4,6 +4,7 @@ namespace Base\Inspector;
 
 use ApiPlatform\Symfony\Bundle\ApiPlatformBundle;
 use Base\BaseBundle;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Composer\InstalledVersions;
@@ -22,7 +23,6 @@ use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\RouterInterface;
 
 /**
  *
@@ -35,8 +35,8 @@ class BundleDataCollector extends AbstractDataCollector
     /** @var ManagerRegistry */
     private ManagerRegistry $doctrine;
 
-    /** @var RouterInterface */
-    private RouterInterface $router;
+    /** @var AdvancedRouterInterface */
+    private AdvancedRouterInterface $router;
 
     /** @var ParameterBagInterface */
     private ParameterBagInterface $parameterBag;
@@ -46,7 +46,7 @@ class BundleDataCollector extends AbstractDataCollector
 
     public array $dataBundles = [];
 
-    public function __construct(AdminContextProvider $adminContextProvider, ManagerRegistry $doctrine, ParameterBagInterface $parameterBag, RouterInterface $router, BaseService $baseService)
+    public function __construct(AdminContextProvider $adminContextProvider, ManagerRegistry $doctrine, ParameterBagInterface $parameterBag, AdvancedRouterInterface $router, BaseService $baseService)
     {
         $this->adminContextProvider = $adminContextProvider;
         $this->doctrine = $doctrine;

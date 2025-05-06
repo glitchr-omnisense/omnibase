@@ -8,7 +8,7 @@ use Base\Entity\User\Notification;
 use Base\Notifier\Recipient\Recipient;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\TimezoneRecipientInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\SettingBagInterface;
 use DateTime;
@@ -112,9 +112,9 @@ abstract class BaseNotifier implements BaseNotifierInterface
     protected ParameterBagInterface $parameterBag;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var LocalizerInterface
@@ -177,7 +177,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this->twig;
     }
 
-    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
+    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, AdvancedRouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
     {
         $this->twig = $twig;
         $this->notifier = $notifier;
@@ -408,16 +408,16 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this;
     }
 
-    public function getRouter(): RouterInterface
+    public function getRouter(): AdvancedRouterInterface
     {
         return $this->router;
     }
 
     /**
-     * @param RouterInterface $router
+     * @param AdvancedRouterInterface $router
      * @return $this
      */
-    public function setRouter(RouterInterface $router)
+    public function setRouter(AdvancedRouterInterface $router)
     {
         $this->router = $router;
         return $this;

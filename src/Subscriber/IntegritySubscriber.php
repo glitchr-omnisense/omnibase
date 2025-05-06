@@ -11,7 +11,7 @@ use Base\Security\RescueFormAuthenticator;
 use Base\BaseBundle;
 use Base\Console\Command\Command;
 use Base\Console\Command\CacheClearCommand;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ReferrerInterface;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\ORM\EntityNotFoundException;
@@ -61,9 +61,9 @@ class IntegritySubscriber implements EventSubscriberInterface
     protected TranslatorInterface $translator;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @Vault
@@ -85,7 +85,7 @@ class IntegritySubscriber implements EventSubscriberInterface
      */
     protected Process $clearProcess;
 
-    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, RouterInterface $router, ReferrerInterface $referrer, string $projectDir, string $secret = null)
+    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, AdvancedRouterInterface $router, ReferrerInterface $referrer, string $projectDir, string $secret = null)
     {
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;

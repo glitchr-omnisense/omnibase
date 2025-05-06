@@ -47,7 +47,7 @@ class HeadingEnhancer implements HeadingEnhancerInterface
 
         $encoding = mb_detect_encoding($html);
         $dom = new DOMDocument('1.0', $encoding);
-        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
+        $dom->loadHTML(mb_convert_encoding($html, 'UTF-8', $encoding), LIBXML_NOERROR);
 
         $headlines = [];
         for ($i = 1; $i <= $maxLevel; $i++) {
@@ -90,7 +90,7 @@ class HeadingEnhancer implements HeadingEnhancerInterface
 
         $encoding = mb_detect_encoding($html);
         $dom = new DOMDocument('1.0', $encoding);
-        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
+        $dom->loadHTML(mb_convert_encoding($html, 'UTF-8', $encoding), LIBXML_NOERROR);
 
         $attrs ??= [];
         $attrs["class"] = $attrs["class"] ?? "";

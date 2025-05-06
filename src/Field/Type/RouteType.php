@@ -15,8 +15,8 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class RouteType extends AbstractType
 {
-    /** @var RouterInterface */
-    protected RouterInterface $router;
+    /** @var AdvancedRouterInterface */
+    protected AdvancedRouterInterface $router;
     /** @var LocalizerInterface */
     protected LocalizerInterface $localizer;
 
@@ -30,7 +30,7 @@ class RouteType extends AbstractType
         return 'route';
     }
 
-    public function __construct(RouterInterface $router, LocalizerInterface $localizer)
+    public function __construct(AdvancedRouterInterface $router, LocalizerInterface $localizer)
     {
         $this->router = $router;
         $this->localizer = $localizer;

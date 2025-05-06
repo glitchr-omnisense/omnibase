@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Loader;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Traits\BaseTrait;
 use Base\Twig\AppVariable;
 use Base\Twig\Variable\RandomVariable;
@@ -21,17 +21,17 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
     protected Environment $twig;
 
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @param \Twig\Loader\FilesystemLoader $defaultLoader
-     * @param RouterInterface $router
+     * @param AdvancedRouterInterface $router
      * @param Environment $twig
      * @param AppVariable $appVariable
      * @param RandomVariable $randomVariable
      * @throws LoaderError
      */
-    public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, RouterInterface $router, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable)
+    public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, AdvancedRouterInterface $router, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable)
     {
         $this->twig = $twig;
         $this->router = $router;

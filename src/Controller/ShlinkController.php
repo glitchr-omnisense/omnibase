@@ -3,7 +3,7 @@
 namespace Base\Controller;
 
 use Base\Repository\Layout\ShlinkRepository;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Base\Annotations\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,11 +20,11 @@ class ShlinkController extends AbstractController
     protected $shlinkRepository;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
-    public function __construct(RouterInterface $router, ShlinkRepository $shlinkRepository)
+    public function __construct(AdvancedRouterInterface $router, ShlinkRepository $shlinkRepository)
     {
         $this->router = $router;
         $this->shlinkRepository = $shlinkRepository;

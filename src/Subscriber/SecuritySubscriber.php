@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\Localizer;
 use Base\Service\MaintenanceProviderInterface;
@@ -51,9 +51,9 @@ class SecuritySubscriber implements EventSubscriberInterface
     protected TokenStorageInterface $tokenStorage;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var UserRepository
@@ -108,7 +108,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         ReferrerInterface            $referrer,
         SettingBagInterface          $settingBag,
         Localizer                    $localizer,
-        RouterInterface              $router,
+        AdvancedRouterInterface              $router,
         ParameterBagInterface        $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
         LauncherInterface            $launcher,

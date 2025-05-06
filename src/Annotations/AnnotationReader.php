@@ -16,7 +16,7 @@ use Base\BaseBundle;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\FlysystemInterface;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -173,13 +173,13 @@ class AnnotationReader extends AbstractLocalCache
     protected EventDispatcherInterface $eventDispatcher;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
-        RouterInterface          $router,
+        AdvancedRouterInterface          $router,
         EntityManager            $entityManager,
         ParameterBagInterface    $parameterBag,
         FlysystemInterface       $flysystem,

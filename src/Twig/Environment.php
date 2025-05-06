@@ -2,7 +2,7 @@
 
 namespace Base\Twig;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
@@ -21,7 +21,7 @@ class Environment extends TwigEnvironment
 {
     protected RequestStack $requestStack;
 
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     protected ParameterBagInterface $parameterBag;
 
@@ -29,7 +29,7 @@ class Environment extends TwigEnvironment
 
     protected Environment $environment;
 
-    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocalizerInterface $localizer, RouterInterface $router, ParameterBagInterface $parameterBag)
+    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, LocalizerInterface $localizer, AdvancedRouterInterface $router, ParameterBagInterface $parameterBag)
     {
         $this->requestStack = $requestStack;
         $this->router = $router;

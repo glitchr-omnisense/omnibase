@@ -5,7 +5,7 @@ namespace Base\Subscriber;
 use Base\Service\ReferrerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
@@ -17,9 +17,9 @@ use Base\Service\ParameterBagInterface;
 class ReferrerSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var ParameterBagInterface
@@ -33,7 +33,7 @@ class ReferrerSubscriber implements EventSubscriberInterface
 
     public function __construct(
         ReferrerInterface     $referrer,
-        RouterInterface       $router,
+        AdvancedRouterInterface       $router,
         ParameterBagInterface $parameterBag
     )
     {

@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Routing\AdvancedRouter;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use finfo;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
@@ -36,9 +36,9 @@ class FileService implements FileServiceInterface
     protected FlysystemInterface $flysystem;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var Environment
@@ -51,7 +51,7 @@ class FileService implements FileServiceInterface
     /** * @var string */
     protected string $publicDir;
 
-    public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
+    public function __construct(Environment $twig, AdvancedRouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
         $this->twig = $twig;
         $this->router = $router;
@@ -289,7 +289,7 @@ class FileService implements FileServiceInterface
         $match = $this->router->getRouteMatch($data);
         $data = $match && array_key_exists("data", $match) ? $match["data"] : $data;
 
-        $uuid = format_uuid(str_replace("/", "-", $data));
+        $uuid = format_uuid(str_replace("/", "-", $data), true);
         if (Uuid::isValid($uuid)) {
             $data = $uuid;
         } else {

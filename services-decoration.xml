@@ -49,6 +49,10 @@
             <argument type="service" id="base.database.entity_hydrator" />
         </service>
 
+        <service id="Base\Inspector\FileLinkFormatter" parent="debug.file_link_formatter" decorates="debug.file_link_formatter" public="false">
+            <tag name="kernel.file_link_formatter" />
+        </service>
+
         <service id="Base\Twig\Environment" parent="twig" decorates="twig">
             <argument type="service" id="request_stack" />
             <argument type="service" id="localizer" />
@@ -61,10 +65,6 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="Base\Admin\Router\AdminUrlGenerator"                 parent="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator"                 decorates="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator">
-            <argument type="service" id="doctrine.orm.entity_manager" />
-        </service>
-        <service id="Base\Admin\Router\AdminRouteGenerator"               parent="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator"               decorates="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator" />
         <service id="Base\Admin\Factory\MenuFactory"                      parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"                      decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory">
             <argument type="service" id="advanced_router" />
         </service>

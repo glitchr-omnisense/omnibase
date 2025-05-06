@@ -11,7 +11,7 @@ use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\Format\SvgFilterInterface;
 use Base\Imagine\Filter\FormatFilterInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Imagine\Image\Palette\RGB;
 use League\Flysystem\UnableToCreateDirectory;
 use LogicException;
@@ -79,7 +79,7 @@ class MediaService extends FileService implements MediaServiceInterface
 
     public function __construct(
         Environment           $twig,
-        RouterInterface       $router,
+        AdvancedRouterInterface       $router,
         ObfuscatorInterface   $obfuscator,
         FlysystemInterface    $flysystem,
         ParameterBagInterface $parameterBag,

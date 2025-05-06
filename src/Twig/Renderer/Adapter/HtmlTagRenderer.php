@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Renderer\Adapter;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Renderer\AbstractTagRenderer;
@@ -19,9 +19,9 @@ class HtmlTagRenderer extends AbstractTagRenderer
 {
     protected RequestStack $requestStack;
 
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
-    public function __construct(Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, RouterInterface $router)
+    public function __construct(Environment $twig, LocalizerInterface $localizer, SluggerInterface $slugger, ParameterBagInterface $parameterBag, RequestStack $requestStack, AdvancedRouterInterface $router)
     {
         parent::__construct($twig, $localizer, $slugger, $parameterBag);
         $this->requestStack = $requestStack;

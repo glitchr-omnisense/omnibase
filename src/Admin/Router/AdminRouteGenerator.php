@@ -8,11 +8,7 @@ use Symfony\Component\Routing\Route;
 
 class AdminRouteGenerator extends \EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator
 {
-    public function __construct(
-        protected iterable $dashboardControllers,
-        protected iterable $crudControllers,
-        protected CacheItemPoolInterface $cache,
-    ) { }
+    public function __construct(...$args) { parent::__construct(...$args); }
 
     protected function getDashboardsRouteConfig(): array
     {

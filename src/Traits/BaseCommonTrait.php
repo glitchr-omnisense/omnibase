@@ -8,7 +8,7 @@ use Base\Service\BaseService;
 use Base\Service\Obfuscator;
 use Base\Service\TradingMarketInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
 use Base\Service\MediaServiceInterface;
@@ -226,11 +226,11 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var RouterInterface|null
+     * @var AdvancedRouterInterface|null
      */
-    protected static ?RouterInterface $router = null;
+    protected static ?AdvancedRouterInterface $router = null;
 
-    public static function setRouter(RouterInterface $router)
+    public static function setRouter(AdvancedRouterInterface $router)
     {
         self::$router = $router;
     }

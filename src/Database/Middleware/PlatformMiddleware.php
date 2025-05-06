@@ -2,9 +2,6 @@
 
 namespace Base\Database\Middleware;
 
-use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
-use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Driver\Middleware;
 use Doctrine\DBAL\Driver;
 

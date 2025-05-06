@@ -122,14 +122,14 @@ trait CacheClearTrait
         ;
         $table->render();
 
-        if ($useCustomRouter === true) {
+        if ($useCustomRouter === true && $this->parameterBag->get("base.router.use_fallback") === true) {
             if ($this->parameterBag->get("base.router.fallback_warning") && !$this->router->getHostFallback()) {
                 $io->warning("No host fallback configured in `base.yaml`" . PHP_EOL . "(configure 'base.router.fallbacks' to remove this message or disable `base.router.fallback_warning` warning).");
             }
-        }
 
-        if ($this->parameterBag->get("base.database.fallback_warning") && !$this->entityManager->getMetadataFactory() instanceof ClassMetadataFactory) {
-            $io->warning("Custom ClassMetadataFactory is configured. No fallback configured in `base.yaml`" . PHP_EOL . "(configure 'doctrine.orm.class_metadata_factory_name' to remove this message or disable `base.database.fallback_warning` warning).");
+            if ($this->parameterBag->get("base.database.fallback_warning") && !$this->entityManager->getMetadataFactory() instanceof ClassMetadataFactory) {
+                $io->warning("Custom ClassMetadataFactory is configured. No fallback configured in `base.yaml`" . PHP_EOL . "(configure 'doctrine.orm.class_metadata_factory_name' to remove this message or disable `base.database.fallback_warning` warning).");
+            }
         }
     }
 

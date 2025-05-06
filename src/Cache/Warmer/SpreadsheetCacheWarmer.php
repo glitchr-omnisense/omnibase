@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\CacheWarmer;
+namespace Base\Cache\Warmer;
 
 use PhpOffice\PhpSpreadsheet\Settings;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -27,10 +27,6 @@ class SpreadsheetCacheWarmer implements CacheWarmerInterface
         return true;
     }
 
-    /**
-     * @param $cacheDir
-     * @return array|string[]
-     */
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         if ($this->shellVerbosity > 0 && 'cli' == php_sapi_name()) {

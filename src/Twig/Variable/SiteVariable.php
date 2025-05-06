@@ -3,7 +3,7 @@
 namespace Base\Twig\Variable;
 
 use Symfony\Component\Routing\Router;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LauncherInterface;
 use Base\Service\LocalizerInterface;
@@ -17,7 +17,7 @@ use Base\Service\TranslatorInterface;
 class SiteVariable
 {
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
     protected $router;
     /**
@@ -46,7 +46,7 @@ class SiteVariable
     protected $baseService;
 
     public function __construct(
-        RouterInterface              $router,
+        AdvancedRouterInterface              $router,
         SitemapperInterface          $sitemapper,
         TranslatorInterface          $translator,
         LocalizerInterface           $localizer,

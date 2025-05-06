@@ -5,7 +5,7 @@ namespace Base\Twig\Variable;
 use Base\Controller\Admin\AbstractCrudController;
 use Base\Controller\Admin\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LauncherInterface;
 use Base\Service\LocalizerInterface;
@@ -22,7 +22,7 @@ class AdminVariable extends SiteVariable
     protected AdminUrlGenerator $adminUrlGenerator;
 
     public function __construct(
-        RouterInterface              $router,
+        AdvancedRouterInterface              $router,
         SitemapperInterface          $sitemapper,
         TranslatorInterface          $translator,
         LocalizerInterface           $localizer,

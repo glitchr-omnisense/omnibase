@@ -30,7 +30,9 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
             $replacementChars = array_pad([], count($reservedChars), "_");
             $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".static_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
             $staticRoutes = self::$router->getCache()->get($cacheKey, function () use (&$staticRoutes) {
+                
                 foreach ($staticRoutes as &$staticRoute) {
+                
                     $host = $staticRoute[0][1];
                     if (!$host) {
                         continue;

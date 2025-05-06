@@ -36,8 +36,6 @@ use Base\Traits\SingletonTrait;
  */
 class BaseBundle extends AbstractBaseBundle
 {
-    use SingletonTrait;
-
     public const VERSION = '1.0.0';
     public const USE_CACHE = true;
 

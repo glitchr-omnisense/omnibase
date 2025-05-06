@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Entity\User\Notification;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use DateTime;
 use Base\Service\Model\IntlDateTime;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -15,8 +15,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class Launcher implements LauncherInterface
 {
-    /** @var RouterInterface */
-    protected RouterInterface $router;
+    /** @var AdvancedRouterInterface */
+    protected AdvancedRouterInterface $router;
     /** @var ParameterBagInterface */
     protected ParameterBagInterface $parameterBag;
     /** @var SettingBagInterface */
@@ -26,7 +26,7 @@ class Launcher implements LauncherInterface
     /** @var TokenStorageInterface */
     protected TokenStorageInterface $tokenStorage;
 
-    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, TokenStorageInterface $tokenStorage)
+    public function __construct(AdvancedRouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, TokenStorageInterface $tokenStorage)
     {
         $this->router = $router;
         $this->parameterBag = $parameterBag;

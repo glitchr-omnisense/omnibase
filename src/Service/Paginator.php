@@ -2,10 +2,10 @@
 
 namespace Base\Service;
 
-use Base\Service\Model\Pagination;
-use Doctrine\ORM\Query;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Base\Service\Model\Pagination;
+use Doctrine\ORM\Query;
 
 /**
  *

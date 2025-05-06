@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
@@ -29,13 +29,13 @@ class EditorType extends AbstractType
     /** @var ParameterBagInterface */
     protected ParameterBagInterface $parameterBag;
 
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
     protected CsrfTokenManagerInterface $csrfTokenManager;
     protected ObfuscatorInterface $obfuscator;
 
     protected TranslatorInterface $translator;
 
-    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator)
+    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig, AdvancedRouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator)
     {
         $this->parameterBag = $parameterBag;
         $this->twig = $twig;

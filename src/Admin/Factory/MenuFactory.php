@@ -2,7 +2,7 @@
 
 namespace Base\Admin\Factory;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 use EasyCorp\Bundle\EasyAdminBundle\Menu\MenuItemMatcher;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -16,9 +16,9 @@ use Symfony\Component\Security\Http\Logout\LogoutUrlGenerator;
 class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
 {
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     public function __construct(...$params)
     {

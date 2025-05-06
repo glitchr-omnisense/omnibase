@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Enum\UserRole;
 use App\Repository\UserRepository;
 use Base\Entity\User\Connection;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ReferrerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Google\Badge\CaptchaBadge;
@@ -51,15 +51,15 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
      */
     protected AuthorizationCheckerInterface $authorizationChecker;
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
     /**
      * @var UserRepository
      */
     protected UserRepository $userRepository;
 
-    public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, RouterInterface $router, AuthorizationCheckerInterface $authorizationChecker)
+    public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, AdvancedRouterInterface $router, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->referrer = $referrer;
         $this->entityManager = $entityManager;

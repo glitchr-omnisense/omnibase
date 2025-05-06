@@ -5,7 +5,7 @@ namespace Base\Service;
 use Base\Annotations\Annotation\Sitemap;
 use Base\Annotations\AnnotationReader;
 use Base\Exception\SitemapNotFoundException;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Model\SitemapEntry;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
@@ -30,7 +30,7 @@ class Sitemapper implements SitemapperInterface
     protected $annotationReader;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
     protected $router;
 
@@ -48,7 +48,7 @@ class Sitemapper implements SitemapperInterface
     protected string $hostname = "";
     protected array $urlset = [];
 
-    public function __construct(Environment $twig, AnnotationReader $annotationReader, RouterInterface $router, LocalizerInterface $localizer)
+    public function __construct(Environment $twig, AnnotationReader $annotationReader, AdvancedRouterInterface $router, LocalizerInterface $localizer)
     {
         $this->twig = $twig;
         $this->router = $router;

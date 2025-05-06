@@ -9,20 +9,20 @@
         {%- set text -%}
             <div class="sf-toolbar-info-group">
                 <div class="sf-toolbar-info-piece">
-                <b>Locale:</b>
-                <span class="sf-toolbar-status">{{ data['locale']|default('N/A') }}</span>
+                    <b>Timezone:</b>
+                    <span class="sf-toolbar-status">{{ collector.data['timezone']|default('N/A') }}</span>
                 </div>
+                <hr/>
                 <div class="sf-toolbar-info-piece">
-                <b>Timezone:</b>
-                <span class="sf-toolbar-status">{{ data['timezone']|default('N/A') }}</span>
-                </div>
-                <div class="sf-toolbar-info-piece">
-                <b>Current Configuration:</b>
-                <span class="sf-toolbar-status">
-                Lang: {{ data['lang']|default('N/A') }},
-                Country: {{ data['country']|default('N/A') }},
-                Timezone: {{ data['timezone']|default('N/A') }}
-                </span>
+                    <b>Locale:</b>
+                    {% for locale in collector.data['locales']|default(['N/A']) %}
+                    <span class="sf-toolbar-status">
+                        {% set current = (locale == collector.data['locale']) ? "active" : null %}
+                        {% if not current %} <a href="{{ path("_switch_locale", {_locale: locale}) }}"> {% endif %}
+                            {{locale|country}}
+                        {% if not current %} </a> {% endif %}
+                    </span>
+                    {% endfor %}
                 </div>
             </div>
         {%- endset -%}

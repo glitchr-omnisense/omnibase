@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\CacheWarmer;
+namespace Base\Cache\Warmer;
 
 use Base\Cache\Abstract\AbstractLocalCacheWarmer;
 

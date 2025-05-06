@@ -24,6 +24,7 @@ class EasyAdminCrudPass implements CompilerPassInterface
 
             $className = 'Base\\Controller\\Admin\\Crud\\' . $className;
             if (class_exists($className)) {
+
                 $definition = $container->register($className, $className);
                 $definition->addTag('ea.crud_controller');
                 $definition->addTag('container.service_subscriber');

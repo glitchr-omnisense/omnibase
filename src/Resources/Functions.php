@@ -200,10 +200,12 @@ namespace {
         return preg_replace("/[^a-zA-Z0-9]/", "", $str);
     }
 
-    function format_uuid(string $uuid): string|false
+    function format_uuid(string $uuid, bool $strict = false): string|false
     {
         $uuid = str_strip_specials($uuid);
-        if (!preg_match("/[a-f0-9]{32}/i", $uuid)) {
+
+        $pattern = $strict ?  "/^[a-f0-9]{32}$/i" :  "/[a-f0-9]{32}/i";
+        if (!preg_match($pattern, $uuid)) {
             return false;
         }
 
@@ -3320,6 +3322,21 @@ namespace {
         return $entry;
     }
 
+    function array_pop_class(string $class, array &$array): mixed
+    {
+        if (empty($array)) {
+            return null;
+        }
+
+        foreach ($array as $key => $entry) {
+            if ($entry instanceof $class) {
+                return array_pop_key($key, $array);
+            }
+        }
+
+        return null;
+    }
+    
     function array_key_startsWith(array $array, string $needle): array
     {
         return array_transforms(fn($k, $v): ?array => str_starts_with($k, $needle) ? [$k, $v] : null, $array);

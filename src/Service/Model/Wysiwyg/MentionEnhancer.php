@@ -68,7 +68,7 @@ class MentionEnhancer implements MentionEnhancerInterface
 
             $encoding = mb_detect_encoding($entry);
             $dom = new DOMDocument('1.0', $encoding);
-            $dom->loadHTML(mb_convert_encoding($entry, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
+            $dom->loadHTML(mb_convert_encoding($entry, 'UTF-8', $encoding), LIBXML_NOERROR);
 
             $tags = $dom->getElementsByTagName("mention");
             if(count($tags) < 1) continue;
@@ -110,7 +110,7 @@ class MentionEnhancer implements MentionEnhancerInterface
             $encoding = mb_detect_encoding($entry);
 
             $dom = new DOMDocument('1.0', $encoding);
-            $dom->loadHTML(mb_convert_encoding($entry, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
+            $dom->loadHTML(mb_convert_encoding($entry, 'UTF-8', $encoding), LIBXML_NOERROR);
 
             $tags = $dom->getElementsByTagName("mention");
             if(count($tags) < 1) continue;

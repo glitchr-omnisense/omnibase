@@ -17,7 +17,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 
 #[AsCommand(name: 'cache:clear', aliases: [], description: '')]
 class CacheClearCommand extends Command
@@ -47,9 +47,9 @@ class CacheClearCommand extends Command
     protected Notifier $notifier;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     public function __construct(
         LocalizerInterface       $localizer,
@@ -59,7 +59,7 @@ class CacheClearCommand extends Command
         SymfonyCacheClearCommand $cacheClearCommand,
         Flysystem                $flysystem,
         Notifier                 $notifier,
-        RouterInterface          $router,
+        AdvancedRouterInterface          $router,
         string                   $projectDir,
         string                   $cacheDir
     )

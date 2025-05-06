@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 use Base\Controller\Admin\AbstractCrudController;
 use Base\Entity\User\Notification;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use TypeError;
 
@@ -27,9 +27,9 @@ use TypeError;
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
     /**
      * @var AdminContextProvider
      */
@@ -39,7 +39,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
      */
     protected AdminUrlGenerator $adminUrlGenerator;
 
-    public function __construct(RouterInterface $router, AdminContextProvider $adminContextProvider, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(AdvancedRouterInterface $router, AdminContextProvider $adminContextProvider, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->router = $router;
 

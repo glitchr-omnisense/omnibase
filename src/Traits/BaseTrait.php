@@ -10,7 +10,7 @@ use Base\Service\ParameterBagInterface;
 use Base\Service\TradingMarketInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Notifier\Abstract\BaseNotifierInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
@@ -175,7 +175,7 @@ trait BaseTrait
         return (self::class === BaseService::class) ? BaseService::$localizer : BaseService::getLocalizer();
     }
 
-    public static function getRouter(): ?RouterInterface
+    public static function getRouter(): ?AdvancedRouterInterface
     {
         return (self::class === BaseService::class) ? BaseService::$router : BaseService::getRouter();
     }

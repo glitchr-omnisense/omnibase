@@ -75,7 +75,7 @@ use Base\Controller\Admin\Crud\Layout\Widget\SlotCrudController;
 use Base\Controller\Admin\Crud\Layout\WidgetCrudController;
 use Base\Entity\Layout\Semantic;
 use Base\Field\Type\BooleanType;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
 use Base\Service\SettingBagInterface;
@@ -144,9 +144,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     protected $entityManager;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var SettingRepository
@@ -173,7 +173,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         TranslatorInterface    $translator,
         AdminContextProvider   $adminContextProvider,
         AdminUrlGenerator      $adminUrlGenerator,
-        RouterInterface        $router,
+        AdvancedRouterInterface        $router,
         IconProvider           $iconProvider,
         MediaService           $mediaService,
         Environment            $twig,
@@ -601,10 +601,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $menu = [];
 
         $menu[] = MenuItem::linkToRoute("admin", [], "Home");
-        if ($this->isGranted('ROLE_EDITOR') && \Base\BaseBundle::hasBundle("wikidoc")) {
+        if ($this->isGranted('ROLE_EDITOR') && \Base\BaseBundle::getInstance()->hasBundle("wikidoc")) {
 
             $menu[] = MenuAfterItem::linkToRoute("admin_manual", [], 'User manual', 'fa-solid fa-fw fa-life-ring');
-            // $menu[] = MenuAfterItem::linkToRoute("admin_manual_developer", [], 'Developers', 'fa-solid fa-fw fa-book');
+            $menu[] = MenuAfterItem::linkToRoute("admin_manual_developer", [], 'Developers', 'fa-solid fa-fw fa-book');
         }
         $menu[] = MenuItem::linkToRoute("app_index", [], 'Back to website', 'fa-solid fa-fw fa-door-open');
 
@@ -728,7 +728,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(UserToken::class),
             ]);
 
-            if(BaseBundle::hasBundle(WikidocBundle::class)) {
+            if(BaseBundle::getInstance()->hasBundle(WikidocBundle::class)) {
 
                 $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('DOCUMENTATION', 'fa-solid fa-life-ring'));
                 $widgets = $this->addWidgetItem($widgets, 'DOCUMENTATION', [

@@ -9,7 +9,7 @@ use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use ErrorException;
 
 /**
@@ -30,11 +30,11 @@ class IconProvider extends AbstractLocalCache
      */
     protected LocalizerInterface $localizer;
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
-    public function __construct(AnnotationReader $annotationReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir, ?string $buildDir = null)
+    public function __construct(AnnotationReader $annotationReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, AdvancedRouterInterface $router, string $cacheDir, ?string $buildDir = null)
     {
         $this->annotationReader = $annotationReader;
         $this->mediaService = $mediaService;

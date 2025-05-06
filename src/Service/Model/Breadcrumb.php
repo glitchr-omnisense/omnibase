@@ -24,7 +24,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     protected array $options = [];
     protected ?Request $request = null;
 
-    protected ?RouterInterface $router = null;
+    protected ?AdvancedRouterInterface $router = null;
     protected string $template = "@Base/breadcrumb/default.html.twig";
 
     protected int $iterator = 0;
@@ -93,7 +93,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
      */
     protected ?AnnotationReader $annotationReader;
 
-    public function __construct(RouterInterface $router, TranslatorInterface $translator, array $options = [], ?string $template = null)
+    public function __construct(AdvancedRouterInterface $router, TranslatorInterface $translator, array $options = [], ?string $template = null)
     {
         $this->router = $router;
         $this->translator = $translator;
@@ -298,20 +298,20 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         return $routeMatch['_controller'] ?? "";
     }
 
-    public function getRouter(): RouterInterface
+    public function getRouter(): AdvancedRouterInterface
     {
         return $this->router;
     }
 
     /**
-     * @param RouterInterface $router
+     * @param AdvancedRouterInterface $router
      * @return $this
      */
     /**
-     * @param RouterInterface $router
+     * @param AdvancedRouterInterface $router
      * @return $this
      */
-    public function setRouter(RouterInterface $router)
+    public function setRouter(AdvancedRouterInterface $router)
     {
         $this->router = $router;
         return $this;

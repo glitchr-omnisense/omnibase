@@ -8,7 +8,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\IdField;
 use Base\Service\FileService;
 use Base\Service\Model\IconizeInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Model\LinkableInterface;
 use Base\Service\SettingBagInterface;
 use Base\Service\Translator;
@@ -66,9 +66,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      * */
     protected SettingBagInterface $settingBag;
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      * */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
     /**
      * @var TranslatorInterface
      * */
@@ -87,7 +87,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         Extension                $extension,
         FileService              $fileService,
         SettingBagInterface      $settingBag,
-        RouterInterface          $router,
+        AdvancedRouterInterface  $router,
         TranslatorInterface      $translator
     )
     {
@@ -144,7 +144,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             try {
                 
                 $entityFqcn = preg_replace("/" . $namespace . "\/", "\\Entity\\", $entityFqcn);
-                // $entityFqcn = BaseBundle::getAlias($entityFqcn);
+                // $entityFqcn = BaseBundle::getInstance()->getAlias($entityFqcn);
 
                 if (class_exists($entityFqcn)) {
                     self::$crudController[$entityFqcn] = get_called_class();
@@ -225,7 +225,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      */
     public static function getTranslationPrefix(?string $prefix = ""): array|false|string|null
     {
-        $bundleEntityNamespaces = array_map(fn($b) => dirname_namespace($b)."\\Entity\\", \Base\BaseBundle::getBundles());
+        $bundleEntityNamespaces = array_map(fn($b) => dirname_namespace($b)."\\Entity\\", \Base\BaseBundle::getInstance()->getBundles());
         $entityNamespaces = array_merge(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], $bundleEntityNamespaces);
 
         $entityPrefix = array_fill(0, 3, "");
@@ -287,7 +287,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         $entity = $this->getEntityFqcn();
         $rootEntity = $this->classMetadataManipulator->getRootEntityName($entity);
-        $rootEntity = BaseBundle::getAlias($rootEntity);
+        $rootEntity = BaseBundle::getInstance()->getAlias($rootEntity);
         $actionDto = $action->getAsDto();
 
         $discriminatorMap = $this->configureDiscriminatorMap($this->classMetadataManipulator->getDiscriminatorMap($entity), $rootEntity, $entity);
@@ -301,7 +301,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         foreach ($discriminatorMap as $key => $class) {
 
-            // $class = BaseBundle::getAlias($class);
             if (is_abstract($class)) {
                 continue;
             }

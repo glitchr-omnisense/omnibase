@@ -2,7 +2,7 @@
 
 namespace Base\Controller;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ReferrerInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\TranslatorInterface;
@@ -23,12 +23,12 @@ class LocalizerController extends AbstractController
      */
     protected LocalizerInterface $localizer;
 
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
     protected ReferrerInterface $referrer;
     protected TranslatorInterface $translator;
     protected EntityManagerInterface $entityManager;
 
-    public function __construct(LocalizerInterface $localizer, EntityManagerInterface $entityManager, RouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
+    public function __construct(LocalizerInterface $localizer, EntityManagerInterface $entityManager, AdvancedRouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
     {
         $this->localizer = $localizer;
         $this->router = $router;

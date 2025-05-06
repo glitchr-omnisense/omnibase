@@ -10,7 +10,7 @@ use App\Entity\User;
 use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Traits\BaseTrait;
 use Symfony\Component\HttpKernel\RebootableInterface;
 
@@ -144,7 +144,7 @@ class BaseService implements RuntimeExtensionInterface
         MediaService                  $mediaService,
         IconProvider                  $iconProvider,
         TranslatorInterface           $translator,
-        RouterInterface               $router,
+        AdvancedRouterInterface               $router,
         EntityHydratorInterface       $entityHydrator,
         ClassMetadataManipulator      $classMetadataManipulator,
         AdminUrlGenerator             $adminUrlGenerator,

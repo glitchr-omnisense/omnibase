@@ -44,12 +44,10 @@ class LocalizerDataCollector extends AbstractDataCollector
     public function collect(Request $request, Response $response, $exception = null): void
     {       
         $this->data["locales"] = $this->localizer->getAvailableLocales();
-
         $this->data["locale"] = $this->localizer->getLocale();
         $this->data["country"] = $this->localizer->getLocaleCountry();
         $this->data["lang"] = $this->localizer->getLocaleLang();
 
         $this->data["timezone"] = $this->localizer->getTimezone();
-
     }
 }

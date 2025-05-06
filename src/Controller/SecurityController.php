@@ -7,7 +7,7 @@ use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Form\FormProxyInterface;
 use Base\Notifier\NotifierInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Security\LoginFormAuthenticator;
 
 use App\Form\Type\SecurityRegistrationType;
@@ -70,9 +70,9 @@ class SecurityController extends AbstractController
     protected NotifierInterface $notifier;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var ParameterBagInterface
@@ -99,7 +99,7 @@ class SecurityController extends AbstractController
         EntityManagerInterface $entityManager,
         TokenRepository        $tokenRepository,
         UserRepository         $userRepository,
-        RouterInterface        $router,
+        AdvancedRouterInterface        $router,
         FormProxy              $formProxy,
         TokenStorageInterface  $tokenStorage,
         TranslatorInterface    $translator,

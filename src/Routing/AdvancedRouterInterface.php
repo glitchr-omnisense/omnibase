@@ -18,7 +18,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  *
  */
-interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
+interface AdvancedRouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
 {
     public function getRouteIndex(): string;
 

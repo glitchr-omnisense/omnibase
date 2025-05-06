@@ -30,7 +30,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  *
  */
-class AdvancedRouter implements RouterInterface
+class AdvancedRouter implements AdvancedRouterInterface
 {
     /**
      * @var Router
@@ -563,7 +563,7 @@ class AdvancedRouter implements RouterInterface
 
     public function getDomainFallbacks(?string $locale = null, ?string $environment = null): array
     {
-        return $this->getFallbackParameters($locale, $environment)["domain"] ?? [];
+        return $this->getFallbackParameters($locale, $environment)["domain"] ?? ["localhost"];
     }
 
     public function getDomainFallback(?string $locale = null, ?string $environment = null): ?string

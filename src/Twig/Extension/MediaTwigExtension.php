@@ -4,7 +4,7 @@ namespace Base\Twig\Extension;
 
 use Base\Controller\UX\MediaController;
 use Base\Routing\AdvancedRouter;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\FileService;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
@@ -25,7 +25,7 @@ use Twig\TwigTest;
  */
 final class MediaTwigExtension extends AbstractExtension
 {
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     protected MediaController $mediaController;
 
@@ -36,7 +36,7 @@ final class MediaTwigExtension extends AbstractExtension
 
     protected string $projectDir;
 
-    public function __construct(RouterInterface $router, MediaService $mediaService, MediaController $mediaController, string $projectDir)
+    public function __construct(AdvancedRouterInterface $router, MediaService $mediaService, MediaController $mediaController, string $projectDir)
     {
         $this->projectDir = $projectDir;
 

@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use  Base\Security\LoginFormAuthenticator;
 use  Base\Security\RescueFormAuthenticator;
@@ -16,15 +16,15 @@ class Referrer implements ReferrerInterface
     /** @var RequestStack */
     private RequestStack $requestStack;
 
-    /** @var RouterInterface */
-    private RouterInterface $router;
+    /** @var AdvancedRouterInterface */
+    private AdvancedRouterInterface $router;
 
     public function __toString(): string
     {
         return $this->getUrl() ?? "";
     }
 
-    public function __construct(RequestStack $requestStack, RouterInterface $router)
+    public function __construct(RequestStack $requestStack, AdvancedRouterInterface $router)
     {
         $this->requestStack = $requestStack;
         $this->router = $router;

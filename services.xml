@@ -171,26 +171,26 @@
         <service id="Base\Cache\Abstract\AbstractLocalCache"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
         <service id="Base\Cache\Abstract\AbstractLocalCacheWarmer"><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
 
-        <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
-        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
+        <service id="Base\Cache\Warmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /><bind key="$cacheDir">%kernel.cache_dir%</bind></service>
+        <service id="Base\Cache\Warmer\IconCacheWarmer"        public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.service.icon" />
         </service>
-        <service id="Base\CacheWarmer\LocalizerCacheWarmer"      public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
+        <service id="Base\Cache\Warmer\LocalizerCacheWarmer"      public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="localizer" />
         </service>
-        <service id="Base\CacheWarmer\WebpackCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
+        <service id="Base\Cache\Warmer\WebpackCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig.webpack_renderer" />
             <argument type="service" id="webpack_encore.entrypoint_lookup[_default]" on-invalid="null" />
             <bind key="$publicDir">%kernel.project_dir%/public</bind>
         </service>
-        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"     parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
+        <service id="Base\Cache\Warmer\AnnotationsCacheWarmer"     parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
             <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
             <argument type="service" id="base.annotation_reader" />
         </service>
-        <service id="Base\CacheWarmer\MetadataCacheWarmer" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
+        <service id="Base\Cache\Warmer\MetadataCacheWarmer" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer" public="true">
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>

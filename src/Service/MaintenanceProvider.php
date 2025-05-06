@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Entity\User\Notification;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -13,8 +13,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class MaintenanceProvider implements MaintenanceProviderInterface
 {
-    /** @var RouterInterface */
-    protected RouterInterface $router;
+    /** @var AdvancedRouterInterface */
+    protected AdvancedRouterInterface $router;
     /** @var ParameterBagInterface */
     protected ParameterBagInterface $parameterBag;
     /** @var SettingBagInterface */
@@ -31,7 +31,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     protected int $uptime = 0;
     protected int $downtime = 0;
 
-    public function __construct(RouterInterface $router, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, TokenStorageInterface $tokenStorage)
+    public function __construct(AdvancedRouterInterface $router, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, TokenStorageInterface $tokenStorage)
     {
         $this->router = $router;
 

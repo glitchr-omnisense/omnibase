@@ -7,7 +7,7 @@ use Base\Enum\UserRole;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\FormFactory;
 use Base\Form\FormProxyInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ParameterBagInterface;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -25,7 +25,7 @@ class FormTypeExtension extends AbstractTypeExtension
 {
     protected FormFactory $formFactory;
 
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     protected ParameterBagInterface $parameterBag;
 
@@ -35,7 +35,7 @@ class FormTypeExtension extends AbstractTypeExtension
 
     protected AuthorizationCheckerInterface $authorizationChecker;
 
-    public function __construct(RouterInterface $router, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, FormFactory $formFactory, FormProxyInterface $formProxy, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(AdvancedRouterInterface $router, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, FormFactory $formFactory, FormProxyInterface $formProxy, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->parameterBag = $parameterBag;
         $this->authorizationChecker = $authorizationChecker;
