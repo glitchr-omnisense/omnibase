@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\VarDumper\Cloner\Data;
 
 /**
  *
@@ -28,7 +29,7 @@ class LocalizerDataCollector extends AbstractDataCollector
 
     public static function getTemplate(): ?string
     {
-        return '@Base/inspector/localizer_data_collector.html.twig';
+        return '@WebProfiler/localizer_data_collector.html.twig';
     }
 
     public function getData(): array
@@ -42,12 +43,10 @@ class LocalizerDataCollector extends AbstractDataCollector
     }
 
     public function collect(Request $request, Response $response, $exception = null): void
-    {       
-        $this->data["locales"] = $this->localizer->getAvailableLocales();
+    { 
         $this->data["locale"] = $this->localizer->getLocale();
         $this->data["country"] = $this->localizer->getLocaleCountry();
         $this->data["lang"] = $this->localizer->getLocaleLang();
-
         $this->data["timezone"] = $this->localizer->getTimezone();
     }
 }

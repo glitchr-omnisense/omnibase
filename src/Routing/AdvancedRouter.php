@@ -373,6 +373,7 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function getRoute(?string $routeNameOrUrl = null): ?Route
     {
+
         if ($routeNameOrUrl === null) {
             $routeNameOrUrl = $this->getRequestUri();
         }
@@ -390,6 +391,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName . "." . $lang] ?? null;
 
         if ($compiledRoute !== null) {
+
             $args = array_transforms(fn($k, $v): array => [$k, in_array($k, [3, 4]) ? $matcher->getCompiledPath($v) : $v], $compiledRoute);
             $locale = $args[1]["_locale"] ?? null;
             $locale = $locale ? ["_locale" => $locale] : [];
@@ -467,7 +469,7 @@ class AdvancedRouter implements AdvancedRouterInterface
             $baseDir = $_SERVER['PHP_SELF'] ? dirname($_SERVER['PHP_SELF']) : null;
         }
 
-        $baseDir ??= first($host["base_dir"]) ?? "";
+        $baseDir ??= first($host["base_dir"] ?? []) ?? "";
         return $baseDir;
     }
 

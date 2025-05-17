@@ -494,7 +494,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                         ->setController($crudController)
                         ->setEntityId($instance->getId())
                         ->setAction($action->getName())
-                        ->includeReferrer()
+                        //->includeReferrer()
                         ->generateUrl();
 
                     $action->setLinkUrl($url);

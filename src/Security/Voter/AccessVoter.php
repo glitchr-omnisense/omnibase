@@ -92,6 +92,7 @@ class AccessVoter extends Voter
         $url = is_string($subject) || $subject instanceof Referrer ? $subject : get_url();
 
         switch ($attribute) {
+
             case self::ADMIN_ACCESS:
                 $access = filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= $user && $user->isGranted("ROLE_SUPERADMIN");

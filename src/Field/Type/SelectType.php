@@ -514,7 +514,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
         }
 
-        dump($viewData);
         $options["multiple"] = $multiple !== null ? $multiple : null;
         $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 

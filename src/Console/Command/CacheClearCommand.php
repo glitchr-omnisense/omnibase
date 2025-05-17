@@ -37,6 +37,11 @@ class CacheClearCommand extends Command
     protected SymfonyCacheClearCommand $cacheClearCommand;
 
     /**
+     * @var CacheClearSessionsCommand
+     */
+    protected CacheClearSessionsCommand $cacheClearSessionsCommand;
+
+    /**
      * @var Flysystem
      */
     protected Flysystem $flysystem;
@@ -52,20 +57,22 @@ class CacheClearCommand extends Command
     protected AdvancedRouterInterface $router;
 
     public function __construct(
-        LocalizerInterface       $localizer,
-        TranslatorInterface      $translator,
-        EntityManagerInterface   $entityManager,
-        ParameterBagInterface    $parameterBag,
-        SymfonyCacheClearCommand $cacheClearCommand,
-        Flysystem                $flysystem,
-        Notifier                 $notifier,
-        AdvancedRouterInterface          $router,
-        string                   $projectDir,
-        string                   $cacheDir
+        LocalizerInterface        $localizer,
+        TranslatorInterface       $translator,
+        EntityManagerInterface    $entityManager,
+        ParameterBagInterface     $parameterBag,
+        SymfonyCacheClearCommand  $cacheClearCommand,
+        CacheClearSessionsCommand $cacheClearSessionsCommand,
+        Flysystem                 $flysystem,
+        Notifier                  $notifier,
+        AdvancedRouterInterface   $router,
+        string                    $projectDir,
+        string                    $cacheDir
     )
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
         $this->cacheClearCommand = $cacheClearCommand;
+        $this->cacheClearSessionsCommand = $cacheClearSessionsCommand;
 
         $this->flysystem = $flysystem;
         $this->notifier = $notifier;
@@ -83,6 +90,7 @@ class CacheClearCommand extends Command
         parent::configure();
         $this
             ->setDefinition([
+                new InputOption('sessions', '', InputOption::VALUE_NONE, 'Kill all existing sessions'),
                 new InputOption('no-extension', '', InputOption::VALUE_NONE, 'Skip base extension'),
                 new InputOption('no-warmup', '', InputOption::VALUE_NONE, 'Do not warm up the cache'),
                 new InputOption('no-optional-warmers', '', InputOption::VALUE_NONE, 'Skip optional cache warmers (faster)'),
@@ -114,6 +122,7 @@ EOF
             $this->phpConfigCheck($io);
             $this->diskAndMemoryCheck($io);
             $this->checkCache($io);
+            $this->checkVirtualization($io);
             $this->checkExtensions($io);
             $this->customFeatureWarnings($io);
         }
@@ -130,6 +139,11 @@ EOF
         self::markAsFirstClear(!file_exists(self::$testFile));
         file_put_contents(self::$testFile, self::getNClears()+1);
         
+        $killSession = $input->getOption('sessions');
+        if ($killSession) {
+            $this->cacheClearSessionsCommand->execute($input, $output);
+        }
+
         if (!$noExtension) {
 
             $this->doubleCacheClear($io);

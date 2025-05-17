@@ -138,9 +138,11 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
      */
     public function persist($entity, bool $flush = false): void
     {
-        if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
+        dump($this->getFqcnEntityName());
+        $entityClass = \property_exists($this, '_entityName') ? $this->_entityName : $this->getFqcnEntityName(); // Doctrine ORM 2 vs. 3
+        if (!is_object($entity) || (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
-            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $this->_entityName . "\" entity, you passed \"" . $class . "\"");
+            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $entityClass . "\" entity, you passed \"" . $class . "\"");
         }
 
         $this->getEntityManager()->persist($entity);
@@ -152,9 +154,11 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     public function remove($entity, bool $flush = false): void
     {
-        if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
+        dump($this->getFqcnEntityName());
+        $entityClass = \property_exists($this, '_entityName') ? $this->_entityName : $this->getFqcnEntityName(); // Doctrine ORM 2 vs. 3
+        if (!is_object($entity) || (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
-            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $this->_entityName . "\" entity, you passed \"" . $class . "\"");
+            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $entityClass . "\" entity, you passed \"" . $class . "\"");
         }
 
         $this->getEntityManager()->remove($entity);

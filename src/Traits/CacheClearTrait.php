@@ -20,6 +20,17 @@ trait CacheClearTrait
         $io->write("<info> [INFO] Cache directory:</info> " . $this->cacheDir . PHP_EOL, true);
     }
 
+    protected function checkVirtualization(SymfonyStyle $io): void
+    {
+        $isDocker = file_exists('/.dockerenv') || (file_exists('/proc/1/cgroup') && strpos(file_get_contents('/proc/1/cgroup'), 'docker') !== false);
+
+        if ($isDocker) {
+            $io->write("<info> [INFO]</info> Docker environment used." . PHP_EOL, true);
+        } else {
+            $io->write("<warning> [WARNING] No Docker environment detected.</warning>" . PHP_EOL, true);
+        }
+    }
+
     protected function checkExtensions(SymfonyStyle $io): void
     {
         $extensions = [
@@ -151,7 +162,7 @@ trait CacheClearTrait
             \opcache_reset();
         }
     }
-
+    
     //
     // Run second cache clear command
     protected function doubleCacheClear(SymfonyStyle $io)

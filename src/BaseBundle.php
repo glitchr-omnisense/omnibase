@@ -29,7 +29,6 @@ use Base\Console\Command\CacheClearCommand;
 use Base\DependencyInjection\Compiler\Pass\DoctrineEnumSubscriberPass;
 use Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass;
 use Base\DependencyInjection\Compiler\Pass\EasyAdminCrudPass;
-use Base\Traits\SingletonTrait;
 
 /**
  *
@@ -112,6 +111,11 @@ class BaseBundle extends AbstractBaseBundle
         $this->invalidCache = false;
     }
 
+    public static function getInstance(bool $instanciateIfNotFound = true): ?self
+    {
+        return parent::getInstance($instanciateIfNotFound);
+    }
+    
     public function warmUp()
     {
         $needsWarmup = !file_exists($this->getCacheDir() . "/pools/base/bundle.php");
@@ -179,7 +183,6 @@ class BaseBundle extends AbstractBaseBundle
 
     public function boot(): void
     {
-
         if (!extension_loaded('imagick')) {
            throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
         }
@@ -191,6 +194,8 @@ class BaseBundle extends AbstractBaseBundle
         if (!self::$cache) {
             $this->warmUp();
         }
+
+        $this->boot_VarDumper();
 
         if ($this->container->getParameter("base.database.use_custom")) {
             $this->doctrineReadiness = $this->boot_Doctrine();
@@ -270,7 +275,7 @@ class BaseBundle extends AbstractBaseBundle
         $container->addCompilerPass(new AnnotationPass());
         $container->addCompilerPass(new DoctrineEnumSubscriberPass());
         $container->addCompilerPass(new DoctrineConfigurationPass());
-        $container->addCompilerPass(new EasyAdminCrudPass());
+        $container->addCompilerPass(new EasyAdminCrudPass(), priority: 1);
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());

@@ -532,7 +532,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 ->setAction(Action::INDEX)
                 ->set("filters[roles][comparison]", "like")
                 ->set("filters[roles][value]", $role)
-                ->set(EA::MENU_INDEX, count($menu))
+                // ->set(EA::MENU_INDEX, count($menu))
                 ->generateUrl();
 
             if (empty($values)) {
@@ -558,8 +558,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                         ->setAction(Action::INDEX)
                         ->set("filters[roles][comparison]", "like")
                         ->set("filters[roles][value]", $role)
-                        ->set(EA::MENU_INDEX, count($menu))
-                        ->set(EA::SUBMENU_INDEX, count($subItems) + 1)
+                        // ->set(EA::MENU_INDEX, count($menu))
+                        // ->set(EA::SUBMENU_INDEX, count($subItems) + 1)
                         ->generateUrl();
 
                     $subItems[] = MenuItem::linkToUrl($label, $icon, $url);

@@ -1,6 +1,7 @@
 <?php
 
 namespace Base\Resources;
+use Symfony\Component\VarDumper\VarDumper;
 
 class Dumper extends \Symfony\Component\VarDumper\Dumper\HtmlDumper
 {
@@ -18,8 +19,25 @@ class Dumper extends \Symfony\Component\VarDumper\Dumper\HtmlDumper
     protected function dumpLine(int $depth, bool $endOfValue = false): void
     {
         $dumpPrefixBak = $this->dumpPrefix;
-        $this->dumpPrefix .= "<span>".\benchmark()."</span><hr>";
+       
+        $backtrace = debug_backtrace_short();
+        $i = null;
 
+        foreach ($backtrace as $index => $trace) {
+            if (strpos($trace, VarDumper::class . "::dump()") !== false) {
+                $i = $index + 1;
+                break;
+            }
+        }
+
+        $location = $i !== null ? $backtrace[$i] ?? null : null;
+        if ($location) {
+            $location = preg_match("/^(.+?)\:(\d+)/", $location, $matches);
+            if ($location) $location = sprintf(" | 🖥️  Location: %s:%s", $matches[1], $matches[2]);
+        }
+
+        $this->dumpPrefix .= "<span>".\benchmark().$location."</span><hr>";
+       
         parent::dumpLine($depth, $endOfValue);
         $this->dumpPrefix = $dumpPrefixBak;
     }

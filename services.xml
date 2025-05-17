@@ -22,6 +22,11 @@
             <argument type="service" id="advanced_router" />
         </service>
 
+        <service id="Base\Console\Command\CacheClearSessionsCommand" parent="Base\Console\Command" public="true">
+            <tag name="console.command" />
+            <bind key="$projectDir">%kernel.project_dir%</bind>
+        </service>
+
         <service id="Base\Controller\MainController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
@@ -1318,10 +1323,6 @@
         </service>
 
         <service id="Base\Controller\Admin\AbstractCrudController">
-            <tag name="controller.service_arguments" />
-            <tag name="container.service_subscriber" />
-            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -1350,6 +1351,6 @@
             <tag name="data_collector" id="locale" />
             <argument type="service" id="localizer" />
         </service>
-        
+
     </services>
 </container>

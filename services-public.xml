@@ -119,6 +119,7 @@
         <service id="Base\Form\FormProxyInterface" alias="form.proxy"/>
 
         <service id="ea_extension" alias="Base\Admin\Config\Extension" />
+        <service id="command.sessions.clear" alias="Base\Console\Command\CacheClearSessionsCommand" />
 
     </services>
 </container>

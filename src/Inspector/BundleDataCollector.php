@@ -62,7 +62,7 @@ class BundleDataCollector extends AbstractDataCollector
 
     public static function getTemplate(): ?string
     {
-        return '@Base/inspector/bundle_data_collector.html.twig';
+        return '@WebProfiler/bundle_data_collector.html.twig';
     }
 
     public function getData(): array

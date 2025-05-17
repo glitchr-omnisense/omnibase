@@ -77,6 +77,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('excerpt', [$this, 'excerpt'], ['is_safe' => ['all']]),
             new TwigFunction('get_class', [$this, 'get_class']),
             new TwigFunction('is_json', 'is_json'),
+            new TwigFunction('is_string', 'is_string'),
             new TwigFunction('is_linkable', [$this, 'is_linkable']),
             new TwigFunction('is_countable', [$this, 'is_countable']),
             new TwigFunction('is_callable', [$this, 'is_callable']),
@@ -191,7 +192,7 @@ final class FunctionTwigExtension extends AbstractExtension
                 ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
                 ->setEntityId($entity->getId())
                 ->setAction(Crud::PAGE_EDIT)
-                ->includeReferrer()
+                //->includeReferrer()
                 ->generateUrl(),
         ]);
     }

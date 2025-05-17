@@ -3,7 +3,7 @@
 {% block toolbar %}
 
         {% set icon %}
-            {{ include('@Base/inspector/bundle_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}
+            {{ include('@WebProfiler/bundle_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}
         {% endset %}
 
         {%- set text -%}
@@ -23,7 +23,7 @@
 
 {% block menu %}
     <span class="label {#{ not collector.isEasyAdminRequest ? 'disabled' }#}">
-        <span class="icon">{{ include('@Base/inspector/bundle_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}</span>
+        <span class="icon">{{ include('@WebProfiler/bundle_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}</span>
         <strong>Base</strong>
     </span>
 {% endblock %}

@@ -5,7 +5,6 @@ namespace Base\Subscriber;
 use Base\Service\HotParameterBag;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
-use PDOException;
 use Doctrine\DBAL\Exception as DBALException;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -59,6 +58,8 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
         if ($this->parameterBag->isReady()) {
             return;
         }
+
+        \benchmark_start();
 
         $allRaw = [];
         try { $allRaw = $this->settingBag->allRaw(true, true); } 

@@ -84,7 +84,7 @@ class AdminVariable extends SiteVariable
             ->setController($entityCrudController)
             ->setEntityId($entity->getId())
             ->setAction(Crud::PAGE_EDIT)
-            ->includeReferrer()
+            //->includeReferrer()
             ->generateUrl();
     }
 }

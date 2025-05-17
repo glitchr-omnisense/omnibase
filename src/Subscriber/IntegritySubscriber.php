@@ -9,7 +9,7 @@ use Base\Entity\User as BaseUser;
 use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
 use Base\BaseBundle;
-use Base\Console\Command\Command;
+use Base\Console\Command;
 use Base\Console\Command\CacheClearCommand;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ReferrerInterface;
@@ -27,7 +27,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use ErrorException;
 use InvalidArgumentException;
 use Symfony\Component\Console\ConsoleEvents;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -40,6 +39,8 @@ use TypeError;
  */
 class IntegritySubscriber implements EventSubscriberInterface
 {
+    public const int DEFAULT_PRIORITY = 7;
+
     /**
      * @var TokenStorageInterface
      */
@@ -106,9 +107,11 @@ class IntegritySubscriber implements EventSubscriberInterface
         return
             [
                 KernelEvents::EXCEPTION => ['onException', 7],
-                RequestEvent::class => ['onKernelRequest', 7],
                 ConsoleEvents::COMMAND => ['onCommand', 2048],
-                RequestEvent::class => ['onEarlyKernelRequest', 2048]
+                RequestEvent::class => [
+                    ['onEarlyKernelRequest', 2048], 
+                    ['onKernelRequest', IntegritySubscriber::DEFAULT_PRIORITY]
+                ]
             ];
     }
 
@@ -178,7 +181,7 @@ class IntegritySubscriber implements EventSubscriberInterface
             return;
         }
 
-        $integrity = $this->checkUserIntegrity();
+        $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
 
@@ -209,7 +212,6 @@ class IntegritySubscriber implements EventSubscriberInterface
             $event->stopPropagation();
         }
     }
-
 
     /**
      * @return array|mixed|null
@@ -251,7 +253,6 @@ class IntegritySubscriber implements EventSubscriberInterface
         return md5($driver . $user . $host . $port . $dbname . $charset);
     }
 
-
     /**
      * @return bool
      */
@@ -291,6 +292,7 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         return array_intersect_key($persistentCollection, $dirtyCollection) !== $dirtyCollection;
     }
+
 
     /**
      * @return bool

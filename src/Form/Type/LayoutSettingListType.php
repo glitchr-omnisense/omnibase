@@ -155,6 +155,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                         case DateTimePickerType::class:
                             $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
                             if (!$datetime) {
+                                
                                 $datetime = $settingValue ? new \DateTime($settingValue) : null;
                             }
                             $settingTranslation->setValue($datetime);

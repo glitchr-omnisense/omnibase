@@ -3,7 +3,7 @@
 {% block toolbar %}
 
         {% set icon %}
-            {{ include('@Base/inspector/localizer_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}
+            {{ include('@WebProfiler/localizer_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}
         {% endset %}
 
         {%- set text -%}
@@ -15,7 +15,7 @@
                 <hr/>
                 <div class="sf-toolbar-info-piece">
                     <b>Locale:</b>
-                    {% for locale in collector.data['locales']|default(['N/A']) %}
+                    {% for locale in app.localizer.getAvailableLocales()|default(['N/A']) %}
                     <span class="sf-toolbar-status">
                         {% set current = (locale == collector.data['locale']) ? "active" : null %}
                         {% if not current %} <a href="{{ path("_switch_locale", {_locale: locale}) }}"> {% endif %}
@@ -33,7 +33,7 @@
 
 {% block menu %}
     <span class="label">
-        <span class="icon">{{ include('@Base/inspector/localizer_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}</span>
+        <span class="icon">{{ include('@WebProfiler/localizer_icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}</span>
         <strong>Localizer</strong>
     </span>
 {% endblock %}

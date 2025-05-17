@@ -337,7 +337,7 @@ namespace {
         return 1000 * (microtime(true) - $_SERVER["APP_TIMER"]);
     }
 
-    function benchmark($memory_footprint = true)
+    function benchmark($memory_footprint = true, $real_usage = true)
     {
         $lap_time = benchmark_lap();
         $s = sprintf("⏱️  Lap: %.2f ms ", $lap_time);
@@ -347,9 +347,9 @@ namespace {
             $memory_usage = format_bytes(memory_get_usage(true));
             $memory_peak  = format_bytes(memory_get_peak_usage(true));
 
-            $s .= sprintf("| 💾 Memory: %.2f MB | 📈 Peak: %.2f MB", $memory_usage, $memory_peak);
+            $s .= sprintf("| 💾 Memory: %.2f(%.2f) MB | 📈 Peak: %.2f(%.2f) MB", $memory_usage, $memory_peak);
         }
-                
+
         return $s;
     }
     

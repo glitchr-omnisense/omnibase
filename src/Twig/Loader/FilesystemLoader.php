@@ -74,20 +74,34 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $twig->setLoader($chainLoader);
 
         // Add @Twig, @Assets and @Layout variables
-        if (!$this->router->isProfiler()) {
-            $this->prependPath($bundlePath . '/inspector', 'WebProfiler');
-        }
-
-        $this->prependPath($bundlePath . '/easyadmin', 'EasyAdmin');
         $this->prependPath($bundlePath . '/notifier');
         $this->prependPath($bundlePath);
 
         $this->prependPath($projectDir . '/src', 'App');
         $this->prependPath($projectDir . '/src/Controller', 'Controller');
         $this->prependPath($projectDir . '/public', 'Public');
+
         $this->prependPath($projectDir . '/vendor/symfony/twig-bridge/Resources/views', 'Twig');
         $this->prependPath($projectDir . '/templates');
 
+        // Allow to override the default bundle path for any bundle but base-bundle
+        $bundlesPath = $bundlePath . '/bundles';
+        if (is_dir($bundlesPath)) {
+
+            $directories = scandir($bundlesPath);
+            foreach ($directories as $directory) {
+                if ($directory === '.' || $directory === '..' || $directory === 'BaseBundle') {
+                    continue;
+                }
+
+                $fullPath = $bundlesPath . '/' . $directory;
+                if (is_dir($fullPath)) {
+                    $namespace = str_replace('Bundle', '', $directory);
+                    $this->prependPath($fullPath, $namespace);
+                }
+            }
+        }
+        
         // Add additional @Namespace variables
         $paths = $baseService->getParameterBag('base.twig.paths') ?? [];
         foreach ($paths as $entry) {
