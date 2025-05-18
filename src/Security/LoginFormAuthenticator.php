@@ -82,10 +82,10 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         ]);
     }
 
-    public function start(Request $request, AuthenticationException $authException = null): Response
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
-        if(!$this->referrer->getUrl()) $this->referrer->setUrl($request->getUri());
-
+        $this->referrer->setUrl($request->getUri());
+        
         $route = $this->authorizationChecker->isGranted("EXCEPTION_ACCESS") ? RescueFormAuthenticator::LOGIN_ROUTE : static::LOGIN_ROUTE;
         return new RedirectResponse($this->router->generate($route));
     }
