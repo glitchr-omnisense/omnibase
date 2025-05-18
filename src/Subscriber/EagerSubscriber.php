@@ -28,7 +28,6 @@ class EagerSubscriber implements EventSubscriberInterface
     {
         return [
             KernelEvents::REQUEST => [
-                ['onKernelRequest', 2049],
                 ['onValidCache', 128]], # must be called IntegritySubscriber::onKernelRequest()
             ConsoleEvents::COMMAND => ['onCommand', 2049]
         ];
@@ -42,23 +41,5 @@ class EagerSubscriber implements EventSubscriberInterface
     public function onValidCache(KernelEvent $e)
     {
         BaseBundle::getInstance()->markCacheAsValid();
-    }
-
-    public function onKernelRequest(KernelEvent $e)
-    {
-        if ($e->getRequest()->getPathInfo() == "/") {
-            return;
-        }
-        if (!$this->baseService->getCurrentRouteName()) {
-            return;
-        }
-        if (str_starts_with($this->baseService->getCurrentRouteName(), "_")) {
-            return;
-        }
-
-        if (!BaseBundle::getInstance()->isDoctrineReady()) {
-            $e->setResponse($this->baseService->redirect($this->baseService->getRouteName("/")));
-            $e->stopPropagation();
-        }
     }
 }

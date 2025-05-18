@@ -347,7 +347,7 @@ namespace {
             $memory_usage = format_bytes(memory_get_usage(true));
             $memory_peak  = format_bytes(memory_get_peak_usage(true));
 
-            $s .= sprintf("| 💾 Memory: %.2f(%.2f) MB | 📈 Peak: %.2f(%.2f) MB", $memory_usage, $memory_peak);
+            $s .= sprintf("| 💾 Memory: %.2f MB | 📈 Peak: %.2f MB", $memory_usage, $memory_peak);
         }
 
         return $s;

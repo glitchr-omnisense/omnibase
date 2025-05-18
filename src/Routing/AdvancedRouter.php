@@ -168,12 +168,12 @@ class AdvancedRouter implements AdvancedRouterInterface
     {
         return $this->isEasyAdmin($request) || $this->isProfiler($request);
     }
-
     public function isProfiler(mixed $request = null): bool
     {
         if (!$request) {
             $request = $this->requestStack->getCurrentRequest();
         }
+
         if ($request instanceof KernelEvent) {
             $request = $request->getRequest();
         } elseif ($request instanceof RequestStack) {
