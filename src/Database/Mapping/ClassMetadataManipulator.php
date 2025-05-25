@@ -135,7 +135,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
      */
     public function setGlobalTrackingPolicy(int $policy)
     {
-        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadata::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadata::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadata::CHANGETRACKING_NOTIFY];
+        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadata::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadata::CHANGETRACKING_DEFERRED_EXPLICIT];
         if (!in_array($policy, $trackingPolicies)) {
             throw new Exception("Invalid global tracking policy \"$policy\" provided");
         }
@@ -163,7 +163,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
      */
     public function setTrackingPolicy($className, int $policy)
     {
-        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadata::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadata::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadata::CHANGETRACKING_NOTIFY];
+        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadata::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadata::CHANGETRACKING_DEFERRED_EXPLICIT];
         if (!in_array($policy, $trackingPolicies)) {
             throw new Exception("Invalid tracking policy \"$policy\" provided for \"$className\"");
         }

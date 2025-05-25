@@ -722,6 +722,7 @@ class AnnotationReader extends AbstractLocalCache
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
         if (!array_key_exists($reflClass->name, $this->propertyAnnotations)) {
+
             // Force to get all known annotations when buffering
             $this->propertyAnnotations[$reflClass->name] = [];
             foreach ($reflClass->getProperties() as $reflProperty) {
@@ -921,7 +922,6 @@ class AnnotationReader extends AbstractLocalCache
         }
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-
         $annotations = [self::TARGET_CLASS => [], self::TARGET_METHOD => [], self::TARGET_PROPERTY => []];
         $annotationNames = $this->normalizeNames($annotationNames);
         $annotationTargets = $this->normalizeTargets($annotationTargets, $annotationNames);

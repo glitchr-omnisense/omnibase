@@ -50,7 +50,7 @@ class Hierarchify extends AbstractAnnotation
         return AnnotationReader::TARGET_CLASS == $target;
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
         if (!method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree') && !$this->parent_method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree')) {
             throw new \Exception("Did you forgot to use \"Base\Metadata\Traits\HierarchifyTrait\" in $classMetadata->customRepositoryClassName ?");

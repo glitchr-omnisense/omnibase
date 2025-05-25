@@ -4,6 +4,7 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -25,7 +26,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Associate extends AbstractAnnotation
+class Associate extends AbstractAnnotation implements ExtensionOptionInterface
 {
     public string $metadata;
 

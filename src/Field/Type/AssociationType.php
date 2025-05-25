@@ -10,6 +10,8 @@ use Base\Service\TranslatorInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping\InverseSideMapping;
+use Doctrine\ORM\Mapping\OwningSideMapping;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\MappingException;
 use Exception;
@@ -390,9 +392,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 $entries = $entries->get("_collection");
             }
 
-            if (!$isOwningSide) {
+            $mapping = $viewData->getMapping();
+            if ($mapping instanceof InverseSideMapping) {
 
-                $mappedBy = $viewData->getMapping()->mappedBy;
+                $mappedBy = $mapping->mappedBy;
                 $oldData = $viewData->toArray();
     
                 foreach (array_diff_object($oldData, $entries->toArray()) as $entry) {
@@ -411,7 +414,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 foreach (array_unique_object(array_union($oldData, $entries->toArray())) as $data) {
 
                     $this->classMetadataManipulator->getEntityManager()->getCache()->evictEntity(get_class($data), $data->getId());
-                    if ($mapping->inversedBy) {
+                    if ($mapping instanceof ToManyOwningSideMapping) {
                         $this->classMetadataManipulator->getEntityManager()->getCache()->evictCollection(get_class($data), $mapping->inversedBy, $data->getId());
                     }
                     if (!$isOwningSide && $mappedBy) {
@@ -425,9 +428,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
             foreach ($entries as $entry) {
 
                 $viewData->add($entry);
-                if (!$isOwningSide) {
+                $mapping = $viewData->getMapping();
+                if ($mapping instanceof InverseSideMapping) {
 
-                    $mappedBy = $viewData->getMapping()->mappedBy;
+                    $mappedBy = $mapping->mappedBy;
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
                         $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());

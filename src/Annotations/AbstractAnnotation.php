@@ -439,13 +439,11 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return self::getClassMetadataManipulator()->setPropertyValue($entity, $property, $value);
     }
 
-    abstract public function supports(string $target, ?string $targetValue = null, mixed $object = null): bool;
-
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
     }
 
-    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
     {
     }
 

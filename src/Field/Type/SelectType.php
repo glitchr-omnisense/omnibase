@@ -17,6 +17,8 @@ use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\InverseSideMapping;
+use Doctrine\ORM\Mapping\OwningSideMapping;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\MappingException;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -527,11 +529,12 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $dataChoices = [$dataChoices];
             }
 
-            if (!$isOwningSide) {
+            $mapping = $viewData->getMapping();
+            if ($mapping instanceof InverseSideMapping) {
                 
                 foreach (array_diff_object($oldData, $dataChoices) as $entry) {
 
-                    $mappedBy = $viewData->getMapping()->mappedBy;
+                    $mappedBy = $mapping->mappedBy;
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
                         $this->propertyAccessor->setValue($entry, $mappedBy, null);
@@ -544,12 +547,11 @@ class SelectType extends AbstractType implements DataMapperInterface
             if ($this->entityManager->getCache()) {
 
                 $mapping = $viewData->getMapping(); // Evict caches and collection caches.
-
                 foreach (array_unique_object(array_union($oldData, $dataChoices)) as $data) {
 
                     $this->entityManager->getCache()->evictEntity(get_class($data), $data->getId());
 
-                    if ($mapping->inversedBy) {
+                    if ($mapping instanceof ToManyOwningSideMapping) {
                         $this->entityManager->getCache()->evictCollection(get_class($data), $mapping->inversedBy, $data->getId());
                     }
                     if (!$isOwningSide && $mappedBy) {
@@ -623,7 +625,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                     }
                 }
             }
+
         } elseif ($data === null) {
+
             if (is_array($options["empty_data"])) {
                 $data = $options["empty_data"];
             } elseif ($options["empty_data"] instanceof Collection) {
@@ -639,7 +643,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
         if (!$form->isSubmitted() && $this->classMetadataManipulator->isEntity($options["class"]) && ($data && !$data instanceof Collection)) {
             $classRepository = $this->entityManager->getRepository($options["class"]);
+
             if ($options["multiple"]) {
+                
                 if ($this->classMetadataManipulator->isEntity($data)) {
                     $data = [$data];
                 }
@@ -649,6 +655,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 $data = $classRepository->cacheById($data, [])->getResult();
                 usort($data, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+
             } else {
                 $data = $this->classMetadataManipulator->isEntity($data) ? $data : $classRepository->cacheOneById($data);
             }

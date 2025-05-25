@@ -104,7 +104,9 @@
         <service id="base.database.metadata_manipulator" alias="Base\Database\Mapping\ClassMetadataManipulator" />
 
         <service id="base.annotation_reader" alias="Base\Annotations\AnnotationReader" />
+
         <service id="base.entity_extension" alias="Base\Database\Entity\EntityExtension" />
+        <service id="Base\Database\Entity\EntityExtensionInterface" alias="base.entity_extension"/>
 
         <service id="twig.loader.filesystem"   alias="Base\Twig\Loader\FilesystemLoader" />
         <service id="twig.random_variable"     alias="Base\Twig\Variable\RandomVariable" />

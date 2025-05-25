@@ -209,6 +209,32 @@ class AdvancedRouter implements AdvancedRouterInterface
         return str_starts_with($route, "ux_");
     }
 
+    public function isAPI(mixed $request = null): bool
+    {
+        if (!$request) {
+            $request = $this->requestStack->getCurrentRequest();
+        }
+        if ($request instanceof KernelEvent) {
+            $request = $request->getRequest();
+        } elseif ($request instanceof RequestStack) {
+            $request = $request->getCurrentRequest();
+        } elseif (!$request instanceof Request) {
+            return false;
+        }
+
+        return str_starts_with($request->getPathInfo(), '/api');
+    }
+
+    public function isMainApplication(mixed $request = null): bool
+    {
+        if ($this->isProfiler($request)) return false;
+        if ($this->isEasyAdmin($request)) return false;
+        if ($this->isUX($request)) return false;
+        if ($this->isAPI($request)) return false;
+
+        return true;
+    }   
+    
     public function isSecured(mixed $request = null): bool
     {
         if (!$request) {

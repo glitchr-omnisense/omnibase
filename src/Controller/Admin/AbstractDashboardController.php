@@ -62,7 +62,7 @@ use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
 use Base\Entity\Extension\Ordering;
 use Base\Entity\Extension\TrashBall;
-use Base\Entity\Layout\Shlink;
+use Base\Entity\Layout\ShortLink;
 use Base\Entity\Thread\Taxon;
 use Base\Field\Type\PasswordType;
 use Base\Field\Type\RouteType;
@@ -670,7 +670,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                     ->set("filters[class][value]", "layoutWidget_slot")->generateUrl()),
                 WidgetItem::linkToCrud(Attachment::class),
                 WidgetItem::linkToCrud(Link::class),
-                WidgetItem::linkToCrud(Shlink::class),
+                WidgetItem::linkToCrud(ShortLink::class),
                 WidgetItem::linkToCrud(Semantic::class),
             ]);
         }

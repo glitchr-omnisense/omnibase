@@ -2,7 +2,7 @@
 
 namespace Base\Controller;
 
-use Base\Repository\Layout\ShlinkRepository;
+use Base\Repository\Layout\ShortLinkRepository;
 use Base\Routing\AdvancedRouterInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Base\Annotations\Annotation\Route;
@@ -12,10 +12,10 @@ use Http\Discovery\Exception\NotFoundException;
 /**
  *
  */
-class ShlinkController extends AbstractController
+class ShortLinkController extends AbstractController
 {
     /**
-     * @var ShlinkRepository
+     * @var ShortLinkRepository
      */
     protected $shlinkRepository;
 
@@ -24,7 +24,7 @@ class ShlinkController extends AbstractController
      */
     protected AdvancedRouterInterface $router;
 
-    public function __construct(AdvancedRouterInterface $router, ShlinkRepository $shlinkRepository)
+    public function __construct(AdvancedRouterInterface $router, ShortLinkRepository $shlinkRepository)
     {
         $this->router = $router;
         $this->shlinkRepository = $shlinkRepository;
@@ -35,7 +35,7 @@ class ShlinkController extends AbstractController
     public function Main(string $slug): Response
     {
         /**
-         * @var Shlink $this
+         * @var ShortLink $this
          */
         $shlink = $this->shlinkRepository->findOneBySlug($slug);
         if ($shlink === null) {

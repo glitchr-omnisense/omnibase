@@ -80,7 +80,7 @@ trait TranslationTrait
         return $this;
     }
 
-    public function isEmpty(array $addIgnoredVars = [], callable $addConditions = null): bool
+    public function isEmpty(array $addIgnoredVars = [], ?callable $addConditions = null): bool
     {
         $ignoredVars = array_unique(array_merge(['id', 'translatable', 'locale'], $addIgnoredVars));
         $ignoredVars = array_intersect(array_keys(get_object_vars($this)), $ignoredVars);

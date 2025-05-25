@@ -10,7 +10,7 @@ use Base\Database\Traits\TranslationTrait;
 use Base\Traits\BaseTrait;
 
 #[ORM\Entity]
-class ShlinkIntl implements TranslationInterface
+class ShortLinkIntl implements TranslationInterface
 {
     use BaseTrait;
     use TranslationTrait;

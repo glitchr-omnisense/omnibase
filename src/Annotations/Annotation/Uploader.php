@@ -567,7 +567,7 @@ class Uploader extends AbstractAnnotation
      * @throws InvalidMimeTypeException
      * @throws InvalidSizeException
      */
-    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null): void
     {
         try {
             $this->uploadFiles($entity, null, $property);

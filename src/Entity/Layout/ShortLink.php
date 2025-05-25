@@ -12,13 +12,13 @@ use Base\Service\Model\LinkableInterface;
 use Base\Annotations\Annotation\Randomize;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\ShlinkRepository;
+use Base\Repository\Layout\ShortLinkRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Annotation\Cache;
 
-#[ORM\Entity(repositoryClass: ShlinkRepository::class)]
+#[ORM\Entity(repositoryClass: ShortLinkRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
-class Shlink implements TranslatableInterface, IconizeInterface, LinkableInterface
+class ShortLink implements TranslatableInterface, IconizeInterface, LinkableInterface
 {
     use TranslatableTrait;
 

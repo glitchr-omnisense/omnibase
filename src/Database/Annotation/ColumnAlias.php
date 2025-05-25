@@ -3,7 +3,8 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
+use Base\Database\Entity\EntityExtension;
 use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -21,7 +22,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
-class ColumnAlias extends AbstractAnnotation
+class ColumnAlias extends AbstractAnnotation implements ExtensionOptionInterface
 {
     public mixed $alias;
     public mixed $column;
@@ -40,10 +41,10 @@ class ColumnAlias extends AbstractAnnotation
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == EntityExtension::TARGET_CLASS || $target == EntityExtension::TARGET_PROPERTY);
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
         if ($target == "property") {
             $alias = $targetValue;

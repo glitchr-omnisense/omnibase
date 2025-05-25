@@ -3,11 +3,10 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
+use Base\Database\Entity\EntityExtension;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
-use Base\Database\Entity\EntityExtensionInterface;
-
+use Base\Database\Annotation\Extension\ExtensionMetadataInterface;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
@@ -17,7 +16,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class Logging extends AbstractAnnotation implements EntityExtensionInterface
+class Logging extends AbstractAnnotation implements ExtensionMetadataInterface
 {
     /**
      * @var bool
@@ -37,7 +36,7 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_CLASS);
+        return ($target == EntityExtension::TARGET_CLASS);
     }
 
     /**

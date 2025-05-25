@@ -80,12 +80,12 @@
             <argument type="service" id="Base\Repository\Layout\Widget\AttachmentRepository" />
         </service>
 
-        <service id="Base\Controller\ShlinkController">
+        <service id="Base\Controller\ShortLinkController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="advanced_router" />
-            <argument type="service" id="Base\Repository\Layout\ShlinkRepository" />
+            <argument type="service" id="Base\Repository\Layout\ShortLinkRepository" />
         </service>
 
         <service id="Base\Subscriber\RouterSubscriber">
@@ -456,6 +456,14 @@
 
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="localizer" />
+        </service>
+
+        <service id="Base\DatabaseSubscriber\ExtensionSubscriber">
+            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="2048" />
+            <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
+            <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
+
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\DatabaseSubscriber\TrackingPolicySubscriber">

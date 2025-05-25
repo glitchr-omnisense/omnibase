@@ -83,6 +83,9 @@ class ReferrerSubscriber implements EventSubscriberInterface
         if ($this->router->isUX()) {
             return;
         }
+        if ($this->router->isAPI()) {
+            return;
+        }
 
         $referrerPath = strval($this->referrer);
         $referrerRoute = $this->router->getRouteName($referrerPath);

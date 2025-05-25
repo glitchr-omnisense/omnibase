@@ -6,14 +6,14 @@ use Base\Field\TranslationField;
 
 use Base\Controller\Admin\AbstractCrudController;
 use Base\Controller\Admin\AbstractDashboardController;
-use Base\Entity\Layout\Shlink;
+use Base\Entity\Layout\ShortLink;
 use Base\Field\SlugField;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 /**
  *
  */
-class ShlinkCrudController extends AbstractCrudController
+class ShortLinkCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string
     {
@@ -22,11 +22,11 @@ class ShlinkCrudController extends AbstractCrudController
 
     /**
      * @param string $entityFqcn
-     * @return Shlink
+     * @return ShortLink
      */
     public function createEntity(string $entityFqcn)
     {
-        return new Shlink("");
+        return new ShortLink("");
     }
 
     public function configureFields(string $pageName, ...$args): iterable

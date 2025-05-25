@@ -39,6 +39,7 @@ use DateTime;
 
 use Base\Traits\CacheableTrait;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 
 #[ORM\Entity(repositoryClass:ThreadRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -52,9 +53,10 @@ use ApiPlatform\Metadata\ApiResource;
 #[ApiResource]
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {
-    use BaseTrait;
     use TrasheableTrait;
     use TranslatableTrait;
+    
+    use BaseTrait;
     use CacheableTrait {
         CacheableTrait::__toKey as __toDefaultKey;
     }

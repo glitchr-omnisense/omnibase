@@ -5,7 +5,7 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Common\Collections\OrderedArrayCollection;
-use Base\Database\Entity\EntityExtensionInterface;
+use Base\Database\Annotation\Extension\ExtensionMetadataInterface;
 use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Doctrine\Common\Annotations\Annotation;
@@ -30,7 +30,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
+class OrderColumn extends AbstractAnnotation implements ExtensionMetadataInterface
 {
     public const ASC = "ASC";
     public const DESC = "DESC";
@@ -149,7 +149,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             return null;
 
         }, array_values($orderedIndexes));
-        
+
         if (is_array($entityValue)) {
             
             if($orderedIndexes) $entityValue = array_flip(array_transforms(fn($k, $v): array => [$entityValue[$k], $v], $orderedIndexes));

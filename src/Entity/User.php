@@ -55,6 +55,8 @@ use App\Enum\UserState;
 use Base\Service\Model\AutocompleteInterface;
 
 use Base\Traits\UserInfoTrait;
+use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass:UserRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -65,6 +67,7 @@ use Base\Traits\UserInfoTrait;
 
 #[AssertBase\UniqueEntity(fields:["email"], groups:["new", "edit"])]
 
+#[ApiResource]
 class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
 {
     use BaseTrait;

@@ -31,6 +31,8 @@ interface AdvancedRouterInterface extends SymfonyRouterInterface, RequestMatcher
     public function isEasyAdmin(mixed $request = null): bool;
 
     public function isUX(mixed $request = null): bool;
+    public function isAPI(mixed $request = null): bool;
+    public function isMainApplication(mixed $request = null): bool;
 
     public function isWdt(mixed $request = null): bool;
 

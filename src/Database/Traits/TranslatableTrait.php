@@ -15,7 +15,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Entity\Layout\Semantic;
 use Base\Entity\Layout\Setting;
-use Base\Entity\Layout\Shlink;
+use Base\Entity\Layout\ShortLink;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Thread;
 use Base\Entity\Thread\Tag;

@@ -69,9 +69,15 @@ trait UserInfoTrait
 
     #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $timezone;
-    public function getCountryCode(): string
+    public function getCountryCode(): ?string
     {
-        return Timezones::getCountryCode($this->getTimezone());
+        try {
+            $countryCode = Timezones::getCountryCode($this->getTimezone());
+        } catch (\Exception $e) {
+            $countryCode = null;
+        }
+
+        return $countryCode;
     }
 
     public function getTimezone(): string
