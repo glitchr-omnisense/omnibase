@@ -6,10 +6,10 @@ use Base\Database\Annotation\Associate;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Database\Annotation\Vault;
-use Base\Annotations\Annotation\Uploader;
-use Base\Database\TranslationInterface;
-use Base\Database\Traits\TranslationTrait;
-use Base\Database\Traits\VaultTrait;
+use Base\Database\Annotation\Uploader;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationTrait;
+use Base\Database\Entity\Extension\VaultTrait;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 

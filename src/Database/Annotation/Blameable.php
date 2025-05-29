@@ -1,8 +1,9 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
@@ -19,7 +20,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  */
 
  #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class Blameable extends AbstractAnnotation
+class Blameable extends AbstractAnnotation implements ExtensionOptionInterface
 {
     private array $fields;
     private array $context;

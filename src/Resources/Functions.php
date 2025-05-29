@@ -3706,7 +3706,6 @@ namespace {
         return $object;
     }
 
-
     /**
      * @param object $object
      * @param array|object|null $vars
@@ -3718,6 +3717,7 @@ namespace {
         if ($vars === null) {
             return $object;
         }
+
         if (is_object($vars)) {
             $vars = cast_to_array($vars);
         }
@@ -3734,6 +3734,7 @@ namespace {
                 $reflProperty->setAccessible(true);
                 $reflProperty->setValue($object, $value);
             }
+
         } while ($reflClass = $reflClass->getParentClass());
 
         return $object;

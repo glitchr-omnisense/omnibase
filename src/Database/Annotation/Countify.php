@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -19,7 +19,7 @@ use Exception;
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Countify extends AbstractAnnotation
+class Countify extends AbstractAnnotation implements ExtensionOptionInterface
 {
     protected ?string $referenceColumn;
     protected string $type;

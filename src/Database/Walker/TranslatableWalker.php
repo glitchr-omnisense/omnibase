@@ -3,8 +3,8 @@
 namespace Base\Database\Walker;
 
 use Base\Database\Mapping\NamingStrategy;
-use Base\Database\TranslatableInterface;
-use Base\Database\TranslationInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;
 use Base\Service\Localizer;
 use Doctrine\ORM\Query\QueryException;

@@ -8,6 +8,7 @@ use Base\Database\Entity\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @method Entity[]    findBy*(...array $customs,
@@ -53,7 +54,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $this->classMetadataCompletor = $classMetadataManipulator->getClassMetadataCompletor($entityName ?? $this->getFqcnEntityName());
 
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
-        $this->serviceParser = new ServiceEntityParser($this, $entityManager, $classMetadataManipulator, $entityHydrator);
+        $this->serviceParser = new ServiceEntityParser(
+            $this, $entityManager, $classMetadataManipulator, 
+            $entityHydrator
+        );
     }
 
     /**
@@ -138,7 +142,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
      */
     public function persist($entity, bool $flush = false): void
     {
-        dump($this->getFqcnEntityName());
         $entityClass = \property_exists($this, '_entityName') ? $this->_entityName : $this->getFqcnEntityName(); // Doctrine ORM 2 vs. 3
         if (!is_object($entity) || (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
@@ -154,7 +157,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     public function remove($entity, bool $flush = false): void
     {
-        dump($this->getFqcnEntityName());
         $entityClass = \property_exists($this, '_entityName') ? $this->_entityName : $this->getFqcnEntityName(); // Doctrine ORM 2 vs. 3
         if (!is_object($entity) || (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass))) {
             $class = (is_object($entity) ? get_class($entity) : "null");

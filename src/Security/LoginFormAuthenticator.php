@@ -149,8 +149,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $targetUrl = $targetPath->getUrl();
 
         $targetPath->clear();
-        
-        if ($targetUrl && $targetPath->sameSite() && !$this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath)) {
+
+        if ($targetUrl && $targetPath->sameSite()) {
             return $this->router->redirect($targetUrl);
         }
 

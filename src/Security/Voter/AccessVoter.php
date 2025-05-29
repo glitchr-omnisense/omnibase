@@ -141,6 +141,7 @@ class AccessVoter extends Voter
 
                 $url = parse_url($url);
                 foreach ($this->urlExceptions as $urlException) {
+                    
                     $exception = true;
 
                     $environment = $urlException["env"] ?? null;

@@ -7,6 +7,7 @@ use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use InvalidArgumentException;
+use LogicException;
 use Psr\Cache\CacheItemInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;

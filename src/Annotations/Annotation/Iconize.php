@@ -3,7 +3,6 @@
 namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 

@@ -17,7 +17,7 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvent;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\FormEvents;
-use Base\Database\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use Doctrine\Common\Collections\Collection;

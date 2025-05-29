@@ -1,7 +1,6 @@
-
 <?php
 
-namespace Base\Database\Entity\Extension;
+namespace Base\Database\Entity\Extension\Type;
 
 interface EntityInlineInterface
 {

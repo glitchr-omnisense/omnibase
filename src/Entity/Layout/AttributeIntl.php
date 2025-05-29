@@ -2,12 +2,12 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Base\Database\Annotation\Associate;
 use Doctrine\ORM\Mapping as ORM;
 
-use Base\Database\TranslationInterface;
-use Base\Database\Traits\TranslationTrait;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationTrait;
 
 use Base\Validator\Constraints as AssertBase;
 use League\Flysystem\FilesystemException;

@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -21,7 +21,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Hashify
- * package Base\Annotations\Annotation\Hashify
+ * package Base\Database\Annotation\Hashify
  *
  * @Annotation
  * @NamedArgumentConstructor
@@ -29,7 +29,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Hashify extends AbstractAnnotation
+class Hashify extends AbstractAnnotation implements ExtensionOptionInterface
 {
     public ?string $referenceColumn;
     public bool $random;

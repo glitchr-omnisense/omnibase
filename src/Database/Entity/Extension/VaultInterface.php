@@ -2,6 +2,6 @@
 
 namespace Base\Database\Entity\Extension;
 
-interface EntityHookInterface
+interface VaultInterface
 {
 }

@@ -5,7 +5,7 @@ namespace Base\Entity\Layout\Widget;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\Slugify;
+use Base\Database\Annotation\Slugify;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;

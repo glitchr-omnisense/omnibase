@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Common\Annotations\Annotation;
@@ -16,7 +16,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class GenerateUuid
- * package Base\Annotations\Annotation\GenerateUuid
+ * package Base\Database\Annotation\GenerateUuid
  *
  * @Annotation
  * @NamedArgumentConstructor
@@ -24,7 +24,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class GenerateUuid extends AbstractAnnotation
+class GenerateUuid extends AbstractAnnotation implements ExtensionOptionInterface
 {
     private mixed $version;
     public const V1_MAC = 1;

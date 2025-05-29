@@ -3,7 +3,7 @@
 namespace Base\Database\Mapping;
 
 use Base\Cache\Abstract\AbstractLocalCache;
-use Base\Database\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Field\Type\DateTimePickerType;
@@ -844,7 +844,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return $this->fetchEntityMapping($entityName, $fieldPath)["targetEntity"] ?? null;
     }
 
-    public function fetchEntityMapping(string $entityName, array|string $fieldPath): ?FieldMapping
+    public function fetchEntityMapping(string $entityName, array|string $fieldPath): null|FieldMapping|AssociationMapping
     {
         $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
         $fieldName = head($fieldPath);
@@ -1030,7 +1030,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
         return false;
     }
 
-    public function getFieldMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?FieldMapping
+    public function getFieldMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): null|FieldMapping|AssociationMapping
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {

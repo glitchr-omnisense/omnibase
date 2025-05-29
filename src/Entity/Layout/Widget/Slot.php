@@ -3,12 +3,12 @@
 namespace Base\Entity\Layout\Widget;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
 
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
-use Base\Annotations\Annotation\Slugify;
+use Base\Database\Annotation\Slugify;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\SlotRepository;

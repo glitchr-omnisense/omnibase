@@ -19,6 +19,14 @@ crud:
     url:
       placeholder: "{0} or /go/to/route"
 
+settings:
+  filter:
+    mono: "Monochrome"
+  appearance:
+    light: "Light"
+    dark: "Dark"
+    auto: "Automatic"
+
 action:
   batch_approve: "Approve"
   batch_publish: "Publish"

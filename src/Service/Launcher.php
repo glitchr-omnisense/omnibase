@@ -42,7 +42,9 @@ class Launcher implements LauncherInterface
             return null;
         }
 
-        return $launchdate instanceof DateTime ? $launchdate : new DateTime($launchdate);
+        if ($launchdate instanceof DateTime) return $launchdate;
+        if (is_string($launchdate)) return new DateTime($launchdate);
+        return null;
     }
 
     public function isLaunched(?string $locale = null): ?bool

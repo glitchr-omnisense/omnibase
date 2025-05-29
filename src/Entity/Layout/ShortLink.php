@@ -2,14 +2,14 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
 
-use Base\Annotations\Annotation\Slugify;
+use Base\Database\Annotation\Slugify;
 use Base\Service\Model\LinkableInterface;
 
-use Base\Annotations\Annotation\Randomize;
+use Base\Database\Annotation\Randomize;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ShortLinkRepository;
@@ -68,9 +68,9 @@ class ShortLink implements TranslatableInterface, IconizeInterface, LinkableInte
         return $this->id;
     }
 
-    #[ORM\Column(type:"string", length:255)]
     #[Randomize]
     #[Slugify(separator:"-")]
+    #[ORM\Column(type:"string", length:255)]
     protected $slug;
 
     public function getSlug(): ?string

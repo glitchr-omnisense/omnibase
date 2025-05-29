@@ -2,7 +2,7 @@
 
 namespace Base\Form\Model;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Base\Form\Common\AbstractModel;
 use Base\Notifier\Recipient\Recipient;
 use Base\Validator\Constraints as AssertBase;

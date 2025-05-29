@@ -224,17 +224,16 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return $this;
     }
 
-    /*
-     * Link to this controller to start the "connect" process
-     */
-
-    #[Route("/{crudControllerFqcn}/{crudAction}/{entityId}", name: "")]
+    #[Route("/{crudControllerFqcn}/{crudAction}/{entityId}", name: "_index", priority: -1)]
     #[Iconize(["fa-solid fa-fw fa-toolbox", "fa-solid fa-fw fa-home"])]
     public function index(?string $crudControllerFqcn = null, ?string $crudAction = "index", ?int $entityId = null): Response
     {
         return $this->render('admin/index.html.twig');
     }
-    
+
+    /*
+     * Link to this controller to start the "connect" process
+     */
     #[Route(["fr" => "/manuel/{slug}", "en" => "/manual/{slug}"], name: "_manual")]
     #[Iconize(["fa-solid fa-life-ring"])]
     #[IsGranted("IS_AUTHENTICATED_FULLY")]
@@ -413,7 +412,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $notification->send("success");
 
             $this->settingRepository->flush();
-            $this->settingBag->clearAll(); // Clear cache
+            // $this->settingBag->clearAll(); // Clear cache
 
             return $this->router->reloadRequest();
         }
@@ -532,12 +531,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 ->setAction(Action::INDEX)
                 ->set("filters[roles][comparison]", "like")
                 ->set("filters[roles][value]", $role)
-                // ->set(EA::MENU_INDEX, count($menu))
                 ->generateUrl();
 
             if (empty($values)) {
 
                 $item = MenuItem::linkToUrl($label, $icon, $url);
+
             } else {
 
                 $item = MenuItem::subMenu($label, $icon, $url);
@@ -558,8 +557,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                         ->setAction(Action::INDEX)
                         ->set("filters[roles][comparison]", "like")
                         ->set("filters[roles][value]", $role)
-                        // ->set(EA::MENU_INDEX, count($menu))
-                        // ->set(EA::SUBMENU_INDEX, count($subItems) + 1)
                         ->generateUrl();
 
                     $subItems[] = MenuItem::linkToUrl($label, $icon, $url);
@@ -587,7 +584,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function configureMenuItems(): iterable
     {
         $menu = [];
-        $menu[] = MenuItem::section('BUSINESS CARD');
+        $menu[] = MenuItem::section('ROLES');
         if (UserRole::class != \Base\Enum\UserRole::class) {
             $menu = $this->addRoles($menu, UserRole::class);
         }

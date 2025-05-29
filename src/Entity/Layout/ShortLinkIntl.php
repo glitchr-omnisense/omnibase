@@ -5,8 +5,8 @@ namespace Base\Entity\Layout;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-use Base\Database\TranslationInterface;
-use Base\Database\Traits\TranslationTrait;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Traits\BaseTrait;
 
 #[ORM\Entity]

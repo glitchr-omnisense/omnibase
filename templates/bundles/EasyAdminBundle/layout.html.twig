@@ -130,21 +130,31 @@
             </li>
             <li>
                 <a href="#" class="dropdown-item dropdown-appearance-item" data-ea-color-scheme="light">
-                    <i class="fa-regular fa-sun"></i> <span>{{ 'settings.appearance.light'|trans(domain = 'EasyAdminBundle') }}</span>
+                    <i class="fa-regular fa-sun"></i> <span>{{ '@admin.settings.appearance.light'|trans }}</span>
                 </a>
             </li>
             <li>
                 <a href="#" class="dropdown-item dropdown-appearance-item" data-ea-color-scheme="dark">
-                    <i class="fa-regular fa-moon"></i> <span>{{ 'settings.appearance.dark'|trans(domain = 'EasyAdminBundle') }}</span>
+                    <i class="fa-regular fa-moon"></i> <span>{{ '@admin.settings.appearance.dark'|trans }}</span>
                 </a>
             </li>
             <li>
                 <a href="#" class="dropdown-item dropdown-appearance-item active" data-ea-color-scheme="auto">
-                    <i class="fa-solid fa-desktop"></i> <span>{{ 'settings.appearance.auto'|trans(domain = 'EasyAdminBundle') }}</span>
+                    <i class="fa-solid fa-desktop"></i> <span>{{ '@admin.settings.appearance.auto'|trans }}</span>
                 </a>
             </li>
         </ul>
+        {% endset %}
 
+
+        {% set filter_menu_dropdown %}
+        {# <ul class="dropdown-menu dropdown-menu-end dropdown-appearance-menu">
+            <li> #}
+                <a href="#" class="dropdown-item dropdown-appearance-item" data-ea-filter-scheme="mono">
+                    <i class="fa-solid fa-fw fa-droplet"></i>
+                </a>
+            {# </li>
+        </ul> #}
         {% endset %}
 
         <div class="wrapper">
@@ -289,13 +299,18 @@
                                     {% endblock responsive_header %}
                                 </div>
 
+                                <div class="user-menu-wrapper">
+                                    {{ filter_menu_dropdown }}
+                                </div>
+                                
                                 {% if ea.context.dashboardHasDarkModeEnabled %}
                                     <div class="dropdown dropdown-settings user-menu-wrapper">
-                                        <a class="dropdown-appearance-button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
+                                        <a class="dropdown-appearance-button dropdown-toggle" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
                                             <i class="fa-solid fa-adjust"></i>
                                         </a>
 
                                         {{ appearance_menu_dropdown }}
+
                                     </div>
                                 {% endif %}
 

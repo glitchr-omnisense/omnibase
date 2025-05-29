@@ -3,14 +3,14 @@
 namespace Base\Entity\Thread;
 
 use App\Entity\Thread;
-use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Slugify;
+use Base\Database\Annotation\Uploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Base\Database\Annotation\DiscriminatorEntry;
 
-use Base\Database\Traits\TranslatableTrait;
+use Base\Database\Entity\Extension\TranslatableTrait;
 
-use Base\Database\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\GraphInterface;
 use Doctrine\Common\Collections\Collection;

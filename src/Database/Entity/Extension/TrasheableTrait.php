@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Database\Traits;
+namespace Base\Database\Entity\Extension;
 
-use Base\Annotations\Annotation\Timestamp;
+use Base\Database\Annotation\Timestamp;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 

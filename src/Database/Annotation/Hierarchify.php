@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -13,7 +13,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Hierarchify
- * package Base\Annotations\Annotation\Hierarchify.
+ * package Base\Database\Annotation\Hierarchify.
  *
  * @Annotation
  * @NamedArgumentConstructor
@@ -21,19 +21,19 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
  #[\Attribute(\Attribute::TARGET_CLASS)]
-class Hierarchify extends AbstractAnnotation
+class Hierarchify extends AbstractAnnotation implements ExtensionOptionInterface 
 {
     /**
      * @var array|string|null
      */
-    public array|string|null $hierarchy;
+    public array|string $hierarchy;
 
     /**
      * @var string|null
      */
     public ?string $separator;
 
-    public function __construct(string|array $hierarchy = null, ?string $separator = null)
+    public function __construct(string|array|null $hierarchy = null, ?string $separator = "/")
     {
         $this->hierarchy = is_string($hierarchy) ? [$hierarchy] : [];
         $this->separator = $separator ?? null;

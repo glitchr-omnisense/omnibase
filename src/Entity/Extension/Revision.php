@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Extension;
 
-use Base\Annotations\Annotation\Hashify;
+use Base\Database\Annotation\Hashify;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 

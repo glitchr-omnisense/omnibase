@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 

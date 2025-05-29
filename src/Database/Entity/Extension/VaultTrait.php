@@ -1,8 +1,7 @@
 <?php
 
-namespace Base\Database\Traits;
+namespace Base\Database\Entity\Extension;
 
-use Base\Entity\Layout\SettingIntl;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -55,7 +54,6 @@ trait VaultTrait
 
     /**
      * @param bool $secure
-     * @return SettingIntl
      */
     public function setSecure(bool $secure)
     {

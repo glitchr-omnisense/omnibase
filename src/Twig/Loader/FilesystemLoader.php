@@ -5,6 +5,7 @@ namespace Base\Twig\Loader;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Traits\BaseTrait;
 use Base\Twig\AppVariable;
+use Base\Twig\Renderer\TagRendererInterface;
 use Base\Twig\Variable\RandomVariable;
 use Twig\Environment;
 use Twig\Error\LoaderError;
@@ -115,5 +116,22 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
             $this->prependPath($path, $namespace);
         }
+    }
+
+    protected array $renderers;
+    public function addRenderer(TagRendererInterface $renderer)
+    {
+        $this->renderers[] = $renderer;
+    }
+
+    public function getRenderer(string $className): ?TagRendererInterface
+    {
+        foreach ($this->renderers as $renderer) {
+            if (is_instanceof($renderer, $className)) {
+                return $renderer;
+            }
+        }
+
+        return null;
     }
 }

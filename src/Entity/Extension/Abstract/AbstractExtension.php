@@ -2,8 +2,8 @@
 
 namespace Base\Entity\Extension\Abstract;
 
-use Base\Annotations\Annotation\Blameable;
-use Base\Annotations\Annotation\Timestamp;
+use Base\Database\Annotation\Blameable;
+use Base\Database\Annotation\Timestamp;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\User;
 use Base\Repository\Extension\Abstract\AbstractExtensionRepository;

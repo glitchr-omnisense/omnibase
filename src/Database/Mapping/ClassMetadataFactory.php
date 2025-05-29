@@ -2,10 +2,8 @@
 
 namespace Base\Database\Mapping;
 
-use Base\Database\Mapping\NamingStrategy;
-use Base\Database\TranslatableInterface;
-use Base\Database\TranslationInterface;
-
+use Base\Database\Event\ResolveDiscriminatorEventArgs;
+use Base\Database\Events;
 use Base\Exception\MissingDiscriminatorMapException;
 use Base\Exception\MissingDiscriminatorValueException;
 use Doctrine\ORM\Mapping\MappingException;
@@ -22,7 +20,7 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
 {
     protected function doLoadMetadata($class, $parent, $rootEntityFound, array $nonSuperclassParents): void
     {
-        $class = $this->resolveDiscriminatorValue($class);
+        $class = $this->resolveDiscriminator($class);
         parent::doLoadMetadata($class, $parent, $rootEntityFound, $nonSuperclassParents);
     }
     
@@ -68,56 +66,14 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
      * @throws \Doctrine\Persistence\Mapping\MappingException
      */
 
-    protected function resolveDiscriminatorValue(ClassMetadata $class): ClassMetadata
+    protected function resolveDiscriminator(ClassMetadata $class): ClassMetadata
     {
-        //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
-        if (is_subclass_of($class->getName(), TranslationInterface::class)) {
+        // Dispatch custom discriminator resolver event
+        $dispatcher = $this->em->getEventManager();
 
-            if (!str_ends_with($class->getName(), NamingStrategy::TABLE_I18N_SUFFIX)) {
-                throw new Exception("Invalid class name for \"" . $class->getName() . "\"");
-            }
-
-            $translatableClass = $class->getName()::getTranslatableEntityClass();
-            $translatableMetadata = $this->getMetadataFor($translatableClass);
-
-            //
-            // Handle translation discriminator map
-            if (!$class->discriminatorMap) {
-                $class->discriminatorMap = array_filter(array_map(function ($className) {
-                    return (is_subclass_of($className, TranslatableInterface::class))
-                        ? $className::getTranslationEntityClass(false)
-                        : null;
-                }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
-            }
-
-            //
-            // Handle translation subclasses
-            $subClasses = [];
-            foreach ($translatableMetadata->subClasses as $translatableSubclass) {
-                $translationClass = $translatableSubclass::getTranslationEntityClass();
-                if ($translationClass !== null && $translationClass != $class->getName()) {
-                    $subClasses[] = $translationClass;
-                }
-            }
-
-            // Apply values..
-            $class->subClasses = array_unique($subClasses);
-            $class->inheritanceType = $translatableMetadata->inheritanceType;
-            $class->discriminatorColumn = $translatableMetadata->discriminatorColumn;
-            if ($class->discriminatorMap) {
-                if (!in_array($class->getName(), $class->discriminatorMap)) {
-                    throw new MissingDiscriminatorMapException(
-                        "Discriminator map missing for \"" . $class->getName() .
-                        "\". Did you forgot to implement \"" . TranslatableInterface::class .
-                        "\" in \"" . $class->getName()::getTranslatableEntityClass() . "\"."
-                    );
-                }
-
-                $class->discriminatorValue = array_flip($translatableMetadata->discriminatorMap)[$translatableMetadata->getName()] ?? null;
-                if (!$class->discriminatorValue) {
-                    throw new MissingDiscriminatorValueException("Discriminator value missing for \"" . $class->getName() . "\".");
-                }
-            }
+        if ($dispatcher->hasListeners(Events::resolveDiscriminator)) {
+            $eventArgs = new ResolveDiscriminatorEventArgs($class, $this->em);
+            $dispatcher->dispatchEvent(Events::resolveDiscriminator, $eventArgs);
         }
 
         if ($class->discriminatorValue || !$class->discriminatorMap ||

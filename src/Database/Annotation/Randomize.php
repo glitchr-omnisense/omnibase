@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Common\Annotations\Annotation;
@@ -14,20 +14,20 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Randomize
- * package Base\Annotations\Annotation\Randomize
+ * package Base\Database\Annotation\Randomize
  *
  * @Annotation
  * @NamedArgumentConstructor
  * @Target({"PROPERTY"})
  */
 
- #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Randomize extends AbstractAnnotation
+#[\Attribute(\Attribute::TARGET_PROPERTY)]
+class Randomize extends AbstractAnnotation implements ExtensionOptionInterface
 {
     protected ?int $length;
     protected ?string $chars;
 
-    public function __construct(int $length = null, ?string $chars = null)
+    public function __construct(?int $length = null, ?string $chars = null)
     {
         $this->length = $length;
         $this->chars = $chars;

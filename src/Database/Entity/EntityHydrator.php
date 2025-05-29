@@ -5,7 +5,7 @@ namespace Base\Database\Entity;
 use Base\Database\Entity\AggregateHydrator\PopulableInterface;
 use Base\Database\Entity\AggregateHydrator\SerializableInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Database\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Type\SetType;
 use Closure;
 use Doctrine\Common\Collections\ArrayCollection;

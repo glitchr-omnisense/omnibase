@@ -7,7 +7,7 @@ Valid: Valider
 
 MARKETPLACES: BOUTIQUE EN LIGNE
 LAYOUT: MISE EN FORME
-BUSINESS CARD: "FICHES MÉTIERS"
+ROLES: "ROLES"
 MEMBERSHIP: "ESPACE MEMBRE"
 THREADS: FILS ROUGE
 EXTENSIONS: EXTENSIONS
@@ -16,6 +16,14 @@ ATTRIBUTES: ATTRIBUTS
 Cart: Panier
 All users: "Tous les utilisateurs"
 Add user: Ajouter un utilisateur
+
+settings:
+  filter:
+    mono: "Monochrome"
+  appearance:
+    light: "Clair"
+    dark: "Sombre"
+    auto: "Automatique"
 
 # CRUD controllers
 crud:

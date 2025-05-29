@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
 use Base\Validator\Constraints\File as ConstraintsFile;
@@ -30,7 +30,7 @@ use function is_file;
 
 /**
  * Class Uploader
- * package Base\Annotations\Annotation\Uploader
+ * package Base\Database\Annotation\Uploader
  *
  * @Annotation
  * @NamedArgumentConstructor
@@ -38,7 +38,7 @@ use function is_file;
  */
 
  #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class Uploader extends AbstractAnnotation
+class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
 {
     protected string $storage;
     protected string $pool;

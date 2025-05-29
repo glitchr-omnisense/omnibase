@@ -1,30 +1,14 @@
 <?php
 
-namespace Base\Database\Traits;
+namespace Base\Database\Entity\Extension;
 
-use App\Entity\Marketplace\Product;
-use App\Entity\Marketplace\Product\Variant;
-use App\Entity\Marketplace\Store;
-use App\Entity\User\Artist;
-use App\Entity\User\Merchant;
 use Base\Database\Mapping\NamingStrategy;
-use Base\Database\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationInterface;
 
-use Base\Entity\Layout\Attribute;
-use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
-use Base\Entity\Layout\Attribute\Hyperlink;
-use Base\Entity\Layout\Semantic;
-use Base\Entity\Layout\Setting;
-use Base\Entity\Layout\ShortLink;
-use Base\Entity\Layout\Widget;
-use Base\Entity\Thread;
-use Base\Entity\Thread\Tag;
-use Base\Entity\Thread\Taxon;
 use Base\Service\BaseService;
 use Base\Service\Localizer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Proxy\Proxy;
 use Exception;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;

@@ -1,45 +1,40 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-
-use DateTime;
-use DateTimeImmutable;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
+
+use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
- * Class Timestamp
- * package Base\Annotations\Annotation\Timestamp
+ * Class Timezone
+ * package Base\Database\Annotation\Timezone
  *
  * @Annotation
  * @NamedArgumentConstructor
- * @Target({"CLASS", "PROPERTY"})
+ * @Target({"PROPERTY"})
  */
 
-#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class Timestamp extends AbstractAnnotation
+ #[\Attribute(\Attribute::TARGET_PROPERTY)]
+class Timezone extends AbstractAnnotation implements ExtensionOptionInterface
 {
-    private array $fields;
+    public const DEFAULT_TIMEZONE = "UTC";
     private array $context;
 
-    private bool $immutable;
-
     /**
-     * @var DateTime
+     * @var string
      */
-    private $value;
+    private string $value;
 
-    public function __construct(string|array $on = [], bool $immutable = false, array $fields = [], string $value = "")
+    public function __construct(string|array $on = [], string $value = "")
     {
         $this->context = array_map("mb_strtolower", is_string($on) ? [$on] : $on);
-        $this->immutable = $immutable;
-        $this->fields = $fields;
         $this->value = $value;
     }
 
@@ -48,23 +43,14 @@ class Timestamp extends AbstractAnnotation
         return $this->context;
     }
 
-    public function getFields(): array
+    public function getValue(): string
     {
-        return $this->fields;
-    }
-
-    public function isImmutable(): bool
-    {
-        return $this->immutable;
-    }
-
-    public function getValue(): DateTime
-    {
-        if (!$this->value) {
-            $this->value = $this->isImmutable() ? new DateTimeImmutable("now") : new DateTime("now");
+        $value = $this->value ?? date_default_timezone_get();
+        if (!in_array($value, timezone_identifiers_list())) {
+            $value = self::DEFAULT_TIMEZONE;
         }
 
-        return $this->value;
+        return $value;
     }
 
     /**
@@ -75,11 +61,7 @@ class Timestamp extends AbstractAnnotation
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        if (!empty($this->fields) && !in_array($targetValue, $this->fields)) {
-            return false;
-        }
-
-        return in_array($this->getImpersonator() ? "impersonator" : "update", $this->context) || in_array("create", $this->context);
+        return in_array("update", $this->context) || in_array("create", $this->context);
     }
 
     /**
@@ -94,7 +76,6 @@ class Timestamp extends AbstractAnnotation
         if (!in_array("create", $this->context)) {
             return;
         }
-
         $this->setFieldValue($entity, $property, $this->getValue());
     }
 
@@ -107,7 +88,7 @@ class Timestamp extends AbstractAnnotation
      */
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        if (!in_array($this->getImpersonator() ? "impersonator" : "update", $this->context)) {
+        if (!in_array("update", $this->context)) {
             return;
         }
 

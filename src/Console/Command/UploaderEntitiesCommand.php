@@ -2,7 +2,7 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
 use League\Flysystem\FileAttributes;

@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\String\Slugger\AsciiSlugger;
@@ -15,7 +15,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Slugify
- * package Base\Annotations\Annotation\Slugify
+ * package Base\Database\Annotation\Slugify
  *
  * @Annotation
  * @NamedArgumentConstructor
@@ -23,7 +23,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Slugify extends AbstractAnnotation
+class Slugify extends AbstractAnnotation implements ExtensionOptionInterface
 {
     protected $slugger;
     protected bool $unique;

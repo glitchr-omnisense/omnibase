@@ -3,8 +3,8 @@
 namespace Base\Entity;
 
 use Base\Database\Annotation\OrderColumn;
-use Base\Database\TranslationInterface;
-use Base\Database\Traits\TranslationTrait;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Traits\BaseTrait;
 
 use Doctrine\ORM\Mapping as ORM;

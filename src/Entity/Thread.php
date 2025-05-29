@@ -16,18 +16,18 @@ use Doctrine\Common\Collections\Collection;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\GenerateUuid;
-use Base\Annotations\Annotation\Timestamp;
-use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\Hierarchify;
+use Base\Database\Annotation\GenerateUuid;
+use Base\Database\Annotation\Timestamp;
+use Base\Database\Annotation\Slugify;
+use Base\Database\Annotation\Hierarchify;
 use Base\Database\Annotation\Cache;
 use Base\Database\Annotation\Trasheable;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
-use Base\Database\Traits\TrasheableTrait;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableTrait;
+use Base\Database\Entity\Extension\TrasheableTrait;
 use Base\Entity\Thread\Taxon;
 use Base\Service\Model\CacheableInterface;
 use Base\Service\Model\IconizeInterface;
@@ -40,6 +40,7 @@ use DateTime;
 use Base\Traits\CacheableTrait;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use Base\Database\Annotation\OrderColumnNew;
 
 #[ORM\Entity(repositoryClass:ThreadRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -338,8 +339,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy:"threads")]
-    #[OrderColumn]
+    #[OrderColumnNew(orderBy: "ownerOrders", sort: "ASC")]
     protected $owners;
+    protected $ownerOrders;
 
     /**
      * @param int $i

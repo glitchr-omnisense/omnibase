@@ -271,13 +271,13 @@ form .label-wrapper .badge
 .locale-dropdown .dropdown-item .country-flag { margin-right:0.5em; height:auto; }
 .timezone-dropdown button i,
 .locale-dropdown button i { margin-right:0.25em; }
-.timezone-dropdown button,
-.locale-dropdown button
-{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
+// .timezone-dropdown button,
+// .locale-dropdown button
+// {
+//     display:flex;
+//     align-items:center;
+//     justify-content:center;
+// }
 
 .form-switch:first-child { padding-left:0; }
 

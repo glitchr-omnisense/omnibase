@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Database\Traits;
+namespace Base\Database\Entity\Extension;
 
 use Base\Database\Mapping\NamingStrategy;
-use Base\Database\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Service\Localizer;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;

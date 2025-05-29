@@ -153,7 +153,7 @@ class Environment extends TwigEnvironment
 
     public function getAsset(string $url): string
     {
-        return $this->getRenderer(HtmlTagRenderer::class)?->getAsset($url);
+        return $this->getRenderer(HtmlTagRenderer::class)?->getAsset($url) ?? $url;
     }
 
     /**

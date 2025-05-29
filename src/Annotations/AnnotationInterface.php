@@ -15,6 +15,8 @@ interface AnnotationInterface
 {
     public function supports(string $target, ?string $targetValue = null, mixed $object = null): bool;
 
+
+    /** to be marked as optional */
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null);
 
     public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);

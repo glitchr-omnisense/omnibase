@@ -28,7 +28,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         return $this->compiledRoutes;
     }
 
-    public function __construct(array $compiledRoutes, RequestContext $context, LoggerInterface $logger = null, string $defaultLocale = null)
+    public function __construct(array $compiledRoutes, RequestContext $context, ?LoggerInterface $logger = null, ?string $defaultLocale = null)
     {
         $this->context = $context;
 
@@ -160,6 +160,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         // Update context, transforms requested route by adding parameters
         if (($route = self::$router->getRoute($routeName))) {
+            
             if ($route->getHost()) {
                 $referenceType = self::ABSOLUTE_URL;
             }
@@ -206,7 +207,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         // Check whether the route is already cached
         $hash = self::$router->getRouteHash($routeName, $routeParameters, $referenceType);
-        if (array_key_exists($hash, $this->cachedRoutes) && $this->cachedRoutes[$hash]["_name"] !== null && BaseBundle::USE_CACHE) {
+        if (array_key_exists($hash, $this->cachedRoutes) && $this->cachedRoutes[$hash]["_name"] !== null) {
             $cachedRoute = $this->cachedRoutes[$hash];
 
             $locale = array_key_exists("_locale", $routeParameters) ? self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]) : self::$router->getLocalizer()->getLocaleLang();
@@ -243,6 +244,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $cache->save(self::$router->getCacheRoutes()->set($this->cachedRoutes));
             }
             
+            // dump($routeName, $routeUrl, sanitize_url($routeUrl));
             return sanitize_url($routeUrl);
         }
 

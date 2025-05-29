@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Database;
+namespace Base\Database\Entity\Extension;
 
 /**
  *

@@ -450,20 +450,14 @@
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="2048" />
-            <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
-            <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
+            <tag name="doctrine.event_listener" event="resolveDiscriminator" priority="2048" />
+            <tag name="doctrine.event_listener" event="onQuery"              priority="2048" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata"    priority="4096" />
+            <tag name="doctrine.event_listener" event="postLoad"             priority="2048" />
+            <tag name="doctrine.event_listener" event="onFlush"              priority="2048" />
 
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="localizer" />
-        </service>
-
-        <service id="Base\DatabaseSubscriber\ExtensionSubscriber">
-            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="2048" />
-            <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
-            <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
-
-            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\DatabaseSubscriber\TrackingPolicySubscriber">
@@ -668,10 +662,6 @@
         </service>
 
         <service id="Base\Database\Entity\EntityExtension" public="true" />
-        <service id="Base\Database\Annotation\OrderColumn"><tag name="base.entity_extension" /></service>
-        <service id="Base\Database\Annotation\Versionable"><tag name="base.entity_extension" /></service>
-        <service id="Base\Database\Annotation\Logging"    ><tag name="base.entity_extension" /></service>
-        <service id="Base\Database\Annotation\Trasheable" ><tag name="base.entity_extension" /></service>
 
         <!-- Twig declarations -->
         <service id="Base\Twig\AssetPackage" public="true">
@@ -890,6 +880,7 @@
         <service id="Base\Subscriber\IsGrantedSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.annotation_reader" />
+            <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.authorization_checker" on-invalid="null" />
         </service>
 

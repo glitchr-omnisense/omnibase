@@ -34,9 +34,9 @@ use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\Timestamp;
-use Base\Annotations\Annotation\Uploader;
-use Base\Annotations\Annotation\Hashify;
+use Base\Database\Annotation\Timestamp;
+use Base\Database\Annotation\Uploader;
+use Base\Database\Annotation\Hashify;
 
 use Base\Service\Localizer;
 use Base\Notifier\Recipient\Recipient;
@@ -56,7 +56,6 @@ use Base\Service\Model\AutocompleteInterface;
 
 use Base\Traits\UserInfoTrait;
 use ApiPlatform\Metadata\ApiResource;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass:UserRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]

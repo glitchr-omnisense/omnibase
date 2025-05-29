@@ -36,7 +36,6 @@ use Base\DependencyInjection\Compiler\Pass\EasyAdminCrudPass;
 class BaseBundle extends AbstractBaseBundle
 {
     public const VERSION = '1.0.0';
-    public const USE_CACHE = true;
 
     public function __construct()
     {

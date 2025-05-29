@@ -10,7 +10,12 @@ use Base\Service\TradingMarket;
  */
 class TradingMarketPass extends AbstractPass
 {
-    public function taggedServiceIds(): string
+    public function serviceInterface(): ?string 
+    { 
+        return null;
+    }
+
+    public function taggedServiceIds(): ?string
     {
         return 'currency.api';
     }

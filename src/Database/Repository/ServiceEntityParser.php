@@ -6,9 +6,8 @@ use AsyncAws\Core\Exception\LogicException;
 use Base\BaseBundle;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Database\TranslatableInterface;
-
-use Base\Database\Walker\TranslatableWalker;
+use Base\Database\Event\DoctrineQueryEventArgs;
+use Base\Database\Events;
 use Base\Service\Model\IntlDateTime;
 use DateTime;
 use Doctrine\ORM\EntityManager;
@@ -1152,7 +1151,7 @@ class ServiceEntityParser
                 $magicFn = self::REQUEST_FIND . ucfirst($magicFn);
             } // find <-> cache, findOne <-> cacheOne, [...]
 
-            $this->cacheable = BaseBundle::USE_CACHE && !is_cli();
+            $this->cacheable = !is_cli();
         }
 
         if (str_starts_with($magicFn, self::REQUEST_FIND . self::SPECIAL_ALL)) {
@@ -1920,25 +1919,26 @@ class ServiceEntityParser
                 throw new Exception("\"" . $sourceEntity . "\" cannot be cached eagerly because of target entity is not configured as a second level cache.");
             }
 
-            if (class_implements_interface($sourceEntity, TranslatableInterface::class) && $associationMapping["fieldName"] == TranslatableWalker::COLUMN_NAME) {
-                continue;
-            } // This is to make sure Translations are not eagerly loaded... see @WARN below.
+            // if (class_implements_interface($sourceEntity, TranslatableInterface::class) && $associationMapping["fieldName"] == TranslatableWalker::COLUMN_NAME) {
+            //     continue;
+            // } // This is to make sure Translations are not eagerly loaded... see @WARN below.
 
             $targetEntity = $associationMapping["targetEntity"];
             if ($targetEntityCacheable && array_key_exists($associationMapping["fieldName"], $joinList)) {
+
                 $this->leftJoin($queryBuilder, $aliasExpr);
                 $queryBuilder->addSelect($aliasIdentifier);
 
-                $newOptions = [
-                    "alias" => $aliasIdentifier,
-                    "required" => $required,
-                    "depth" => $depth,
-                    "join" => $joinList[$associationMapping["fieldName"]]
-                ];
+                // $newOptions = [
+                //     "alias" => $aliasIdentifier,
+                //     "required" => $required,
+                //     "depth" => $depth,
+                //     "join" => $joinList[$associationMapping["fieldName"]]
+                // ];
 
-                // Map associations
-                $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
-                $this->getEagerQuery($queryBuilder, array_merge($options, $newOptions), $targetClassMetadata);
+                // Map associations (eagerly loaded) to the query builder to make sure they are cached
+                // $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
+                // $this->getEagerQuery($queryBuilder, array_merge($options, $newOptions), $targetClassMetadata);
             }
         }
 
@@ -1959,39 +1959,43 @@ class ServiceEntityParser
     {
         $queryBuilder = $this->getQueryBuilder($criteria, $orderBy ?? [], $limit, $offset, $groupBy ?? [], $selectAs ?? []);
 
-        //
-        // Eagerly load translations
-        $entityName = $this->classMetadata->getName();
+        $dispatcher = $this->entityManager->getEventManager();
+        if ($dispatcher->hasListeners(Events::preQuery)) {
+            $eventArgs = new DoctrineQueryEventArgs($this->classMetadata, $queryBuilder, null);
+            $dispatcher->dispatchEvent(Events::preQuery, $eventArgs);
+            $queryBuilder = $eventArgs->getQueryBuilder();
+        }        
 
         //
-        // Eager load feature
-        if ($this->eagerly === false && class_implements_interface($entityName, TranslatableInterface::class)) {
-            $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . TranslatableWalker::COLUMN_NAME);
-            // @TODO this is commented because it generates more queries as no cache result is used..
-            // $queryBuilder->addSelect(self::ALIAS_ENTITY."_".TranslatableWalker::COLUMN_NAME);
+        // @DEPRECATED: Eager load feature
+        // if ($this->eagerly === false && class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class)) {
+        //     $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . TranslatableWalker::COLUMN_NAME);
+            
+        //     // @TODO this is commented because it generates more queries as no cache result is used..
+        //     // $queryBuilder->addSelect(self::ALIAS_ENTITY."_".TranslatableWalker::COLUMN_NAME);
 
-            //
-            // @WARN: The above line is commented because of a conflict with __findOneBy..
-            // Joining translations in DQL that way create one entry (Translation) per locale
-            // It would be good to consider loading 3 language max:
-            // - Default one, Lang fallback, and the requested one.
-            // If not make sure (in TranslatableWalker?) every request returns exactly 3 entries (NULL entries if not found?)
-        }
+        //     //
+        //     // @WARN: The above line is commented because of a conflict with __findOneBy..
+        //     // Joining translations in DQL that way create one entry (Translation) per locale
+        //     // It would be good to consider loading 3 language max:
+        //     // - Default one, Lang fallback, and the requested one.
+        //     // If not make sure (in TranslatableWalker?) every request returns exactly 3 entries (NULL entries if not found?)
+        // }
 
         $query = $this->eagerly === false ? $queryBuilder->getQuery() : $this->getEagerQuery($queryBuilder);
-        if ($groupBy) {
-            $query->setCacheable(false);
-        } // @TODO, if groupBy is used, cache is disabled.. id column not stored for some reasons.
+        
+        // @WARN, if groupBy is used, cache must be disabled.. id column not stored for some reasons.
+        if ($groupBy) $query->setCacheable(false);
 
         $query->useQueryCache($this->cacheable);
-	if($this->classMetadata->cache !== null && array_key_exists("region", $this->classMetadata->cache)) {
+    	if($this->classMetadata->cache !== null && array_key_exists("region", $this->classMetadata->cache)) {
             $query->setCacheRegion($this->classMetadata->cache["region"]);
         }
 
-        //
-        // Apply custom output walker to all entities (some join may relates to translatable entities)
-        if (class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class)) {
-            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
+        if ($dispatcher->hasListeners(Events::onQuery)) {
+            $eventArgs = new DoctrineQueryEventArgs($this->classMetadata, null, $query);
+            $dispatcher->dispatchEvent(Events::onQuery, $eventArgs);
+            $query = $eventArgs->getQuery();
         }
 
         return $query;
