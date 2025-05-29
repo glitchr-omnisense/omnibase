@@ -37,6 +37,7 @@
         "enshrined/svg-sanitize": "*",
         "florianv/swap": "^4.0",
         "glitchr/backup-manager": "4.0.*-dev",
+        "glitchr/well-known": "1.0.*-dev",
         "glitchr/base-plugin": "2.0.*-dev",
         "glitchr/doctrine-dc2type": "1.0.*-dev",
         "hashids/hashids": "^4.1",
