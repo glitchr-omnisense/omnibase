@@ -11,7 +11,6 @@
             "email": "marco.meyer@glitchr.io"
         }
     ],
-
     "autoload": {
         "psr-4": {
             "Base\\": "./src"
@@ -87,8 +86,8 @@
         "symfony/web-profiler-bundle": "^6.0|^7.0|^7.0"
     },
     "config": {
-	"minimum-stability": "dev",
-	"prefer-stable": true
+	    "minimum-stability": "dev",
+    	"prefer-stable": true,
         "sort-packages": true,
         "allow-plugins": {
             "php-http/discovery": true
