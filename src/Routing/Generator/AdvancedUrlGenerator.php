@@ -240,11 +240,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                     "_name" => $routeName,
                     "_requirements" => $routeRequirements
                 ];
-                
+
                 $cache->save(self::$router->getCacheRoutes()->set($this->cachedRoutes));
             }
-            
-            // dump($routeName, $routeUrl, sanitize_url($routeUrl));
+
             return sanitize_url($routeUrl);
         }
 
