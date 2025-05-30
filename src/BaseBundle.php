@@ -219,8 +219,6 @@ class BaseBundle extends AbstractBaseBundle
                     (new \Symfony\Component\VarDumper\Cloner\VarCloner())->cloneVar($var)
                 );
             });
-
-            throw new EnvNotFoundException('Application requires `symfony/var-dumper`, but it is not enabled.');
         }
 
         
