@@ -22,6 +22,7 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
+use Symfony\Component\Console\Exception\ExceptionInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
@@ -29,6 +30,8 @@ use Base\Console\Command\CacheClearCommand;
 use Base\DependencyInjection\Compiler\Pass\DoctrineEnumSubscriberPass;
 use Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass;
 use Base\DependencyInjection\Compiler\Pass\EasyAdminCrudPass;
+use Base\DependencyInjection\Dumper\CliDumper;
+use Base\DependencyInjection\Dumper\HtmlDumper;
 
 /**
  *
@@ -194,71 +197,70 @@ class BaseBundle extends AbstractBaseBundle
             $this->warmUp();
         }
 
-        $this->boot_VarDumper();
+        if (class_exists(\Symfony\Component\VarDumper\VarDumper::class)) {
 
+            $htmlDumper = new HtmlDumper();
+            $cliDumper = new CliDumper();
+
+            \Symfony\Component\VarDumper\VarDumper::setHandler(function ($var) use ($htmlDumper, $cliDumper) {
+
+                static $startTime = null;
+                if ($startTime === null) {
+                    $startTime = microtime(true);
+                }
+
+                if(is_cli()) {
+                    $dumper = $cliDumper;
+                } else {
+                    $dumper = $htmlDumper;
+                }
+
+                $dumper->dump(
+                    (new \Symfony\Component\VarDumper\Cloner\VarCloner())->cloneVar($var)
+                );
+            });
+
+            throw new EnvNotFoundException('Application requires `symfony/var-dumper`, but it is not enabled.');
+        }
+
+        
         if ($this->container->getParameter("base.database.use_custom")) {
-            $this->doctrineReadiness = $this->boot_Doctrine();
+                
+            // Start session here to access client information
+            $timezone = null;
+            if (method_exists(User::class, "getCookie")) $timezone = User::getCookie("timezone");
+            if (!in_array($timezone, timezone_identifiers_list())) $timezone = "UTC";
+
+            // Set default time to UTC everywhere
+            date_default_timezone_set($timezone);
+            Type::overrideType('date', UTCDateTimeType::class);
+            Type::overrideType('datetime', UTCDateTimeType::class);
+            Type::overrideType('datetimetz', UTCDateTimeType::class);
+
+            $classList = array_merge(
+                self::getAllClasses(self::getBundleDir() . "/src/Enum"),
+                self::getAllClasses($this->getProjectDir() . "/src/Enum")
+            );
+
+            foreach ($classList as $className) {
+
+                if(!Type::hasType($className::getStaticName())) {
+                    Type::addType($className::getStaticName(), $className);
+                }
+
+                $type = Type::getType($className::getStaticName());
+                if($type == $className) {
+                    throw new EnvNotFoundException('Doctrine type `'.$className::getStaticName().'` already exists, conflict detected between '. $className." and ". get_class($type));
+                }
+            }
+
+            $entityManager = $this->container->get('doctrine.orm.entity_manager'); 
+            $entityManager->getFilters()->enable("trash_filter");
+            $entityManager->getFilters()->enable("vault_filter")->setEnvironment($this->getEnvironment());
         }
 
         CacheClearCommand::$testFile ??= $this->getCacheDir().".txt";
         $this->boot = true;
-    }
-
-    public function boot_VarDumper(): bool
-    {
-        if (!class_exists(\Symfony\Component\VarDumper\VarDumper::class)) return false;
-        if (is_cli()) return false;
-
-        \Symfony\Component\VarDumper\VarDumper::setHandler(function ($var)
-        {
-            static $startTime = null;
-            if ($startTime === null) {
-                $startTime = microtime(true);
-            }
-
-            (new \Base\Resources\Dumper())->dump(
-                (new \Symfony\Component\VarDumper\Cloner\VarCloner())->cloneVar($var)
-            );
-        });
-
-        return true;
-    }
-
-    public function boot_Doctrine(): bool
-    {
-        // Start session here to access client information
-        $timezone = null;
-        if (method_exists(User::class, "getCookie")) $timezone = User::getCookie("timezone");
-        if (!in_array($timezone, timezone_identifiers_list())) $timezone = "UTC";
-
-        // Set default time to UTC everywhere
-        date_default_timezone_set($timezone);
-        Type::overrideType('date', UTCDateTimeType::class);
-        Type::overrideType('datetime', UTCDateTimeType::class);
-        Type::overrideType('datetimetz', UTCDateTimeType::class);
-
-        $classList = array_merge(
-            self::getAllClasses(self::getBundleDir() . "/src/Enum"),
-            self::getAllClasses($this->getProjectDir() . "/src/Enum")
-        );
-
-        foreach ($classList as $className) {
-
-            if(!Type::hasType($className::getStaticName())) {
-                Type::addType($className::getStaticName(), $className);
-            }
-
-            $type = Type::getType($className::getStaticName());
-            if($type == $className) {
-                throw new EnvNotFoundException('Doctrine type `'.$className::getStaticName().'` already exists, conflict detected between '. $className." and ". get_class($type));
-            }
-        }
-
-        $entityManager = $this->container->get('doctrine.orm.entity_manager'); 
-        $entityManager->getFilters()->enable("trash_filter");
-        $entityManager->getFilters()->enable("vault_filter")->setEnvironment($this->getEnvironment());
-
-        return true;
     }
 
     public function isBuilt() { return $this->container !== null; }

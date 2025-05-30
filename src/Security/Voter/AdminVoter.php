@@ -5,6 +5,7 @@ namespace Base\Security\Voter;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 
 /**
  *
@@ -29,7 +30,7 @@ class AdminVoter extends Voter
         return $this->router->isAdmin() && $attribute == self::BACKEND;
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         //
         // Check if current user is authenticated

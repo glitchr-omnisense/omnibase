@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Resources;
+namespace Base\DependencyInjection\Dumper;
 use Symfony\Component\VarDumper\VarDumper;
 
-class Dumper extends \Symfony\Component\VarDumper\Dumper\HtmlDumper
+class HtmlDumper extends \Symfony\Component\VarDumper\Dumper\HtmlDumper
 {
     protected function style(string $style, string $value, array $attr = []): string
     {

@@ -865,6 +865,37 @@ namespace {
         return str_starts_with($s, "data:");
     }
 
+        function is_verbose(): bool
+        {
+            if (is_cli() && isset($_SERVER["argv"])) {
+                foreach ($_SERVER["argv"] as $arg) {
+                    if ($arg === "--verbose" || preg_match('/^-v+$/', $arg)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Returns the verbosity level as an integer.
+         * -v => 1, -vv => 2, -vvv => 3, --verbose => 1
+         */
+        function verbose_level(): int
+        {
+            if (is_cli() && isset($_SERVER["argv"])) {
+                $level = 0;
+                foreach ($_SERVER["argv"] as $arg) {
+                    if ($arg === "--verbose") {
+                        $level = max($level, 1);
+                    } elseif (preg_match('/^-v+$/', $arg)) {
+                        $level = max($level, strlen($arg) - 1);
+                    }
+                }
+                return $level;
+            }
+            return 0;
+        }
     function fetch_url(string $url, string $prefix = "file", string $tmpdir = "/tmp"): string
     {
         $tmpfname = tempnam($tmpdir, $prefix);
@@ -1101,6 +1132,7 @@ namespace {
 
         $debug_backtrace = debug_backtrace();
         foreach ($debug_backtrace as $key => $trace) {
+        
             $entry = "";
             if (array_key_exists("file", $trace)) {
                 $entry = "./".relative_path($trace["file"], project_dir()) . ":" . $trace["line"];
@@ -4442,7 +4474,7 @@ namespace {
      * @param array|null $debug_backtrace
      * @return bool
      */
-    function check_backtrace(string $str_starts_with = "", string $str_ends_with = "", array $debug_backtrace = null)
+    function check_backtrace(string $str_starts_with = "", string $str_ends_with = "", ?array $debug_backtrace = null)
     {
         $debug_backtrace ??= debug_backtrace();
         foreach ($debug_backtrace as $trace) {
