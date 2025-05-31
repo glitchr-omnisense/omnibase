@@ -5,7 +5,9 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Annotation\Extension\ExtensionInlineInterface;
+use Base\Database\Event\DoctrineQueryEventArgs;
 use Base\Database\Type\SetType;
+use Base\Database\Walker\OrderByWalker;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 
@@ -13,6 +15,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
+use Doctrine\ORM\Query;
 use Exception;
 
 /**
@@ -49,9 +52,9 @@ class OrderColumnNew extends AbstractAnnotation implements ExtensionInlineInterf
             $type = $this->getClassMetadataManipulator()->getTypeOfField($object, $targetValue);
             $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
 
+            $isSet = is_instanceof($doctrineType, SetType::class);
             $isArray = is_instanceof($doctrineType, JsonType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
-            $isSet = is_instanceof($doctrineType, SetType::class);
 
             if (!$isSet && !$isArray && !$isToMany) {
                 return false;
@@ -110,14 +113,55 @@ class OrderColumnNew extends AbstractAnnotation implements ExtensionInlineInterf
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
-        // if (!$this->supports($target, $targetValue, $classMetadata)) return;
-            
-        // $property = $classMetadata->getFieldMapping($targetValue);
-        // $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $targetValue);
+        if (!$this->supports($target, $targetValue, $classMetadata)) return;
 
-        // if (is_instanceof($type, JsonType::class) || is_instanceof($type, SetType::class)) {
-        //     self::$orderedColumns[$classMetadata->getName()][] = $targetValue;
-        //     $this->ordering[$property] = $this->orderBy;
-        // }
+        // Check if orderBy is mapped as JSON
+        $orderByType = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $this->orderBy);
+        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($orderByType);
+
+        if ($doctrineType instanceof JsonType || $doctrineType === 'json' || $doctrineType === JsonType::class) {
+            throw new Exception("The 'orderBy' field '{$this->orderBy}' cannot be of type JSON.");
+        }
+
+        // Map the orderBy column if not already mapped
+        if (!$classMetadata->hasField($this->orderBy)) {
+            $classMetadata->mapField([
+                'fieldName' => $this->orderBy,
+                'type' => $orderByType,
+            ]);
+        }
+    }
+
+    public function onQuery(DoctrineQueryEventArgs $args): void
+    {
+        $classMetadata = $args->getClassMetadata();
+        $fields = array_merge($classMetadata->getFieldNames(), $classMetadata->getAssociationNames());
+
+        foreach ($fields as $field) {
+
+            $annotations = $this->getAnnotationReader()->getPropertyAnnotations($classMetadata->getName(), self::class);
+            if (isset($annotations[$field])) {
+
+                $annotation = last($annotations[$field]);
+                $orderBy = $annotation->orderBy;
+                $sort = $annotation->sort ?? self::ASC;
+
+                $existingOrder = $args->getQuery()->getHint(OrderByWalker::HINT_ORDER_ARRAY);
+                if(!$existingOrder) $existingOrder = [];
+                $newOrder = array_merge($existingOrder, [$field => [$orderBy, $sort]]);
+                $args->getQuery()->setHint(OrderByWalker::HINT_ORDER_ARRAY, $newOrder);
+                
+                $existingOrder = $args->getQuery()->getHint(Query::HINT_CUSTOM_TREE_WALKERS);
+                if(!$existingOrder) $existingOrder = [];
+                $newOrder = array_merge($existingOrder, [OrderByWalker::class]);
+                $args->getQuery()->setHint(Query::HINT_CUSTOM_TREE_WALKERS, $newOrder);
+            }
+        }
+    }
+
+    public function postQuery(DoctrineQueryEventArgs $args): void
+    {
+        dump($args->getQuery()->getSQL());
+        exit(1);
     }
 }

@@ -8,7 +8,6 @@ use Base\Database\Entity\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @method Entity[]    findBy*(...array $customs,

@@ -4,6 +4,8 @@ namespace Base\Annotations;
 
 use App\Entity\User;
 use Base\Database\Entity\EntityHydratorInterface;
+use Base\Database\Event\DoctrineQueryEventArgs;
+use Base\Database\Event\ResolveDiscriminatorEventArgs;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\FlysystemInterface;
@@ -440,6 +442,21 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
+    {
+    }
+
+    public function resolveDiscriminator(ResolveDiscriminatorEventArgs $args): void
+    {
+    }
+
+    public function preQuery(DoctrineQueryEventArgs $args): void
+    {
+    }
+
+    public function onQuery(DoctrineQueryEventArgs $args): void
+    {
+    }
+    public function postQuery(DoctrineQueryEventArgs $args): void
     {
     }
 

@@ -4,6 +4,7 @@ namespace Base\DependencyInjection\Compiler\Pass;
 
 use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
+use Base\Database\Function\JsonArrayPosition;
 use Base\Database\Function\Rand;
 use DoctrineExtensions\Query\Mysql\Field;
 use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
@@ -50,6 +51,13 @@ class DoctrineConfigurationPass implements CompilerPassInterface
             $definition->addMethodCall('addCustomStringFunction', [
                 DqlFunctions\JsonContains::FUNCTION_NAME,
                 DqlFunctions\JsonContains::class
+            ]);
+        }
+
+        if (class_exists(JsonArrayPosition::class)) {
+            $definition->addMethodCall('addCustomStringFunction', [
+                JsonArrayPosition::FUNCTION_NAME,
+                JsonArrayPosition::class
             ]);
         }
 

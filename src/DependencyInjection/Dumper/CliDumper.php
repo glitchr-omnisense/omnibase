@@ -10,7 +10,7 @@ class CliDumper extends \Symfony\Component\VarDumper\Dumper\CliDumper
     protected bool $debug = false;
     public function __construct($output = null, ?string $charset = null, int $flags = 0)
     {
-        $this->debug = is_verbose();
+        $this->debug = verbose_level() > 2;
         parent::__construct($output, $charset, $flags);
     }
 

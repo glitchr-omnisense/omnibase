@@ -2,8 +2,6 @@
 
 namespace Base\Database\Repository;
 
-use AsyncAws\Core\Exception\LogicException;
-use Base\BaseBundle;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Event\DoctrineQueryEventArgs;
@@ -546,56 +544,64 @@ class ServiceEntityParser
 
         // TODO: Safety check in dev mode only (maybe..)
         foreach ($this->classMetadataManipulator->getFieldNames($this->classMetadata->name) as $field) {
-            if (str_contains($field, self::OPTION_WITH_ROUTE) ||
-                str_contains($field, self::OPTION_BUT) ||
-                str_contains($field, self::OPTION_MODEL) ||
-
-                str_contains($field, self::OPTION_INSTANCEOF) ||
-                str_contains($field, self::OPTION_NOT_INSTANCEOF) ||
-                str_contains($field, self::OPTION_CLASSOF) ||
-                str_contains($field, self::OPTION_NOT_CLASSOF) ||
-                str_contains($field, self::OPTION_MEMBEROF) ||
-                str_contains($field, self::OPTION_NOT_MEMBEROF) ||
-
-                str_contains($field, self::OPTION_PARTIAL) ||
-                str_contains($field, self::OPTION_INSENSITIVE) ||
-                str_contains($field, self::OPTION_CLOSESTTO) ||
-                str_contains($field, self::OPTION_FARESTTO) ||
-                str_contains($field, self::OPTION_STARTING_WITH) ||
-                str_contains($field, self::OPTION_ENDING_WITH) ||
-                str_contains($field, self::OPTION_NOT_STARTING_WITH) ||
-                str_contains($field, self::OPTION_NOT_ENDING_WITH) ||
-
-                str_contains($field, self::OPTION_LOWER) ||
-                str_contains($field, self::OPTION_GREATER) ||
-                str_contains($field, self::OPTION_LOWER_EQUAL) ||
-                str_contains($field, self::OPTION_GREATER_EQUAL) ||
-
-                str_contains($field, self::OPTION_OVER) ||
-                str_contains($field, self::OPTION_NOT_OVER) ||
-                str_contains($field, self::OPTION_YOUNGER) ||
-                str_contains($field, self::OPTION_OLDER) ||
-                str_contains($field, self::OPTION_WITHIN) ||
-                str_contains($field, self::OPTION_YOUNGER_EQUAL) ||
-                str_contains($field, self::OPTION_OLDER_EQUAL) ||
-
-                str_contains($field, self::OPTION_EQUAL) ||
-                str_contains($field, self::OPTION_NOT_EQUAL) ||
-                str_contains($field, self::OPTION_NULL) ||
-                str_contains($field, self::OPTION_NOT_NULL) ||
-                str_contains($field, self::OPTION_EMPTY) ||
-                str_contains($field, self::OPTION_NOT_EMPTY) ||
-                str_contains($field, self::OPTION_TRUE) ||
-                str_contains($field, self::OPTION_NOT_TRUE) ||
-                str_contains($field, self::OPTION_FALSE) ||
-                str_contains($field, self::OPTION_NOT_FALSE) ||
-
-                str_contains($field, self::SEPARATOR_AND) ||
-                str_contains($field, self::SEPARATOR_OR) ||
-                str_contains($field, self::SEPARATOR)) {
+            $conflictingOption = null;
+            $optionsToCheck = [
+                self::OPTION_WITH_ROUTE,
+                self::OPTION_BUT,
+                self::OPTION_MODEL,
+                self::OPTION_INSTANCEOF,
+                self::OPTION_NOT_INSTANCEOF,
+                self::OPTION_CLASSOF,
+                self::OPTION_NOT_CLASSOF,
+                self::OPTION_MEMBEROF,
+                self::OPTION_NOT_MEMBEROF,
+                self::OPTION_PARTIAL,
+                self::OPTION_INSENSITIVE,
+                self::OPTION_CLOSESTTO,
+                self::OPTION_FARESTTO,
+                self::OPTION_STARTING_WITH,
+                self::OPTION_ENDING_WITH,
+                self::OPTION_NOT_STARTING_WITH,
+                self::OPTION_NOT_ENDING_WITH,
+                self::OPTION_LOWER,
+                self::OPTION_GREATER,
+                self::OPTION_LOWER_EQUAL,
+                self::OPTION_GREATER_EQUAL,
+                self::OPTION_OVER,
+                self::OPTION_NOT_OVER,
+                self::OPTION_YOUNGER,
+                self::OPTION_OLDER,
+                self::OPTION_WITHIN,
+                self::OPTION_YOUNGER_EQUAL,
+                self::OPTION_OLDER_EQUAL,
+                self::OPTION_EQUAL,
+                self::OPTION_NOT_EQUAL,
+                self::OPTION_NULL,
+                self::OPTION_NOT_NULL,
+                self::OPTION_EMPTY,
+                self::OPTION_NOT_EMPTY,
+                self::OPTION_TRUE,
+                self::OPTION_NOT_TRUE,
+                self::OPTION_FALSE,
+                self::OPTION_NOT_FALSE,
+                self::SEPARATOR_AND,
+                self::SEPARATOR_OR,
+                self::SEPARATOR
+            ];
+            foreach ($optionsToCheck as $option) {
+                $pos = strpos($field, $option);
+                if ($pos !== false) {
+                    $nextChar = substr($field, $pos + strlen($option), 1);
+                    if ($nextChar !== '' && ctype_upper($nextChar)) {
+                        $conflictingOption = $option;
+                        break;
+                    }
+                }
+            }
+            if ($conflictingOption !== null) {
                 throw new Exception(
                     "\"" . $this->serviceEntity->getFqcnEntityName() . "\" entity has a field called \"$field\". " .
-                    "This is unfortunate, because this word is used to customize DQL queries. " .
+                    "This is unfortunate, because this word (\"$conflictingOption\") is used to customize DQL queries. " .
                     "Please build your own DQL query or change your database field name"
                 );
             }
@@ -1983,7 +1989,12 @@ class ServiceEntityParser
         // }
 
         $query = $this->eagerly === false ? $queryBuilder->getQuery() : $this->getEagerQuery($queryBuilder);
-        
+        if ($dispatcher->hasListeners(Events::onQuery)) {
+            $eventArgs = new DoctrineQueryEventArgs($this->classMetadata, $queryBuilder, $query);
+            $dispatcher->dispatchEvent(Events::onQuery, $eventArgs);
+            $query = $eventArgs->getQuery();
+        }        
+
         // @WARN, if groupBy is used, cache must be disabled.. id column not stored for some reasons.
         if ($groupBy) $query->setCacheable(false);
 
@@ -1992,9 +2003,9 @@ class ServiceEntityParser
             $query->setCacheRegion($this->classMetadata->cache["region"]);
         }
 
-        if ($dispatcher->hasListeners(Events::onQuery)) {
+        if ($dispatcher->hasListeners(Events::postQuery)) {
             $eventArgs = new DoctrineQueryEventArgs($this->classMetadata, null, $query);
-            $dispatcher->dispatchEvent(Events::onQuery, $eventArgs);
+            $dispatcher->dispatchEvent(Events::postQuery, $eventArgs);
             $query = $eventArgs->getQuery();
         }
 

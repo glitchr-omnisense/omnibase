@@ -43,6 +43,16 @@ class DoctrineQueryEventArgs extends EventArgs
     }
 
     /**
+     * Get the name of the entity associated with the query.
+     *
+     * @return string The fully qualified class name of the entity
+     */
+    public function getEntityName(): string
+    {
+        return $this->classMetadata->name;
+    }
+
+    /**
      * Set the current Doctrine Query object.
      *
      * @param Query $query The Doctrine ORM Query object

@@ -2,6 +2,8 @@
 
 namespace Base\Annotations;
 
+use Base\Database\Event\DoctrineQueryEventArgs;
+use Base\Database\Event\ResolveDiscriminatorEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
@@ -15,9 +17,15 @@ interface AnnotationInterface
 {
     public function supports(string $target, ?string $targetValue = null, mixed $object = null): bool;
 
-
-    /** to be marked as optional */
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null);
+    
+    public function resolveDiscriminator(ResolveDiscriminatorEventArgs $args) : void;
+
+    public function preQuery(DoctrineQueryEventArgs $args) : void;
+
+    public function onQuery(DoctrineQueryEventArgs $args) : void;
+
+    public function postQuery(DoctrineQueryEventArgs $args) : void;
 
     public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null);
 

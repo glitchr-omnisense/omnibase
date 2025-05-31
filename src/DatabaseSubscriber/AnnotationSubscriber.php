@@ -6,6 +6,8 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
+use Base\Database\Event\DoctrineQueryEventArgs;
+use Base\Database\Event\ResolveDiscriminatorEventArgs;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
@@ -104,6 +106,263 @@ class AnnotationSubscriber
                 }
 
                 $annotation->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
+            }
+        }
+    }
+
+    public function resolveDiscriminator(ResolveDiscriminatorEventArgs $event)
+    {
+        // needs to be booted to be aware of custom doctrine types.
+        if (!BaseBundle::getInstance()->isBooted()) {
+            return;
+        }
+
+        $className = $event->getClassMetadata()->name;
+        $classMetadata = $event->getClassMetadata();
+
+        $annotations = $this->annotationReader->getAnnotations($className);
+
+        $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+        foreach ($classAnnotations as $annotation) {
+            if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                continue;
+            }
+
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
+                continue;
+            }
+
+            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className)) {
+                continue;
+            }
+
+            $annotation->resolveDiscriminator($event, $classMetadata, $className);
+        }
+
+        $methodAnnotations = $annotations[AnnotationReader::TARGET_METHOD][$className] ?? [];
+        foreach ($methodAnnotations as $method => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+
+                if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+
+                if (!$annotation->supports(AnnotationReader::TARGET_METHOD, $method)) {
+                    continue;
+                }
+
+                $annotation->resolveDiscriminator($event, $classMetadata, $method);
+            }
+        }
+
+        $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        foreach ($propertyAnnotations as $property => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+
+                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+
+                if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property)) {
+                    continue;
+                }
+
+                $annotation->resolveDiscriminator($event, $classMetadata, $property);
+            }
+        }
+    }
+
+    public function preQuery(DoctrineQueryEventArgs $event): void
+    {
+        // needs to be booted to be aware of custom doctrine types.
+        if (!BaseBundle::getInstance()->isBooted()) {
+            return;
+        }
+
+        $classMetadata = $event->getClassMetadata();
+        $className = $event->getEntityName() ?? null;
+        $annotations = $this->annotationReader->getAnnotations($className);
+
+        // Class annotations
+        $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+        foreach ($classAnnotations as $annotation) {
+            if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                continue;
+            }
+
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
+                continue;
+            }
+            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $classMetadata)) {
+                continue;
+            }
+            $annotation->preQuery($event, $classMetadata, $className);
+        }
+
+        // Method annotations
+        $methodAnnotations = $annotations[AnnotationReader::TARGET_METHOD][$className] ?? [];
+        foreach ($methodAnnotations as $method => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+                
+                if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+                if (!$annotation->supports(AnnotationReader::TARGET_METHOD, $method, $classMetadata)) {
+                    continue;
+                }
+                $annotation->preQuery($event, $classMetadata, $method);
+            }
+        }
+
+        // Property annotations
+        $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        foreach ($propertyAnnotations as $property => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+
+                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+                if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $classMetadata)) {
+                    continue;
+                }
+                $annotation->preQuery($event, $classMetadata, $property);
+            }
+        }
+    }
+
+    public function onQuery(DoctrineQueryEventArgs $event)
+    {
+        // needs to be booted to be aware of custom doctrine types.
+        if (!BaseBundle::getInstance()->isBooted()) {
+            return;
+        }
+
+        $classMetadata = $event->getClassMetadata();
+        $className = $event->getEntityName() ?? null;
+
+        $annotations = $this->annotationReader->getAnnotations($className);
+
+        // Class annotations
+        $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+        foreach ($classAnnotations as $annotation) {
+            if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                continue;
+            }
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
+                continue;
+            }
+            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $classMetadata)) {
+                continue;
+            }
+            $annotation->onQuery($event, $classMetadata, $className);
+        }
+
+        // Method annotations
+        $methodAnnotations = $annotations[AnnotationReader::TARGET_METHOD][$className] ?? [];
+        foreach ($methodAnnotations as $method => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+                if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+                if (!$annotation->supports(AnnotationReader::TARGET_METHOD, $method, $classMetadata)) {
+                    continue;
+                }
+                $annotation->onQuery($event, $classMetadata, $method);
+            }
+        }
+
+        // Property annotations
+        $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        foreach ($propertyAnnotations as $property => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+                if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $classMetadata)) {
+                    continue;
+                }
+                $annotation->onQuery($event, $classMetadata, $property);
+            }
+        }
+    }
+
+
+    public function postQuery(DoctrineQueryEventArgs $event)
+    {
+        // needs to be booted to be aware of custom doctrine types.
+        if (!BaseBundle::getInstance()->isBooted()) {
+            return;
+        }
+
+        $classMetadata = $event->getClassMetadata();
+        $className = $event->getEntityName() ?? null;
+
+        $annotations = $this->annotationReader->getAnnotations($className);
+
+        // Class annotations
+        $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+        foreach ($classAnnotations as $annotation) {
+            if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                continue;
+            }
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($annotation))) {
+                continue;
+            }
+            if (!$annotation->supports(AnnotationReader::TARGET_CLASS, $className, $classMetadata)) {
+                continue;
+            }
+            $annotation->postQuery($event, $classMetadata, $className);
+        }
+
+        // Method annotations
+        $methodAnnotations = $annotations[AnnotationReader::TARGET_METHOD][$className] ?? [];
+        foreach ($methodAnnotations as $method => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+                if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+                if (!$annotation->supports(AnnotationReader::TARGET_METHOD, $method, $classMetadata)) {
+                    continue;
+                }
+                $annotation->postQuery($event, $classMetadata, $method);
+            }
+        }
+
+        // Property annotations
+        $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        foreach ($propertyAnnotations as $property => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
+                    continue;
+                }
+                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+                if (!$annotation->supports(AnnotationReader::TARGET_PROPERTY, $property, $classMetadata)) {
+                    continue;
+                }
+                $annotation->postQuery($event, $classMetadata, $property);
             }
         }
     }

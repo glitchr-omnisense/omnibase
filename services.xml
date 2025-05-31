@@ -433,26 +433,31 @@
         </service>
 
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_listener" event="loadClassMetadata" priority="4096" />
-            <tag name="doctrine.event_listener" event="postLoad" priority="2048" />
-            <tag name="doctrine.event_listener" event="preFlush" priority="2048" />
-            <tag name="doctrine.event_listener" event="onFlush" priority="2048" />
-            <tag name="doctrine.event_listener" event="postFlush" priority="2048" />
-            <tag name="doctrine.event_listener" event="prePersist" priority="2048" />
-            <tag name="doctrine.event_listener" event="preUpdate" priority="2048" />
-            <tag name="doctrine.event_listener" event="preRemove" priority="2048" />
-            <tag name="doctrine.event_listener" event="postPersist" priority="2048" />
-            <tag name="doctrine.event_listener" event="postUpdate" priority="2048" />
-            <tag name="doctrine.event_listener" event="postRemove" priority="2048" />
+            <tag name="doctrine.event_listener" event="loadClassMetadata"    priority="4096" />
+            <tag name="doctrine.event_listener" event="resolveDiscriminator" priority="2048" />
+            <tag name="doctrine.event_listener" event="preQuery"             priority="2048" />
+            <tag name="doctrine.event_listener" event="onQuery"              priority="2048" />
+            <tag name="doctrine.event_listener" event="postQuery"            priority="2048" />
+
+            <tag name="doctrine.event_listener" event="postLoad"             priority="2048" />
+            <tag name="doctrine.event_listener" event="preFlush"             priority="2048" />
+            <tag name="doctrine.event_listener" event="onFlush"              priority="2048" />
+            <tag name="doctrine.event_listener" event="postFlush"            priority="2048" />
+            <tag name="doctrine.event_listener" event="prePersist"           priority="2048" />
+            <tag name="doctrine.event_listener" event="preUpdate"            priority="2048" />
+            <tag name="doctrine.event_listener" event="preRemove"            priority="2048" />
+            <tag name="doctrine.event_listener" event="postPersist"          priority="2048" />
+            <tag name="doctrine.event_listener" event="postUpdate"           priority="2048" />
+            <tag name="doctrine.event_listener" event="postRemove"           priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.annotation_reader" />
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
+            <tag name="doctrine.event_listener" event="loadClassMetadata"    priority="4096" />
             <tag name="doctrine.event_listener" event="resolveDiscriminator" priority="2048" />
             <tag name="doctrine.event_listener" event="onQuery"              priority="2048" />
-            <tag name="doctrine.event_listener" event="loadClassMetadata"    priority="4096" />
             <tag name="doctrine.event_listener" event="postLoad"             priority="2048" />
             <tag name="doctrine.event_listener" event="onFlush"              priority="2048" />
 
