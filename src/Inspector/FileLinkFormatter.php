@@ -8,6 +8,7 @@ class FileLinkFormatter extends SymfonyFileLinkFormatter
 {
     public function format(string $file, int $line): string|false
     {
+        
         if ($fmt = $this->getFileLinkFormat()) {
             for ($i = 1; isset($fmt[$i]); ++$i) {
                 if (str_starts_with($file, $k = $fmt[$i++])) {
@@ -16,7 +17,7 @@ class FileLinkFormatter extends SymfonyFileLinkFormatter
                 }
             }
 
-            $dict = ['%f' => $file, '%l' => $line, '%b' => $this->baseDir];
+            $dict = ['%f' => $file, '%l' => $line, '%b' => $this->baseDir ?? project_dir()];
             $fmt0 = preg_replace_callback(
                 '/([^\/]+)\[([^\,\:\;]+)[,:;]([^\,\:\;]+)\]/',
                 function ($matches) use (&$dict, $file) {

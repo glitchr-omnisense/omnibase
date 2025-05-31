@@ -49,6 +49,7 @@
             <argument type="service" id="base.database.entity_hydrator" />
         </service>
 
+        <service id="Base\Inspector\HtmlErrorRenderer" parent="error_handler.error_renderer.html" decorates="error_handler.error_renderer.html" />
         <service id="Base\Inspector\FileLinkFormatter" parent="debug.file_link_formatter" decorates="debug.file_link_formatter" public="false">
             <tag name="kernel.file_link_formatter" />
         </service>
