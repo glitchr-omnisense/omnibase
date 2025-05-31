@@ -21,7 +21,7 @@ class HtmlErrorRenderer extends SymfonyHtmlErrorRenderer
         $projectDir = $projectDir ?? $_ENV["PWD"] ?? project_dir();
         $appPath = $_ENV["APP_PATH"] ?? null;
         if ($appPath) {
-            $format = "vscode://file/%%f[%%b:".$_ENV["APP_PATH"]."]:%%l";
+            $format = "vscode://file/%f[%b:".$_ENV["APP_PATH"]."]:%l";
         }
 
         $fileLinkFormat = new FileLinkFormatter($format ?? null, null, $projectDir);
