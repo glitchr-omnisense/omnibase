@@ -49,7 +49,7 @@ class Cascade extends AbstractAnnotation implements ExtensionOptionInterface
             $column = $this->column;
         }
 
-        $columnAlias = $this->getAnnotation($classMetadata, $column, ColumnAlias::class);
+        $columnAlias = $this->getAnnotation($classMetadata, $column, Alias::class);
         if ($columnAlias) {
             $column = $columnAlias->column;
         }

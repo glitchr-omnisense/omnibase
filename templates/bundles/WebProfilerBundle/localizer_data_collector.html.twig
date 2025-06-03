@@ -12,17 +12,16 @@
                     <b>Timezone:</b>
                     <span class="sf-toolbar-status">{{ collector.data['timezone']|default('N/A') }}</span>
                 </div>
-                <hr/>
                 <div class="sf-toolbar-info-piece">
                     <b>Locale:</b>
-                    {% for locale in app.localizer.getAvailableLocales()|default(['N/A']) %}
                     <span class="sf-toolbar-status">
+                    {% for locale in app.localizer.getAvailableLocales()|default(['N/A']) %}
                         {% set current = (locale == collector.data['locale']) ? "active" : null %}
                         {% if not current %} <a href="{{ path("_switch_locale", {_locale: locale}) }}"> {% endif %}
                             {{locale|country}}
                         {% if not current %} </a> {% endif %}
-                    </span>
                     {% endfor %}
+                    </span>
                 </div>
             </div>
         {%- endset -%}

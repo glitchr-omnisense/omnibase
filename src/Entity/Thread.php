@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
-use Base\Database\Annotation\ColumnAlias;
+use Base\Database\Annotation\Alias;
 
 use Base\Database\Annotation\OrderColumn;
 use DateTimeInterface;
@@ -37,10 +37,10 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
 use DateTime;
 
+use Base\Database\Entity\Extension\AliasTrait;
 use Base\Traits\CacheableTrait;
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
-use Base\Database\Annotation\OrderColumnNew;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
 
 #[ORM\Entity(repositoryClass:ThreadRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -54,12 +54,25 @@ use Base\Database\Annotation\OrderColumnNew;
 #[ApiResource]
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {
-    use TrasheableTrait;
-    use TranslatableTrait;
-    
     use BaseTrait;
+    use TrasheableTrait;
+    use TranslatableTrait {
+        TranslatableTrait::__call as __translatableCall;
+    }
+    use AliasTrait {
+        AliasTrait::__call as __columnAliasCall;
+    }
     use CacheableTrait {
         CacheableTrait::__toKey as __toDefaultKey;
+    }
+
+    public function __call(string $method, array $arguments): mixed
+    {
+        try { 
+            return $this->__columnAliasCall($method, $arguments);
+        } catch (AccessException $e) {
+            return $this->__translatableCall($method, $arguments);
+        }
     }
 
     public function __toKey(mixed ...$variadic): string
@@ -182,7 +195,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     #[ORM\ManyToMany(targetEntity:Thread::class)]
     protected $connexes;
 
-    public function getConnexes(): Collection
+    public function getConnex(): Collection
     {
         return $this->connexes;
     }
@@ -339,9 +352,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy:"threads")]
-    #[OrderColumnNew(orderBy: "ownerOrders", sort: "ASC")]
+    #[OrderColumn(orderBy: "ownerPositions")]
     protected $owners;
-    protected $ownerOrders;
+    protected $ownerPositions;
 
     /**
      * @param int $i
@@ -405,8 +418,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy:"threads", cascade:["persist"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy: "tagPositions")]
     protected $tags;
+    protected $tagPositions;
 
     /**
      * @return false|mixed|null
@@ -444,8 +458,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     #[ORM\ManyToMany(targetEntity:Taxon::class, inversedBy:"threads", cascade:["persist"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy:"taxonPositions")]
     protected $taxa;
+    protected $taxonPositions;
 
     public function getTaxa(): Collection
     {
@@ -480,9 +495,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    #[ColumnAlias(column: "taxa")]
+    #[Alias(column: "taxa")]
     protected $taxons;
-
     public function getTaxons(): Collection
     {
         return $this->taxons;

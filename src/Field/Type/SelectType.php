@@ -240,6 +240,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     {
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
+            
             $form = $event->getForm();
             $options = $form->getConfig()->getOptions();
 
@@ -439,6 +440,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                         $choices[$label . "/" . $ii] = $id;
                     }
                 }
+
             } else {
                 $choices = $dataChoices;
             }
@@ -458,7 +460,7 @@ class SelectType extends AbstractType implements DataMapperInterface
      * @return void
      */
     public function mapDataToForms($viewData, Traversable $forms): void
-    { /* done in buildView due to select2 extend */ }
+    { /* done in buildView using select2 extend */ }
 
     /**
      * @param Traversable $forms
@@ -489,6 +491,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
+
             $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
             if (!$options["multiple"]) {
 
@@ -544,37 +547,27 @@ class SelectType extends AbstractType implements DataMapperInterface
                 }
             }
 
-            if ($this->entityManager->getCache()) {
+            // Only clear & re-add when the collection’s contents or order actually changed
+            if ($oldData !== $dataChoices) {
 
-                $mapping = $viewData->getMapping(); // Evict caches and collection caches.
-                foreach (array_unique_object(array_union($oldData, $dataChoices)) as $data) {
+                $viewData->clear();
+                foreach ($dataChoices as $entry) {
 
-                    $this->entityManager->getCache()->evictEntity(get_class($data), $data->getId());
-
-                    if ($mapping instanceof ToManyOwningSideMapping) {
-                        $this->entityManager->getCache()->evictCollection(get_class($data), $mapping->inversedBy, $data->getId());
-                    }
+                    $viewData->add($entry);
                     if (!$isOwningSide && $mappedBy) {
-                        $this->entityManager->getCache()->evictCollection($mapping->targetEntity, $mappedBy, $viewData->getOwner());
-                    }
-                }
-            }
 
-            // Ordering
-            $viewData->clear();
-            foreach ($dataChoices as $entry) {
-                $viewData->add($entry);
-                if (!$isOwningSide && $mappedBy) {
-                    $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
-                    if (!$owningSide instanceof Collection) {
-                        $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
-                    } elseif (!$owningSide->contains($viewData->getOwner())) {
-                        $owningSide->add($viewData->getOwner());
+                        $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
+                        if (!$owningSide instanceof Collection) {
+                            $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
+                        } elseif (!$owningSide->contains($viewData->getOwner())) {
+                            $owningSide->add($viewData->getOwner());
+                        }
                     }
                 }
             }
 
         } elseif ($viewData instanceof Collection) {
+
             $viewData->clear();
             if (!is_iterable($dataChoices)) {
                 $dataChoices = $dataChoices ? [$dataChoices] : [];
@@ -583,11 +576,14 @@ class SelectType extends AbstractType implements DataMapperInterface
             foreach ($dataChoices as $data) {
                 $viewData->add($data);
             }
+
         } elseif ($options["multiple"]) {
+
             $viewData = [];
             foreach ($dataChoices as $data) {
                 $viewData[] = $data;
             }
+
         } else {
             $viewData = $dataChoices;
         }
@@ -666,6 +662,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         }
 
         if ($options["select2"] !== null) {
+
             // Double-check for "multiple" option
             // * If database can accept multiples, it can also accept single elements
             // * But database with single entry cannot accept multiple elements.. So I arbitrarily keep only the first element..

@@ -8,6 +8,7 @@ use Base\Database\Event\DoctrineQueryEventArgs;
 use Base\Database\Event\ResolveDiscriminatorEventArgs;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Mapping\ClassMetadataCompletor;
+use Base\Database\Repository\ServiceEntityRepository;
 use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\ORM\EntityManager;
@@ -443,6 +444,32 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
+        // only enforce repository if this annotation or any parent (except AbstractAnnotation) declares pre/on/postQuery
+        $hasHooks = false;
+        $current   = get_class($this);
+        while ($current && $current !== AbstractAnnotation::class) {
+            $ref = new \ReflectionClass($current);
+            foreach (['preQuery', 'onQuery', 'postQuery'] as $m) {
+                if ($ref->hasMethod($m)
+                    && $ref->getMethod($m)->getDeclaringClass()->getName() === $current
+                ) {
+                    $hasHooks = true;
+                    break 2;
+                }
+            }
+            $current = get_parent_class($current);
+        }
+
+        if ($hasHooks) {
+            $repoClass = $classMetadata->customRepositoryClassName;
+            if (!$repoClass || !is_subclass_of($repoClass, ServiceEntityRepository::class)) {
+                throw new \Exception(
+                    'Entity "' . $classMetadata->getName() .
+                    '" must use a repository extending ' . ServiceEntityRepository::class .
+                    ' to leverage query hooks.'
+                );
+            }
+        }
     }
 
     public function resolveDiscriminator(ResolveDiscriminatorEventArgs $args): void
@@ -456,6 +483,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public function onQuery(DoctrineQueryEventArgs $args): void
     {
     }
+
     public function postQuery(DoctrineQueryEventArgs $args): void
     {
     }

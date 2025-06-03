@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute;
 
-use Base\Database\Annotation\ColumnAlias;
+use Base\Database\Annotation\Alias;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Database\Entity\Extension\TranslatableInterface;
@@ -49,7 +49,7 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
         return "<b>" . ($this->adapter ?? "Hyperlink") . " #" . $this->getId() . "</b> " . $value;
     }
 
-    #[ColumnAlias(column: "adapter")]
+    #[Alias(column: "adapter")]
     protected $hyperpattern;
 
     public function getHyperpattern(): ?HyperpatternAdapter

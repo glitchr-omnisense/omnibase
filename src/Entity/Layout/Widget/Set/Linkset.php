@@ -37,8 +37,9 @@ class Linkset extends Widget implements IconizeInterface, SetInterface
     }
 
     #[ORM\ManyToMany(targetEntity:Hyperlink::class, orphanRemoval:true, cascade:["persist"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy:"hyperlinkPositions")]
     protected $hyperlinks;
+    protected $hyperlinkPositions;
     public function getHyperlinks(): Collection
     {
         return $this->hyperlinks;

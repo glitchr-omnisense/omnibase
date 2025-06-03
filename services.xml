@@ -431,7 +431,7 @@
         <service id="Base\Database\Middleware\PlatformMiddleware">
             <tag name="doctrine.middleware" />
         </service>
-
+        
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_listener" event="loadClassMetadata"    priority="4096" />
             <tag name="doctrine.event_listener" event="resolveDiscriminator" priority="2048" />

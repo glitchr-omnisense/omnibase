@@ -155,10 +155,11 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
 
     #[ORM\ManyToMany(targetEntity:Widget::class)]
     #[ORM\JoinColumn(onDelete:"SET NULL")]
-    #[OrderColumn]
+    #[OrderColumn(orderBy:"connexPositions")]
     protected $connexes;
+    protected $connexPositions;
 
-    public function getConnexes(): Collection
+    public function getConnex(): Collection
     {
         return $this->connexes;
     }
@@ -179,7 +180,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
     }
 
     #[ORM\Column(type:"datetime", nullable:true)]
-    #Timestamp(on:"create")]
+    #[Timestamp(on:"create")]
     protected $createdAt;
 
     public function getCreatedAt(): ?DateTimeInterface

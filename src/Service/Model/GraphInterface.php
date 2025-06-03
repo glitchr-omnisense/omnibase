@@ -13,5 +13,5 @@ interface GraphInterface
 
     public function getChildren(): Collection;
 
-    public function getConnexes(): Collection;
+    public function getConnex(): Collection;
 }

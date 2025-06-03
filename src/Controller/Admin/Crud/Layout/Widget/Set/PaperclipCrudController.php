@@ -7,7 +7,7 @@ use Base\Controller\Admin\Crud\Layout\WidgetCrudController;
 /**
  *
  */
-class AttachmentBoxCrudController extends WidgetCrudController
+class PaperclipCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string
     {

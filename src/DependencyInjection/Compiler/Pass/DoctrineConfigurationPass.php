@@ -26,7 +26,7 @@ class DoctrineConfigurationPass implements CompilerPassInterface
         $definition->addMethodCall('addFilter', ['vault_filter', VaultFilter::class]);
 
         // Add DQL numeric functions
-        $definition->addMethodCall('addCustomNumericFunction', ['rand', Rand::class]);
+        $definition->addMethodCall('addCustomNumericFunction', ['RAND', Rand::class]);
 
         if (class_exists(Field::class)) {
             $definition->addMethodCall('addCustomNumericFunction', ['FIELD', Field::class]);

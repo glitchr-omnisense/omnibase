@@ -22,15 +22,17 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
-class ColumnAlias extends AbstractAnnotation implements ExtensionOptionInterface
+class Alias extends AbstractAnnotation implements ExtensionOptionInterface
 {
-    public mixed $alias;
-    public mixed $column;
+    public string $alias;
+    public string $column;
+    public ?string $type;
 
-    public function __construct(string $column = "", string $alias = "")
+    public function __construct(string $column = "", string $alias = "", ?string $type = null)
     {
         $this->column = $column;
         $this->alias = $alias;
+        $this->type = $type; // filter by class if provided (for associations)
     }
 
     /**

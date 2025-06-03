@@ -12,14 +12,14 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Widget\Set\AttachmentBoxRepository;
+use Base\Repository\Layout\Widget\Set\PaperclipRepository;
 
 use Base\Database\Annotation\Cache;
 
-#[ORM\Entity(repositoryClass:AttachmentBoxRepository::class)]
+#[ORM\Entity(repositoryClass:PaperclipRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 #[DiscriminatorEntry]
-class AttachmentBox extends Widget implements IconizeInterface
+class Paperclip extends Widget implements IconizeInterface
 {
     public function __iconize(): ?array
     {
@@ -27,7 +27,7 @@ class AttachmentBox extends Widget implements IconizeInterface
     }
     public static function __iconizeStatic(): ?array
     {
-        return ["fa-solid fa-boxes"];
+        return ["fa-solid fa-paperclip"];
     }
 
     public function __construct(?string $title = null, array $attachments = [])
@@ -37,8 +37,9 @@ class AttachmentBox extends Widget implements IconizeInterface
     }
 
     #[ORM\ManyToMany(targetEntity:Attachment::class, orphanRemoval:true, cascade:["persist"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy:"attachementPositions")]
     protected $attachments;
+    protected $attachmentPositions;
     public function getAttachments(): Collection
     {
         return $this->attachments;

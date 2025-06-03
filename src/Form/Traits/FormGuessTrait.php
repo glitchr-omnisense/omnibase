@@ -3,8 +3,8 @@
 namespace Base\Form\Traits;
 
 use Base\Annotations\AnnotationReader;
-use Base\Database\Annotation\ColumnAlias;
-use Base\Database\Annotation\OrderColumnNew;
+use Base\Database\Annotation\Alias;
+use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
@@ -257,14 +257,14 @@ trait FormGuessTrait
                 $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
-            $annotations = AnnotationReader::getInstance()->getAnnotations($target, [OrderColumnNew::class, ColumnAlias::class], [AnnotationReader::TARGET_PROPERTY]);
+            $annotations = AnnotationReader::getInstance()->getAnnotations($target, [OrderColumn::class, Alias::class], [AnnotationReader::TARGET_PROPERTY]);
             $options['sortable'] = !empty(array_filter_recursive($annotations['property'][$target][$form->getName()] ?? []));
             if (!$options['sortable']) {
 
-                $columnAlias = $annotations['property'][$target][$form->getName()][ColumnAlias::class] ?? null;
+                $columnAlias = $annotations['property'][$target][$form->getName()][Alias::class] ?? null;
                 if ($columnAlias) {
                     $aliasedColumn = $columnAlias->getAlias();
-                    $options['sortable'] = !empty(array_filter_recursive($annotations['property'][$target][$aliasedColumn][OrderColumnNew::class] ?? []));
+                    $options['sortable'] = !empty(array_filter_recursive($annotations['property'][$target][$aliasedColumn][OrderColumn::class] ?? []));
                 }
             }
         }

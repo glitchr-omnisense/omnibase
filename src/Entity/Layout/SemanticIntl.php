@@ -34,9 +34,7 @@ class SemanticIntl implements TranslationInterface
     }
 
     #[ORM\Column(type:"json")]
-    #[OrderColumn]
     protected $keywords = [];
-
     public function getKeywords(): array
     {
         return $this->keywords ?? [];

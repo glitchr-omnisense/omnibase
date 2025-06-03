@@ -35,9 +35,11 @@ class Book extends Widget implements IconizeInterface, SetInterface
         parent::__construct($title);
     }
 
-    #[ORM\ManyToMany(targetEntity:Page::class, orphanRemoval:true, cascade:["persist"])]
-    #[OrderColumn]
+    #[ORM\OneToMany(targetEntity: Page::class, mappedBy: "book", orphanRemoval: true, cascade: ["persist"])]
+    #[OrderColumn(orderBy: "pagePositions")]
     protected $pages;
+    protected $pagePositions = [];
+
     public function getPages(): Collection
     {
         return $this->pages;

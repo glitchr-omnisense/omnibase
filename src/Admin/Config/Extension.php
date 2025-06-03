@@ -6,9 +6,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use Twig\Environment;
 
-/**
- *
- */
 class Extension
 {
     public const PAGE_DEFAULT = "default";
@@ -50,11 +47,6 @@ class Extension
      * @param string|null $pageName
      * @return $this
      */
-    /**
-     * @param $title
-     * @param string|null $pageName
-     * @return $this
-     */
     public function setPageTitle($title, ?string $pageName = null)
     {
         return $this->setTitle($title, $pageName);
@@ -88,11 +80,6 @@ class Extension
         return $this->getFallback("logo", $pageName);
     }
 
-    /**
-     * @param string $logo
-     * @param string|null $pageName
-     * @return $this
-     */
     /**
      * @param string $logo
      * @param string|null $pageName
@@ -162,11 +149,6 @@ class Extension
      * @param string|null $pageName
      * @return $this
      */
-    /**
-     * @param string $icon
-     * @param string|null $pageName
-     * @return $this
-     */
     public function setIcon(string $icon, ?string $pageName = null)
     {
         $this->icon[$pageName ?? self::PAGE_DEFAULT] = $icon;
@@ -186,12 +168,6 @@ class Extension
         return $this->getFallback("imageAttributes", $pageName);
     }
 
-    /**
-     * @param string|null $image
-     * @param array $attrs
-     * @param string|null $pageName
-     * @return $this
-     */
     /**
      * @param string|null $image
      * @param array $attrs

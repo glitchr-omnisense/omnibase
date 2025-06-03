@@ -205,7 +205,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     #[ORM\ManyToMany(targetEntity:Taxon::class)]
     protected $connexes;
 
-    public function getConnexes(): Collection
+    public function getConnex(): Collection
     {
         return $this->connexes;
     }

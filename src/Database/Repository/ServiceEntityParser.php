@@ -1970,7 +1970,7 @@ class ServiceEntityParser
             $eventArgs = new DoctrineQueryEventArgs($this->classMetadata, $queryBuilder, null);
             $dispatcher->dispatchEvent(Events::preQuery, $eventArgs);
             $queryBuilder = $eventArgs->getQueryBuilder();
-        }        
+        }
 
         //
         // @DEPRECATED: Eager load feature

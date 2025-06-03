@@ -56,7 +56,7 @@ class OrphanRemoval extends AbstractAnnotation implements ExtensionOptionInterfa
             $column = $this->column;
         }
 
-        $columnAlias = $this->getAnnotation($classMetadata, $column, ColumnAlias::class);
+        $columnAlias = $this->getAnnotation($classMetadata, $column, Alias::class);
         if ($columnAlias) {
             $column = $columnAlias->column;
         }

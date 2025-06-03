@@ -187,7 +187,7 @@ trait TranslatableTrait
      * @param array $arguments
      * @throws Exception
      */
-    public function __call(string $method, array $arguments)
+    public function __call(string $method, array $arguments): mixed
     {
         $className = self::class;
         $translationClassName = $this->getTranslationEntityClass();

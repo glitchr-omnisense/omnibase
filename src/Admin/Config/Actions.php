@@ -90,6 +90,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
                     $cacheable = $entityRepository->getClassMetadata()->cache;
                     if ($entityRepository instanceof ServiceEntityRepository) {
+return "";
                         if (get_parent_class($entity) !== false) {
                             $prevEntity = $entityRepository->{$cacheable ? "cachePreviousOneByClassOf" : "findPreviousOneByClassOf"}($entity->getId(), get_class($entity));
                         } else {
@@ -136,7 +137,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                     $cacheable = $entityRepository->getClassMetadata()->cache;
                     
                     if ($entityRepository instanceof ServiceEntityRepository) {
-                        if (get_parent_class($entity) !== false) {
+return "";                        if (get_parent_class($entity) !== false) {
                             $nextEntity = $entityRepository->{$cacheable ? "cacheNextOneByClassOf" : "findNextOneByClassOf"}($entity->getId(), get_class($entity));
                         } else {
                             $nextEntity = $entityRepository->{$cacheable ? "cacheNextOneBy" : "findNextOneBy"}($entity->getId());

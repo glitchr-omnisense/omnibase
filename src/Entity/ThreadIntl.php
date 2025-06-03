@@ -57,7 +57,6 @@ class ThreadIntl implements TranslationInterface
     #[ORM\Column(type:"json")]
     #[OrderColumn]
     protected $keywords = [];
-
     public function getKeywords(): array
     {
         return $this->keywords ?? [];
@@ -76,7 +75,6 @@ class ThreadIntl implements TranslationInterface
 
     #[ORM\Column(type:"text", nullable:true)]
     protected $excerpt;
-
     public function getExcerpt(): ?string
     {
         return $this->excerpt;
