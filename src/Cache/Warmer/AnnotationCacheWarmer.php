@@ -7,6 +7,6 @@ use Base\Cache\Abstract\AbstractLocalCacheWarmer;
 /**
  *
  */
-class AnnotationsCacheWarmer extends AbstractLocalCacheWarmer
+class AnnotationCacheWarmer extends AbstractLocalCacheWarmer
 {
 }

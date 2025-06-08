@@ -144,6 +144,7 @@ trait TranslatableTrait
 
         $translation = $translations[$normLocale] ?? null;
         if (!$translation && $locale === null) {
+
             // First entry is default locale
             $locales = array_filter($translations->getKeys(), fn($l) => in_array($l, $availableLocales));
             foreach ($locales as $locale) {
@@ -152,7 +153,6 @@ trait TranslatableTrait
                     break;
                 }
             }
-
 
             // Search for compatible lang
             if ($translation == null) {
@@ -271,7 +271,7 @@ trait TranslatableTrait
      * @return $this
      * @throws Exception
      */
-    public function __set($property, $value)
+    public function __set(string $property, mixed $value): void
     {
         $accessor = PropertyAccess::createPropertyAccessor();
         $property = snake2camel($property);
@@ -281,39 +281,53 @@ trait TranslatableTrait
         if(str_starts_with(get_class($entity), "Proxies\\__CG__")) {
 
             write_property($entity, $property, $value);
-            return $this;
+            return;
         }
 
         //
         // Setter method in called class
         if (method_exists($entity, "set" . mb_ucfirst($property))) {
-            return $entity->{"set" . mb_ucfirst($property)}($value);
+            $entity->{"set" . mb_ucfirst($property)}($value);
+            return;
         } elseif (property_exists($entity, $property)) {
-            if (!$accessor->isWritable($entity, $property)) {
-                throw new AccessException("Property \"$property\" not writable in " . get_class($entity));
-            }
+            
+            try {
 
-            $accessor->setValue($entity, $property, $value);
-            return $this;
+                if ($accessor->isWritable($entity, $property)) {
+                    $accessor->setValue($entity, $property, $value);
+                    return;
+                }
+
+            } catch (\Throwable) { }
+
+            return;
         }
 
         //
         // Setter method for current locale
         $entityIntl = $entity->translate();
         if (method_exists($entityIntl, "set" . mb_ucfirst($property))) {
-            return $entityIntl->{"set" . mb_ucfirst($property)}($value);
-        } elseif (property_exists($entityIntl, $property)) {
-            if (!$accessor->isWritable($entityIntl, $property)) {
-                throw new AccessException("Property \"$property\" not writable in " . get_class($entityIntl));
-            }
+            
+            $entityIntl->{"set" . mb_ucfirst($property)}($value);
+            return;
 
-            $accessor->setValue($entityIntl, $property, $value);
-            return $this;
+        } elseif (property_exists($entityIntl, $property)) {
+
+            try {
+
+                if ($accessor->isWritable($entityIntl, $property)) {
+                    $accessor->setValue($entityIntl, $property, $value);
+                    return;
+                }
+
+            } catch (\Throwable) { }
+
+            return;
         }
 
         // Prevent "ea_" property exception conflict.. Damn'it.. ! >()
         if (str_starts_with($property, "ea_")) {
-            return $this;
+            return;
         }
 
         throw new AccessException("Can't get a way to write property \"$property\" in class \"" . get_class($entity) . "\" or its corresponding translation class \"" . $entity->getTranslationEntityClass() . "\".");
@@ -324,10 +338,15 @@ trait TranslatableTrait
      * @return mixed|null
      * @throws Exception
      */
-    public function __get($property)
+    public function __get(string $property): mixed
     {        
         $accessor = PropertyAccess::createPropertyAccessor();
         $property = snake2camel($property);
+
+        // if($property == "comments") {
+        //     dump("TranslatableTrait::__get() called for property \"$property\" in " . get_class($this));
+        //     exit(1);
+        // }
 
         //
         // Getter method in called class
@@ -336,8 +355,13 @@ trait TranslatableTrait
             return $entity->{$property}();
         } elseif (method_exists($entity, "get" . mb_ucfirst($property))) {
             return $entity->{"get" . mb_ucfirst($property)}();
-        } elseif (property_exists($entity, $property) && $accessor->isReadable($entity, $property)) {
-            return $accessor->getValue($entity, $property);
+        } elseif (property_exists($entity, $property)) {
+
+            try {
+                return $accessor->isReadable($entity, $property) ? $accessor->getValue($entity, $property) : $entity->{$property};
+            } catch (\Throwable) {
+                //return $entity->{$property};
+            }
         }
 
         //
@@ -350,8 +374,13 @@ trait TranslatableTrait
             $value = $entityIntl->{$property}();
         } elseif (method_exists($entityIntl, "get" . mb_ucfirst($property))) {
             $value = $entityIntl->{"get" . mb_ucfirst($property)}();
-        } elseif (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
-            $value = $accessor->getValue($entityIntl, $property);
+        } elseif (property_exists($entityIntl, $property)) {
+            
+            try {
+                $value =  $accessor->isReadable($entityIntl, $property) ? $accessor->getValue($entityIntl, $property) : $entityIntl->{$property};
+            } catch (\Throwable) {
+                //$value = $entityIntl->{$property};
+            }
         }
 
         // If current locale is empty.. then try to access value from default locale
@@ -371,8 +400,13 @@ trait TranslatableTrait
             return $entityIntl->{$property}();
         } elseif (method_exists($entityIntl, "get" . mb_ucfirst($property))) {
             return $entityIntl->{"get" . mb_ucfirst($property)}();
-        } elseif (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
-            return $accessor->getValue($entityIntl, $property);
+        } elseif (property_exists($entityIntl, $property)) {
+            
+            try {
+                return $accessor->isReadable($entityIntl, $property) ? $accessor->getValue($entityIntl, $property) : $entityIntl->{$property};
+            } catch (\Throwable) {
+                //return $entityIntl->{$property};
+            }
         }
 
         // Exception for EA variables (cf. EA's FormField)
@@ -383,7 +417,7 @@ trait TranslatableTrait
         throw new AccessException("Can't get a way to read property \"$property\" in class \"" . get_class($entity) . "\" or its corresponding translation class \"" . $entity->getTranslationEntityClass() . "\".");
     }
 
-    public function __isset($property): bool
+    public function __isset(string $property): bool
     {
         $accessor = PropertyAccess::createPropertyAccessor();
         $property = snake2camel($property);
