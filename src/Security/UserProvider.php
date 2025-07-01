@@ -3,7 +3,6 @@
 namespace Base\Security;
 
 use App\Entity\User;
-use App\Enum\UserRole;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;

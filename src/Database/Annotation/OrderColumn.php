@@ -81,12 +81,8 @@ class OrderColumn extends AbstractAnnotation implements ExtensionInlineInterface
     {
         if (!$this->supports($target, $targetValue, $classMetadata)) return;
 
-        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $targetValue);
-        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
-
-        $isAssociation = $classMetadata->hasAssociation($targetValue);
-
         // For associations, orderBy is mandatory and must be JSON or string
+        $isAssociation = $classMetadata->hasAssociation($targetValue);
         if ($isAssociation) {
 
             if (!$this->orderBy) {
@@ -94,6 +90,7 @@ class OrderColumn extends AbstractAnnotation implements ExtensionInlineInterface
             }
 
             $orderByType = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $this->orderBy);
+            if(!$orderByType) $orderByType = "json";
 
             // Check if orderBy is mapped as JSON or string
             $doctrineOrderByType = $this->getClassMetadataManipulator()->getDoctrineType($orderByType);

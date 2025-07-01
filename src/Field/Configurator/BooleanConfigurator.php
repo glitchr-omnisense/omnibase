@@ -55,7 +55,8 @@ final class BooleanConfigurator implements FieldConfiguratorInterface
         if ($isRenderedAsSwitch) {
             $crudDto = $context->getCrud();
 
-            if (null !== $crudDto && Action::NEW !== $crudDto->getCurrentAction()) {
+            if (null !== $crudDto && Action::NEW !== $crudDto->getCurrentAction() && $entityDto->getPrimaryKeyValue() !== null) {
+                
                 $toggleUrl = $this->adminUrlGenerator
                     ->setAction(Action::EDIT)
                     ->setEntityId($entityDto->getPrimaryKeyValue())

@@ -31,6 +31,7 @@
             <argument type="service" id="referrer" />
             <argument type="service" id="twig" />
             <argument type="service" id="localizer" />
+            <argument type="service" id="themizer" />
         </service>
 
         <service id="Base\Twig\Loader\FilesystemLoader" decorates="twig.loader.native_filesystem">

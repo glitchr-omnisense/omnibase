@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Currencies;
 use Symfony\Component\Intl\Exception\MissingResourceException;
-use Symfony\Component\Intl\Exception\ResourceBundleNotFoundException;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 use Symfony\Component\Intl\Timezones;
@@ -133,6 +132,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     public static function getLocales()
     {
         if (self::$locales === null) {
+
             self::$locales = [];
             foreach (Locales::getLocales() as $locale) {
                 // NB: Only keep xx-YY locale format

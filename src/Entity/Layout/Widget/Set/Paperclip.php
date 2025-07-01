@@ -37,7 +37,7 @@ class Paperclip extends Widget implements IconizeInterface
     }
 
     #[ORM\ManyToMany(targetEntity:Attachment::class, orphanRemoval:true, cascade:["persist"])]
-    #[OrderColumn(orderBy:"attachementPositions")]
+    #[OrderColumn(orderBy:"attachmentPositions")]
     protected $attachments;
     protected $attachmentPositions;
     public function getAttachments(): Collection

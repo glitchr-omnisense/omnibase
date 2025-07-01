@@ -159,7 +159,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
     protected $connexes;
     protected $connexPositions;
 
-    public function getConnex(): Collection
+    public function getConnexes(): Collection
     {
         return $this->connexes;
     }

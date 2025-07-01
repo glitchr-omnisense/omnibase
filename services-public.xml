@@ -94,6 +94,8 @@
 
         <service id="localizer" alias="Base\Service\Localizer" />
         <service id="Base\Service\LocalizerInterface" alias="localizer"/>
+        <service id="themizer" alias="Base\Service\Themizer" />
+        <service id="Base\Service\ThemizerInterface" alias="themizer"/>
 
         <service id="doctrine.orm.naming_strategy.camel" alias="Base\Database\Mapping\NamingStrategy" />
         <service id="base.database.metadata_factory"     alias="Base\Database\Mapping\ClassMetadataFactory" />

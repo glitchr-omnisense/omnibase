@@ -185,6 +185,10 @@
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="localizer" />
         </service>
+        <service id="Base\Cache\Warmer\ThemizerCacheWarmer"      public="true" parent="Base\Cache\Abstract\AbstractLocalCacheWarmer">
+            <tag name="kernel.cache_warmer" />
+            <argument type="service" id="themizer" />
+        </service>
         <service id="Base\Cache\Warmer\WebpackCacheWarmer"  parent="Base\Cache\Abstract\AbstractLocalCacheWarmer"><tag name="kernel.cache_warmer" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig.webpack_renderer" />
@@ -231,6 +235,11 @@
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
+        </service>
+        <service id="Base\Service\Themizer" parent="Base\Cache\Abstract\AbstractLocalCache" public="true">
+
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="security.token_storage" />
         </service>
 
         <service id="Base\Cache\SimpleCache" parent="Base\Cache\Abstract\AbstractLocalCache" public="true" />

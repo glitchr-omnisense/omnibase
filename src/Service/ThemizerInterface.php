@@ -5,7 +5,7 @@ namespace Base\Service;
 /**
  *
  */
-interface TrackingServiceInterface
+interface ThemizerInterface
 {
 
 }

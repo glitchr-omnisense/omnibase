@@ -41,6 +41,10 @@ textarea.form-control {
     overflow: scroll;
 }
 
+form.ea-edit-form {
+    padding: 0 0.75em;
+}
+
 .ea-new-form .codex-editor__redactor, .ea-edit-form .codex-editor__redactor
 {
     color: #222;
@@ -1125,6 +1129,11 @@ form .row button[type="submit"] { margin: 1em 0; }
 .btn.text-danger { color: white !important; background-color: rgba(var(--bs-danger-rgb),var(--bs-text-opacity))!important; }
 .btn.text-success { color: white !important; background-color: rgba(var(--bs-success-rgb),var(--bs-text-opacity))!important; }
 
+.ts-wrapper.form-control .ts-control, .ts-wrapper.form-control.single.input-active .ts-control, .ts-wrapper.form-select .ts-control, .ts-wrapper.form-select.single.input-active .ts-control
+{
+    box-shadow: none;
+    height:38px;
+}
 .ea-dark-scheme .form-switch .form-check-input:checked, .ea-dark-scheme .form-switch .form-check-input:checked { border-color:unset; }
 .ea-dark-scheme .form-switch .form-check-input:checked, .ea-dark-scheme .form-switch .form-check-input:checked { background-color: var(--form-switch-checked-bg); }
 
@@ -1134,7 +1143,7 @@ form .row button[type="submit"] { margin: 1em 0; }
 .ts-control {
     background-color: transparent;
     border: 1px solid var(--content-top-border-color);
-    margin: 0.5em 0;
+    /* margin: 0.5em 0; */
 }
 
 .dropzone { border: 1px solid var(--content-top-border-color); }

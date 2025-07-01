@@ -101,7 +101,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         return parent::__construct($compiledRoutes, $context);
     }
 
-    public function redirect(string $path, string $route, string $scheme = null): array
+    public function redirect(string $path, string $route, ?string $scheme = null): array
     {
         return [
             '_controller' => RedirectController::class . '::urlRedirectAction',

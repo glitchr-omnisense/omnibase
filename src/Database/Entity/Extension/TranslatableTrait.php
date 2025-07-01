@@ -290,16 +290,11 @@ trait TranslatableTrait
             $entity->{"set" . mb_ucfirst($property)}($value);
             return;
         } elseif (property_exists($entity, $property)) {
-            
-            try {
+            if (!$accessor->isWritable($entity, $property)) {
+                throw new AccessException("Property \"$property\" not writable in " . get_class($entity));
+            }
 
-                if ($accessor->isWritable($entity, $property)) {
-                    $accessor->setValue($entity, $property, $value);
-                    return;
-                }
-
-            } catch (\Throwable) { }
-
+            $accessor->setValue($entity, $property, $value);
             return;
         }
 
@@ -312,16 +307,11 @@ trait TranslatableTrait
             return;
 
         } elseif (property_exists($entityIntl, $property)) {
+            if (!$accessor->isWritable($entityIntl, $property)) {
+                throw new AccessException("Property \"$property\" not writable in " . get_class($entityIntl));
+            }
 
-            try {
-
-                if ($accessor->isWritable($entityIntl, $property)) {
-                    $accessor->setValue($entityIntl, $property, $value);
-                    return;
-                }
-
-            } catch (\Throwable) { }
-
+            $accessor->setValue($entityIntl, $property, $value);
             return;
         }
 
@@ -343,11 +333,6 @@ trait TranslatableTrait
         $accessor = PropertyAccess::createPropertyAccessor();
         $property = snake2camel($property);
 
-        // if($property == "comments") {
-        //     dump("TranslatableTrait::__get() called for property \"$property\" in " . get_class($this));
-        //     exit(1);
-        // }
-
         //
         // Getter method in called class
         $entity = $this;
@@ -355,13 +340,8 @@ trait TranslatableTrait
             return $entity->{$property}();
         } elseif (method_exists($entity, "get" . mb_ucfirst($property))) {
             return $entity->{"get" . mb_ucfirst($property)}();
-        } elseif (property_exists($entity, $property)) {
-
-            try {
-                return $accessor->isReadable($entity, $property) ? $accessor->getValue($entity, $property) : $entity->{$property};
-            } catch (\Throwable) {
-                //return $entity->{$property};
-            }
+        } elseif (property_exists($entity, $property) && $accessor->isReadable($entity, $property)) {
+            return $accessor->getValue($entity, $property);
         }
 
         //
@@ -374,13 +354,8 @@ trait TranslatableTrait
             $value = $entityIntl->{$property}();
         } elseif (method_exists($entityIntl, "get" . mb_ucfirst($property))) {
             $value = $entityIntl->{"get" . mb_ucfirst($property)}();
-        } elseif (property_exists($entityIntl, $property)) {
-            
-            try {
-                $value =  $accessor->isReadable($entityIntl, $property) ? $accessor->getValue($entityIntl, $property) : $entityIntl->{$property};
-            } catch (\Throwable) {
-                //$value = $entityIntl->{$property};
-            }
+        } elseif (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
+            $value = $accessor->getValue($entityIntl, $property);
         }
 
         // If current locale is empty.. then try to access value from default locale
@@ -400,13 +375,8 @@ trait TranslatableTrait
             return $entityIntl->{$property}();
         } elseif (method_exists($entityIntl, "get" . mb_ucfirst($property))) {
             return $entityIntl->{"get" . mb_ucfirst($property)}();
-        } elseif (property_exists($entityIntl, $property)) {
-            
-            try {
-                return $accessor->isReadable($entityIntl, $property) ? $accessor->getValue($entityIntl, $property) : $entityIntl->{$property};
-            } catch (\Throwable) {
-                //return $entityIntl->{$property};
-            }
+        } elseif (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property)) {
+            return $accessor->getValue($entityIntl, $property);
         }
 
         // Exception for EA variables (cf. EA's FormField)

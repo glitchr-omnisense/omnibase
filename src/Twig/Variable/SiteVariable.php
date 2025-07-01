@@ -46,7 +46,7 @@ class SiteVariable
     protected $baseService;
 
     public function __construct(
-        AdvancedRouterInterface              $router,
+        AdvancedRouterInterface      $router,
         SitemapperInterface          $sitemapper,
         TranslatorInterface          $translator,
         LocalizerInterface           $localizer,

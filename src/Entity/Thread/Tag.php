@@ -15,7 +15,9 @@ use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Database\Annotation\Cache;
+use Base\Database\Entity\Extension\AliasInterface;
 use Base\Database\Entity\Extension\AliasTrait;
+use Base\Database\Entity\Extension\TranslatableAliasTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Thread\TagRepository;
 use League\Flysystem\FilesystemException;
@@ -27,34 +29,9 @@ use Symfony\Component\PropertyAccess\Exception\AccessException;
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
 #[ORM\DiscriminatorColumn(name: "class", type: "string")]
 #[DiscriminatorEntry(value: "abstract")]
-class Tag implements TranslatableInterface, IconizeInterface
+class Tag implements TranslatableInterface, IconizeInterface, AliasInterface
 {
-    use TranslatableTrait {
-        TranslatableTrait::__call  as __call;
-        TranslatableTrait::__isset as __translatableisset;
-        TranslatableTrait::__get   as __translatableGet;
-        TranslatableTrait::__set   as __translatableSet;
-    }
-    use AliasTrait {
-        AliasTrait::__isset  as __aliasIsset;
-        AliasTrait::__get  as __aliasGet;
-        AliasTrait::__set  as __aliasSet;
-    }
-
-    public function __isset(string $property): bool {
-        if($this->__aliasIsset($property)) return true;
-        return $this->__translatableIsset($property);
-    }
-
-    public function __get(string $property): mixed {
-        try { return $this->__aliasGet($property); }
-        catch (AccessException $e) { return $this->__translatableGet($property); }
-    }
-
-    public function __set(string $property, mixed $value): void {
-        try { $this->__aliasSet($property, $value); } 
-        catch (AccessException $e) { $this->__translatableSet($property, $value); }
-    }
+    use TranslatableAliasTrait;
 
     /**
      * @return string
@@ -74,7 +51,6 @@ class Tag implements TranslatableInterface, IconizeInterface
         return ["fa-solid fa-tags"];
     }
 
-
     public function __construct(?string $label = null, ?string $slug = null)
     {
         $this->setLabel($label);
@@ -87,7 +63,6 @@ class Tag implements TranslatableInterface, IconizeInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type:"integer")]
-
     protected $id;
 
     public function getId(): ?int

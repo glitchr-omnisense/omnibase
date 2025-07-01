@@ -8,6 +8,7 @@ use Base\Service\ParameterBagInterface;
 use Base\Service\ReferrerInterface;
 use Base\Service\SettingBag;
 use Base\Service\SettingBagInterface;
+use Base\Service\ThemizerInterface;
 use Base\Traits\ProxyTrait;
 use Base\Twig\Variable\AdminVariable;
 use Base\Twig\Variable\EmailVariable;
@@ -15,56 +16,51 @@ use Base\Twig\Variable\RandomVariable;
 use Base\Twig\Variable\SiteVariable;
 use Twig\Environment;
 
+use Symfony\Bridge\Twig\AppVariable as SymfonyAppVariable;
+
 /**
  *
  */
 class AppVariable
 {
     use ProxyTrait;
-
     protected array $meta;
 
     public ReferrerInterface $referrer;
-
     public Environment $twig;
-
     public SettingBagInterface $settingBag;
-
     public ParameterBagInterface $parameterBag;
-
     public SiteVariable $site;
-
     public RandomVariable $random;
-
     public EmailVariable $email;
-
     public AdminVariable $admin;
-
     public LocalizerInterface $localizer;
+    public ThemizerInterface $themizer;
 
     public function __construct(
-        \Symfony\Bridge\Twig\AppVariable $appVariable,
-        RandomVariable                   $random,
-        SiteVariable                     $site,
-        EmailVariable                    $email,
-        AdminVariable                    $admin,
-        SettingBag                       $settingBag,
-        ParameterBagInterface            $parameterBag,
-        ReferrerInterface                $referrer,
-        Environment                      $twig,
-        Localizer                        $localizer
-    )
-    {
-        $this->settingBag = $settingBag;
-        $this->referrer = $referrer;
-        $this->twig = $twig;
+        SymfonyAppVariable    $appVariable,
+        RandomVariable        $random,
+        SiteVariable          $site,
+        EmailVariable         $email,
+        AdminVariable         $admin,
+        SettingBag            $settingBag,
+        ParameterBagInterface $parameterBag,
+        ReferrerInterface     $referrer,
+        Environment           $twig,
+        LocalizerInterface    $localizer,
+        ThemizerInterface     $themizer
+    ) {
+        $this->settingBag   = $settingBag;
+        $this->referrer     = $referrer;
+        $this->twig         = $twig;
         $this->parameterBag = $parameterBag;
-        $this->localizer = $localizer;
+        $this->localizer    = $localizer;
+        $this->themizer     = $themizer;
 
-        $this->admin = $admin;
+        $this->admin  = $admin;
         $this->random = $random;
-        $this->site = $site;
-        $this->email = $email;
+        $this->site   = $site;
+        $this->email  = $email;
 
         $this->setProxy($appVariable);
     }
@@ -118,5 +114,10 @@ class AppVariable
             'lang' => $this->localizer->getLocaleLang(),
             'country' => $this->localizer->getLocaleCountry(),
         ];
+    }
+
+    public function theme()
+    {
+        return $this->themizer;
     }
 }

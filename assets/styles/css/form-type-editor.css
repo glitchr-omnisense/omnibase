@@ -14,6 +14,9 @@
     color:#222;
     margin-right:10px;
 }
+.ce-toolbar__actions {
+    padding-right:0;
+}
 .ce-popover-item[data-item-name="paragraph"] svg
 {
     color: #222;

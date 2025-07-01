@@ -978,10 +978,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
+    #[ORM\Column(type:"datetime", nullable:true)]
+    #[Timestamp]
+    protected $birthdate;
+    public function getBirthday(): ?DateTimeInterface
+    {
+        return $this->birthdate;
+    }
+
     #[ORM\Column(type:"datetime")]
     #[Timestamp(on:"create")]
     protected $createdAt;
-
     public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
@@ -990,7 +997,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     #[ORM\Column(type:"datetime")]
     #[Timestamp(on:["create", "update"])]
     protected $updatedAt;
-
     public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
@@ -998,7 +1004,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     #[ORM\Column(type:"datetime", nullable:true)]
     protected $activeAt;
-
     public function getActiveAt(): ?DateTimeInterface
     {
         return $this->activeAt;

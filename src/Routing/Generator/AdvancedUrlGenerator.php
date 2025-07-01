@@ -114,7 +114,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $baseDir = array_pop_key("_base_dir", $routeParameters) ?? $this->getContext()->getBaseUrl();
             $host = array_pop_key("_host", $routeParameters) ?? $this->getContext()->getHost();
             $port = array_pop_key("_port", $routeParameters) ?? explode(":", $host)[1] ?? $this->getContext()->getHttpPort();
-            $host = explode(":", $host)[0] . ":" . $port;
+            $host = explode(":", $host)[0] . ($port == 80 || $port == 443 || !$port) ? "" : (":" . $port);
 
             $parse = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
             $parse["base_dir"] = $baseDir;
@@ -128,7 +128,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $this->getContext()->setBaseUrl($parse["base_dir"]);
             }
 
-            $this->getContext()->setHttpPort(80);    // Port already included in host
+            $this->getContext()->setHttpPort(80);   // Port already included in host
             $this->getContext()->setHttpsPort(443); // Port already included in host
             $this->getContext()->setScheme($parse["scheme"] ?? "https");
             $this->getContext()->setQueryString($parse["query"] ?? "");
@@ -170,8 +170,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $this->getContext()->setHost($host);
 
             $port = self::$router->getPort() ?? 80;
-            $this->getContext()->setHttpPort($port);
-            $this->getContext()->setHttpsPort($port);
+            $this->getContext()->setHttpPort($port == 443 ? 80 : $port);
+            $this->getContext()->setHttpsPort($port == 80 ? 443 : $port);
 
             $path = $route->getPath();
 
@@ -221,7 +221,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routes = $this->resolveCandidates($routeName, $routeParameters, $referenceType);
         foreach($routes as $routeName => $route) {
 
-            
             try {
                 $routeUrl = parent::generate($routeName, $routeParameters, $referenceType);
             } catch(\Exception $_) {

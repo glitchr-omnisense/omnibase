@@ -40,6 +40,7 @@ use DateTime;
 use Base\Database\Entity\Extension\AliasTrait;
 use Base\Traits\CacheableTrait;
 use ApiPlatform\Metadata\ApiResource;
+use Base\Database\Entity\Extension\TranslatableAliasTrait;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 
 #[ORM\Entity(repositoryClass:ThreadRepository::class)]
@@ -56,33 +57,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 {
     use BaseTrait;
     use TrasheableTrait;
-
-    use TranslatableTrait {
-        TranslatableTrait::__call  as __call;
-        TranslatableTrait::__isset as __translatableisset;
-        TranslatableTrait::__get   as __translatableGet;
-        TranslatableTrait::__set   as __translatableSet;
-    }
-    use AliasTrait {
-        AliasTrait::__isset  as __aliasIsset;
-        AliasTrait::__get  as __aliasGet;
-        AliasTrait::__set  as __aliasSet;
-    }
-
-    public function __isset(string $property): bool {
-        if($this->__aliasIsset($property)) return true;
-        return $this->__translatableIsset($property);
-    }
-
-    public function __get(string $property): mixed {
-        try { return $this->__aliasGet($property); }
-        catch (AccessException $e) { return $this->__translatableGet($property); }
-    }
-
-    public function __set(string $property, mixed $value): void {
-        try { $this->__aliasSet($property, $value); } 
-        catch (AccessException $e) { $this->__translatableSet($property, $value); }
-    }
+    use TranslatableAliasTrait;
 
     use CacheableTrait { CacheableTrait::__toKey as __toDefaultKey; }
     public function __toKey(mixed ...$variadic): string
@@ -205,7 +180,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     #[ORM\ManyToMany(targetEntity:Thread::class)]
     protected $connexes;
 
-    public function getConnex(): Collection
+    public function getConnexes(): Collection
     {
         return $this->connexes;
     }
@@ -507,10 +482,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 
     #[Alias(column: "taxa")]
     protected $taxons;
-    public function getTaxons(): Collection
-    {
-        return $this->taxons;
-    }
 
     #[ORM\OneToMany(targetEntity: Mention::class, mappedBy:"thread", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $mentions;

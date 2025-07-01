@@ -38,7 +38,7 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
     public function refreshUser(UserInterface $user): UserInterface
     {
         $user = $this->cacheOneByEmail($user->getEmail());
-        if (!$user instanceof User) {
+        if (!$user instanceof User || $user === null) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
