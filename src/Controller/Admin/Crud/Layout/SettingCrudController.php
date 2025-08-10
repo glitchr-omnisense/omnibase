@@ -24,10 +24,7 @@ class SettingCrudController extends AbstractCrudController
      * @param string $entityFqcn
      * @return Setting
      */
-    public function createEntity(string $entityFqcn)
-    {
-        return new Setting("");
-    }
+    public function createEntity(string $entityFqcn): object{ return new Setting(""); }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

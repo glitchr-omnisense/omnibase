@@ -19,10 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class AttachmentCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string
-    {
-        return null;
-    }
+    public static function getPreferredIcon(): ?string { return null; }
 
     /**
      * @param AdminContext $context

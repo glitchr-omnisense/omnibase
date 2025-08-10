@@ -22,10 +22,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
  */
 class ImageCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string
-    {
-        return null;
-    }
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
     {
@@ -54,7 +51,7 @@ class ImageCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         return parent::configureActions($actions)
-            ->remove(Crud::PAGE_INDEX, Action::NEW);
+                     ->remove(Crud::PAGE_INDEX, Action::NEW);
     }
 
     public function configureFields(string $pageName, ...$args): iterable

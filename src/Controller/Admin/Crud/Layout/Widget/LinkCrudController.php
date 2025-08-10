@@ -16,10 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
  */
 class LinkCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string
-    {
-        return null;
-    }
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

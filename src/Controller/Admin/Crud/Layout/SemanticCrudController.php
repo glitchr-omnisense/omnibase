@@ -30,10 +30,7 @@ class SemanticCrudController extends AbstractCrudController
      * @param string $entityFqcn
      * @return Semantic
      */
-    public function createEntity(string $entityFqcn)
-    {
-        return new Semantic("");
-    }
+    public function createEntity(string $entityFqcn): object { return new Semantic(""); }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

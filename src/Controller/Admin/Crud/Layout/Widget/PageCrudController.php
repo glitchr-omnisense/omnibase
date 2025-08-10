@@ -14,10 +14,7 @@ use Base\Field\SelectField;
  */
 class PageCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string
-    {
-        return null;
-    }
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

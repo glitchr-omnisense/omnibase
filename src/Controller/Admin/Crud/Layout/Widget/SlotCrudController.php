@@ -27,10 +27,7 @@ class SlotCrudController extends WidgetCrudController
      * @param string $entityFqcn
      * @return mixed
      */
-    public function createEntity(string $entityFqcn)
-    {
-        return new $entityFqcn("");
-    }
+    public function createEntity(string $entityFqcn): object { return new $entityFqcn(""); }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

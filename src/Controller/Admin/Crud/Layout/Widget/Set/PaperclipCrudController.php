@@ -4,9 +4,6 @@ namespace Base\Controller\Admin\Crud\Layout\Widget\Set;
 
 use Base\Controller\Admin\Crud\Layout\WidgetCrudController;
 
-/**
- *
- */
 class PaperclipCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string

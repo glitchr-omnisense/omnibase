@@ -12,10 +12,7 @@ use Base\Field\RouteField;
  */
 class RouteCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string
-    {
-        return null;
-    }
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

@@ -24,10 +24,7 @@ class ShortLinkCrudController extends AbstractCrudController
      * @param string $entityFqcn
      * @return ShortLink
      */
-    public function createEntity(string $entityFqcn)
-    {
-        return new ShortLink("");
-    }
+    public function createEntity(string $entityFqcn): object { return new ShortLink(""); }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

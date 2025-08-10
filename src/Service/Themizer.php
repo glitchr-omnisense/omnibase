@@ -70,74 +70,92 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
         return $layouts;
     }
     
-    public function getMode(): ?array
+    public function modes(): ?array
     {
-        // Get the list of valid modes from parameters
-        $validModes = $this->parameterBag->get('base.twig.modes') ?? [];
+        return $this->parameterBag->get('base.twig.modes') ?? null;
+    }
 
-        // Normalize modes: ensure each has 'name', 'class', and 'icon'
-        $modesByName = [];
-        foreach ($validModes as $mode) {
-            $name = $mode['name'] ?? null;
-            if (!$name) {
-                continue;
-            }
-            $modesByName[$name] = [
-                'name' => $name,
-                'class' => $mode['class'] ?? $name,
-                'icon' => $mode['icon'] ?? null,
-            ];
+    public function mode(): ?array
+    {  
+        // Get the list of valid modes from parameters
+        $modesByName = $this->parameterBag->get('base.twig.modes') ?? [];
+        foreach ($modesByName as $key => $mode) {
+            $modesByName[$key]["class"] = "data-mode-{$key}";
         }
 
-        $defaultModeName = $this->parameterBag->get('base.twig.mode') ?? 'auto';
+        $firstModeName = first(array_keys($modesByName));
+        $defaultModeName = $this->parameterBag->get('base.twig.mode') ?? $firstModeName;
         $selectedModeName = $defaultModeName;
-
-        if ($defaultModeName === 'auto' && isset($_COOKIE['USER/THEME/MODE'])) {
+        
+        if ($defaultModeName === $firstModeName && isset($_COOKIE['USER/THEME/MODE'])) {
             $cookieMode = strtolower($_COOKIE['USER/THEME/MODE']);
             if (isset($modesByName[$cookieMode])) {
                 $selectedModeName = $cookieMode;
             }
         }
 
-        if (!isset($modesByName[$selectedModeName])) {
-            $selectedModeName = array_key_first($modesByName);
-        }
-
-        return $modesByName[$selectedModeName] ?? null;
+        return \array_key_exists($selectedModeName, $modesByName) 
+            ? [$selectedModeName => $modesByName[$selectedModeName]] : null;
     }
 
-    public function getAudience(?string $name = null): ?array
+    public function filters(): ?array
     {
-        $audiences = $this->parameterBag->get('base.twig.audiences') ?? [];
+        return $this->parameterBag->get('base.twig.filters') ?? null;
+    }
+
+    public function filter(): ?array
+    {
+        // Get the list of valid modes from parameters
+        $filtersByName = $this->parameterBag->get('base.twig.filters') ?? [];
+        foreach ($filtersByName as $name => &$filter) {
+            $filter["class"] = "data-filter-{$name}";
+        }
+
+        $selectedFilterName = null;
+        if (isset($_COOKIE['USER/THEME/FILTER'])) {
+            $cookieFilter = strtolower($_COOKIE['USER/THEME/FILTER']);
+            if (isset($filtersByName[$cookieFilter])) {
+                $selectedFilterName = $cookieFilter;
+            }
+        }
+
+        return $selectedFilterName !== null && \array_key_exists($selectedFilterName, $filtersByName) 
+            ? [$selectedFilterName => $filtersByName[$selectedFilterName]] : null;
+    }
+
+    public function audience(): ?array 
+    {
+        $audiencesByName = $this->parameterBag->get('base.twig.audiences') ?? [];
+        foreach ($audiencesByName as $key => $audience) {
+            $audiencesByName[$key]["class"] = "data-audience-{$key}";
+        }
+
         $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
+        $userAge = $user !== null && method_exists($user, 'getAge') ? $user->getAge() : null;
 
-        if ($name === null) {
-            $audience = $audiences[0] ?? null;
-        } else {
-            $audience = null;
-            foreach ($audiences as $a) {
-                if (isset($a['name']) && $a['name'] === $name) {
-                    $audience = $a;
-                    break;
-                }
+        $defaultAudience = $this->parameterBag->get('base.twig.default_audience') ?? null;
+        if ($userAge === null) {
+
+            if($defaultAudience === null) return null;
+            return \array_key_exists($defaultAudience, $audiencesByName) 
+                    ? [$defaultAudience => $audiencesByName[$defaultAudience]] : null;
+        }
+
+        uasort($audiencesByName, function ($a, $b) {
+            $ageA = $a['age'] ?? 0;
+            $ageB = $b['age'] ?? 0;
+            return $ageA <=> $ageB;
+        });
+
+        $selectedAudience = null;
+        foreach ($audiencesByName as $audience) {
+            if (isset($audience['age']) && $userAge <= $audience['age']) {
+                $selectedAudience = $audience;
             }
         }
 
-        if ($audience && isset($audience['age'])) {
-
-            $userAge = null;
-            if (is_object($user) && method_exists($user, 'getAge')) {
-                $userAge = $user->getAge();
-            } elseif (is_array($user) && isset($user['age'])) {
-                $userAge = $user['age'];
-            }
-
-            if ($userAge === null || $userAge < $audience['age']) {
-                return $audiences[$this->parameterBag->get('base.twig.default_audience')] ?? null;
-            }
-        }
-
-        return $audience;
+        return $selectedAudience !== null && \array_key_exists($selectedAudience, $audiencesByName) 
+            ? [$selectedAudience => $audiencesByName[$selectedAudience]] : null;
     }
 
     /**
@@ -145,20 +163,28 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
      *
      * @return array|null
      */
+    public function events(): ?array { return $this->getEvents(); }
     public function getEvents(): ?array
     {
         $events = $this->parameterBag->get('base.twig.events') ?? [];
-        $activeEvents = [];
+        foreach ($events as $key => $event) {
+            $events[$key]["class"] = "data-event-{$key}";
+        }
 
+        $activeEvents = [];
         foreach ($events as $name => $event) {
+
             // Check for begin and end if present (inclusive)
             if (isset($event['begin']) && isset($event['end'])) {
                 $now = new \DateTimeImmutable();
                 $begin = new \DateTimeImmutable($event['begin']);
                 $end = new \DateTimeImmutable($event['end']);
+                // If 'begin' and 'end' are on the same day but 'end' is before 'begin', assume it spans midnight
+                if ($end < $begin && $begin->format('Y-m-d') === $end->format('Y-m-d')) {
+                    $end = $end->modify('+1 day');
+                }
 
                 if ($now < $begin || $now > $end) {
-                    // Event is not active
                     continue;
                 }
             }
@@ -168,10 +194,11 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
 
         // Sort by priority (descending), then by begin (ascending)
         uasort($activeEvents, function ($a, $b) {
+
             $priorityA = $a['priority'] ?? 0;
             $priorityB = $b['priority'] ?? 0;
             if ($priorityA !== $priorityB) {
-                return $priorityB <=> $priorityA;
+            return $priorityB <=> $priorityA;
             }
 
             $beginA = isset($a['begin']) ? strtotime($a['begin']) : 0;
@@ -179,6 +206,12 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
             return $beginA <=> $beginB;
         });
 
+        // Remove 'priority' from each event after sorting
+        foreach ($activeEvents as &$event) {
+            unset($event['priority']);
+        }
+
         return !empty($activeEvents) ? $activeEvents : null;
     }
+
 }
