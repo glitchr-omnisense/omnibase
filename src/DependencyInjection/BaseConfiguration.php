@@ -500,7 +500,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                                 ->useAttributeAsKey('name')
                                 ->arrayPrototype()
                                     ->children()
-                                        ->integerNode('age')->defaultValue(99)->end()
+                                        ->integerNode('age')->defaultNull()->end()
                                         ->scalarNode('icon')->defaultNull()->end()
                                     ->end()
                                 ->end()
@@ -526,6 +526,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                                     ->children()
                                         ->scalarNode('class')->defaultNull()->end()
                                         ->scalarNode('icon')->defaultNull()->end()
+                                        ->scalarNode('prefers')->defaultNull()->end()
                                     ->end()
                                 ->end()
                                 ->defaultValue([

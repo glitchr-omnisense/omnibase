@@ -2,9 +2,8 @@
 
 <script{% if csp_script_nonce is defined and csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>/*<![CDATA[*/
 
-console.log("Glitchr WebProfilerBundle: toolbar_js.html.twig loaded");
-{# 
-document.addEventListener('DOMContentLoaded', function() {
+console.debug("Glitchr WebProfilerBundle: toolbar_js.html.twig loaded: @TODO Make the bar draggable");
+{# document.addEventListener('DOMContentLoaded', function() {
   // 0) CONFIGURATION: adjust these radii to taste
   const RADIUS_ALL        = '4px';            // during drag or before snap
   const RADIUS_SNAPPED_L  = '0px 4px 4px 0px'; // snapped to left: round right side

@@ -80,6 +80,15 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
 
         return $modes;
     }
+    
+    public function color_scheme(): string
+    {
+        $mode = $this->getMode();
+        if ($mode && isset($mode['prefers'])) {
+            return $mode['prefers'];
+        }
+        return '';
+    }
 
     public function getMode(): ?array
     {
@@ -127,8 +136,10 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
             }
         }
 
-        if($selectedFilterName === null) $selectedFilterName = first(array_keys($filtersByName));
-        if(!array_key_exists($selectedFilterName, $filtersByName) ) return null;
+        if(!array_key_exists($selectedFilterName, $filtersByName) ) return [
+            "id" => "none",
+            "icon" => "fa-solid fa-fw fa-palette"
+        ];
         
         $filter = $filtersByName[$selectedFilterName];
         $filter["id"] = $selectedFilterName;
@@ -168,19 +179,25 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
         }
 
         uasort($audiencesByName, function ($a, $b) {
-            $ageA = $a['age'] ?? 0;
-            $ageB = $b['age'] ?? 0;
+
+            $ageA = $a['age'] ?? null;
+            $ageB = $b['age'] ?? null;
+
+            if ($ageA === null && $ageB === null) return 0;
+            if ($ageA === null) return 1;
+            if ($ageB === null) return -1;
+            
             return $ageA <=> $ageB;
         });
 
         $selectedAudience = null;
-        foreach ($audiencesByName as $audience) {
-            if (isset($audience['age']) && $userAge <= $audience['age']) {
-                $selectedAudience = $audience;
+        foreach ($audiencesByName as $key => $audience) {
+            if (isset($audience['age']) && $userAge > $audience['age']) {
+                unset($audiencesByName[$key]);
             }
         }
 
-        if($selectedAudience === null) return null;
+        if($selectedAudience === null) $selectedAudience = first(array_keys($audiencesByName));
         if(!\array_key_exists($selectedAudience, $audiencesByName)) return null;
 
         $audience = $audiencesByName[$selectedAudience];

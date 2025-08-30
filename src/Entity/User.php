@@ -979,11 +979,27 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     #[ORM\Column(type:"datetime", nullable:true)]
-    #[Timestamp]
     protected $birthdate;
-    public function getBirthday(): ?DateTimeInterface
+    public function getBirthdate(): ?DateTimeInterface
     {
         return $this->birthdate;
+    }
+    public function setBirthdate(?DateTimeInterface $birthdate): self
+    {
+        $this->birthdate = $birthdate;
+        return $this;
+    }
+
+    public function getAge(): ?int
+    {
+        if ($this->birthdate === null) {
+            return null;
+        }
+
+        $today = new DateTime('now');
+        $age = $today->diff($this->birthdate);
+
+        return $age->y;
     }
 
     #[ORM\Column(type:"datetime")]

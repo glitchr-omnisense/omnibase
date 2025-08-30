@@ -12,7 +12,8 @@ interface ThemizerInterface
     
     public function getAvailableModes(): array;
     public function getMode(): ?array;
-    
+    public function color_scheme(): string;
+
     public function getAudienceCategories(): array;
     public function getAudience(): ?array;
 

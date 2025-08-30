@@ -15,8 +15,10 @@ use Base\Security\LoginRestrictionInterface;
 use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
@@ -78,11 +80,14 @@ class UserCrudController extends UserActionCrudController
             yield BooleanField::new("isApproved")->withConfirmation()->showInline();
 
             yield AvatarField::new('avatar')->setColumns(2)->hideOnDetail()->setCropper();
+            yield IntegerField::new('age')->onlyOnIndex();
 
             yield RoleField::new('roles')->setColumns(5);
             yield EmailField::new('email')->setColumns(5);
 
-            yield FormField::addRow()->setLabel("spacer")->setColumns(2);
+            yield DateField::new('birthdate')->hideOnIndex()->setColumns(2);
+
+            // yield FormField::addRow()->setLabel("spacer")->setColumns(2);
             yield PasswordField::new('plainPassword')->onlyOnForms()->setRequired(false)->setColumns(10)->showInline(false)->setRepeater(true)->setRevealer(true);
 
             yield DateTimeField::new('activeAt')->hideOnForm();
