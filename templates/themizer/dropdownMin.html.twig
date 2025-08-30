@@ -1,0 +1,17 @@
+<div class="locale-dropdown dropdown">
+    <button class="btn dropdown-toggle" type="button" id="dropdown-filter" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa-solid fa-globe"></i>
+    </button>
+    <ul class="dropdown-menu {{ class|default("") }}" aria-labelledby="dropdown-filter">
+    <li class="dropdown-label">
+        <span>{{ '@themizer.mode._plural'|trans }}</span>
+    </li>
+    {% for filter in available_theme_modes %}
+        {% set current = (filter == current_theme_mode) ? "active" : null %}
+        <li><a href="{{ path("_switch_filter", {_filter: filter|lang}) }}" {{ html_attributes({"class": "dropdown-item "~current}) }}>
+            <img class="country-flag" alt="{{filter|country}}" src="{{asset('bundles/base/images/flags/'~(filter|country)~'.svg')}}" style="max-width:50px"> {{ filter|lang_name|capitalize }}
+        </a></li>
+    {% endfor %}
+    </ul>
+</div>
+

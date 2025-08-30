@@ -70,21 +70,23 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
         return $layouts;
     }
     
-    public function modes(): ?array
+    public function getAvailableModes(): array
     {
-        return $this->parameterBag->get('base.twig.modes') ?? null;
-    }
-
-    public function mode(): ?array
-    {  
-        // Get the list of valid modes from parameters
-        $modesByName = $this->parameterBag->get('base.twig.modes') ?? [];
-        foreach ($modesByName as $key => $mode) {
-            $modesByName[$key]["class"] = "data-mode-{$key}";
+        $modes = $this->parameterBag->get('base.twig.themes.modes') ?? [];
+        foreach ($modes as $key => $mode) {
+            $modes[$key]["id"] = $key;
+            $modes[$key]["class"] = "theme-mode-{$key}";
         }
 
+        return $modes;
+    }
+
+    public function getMode(): ?array
+    {
+        // Get the list of valid modes from parameters
+        $modesByName = $this->getAvailableModes();
         $firstModeName = first(array_keys($modesByName));
-        $defaultModeName = $this->parameterBag->get('base.twig.mode') ?? $firstModeName;
+        $defaultModeName = $this->parameterBag->get('base.twig.themes.mode') ?? $firstModeName;
         $selectedModeName = $defaultModeName;
         
         if ($defaultModeName === $firstModeName && isset($_COOKIE['USER/THEME/MODE'])) {
@@ -94,23 +96,29 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
             }
         }
 
-        return \array_key_exists($selectedModeName, $modesByName) 
-            ? [$selectedModeName => $modesByName[$selectedModeName]] : null;
+        if($selectedModeName === null) return null;
+        if(!array_key_exists($selectedModeName, $modesByName) ) return null;
+
+        $mode = $modesByName[$selectedModeName];
+        $mode["id"] = $selectedModeName;
+        return $mode;
     }
 
-    public function filters(): ?array
+    public function getAvailableFilters(): array
     {
-        return $this->parameterBag->get('base.twig.filters') ?? null;
-    }
-
-    public function filter(): ?array
-    {
-        // Get the list of valid modes from parameters
-        $filtersByName = $this->parameterBag->get('base.twig.filters') ?? [];
+        $filtersByName = $this->parameterBag->get('base.twig.themes.filters') ?? [];
         foreach ($filtersByName as $name => &$filter) {
-            $filter["class"] = "data-filter-{$name}";
+            $filter["id"] = $name;
+            $filter["class"] = "theme-filter-{$name}";
         }
 
+        return $filtersByName;
+    }
+
+    public function getFilter(): ?array
+    {
+        // Get the list of valid modes from parameters
+        $filtersByName = $this->getAvailableFilters();
         $selectedFilterName = null;
         if (isset($_COOKIE['USER/THEME/FILTER'])) {
             $cookieFilter = strtolower($_COOKIE['USER/THEME/FILTER']);
@@ -119,26 +127,44 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
             }
         }
 
-        return $selectedFilterName !== null && \array_key_exists($selectedFilterName, $filtersByName) 
-            ? [$selectedFilterName => $filtersByName[$selectedFilterName]] : null;
+        if($selectedFilterName === null) $selectedFilterName = first(array_keys($filtersByName));
+        if(!array_key_exists($selectedFilterName, $filtersByName) ) return null;
+        
+        $filter = $filtersByName[$selectedFilterName];
+        $filter["id"] = $selectedFilterName;
+        return $filter;
     }
 
-    public function audience(): ?array 
+    public function getAudienceCategories(): array
     {
-        $audiencesByName = $this->parameterBag->get('base.twig.audiences') ?? [];
-        foreach ($audiencesByName as $key => $audience) {
-            $audiencesByName[$key]["class"] = "data-audience-{$key}";
+        $audiences = $this->parameterBag->get('base.twig.themes.audiences') ?? [];
+        foreach ($audiences as $key => $audience) {
+            $audiences[$key]["id"] = $key;
+            $audiences[$key]["class"] = "theme-audience-{$key}";
+        }
+
+        return $audiences;
+    }
+
+    public function getAudience(): ?array
+    {
+        $audiencesByName = $this->getAudienceCategories();
+        if (empty($audiencesByName)) {
+            return null;
         }
 
         $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $userAge = $user !== null && method_exists($user, 'getAge') ? $user->getAge() : null;
 
-        $defaultAudience = $this->parameterBag->get('base.twig.default_audience') ?? null;
+        $defaultAudience = $this->parameterBag->get('base.twig.themes.default_audience') ?? null;
         if ($userAge === null) {
 
             if($defaultAudience === null) return null;
-            return \array_key_exists($defaultAudience, $audiencesByName) 
-                    ? [$defaultAudience => $audiencesByName[$defaultAudience]] : null;
+            if(!\array_key_exists($defaultAudience, $audiencesByName)) return null;
+
+            $audience = $audiencesByName[$defaultAudience];
+            $audience['id'] = $defaultAudience;
+            return $audience;
         }
 
         uasort($audiencesByName, function ($a, $b) {
@@ -154,8 +180,12 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
             }
         }
 
-        return $selectedAudience !== null && \array_key_exists($selectedAudience, $audiencesByName) 
-            ? [$selectedAudience => $audiencesByName[$selectedAudience]] : null;
+        if($selectedAudience === null) return null;
+        if(!\array_key_exists($selectedAudience, $audiencesByName)) return null;
+
+        $audience = $audiencesByName[$selectedAudience];
+        $audience['id'] = $selectedAudience;
+        return $audience;
     }
 
     /**
@@ -163,14 +193,21 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
      *
      * @return array|null
      */
-    public function events(): ?array { return $this->getEvents(); }
-    public function getEvents(): ?array
+    public function getAvailableEvents(): array
     {
-        $events = $this->parameterBag->get('base.twig.events') ?? [];
+        $events = $this->parameterBag->get('base.twig.themes.events') ?? [];
         foreach ($events as $key => $event) {
-            $events[$key]["class"] = "data-event-{$key}";
+            $events[$key]["id"] = $key;
+            $events[$key]["class"] = "theme-event-{$key}";
         }
 
+        return $events;
+    }
+
+    public function getEvent(): ?array
+    {
+        $events = $this->getAvailableEvents();
+        
         $activeEvents = [];
         foreach ($events as $name => $event) {
 
@@ -189,21 +226,21 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
                 }
             }
 
+            $activeEvents[$name]["id"] = $name;
             $activeEvents[$name] = $event;
         }
 
         // Sort by priority (descending), then by begin (ascending)
         uasort($activeEvents, function ($a, $b) {
-
             $priorityA = $a['priority'] ?? 0;
             $priorityB = $b['priority'] ?? 0;
             if ($priorityA !== $priorityB) {
-            return $priorityB <=> $priorityA;
+                return $priorityB <=> $priorityA; // Higher priority first
             }
 
             $beginA = isset($a['begin']) ? strtotime($a['begin']) : 0;
             $beginB = isset($b['begin']) ? strtotime($b['begin']) : 0;
-            return $beginA <=> $beginB;
+            return $beginB <=> $beginA; // Later begin first (descending)
         });
 
         // Remove 'priority' from each event after sorting
@@ -211,7 +248,8 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
             unset($event['priority']);
         }
 
-        return !empty($activeEvents) ? $activeEvents : null;
+        if(empty($activeEvents)) return null;
+        return first($activeEvents);
     }
 
 }

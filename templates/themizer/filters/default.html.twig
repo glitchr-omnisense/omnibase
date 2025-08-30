@@ -1,0 +1,11 @@
+<div class="filter-default">
+    <span class="label">{{ "@themizer.filters._singular"|trans }}</span>
+    <ul class="filter">
+    {# {% for filter in available_filters %}
+        {% set current = (filter == current_filter) ? "active" : null %}
+        <li><a href="{{ path("_switch_filter", {_filter: filter|lang}) }}" {{ html_attributes({"class":current}) }}>
+            <img class="country-flag" alt="{{filter|country}}" src="{{asset('bundles/base/images/flags/'~(filter|country)~'.svg')}}" style="max-width:50px">
+        </a></li>
+    {% endfor %} #}
+    </ul>
+</div>

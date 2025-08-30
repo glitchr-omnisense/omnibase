@@ -1,0 +1,9 @@
+<div class="filter-text">
+    <span class="label">{{ "@themizer.filters._singular"|trans }}</span>
+    <ul class="filter">
+    {# {% for filter in available_filters %}
+        {% set current = (filter == current_filter) ? "active" : null %}
+        <li><a href="{{ path("_switch_filter", {_filter: filter|lang}) }}" {{ html_attributes({"class":current}) }}>{{ filter|country }} | {{ filter|lang_name|capitalize}}</a></li>
+    {% endfor %} #}
+    </ul>
+</div>

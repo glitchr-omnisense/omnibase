@@ -1,0 +1,15 @@
+mode:
+    _singular: Mode
+    _plural: Modes
+
+filter:
+    _singular: Filtre
+    _plural: Filtres
+
+audience:
+    _singular: Audience
+    _plural: Audiences
+
+event:
+    _singular: Événement
+    _plural: Événements
