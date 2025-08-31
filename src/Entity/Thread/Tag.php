@@ -87,7 +87,6 @@ class Tag implements TranslatableInterface, IconizeInterface, AliasInterface
 
     #[ORM\Column(type:"string", length:9, nullable:true)]
     protected $color;
-
     public function getColor(): ?string
     {
         return $this->color;

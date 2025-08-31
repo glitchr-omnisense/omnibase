@@ -64,7 +64,7 @@ class OrderedArrayCollection extends ArrayCollection
         return $this;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         $this->reorder();
         return parent::toArray();
@@ -73,13 +73,13 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * {@inheritDoc}
      */
-    public function first()
+    public function first(): mixed
     {
         $this->reorder();
         return parent::first();
     }
 
-    protected function createFrom(array $elements)
+    protected function createFrom(array $elements): static 
     {
         $this->reorder();
         return parent::createFrom($elements);
@@ -88,7 +88,7 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * {@inheritDoc}
      */
-    public function last()
+    public function last(): mixed
     {
         $this->reorder();
         return parent::last();
@@ -97,7 +97,7 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * {@inheritDoc}
      */
-    public function key()
+    public function key(): int|string|null
     {
         $this->reorder();
         return parent::key();
@@ -106,7 +106,7 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * {@inheritDoc}
      */
-    public function next()
+    public function next(): mixed
     {
         $this->reorder();
         return parent::next();
@@ -115,7 +115,7 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * {@inheritDoc}
      */
-    public function current()
+    public function current(): mixed
     {
         $this->reorder();
         return parent::current();
@@ -169,7 +169,7 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * {@inheritDoc}
      */
-    public function get(string|int $key)
+    public function get(string|int $key): mixed
     {
         $this->reorder();
         return parent::get($key);
@@ -178,7 +178,7 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * {@inheritDoc}
      */
-    public function getKeys()
+    public function getKeys(): array
     {
         $this->reorder();
         return parent::getKeys();
@@ -187,16 +187,16 @@ class OrderedArrayCollection extends ArrayCollection
     /**
      * {@inheritDoc}
      */
-    public function getValues()
+    public function getValues(): array 
     {
         $this->reorder();
         return parent::getValues();
     }
 
-    public function set(string|int $key, mixed $value)
+    public function set(string|int $key, mixed $value): void
     {
         $this->reorder();
-        return parent::set($key, $value);
+        parent::set($key, $value);
     }
 
     public function getIterator(): Traversable
@@ -205,43 +205,43 @@ class OrderedArrayCollection extends ArrayCollection
         return parent::getIterator();
     }
 
-    public function map(Closure $func)
+    public function map(Closure $func): static 
     {
         $this->reorder();
         return parent::map($func);
     }
 
-    public function reduce(Closure $func, $initial = null)
+    public function reduce(Closure $func, $initial = null): mixed
     {
         $this->reorder();
         return parent::reduce($func, $initial);
     }
 
-    public function filter(Closure $p)
+    public function filter(Closure $p): static
     {
         $this->reorder();
         return parent::filter($p);
     }
 
-    public function findFirst(Closure $p)
+    public function findFirst(Closure $p): mixed
     {
         $this->reorder();
         return parent::findFirst($p);
     }
 
-    public function forAll(Closure $p)
+    public function forAll(Closure $p): bool
     {
         $this->reorder();
         return parent::forAll($p);
     }
 
-    public function partition(Closure $p)
+    public function partition(Closure $p): array
     {
         $this->reorder();
         return parent::partition($p);   
     }
 
-    public function slice(int $offset, int|null $length = null)
+    public function slice(int $offset, int|null $length = null): array
     {
         $this->reorder();
         return parent::slice($offset, $length);

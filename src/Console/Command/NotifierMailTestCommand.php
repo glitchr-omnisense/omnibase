@@ -2,6 +2,7 @@
 
 namespace Base\Console\Command;
 
+use App\Entity\User;
 use Base\Console\Command;
 use App\Repository\UserRepository;
 use Base\Notifier\NotifierInterface;
@@ -46,31 +47,37 @@ class NotifierMailTestCommand extends Command
         }
 
         $userId = $input->getOption('user');        
-        $user = $this->userRepository->findByIdOrEmailOrUsername($userId)->getResult();
+        $user = $this->userRepository->findByIdOrEmailOrUsername($userId)?->getResult();
         if ($userId && !$user) {
             $io->warning("No user found by ID, email or username using `$userId`.");
         }
 
+        $mail = mailparse($this->notifier->getTechnicalRecipient()->getEmail());
         if(!$user) {
-            $user = $this->userRepository->findByEmail($this->notifier->getTechnicalRecipient()->getEmail())->getResult();
+            $user = $this->userRepository->findByEmail(first($mail))?->getResult();
             if (!$user) {
-                $io->warning("No user found in database for the technical recipient: " . $this->notifier->getTechnicalRecipient());
+                $io->warning("No user found in database as technical recipient: " . $this->notifier->getTechnicalRecipient());
+                $user = new User();
+                $user->setUsername(first($mail));
+                $user->setEmail(first(array_keys($mail)));
+                $userId = 0;
             }
         }
 
         if(!$user) {
             
-            $user = $this->userRepository->findOne()->getResult();
+            $user = $this->userRepository->findOne();
+            $userId = $user?->getId();
             if (!$user) {
-                $io->warning("No user found in database for the technical recipient: " . $this->notifier->getTechnicalRecipient());
+                $io->warning("No user found in database as technical recipient: " . $this->notifier->getTechnicalRecipient());
                 return Command::FAILURE;
             }
         }
-        
-        $io->note("Sending test email to user ID: $userId");
+
+        $io->note("Sending test email to $user (ID:$userId)");
         $this->notifier->testEmail($user);
 
-        $io->success("Test email sent to user ID: $userId");
+        $io->success("Test email sent to $user (ID:$userId)");
         return Command::SUCCESS;
     }
 }

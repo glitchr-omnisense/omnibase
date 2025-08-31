@@ -20,9 +20,12 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification = new Notification("email.html.twig");
         $notification->setUser($user);
 
+        $route = $this->router->getRouteName();
+        if(!$route) $route = "_profiler_email";
+
         $url = null;
-        if (!str_ends_with($this->router->getRouteName(), "_send")) {
-            $url = $this->router->generate($this->router->getRouteName() . "_send");
+        if (!str_ends_with($route, "_send")) {
+            $url = $this->router->generate($route . "_send");
         }
 
         $notification->setContext([
@@ -53,6 +56,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
                     Pellentesque pretium dui ac justo elementum blandit.
                     Donec nibh erat, maximus in condimentum ac, condimentum eget lorem.
                     Sed hendrerit maximus ante, eu euismod purus tempor vel.",
+
             "footer_text" => $this->translator->trans('@emails.returnIndex', [$this->router->generate("/", [], Router::ABSOLUTE_URL)]) ?? null
         ]);
 
