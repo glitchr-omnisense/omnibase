@@ -13,6 +13,7 @@ use Backup\Manager\Databases\Database;
 use Backup\Manager\Databases\DatabaseProvider;
 use Backup\Manager\Databases\DatabaseTypeNotSupported;
 use Backup\Manager\Databases\MysqlDatabase;
+use Backup\Manager\Databases\MariaDatabase;
 use Backup\Manager\Databases\PostgresqlDatabase;
 
 use Backup\Manager\Filesystems\Awss3Filesystem;
@@ -23,7 +24,6 @@ use Backup\Manager\Filesystems\FilesystemTypeNotSupported;
 use Backup\Manager\Filesystems\FtpFilesystem;
 use Backup\Manager\Filesystems\GcsFilesystem;
 use Backup\Manager\Filesystems\LocalFilesystem;
-use Backup\Manager\Filesystems\RackspaceFilesystem;
 use Backup\Manager\Filesystems\SftpFilesystem;
 use Backup\Manager\Filesystems\WebdavFilesystem;
 use Backup\Manager\Manager as BackupManager;
@@ -175,6 +175,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         $databases = new DatabaseProvider(new Config($this->databaseConfigs));
         $databases->add(new MysqlDatabase());
+        $databases->add(new MariaDatabase());
         $databases->add(new PostgresqlDatabase());
 
         $compressors = new CompressorProvider();
@@ -485,8 +486,8 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Prepare backup
         $destinations = [];
 
-	// Remove files from -1d
-	$yesterdayPrefix = $prefix . "-" . (new DateTime("-1 day"))->format('Ymd');
+        // Remove files from -1d
+        $yesterdayPrefix = $prefix . "-" . (new DateTime("-1 day"))->format('Ymd');
         $outputDir = $this->getCacheDir() . "/" . $yesterdayPrefix;
         if (is_dir($outputDir)) {
             rrmdir($outputDir);
@@ -519,12 +520,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Dump database to local repository
         $this->output?->section()->writeln("<info>- Temporary working directory:</info> " . $this->getCacheDir() . "/" . $prefix);
         if ($databases) {
+
             $databases = is_string($databases) ? [$databases] : $databases;
             $this->output?->section()->writeln("<info>- Backing database(s):</info> " . implode(", ", $databases));
 
             foreach ($databases as $database) {
                 parent::makeBackup()->run($database, [new Destination("local", $prefix . "/databases/" . $database . ".sql")], "null");
             }
+
         } else {
 
             $this->output?->section()->writeln("<warning>- No database backed up..</warning> please provide `--database` option");
@@ -547,6 +550,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         if (is_dir($outputDir)) {
             rrmdir($outputDir);
         }
+
+	if( empty($output) ) {
+	    return false;
+	}
 
         foreach ($destinations as $id => $destination) {
 
@@ -738,11 +745,12 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         if ($compression) {
 
             if ($ret) {
-                throw new LogicException("Failed to create tarball: " . $output."; ".$_);
+                throw new LogicException("Failed to create tarball: " . $output);
             }
 
             $compressor = $this->compressors->get($this->compression);
             $compressedOutput = $compressor->getCompressedPath($output);
+	        if(file_exists($compressedOutput)) unlink($compressedOutput);
 
             if($verbose) $this->output?->section()->writeln("<info>- Compressing.. </info> ./" . basename($compressedOutput));
             $command = $compressor->getCompressCommandLine($output);

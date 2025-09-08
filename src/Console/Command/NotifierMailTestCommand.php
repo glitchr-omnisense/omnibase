@@ -74,10 +74,10 @@ class NotifierMailTestCommand extends Command
             }
         }
 
-        $io->note("Sending test email to $user (ID:$userId)");
-        $this->notifier->testEmail($user);
+        $notification = $this->notifier->testEmail($user);
+        $notification->send();
+        $io->success("Sent test email to {$user->getEmail()} (Username: {$user->getUsername()}, ID: {$userId}) using async transport.");
 
-        $io->success("Test email sent to $user (ID:$userId)");
         return Command::SUCCESS;
     }
 }

@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Router;
  */
 class Notifier extends BaseNotifier implements NotifierInterface
 {
-    public function testEmail(?User $user): Notification
+    public function testEmail(User $user): Notification
     {
         $notification = new Notification("email.html.twig");
         $notification->setUser($user);
