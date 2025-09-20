@@ -278,7 +278,7 @@ class IntegritySubscriber implements EventSubscriberInterface
             return true;
         }
 
-        $persistentCollection = ($user->getLogs() instanceof PersistentCollection ? (array)$user->getLogs() : null);
+        $persistentCollection = ($user->getNotifications() instanceof PersistentCollection ? (array)$user->getNotifications() : null);
         if ($persistentCollection === null) {
             return false;
         }

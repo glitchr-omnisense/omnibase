@@ -412,7 +412,7 @@
                                     {% else %}
 
                                     {% if ea_extra.widgets(ea.context.crud.getCurrentPage() ?? null) is defined and ea_extra.widgets(ea.context.crud.getCurrentPage() ?? null)|length > 0 %}
-                                    <div class="row mx-0">
+                                    <div class="justify-content-start row mx-0">
                                         {% set content_widget_closure = false %}
                                         {% for content_widget in ea_extra.widgets(ea.context.crud.getCurrentPage() ?? null)  %}
 

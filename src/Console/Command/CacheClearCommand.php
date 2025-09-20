@@ -10,13 +10,15 @@ use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Command\CacheClearCommand as SymfonyCacheClearCommand;
+
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Symfony\Bundle\FrameworkBundle\Command\CacheClearCommand as SymfonyCacheClearCommand;
 use Base\Routing\AdvancedRouterInterface;
 
 #[AsCommand(name: 'cache:clear', aliases: [], description: '')]
@@ -32,14 +34,14 @@ class CacheClearCommand extends Command
     public static string $testFile;
 
     /**
-     * @var SymfonyCacheClearCommand
+     * @var SymfonyCommand
      */
-    protected SymfonyCacheClearCommand $cacheClearCommand;
+    protected SymfonyCommand $cacheClearCommand;
 
     /**
-     * @var CacheClearSessionsCommand
+     * @var SymfonyCommand
      */
-    protected CacheClearSessionsCommand $cacheClearSessionsCommand;
+    protected SymfonyCommand $cacheClearSessionsCommand;
 
     /**
      * @var Flysystem
@@ -57,17 +59,17 @@ class CacheClearCommand extends Command
     protected AdvancedRouterInterface $router;
 
     public function __construct(
-        LocalizerInterface        $localizer,
-        TranslatorInterface       $translator,
-        EntityManagerInterface    $entityManager,
-        ParameterBagInterface     $parameterBag,
-        SymfonyCacheClearCommand  $cacheClearCommand,
-        CacheClearSessionsCommand $cacheClearSessionsCommand,
-        Flysystem                 $flysystem,
-        Notifier                  $notifier,
-        AdvancedRouterInterface   $router,
-        string                    $projectDir,
-        string                    $cacheDir
+        LocalizerInterface      $localizer,
+        TranslatorInterface     $translator,
+        EntityManagerInterface  $entityManager,
+        ParameterBagInterface   $parameterBag,
+        SymfonyCommand          $cacheClearCommand,
+        SymfonyCommand          $cacheClearSessionsCommand,
+        Flysystem               $flysystem,
+        Notifier                $notifier,
+        AdvancedRouterInterface $router,
+        string                  $projectDir,
+        string                  $cacheDir
     )
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);
@@ -106,7 +108,7 @@ EOF
             );
     }
 
-    public function getTestFile(): string { return self::$testFile; }
+    public static function getTestFile(): string { return self::$testFile; }
     public static function markAsFirstClear(bool $first = true) { if($first) file_put_contents(self::$testFile, 0); }
     public static function applicationNotStarted(): bool { return self::getNClears() < 1; }
     public static function isFirstClear(): bool { return self::getNClears() < 2; }
@@ -117,6 +119,7 @@ EOF
         $io = new SymfonyStyle($input, $output);
         $this->cacheClearCommand->setApplication($this->getApplication());
 
+        $alreadyStarted = !self::applicationNotStarted();
         $noExtension = $input->getOption('no-extension') ?? true;
         if (!$noExtension) {
             $this->phpConfigCheck($io);
@@ -148,10 +151,12 @@ EOF
 
             $this->doubleCacheClear($io);
             $this->webpackCheck($io);
-            $this->generateSymlinks($io);
             $this->technicalSupportCheck($io);
             $this->clearOPCache($io);
+            if ($alreadyStarted) 
+                $this->generateSymlinks($io);
         }
+        
 
         return $ret;
     }

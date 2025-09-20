@@ -627,6 +627,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         if (!$restoreApplication) {
             $this->output?->section()->writeln("<info>- Application not restored !</info> ");
         } else {
+
             $this->openArchive($outputDir . "/application.tar");
             rename($outputDir . "/application", $location);
 

@@ -104,9 +104,8 @@ class IntlSubscriber
     public function postLoad(LifecycleEventArgs $args)
     {
         $uow = $this->entityManager->getUnitOfWork();
-
+        
         $object = $args->getObject();
-        $this->upgradeIntl($object);
 
         if (is_subclass_of($object, TranslationInterface::class)) {
             if ($object->isEmpty()) { // Mark as removal for mispersistent translations..

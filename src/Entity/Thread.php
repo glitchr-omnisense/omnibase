@@ -26,7 +26,6 @@ use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
 use Base\Database\Entity\Extension\TranslatableInterface;
-use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Database\Entity\Extension\TrasheableTrait;
 use Base\Entity\Thread\Taxon;
 use Base\Service\Model\CacheableInterface;
@@ -37,11 +36,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
 use DateTime;
 
-use Base\Database\Entity\Extension\AliasTrait;
 use Base\Traits\CacheableTrait;
 use ApiPlatform\Metadata\ApiResource;
 use Base\Database\Entity\Extension\TranslatableAliasTrait;
-use Symfony\Component\PropertyAccess\Exception\AccessException;
 
 #[ORM\Entity(repositoryClass:ThreadRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]

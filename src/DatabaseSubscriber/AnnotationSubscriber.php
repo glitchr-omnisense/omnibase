@@ -44,11 +44,6 @@ class AnnotationSubscriber
 
     public function loadClassMetadata(LoadClassMetadataEventArgs $event)
     {
-        // needs to be booted to be aware of custom doctrine types.
-        if (!BaseBundle::getInstance()->isBooted()) {
-            return;
-        }
-
         $className = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
 
@@ -112,11 +107,6 @@ class AnnotationSubscriber
 
     public function resolveDiscriminator(ResolveDiscriminatorEventArgs $event)
     {
-        // needs to be booted to be aware of custom doctrine types.
-        if (!BaseBundle::getInstance()->isBooted()) {
-            return;
-        }
-
         $className = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
 
@@ -180,11 +170,6 @@ class AnnotationSubscriber
 
     public function preQuery(DoctrineQueryEventArgs $event): void
     {
-        // needs to be booted to be aware of custom doctrine types.
-        if (!BaseBundle::getInstance()->isBooted()) {
-            return;
-        }
-
         $classMetadata = $event->getClassMetadata();
         $className = $event->getEntityName() ?? null;
         $annotations = $this->annotationReader->getAnnotations($className);
@@ -244,11 +229,6 @@ class AnnotationSubscriber
 
     public function onQuery(DoctrineQueryEventArgs $event)
     {
-        // needs to be booted to be aware of custom doctrine types.
-        if (!BaseBundle::getInstance()->isBooted()) {
-            return;
-        }
-
         $classMetadata = $event->getClassMetadata();
         $className = $event->getEntityName() ?? null;
 
@@ -304,14 +284,8 @@ class AnnotationSubscriber
         }
     }
 
-
     public function postQuery(DoctrineQueryEventArgs $event)
     {
-        // needs to be booted to be aware of custom doctrine types.
-        if (!BaseBundle::getInstance()->isBooted()) {
-            return;
-        }
-
         $classMetadata = $event->getClassMetadata();
         $className = $event->getEntityName() ?? null;
 
@@ -582,6 +556,7 @@ class AnnotationSubscriber
         $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
         foreach ($propertyAnnotations as $property => $_) {
             foreach ($_ as $annotation) {
+
                 if (!is_subclass_of($annotation, AbstractAnnotation::class)) {
                     continue;
                 }

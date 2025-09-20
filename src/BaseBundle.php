@@ -7,7 +7,8 @@ if(!isset($_SERVER["APP_TIMER"])) {
 }
 
 use App\Entity\User;
-use Base\Database\Type\UTCDateTimeType;
+use Base\Database\Type\DateTimeTypeUTC as DateTimeType;
+use Base\Database\Type\ArrayType;
 use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
 use Base\DependencyInjection\Compiler\Pass\TradingMarketPass;
 use Base\DependencyInjection\Compiler\Pass\EntityExtensionPass;
@@ -27,6 +28,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
+use Base\DependencyInjection\Compiler\Pass\CommandPass;
 use Base\DependencyInjection\Compiler\Pass\DoctrineEnumSubscriberPass;
 use Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass;
 use Base\DependencyInjection\Compiler\Pass\EasyAdminCrudPass;
@@ -231,9 +233,13 @@ class BaseBundle extends AbstractBaseBundle
 
             // Set default time to UTC everywhere
             date_default_timezone_set($timezone);
-            Type::overrideType('date', UTCDateTimeType::class);
-            Type::overrideType('datetime', UTCDateTimeType::class);
-            Type::overrideType('datetimetz', UTCDateTimeType::class);
+            Type::overrideType('date', DateTimeType::class);
+            Type::overrideType('datetime', DateTimeType::class);
+            Type::overrideType('datetimetz', DateTimeType::class);
+
+            // Backward compatibility (see doctrine:array:upgrade)
+            if(Type::hasType('array')) Type::overrideType('array', ArrayType::class);
+            else Type::addType('array', ArrayType::class);
 
             $classList = array_merge(
                 self::getAllClasses(self::getBundleDir() . "/src/Enum"),

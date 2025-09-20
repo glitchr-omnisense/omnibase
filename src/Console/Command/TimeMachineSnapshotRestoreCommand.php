@@ -36,9 +36,11 @@ class TimeMachineSnapshotRestoreCommand extends TimeMachineSnapshotCommand
         }
 
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('You are about to restore an old version. Do you wish to continue ? [y/N] ', false);
-        if (!$helper->ask($input, $output, $question)) {
-            return Command::SUCCESS;
+        if($id < 0) {
+            $question = new ConfirmationQuestion('You are about to restore the latest version. Do you wish to continue ? [y/N] ', false);
+            if (!$helper->ask($input, $output, $question)) {
+                return Command::SUCCESS;
+            }
         }
 
         $helper = $this->getHelper('question');

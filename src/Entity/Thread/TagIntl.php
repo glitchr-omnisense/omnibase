@@ -27,9 +27,9 @@ class TagIntl implements TranslationInterface
     }
 
     #[ORM\Column(type:"json")]
-    #[OrderColumn]
+    #[OrderColumn(orderBy: "keywordPositions")]
     protected $keywords = [];
-
+    protected $keywordPositions;
     public function getKeywords(): array
     {
         return $this->keywords ?? [];

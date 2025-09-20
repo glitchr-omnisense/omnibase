@@ -400,7 +400,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                                 yield null => $yield;
                             }
                         }
+
                     } else {
+
                         // Format values
                         $format = FORMAT_IDENTITY;
                         if ($options["capitalize"] !== null) {
@@ -897,5 +899,6 @@ class SelectType extends AbstractType implements DataMapperInterface
         foreach ($view->vars["data"] as $key => $choice) {
             $view->vars["data"][$key] = $this->classMetadataManipulator->isEntity($choice) ? $choice->getId() : $choice;
         }
+
     }
 }

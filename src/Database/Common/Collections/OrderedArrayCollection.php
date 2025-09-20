@@ -16,7 +16,7 @@ use Traversable;
 class OrderedArrayCollection extends ArrayCollection
 {
     /**  * @var array */
-    protected array $positions; 
+    protected array $positions;
     // NB: position is not called in clear(), add(), remove() or removeElement(); it is computed only when in reorder()
     //     it would not remember in such case.
     

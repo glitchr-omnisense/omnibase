@@ -5,12 +5,10 @@ namespace Base\Service;
 use Base\Database\Type\SetType;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Component\Translation\Translator as SymfonyTranslator;
 
-/**
- *
- */
 class Translator implements TranslatorInterface
 {
     public const PARSE_EXTENDS = "extends";
@@ -64,15 +62,21 @@ class Translator implements TranslatorInterface
         $this->isDebug = $kernel->isDebug();
     }
 
+    public function getCatalogue(?string $locale = null): MessageCatalogueInterface
+    {
+        return $this->translator->getCatalogue($locale ?? $this->getLocale());
+    }
+
+    public function getCatalogues(): array
+    {
+        return $this->translator->getCatalogues();
+    }
+
     public function getLocale(): string
     {
         return $this->translator->getLocale();
     }
 
-    /**
-     * @param string $locale
-     * @return $this
-     */
     /**
      * @param string $locale
      * @return $this

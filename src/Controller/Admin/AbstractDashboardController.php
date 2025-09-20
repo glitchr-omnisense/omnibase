@@ -58,9 +58,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\HttpFoundation\Request;
 
 use Base\Admin\Config\Traits\WidgetTrait;
-use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
-use Base\Entity\Extension\Ordering;
 use Base\Entity\Extension\TrashBall;
 use Base\Entity\Layout\ShortLink;
 use Base\Entity\Thread\Taxon;
@@ -82,7 +80,6 @@ use Base\Service\SettingBagInterface;
 use Base\Twig\Environment;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -708,8 +705,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', "fa-solid fa-book"));
             $widgets = $this->addWidgetItem($widgets, "EXTENSIONS", [
-                WidgetItem::linkToCrud(Log::class),
-                WidgetItem::linkToCrud(Ordering::class),
                 WidgetItem::linkToCrud(Revision::class),
                 WidgetItem::linkToCrud(TrashBall::class),
             ]);

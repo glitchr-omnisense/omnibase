@@ -334,7 +334,6 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Console\Command\UserLogCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\UserNotificationCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\UploaderEntitiesCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\UploaderImagesCropCommand" parent="Base\Console\Command\UploaderImagesCommand"><tag name="console.command" /></service>
@@ -935,16 +934,7 @@
             <bind key="$projectDir">%kernel.project_dir%</bind>
             <bind key="$secret">%kernel.secret%</bind>
         </service>
-
-        <service id="Base\EntitySubscriber\LogSubscriber">
-            <tag name="kernel.event_subscriber" />
-            <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
-            <argument type="service" id="security.untracked_token_storage" />
-            <argument type="service" id="App\Repository\UserRepository" />
-            <argument type="service" id="base.service" />
-            <argument type="service" id="parameter_bag" />
-        </service>
-
+        
         <service id="Base\EntityDispatcher\Event\UserEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
             <tag name="doctrine.event_listener" event="prePersist" />
             <tag name="doctrine.event_listener" event="postPersist" />

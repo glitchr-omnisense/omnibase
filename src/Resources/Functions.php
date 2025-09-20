@@ -724,6 +724,15 @@ namespace {
         return mb_strtolower(str_replace($separator . $separator, $separator, str_replace('.' . $separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator . '$0', str_replace(" ", $separator, $input)))));
     }
 
+    function mb_utf8(string $html)
+    {
+        $encoding = mb_detect_encoding($html, ['UTF-8','Windows-1252','ISO-8859-1'], true);
+        if ($encoding === false) $encoding = 'ISO-8859-1';
+
+        $html = mb_convert_encoding($html, 'UTF-8', $encoding);
+        return preg_replace('/^\xEF\xBB\xBF/', '', $html);
+    }
+
     /**
      * @param string $input
      * @param string $separator
@@ -1419,6 +1428,30 @@ namespace {
 
         $reflProperty = new ReflectionProperty($class, $property);
         return $reflProperty->getDeclaringClass()->getName();
+    }
+
+    /**
+     * @param $object_or_class
+     * @param string $property
+     * @return string|null
+     * @throws ReflectionException
+     */
+    function property_visibility($object_or_class, string $property): ?string
+    {
+        $class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
+
+        $reflProperty = new ReflectionProperty($class, $property);
+        if ($reflProperty->isPublic()) {
+            return "public";
+        }
+        if ($reflProperty->isProtected()) {
+            return "protected";
+        }
+        if ($reflProperty->isPrivate()) {
+            return "private";
+        }
+
+        return null;
     }
 
     /**
@@ -4022,18 +4055,30 @@ namespace {
         return $length < 1 ? "" : str_repeat(" ", $length);
     }
 
-    function usort_column(array &$array, string $column, callable $fn): bool
+    function usort_column(array $array, string $column, callable $fn): bool
     {
         return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null));
     }
 
-    function usort_key(array &$array, array $ordering = []): array
+    function usort_key(array $array, array $ordering): array
     {
-        uksort($array, function($key1, $key2) use ($ordering) {
-            return (array_search($key1, $ordering) <=> array_search($key2, $ordering));
+        // build list of indices for $current
+        $indices = array_keys($array);
+
+        // stable sort indices by ordering value (missing => very large => goes last)
+        usort($indices, function($i, $j) use ($ordering) {
+            $pi = $ordering[$i] ?? PHP_INT_MAX;
+            $pj = $ordering[$j] ?? PHP_INT_MAX;
+            return $pi <=> $pj;
         });
 
-        return $array;
+        // return values in new order, reindexed 0..N-1
+        $result = [];
+        foreach ($indices as $idx) {
+            $result[] = $array[$idx];
+        }
+        
+        return $result;
     }
 
     /**
@@ -4041,7 +4086,7 @@ namespace {
      * @param string|array $startingWith
      * @return true
      */
-    function usort_startsWith(array &$array, string|array $startingWith)
+    function usort_startsWith(array $array, string|array $startingWith)
     {
         if (!is_array($startingWith)) {
             $startingWith = [$startingWith];

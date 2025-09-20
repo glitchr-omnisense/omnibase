@@ -8,7 +8,6 @@ use Base\Exception\MissingLocaleException;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
-use Base\Entity\Extension\Log;
 use Base\Entity\User\Connection;
 
 use App\Entity\User\Token;
@@ -134,7 +133,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->states = [UserState::ENABLED, UserState::NEWCOMER];
 
         $this->tokens = new ArrayCollection();
-        $this->logs = new ArrayCollection();
         $this->permissions = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->groups = new ArrayCollection();
@@ -385,8 +383,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     #[ORM\Column(type: "user_role")]
     #[Assert\NotBlank(groups: ["new", "edit"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy: "rolesPositions")]
     protected $roles = [];
+    protected $rolesPositions;
     public function isSocial(): bool
     {
         return in_array(UserRole::SOCIAL, $this->roles);
@@ -413,37 +412,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         }
 
         $this->roles = array_filter(array_unique($roles));
-        return $this;
-    }
-
-    #[ORM\OneToMany(targetEntity:Log::class, mappedBy:"user")]
-    #[ORM\JoinColumn(onDelete:"SET NULL")]
-    protected $logs;
-
-    public function getLogs(): Collection
-    {
-        return $this->logs;
-    }
-
-    public function addLog(Log $log): self
-    {
-        if (!$this->logs->contains($log)) {
-            $this->logs[] = $log;
-            $log->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeLog(Log $log): self
-    {
-        if ($this->logs->removeElement($log)) {
-            // set the owning side to null (unless already changed)
-            if ($log->getUser() === $this) {
-                $log->setUser(null);
-            }
-        }
-
         return $this;
     }
 

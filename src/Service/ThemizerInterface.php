@@ -14,7 +14,12 @@ interface ThemizerInterface
     public function getMode(): ?array;
     public function color_scheme(): string;
 
+    public function getAvailableWidths(): array;
+    public function getWidth(): ?int;
+    public function width(): ?int;
+
     public function getAudienceCategories(): array;
     public function getAudience(): ?array;
+
 
 }

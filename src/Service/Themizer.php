@@ -69,13 +69,22 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
 
         return $layouts;
     }
-    
+
     public function getAvailableModes(): array
     {
         $modes = $this->parameterBag->get('base.twig.themes.modes') ?? [];
+
+        $selectedMode = $_COOKIE['USER/THEME/MODE'] ?? null;          // 'auto' | 'light' | 'dark'
+        $resolvedMode = $_COOKIE['USER/THEME/PREFERS_MODE'] ?? null;  // 'light' | 'dark' (resolved from OS if auto)
+
         foreach ($modes as $key => $mode) {
-            $modes[$key]["id"] = $key;
-            $modes[$key]["class"] = "theme-mode-{$key}";
+            $modes[$key]['id']    = $key;
+
+            $modes[$key]['active']   = ($key === $selectedMode);
+            $modes[$key]['class'] = "theme-mode-";
+            $modes[$key]['class'] .= ($selectedMode === 'auto')
+                ? $resolvedMode
+                : $key;
         }
 
         return $modes;
@@ -203,6 +212,41 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
         $audience = $audiencesByName[$selectedAudience];
         $audience['id'] = $selectedAudience;
         return $audience;
+    }
+
+    public function getAvailableWidths(): array
+    {
+        $widths = $this->parameterBag->get('base.twig.themes.widths') ?? [];
+        foreach ($widths as $key => &$width) {
+            $width["id"] = $key;
+            $width["style"] = "width:".$width."%";
+        }
+
+        return $widths;
+    
+    }
+    public function width(): ?int { return $this->getWidth(); }
+    public function getWidth(): ?int
+    {
+        $widths = $this->parameterBag->get('base.twig.themes.widths') ?? [];
+        foreach ($widths as $key => &$width) {
+            $width["id"] = $key;
+            $width["class"] = "theme-width-{$key}";
+        }
+
+        $selectedWidthName = null;
+        if (isset($_COOKIE['USER/THEME/WIDTH'])) {
+            $cookieWidth = strtolower($_COOKIE['USER/THEME/WIDTH']);
+            if (isset($widths[$cookieWidth])) {
+                $selectedWidthName = $cookieWidth;
+            }
+        }
+
+        if(!array_key_exists($selectedWidthName, $widths) ) return null;
+
+        $width = $widths[$selectedWidthName];
+        $width["id"] = $selectedWidthName;
+        return $width['value'] ?? null;
     }
 
     /**
