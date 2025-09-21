@@ -10,7 +10,7 @@ use App\Entity\User;
 use Base\Database\Type\DateTimeTypeUTC as DateTimeType;
 use Base\Database\Type\ArrayType;
 use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
-use Base\DependencyInjection\Compiler\Pass\TradingMarketPass;
+use Base\DependencyInjection\Compiler\Pass\TradingPass;
 use Base\DependencyInjection\Compiler\Pass\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\Pass\IconProviderPass;
 use Base\DependencyInjection\Compiler\Pass\ObfuscatorCompressionPass;
@@ -284,7 +284,7 @@ class BaseBundle extends AbstractBaseBundle
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
         $container->addCompilerPass(new SharerPass());
-        $container->addCompilerPass(new TradingMarketPass());
+        $container->addCompilerPass(new TradingPass());
         $container->addCompilerPass(new TagRendererPass());
         $container->addCompilerPass(new ObfuscatorCompressionPass());
         $container->addCompilerPass(new WorkflowPass());

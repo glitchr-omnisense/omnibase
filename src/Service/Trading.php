@@ -20,7 +20,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 /**
  *
  */
-class TradingMarket implements TradingMarketInterface
+class Trading implements TradingInterface
 {
     /**
      * @var Swap

@@ -8,7 +8,7 @@ use Exchanger\Contract\ExchangeRate;
 /**
  *
  */
-interface TradingMarketInterface
+interface TradingInterface
 {
     public function normalize(string $source, string $target, mixed $value, null|string|int|DateTime $datetime): ?ExchangeRate;
 

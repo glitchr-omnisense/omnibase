@@ -7,7 +7,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Service\Obfuscator;
 use Base\Service\ParameterBagInterface;
-use Base\Service\TradingMarketInterface;
+use Base\Service\TradingInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Notifier\Abstract\BaseNotifierInterface;
 use Base\Routing\AdvancedRouterInterface;
@@ -205,9 +205,9 @@ trait BaseTrait
         return (self::class === BaseService::class) ? BaseService::$slugger : BaseService::getSlugger();
     }
 
-    public static function getTradingMarket(): ?TradingMarketInterface
+    public static function getTrading(): ?TradingInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$tradingMarket : BaseService::getTradingMarket();
+        return (self::class === BaseService::class) ? BaseService::$tradingMarket : BaseService::getTrading();
     }
 
     /**

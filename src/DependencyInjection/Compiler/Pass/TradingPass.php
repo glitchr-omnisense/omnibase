@@ -3,12 +3,12 @@
 namespace Base\DependencyInjection\Compiler\Pass;
 
 use Base\DependencyInjection\Compiler\AbstractPass;
-use Base\Service\TradingMarket;
+use Base\Service\Trading;
 
 /**
  *
  */
-class TradingMarketPass extends AbstractPass
+class TradingPass extends AbstractPass
 {
     public function serviceInterface(): ?string 
     { 
@@ -22,7 +22,7 @@ class TradingMarketPass extends AbstractPass
 
     public function classFqcn(): string
     {
-        return TradingMarket::class;
+        return Trading::class;
     }
 
     public function addMethod(): string

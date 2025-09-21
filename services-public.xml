@@ -17,8 +17,8 @@
         <service id="advanced_router" alias="Base\Routing\AdvancedRouter"/>
         <service id="Base\Routing\AdvancedRouterInterface" alias="advanced_router"/>
 
-        <service id="trading_market" alias="Base\Service\TradingMarket" />
-        <service id="Base\Service\TradingMarketInterface" alias="trading_market"/>
+        <service id="trading_market" alias="Base\Service\Trading" />
+        <service id="Base\Service\TradingInterface" alias="trading_market"/>
 
         <service id="wysiwyg_enhancer" alias="Base\Service\WysiwygEnhancer" />
         <service id="Base\Service\WysiwygEnhancerInterface" alias="wysiwyg_enhancer"/>

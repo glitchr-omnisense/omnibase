@@ -616,7 +616,7 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
-        <service id="Base\Service\TradingMarket">
+        <service id="Base\Service\Trading">
             <argument type="service" id="http_client" />
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
@@ -720,7 +720,7 @@
             <argument type="service" id="semantic_enhancer" />
         </service>
 
-        <service id="Base\Twig\Extension\TradingMarketTwigExtension" public="true">
+        <service id="Base\Twig\Extension\TradingTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="trading_market" />
         </service>

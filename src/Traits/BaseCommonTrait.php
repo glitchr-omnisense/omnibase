@@ -6,7 +6,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Service\BaseService;
 use Base\Service\Obfuscator;
-use Base\Service\TradingMarketInterface;
+use Base\Service\TradingInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\SettingBag;
@@ -156,11 +156,11 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var TradingMarketInterface|null
+     * @var TradingInterface|null
      */
-    protected static ?TradingMarketInterface $tradingMarket = null;
+    protected static ?TradingInterface $tradingMarket = null;
 
-    public static function setTradingMarket(?TradingMarketInterface $tradingMarket)
+    public static function setTrading(?TradingInterface $tradingMarket)
     {
         self::$tradingMarket = $tradingMarket;
     }

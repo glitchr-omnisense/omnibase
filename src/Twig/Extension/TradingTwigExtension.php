@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Service\TradingMarketInterface;
+use Base\Service\TradingInterface;
 use Twig\Error\RuntimeError;
 use Twig\Extension\AbstractExtension;
 use Twig\Extra\Intl\IntlExtension;
@@ -12,7 +12,7 @@ use Twig\TwigFunction;
 /**
  *
  */
-final class TradingMarketTwigExtension extends AbstractExtension
+final class TradingTwigExtension extends AbstractExtension
 {
     /**
      * @var IntlExtension
@@ -20,11 +20,11 @@ final class TradingMarketTwigExtension extends AbstractExtension
     protected $intlExtension;
 
     /**
-     * @var TradingMarketInterface
+     * @var TradingInterface
      */
     protected $tradingMarket;
 
-    public function __construct(TradingMarketInterface $tradingMarket)
+    public function __construct(TradingInterface $tradingMarket)
     {
         $this->tradingMarket = $tradingMarket;
         $this->intlExtension = new IntlExtension();
