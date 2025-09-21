@@ -4,6 +4,7 @@ debug:
   is_alias: "Ce champ est un alias"
   is_multiple: "Ce champ peut prendre plusieurs entrées"
   is_inherited: "Ce champ est hérité d'un objet parent"
+  is_descending: "Ce champ est stocké en ordre inverse"
 
 boolean:
   title: "Action démandée sur \"{0}\""

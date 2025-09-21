@@ -203,6 +203,9 @@ class FormTypeExtension extends AbstractTypeExtension
         if (false === $this->classMetadataManipulator->isCollectionOwner($form)) {
             $view->vars['is_inherited'] = true;
         }
+        if ($this->formFactory->guessOrderDirection($form, $options)) {
+            $view->vars['is_descending'] = true;
+        }
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

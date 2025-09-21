@@ -4,6 +4,7 @@ debug:
   is_alias: "This field is an alias to another variable name"
   is_multiple: "This field can have multiple values"
   is_inherited: "This field is inherited from it's parent object"
+  is_descending: "This field is stored in descending order"
 
 boolean:
   title: "Toggle switch on \"{0}\""

@@ -225,8 +225,8 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
         return $widths;
     
     }
-    public function width(): ?int { return $this->getWidth(); }
-    public function getWidth(): ?int
+    public function width(): ?array { return $this->getWidth(); }
+    public function getWidth(): ?array
     {
         $widths = $this->parameterBag->get('base.twig.themes.widths') ?? [];
         foreach ($widths as $key => &$width) {
@@ -242,11 +242,14 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
             }
         }
 
-        if(!array_key_exists($selectedWidthName, $widths) ) return null;
-
+        if(!array_key_exists($selectedWidthName, $widths) ) return [
+            "id" => "auto",
+            "icon" => "fa-solid fa-fw fa-text-width"
+        ];
+        
         $width = $widths[$selectedWidthName];
         $width["id"] = $selectedWidthName;
-        return $width['value'] ?? null;
+        return $width ?? [];
     }
 
     /**
