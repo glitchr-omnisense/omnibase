@@ -24,6 +24,8 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping\AssociationMapping;
+use Doctrine\ORM\Proxy\InternalProxy;
+use Doctrine\Persistence\Proxy as PersistenceProxy;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -630,6 +632,9 @@ class EntityHydrator implements EntityHydratorInterface
 
             $this->reflProperties[$reflEntity->getName()] = [];
             foreach ($reflEntity->getProperties() as $reflProperty) {
+                if ($reflProperty->isPrivate()) {
+                    continue;
+                }
                 $reflProperty->setAccessible(true);
                 $this->reflProperties[$reflEntity->getName()][$reflProperty->getName()] = $reflProperty;
             }

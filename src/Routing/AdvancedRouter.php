@@ -400,7 +400,6 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function getRoute(?string $routeNameOrUrl = null): ?Route
     {
-
         if ($routeNameOrUrl === null) {
             $routeNameOrUrl = $this->getRequestUri();
         }

@@ -43,6 +43,7 @@ final class ThemizerTwigExtension extends AbstractExtension
             new TwigFunction('compatible_theme', [Themizer::class, 'compatibleLocale'], ['is_safe' => ['all']]),
             new TwigFunction('render_theme_modes', [$this, 'renderModes'], ['needs_environment' => true, 'is_safe' => ['all']]),
             new TwigFunction('render_theme_filters', [$this, 'renderFilters'], ['needs_environment' => true, 'is_safe' => ['all']]),
+            new TwigFunction('render_theme_widths', [$this, 'renderWidths'], ['needs_environment' => true, 'is_safe' => ['all']]),
         ];
     }
 
@@ -59,6 +60,14 @@ final class ThemizerTwigExtension extends AbstractExtension
         return $twig->render($template, array_merge($options, [
             'available_theme_filters' => $this->themizer->getAvailableFilters(),
             'current_theme_filter' => $this->themizer->getFilter(),
+        ]));
+    }
+
+    public function renderWidths(Environment $twig, array $options = [], string $template = '@Base/themizer/widths/dropdown.html.twig'): ?string
+    {
+        return $twig->render($template, array_merge($options, [
+            'available_theme_widths' => $this->themizer->getAvailableWidths(),
+            'current_theme_width' => $this->themizer->getWidth(),
         ]));
     }
 }

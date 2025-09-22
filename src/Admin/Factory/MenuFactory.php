@@ -35,6 +35,7 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
         }
 
         if (MenuItemDto::TYPE_SUBMENU === $menuItemType) {
+            
             $url = $menuItemDto->getLinkUrl();
             $url = parse_url($url);
             $url["query"] ??= "";
@@ -56,11 +57,25 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
         }
 
         if (MenuItemDto::TYPE_URL === $menuItemType) {
+
             $url = $menuItemDto->getLinkUrl();
             $url = parse_url($url);
+
             $url["query"] ??= "";
             $url["query"] = explode_attributes("&", $url["query"]);
             $url["query"] = str_replace("\"", "", implode_attributes("&", $url["query"]));
+
+            $uu = compose_url(
+                $url["scheme"] ?? null,
+                $url["user"] ?? null,
+                $url["password"] ?? null,
+                $url["machine"] ?? null,
+                $url["subdomain"] ?? null,
+                $url["domain"] ?? null,
+                $url["port"] ?? null,
+                $url["path"] ?? null,
+                $url["query"] ?? null
+            );
 
             return compose_url(
                 $url["scheme"] ?? null,

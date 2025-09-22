@@ -219,7 +219,6 @@ class Themizer extends AbstractLocalCache implements ThemizerInterface
         $widths = $this->parameterBag->get('base.twig.themes.widths') ?? [];
         foreach ($widths as $key => &$width) {
             $width["id"] = $key;
-            $width["style"] = "width:".$width."%";
         }
 
         return $widths;

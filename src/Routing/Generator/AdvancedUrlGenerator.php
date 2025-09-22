@@ -128,8 +128,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $this->getContext()->setBaseUrl($parse["base_dir"]);
             }
 
-            $this->getContext()->setHttpPort(80);   // Port already included in host
-            $this->getContext()->setHttpsPort(443); // Port already included in host
+            $this->getContext()->setHttpPort(80);   // Correct port should already be included in host
+            $this->getContext()->setHttpsPort(443); // Correct port should already be included in host
             $this->getContext()->setScheme($parse["scheme"] ?? "https");
             $this->getContext()->setQueryString($parse["query"] ?? "");
         }

@@ -373,6 +373,10 @@ namespace {
 
     function get_url(?string $scheme = null, ?string $http_host = null, ?string $request_uri = null): ?string
     {
+        $http_host = $http_host ? $http_host : null;
+        $scheme = $scheme ? $scheme : null;
+        $request_uri = $request_uri ? $request_uri : null;
+
         $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"] ?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
         $scheme = $scheme && (strcasecmp('on', $scheme) == 0 || strcasecmp('https', $scheme) == 0);
         $scheme = $scheme ? "https" : "http";
@@ -472,29 +476,68 @@ namespace {
         ?string         $path = null,
         ?string         $query = null,
         ?string         $fragment = null
-    ): array|string|int|false|null
-    {
-        $scheme = ($domain && $scheme) ? $scheme . "://" : null;
-        $user = ($domain && $user) ? $user . "@" : null;
-        $password = ($domain && $user && $password) ? ":" . $password : null;
+    ): string {
+        // Only build scheme if domain is provided
+        $schemePart = ($domain && $scheme) ? $scheme . "://" : '';
 
-        $subdomain = ($domain && $subdomain) ? $subdomain . "." : null;
-        $machine = ($domain && $machine) ? $machine . "." : null;
-        $port = ($domain && $port && $port != 80 && $port != 443) ? ":" . $port : null;
+        // User:password@ part
+        $userPart = '';
+        if ($domain && $user) {
+            $userPart = $user;
+            if ($password) {
+                $userPart .= ':' . $password;
+            }
+            $userPart .= '@';
+        }
 
-        $queryInPath = $path ? (explode("?", $path)[1] ?? null) : null;
-        $path = $path ? (explode("?", $path)[0] ?? null) : null;
+        // Machine and subdomain
+        $machinePart = ($domain && $machine) ? $machine . '.' : '';
+        $subdomainPart = ($domain && $subdomain) ? $subdomain . '.' : '';
 
-        if($queryInPath) $query = $query ? $queryInPath."&".$query : $queryInPath;
-            $query = $query ? "?" . $query : null;
+        // Port
+        $portPart = ($domain && $port && !in_array($port, [80, 443])) ? ':' . $port : '';
 
-        if($path != null && $path != "/" && str_ends_with($path, "/")) $path = null;
-        $pathToQuerySlash = ($path != null && !str_ends_with($path, "/") && !empty($query) ? "/" : "");
+        // Split path and query if path contains ?
+        $queryInPath = null;
+        if ($path) {
+            $parts = explode('?', $path, 2);
+            $path = $parts[0];
+            if (isset($parts[1])) {
+                $queryInPath = $parts[1];
+            }
+        }
 
-        $fragment = $fragment and !str_starts_with($fragment, "#") ? "#".$fragment : null;
-        
-        $url = $scheme . $machine . $subdomain . $domain . $port . $user . $password . $path . $pathToQuerySlash . $query. $fragment;
-        return $url ?: "/";
+        // Merge queries
+        if ($queryInPath) {
+            $query = $query ? $queryInPath . '&' . $query : $queryInPath;
+        }
+        $queryPart = $query ? '?' . $query : '';
+
+        // Normalize path
+        $path = rtrim($path ?? '', '/'); // remove trailing slash
+        $pathPart = $path !== '' ? $path : '';
+        $pathToQuerySlash = ($pathPart !== '' && $queryPart !== '') ? '/' : '';
+
+        // Normalize fragment
+        if ($fragment && !str_starts_with($fragment, '#')) {
+            $fragment = '#' . $fragment;
+        }
+        $fragmentPart = $fragment ?? '';
+
+        // Compose full URL
+        $url = $schemePart
+            . $userPart
+            . $password // already included in userPart if present
+            . $machinePart
+            . $subdomainPart
+            . $domain
+            . $portPart
+            . $pathPart
+            . $pathToQuerySlash
+            . $queryPart
+            . $fragmentPart;
+
+        return $url ?: '/';
     }
 
     // NB: Path variable should not be removed, at most empty string..
@@ -525,6 +568,7 @@ namespace {
         }
 
         if (array_key_exists("host", $parse)) {
+
             $port = array_key_exists("port", $parse) ? ":" . $parse["port"] : "";
             $parse["host"] = $parse["host"] . $port;
 
@@ -551,7 +595,7 @@ namespace {
                     $parse["domain"] = $match[1];
                 }
                 if (count($match) > 2) {
-                    $parse["port"] = $match[2];
+                    $parse["port"] = intval($match[2]);
                 }
 
                 $subdomain = str_rstrip($hostWithoutPort, "." . $parse["domain"]);
@@ -576,7 +620,7 @@ namespace {
                     $parse["domain"] = $match[1];
                 }
                 if (count($match) > 2) {
-                    $parse["port"] = $match[2];
+                    $parse["port"] = intval($match[2]);
                 }
             }
         }

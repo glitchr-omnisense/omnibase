@@ -198,7 +198,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
             $this->getContext()->setHost($parse["host"] ?? "localhost");
             $this->getContext()->setHttpPort((int)($parse["port"] ?? 80));
-            $this->getContext()->setHttpsPort((int)($parse["port"] ?? 8000));
+            $this->getContext()->setHttpsPort((int)($parse["port"] ?? 443));
             $this->getContext()->setQueryString($parse["query"] ?? "");
 
             $pathinfo = parse_url2($pathinfo)["path"] ?? "";
