@@ -540,6 +540,14 @@ namespace {
         return $url ?: '/';
     }
 
+    function strtobool(string $val): bool {
+        return match(strtolower($val)) {
+            'on', 'true', '1', 'yes' => true,
+            'off', 'false', '0', 'no' => false,
+            default => false,
+        };
+    }
+
     // NB: Path variable should not be removed, at most empty string..
     function parse_url2(string $url, int $component = -1, string $base = "/"): array|string|int|false|null
     {
@@ -615,7 +623,9 @@ namespace {
                 $domain = explode(".", $match[1]);
                 $parse["sld"] = first($domain);
                 $parse["tld"] = implode(".", tail($domain));
+            
             } elseif (preg_match('/^([a-z0-9][a-z0-9\-]{0,63}?)\:?([0-9]{1,5})?$/i', strtolower($parse["host"] ?? ""), $match)) {
+            
                 if (count($match) > 1) {
                     $parse["domain"] = $match[1];
                 }
@@ -623,6 +633,8 @@ namespace {
                     $parse["port"] = intval($match[2]);
                 }
             }
+
+            $parse["host"] = explode(":", $parse["host"] ?? "")[0];
         }
 
         $parse["path"] = $root . $path;

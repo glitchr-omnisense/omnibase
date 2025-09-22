@@ -196,9 +196,28 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
                 $parse = parse_url2(get_url()) ?? [];
             }
 
+            $validHttpPort = json_decode($_ENV["HTTP_PORT"] ?? "[]", true);
+            $validHttpsPort = json_decode($_ENV["HTTPS_PORT"] ?? "[]", true);
+            $isHttpsEnv = strtobool($_ENV["HTTPS"] ?? "off");
+            $scheme = $parse['scheme'] ?? ($isHttpsEnv ? 'https' : 'http');
+            $port = isset($parse['port']) ? (int)$parse['port'] : null;
+
+            // Regularize HTTP/HTTPS ports
+            if (!empty($port) && in_array($port, $validHttpPort)) $httpPort = $port;
+            else $httpPort = first($validHttpPort);
+            if (!empty($port) && in_array($port, $validHttpsPort)) $httpsPort = $port;
+            else $httpsPort = first($validHttpsPort);
+
+            if ($scheme === 'https') {
+                if (!in_array($port, $validHttpsPort)) $httpsPort = first($validHttpsPort);
+            } else {
+                if (!in_array($port, $validHttpPort)) $httpPort = first($validHttpPort);
+            }
+
+            // Save in context
+            $this->getContext()->setHttpPort($httpPort);
+            $this->getContext()->setHttpsPort($httpsPort);
             $this->getContext()->setHost($parse["host"] ?? "localhost");
-            $this->getContext()->setHttpPort((int)($parse["port"] ?? 80));
-            $this->getContext()->setHttpsPort((int)($parse["port"] ?? 443));
             $this->getContext()->setQueryString($parse["query"] ?? "");
 
             $pathinfo = parse_url2($pathinfo)["path"] ?? "";

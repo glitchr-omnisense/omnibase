@@ -107,8 +107,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     public function resolveParameters(?array $routeParameters = null): ?array
     {
         if ($routeParameters === null) {
+
             $parse = parse_url2(get_url(), -1, self::$router->getBaseDir()); // Make sure also it gets the basic context
+
         } else {
+
             // Use either parameters or $_SERVER variables to determine the host to provide
             $scheme = array_pop_key("_scheme", $routeParameters) ?? $this->getContext()->getScheme();
             $baseDir = array_pop_key("_base_dir", $routeParameters) ?? $this->getContext()->getBaseUrl();
@@ -128,8 +131,27 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $this->getContext()->setBaseUrl($parse["base_dir"]);
             }
 
-            $this->getContext()->setHttpPort(80);   // Correct port should already be included in host
-            $this->getContext()->setHttpsPort(443); // Correct port should already be included in host
+            $validHttpPort = json_decode($_ENV["HTTP_PORT"] ?? "[]", true);
+            $validHttpsPort = json_decode($_ENV["HTTPS_PORT"] ?? "[]", true);
+            $isHttpsEnv = strtobool($_ENV["HTTPS"] ?? "off");
+            $scheme = $parse['scheme'] ?? ($isHttpsEnv ? 'https' : 'http');
+            $port = isset($parse['port']) ? (int)$parse['port'] : null;
+
+            // Regularize HTTP/HTTPS ports
+            if (!empty($port) && in_array($port, $validHttpPort)) $httpPort = $port;
+            else $httpPort = first($validHttpPort);
+            if (!empty($port) && in_array($port, $validHttpsPort)) $httpsPort = $port;
+            else $httpsPort = first($validHttpsPort);
+
+            if ($scheme === 'https') {
+                if (!in_array($port, $validHttpsPort)) $httpsPort = first($validHttpsPort);
+            } else {
+                if (!in_array($port, $validHttpPort)) $httpPort = first($validHttpPort);
+            }
+
+            // Save in context
+            $this->getContext()->setHttpPort($httpPort);
+            $this->getContext()->setHttpsPort($httpsPort);
             $this->getContext()->setScheme($parse["scheme"] ?? "https");
             $this->getContext()->setQueryString($parse["query"] ?? "");
         }
@@ -140,6 +162,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         $referenceType = array_key_exists("_host", $routeParameters) && $routeParameters["_host"] !== null ? self::ABSOLUTE_URL : $referenceType;
+        $isHttpsEnv = strtobool($_ENV["HTTPS"] ?? "off");
 
         //
         // Prevent to generate custom route with Symfony internal route.
@@ -161,18 +184,36 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // Update context, transforms requested route by adding parameters
         if (($route = self::$router->getRoute($routeName))) {
             
-            if ($route->getHost()) {
-                $referenceType = self::ABSOLUTE_URL;
-            }
+            $isHttpsEnv = strtobool($_ENV["HTTPS"] ?? "off");
+            if ($route->getHost() || $isHttpsEnv) $referenceType = self::ABSOLUTE_URL;
 
             $host = $route->getHost() ? $route->getHost() : self::$router->getHost();
-            $host = explode(":", $host)[0]; // Remove port from host..
+            $host = explode(":", $host)[0]; // Force removing port from host..
             $this->getContext()->setHost($host);
 
-            $port = self::$router->getPort() ?? 80;
-            $this->getContext()->setHttpPort($port == 443 ? 80 : $port);
-            $this->getContext()->setHttpsPort($port == 80 ? 443 : $port);
+            $scheme = self::$router->getScheme() ?? $this->getContext()->getScheme();
+            $port = self::$router->getPort() ?? $this->getContext()->getHttpPort();
 
+            $validHttpPort = json_decode($_ENV["HTTP_PORT"] ?? "[]", true);
+            $validHttpsPort = json_decode($_ENV["HTTPS_PORT"] ?? "[]", true);
+            $scheme = $scheme ?? ($isHttpsEnv ? 'https' : 'http');
+            $port = isset($port) ? (int)$port : null;
+
+            // Regularize HTTP/HTTPS ports
+            if (!empty($port) && in_array($port, $validHttpPort)) $httpPort = $port;
+            else $httpPort = first($validHttpPort);
+            if (!empty($port) && in_array($port, $validHttpsPort)) $httpsPort = $port;
+            else $httpsPort = first($validHttpsPort);
+
+            if ($scheme === 'https') {
+                if (!in_array($port, $validHttpsPort)) $httpsPort = first($validHttpsPort);
+            } else {
+                if (!in_array($port, $validHttpPort)) $httpPort = first($validHttpPort);
+            }
+
+            // Save in context
+            $this->getContext()->setHttpPort($httpPort);
+            $this->getContext()->setHttpsPort($httpsPort);
             $path = $route->getPath();
 
             if (str_contains($host . $path, "{") && str_contains($host . $path, "}")) {
