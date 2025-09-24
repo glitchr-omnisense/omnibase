@@ -2,223 +2,39 @@
 
 <script{% if csp_script_nonce is defined and csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>/*<![CDATA[*/
 
-console.debug("Glitchr WebProfilerBundle: toolbar_js.html.twig loaded: @TODO Make the bar draggable");
-{# document.addEventListener('DOMContentLoaded', function() {
-  // 0) CONFIGURATION: adjust these radii to taste
-  const RADIUS_ALL        = '4px';            // during drag or before snap
-  const RADIUS_SNAPPED_L  = '0px 4px 4px 0px'; // snapped to left: round right side
-  const RADIUS_SNAPPED_R  = '4px 0px 0px 4px'; // snapped to right: round left side
-  const EDGE_THRESHOLD_PX = 5;                // within 5px → animate snap
+{# @TODO: Improve the toolbar drag and drop #}
+{# function makeToolbarDraggable() {
 
-  // 1) Find the toolbar toggle button
-  const selector = '.sf-toolbar.sf-toolbar-closed .sf-toolbarreset .sf-toolbar-toggle-button';
-  const button = document.querySelector(selector);
-  if (!button) {
-    // If the toolbar toggle button isn’t in DOM, bail out.
-    return;
-  }
+       setTimeout(() => {
+        const block = document.querySelector('.sf-toolbarreset');
+        if (!block) return;
 
-  // 2) Key under which we store the button’s last position
-  const STORAGE_KEY = 'sfToolbarTogglePosition';
+        let offsetX = 0, offsetY = 0;
 
-  // 3) Attempt to load a previously saved position from localStorage
-  let saved = null;
-  try {
-    saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  } catch (e) {
-    saved = null;
-  }
-  if (
-    saved &&
-    (saved.edge === 'left' || saved.edge === 'right') &&
-    typeof saved.top === 'number'
-  ) {
-    // Apply the saved position immediately
-    button.style.position     = 'fixed';
-    button.style.top          = saved.top + 'px';
-    button.style.borderRadius = (saved.edge === 'left')
-      ? RADIUS_SNAPPED_L
-      : RADIUS_SNAPPED_R;
+        block.draggable = true;
 
-    if (saved.edge === 'left') {
-      button.style.left  = '0px';
-      button.style.right = '';
-    } else {
-      button.style.right = '0px';
-      button.style.left  = '';
-    }
-  } else {
-    // If no saved data, give the button a uniform radius so it looks nice
-    button.style.borderRadius = RADIUS_ALL;
-  }
+        block.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', '');
+            block.classList.add('dragging');
+            const rect = block.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            console.log(offsetX, offsetY);
+        });
 
-  // 4) Make the button draggable
-  let dragging = false;
-  let offsetX  = 0;
-  let offsetY  = 0;
+        block.addEventListener('dragend', e => {
+            block.classList.remove('dragging');
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            block.style.transform = `translate(${x}px, ${y}px)`;
+            console.log(x,y);
+        });
 
-  // Hint visually that this can be dragged
-  button.style.cursor = 'move';
+        document.addEventListener('dragover', e => e.preventDefault());
+        document.addEventListener('drop', e => e.preventDefault());
+    }, 1000);
+}
 
-  button.addEventListener('mousedown', function(e) {
-    e.preventDefault();
-
-    // Remove any snap‐radius and use the “all‐around” radius during drag
-    button.style.borderRadius = RADIUS_ALL;
-
-    // Record the mouse‐to‐button offset
-    const rect = button.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
-
-    // Switch to fixed positioning (if not already)
-    button.style.position = 'fixed';
-
-    // Clear any “right” so we can place via “left” initially
-    button.style.right = '';
-
-    // Ensure top/left are explicitly set so the button follows the mouse
-    button.style.left = rect.left + 'px';
-    button.style.top  = rect.top + 'px';
-
-    dragging = true;
-    document.body.style.userSelect = 'none'; // prevent text selection
-  });
-
-  document.addEventListener('mousemove', function(e) {
-    if (!dragging) return;
-    e.preventDefault();
-
-    // Compute new left/top so that the cursor remains at the same offset
-    let newLeft = e.clientX - offsetX;
-    let newTop  = e.clientY - offsetY;
-
-    // Clamp vertical (0 <= newTop <= viewportHeight - buttonHeight)
-    const vh = window.innerHeight;
-    const bh = button.getBoundingClientRect().height;
-    if (newTop < 0)        newTop = 0;
-    if (newTop > vh - bh)  newTop = vh - bh;
-
-    // Clamp horizontal (0 <= newLeft <= viewportWidth - buttonWidth)
-    const vw = window.innerWidth;
-    const bw = button.getBoundingClientRect().width;
-    if (newLeft < 0)        newLeft = 0;
-    if (newLeft > vw - bw)  newLeft = vw - bw;
-
-    button.style.left = newLeft + 'px';
-    button.style.top  = newTop + 'px';
-  });
-
-  document.addEventListener('mouseup', function(e) {
-    if (!dragging) return;
-    dragging = false;
-    document.body.style.userSelect = '';
-
-    // At release, decide snapping/animation
-    const rect = button.getBoundingClientRect();
-    const vw   = window.innerWidth;
-    const bw   = rect.width;
-
-    // How far from each edge?
-    const distLeft  = rect.left;
-    const distRight = vw - (rect.left + bw);
-
-    if (distLeft < EDGE_THRESHOLD_PX) {
-      // Release was within 5px of the left edge → animate snap
-      animateSnap('left', rect.top);
-      return;
-    }
-    if (distRight < EDGE_THRESHOLD_PX) {
-      // Release was within 5px of the right edge → animate snap
-      animateSnap('right', rect.top);
-      return;
-    }
-
-    // Otherwise, snap instantly to whichever half‐way point is closer
-    const threshold = vw / 2;
-    if (rect.left + bw / 2 < threshold) {
-      // snap to left instantly
-      button.style.left = '0px';
-      button.style.right = '';
-      button.style.borderRadius = RADIUS_SNAPPED_L;
-      savePosition('left', rect.top);
-    } else {
-      // snap to right instantly
-      button.style.right = '0px';
-      button.style.left  = '';
-      button.style.borderRadius = RADIUS_SNAPPED_R;
-      savePosition('right', rect.top);
-    }
-  });
-
-  // 5) If the window resizes, re‐clamp saved vertical position (and re‐snap to same edge)
-  window.addEventListener('resize', function() {
-    let current = null;
-    try {
-      current = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    } catch (_) {
-      current = null;
-    }
-    if (!current || typeof current.top !== 'number') return;
-
-    // Re‐clamp vertical so it isn’t off‐screen
-    const vh = window.innerHeight;
-    const bh = button.getBoundingClientRect().height;
-    let newTop = current.top;
-    if (newTop > vh - bh) {
-      newTop = Math.max(0, vh - bh);
-    }
-
-    // Re‐apply the same edge (left/right) at that clamped top
-    button.style.position = 'fixed';
-    button.style.top      = newTop + 'px';
-    if (current.edge === 'left') {
-      button.style.left = '0px';
-      button.style.right = '';
-      button.style.borderRadius = RADIUS_SNAPPED_L;
-    } else {
-      button.style.right = '0px';
-      button.style.left  = '';
-      button.style.borderRadius = RADIUS_SNAPPED_R;
-    }
-
-    savePosition(current.edge, newTop);
-  });
-
-  // 6) Helper: animate a smooth snap (200ms) and then store the result
-  function animateSnap(edge, topPx) {
-    // Fix vertical
-    button.style.position = 'fixed';
-    button.style.top = topPx + 'px';
-    // Temporarily enable CSS transition for left/right
-    button.style.transition = 'left 0.2s ease, right 0.2s ease';
-
-    if (edge === 'left') {
-      button.style.left = '0px';
-      button.style.right = '';
-      button.style.borderRadius = RADIUS_SNAPPED_L;
-    } else {
-      button.style.right = '0px';
-      button.style.left  = '';
-      button.style.borderRadius = RADIUS_SNAPPED_R;
-    }
-
-    // After the 200ms animation, remove the transition so future moves are instant
-    setTimeout(function() {
-      button.style.transition = '';
-      savePosition(edge, topPx);
-    }, 210); // slight buffer > 200ms
-  }
-
-  // 7) Helper: save { edge: "left"|"right", top: number } to localStorage
-  function savePosition(edge, topPx) {
-    const data = { edge: edge, top: topPx };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (err) {
-      console.warn('Could not save toolbar toggle position:', err);
-    }
-  }
-}); #}
+makeToolbarDraggable(); #}
 
 </script>

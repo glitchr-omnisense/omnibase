@@ -1,5 +1,15 @@
 {% include "@!WebProfiler/Profiler/toolbar.css.twig" %}
 
+.sf-toolbarreset[draggable="true"] {
+    cursor: grab;       
+    user-select: none;  
+    touch-action: none; 
+}
+
+.sf-toolbarreset[draggable="true"].dragging {
+    cursor: grabbing;
+    opacity: 0.9;
+}
 
 .sf-toolbar-block:hover .sf-toolbar-info 
 { 
