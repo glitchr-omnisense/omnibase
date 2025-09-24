@@ -239,7 +239,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                                     ->defaultValue('%env(APP_ENV)%')
                                 ->end()
                                 ->booleanNode('reduction')
-                                    ->defaultValue(false)
+                                    ->defaultValue(null)
                                 ->end()
                                 ->variableNode('subdomain')
                                     ->info('Sub-domain')

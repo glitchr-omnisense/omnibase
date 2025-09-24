@@ -73,6 +73,7 @@ function edjs(inputEl, holderId, value = {}, options = {})
 
     var onSave = (savedData) => { if(inputEl != undefined) $(inputEl).val(JSON.stringify(savedData)); }
 
+    if(inputEl == undefined) console.warn("EditorJS in read-only mode (some EventDispatcher .off() may appear)");
     Object.assign(options, {
         readOnly: (inputEl == undefined),
         tools: {

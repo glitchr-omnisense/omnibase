@@ -50,54 +50,55 @@ class RouterSubscriber implements EventSubscriberInterface
     }
 
     public function onKernelRequest(RequestEvent $event)
-    {
+    {        
         if (!$event->isMainRequest()) {
             return;
         }
 
-        // $route = $this->router->getRoute();
-        // if (!$route) {
-        //     return;
-        // }
+        $route = $this->router->getRoute();
+        if (!$route) {
+            return;
+        }
 
         $url = get_url();
 
-        // @TODO: VALIDATE_IP to be checked ? if found to be useful
-        // $ipRestriction = !$this->parameterBag->get("base.router.ip_access") && $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
-        // if ($ipRestriction) {
+        $ipRestriction = !$this->parameterBag->get("base.router.ip_access") && $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
+        $reductionRequired = $this->router->reducesOnFallback();
 
-        //     $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
-        //     if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback) {
-        //         throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
-        //     }
+        if ($ipRestriction) {
 
-        //     $parsedUrl = parse_url2(get_url());
-        //     //$parsedUrl["scheme"] = $this->router->getScheme(); //NB: Some server returns http when connection is not secured
-        //     $parsedUrl["host"] = $this->router->getHostFallback();
-
-        //     $url = compose_url(
-        //         $parsedUrl["scheme"] ?? null,
-        //         null,
-        //         null,
-        //         null,
-        //         null,
-        //         $parsedUrl["host"] ?? null,
-        //         null,
-        //         $parsedUrl["path"] ?? null,
-        //         $parsedUrl["query"] ?? null,
-        //         $parsedUrl["fragment"] ?? null
-        //     );
-
-        // } else
-        if (!$this->router->getHost() && $this->router->reducesOnFallback()) {
+            $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
+            if (!$this->parameterBag->get("base.router.ip_access") && $ipFallback) {
+                throw new \LogicException("IP access is disallowed and your fallback is an IP address. Either change your fallback `HTTP_DOMAIN` or turn on `base.router.ip_access`");
+            }
 
             $parsedUrl = parse_url2(get_url());
-            //$parsedUrl["scheme"] = $this->router->getScheme(); //NB: Some server returns http when connection is not secured
+            $parsedUrl["scheme"] = $this->router->getScheme();
+	        $parsedUrl["host"] = $this->router->getHostFallback();
+            $parsedUrl["port"] = $this->router->getPortFallback();
+
+            $url = compose_url(
+                 $parsedUrl["scheme"] ?? null,
+                 null,
+                 null,
+                 null,
+                 null,
+                 $parsedUrl["host"] ?? null,
+                 $parsedUrl["port"] ?? null,
+                 $parsedUrl["path"] ?? null,
+                 $parsedUrl["query"] ?? null,
+                 $parsedUrl["fragment"] ?? null
+             );
+
+        } elseif ($reductionRequired) {
+
+            $parsedUrl = parse_url2(get_url());
+            $parsedUrl["scheme"] = $this->router->getScheme();
             $parsedUrl["machine"] = $this->router->getMachine() ?? null;
             $parsedUrl["subdomain"] = $this->router->getSubdomain() ?? null;
             $parsedUrl["domain"] = $this->router->getDomain() ?? null;
             $parsedUrl["port"] = $this->router->getPort() ?? null;
-
+            
             $url = compose_url(
                 $parsedUrl["scheme"] ?? null,
                 null,

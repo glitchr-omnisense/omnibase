@@ -162,7 +162,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         $referenceType = array_key_exists("_host", $routeParameters) && $routeParameters["_host"] !== null ? self::ABSOLUTE_URL : $referenceType;
-        $isHttpsEnv = strtobool($_ENV["HTTPS"] ?? "off");
 
         //
         // Prevent to generate custom route with Symfony internal route.
@@ -185,14 +184,16 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if (($route = self::$router->getRoute($routeName))) {
             
             $isHttpsEnv = strtobool($_ENV["HTTPS"] ?? "off");
-            if ($route->getHost() || $isHttpsEnv) $referenceType = self::ABSOLUTE_URL;
-
+            
             $host = $route->getHost() ? $route->getHost() : self::$router->getHost();
             $host = explode(":", $host)[0]; // Force removing port from host..
             $this->getContext()->setHost($host);
 
             $scheme = self::$router->getScheme() ?? $this->getContext()->getScheme();
             $port = self::$router->getPort() ?? $this->getContext()->getHttpPort();
+            if ($route->getHost() || ($isHttpsEnv && $scheme === 'http')) {
+                $referenceType = self::ABSOLUTE_URL; // Force absolute URL if unconsistent HTTP scheme
+            }
 
             $validHttpPort = json_decode($_ENV["HTTP_PORT"] ?? "[]", true);
             $validHttpsPort = json_decode($_ENV["HTTPS_PORT"] ?? "[]", true);

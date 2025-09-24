@@ -542,7 +542,6 @@ class ServiceEntityParser
         $magicFn = null;
         $magicArgs = [];
 
-        // TODO: Safety check in dev mode only (maybe..)
         foreach ($this->classMetadataManipulator->getFieldNames($this->classMetadata->name) as $field) {
             $conflictingOption = null;
             $optionsToCheck = [
@@ -1618,7 +1617,7 @@ class ServiceEntityParser
                 $tableColumn = "LOWER(" . $tableColumn . ")";
             }
 
-            if ($isPartial) { // @TODO: THIS PARTIAL OPTION HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
+            if ($isPartial) {
 
                 if ($tableOperator != self::OPTION_EQUAL && $tableOperator != self::OPTION_NOT_EQUAL) {
                     throw new Exception("Invalid operator for association field \"$fieldName\": " . $tableOperator);
@@ -1971,22 +1970,6 @@ class ServiceEntityParser
             $dispatcher->dispatchEvent(Events::preQuery, $eventArgs);
             $queryBuilder = $eventArgs->getQueryBuilder();
         }
-
-        //
-        // @DEPRECATED: Eager load feature
-        // if ($this->eagerly === false && class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class)) {
-        //     $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . TranslatableWalker::COLUMN_NAME);
-            
-        //     // @TODO this is commented because it generates more queries as no cache result is used..
-        //     // $queryBuilder->addSelect(self::ALIAS_ENTITY."_".TranslatableWalker::COLUMN_NAME);
-
-        //     //
-        //     // @WARN: The above line is commented because of a conflict with __findOneBy..
-        //     // Joining translations in DQL that way create one entry (Translation) per locale
-        //     // It would be good to consider loading 3 language max:
-        //     // - Default one, Lang fallback, and the requested one.
-        //     // If not make sure (in TranslatableWalker?) every request returns exactly 3 entries (NULL entries if not found?)
-        // }
 
         $query = $this->eagerly === false ? $queryBuilder->getQuery() : $this->getEagerQuery($queryBuilder);
         if ($dispatcher->hasListeners(Events::onQuery)) {

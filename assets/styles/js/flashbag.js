@@ -156,5 +156,5 @@ $.fn.flashNotification.defaults = {
     'scrollUp'          : true
 };
 
-window.addEventListener('onbeforeunload', function(event) { $('#flash-messages').flashNotification('reset'); });
+window.addEventListener('beforeunload', function(event) { $('#flash-messages').flashNotification('reset'); });
 window.addEventListener('load', function(event) { $('#flash-messages').flashNotification('init'); });

@@ -389,7 +389,7 @@ namespace {
 	
         return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
-
+    
     /**
      * @param string $dir
      * @return bool
@@ -540,7 +540,8 @@ namespace {
         return $url ?: '/';
     }
 
-    function strtobool(string $val): bool {
+    function strtobool(string|bool $val): bool {
+        if (is_bool($val)) return $val;
         return match(strtolower($val)) {
             'on', 'true', '1', 'yes' => true,
             'off', 'false', '0', 'no' => false,
