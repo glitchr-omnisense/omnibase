@@ -138,7 +138,6 @@ class OrderColumn extends AbstractAnnotation implements ExtensionInlineInterface
 
         $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
         object_hydrate($entity, [$this->orderBy => json_encode($orderBy)]);
-        $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void

@@ -131,7 +131,7 @@ class Slugify extends AbstractAnnotation implements ExtensionOptionInterface
         }
 
         if (!$input) {
-            $input = camel2snake(class_basename($entity), '-');
+            $input = camel2snake(class_basename($entity), '-')."-".$entity->getId()."-".\rand_str(6);
         }
         $input .= !empty($suffix) ? $this->separator . $suffix : '';
 
