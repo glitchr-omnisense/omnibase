@@ -63,7 +63,7 @@ trait TranslatableTrait
     /**
      * @var TranslationInterface[]|Collection
      */
-    protected $translations;
+    protected $translations = null;
 
     /**
      * @return TranslationInterface|ArrayCollection|Collection
@@ -81,10 +81,6 @@ trait TranslatableTrait
      * @param TranslationInterface $translation
      * @return $this
      */
-    /**
-     * @param TranslationInterface $translation
-     * @return $this
-     */
     public function removeTranslation(TranslationInterface $translation)
     {
         if ($this->getTranslations()->contains($translation)) {
@@ -94,9 +90,6 @@ trait TranslatableTrait
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -259,12 +252,6 @@ trait TranslatableTrait
         return null;
     }
 
-    /**
-     * @param $property
-     * @param $value
-     * @return $this
-     * @throws Exception
-     */
     /**
      * @param $property
      * @param $value

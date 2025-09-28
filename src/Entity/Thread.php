@@ -92,6 +92,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         $this->owners = new ArrayCollection();
         $this->connexes = new ArrayCollection();
         $this->taxa = new ArrayCollection();
+        $this->translations = new ArrayCollection();
 
         $this->setParent($parent);
         $this->addOwner($owner);

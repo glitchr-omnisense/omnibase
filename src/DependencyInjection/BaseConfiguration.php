@@ -539,9 +539,9 @@ class BaseConfiguration extends AbstractBaseConfiguration
                                     ->end()
                                 ->end()
                                 ->defaultValue([
-                                    ['name' => 'auto', 'icon' => 'fa fa-fw fa-magic'],
-                                    ['name' => 'dark', 'icon' => 'fa fa-fw fa-moon'],
-                                    ['name' => 'light', 'icon' => 'fa fa-fw fa-sun']
+                                    ['name' => 'auto', 'icon' => 'fa-solid fa-fw fa-circle-half-stroke'],
+                                    ['name' => 'dark', 'icon' => 'fa-solid fa-fw fa-moon'],
+                                    ['name' => 'light', 'icon' => 'fa-solid fa-fw fa-sun']
                                 ])
                             ->end()
                             ->arrayNode('filters')

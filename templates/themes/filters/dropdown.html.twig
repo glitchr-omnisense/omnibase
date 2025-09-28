@@ -1,0 +1,14 @@
+<div class="dropdown-theme-filter-wrapper shrink">
+    <ul class="{{ class|default("") }}" aria-labelledby="dropdown-theme-filter">
+    {% for _key, _filter in available_theme_filters %}
+        {% set current = _key == current_theme_filter.id ? "active" : null %}
+            <li><button class="dropdown-item {{ current }}"
+                    data-id="{{ _filter.id }}" 
+                    data-class="{{ _filter.class }}" 
+                    data-icon="{{ _filter.icon }}">
+                <i class="{{ _filter["icon"] }}"></i>
+                <span>{{ ("@themes.filter." ~ _filter.id ~ "._singular")|trans }}</span>
+        </button></li>
+    {% endfor %}
+    </ul>
+</div>

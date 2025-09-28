@@ -170,7 +170,7 @@ class MediaService extends FileService implements MediaServiceInterface
     public function soundify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
-            return $path;
+            return "";
         }
 
         $sources = $this->audio($path);
@@ -185,7 +185,7 @@ class MediaService extends FileService implements MediaServiceInterface
     public function vidify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
-            return $path;
+            return "";
         }
 
         $sources = $this->video($path);
