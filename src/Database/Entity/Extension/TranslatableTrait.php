@@ -333,8 +333,11 @@ trait TranslatableTrait
 
         //
         // Proxy getter method for current locale
-        $defaultLocale = BaseService::getLocalizer()->getDefaultLocale();
+        $defaultLocale = BaseService::getLocalizer()?->getDefaultLocale();
         $entityIntl = $entity->translate();
+        if(!$entityIntl) {
+            return null;
+        }
 
         $value = null;
         if (method_exists($entityIntl, $property)) {

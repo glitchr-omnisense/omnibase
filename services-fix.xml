@@ -63,6 +63,7 @@
             <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator" />
+            <argument type="service" id="cache.easyadmin" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 

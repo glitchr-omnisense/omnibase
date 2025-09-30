@@ -58,15 +58,20 @@ class SelectConfigurator implements FieldConfiguratorInterface
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         // Formatted value
-        $class = $field->getCustomOption(SelectField::OPTION_CLASS);
+        $values = $field->getValue();
+        $class  = $field->getCustomOption(SelectField::OPTION_CLASS);
         if (!$class) {
-            $values = $field->getValue();
+
             if ($values instanceof Collection) {
-                $class = is_object($values->first()) ? get_class($values->first()) : null;
+
+                $aliasMap = $this->classMetadataManipulator->getClassMetadataCompletor($values->getOwner());
+                $classMetadata = $this->classMetadataManipulator->getClassMetadata($values->getOwner());
+                
+                $propertyName = $aliasMap->aliasNames[$field->getProperty()] ?? $field->getProperty();
+                $class = $classMetadata->getAssociationMapping($propertyName)->declared;                
             }
         }
 
-        $values = $field->getValue();
         $values = is_array($values) ? new ArrayCollection($values) : $values;
         $formattedValues = [];
 
@@ -80,9 +85,14 @@ class SelectConfigurator implements FieldConfiguratorInterface
         if ($showFirst) {
             $displayLimit--;
         }
+        if($displayLimit < 0) {
+            $displayLimit = 0;
+        }
 
         if ($values instanceof Collection) {
+
             foreach ($values as $key => $value) {
+
                 $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
                 $dataClass = $dataClass ?? $defaultClass;
 
@@ -98,9 +108,10 @@ class SelectConfigurator implements FieldConfiguratorInterface
                     }
                 }
             }
-        } else {
-            $value = $field->getValue();
 
+        } else {
+
+            $value = $field->getValue();
             $field->setCustomOption(SelectField::OPTION_RENDER_FORMAT, "text");
 
             $dataClass = $class ?? (is_object($value) ? get_class($value) : null);

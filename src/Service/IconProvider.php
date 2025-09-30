@@ -48,16 +48,18 @@ class IconProvider extends AbstractLocalCache
     {
         $this->routeIcons = $this->getCache("/RouteIcons", function () {
             return array_transforms(function ($route, $controller): ?array {
+                
                 $controller = $controller->getDefault("_controller");
                 if (!$controller) {
                     return [];
                 }
 
-                try {
-                    list($class, $method) = explode("::", $controller);
-                } catch (ErrorException $e) {
+                $parts = explode("::", $controller);
+                if (count($parts) !== 2) {
                     return [];
                 }
+
+                list($class, $method) = $parts;
                 if (!class_exists($class)) {
                     return [];
                 }
@@ -68,6 +70,7 @@ class IconProvider extends AbstractLocalCache
                 }
 
                 return [$route, end($iconAnnotations)->getIcons()];
+
             }, $this->router->getRouteCollection()->all());
         });
 

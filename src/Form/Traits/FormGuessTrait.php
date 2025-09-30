@@ -336,9 +336,9 @@ trait FormGuessTrait
             // Try to guess from Doctrine OrderBy mapping if annotation not found
             if (!$order && $this->classMetadataManipulator && $this->classMetadataManipulator->isEntity($target)) {
                 $mapping = $this->classMetadataManipulator->getMapping($target, $form->getName());
-                if (isset($mapping['orderBy']) && is_array($mapping['orderBy'])) {
+                if (isset($mapping->orderBy) && is_array($mapping->orderBy)) {
                     // Get the first order direction for this field
-                    $orderDirections = array_values($mapping['orderBy']);
+                    $orderDirections = array_values($mapping->orderBy);
                     if (count($orderDirections)) {
                         $order = strtoupper($orderDirections[0]);
                     }
