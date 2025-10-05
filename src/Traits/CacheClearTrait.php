@@ -242,6 +242,69 @@ trait CacheClearTrait
         }
     }
 
+    /**
+     * Generates or deletes a phpinfo.php file in the public directory.
+     *
+     * @param SymfonyStyle $io
+     * @param bool $delete If true, deletes the file instead of generating it.
+     */
+    protected function generatePhpInfo(SymfonyStyle $io, bool $delete = false): void
+    {
+        $targetFile = $this->projectDir . '/public/phpinfo.php';
+
+        // Detect storage backends if available
+        $storageNames = method_exists($this->flysystem, 'getStorageNames')
+            ? $this->flysystem->getStorageNames(false)
+            : [];
+
+        if (!empty($storageNames)) {
+            $io->note(sprintf(
+                "PHP Info file will be generated in the public directory at '%s'.\nDetected storage backends: %s",
+                $targetFile,
+                implode(', ', $storageNames)
+            ));
+        }
+
+        if ($delete) {
+            if (is_file($targetFile)) {
+                if (@unlink($targetFile)) {
+                    $io->success(sprintf('phpinfo.php successfully removed from %s', $targetFile));
+                } else {
+                    $io->error(sprintf('Failed to remove phpinfo.php from %s', $targetFile));
+                }
+            } else {
+                $io->warning(sprintf('phpinfo.php does not exist at %s', $targetFile));
+            }
+            return;
+        }
+
+        $content = <<<'PHP'
+<?php
+use App\Kernel;
+
+$_SERVER["APP_TIMER"] = microtime(true);
+require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
+
+return function (array $context) {
+    if (! (bool) ($context['APP_DEBUG'] ?? false)) {
+        header("Location: .");
+        exit;
+    }
+
+    phpinfo();
+    phpinfo(INFO_MODULES);
+};
+PHP;
+
+        // Try to write the file, handle errors
+        if (@file_put_contents($targetFile, $content) === false) {
+            $io->error(sprintf('Could not write phpinfo.php to %s', $targetFile));
+            return;
+        }
+
+        $io->success(sprintf('phpinfo.php successfully generated at %s', $targetFile));
+    }
+
     protected function generateSymlinks(SymfonyStyle $io): void
     {
         //

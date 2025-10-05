@@ -352,7 +352,7 @@ class EditorController extends AbstractController
             return new Response("Uploaded file lost in the limbo.", 500);
         }
         
-        $operator = $this->parameterBag->get("base.twig.editor.operator");
+        $operator = $this->parameterBag->get("base.twig.editor.storage");
         if (!$operator) {
             return new Response("No storage provided.", 500);
         }
@@ -420,7 +420,7 @@ class EditorController extends AbstractController
         $fileExtension = $mimeType ? $this->mimeTypes->getExtensions($mimeType)[0] ?? null : null;
         $filePath = "/" . $fileUuid . ($fileExtension ? "." . $fileExtension : "");
 
-        $operator = $this->parameterBag->get("base.twig.editor.operator");
+        $operator = $this->parameterBag->get("base.twig.editor.storage");
         if (!file_exists($file->getPathname())) {
             return new Response("Uploaded file lost in the limbo.", 500);
         }

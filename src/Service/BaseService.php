@@ -12,7 +12,6 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Traits\BaseTrait;
-use Symfony\Component\HttpKernel\RebootableInterface;
 
 use Symfony\Component\Form\FormInterface;
 

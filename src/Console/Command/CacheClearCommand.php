@@ -152,8 +152,11 @@ EOF
             $this->webpackCheck($io);
             $this->technicalSupportCheck($io);
             $this->clearOPCache($io);
-            if ($alreadyStarted) 
+
+            $this->generatePhpInfo($io, !$this->router->isDebug());
+            if ($alreadyStarted) {
                 $this->generateSymlinks($io);
+            }
         }
         
 
