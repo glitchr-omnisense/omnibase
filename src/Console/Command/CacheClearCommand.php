@@ -18,7 +18,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
-use Symfony\Bundle\FrameworkBundle\Command\CacheClearCommand as SymfonyCacheClearCommand;
 use Base\Routing\AdvancedRouterInterface;
 
 #[AsCommand(name: 'cache:clear', aliases: [], description: '')]

@@ -135,6 +135,11 @@ trait BaseTrait
         return BaseService::getProjectDir() . "/data";
     }
 
+    public static function getFixtureDir(): string
+    {
+        return BaseService::getProjectDir() . "/fixtures";
+    }
+
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator
     {
         return (self::class === BaseService::class) ? BaseService::$classMetadataManipulator : BaseService::getClassMetadataManipulator();
