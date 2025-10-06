@@ -6,6 +6,7 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
+use EasyCorp\Bundle\EasyAdminBundle\Config\ActionGroup as EaActionGroup;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionConfigDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -168,7 +169,7 @@ return "";                        if (get_parent_class($entity) !== false) {
      * @param callable|null $callable
      * @return $this|Actions
      */
-    public function add(string $pageName, EaAction|string $actionNameOrObject, ?string $actionIcon = null, callable $callable = null)
+    public function add(string $pageName, EaAction|EaActionGroup|string $actionNameOrObject, ?string $actionIcon = null, ?callable $callable = null)
     {
         parent::add($pageName, $actionNameOrObject);
         $actionDto = $this->dto->getAction($pageName, $actionNameOrObject);
