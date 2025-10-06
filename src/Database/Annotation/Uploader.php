@@ -62,7 +62,7 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
         array $formats = [])
     {
         $this->pool = $pool;
-        $this->storage = $storage ?? BaseService::getParameterBag("base.uploader.storage");
+        $this->storage = $storage ?? $this->getParameterBag()->get("base.uploader.storage");
         $this->missable = $missable;
         $this->fetch = $fetch;
         $this->config = $config;
