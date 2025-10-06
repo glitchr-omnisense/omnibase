@@ -27,7 +27,7 @@ class AttributeIntl implements TranslationInterface
 
     #[ORM\Column(type:"json")]
     #[AssertBase\File(max_size:"2MB", groups:["new", "edit"])]
-    #[Uploader(storage:"local.storage", max_size:"2MB", missable:true)]
+    #[Uploader(max_size:"2MB", missable:true)]
     #[Associate(metadata:"class")]
     protected $value;
 

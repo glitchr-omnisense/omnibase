@@ -61,12 +61,6 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
         self::$projectDir = dirname(__FILE__, 6);
         self::$publicDir = self::$projectDir . "/public";
-
-        if (!$this->hasStorage("local.storage")) {
-            throw new InvalidArgumentException("\"local.storage\" storage not found in your Flysystem configuration.");
-        }
-
-        $this->setDefaultStorage("local.storage");
     }
 
     /**

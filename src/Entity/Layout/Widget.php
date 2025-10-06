@@ -121,7 +121,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
     }
 
     #[ORM\Column(type:"text", nullable:true)]
-    #[Uploader(storage:"local.storage", max_size:"1024KB", mime_types:["image/*"])]
+    #[Uploader(max_size:"1024KB", mime_types:["image/*"])]
     #[AssertBase\File(max_size:"1024KB", mime_types:["image/*"], groups:["new", "edit"])]
     protected $thumbnail;
 

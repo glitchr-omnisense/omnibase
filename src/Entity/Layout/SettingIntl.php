@@ -64,7 +64,7 @@ class SettingIntl implements TranslationInterface
     }
 
     #[ORM\Column(type:"json")]
-    #[Uploader(storage:"local.storage", max_size:"2MB", missable:true)]
+    #[Uploader(max_size:"2MB", missable:true)]
     #[Associate(metadata:"class")]
     protected $value = null;
 

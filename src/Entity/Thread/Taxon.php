@@ -83,7 +83,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     }
 
     #[ORM\Column(type:"text", nullable:true)]
-    #[Uploader(storage:"local.storage", max_size:"2MB", mime_types:["image/*"])]
+    #[Uploader(max_size:"2MB", mime_types:["image/*"])]
     protected $icon;
 
     /**

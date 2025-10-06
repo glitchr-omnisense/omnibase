@@ -2,6 +2,8 @@
 
 namespace Base\Twig\Extension;
 
+use Base\Service\BaseService;
+
 use Base\Service\EditorEnhancerInterface;
 use Base\Service\WysiwygEnhancerInterface;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
@@ -61,9 +63,9 @@ final class HtmlTwigExtension extends AbstractExtension
         if ($mediaConfig) {
             
             $mediaConfig = is_array($mediaConfig) ? $mediaConfig : [];
-            $mediaConfig["storage"] ??= "local.media";
+            $mediaConfig["storage"] ??= BaseService::getParameterBag("base.editor.storage");;
 
-            $htmlOrJson = $enhancer->enhanceMedia($htmlOrJson, );
+            $htmlOrJson = $enhancer->enhanceMedia($htmlOrJson);
         }
 
         $maxHeadings = array_pop_key('headings', $options) ?? 0;

@@ -7,6 +7,7 @@ use Base\Annotations\AnnotationReader;
 use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
+use Base\Service\BaseService;
 use Base\Validator\Constraints\File as ConstraintsFile;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -51,7 +52,7 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
     protected int $maxSize;
 
     public function __construct(
-        string $pool = "default", 
+        ?string $pool = "_",
         ?string $max_size = null, 
         ?string $storage = null, 
         bool $missable = false, 
@@ -61,7 +62,7 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
         array $formats = [])
     {
         $this->pool = $pool;
-        $this->storage = $storage;
+        $this->storage = $storage ?? BaseService::getParameterBag("base.uploader.storage");
         $this->missable = $missable;
         $this->fetch = $fetch;
         $this->config = $config;

@@ -56,7 +56,7 @@ class Tooltip implements TranslatableInterface, IconizeInterface
     }
 
     #[ORM\Column(type:"text", nullable:true)]
-    #[Uploader(storage:"local.storage", max_size:"2MB", mime_types:["image/*"], missable:true)]
+    #[Uploader(max_size:"2MB", mime_types:["image/*"], missable:true)]
     #[AssertBase\File(max_size:"2MB", mime_types:["image/*"], groups:["new", "edit"])]
     protected $icon;
 

@@ -66,7 +66,7 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
     }
 
     #[ORM\Column(type:"text")]
-    #[Uploader(storage:"local.storage", max_size:"4096K")]
+    #[Uploader(max_size:"4096K")]
     #[AssertBase\File(max_size:"4096K", groups:["new", "edit"])]
     protected $download;
 

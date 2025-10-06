@@ -39,7 +39,8 @@ class ContactModel extends AbstractModel
 
     /**
      * @var array
-     * @Uploader(storage="local.storage", max_size="5MB", mime_types={"image/*"})
      */
+
+    #[Uploader(max_size: "5MB", mime_types: ["image/*"])]
     public array $attachments;
 }
