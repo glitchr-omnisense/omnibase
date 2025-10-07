@@ -252,7 +252,6 @@ class MediaController extends AbstractController
     #[Route("/images/{data}/image.webp", name: "imageWebp", requirements: ["data" => ".+"])]
     public function ImageWebp($data): Response
     {
-     
         $config = $this->mediaService->resolve($data);
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();

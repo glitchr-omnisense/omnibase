@@ -13,3 +13,28 @@ audience:
 event:
     _singular: Événement
     _plural: Événements
+
+    night:
+        _singular: Nuit
+        _plural: Nuits
+    summer:
+        _singular: Été
+        _plural: Étés
+    winter:
+        _singular: Hiver
+        _plural: Hivers
+    spring:
+        _singular: Printemps
+        _plural: Printemps
+    autumn:
+        _singular: Automne
+        _plural: Automnes
+    halloween:
+        _singular: Halloween
+        _plural: Halloweens
+    christmas:
+        _singular: Noël
+        _plural: Noëls
+    easter:
+        _singular: Pâques
+        _plural: Pâques

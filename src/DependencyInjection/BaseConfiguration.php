@@ -384,6 +384,14 @@ class BaseConfiguration extends AbstractBaseConfiguration
                     ->end()
                 ->end()
 
+            ->arrayNode('files')->addDefaultsIfNotSet()
+                ->children()
+                    ->scalarNode('storage')
+                        ->defaultValue(null)
+                        ->end()
+                    ->end()
+                ->end()
+
             ->arrayNode('images')->addDefaultsIfNotSet()
                 ->children()
                     ->scalarNode('max_resolution')

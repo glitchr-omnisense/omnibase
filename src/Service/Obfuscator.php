@@ -129,8 +129,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 
             return $hash ?: null;
 
-        } catch (ErrorException $e) {
-        }
+        } catch (ErrorException $e) {}
 
         if ($short && Uuid::isValid($uuid)) {
             $this->deleteCache("/Identifiers/" . $uuid);

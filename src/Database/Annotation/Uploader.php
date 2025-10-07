@@ -362,7 +362,7 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
 
             if ($adapter instanceof LocalFilesystemAdapter) {
                 if ($operator->fileExists($path)) {
-                    $fileList[] = new File($that->getFlysystem()->prefixPath($path));
+                    $fileList[] = new File($that->getFlysystem()->prefixPath($path, $that->getStorage()));
                 }
 
                 continue;

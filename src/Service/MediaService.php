@@ -9,7 +9,6 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
-use Base\Imagine\Filter\Format\SvgFilterInterface;
 use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Imagine\Image\Palette\RGB;
@@ -59,8 +58,6 @@ class MediaService extends FileService implements MediaServiceInterface
      */
     protected ?MediaController $mediaController = null;
 
-    protected string $localCache;
-
     /** @var ?int */
     protected ?int $timeout;
     /** @var ?int */
@@ -78,17 +75,17 @@ class MediaService extends FileService implements MediaServiceInterface
     protected ?bool $enableWebp;
 
     public function __construct(
-        Environment           $twig,
-        AdvancedRouterInterface       $router,
-        ObfuscatorInterface   $obfuscator,
-        FlysystemInterface    $flysystem,
-        ParameterBagInterface $parameterBag,
-        ImagineInterface      $imagineBitmap,
-        ImagineInterface      $imagineSvg,
-        ?Profiler             $profiler
+        Environment             $twig,
+        AdvancedRouterInterface $router,
+        ObfuscatorInterface     $obfuscator,
+        FlysystemInterface      $flysystem,
+        ParameterBagInterface   $parameterBag,
+        ImagineInterface        $imagineBitmap,
+        ImagineInterface        $imagineSvg,
+        ?Profiler               $profiler
     )
     {
-        parent::__construct($twig, $router, $obfuscator, $flysystem);
+        parent::__construct($twig, $router, $obfuscator, $flysystem, $parameterBag);
 
         $this->profiler = $profiler;
 
@@ -104,9 +101,6 @@ class MediaService extends FileService implements MediaServiceInterface
         $this->debug = $parameterBag->get("base.images.debug");
 
         $this->twig = $twig;
-
-        // Local cache directory for filtered images
-        $this->localCache = "local.cache";
     }
 
     /**
@@ -354,8 +348,8 @@ class MediaService extends FileService implements MediaServiceInterface
     public function lightbox(
         null|array|string $path,
         array             $attributes = [],
-        array|string      $lightboxId = null,
-        array|string      $lightboxTitle = null,
+        null|array|string      $lightboxId = null,
+        null|array|string      $lightboxTitle = null,
         array             $lightboxAttributes = [],
                           ...$srcset
     ): null|array|string

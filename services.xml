@@ -562,11 +562,11 @@
             <argument type="service" id="advanced_router" />
             <argument type="service" id="obfuscator" />
             <argument type="service" id="flysystem" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Service\MediaService" public="true" parent="Base\Service\FileService">
             <tag name="twig.runtime" />
-            <argument type="service" id="parameter_bag" />
             <argument type="service" id="imagine.bitmap" />
             <argument type="service" id="imagine.svg" />
             <argument type="service" id="profiler" on-invalid="null" />
