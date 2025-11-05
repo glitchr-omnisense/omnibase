@@ -150,8 +150,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
 
             // Save in context
-            $this->getContext()->setHttpPort($httpPort);
-            $this->getContext()->setHttpsPort($httpsPort);
+            $this->getContext()->setHttpPort($httpPort ?? 80);
+            $this->getContext()->setHttpsPort($httpsPort ?? 443);
             $this->getContext()->setScheme($parse["scheme"] ?? "https");
             $this->getContext()->setQueryString($parse["query"] ?? "");
         }
@@ -168,7 +168,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         if (str_starts_with($routeName, "_") || !self::$router->useAdvancedFeatures()) {
             $routeParameters = $this->resolveParameters($routeParameters);
-            return parent::generate($routeName, $routeParameters, $referenceType);
+            $routeUrl = parent::generate($routeName, $routeParameters, $referenceType);
+            $routeUrl = str_replace(
+                ["http://", "https://"], // Ignore forced scheme from Symfony internal route generation
+                [self::$router->getScheme() . "://", self::$router->getScheme() . "://"], $routeUrl
+            );
+
+            return $routeUrl;
         }
 
         //
@@ -199,7 +205,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $validHttpsPort = json_decode($_ENV["HTTPS_PORT"] ?? "[]", true);
             $scheme = $scheme ?? ($isHttpsEnv ? 'https' : 'http');
             $port = isset($port) ? (int)$port : null;
-
+            
             // Regularize HTTP/HTTPS ports
             if (!empty($port) && in_array($port, $validHttpPort)) $httpPort = $port;
             else $httpPort = first($validHttpPort);
@@ -213,8 +219,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
 
             // Save in context
-            $this->getContext()->setHttpPort($httpPort);
-            $this->getContext()->setHttpsPort($httpsPort);
+            $this->getContext()->setHttpPort($httpPort ?? 80);
+            $this->getContext()->setHttpsPort($httpsPort ?? 443);
             $path = $route->getPath();
 
             if (str_contains($host . $path, "{") && str_contains($host . $path, "}")) {

@@ -466,17 +466,34 @@ namespace {
     }
 
     function compose_url(
-        ?string         $scheme = null,
-        ?string         $user = null,
-        ?string         $password = null,
-        ?string         $machine = null,
-        ?string         $subdomain = null,
-        ?string         $domain = null,
-        string|int|null $port = null,
-        ?string         $path = null,
-        ?string         $query = null,
-        ?string         $fragment = null
+        string|array|null $scheme = null,
+        ?string           $user = null,
+        ?string           $password = null,
+        ?string           $machine = null,
+        ?string           $subdomain = null,
+        ?string           $domain = null,
+        string|int|null   $port = null,
+        ?string           $path = null,
+        ?string           $query = null,
+        ?string           $fragment = null
     ): string {
+
+        if (is_array($scheme)) {
+            $parts = $scheme;
+            return compose_url(
+                $parts["scheme"] ?? null,
+                $parts["user"] ?? null,
+                $parts["password"] ?? null,
+                $parts["machine"] ?? null,
+                $parts["subdomain"] ?? null,
+                $parts["domain"] ?? null,
+                $parts["port"] ?? null,
+                $parts["path"] ?? null,
+                $parts["query"] ?? null,
+                $parts["fragment"] ?? null
+            );
+        }
+
         // Only build scheme if domain is provided
         $schemePart = ($domain && $scheme) ? $scheme . "://" : '';
 
@@ -550,8 +567,10 @@ namespace {
     }
 
     // NB: Path variable should not be removed, at most empty string..
-    function parse_url2(string $url, int $component = -1, string $base = "/"): array|string|int|false|null
+    function parse_url2(?string $url, int $component = -1, string $base = "/"): array|string|int|false|null
     {
+        if ($url === null) return null;
+        
         $noscheme = !str_contains($url, "://");
         if ($noscheme) {
             $url = "file://" . $url;
