@@ -347,9 +347,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->updatedAt = new DateTime("now"); // Plain password is not an ORM variable..
     }
 
-    public function eraseCredentials(): void
+    public function __serialize(): array
     {
-        $this->plainPassword = null;
+        $this->erasePlainPassword();
+        return (array) $this;
     }
 
     /**
@@ -359,6 +360,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         $this->plainPassword = null;
         return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        $this->erasePlainPassword();
     }
 
     /**

@@ -278,7 +278,6 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         try {
             $operator->createDirectory($path, $config);
         } catch (UnableToDeleteFile|UnableToDeleteDirectory $e) {
-            throw new NotDeletableException("Unable to create directory \"$path\".. " . $e->getMessage());
         }
         return true;
     }

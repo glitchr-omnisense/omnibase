@@ -50,7 +50,7 @@ class RouterSubscriber implements EventSubscriberInterface
     }
 
     public function onKernelRequest(RequestEvent $event)
-    {        
+    {
         if (!$event->isMainRequest()) {
             return;
         }
@@ -93,7 +93,6 @@ class RouterSubscriber implements EventSubscriberInterface
         } elseif ($reductionRequired) {
 
             $parsedUrl = parse_url2(get_url());
-            $parsedUrl["scheme"] = $this->router->getScheme();
             $parsedUrl["machine"] = $this->router->getMachine() ?? null;
             $parsedUrl["subdomain"] = $this->router->getSubdomain() ?? null;
             $parsedUrl["domain"] = $this->router->getDomain() ?? null;
@@ -114,7 +113,7 @@ class RouterSubscriber implements EventSubscriberInterface
         }
 
         // Redirect to sanitized url
-        if ($url != get_url()) {
+        if ($url != get_url("http") && $url != get_url("https")) {
             $event->setResponse(new RedirectResponse($url));
             $event->stopPropagation();
         }

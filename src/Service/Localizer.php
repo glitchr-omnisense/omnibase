@@ -195,11 +195,13 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     {
         $currentLocale = $this->getLocale();
         if ($request !== null) {
-            if (self::isLate()) {
-                $method = __CLASS__ . "::" . __FUNCTION__;
-                $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
-                throw new Exception("You cannot call " . $method . ", after \"" . $location . "\" got triggered.");
-            }
+
+            // Conflict with FrankenPHP request lifecycle
+            // if (self::isLate()) {
+            //     $method = __CLASS__ . "::" . __FUNCTION__;
+            //     $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
+            //     throw new Exception("You cannot call " . $method . ", after \"" . $location . "\" got triggered.");
+            // }
 
             // Symfony request needs underscore separator, regardless of the constant defined above
             $request->setLocale(substr_replace($locale, "_", 2, 1));

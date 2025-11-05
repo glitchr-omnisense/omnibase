@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\SessionStorageFactoryInterf
 use Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface;
 
 // Help opcache.preload discover always-needed symbols
-class_exists(DynamicSessionStorage::class);
+// class_exists(DynamicSessionStorage::class);
 
 /**
  * @author Jérémy Derussé <jeremy@derusse.com>
@@ -34,7 +34,7 @@ class DynamicSessionStorageFactory implements SessionStorageFactoryInterface
     /**
      * @see DynamicSessionStorage constructor.
      */
-    public function __construct(array $options = [], AbstractProxy|SessionHandlerInterface $handler = null, MetadataBag $metaBag = null, bool $secure = false)
+    public function __construct(array $options = [], AbstractProxy|SessionHandlerInterface|null $handler = null, MetadataBag|null $metaBag = null, bool $secure = false)
     {
         $this->options = $options;
         $this->handler = $handler;
