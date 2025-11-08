@@ -17,9 +17,6 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function renderAsTooltip()
     {
         $this->dto->addHtmlAttributes(['tooltip' => true]);
@@ -30,9 +27,6 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function targetBlank()
     {
         $this->dto->addHtmlAttributes(['target' => "_blank"]);
@@ -40,9 +34,6 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */

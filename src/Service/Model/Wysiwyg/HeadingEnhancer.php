@@ -45,7 +45,6 @@ class HeadingEnhancer implements HeadingEnhancerInterface
         $maxLevel ??= 6;
         $maxLevel = max(1, $maxLevel);
 
-        
         $dom = new DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
         $dom->loadHTML('<?xml encoding="UTF-8">' . mb_utf8($html), LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NONET);
@@ -58,7 +57,7 @@ class HeadingEnhancer implements HeadingEnhancerInterface
             foreach ($tags as $tag) {
     
                 $content = str_replace("&nbsp;", " ", $tag->nodeValue);
-                // $content = trim(str_strip_nonprintable(strip_tags($content)));
+                
                 $id = strtolower($this->slugger->slug($content));
                 $headlines[] = [
                     "tag" => $tagName,

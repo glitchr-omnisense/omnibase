@@ -30,7 +30,6 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         }
 
         $headlines = [];
-
         foreach ($json->blocks ?? [] as $block) {
 
             if ($block->type != "header") continue;

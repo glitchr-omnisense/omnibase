@@ -14,9 +14,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
 use function Symfony\Component\Translation\t;
 
-/**
- *
- */
 class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
 {
     protected AdminUrlGenerator $adminUrlGenerator;
@@ -32,9 +29,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
     public static function new(...$args)
     {
         $dto = new ActionConfigDto();
-        $test = new static($dto, ...$args);
-
-        return $test;
+        return new static($dto, ...$args);
     }
 
     /**
@@ -91,7 +86,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
                     $cacheable = $entityRepository->getClassMetadata()->cache;
                     if ($entityRepository instanceof ServiceEntityRepository) {
-return "";
+
                         if (get_parent_class($entity) !== false) {
                             $prevEntity = $entityRepository->{$cacheable ? "cachePreviousOneByClassOf" : "findPreviousOneByClassOf"}($entity->getId(), get_class($entity));
                         } else {
@@ -138,7 +133,7 @@ return "";
                     $cacheable = $entityRepository->getClassMetadata()->cache;
                     
                     if ($entityRepository instanceof ServiceEntityRepository) {
-return "";                        if (get_parent_class($entity) !== false) {
+                        if (get_parent_class($entity) !== false) {
                             $nextEntity = $entityRepository->{$cacheable ? "cacheNextOneByClassOf" : "findNextOneByClassOf"}($entity->getId(), get_class($entity));
                         } else {
                             $nextEntity = $entityRepository->{$cacheable ? "cacheNextOneBy" : "findNextOneBy"}($entity->getId());
