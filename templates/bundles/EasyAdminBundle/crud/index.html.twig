@@ -90,7 +90,8 @@
     {% set has_filters = filters|length > 0 %}
     {% set num_results = entities|length %}
 
-    <table class="table datagrid {{ entities is empty ? 'datagrid-empty' }}">
+    <div class="table-container">
+    <table class="table datagrid {{ entities is empty ? 'datagrid-empty' }} sticky-table">
         {% if num_results > 0 %}
             <thead>
             {% block table_head %}
@@ -110,7 +111,7 @@
                         {% set next_sort_direction = is_sorting_field ? (ea.search.sortDirection(field.property) == ea_sort_desc ? ea_sort_asc : ea_sort_desc) : ea_sort_desc %}
                         {% set column_icon = is_sorting_field ? (next_sort_direction == ea_sort_desc ? 'fa-arrow-up' : 'fa-arrow-down') : 'fa-sort' %}
 
-                        <th class="{{ is_sorting_field ? 'sorted' }} {{ field.isVirtual ? 'field-virtual' }} header-for-{{ field.cssClass|split(' ')|filter(class => class starts with 'field-')|join('') }} text-{{ field.textAlign }}" dir="{{ ea.i18n.textDirection }}">
+                        <th class="{{ is_sorting_field ? 'sorted' }} {{ field.isVirtual ? 'field-virtual' }} header-for-{{ field.cssClass|split(' ')|filter(class => class starts with 'field-')|join('') }} text-{{ field.textAlign ?? 'left' }}" dir="{{ ea.i18n.textDirection }}">
                             {% if field.isSortable %}
                                 <a href="{{ ea_url({ page: 1, sort: { (field.property): next_sort_direction } }) }}">
                                     {{ field.label|trans|raw }} <i class="fa-solid fa-fw {{ column_icon }}"></i>
@@ -216,13 +217,14 @@
         {% endblock table_footer %}
         </tfoot>
     </table>
+    </div>
 
     {% if entities|length > 0 %}
-        <div class="content-panel-footer without-padding without-border">
-            {% block paginator %}
-                {{ include(ea.templatePath('crud/paginator'), { render_detailed_pagination: not some_results_are_hidden }) }}
-            {% endblock paginator %}
-        </div>
+    <div class="content-panel-footer without-padding without-border">
+        {% block paginator %}
+            {{ include(ea.templatePath('crud/paginator'), { render_detailed_pagination: not some_results_are_hidden }) }}
+        {% endblock paginator %}
+    </div>
     {% endif %}
 
     {% block delete_form %}

@@ -14,14 +14,13 @@
 
 html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
 
-
-.row {
+/* .row {
     margin-left:3.5em !important;
     margin-right:0 !important;
     margin-top:0 !important;
-}
+} */
 
-.row>* { padding-left:0;}
+/* .row>* { padding-left:0;} */
 
 textarea.form-control {
     min-height: calc(8.5em + .75rem + 2px);
@@ -42,7 +41,7 @@ textarea.form-control {
 }
 
 form.ea-edit-form {
-    padding: 0 0.75em;
+    padding: 0 5em;
 }
 
 .ea-new-form .codex-editor__redactor, .ea-edit-form .codex-editor__redactor
@@ -325,7 +324,7 @@ fieldset>legend
 {
     text-transform: initial;
 }
-.actions { padding: 35px !important; }
+
 .actions a { display:flex; }
 .actions .dropdown-toggle .action-icon { top: 2px; }
 .actions .dropdown-menu .action-icon { top: 0; font-size:13pt; }
@@ -412,7 +411,7 @@ form fieldset
 .ea .row:not(form) > .col { display: grid; width:350px; padding:0 50px; }
 .page-wrapper fieldset { height: 100%; }
 .page-wrapper fieldset.empty { display:none; }
-.ea .page-wrapper {     overflow: hidden; }
+
 form fieldset legend { font-size: 11pt; }
 .datagrid td             .form-email { display: flex; }
 .datagrid td.text-left   .form-email { justify-content: flex-start; }
@@ -492,11 +491,11 @@ margin: 0 0.25em;
 
 .online-user-wrapper
 {
-display: flex;
-align-items: center;
+    display: flex;
+    align-items: center;
 
-margin-bottom: 0;
-list-style: none;
+    margin-bottom: 0;
+    list-style: none;
 }
 
 .filter-content .form-group:last-of-type { padding-bottom: 12px; }
@@ -675,8 +674,6 @@ padding: 0em 0.25em;
 
 body {
     color: var(--button-color);
-    overflow-x: hidden;
-    overflow-y: scroll;
 }
 .navbar-custom-menu { height: 100%; }
 .user-menu-wrapper
@@ -788,17 +785,75 @@ body.ea-edit .content-header, body.ea-new .content-header {
     padding-right: 1em;
 }
 
+.ea-index .main-content .content-wrapper, .ea-edit .main-content .content-wrapper, .ea-details .main-content .content-wrapper
+{
+    display:block;
+}
+.table-container {
+  width: 100%;
+  overflow: auto;
+}
+
+.sticky-table {
+  border-collapse: separate; /* <── KEY FIX: must NOT be collapse for sticky to work across axes */
+  border-spacing: 0;
+  min-width: 800px;
+}
+
+.sticky-table .actions { padding: 25px 0px 25px 10px; }
+
+.sticky-table th,
+.sticky-table td {
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+.sticky-table tr:nth-child(odd) td:last-child, .sticky-table-right tr:nth-child(odd) td:last-child,
+.sticky-table tr:nth-child(odd) th:last-child, .sticky-table-right tr:nth-child(odd) th:last-child {
+  box-shadow: -10px 0px 10px -5px var(--sidebar-bg) !important;
+}
+.sticky-table tr:nth-child(even) td:last-child, .sticky-table-right tr:nth-child(even) td:last-child,
+.sticky-table tr:nth-child(even) th:last-child, .sticky-table-right tr:nth-child(even) th:last-child {
+  box-shadow: -10px 0px 10px -5px var(--body-bg) !important;
+}
+
+/* Sticky header (row) */
+.sticky-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5; /* ensure header always above body */
+}
+
+/* Sticky first column */
+.sticky-table th:first-child,
+.sticky-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+
+/* Sticky last column */
+.sticky-table th:last-child,
+.sticky-table td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 3;
+}
+
+/* Ensure header corners are above both header and column */
+.sticky-table thead th:first-child {
+  z-index: 6; /* top-left */
+}
+
+.sticky-table thead th:last-child {
+  z-index: 6; /* top-right */
+}
+
 .ea-index .content-body { padding-top:2.5em;}
 .content-body:first-child { padding-top:0em; }
 
-.ea .content-body:last-child { margin-bottom: 2.5em; }
-.ea .content-body { margin:auto; width: calc(100% - 2em); }
-
-.ea-index .content-body
-{
-    margin:0 0 0 3em;
-    width:100%;
-}
+/* .ea .content-body:last-child { margin-bottom: 2.5em; } */
+/* .ea .content-body { margin:auto; width: calc(100% - 2em); } */
 
 .dropzone .dz-preview .dz-details .dz-tools a i.fa-external-link-square-alt { color: var(--link-color); }
 .dropzone .dz-preview .dz-details .dz-tools a:hover i.fa-external-link-square-alt {
@@ -971,16 +1026,40 @@ body.ea-edit .content-header, body.ea-new .content-header {
 .main-content {
     max-width: calc(100vw - var(--sidebar-max-width));
 }
-.ea-index .main-content .content-wrapper,
-.ea-edit .main-content .content-wrapper,
-.ea-details .main-content .content-wrapper { margin-bottom:0em; overflow:scroll; }
+
+#modal-filters .modal-header
+{
+    display:flex;
+}
+
+#modal-filters .modal-header > *
+{
+    flex-grow: 1;
+    margin:5px;
+}
+
+.filter-field {
+    border: none !important;
+}
+.border-bottom {
+    border-bottom: 1px solid var(--modal-border-color) !important;
+}
+
+.ea-new .main-content, .ea-edit .main-content, .ea-details .main-content {
+    overflow: hidden;
+}
+
 .ea-sidebar-width-compact .content-header { width: calc(100vw - 44px); }
 #header-logo
 {
     margin-top:45px;
 }
 .content-panel-footer.without-border { border:0; }
-.content-panel-footer { width: calc(100vw - var(--sidebar-max-width) - var(--lg-content-padding-right) - var(--lg-content-padding-left)); }
+.content-panel-footer { 
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+}
 .dropdown-locale
 {
     color: var(--dropdown-appearance-icon-color);
@@ -1284,6 +1363,8 @@ fieldset .sidebar-menu { margin:0.25em 0em 0.25em 0; }
 .ea-index .content-body
 {
     border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
 }
 
 [id*='ea_form_fieldset_'].form-control
@@ -1293,16 +1374,26 @@ fieldset .sidebar-menu { margin:0.25em 0em 0.25em 0; }
 
 .datagrid tbody tr:nth-child(odd):hover td, .datagrid tbody tr:hover th { background-color: var(--secondary-bg); }
 .datagrid tbody tr:nth-child(odd) td {
-    background-color: transparent;
+    background-color: var(--body-bg);
+} 
+.datagrid tbody th:nth-child(odd) td {
+    background-color: var(--body-bg);
 } 
 
-.datagrid tbody tr:nth-child(even):hover td { background-color: var(--secondary-bg);; }
+.datagrid tbody tr:nth-child(even):hover td { background-color: var(--secondary-bg); }
 .datagrid tbody tr:nth-child(even) td {
     background-color: var(--sidebar-bg);
 }
+.datagrid tbody th:nth-child(even) td {
+    background-color: var(--sidebar-bg);
+}
   
-.datagrid thead { background-color:var(--sidebar-bg); }
-.datagrid thead th { background-color: transparent; }
+.datagrid thead { 
+    background-color:var(--sidebar-bg);
+    position: relative;
+    z-index: 5;
+}
+.datagrid thead th { background-color: var(--sidebar-bg); }
 .datagrid .ea-lightbox-thumbnail img
 {
     border:0;
