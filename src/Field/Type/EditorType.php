@@ -3,6 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Routing\AdvancedRouterInterface;
+use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
@@ -34,8 +35,9 @@ class EditorType extends AbstractType
     protected ObfuscatorInterface $obfuscator;
 
     protected TranslatorInterface $translator;
+    protected MediaEnhancerInterface $mediaEnhancer;
 
-    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig, AdvancedRouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator)
+    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig, AdvancedRouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator, MediaEnhancerInterface $mediaEnhancer)
     {
         $this->parameterBag = $parameterBag;
         $this->twig = $twig;
@@ -43,6 +45,7 @@ class EditorType extends AbstractType
         $this->csrfTokenManager = $csrfTokenManager;
         $this->obfuscator = $obfuscator;
         $this->translator = $translator;
+        $this->mediaEnhancer = $mediaEnhancer;
     }
 
     public function getParent(): ?string
@@ -81,8 +84,7 @@ class EditorType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
-            
-            $form = $event->getForm();
+
             $data = $event->getData();
 
             $json = json_decode($data);
@@ -104,6 +106,15 @@ class EditorType extends AbstractType
         $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
         $data = $this->obfuscator->encode(["token" => $token], ObfuscatorInterface::NO_SHORT);
 
+        $value = \json_decode($view->vars["value"]);
+        foreach($value->blocks as $k => $block) {
+            if ($block->type === "image" && property_exists($block->data, "file") && property_exists($block->data->file, "url")) {
+                $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->url, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
+                $value->blocks[$k] = $block;
+            }
+        }
+        
+        $view->vars["value"] = json_encode($value);
         $view->vars["uploadByFile"] = $this->router->generate("ux_editorjs_uploadByFile", ["data" => $data]);
         $view->vars["uploadByUrl"]  = $this->router->generate("ux_editorjs_uploadByUrl", ["data" => $data]);
 

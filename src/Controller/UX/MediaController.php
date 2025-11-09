@@ -223,6 +223,7 @@ class MediaController extends AbstractController
 
         $request = $this->requestStack->getCurrentRequest();
         $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
@@ -256,7 +257,7 @@ class MediaController extends AbstractController
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();
         }
-
+       
         $webp = $config["webp"] ?? $this->mediaService->isWebpEnabled();
         if (!$webp) {
             return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
@@ -282,6 +283,7 @@ class MediaController extends AbstractController
 
         $request = $this->requestStack->getCurrentRequest();
         $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 

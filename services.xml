@@ -520,6 +520,7 @@
         <service id="Base\Service\Model\Wysiwyg\MediaEnhancer" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="base.service.image" />
+            <argument type="service" id="flysystem" />
         </service>
 
         <service id="Base\Service\Model\Wysiwyg\HeadingEnhancer" public="true">
@@ -1076,6 +1077,7 @@
             <argument type="service" id="advanced_router" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="obfuscator" />
+            <argument type="service" id="media_enhancer" />
         </service>
 
         <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="trading_market" /></service>

@@ -113,6 +113,7 @@
     }) %}
 
     {{ form_widget(form) }}
+    
     <div id="{{ id }}_editor" {{ block('attributes') }}>{{ value|wysiwyg|raw }}</div>
     <div class="form-text text-muted clear-both">{{"@fields.wysiwyg.soft_linebreak"|trans}}</span></div>
 {%- endblock wysiwyg_widget -%}

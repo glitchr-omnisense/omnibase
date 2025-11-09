@@ -70,7 +70,7 @@ function edjs(inputEl, holderId, value = {}, options = {})
     
     var data = json_decode(value);
     if (data) Object.assign(options, {data:data});
-
+    
     var onSave = (savedData) => { if(inputEl != undefined) $(inputEl).val(JSON.stringify(savedData)); }
 
     if(inputEl == undefined) console.warn("EditorJS in read-only mode (some EventDispatcher .off() may appear)");

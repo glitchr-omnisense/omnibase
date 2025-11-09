@@ -95,16 +95,15 @@ class SecurityController extends AbstractController
     protected TokenRepository $tokenRepository;
 
     public function __construct(
-        NotifierInterface      $notifier,
-        EntityManagerInterface $entityManager,
-        TokenRepository        $tokenRepository,
-        UserRepository         $userRepository,
-        AdvancedRouterInterface        $router,
-        FormProxy              $formProxy,
-        TokenStorageInterface  $tokenStorage,
-        TranslatorInterface    $translator,
-        ParameterBagInterface  $parameterBag
-    )
+        NotifierInterface       $notifier,
+        EntityManagerInterface  $entityManager,
+        TokenRepository         $tokenRepository,
+        UserRepository          $userRepository,
+        AdvancedRouterInterface $router,
+        FormProxy               $formProxy,
+        TokenStorageInterface   $tokenStorage,
+        TranslatorInterface     $translator,
+        ParameterBagInterface   $parameterBag)
     {
         $this->router = $router;
         $this->translator = $translator;
@@ -195,6 +194,8 @@ class SecurityController extends AbstractController
         }
 
         $returnUrl = $referrer->getUrl() ?? $this->router->getUrlIndex();
+        if($this->router->isSecured($request)) $returnUrl = $this->router->getUrlIndex();
+
         // Redirect to previous page
         return $this->redirect($returnUrl);
     }

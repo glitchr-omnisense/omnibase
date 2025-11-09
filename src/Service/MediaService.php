@@ -542,8 +542,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $filters = $config["filters"] ?? $options["filters"] ?? [];
         $storage = $config["storage"] ?? $options["storage"] ?? null;
         $output = $config["output"] ?? $options["output"] ?? realpath($path);
-
-        //
+        
         // Apply image resolution limitation
         if (!is_instanceof($this->maxResolution, ThumbnailFilter::class)) {
             throw new NotFoundHttpException("Resolution filter \"" . $this->maxResolution . "\" must inherit from " . ThumbnailFilter::class);
@@ -586,7 +585,7 @@ class MediaService extends FileService implements MediaServiceInterface
 
         $pathRelative = $this->flysystem->stripPrefix($output, $storage);
         $pathCache = $pathRelative;
-
+        
         // Encode path using hashid only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over. Lines below make sure suffix is applied including filter operations
         $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);

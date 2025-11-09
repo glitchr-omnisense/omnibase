@@ -63,13 +63,14 @@ final class HtmlTwigExtension extends AbstractExtension
         if ($mediaConfig) {
             
             $mediaConfig = is_array($mediaConfig) ? $mediaConfig : [];
-            $mediaConfig["storage"] ??= BaseService::getParameterBag("base.editor.storage");;
+            $mediaConfig["storage"] ??= BaseService::getParameterBag("base.twig.editor.storage");
 
-            $htmlOrJson = $enhancer->enhanceMedia($htmlOrJson);
+            $htmlOrJson = $enhancer->enhanceMedia($htmlOrJson, $mediaConfig);
         }
 
         $maxHeadings = array_pop_key('headings', $options) ?? 0;
         if ($maxHeadings) {
+
             $htmlOrJson = $enhancer->enhanceHeadings($htmlOrJson, $maxHeadings === true ? null : $maxHeadings);
         }
 
