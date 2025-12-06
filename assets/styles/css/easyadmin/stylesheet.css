@@ -325,6 +325,16 @@ fieldset>legend
     text-transform: initial;
 }
 
+.action-inner {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+    display: flex;
+    padding: 10px 10px;
+}
+
 .actions a { display:flex; }
 .actions .dropdown-toggle .action-icon { top: 2px; }
 .actions .dropdown-menu .action-icon { top: 0; font-size:13pt; }

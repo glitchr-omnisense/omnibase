@@ -2,13 +2,11 @@
 
 namespace Base\Routing\Generator;
 
-use Base\BaseBundle;
 use Base\Service\Localizer;
 use Exception;
 use Generator;
 use Psr\Log\LoggerInterface;
 
-use InvalidArgumentException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
 use Symfony\Component\Routing\RequestContext;
@@ -34,7 +32,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         //
         // NB: Static routes using multiple host, or domains might be screened.. imo
-
         $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];
         $replacementChars = array_pad([], count($reservedChars), "_");
         $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".compiled_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
@@ -139,14 +136,14 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             // Regularize HTTP/HTTPS ports
             if (!empty($port) && in_array($port, $validHttpPort)) $httpPort = $port;
-            else $httpPort = first($validHttpPort);
+            else $httpPort = first($validHttpPort) ?? $port;
             if (!empty($port) && in_array($port, $validHttpsPort)) $httpsPort = $port;
-            else $httpsPort = first($validHttpsPort);
+            else $httpsPort = first($validHttpsPort) ?? $port;
 
             if ($scheme === 'https') {
-                if (!in_array($port, $validHttpsPort)) $httpsPort = first($validHttpsPort);
+                if (count($validHttpsPort) && !in_array($port, $validHttpsPort)) $httpsPort = first($validHttpsPort);
             } else {
-                if (!in_array($port, $validHttpPort)) $httpPort = first($validHttpPort);
+                if (count($validHttpPort) && !in_array($port, $validHttpPort)) $httpPort = first($validHttpPort);
             }
 
             // Save in context
@@ -213,9 +210,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             else $httpsPort = first($validHttpsPort);
 
             if ($scheme === 'https') {
-                if (!in_array($port, $validHttpsPort)) $httpsPort = first($validHttpsPort);
+                if (count($validHttpsPort) && !in_array($port, $validHttpsPort)) $httpsPort = first($validHttpsPort);
             } else {
-                if (!in_array($port, $validHttpPort)) $httpPort = first($validHttpPort);
+                if (count($validHttpPort) && !in_array($port, $validHttpPort)) $httpPort = first($validHttpPort);
             }
 
             // Save in context

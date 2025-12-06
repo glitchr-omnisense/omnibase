@@ -68,6 +68,7 @@
         </service>
 
         <service id="Base\Admin\Router\AdminRouteGenerator"               parent="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator"               decorates="EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator" />
+        <service id="Base\Admin\Router\AdminUrlGenerator"                 parent="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator"                 decorates="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         <service id="Base\Admin\Provider\AdminContextProvider"            parent="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider"            decorates="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
         <service id="Base\Admin\Factory\AdminContextFactory"              parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory"              decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory">
             <argument type="service" id="ea_extension" />

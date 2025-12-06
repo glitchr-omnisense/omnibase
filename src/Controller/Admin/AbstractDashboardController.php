@@ -165,17 +165,17 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public const TRANSLATION_ENUM = "enums";
 
     public function __construct(
-        Extension              $extension,
-        RequestStack           $requestStack,
-        TranslatorInterface    $translator,
-        AdminContextProvider   $adminContextProvider,
-        AdminUrlGenerator      $adminUrlGenerator,
-        AdvancedRouterInterface        $router,
-        IconProvider           $iconProvider,
-        MediaService           $mediaService,
-        Environment            $twig,
-        EntityManagerInterface $entityManager,
-        SettingBagInterface    $settingBag
+        Extension               $extension,
+        RequestStack            $requestStack,
+        TranslatorInterface     $translator,
+        AdminContextProvider    $adminContextProvider,
+        AdminUrlGenerator       $adminUrlGenerator,
+        AdvancedRouterInterface $router,
+        IconProvider            $iconProvider,
+        MediaService            $mediaService,
+        Environment             $twig,
+        EntityManagerInterface  $entityManager,
+        SettingBagInterface     $settingBag
     )
     {
         $this->extension = $extension;
@@ -524,8 +524,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $url = $this->adminUrlGenerator
                 ->unsetAll()
-                ->setController($crudController)
-                ->setAction(Action::INDEX)
+                // ->setController($crudController)
+                // ->setAction(Action::INDEX)
                 ->set("filters[roles][comparison]", "like")
                 ->set("filters[roles][value]", $role)
                 ->generateUrl();
@@ -550,8 +550,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
                     $url = $this->adminUrlGenerator
                         ->unsetAll()
-                        ->setController($crudController)
-                        ->setAction(Action::INDEX)
+                        // ->setController($crudController)
+                        // ->setAction(Action::INDEX)
                         ->set("filters[roles][comparison]", "like")
                         ->set("filters[roles][value]", $role)
                         ->generateUrl();

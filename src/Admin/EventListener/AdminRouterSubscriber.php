@@ -20,6 +20,7 @@ class AdminRouterSubscriber extends \EasyCorp\Bundle\EasyAdminBundle\EventListen
 
     protected function getCrudControllerInstance(Request $request): ?CrudControllerInterface
     {
+        // dump($request);
         $crudControllerFqcn = $request->attributes->get(EA::CRUD_CONTROLLER_FQCN);
         if($crudControllerFqcn) {
             $request->query->set(EA::CRUD_CONTROLLER_FQCN, $crudControllerFqcn);

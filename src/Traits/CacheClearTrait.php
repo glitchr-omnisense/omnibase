@@ -176,11 +176,6 @@ trait CacheClearTrait
            $clearProcess->mustRun();
         }
 
-        if (CacheClearCommand::isFirstClear()) {
-            $io->warning('Cache requires to run a second `cache:clear` to account for base bundle features.');
-            return true;
-        }
-
         return false;
     }
 

@@ -581,24 +581,24 @@ class AdvancedRouter implements AdvancedRouterInterface
     {
         $parsedUrl = parse_url2(get_url());
         $port = $parsedUrl["port"] ?? null;
-
         $scheme = $this->getScheme($locale, $environment);
         
         $fallbackPorts = $this->getPortFallbacks($locale, $environment);
-        if (!in_array($port, $fallbackPorts, true)) {
+        if (count($fallbackPorts) && !in_array($port, $fallbackPorts, true)) {
             $port = $this->getPortFallback($locale, $environment);
         }
 
         $httpsPorts = isset($_SERVER['HTTPS_PORT']) ? (array) json_decode($_SERVER['HTTPS_PORT'], true) : [443];
         $httpPorts  = isset($_SERVER['HTTP_PORT'])  ? (array) json_decode($_SERVER['HTTP_PORT'],  true) : [80];
+
         if ($port === null) {
             if ($scheme === 'https') $port = first($httpsPorts) ?? 443;
             else $port = first($httpPorts) ?? 80;
         }
 
         // Remove default ports for the scheme or if in the allowed list
-        if($scheme === 'https' && !in_array((int) $port, $httpsPorts, true)) $port = first($httpsPorts);
-        if($scheme === 'http'  && !in_array((int) $port, $httpPorts,  true)) $port = first($httpPorts);
+        if($scheme === 'https' && count($httpsPorts) && !in_array((int) $port, $httpsPorts, true)) $port = first($httpsPorts);
+        if($scheme === 'http'  && count($httpPorts)  && !in_array((int) $port, $httpPorts,  true)) $port = first($httpPorts);
         if (in_array($port, [80, 443], true)) $port = null;
 
         return (int) $port;

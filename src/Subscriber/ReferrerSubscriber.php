@@ -53,7 +53,7 @@ class ReferrerSubscriber implements EventSubscriberInterface
      */
     public function getCurrentRouteName($event)
     {
-        return $event->getRequest()->get('_route');
+        return $event->getRequest()->attributes->get('_route');
     }
 
     /**

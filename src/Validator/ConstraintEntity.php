@@ -25,7 +25,7 @@ abstract class ConstraintEntity extends Constraint
     public function __construct(
         $fields,
         array $options = [],
-        array $groups = null,
+        ?array $groups = null,
         $payload = null
     )
     {

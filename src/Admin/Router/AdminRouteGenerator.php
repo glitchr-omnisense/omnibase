@@ -8,8 +8,6 @@ use Symfony\Component\Routing\Route;
 
 class AdminRouteGenerator extends \EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator
 {
-    public function __construct(...$args) { parent::__construct(...$args); }
-
     protected function transformCrudControllerNameToKebabCase(string $crudControllerFqcn): string
     {
         $cleanShortName = str_replace(['CrudController', 'Controller'], '', (new \ReflectionClass($crudControllerFqcn))->getShortName());

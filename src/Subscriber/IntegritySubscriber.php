@@ -121,11 +121,6 @@ class IntegritySubscriber implements EventSubscriberInterface
             $this->clearProcess->mustRun();
             throw new RuntimeException("Application integrity compromised, cache clear not started yet.", 0);
         }
-    
-        if(CacheClearCommand::isFirstClear()) {
-            $this->clearProcess->mustRun();
-            throw new RuntimeException("Application integrity compromised, double cache clear required.", 0);
-        }
     }
 
     public function onCommand(ConsoleEvent $event)
