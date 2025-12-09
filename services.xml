@@ -300,7 +300,7 @@
         <service id="Base\Console\Command\DoctrineSchemaCharsetCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\DoctrineArrayUpgradeCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
 
-        <service id="Base\Service\TimeMachine" parent="BackupManager\Manager" public="true">
+        <service id="Base\Service\TimeMachine" parent="Backup\Manager\Manager" public="true">
             <argument type="service" id="flysystem" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="parameter_bag" />
@@ -1033,8 +1033,6 @@
         <service id="Base\Field\Type\ForexType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /><argument type="service" id="base.service.icon" /></service>
         <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
-
-        <service id="Base\Field\Type\TextType"><tag name="form.type" /></service>
 
         <service id="Base\Field\Type\AssociationType">
             <tag name="form.type" />

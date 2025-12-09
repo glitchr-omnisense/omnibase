@@ -252,16 +252,19 @@ trait CacheClearTrait
             ? $this->flysystem->getStorageNames(false)
             : [];
 
-        if (!empty($storageNames)) {
-            $io->note(sprintf(
-                "PHP Info file will be generated in the public directory at '%s'.\nDetected storage backends: %s",
-                $targetFile,
-                implode(', ', $storageNames)
-            ));
+        if (!is_file($targetFile)) {
+            if (!empty($storageNames)) {
+                $io->note(sprintf(
+                    "PHP Info file will be generated in the public directory at '%s'.\nDetected storage backends: %s",
+                    $targetFile,
+                    implode(', ', $storageNames)
+                ));
+            }
         }
 
+        $alreadyExists = is_file($targetFile);
         if ($delete) {
-            if (is_file($targetFile)) {
+            if ($alreadyExists) {
                 if (@unlink($targetFile)) {
                     $io->success(sprintf('phpinfo.php successfully removed from %s', $targetFile));
                 } else {
@@ -297,7 +300,9 @@ PHP;
             return;
         }
 
-        $io->success(sprintf('phpinfo.php successfully generated at %s', $targetFile));
+        if(!$alreadyExists && \file_exists($targetFile)) {
+            $io->success(sprintf('phpinfo.php successfully generated at %s', $targetFile));
+        }
     }
 
     protected function generateSymlinks(SymfonyStyle $io): void

@@ -6,7 +6,7 @@
 
     {% set linkUrl = action.linkUrl %}
     {% if action.crudActionName == "index" and action.type == "entity" %}
-        {% set linkUrl = app.request.get("referrer") ?? linkUrl %}
+        {% set linkUrl = app.request.attributes.get("referrer") ?? linkUrl %}
     {% endif %}
 
     {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}

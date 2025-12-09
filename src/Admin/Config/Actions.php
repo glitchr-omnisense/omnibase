@@ -19,9 +19,8 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
     protected AdminUrlGenerator $adminUrlGenerator;
     protected EntityManagerInterface $entityManager;
 
-    protected function __construct(ActionConfigDto $actionConfigDto, AdminUrlGenerator $adminUrlGenerator, EntityManagerInterface $entityManager)
+    protected function __construct(protected readonly ActionConfigDto $dto, AdminUrlGenerator $adminUrlGenerator, EntityManagerInterface $entityManager)
     {
-        $this->dto = $actionConfigDto;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->entityManager = $entityManager;
     }

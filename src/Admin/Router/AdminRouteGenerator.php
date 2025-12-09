@@ -26,6 +26,7 @@ class AdminRouteGenerator extends \EasyCorp\Bundle\EasyAdminBundle\Router\AdminR
             $shortName .= '_base';
         }
 
+        // dump(1);
         return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $shortName));
     }
 }

@@ -39,7 +39,7 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
      */
     public function displayAsSeparator()
     {
-        $this->dto->setHtmlElement('separator');
+        // $this->dto->setHtmlElement('separator');
 
         return $this;
     }
@@ -52,7 +52,7 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
      */
     public function displayAsDropdown()
     {
-        $this->dto->setHtmlElement('dropdown');
+        // $this->dto->setHtmlElement('dropdown');
 
         return $this;
     }

@@ -3849,6 +3849,16 @@ namespace {
 
     /**
      * @param object $object
+     * @return array
+     * @throws Exception
+     */
+    function object_dehydrate(object $object, bool $keepChildObjects = true): array
+    {
+        return cast_to_array($object, $keepChildObjects);
+    }
+
+    /**
+     * @param object $object
      * @param array|object|null $vars
      * @return object
      * @throws Exception
