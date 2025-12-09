@@ -2,12 +2,18 @@
 
 namespace Base\DependencyInjection\Compiler\Pass;
 
+use EasyCorp\Bundle\EasyAdminBundle\DependencyInjection\EasyAdminExtension;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Finder\Finder;
 
 class EasyAdminCrudPass implements CompilerPassInterface
 {
+    public static function getPriority(): int
+    {
+        return 1;
+    }
+
     public function process(ContainerBuilder $container): void
     {
         // Define the directory to scan for CRUD controllers
@@ -26,7 +32,7 @@ class EasyAdminCrudPass implements CompilerPassInterface
             if (class_exists($className) && !\is_abstract($className)) {
 
                 $definition = $container->register($className, $className);
-                $definition->addTag('ea.crud_controller');
+                $definition->addTag(EasyAdminExtension::TAG_CRUD_CONTROLLER);
                 $definition->addTag('controller.service_arguments');                
                 $definition->addTag('container.service_subscriber');
                 $definition->setAutowired(true);

@@ -9,29 +9,16 @@ if(!isset($_SERVER["APP_TIMER"])) {
 use App\Entity\User;
 use Base\Database\Type\DateTimeTypeUTC as DateTimeType;
 use Base\Database\Type\ArrayType;
-use Base\DependencyInjection\Compiler\Pass\AnnotationPass;
-use Base\DependencyInjection\Compiler\Pass\TradingPass;
-use Base\DependencyInjection\Compiler\Pass\EntityExtensionPass;
-use Base\DependencyInjection\Compiler\Pass\IconProviderPass;
-use Base\DependencyInjection\Compiler\Pass\ObfuscatorCompressionPass;
-use Base\DependencyInjection\Compiler\Pass\SharerPass;
-use Base\DependencyInjection\Compiler\Pass\TagRendererPass;
-use Base\DependencyInjection\Compiler\Pass\WorkflowPass;
 use Doctrine\DBAL\Types\Type;
 
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
-use Symfony\Component\Console\Exception\ExceptionInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
-use Base\DependencyInjection\Compiler\Pass\CommandPass;
-use Base\DependencyInjection\Compiler\Pass\DoctrineEnumSubscriberPass;
-use Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass;
-use Base\DependencyInjection\Compiler\Pass\EasyAdminCrudPass;
 use Base\DependencyInjection\Dumper\CliDumper;
 use Base\DependencyInjection\Dumper\HtmlDumper;
 
@@ -277,17 +264,20 @@ class BaseBundle extends AbstractBaseBundle
             $this->warmUp();
         }
 
-        $container->addCompilerPass(new AnnotationPass());
-        $container->addCompilerPass(new DoctrineEnumSubscriberPass());
-        $container->addCompilerPass(new DoctrineConfigurationPass());
-        $container->addCompilerPass(new EasyAdminCrudPass(), priority: 1);
-        $container->addCompilerPass(new IconProviderPass());
-        $container->addCompilerPass(new EntityExtensionPass());
-        $container->addCompilerPass(new SharerPass());
-        $container->addCompilerPass(new TradingPass());
-        $container->addCompilerPass(new TagRendererPass());
-        $container->addCompilerPass(new ObfuscatorCompressionPass());
-        $container->addCompilerPass(new WorkflowPass());
+        /* Register compiler passes */
+        $finder = new \Symfony\Component\Finder\Finder();
+        $finder->files()
+            ->in($this->getBundleDir() . '/src/DependencyInjection/Compiler/Pass')
+            ->name('*Pass.php')
+            ->notName('AbstractPass.php');
+
+        foreach ($finder as $file) {
+            $class = 'Base\\DependencyInjection\\Compiler\\Pass\\' . $file->getBasename('.php');
+            if (class_exists($class) && !in_array($class, [__CLASS__])) {
+                $priority = method_exists($class, 'getPriority') ? $class::getPriority() : 0;
+                $container->addCompilerPass(new $class(), priority: $priority);
+            }
+        }
 
         /* Register aliased repositories */
         foreach (self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
