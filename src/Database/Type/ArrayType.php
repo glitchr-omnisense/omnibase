@@ -8,6 +8,8 @@ namespace Base\Database\Type;
 
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Deprecations\Deprecation;
 
 use function is_resource;
@@ -22,8 +24,6 @@ use const E_USER_DEPRECATED;
 
 /**
  * Type that maps a PHP array to a clob SQL type.
- *
- * @deprecated Use {@link JsonType} instead.
  */
 class ArrayType extends Type
 {
@@ -60,7 +60,7 @@ class ArrayType extends Type
                 return false;
             }
 
-            throw ConversionException::conversionFailedUnserialization($this->getName(), $message);
+            throw new \RuntimeException($this->getName(), $message);
         });
 
         try {
@@ -75,7 +75,7 @@ class ArrayType extends Type
      */
     public function getName()
     {
-        return Types::ARRAY;
+        return "array";
     }
 
     /**
