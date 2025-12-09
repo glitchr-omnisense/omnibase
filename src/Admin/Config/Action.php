@@ -39,7 +39,14 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
      */
     public function displayAsSeparator()
     {
+        \trigger_deprecation(
+            'glitchr/base-bundle',
+            '1.8.0',
+            'The "%s()" method is deprecated, use displayAsButton() instead.',
+            __METHOD__
+        );
         // $this->dto->setHtmlElement('separator');
+        $this->dto->setHtmlElement('button');
 
         return $this;
     }
@@ -52,7 +59,15 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
      */
     public function displayAsDropdown()
     {
+                \trigger_deprecation(
+            'glitchr/base-bundle',
+            '1.8.0',
+            'The "%s()" method is deprecated, use displayAsButton() instead.',
+            __METHOD__
+        );
+
         // $this->dto->setHtmlElement('dropdown');
+        $this->dto->setHtmlElement('button');
 
         return $this;
     }

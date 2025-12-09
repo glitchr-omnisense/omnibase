@@ -9,9 +9,6 @@ use Symfony\Component\Uid\Uuid;
 
 use Base\Bundle\AbstractBaseConfiguration;
 
-/**
- *
- */
 class BaseConfiguration extends AbstractBaseConfiguration
 {
     public function getConfigTreeBuilder(): TreeBuilder

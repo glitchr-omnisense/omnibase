@@ -35,12 +35,9 @@
         </service>
 
         <service id="Base\Twig\Loader\FilesystemLoader" decorates="twig.loader.native_filesystem">
-            <tag name="twig.loader" priority="1" />
             <argument type="service" id=".inner" />
-            <argument type="service" id="advanced_router" />
-            <argument type="service" id="twig" />
-            <argument type="service" id="twig.app_variable" />
-            <argument type="service" id="twig.random_variable" />
+            <argument type="service" id="parameter_bag" />
+            <argument>%kernel.project_dir%</argument>
         </service>
 
         <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/>

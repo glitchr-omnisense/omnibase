@@ -19,11 +19,12 @@ use Symfony\Component\Workflow\WorkflowInterface;
 
 use Base\Bundle\AbstractBaseExtension;
 use Base\Service\Model\Sharer\SharerAdapterInterface;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
 /**
  *
  */
-class BaseExtension extends AbstractBaseExtension
+class BaseExtension extends AbstractBaseExtension implements PrependExtensionInterface
 {
     /**
      * {@inheritdoc}
@@ -71,5 +72,22 @@ class BaseExtension extends AbstractBaseExtension
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "preRemove"]);
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postRemove"]);
         
+    }
+
+    public function prepend(ContainerBuilder $builder): void
+    {
+        
+        $builder->prependExtensionConfig('twig_component', [
+            'defaults' => [
+                'Base\\Twig\\Component\\' => [
+                    'template_directory' => '@Base/components/',
+                    'name_prefix' => 'base',
+                ],
+                'App\\Twig\\Component\\' => [
+                    'template_directory' => '@App/components/',
+                    'name_prefix' => 'app',
+                ],
+            ],
+        ]);
     }
 }

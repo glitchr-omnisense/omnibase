@@ -165,17 +165,17 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public const TRANSLATION_ENUM = "enums";
 
     public function __construct(
-        Extension               $extension,
-        RequestStack            $requestStack,
-        TranslatorInterface     $translator,
-        AdminContextProvider    $adminContextProvider,
-        AdminUrlGenerator       $adminUrlGenerator,
-        AdvancedRouterInterface $router,
-        IconProvider            $iconProvider,
-        MediaService            $mediaService,
-        Environment             $twig,
-        EntityManagerInterface  $entityManager,
-        SettingBagInterface     $settingBag
+        Extension              $extension,
+        RequestStack           $requestStack,
+        TranslatorInterface    $translator,
+        AdminContextProvider   $adminContextProvider,
+        AdminUrlGenerator      $adminUrlGenerator,
+        AdvancedRouterInterface        $router,
+        IconProvider           $iconProvider,
+        MediaService           $mediaService,
+        Environment            $twig,
+        EntityManagerInterface $entityManager,
+        SettingBagInterface    $settingBag
     )
     {
         $this->extension = $extension;
@@ -522,7 +522,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $label = $this->translator->transEnum($role, $class, Translator::NOUN_PLURAL);
             $icon = UserRole::getIcon($role, 1) ?? "fa-solid fa-fw fa-user";
 
-            // dump($crudController);
             $url = $this->adminUrlGenerator
                 ->unsetAll()
                 ->setController($crudController)
@@ -530,7 +529,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 ->set("filters[roles][comparison]", "like")
                 ->set("filters[roles][value]", $role)
                 ->generateUrl();
-            
+
             if (empty($values)) {
 
                 $item = MenuItem::linkToUrl($label, $icon, $url);
@@ -551,8 +550,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
                     $url = $this->adminUrlGenerator
                         ->unsetAll()
-                        // ->setController($crudController)
-                        // ->setAction(Action::INDEX)
+                        ->setController($crudController)
+                        ->setAction(Action::INDEX)
                         ->set("filters[roles][comparison]", "like")
                         ->set("filters[roles][value]", $role)
                         ->generateUrl();

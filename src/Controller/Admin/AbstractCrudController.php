@@ -144,8 +144,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             try {
                 
                 $entityFqcn = preg_replace("/" . $namespace . "\/", "\\Entity\\", $entityFqcn);
-                // $entityFqcn = BaseBundle::getInstance()->getAlias($entityFqcn);
-
                 if (class_exists($entityFqcn)) {
                     self::$crudController[$entityFqcn] = get_called_class();
                     return $entityFqcn;
@@ -315,7 +313,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         }
 
         if (count(array_filter($discriminatorMap, fn($e) => $e !== $entity)) > 0) {
-            $actionDto->setHtmlElement("discriminator");
+            \trigger_deprecation('glitchr/base-bundle', 'v4.5.0', 'Setting the "discriminator" HTML attribute is deprecated, use the "map" attribute instead.');
+            // $actionDto->setHtmlElement("discriminator"); // @TODO Consider replacement
+            $actionDto->setHtmlElement("button");
             $actionDto->setHtmlAttributes($htmlAttributes);
         }
 
@@ -494,7 +494,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                         ->setController($crudController)
                         ->setEntityId($instance->getId())
                         ->setAction($action->getName())
-                        //->includeReferrer()
                         ->generateUrl();
 
                     $action->setLinkUrl($url);

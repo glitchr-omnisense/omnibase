@@ -14,7 +14,7 @@ class AdminContextFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\Admin
 
     public function __construct(...$vars)
     {
-        $this->extension = \array_pop_class(Extension::class, $vars);
+        $this->extension = array_pop($vars);
         parent::__construct(...$vars);      
     }
 
