@@ -329,7 +329,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             ->addCssClass('btn btn-primary text-danger');
 
         if (is_instanceof($this->getEntityFqcn(), LinkableInterface::class)) {
-            $linkToEntity = \Base\Admin\Config\Action::new(\Base\Admin\Config\Action::GOTO, self::getEntityLabelInSingular(), "fa-solid fa-fw fa-plug")
+            $linkToEntity = \Base\Admin\Config\Action::new(\Base\Admin\Config\Action::GOTO, "", "fa-solid fa-fw fa-plug")
                 ->renderAsTooltip()
                 ->linkToUrl(fn($e) => $e->__toLink() ?? "");
 

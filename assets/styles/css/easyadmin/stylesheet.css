@@ -7,9 +7,12 @@
     --select2-bg: var(--gray-100);
     --font-size-base:15px;
     --sidebar-max-width:280px;
+    --button-bg: white;
+    --button-color: var(--text-color-dark);
 }
 .ea-dark-scheme {
     --sidebar-menu-active-item-color: var(--button-primary-bg);
+    --button-bg: black;
 }
 
 html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
@@ -235,7 +238,7 @@ ul.sidebar-menu a, .user-menu-wrapper a.user-details, .user-menu-wrapper a.user-
 .field-country .country-flag {
     border-radius: 5px;
     box-shadow: none;
-    max-height:17px;
+    max-height:20px;
 }
 
 .form-group label, .form-group legend.col-form-label { padding: 0; }
@@ -987,10 +990,10 @@ body.ea-edit .content-header, body.ea-new .content-header {
     padding: 0;
 }
 
-.actions span:not(:empty)
-{
-    margin-left:5px;
+.badge:has(.country-flag) {
+    padding: 0 !important;
 }
+
 .actions .action-icon
 {
     font-size:14pt !important;
@@ -1212,9 +1215,21 @@ ul.sidebar-menu {
 form .row > div.form-group { padding: 1em 0;}
 form .row button[type="submit"] { margin: 1em 0; }
 
-.btn.text-danger { color: white !important; background-color: rgba(var(--bs-danger-rgb),var(--bs-text-opacity))!important; }
-.btn.text-success { color: white !important; background-color: rgba(var(--bs-success-rgb),var(--bs-text-opacity))!important; }
+.btn.text-danger { color: white !important; background: rgba(var(--bs-danger-rgb),var(--bs-text-opacity))!important; }
+.btn.text-success { color: white !important; background: rgba(var(--bs-success-rgb),var(--bs-text-opacity))!important; }
+.btn.text-danger .btn-icon { color: white !important; }
+.btn.text-success .btn-icon { color: white !important; }
 
+.action-goto.btn > .btn-icon, .action-goto.btn, .action-see .btn-icon {
+    background: var(--bs-info) !important;
+    color: #fff;
+}
+
+.action-separator { 
+    background: none;
+    border: none;
+    box-shadow: none;
+}
 .ts-wrapper.form-control .ts-control, .ts-wrapper.form-control.single.input-active .ts-control, .ts-wrapper.form-select .ts-control, .ts-wrapper.form-select.single.input-active .ts-control
 {
     box-shadow: none;

@@ -142,7 +142,7 @@ class IconProvider extends AbstractLocalCache
         if (!$icon) {
             return $icon;
         }
-
+   
         if ($icon instanceof IconizeInterface) {
             $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
         } elseif (($routeIcons = $this->getRouteIcons($icon))) {

@@ -106,7 +106,11 @@ class EditorType extends AbstractType
         $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
         $data = $this->obfuscator->encode(["token" => $token], ObfuscatorInterface::NO_SHORT);
 
-        $value = \json_decode($view->vars["value"]);
+        $value = \json_decode($view->vars["value"] ?? "{}");
+        if(!$value || !property_exists($value, "blocks")) {
+            $value = (object) ["time" => time(), "blocks" => []];
+        }
+        
         foreach($value->blocks as $k => $block) {
             if ($block->type === "image" && property_exists($block->data, "file") && property_exists($block->data->file, "url")) {
                 $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->url, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
