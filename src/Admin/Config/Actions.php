@@ -44,19 +44,20 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->linkToCrudAction(Action::SEPARATOR);
         }
 
-        if (Action::GROUP === $actionName) {
-            return Action::new(Action::GROUP, ":::")
-                ->setCssClass('action-' . Action::GROUP)
-                ->displayAsDropdown()
-                ->linkToCrudAction(Action::GROUP);
-        }
+        // @TOOD: Use new EA group action 
+        // if (Action::GROUP === $actionName) {
+        //     return Action::new(Action::GROUP, ":::")
+        //         ->setCssClass('action-' . Action::GROUP)
+        //         ->displayAsDropdown()
+        //         ->linkToCrudAction(Action::GROUP);
+        // }
 
         if (Action::SAVE_AND_RETURN === $actionName) {
             return Action::new(Action::SAVE_AND_RETURN, t(Crud::PAGE_EDIT === $pageName ? 'action.save' : 'action.create', domain: 'EasyAdminBundle'))
                 ->setCssClass('action-' . Action::SAVE_AND_RETURN)
                 ->addCssClass('btn btn-primary action-save')
                 ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])
-                ->displayAsButton()
+                ->renderAsButton()
                 ->renderAsTooltip()
                 ->linkToCrudAction(Crud::PAGE_EDIT === $pageName ? Action::EDIT : Action::NEW);
         }
@@ -66,7 +67,6 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->setCssClass('action-' . Action::SAVE_AND_CONTINUE)
                 ->addCssClass('btn btn-secondary action-save text-success')
                 ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])
-                ->displayAsButton()
                 ->renderAsTooltip()
                 ->linkToCrudAction(Crud::PAGE_EDIT === $pageName ? Action::EDIT : Action::NEW);
         }
@@ -75,7 +75,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
             return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'admin'))
                 ->setCssClass('action-' . Action::GOTO_PREV)
                 ->addCssClass('btn btn-secondary')
-                ->displayAsLink()
+                ->renderAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 
@@ -101,7 +101,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
             return Action::new(Action::GOTO_SEE, t('action.goto_see', domain: 'admin'))
                 ->setCssClass('action-' . Action::GOTO_SEE)
                 ->addCssClass('btn btn-secondary')
-                ->displayAsLink()
+                ->renderAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 
@@ -121,7 +121,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
             return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'admin'))
                 ->setCssClass('action-' . Action::GOTO_NEXT)
                 ->addCssClass('btn btn-secondary')
-                ->displayAsLink()
+                ->renderAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 

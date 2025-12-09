@@ -251,9 +251,9 @@ class BundleDataCollector extends AbstractDataCollector
         if (class_exists(EasyAdminBundle::class)) {
             $data[$this->getBundleFormattedName(EasyAdminBundle::class)] = $context ? [
                 'CRUD Controller FQCN' => $context->getCrud()?->getControllerFqcn(),
-                'CRUD Action' => $context->getRequest()->get(EA::CRUD_ACTION),
-                'Entity ID' => $context->getRequest()->get(EA::ENTITY_ID),
-                'Sort' => $context->getRequest()->get(EA::SORT),
+                'CRUD Action' => $context->getRequest()->query->get(EA::CRUD_ACTION),
+                'Entity ID' => $context->getRequest()->query->get(EA::ENTITY_ID),
+                'Sort' => $context->getRequest()->query->get(EA::SORT),
             ] : [];
         }
 
