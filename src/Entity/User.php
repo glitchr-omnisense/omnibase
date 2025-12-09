@@ -362,11 +362,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function eraseCredentials(): void
-    {
-        $this->erasePlainPassword();
-    }
-
+    public function eraseCredentials(): void { } // @TODO: deprecated to be removed in Symfony >7.3
+    
     /**
      * @var string The hashed password
      */
