@@ -64,8 +64,12 @@
 
     {% block global_actions %}
         <div class="global-actions">
-            {% for action in global_actions %}
-                {{ include(action.templatePath, { action: action }, with_context = false) }}
+            {% for item in global_actions|reverse %}
+                {% if item.isActionGroup %}
+                    {{ include(item.templatePath, {group: item, entity: null}, with_context: false) }}
+                {% else %}
+                    {{ include(item.templatePath, {action: item}, with_context: false) }}
+                {% endif %}
             {% endfor %}
         </div>
     {% endblock global_actions %}
@@ -73,7 +77,7 @@
         {% if has_batch_actions %}
             <div class="batch-actions d-none">
                 {% for action in batch_actions %}
-                    {{ include(action.templatePath, { action: action }, with_context = false) }}
+                    {{ include(action.templatePath, {action: action}, with_context: false) }}
                 {% endfor %}
             </div>
         {% endif %}
@@ -134,18 +138,20 @@
         {% block table_body %}
             {% for entity in entities %}
                 {% if entity.isAccessible %}
-                    <tr data-id="{{ entity.primaryKeyValueAsString }}">
+                    <tr data-id="{{ entity.primaryKeyValueAsString }}" {% block entity_row_attributes %}{% endblock %}>
                         {% if has_batch_actions %}
                             <td class="batch-actions-selector">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input form-batch-checkbox" value="{{ entity.primaryKeyValue }}">
+                                    <input type="checkbox" class="form-check-input form-batch-checkbox" id="form-batch-checkbox-{{ loop.index0 }}" value="{{ entity.primaryKeyValue }}">
                                 </div>
                             </td>
                         {% endif %}
 
                         {% for field in entity.fields %}
-                            <td data-label="{{ field.label|trans|e('html_attr') }}" class="{{ field.property == sort_field_name ? 'sorted' }} text-{{ field.textAlign ?? "left" }} {{ field.cssClass }}" dir="{{ ea.i18n.textDirection }}">
-                                {{ include(field.templatePath, { field: field, entity: entity }, with_context = false) }}
+                            {% set is_searchable = null == ea.crud.searchFields or field.property in ea.crud.searchFields %}
+
+                            <td data-column="{{ field.property }}" data-label="{{ field.label|trans|e('html') }}" class="{{ is_searchable ? 'searchable' }} {{ field.property == sort_field_name ? 'sorted' }} text-{{ field.textAlign }} {{ field.cssClass }}" dir="{{ ea.i18n.textDirection }}" {% for name, value in field.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                                {{ include(field.templatePath, {field: field, entity: entity}, with_context: false) }}
                             </td>
                         {% endfor %}
 
@@ -153,24 +159,40 @@
                             <td class="actions {{ ea.crud.showEntityActionsAsDropdown ? 'actions-as-dropdown' }}">
                                 {% if entity.actions.count > 0 %}
                                     {% if ea.crud.showEntityActionsAsDropdown %}
-                                        <div class="dropdown dropdown-actions">
-                                            <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                {# don't use FontAwesome 'fa-ellipsis-h' icon here because it doesn't look good #}
-                                                {# this icon is 'dots-horizontal' icon from https://heroicons.com/ #}
-                                                <svg xmlns="http://www.w3.org/2000/svg" height="21" width="21" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                                </svg>
-                                            </a>
+                                        {% set hasAnyActionWithIcon = entity.actions|filter(item => item.isActionGroup ? false : item.icon is not null)|length > 0 %}
+                                        <twig:ea:ActionMenu class="dropdown-actions">
+                                            <twig:ea:ActionMenu:Button withoutDropdownToggleMarker>
+                                                <twig:ea:Icon name="internal:dots-horizontal" />
+                                            </twig:ea:ActionMenu:Button>
 
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                {% for action in entity.actions %}
-                                                    {{ include(action.templatePath, { action: action, entity: entity, isIncludedInDropdown: ea.crud.showEntityActionsAsDropdown }, with_context = false) }}
-                                                {% endfor %}
-                                            </div>
-                                        </div>
+                                            <twig:ea:ActionMenu:Overlay>
+                                                <twig:ea:ActionMenu:ActionList hasSubmenus="{{ entity.actions|filter(item => item.isActionGroup)|length > 0 }}">
+                                                    {% for item in entity.actions %}
+                                                        {% if item.isActionGroup %}
+                                                            <twig:ea:ActionMenu:ActionList:ItemGroup
+                                                                group="{{ item }}"
+                                                                showBlankIcons="{{ hasAnyActionWithIcon }}"
+                                                                entity="{{ entity }}" />
+                                                        {% else %}
+                                                            <twig:ea:ActionMenu:ActionList:Item
+                                                                class="{{ item.cssClass }} dropdown-item-variant-{{ item.variant.value }}" url="{{ item.linkUrl }}"
+                                                                icon="{{ item.icon }}" icon:class="action-icon"
+                                                                htmlAttributes="{{ item.htmlAttributes }}"
+                                                                renderAsForm="{{ item.isRenderedAsForm }}"
+                                                                label="{{ item.label|trans }}" label:class="action-label" renderLabelRaw
+                                                                showBlankIcons="{{ hasAnyActionWithIcon }}" />
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </twig:ea:ActionMenu:ActionList>
+                                            </twig:ea:ActionMenu:Overlay>
+                                        </twig:ea:ActionMenu>
                                     {% else %}
                                         {% for action in entity.actions %}
-                                            {{ include(action.templatePath, { action: action, entity: entity, isIncludedInDropdown: ea.crud.showEntityActionsAsDropdown }, with_context = false) }}
+                                            {% if action.isActionGroup %}
+                                                {{ include(action.templatePath, {group: action, entity: entity}, with_context: false) }}
+                                            {% else %}
+                                                {{ include(action.templatePath, {action: action, entity: entity, isIncludedInDropdown: ea.crud.showEntityActionsAsDropdown}, with_context: false) }}
+                                            {% endif %}
                                         {% endfor %}
                                     {% endif %}
                                 {% endif %}
@@ -205,7 +227,7 @@
             {% if some_results_are_hidden %}
                 <tr class="datagrid-row-empty">
                     <td class="text-center" colspan="100">
-                        <span class="datagrid-row-empty-message"><i class="fa-solid fa-lock mr-1"></i> {{ 'datagrid.hidden_results'|trans({}, 'EasyAdminBundle') }}</span>
+                        <span class="datagrid-row-empty-message"><twig:ea:Icon name="internal:lock" class="mr-1" /> {{ 'datagrid.hidden_results'|trans({}, 'EasyAdminBundle') }}</span>
                     </td>
                 </tr>
             {% endif %}
