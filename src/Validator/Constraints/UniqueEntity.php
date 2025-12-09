@@ -3,63 +3,75 @@
 namespace Base\Validator\Constraints;
 
 use Base\Validator\ConstraintEntity;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
- * Constraint for the StringCase Entity validator.
+ * Constraint for UniqueEntity validation.
  *
  * @Annotation
  * @NamedArgumentConstructor
- * @Target({"CLASS", "ANNOTATION"})
- *
+ * @Target({"CLASS"})
  */
-
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class UniqueEntity extends ConstraintEntity
 {
     public const NOT_UNIQUE_ERROR = '23bd9dbf-6b9b-41cd-a99e-4844bcf3077f';
 
-    public $service = 'doctrine.orm.validator.unique';
-    public $em = null;
-    public $entityClass = null;
-    public $repositoryMethod = 'findBy';
-    public $fields = [];
-    public $errorPath = null;
-    public $ignoreNull = true;
+    public  string $service = 'doctrine.orm.validator.unique';
+    public ?string $em = null;
+    public ?string $entityClass = null;
+    public  string $repositoryMethod = 'findBy';
+    public  string|array $fields = [];
+    public ?string $errorPath = null;
+    public  bool $ignoreNull = true;
 
     protected const ERROR_NAMES = [
         self::NOT_UNIQUE_ERROR => 'NOT_UNIQUE_ERROR',
     ];
 
     /**
-     * {@inheritdoc}
+     * Symfony 7.4+ compliant constructor.
      *
-     * @param array|string $fields the combination of fields that must contain unique values or a set of options
+     * @param array|string $fields
+     * @param string|null  $message
+     * @param string|null  $service
+     * @param string|null  $em
+     * @param string|null  $entityClass
+     * @param string|null  $repositoryMethod
+     * @param string|null  $errorPath
+     * @param bool|null    $ignoreNull
+     * @param array|null   $groups
+     * @param mixed|null   $payload
      */
     public function __construct(
-        $fields,
-        string $message = null,
-        string $service = null,
-        string $em = null,
-        string $entityClass = null,
-        string $repositoryMethod = null,
-        string $errorPath = null,
-        bool $ignoreNull = null,
-        array $groups = null,
-        $payload = null,
-        array $options = []
+        array|string $fields,
+        ?string $message = null,
+        ?string $service = null,
+        ?string $em = null,
+        ?string $entityClass = null,
+        ?string $repositoryMethod = null,
+        ?string $errorPath = null,
+        ?bool $ignoreNull = null,
+        ?array $groups = null,
+        mixed $payload = null,
     ) {
-        parent::__construct($fields, $options, $groups, $payload);
+        // REQUIRED: Set base fields BEFORE calling parent
+        $this->fields = $fields;
 
-        $this->message = $message ?? $this->message;
-        $this->service = $service ?? $this->service;
-        $this->em = $em ?? $this->em;
-        $this->entityClass = $entityClass ?? $this->entityClass;
+        // Override defaults only when provided
+        if ($service !== null)         $this->service = $service;
+        if ($em !== null)              $this->em = $em;
+        if ($entityClass !== null)     $this->entityClass = $entityClass;
+        if ($repositoryMethod !== null)$this->repositoryMethod = $repositoryMethod;
+        if ($errorPath !== null)       $this->errorPath = $errorPath;
+        if ($ignoreNull !== null)      $this->ignoreNull = $ignoreNull;
 
-        $this->repositoryMethod = $repositoryMethod ?? $this->repositoryMethod;
-        $this->errorPath = $errorPath ?? $this->errorPath;
-        $this->ignoreNull = $ignoreNull ?? $this->ignoreNull;
+        // Message fallback is handled by ConstraintEntity
+        parent::__construct(
+            fields: $fields,
+            entity: null,
+            message: $message,
+            groups: $groups,
+            payload: $payload
+        );
     }
 }
