@@ -86,7 +86,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         return $this->inner->getSourceContext($name);
     }
 
-    public function exists(string $name)
+    public function exists(string $name): bool
     {
         return ($this->useCustomLoader && parent::exists($name)) || $this->inner->exists($name);
     }
