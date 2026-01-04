@@ -143,20 +143,6 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
 
     public function enhanceMedia(mixed $html, array $config = [], FilterInterface|array $filters = [], array $attrs = []): mixed
     {
-        if ($html === null) {
-            return null;
-        }
-
-        if (is_array($html)) {
-
-            $htmlRet = [];
-            foreach ($html as $htmlEntry) {
-                $htmlRet[] = $this->enhanceMedia($htmlEntry, $config, $filters, $attrs);
-            }
-
-            return $htmlRet;
-        }
-
-        return $this->mediaEnhancer->enhance($html, $config, $filters, $attrs);
+        return $html; // No media enhancer for html wysiwig at the moment, use editor enhancer instead
     }
 }

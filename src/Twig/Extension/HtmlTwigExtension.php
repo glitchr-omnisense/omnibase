@@ -51,7 +51,7 @@ final class HtmlTwigExtension extends AbstractExtension
         } else {
             throw new \RuntimeException('Unsupported wysiwyg input');
         }
-
+        
         $htmlOrJson = $enhancer->enhanceMentions($htmlOrJson);
         
         $applySemantics = array_pop_key('semantics', $options) ?? false;

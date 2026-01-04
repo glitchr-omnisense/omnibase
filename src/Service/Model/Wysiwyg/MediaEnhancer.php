@@ -43,7 +43,10 @@ class MediaEnhancer implements MediaEnhancerInterface
             if(!$entry) continue;
             if(array_key_exists("storage", $config)) {
                 $storage = $config["storage"] ?? null;
-                $entry = $this->flysystem->getPublic(basename($entry), $storage);
+                $_entry = $this->flysystem->getPublic(basename($entry), $storage);
+                if($_entry) {
+                    $entry = $_entry;
+                }
             }
 
             $entry = $this->mediaService->image($entry, $config, $filters);
