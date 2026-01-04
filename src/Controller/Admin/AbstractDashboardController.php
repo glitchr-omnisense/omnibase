@@ -607,29 +607,17 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureActions(): Actions
     {
+        // $batchActionDelete = Action::new('batchActionDelete', '@' . AbstractDashboardController::TRANSLATION_DASHBOARD . '.action.batch_delete', 'fa-solid fa-user-times')
+        //     ->linkToCrudAction('batchActionDelete')
+        //     ->renderAsButton()
+        //     ->addCssClass('btn btn-primary text-danger');
+
         return Actions::new($this->adminUrlGenerator, $this->entityManager)
-            ->add(Crud::PAGE_INDEX, Action::NEW, 'fa-solid fa-fw fa-edit')
-            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt', fn(EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_INDEX, Action::DETAIL, 'fa-solid fa-fw fa-search', fn(EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right')
-            ->add(Crud::PAGE_DETAIL, Action::INDEX, 'fa-solid fa-fw fa-undo')
-            ->add(Crud::PAGE_DETAIL, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right')
-            ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left')
-            ->add(Crud::PAGE_DETAIL, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt')
-            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_EDIT, Action::INDEX, 'fa-solid fa-fw fa-undo')
-            ->add(Crud::PAGE_EDIT, Action::DETAIL, 'fa-solid fa-fw fa-search')
-            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
-            ->add(Crud::PAGE_EDIT, Action::SEPARATOR)
-            ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right')
-            ->add(Crud::PAGE_EDIT, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right')
-            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-floppy-disk')
-            ->add(Crud::PAGE_EDIT, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left')
-            ->add(Crud::PAGE_NEW, Action::INDEX, 'fa-solid fa-fw fa-backspace')
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN, 'fa-solid fa-share-from-square')
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-floppy-disk')
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER, 'fa-solid fa-fw fa-edit');
+            // ->addBatchAction($batchActionDelete)
+            // ->setPermission($batchActionDelete, 'ROLE_SUPERADMIN')
+            ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
+            ->setPermission(Action::EDIT, 'ROLE_ADMIN')
+            ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN');
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu

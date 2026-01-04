@@ -8,9 +8,6 @@ use  Base\Security\LoginFormAuthenticator;
 use  Base\Security\RescueFormAuthenticator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-/**
- *
- */
 class Referrer implements ReferrerInterface
 {
     /** @var RequestStack */
@@ -19,15 +16,19 @@ class Referrer implements ReferrerInterface
     /** @var AdvancedRouterInterface */
     private AdvancedRouterInterface $router;
 
+    /** @var LocalizerInterface */
+    private LocalizerInterface $localizer;
+
     public function __toString(): string
     {
         return $this->getUrl() ?? "";
     }
 
-    public function __construct(RequestStack $requestStack, AdvancedRouterInterface $router)
+    public function __construct(RequestStack $requestStack, AdvancedRouterInterface $router, LocalizerInterface $localizer)
     {
         $this->requestStack = $requestStack;
         $this->router = $router;
+        $this->localizer = $localizer;
     }
 
     public function redirect(array $headers = []): RedirectResponse
@@ -67,10 +68,6 @@ class Referrer implements ReferrerInterface
         $this->requestStack->getMainRequest()->getSession()->set('_target_path', null);
     }
 
-    /**
-     * @param string|null $url
-     * @return $this
-     */
     /**
      * @param string|null $url
      * @return $this
@@ -140,13 +137,14 @@ class Referrer implements ReferrerInterface
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
-        $targetUrl = parse_url2($request->getUri());
-        
+        // Host stripping
+        $targetUrl = parse_url2($targetPath);
+
         $currentHost = parse_url2(get_url())["host"] ?? null;
         $targetHost = $targetUrl["host"] ?? $currentHost ?? null;
         if($currentHost == $targetHost) $targetUrl["host"] = null;
-        $targetPath = compose_url($targetUrl);
 
+        $targetPath = compose_url($targetUrl);
         return $targetRoute ? $targetPath : null;
     }
 }

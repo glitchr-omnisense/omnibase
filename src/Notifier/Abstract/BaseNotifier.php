@@ -303,7 +303,12 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         $defaultMail = mailparse($this->technicalRecipient->getEmail());
 
-        $mail = $this->settingBag->getScalar("base.settings.mail");
+        try {
+            $mail = $this->settingBag->getScalar("base.settings.mail");
+        } catch (Exception $e) {
+            $mail = null;
+        }
+
         if (!$mail && $this->getAdminRecipient() instanceof EmailRecipientInterface) {
             $mail = $this->getAdminRecipient()?->getEmail();
         }
@@ -314,8 +319,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
             return new NoRecipient();
         }
 
+
         $mail = trim(explode("<", $mail)[1] ?? $mail, ">");
-        $mailName = $this->settingBag->getScalar("base.settings.mail.name");
+        try {
+            $mailName = $this->settingBag->getScalar("base.settings.mail.name");
+        } catch (Exception $e) {
+            $mailName = null;
+        }
+
         if(!$mailName) {
             $mailName = trim(explode("<", $mail)[0]);
         }
@@ -332,7 +343,12 @@ abstract class BaseNotifier implements BaseNotifierInterface
             ));
         }
 
-        $phone = $this->settingBag->getScalar("base.settings.phone");
+        try {
+            $phone = $this->settingBag->getScalar("base.settings.phone");
+        } catch (Exception $e) {
+            $phone = null;
+        }
+
         if (!$phone && $this->getAdminRecipient() instanceof SmsRecipientInterface) {
             $phone = $this->getAdminRecipient()?->getPhone();
         }

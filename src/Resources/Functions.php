@@ -3389,6 +3389,46 @@ namespace {
     }
 
     /**
+     * @param array $haystack
+     * @return string|null
+     */
+    function array_class_ancestor(array $haystack): ?string
+    {
+        if (empty($haystack)) {
+            return null;
+        }
+
+        // Normalize to class names
+        $classes = array_map(
+            fn($c) => is_object($c) ? get_class($c) : $c,
+            $haystack
+        );
+
+        // Get ancestors of first class (including itself)
+        $common = array_merge(
+            [$classes[0]],
+            class_parents($classes[0]) ?: []
+        );
+
+        // Intersect with ancestors of all other classes
+        foreach (array_slice($classes, 1) as $class) {
+            $ancestors = array_merge(
+                [$class],
+                class_parents($class) ?: []
+            );
+
+            $common = array_intersect($common, $ancestors);
+
+            if (empty($common)) {
+                return null;
+            }
+        }
+
+        // Return nearest ancestor (child-most)
+        return array_values($common)[0];
+    }
+
+    /**
      * @param $objectOrClass
      * @param array $haystack
      * @return string|int|false

@@ -15,9 +15,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
-/**
- *
- */
 class ThreadCrudController extends ThreadActionCrudController
 {
     public static function getPreferredIcon(): ?string

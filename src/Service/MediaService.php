@@ -542,7 +542,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $filters = $config["filters"] ?? $options["filters"] ?? [];
         $storage = $config["storage"] ?? $options["storage"] ?? null;
         $output = $config["output"] ?? $options["output"] ?? realpath($path);
-        
+
         // Apply image resolution limitation
         if (!is_instanceof($this->maxResolution, ThumbnailFilter::class)) {
             throw new NotFoundHttpException("Resolution filter \"" . $this->maxResolution . "\" must inherit from " . ThumbnailFilter::class);
@@ -621,7 +621,7 @@ class MediaService extends FileService implements MediaServiceInterface
                 if (!file_exists($filteredPath)) {
                     
                     if (!$this->fallback) {
-                        throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provided.");
+                        throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provide in ".$storage.".");
                     }
 
                     $filteredPath = $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension());

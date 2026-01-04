@@ -67,11 +67,13 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->setCssClass('action-' . Action::SAVE_AND_CONTINUE)
                 ->addCssClass('btn btn-secondary action-save text-success')
                 ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])
+                ->renderAsButton()
                 ->renderAsTooltip()
                 ->linkToCrudAction(Crud::PAGE_EDIT === $pageName ? Action::EDIT : Action::NEW);
         }
 
         if (Action::GOTO_PREV === $actionName) {
+
             return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'admin'))
                 ->setCssClass('action-' . Action::GOTO_PREV)
                 ->addCssClass('btn btn-secondary')
@@ -101,6 +103,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
             return Action::new(Action::GOTO_SEE, t('action.goto_see', domain: 'admin'))
                 ->setCssClass('action-' . Action::GOTO_SEE)
                 ->addCssClass('btn btn-secondary')
+                ->setHtmlAttributes(['target' => '_blank'])
                 ->renderAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
@@ -118,6 +121,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
         }
 
         if (Action::GOTO_NEXT === $actionName) {
+
             return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'admin'))
                 ->setCssClass('action-' . Action::GOTO_NEXT)
                 ->addCssClass('btn btn-secondary')
@@ -166,14 +170,33 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
     public function add(string $pageName, EaAction|EaActionGroup|string $actionNameOrObject, ?string $actionIcon = null, ?callable $callable = null)
     {
         parent::add($pageName, $actionNameOrObject);
+
         $actionDto = $this->dto->getAction($pageName, $actionNameOrObject);
         if ($actionIcon) {
             $actionDto->setIcon($actionIcon);
         }
 
         if ($callable != null) {
-            parent::update($pageName, $actionNameOrObject, $callable);
+            $this->update($pageName, $actionNameOrObject, $callable);
         }
+
+        return $this;
+    }
+
+    public function update(string $pageName, string $actionName, callable $callable)
+    {
+        if (null === $actionDto = $this->dto->getAction($pageName, $actionName)) {
+            throw new \InvalidArgumentException(sprintf('The "%s" action does not exist in the "%s" page, so you cannot update it. Instead, add the action with the "add()" method.', $actionName, $pageName));
+        }
+
+        $action = $actionDto->getAsConfigObject();
+        if (null !== $actionDto->getUrl()) {
+            $action->linkToUrl($actionDto->getUrl());
+        }
+
+        /** @var Action $action */
+        $action = $callable($action);
+        $this->dto->setAction($pageName, $action->getAsDto());
 
         return $this;
     }

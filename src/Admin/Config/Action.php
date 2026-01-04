@@ -2,9 +2,8 @@
 
 namespace Base\Admin\Config;
 
-/**
- *
- */
+use EasyCorp\Bundle\EasyAdminBundle\Twig\Component\Option\ButtonElement;
+
 class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
 {
     public const GOTO_PREV = 'prev';
@@ -30,6 +29,15 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
     public function targetBlank()
     {
         $this->dto->addHtmlAttributes(['target' => "_blank"]);
+
+        return $this;
+    }
+
+    public function renderAsLink(bool $renderAsLink = true)
+    {
+        if ($renderAsLink) {
+            $this->dto->setHtmlElement(ButtonElement::A);
+        }
 
         return $this;
     }

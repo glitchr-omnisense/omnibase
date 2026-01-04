@@ -17,7 +17,6 @@ use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\EntityCollection;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -32,6 +31,9 @@ use Exception;
 use LogicException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
+use Base\Admin\Config\Action;
 
 abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController
 {
@@ -281,7 +283,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      * @return Action
      * @throws Exception
      */
-    public function setDiscriminatorMapAttribute(Action $action): Action
+    public function setDiscriminatorMapAttribute(EaAction $action): EaAction
     {
         $entity = $this->getEntityFqcn();
         $rootEntity = $this->classMetadataManipulator->getRootEntityName($entity);
@@ -292,25 +294,26 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if ($discriminatorMap === null) {
             $discriminatorMap = array_filter($this->classMetadataManipulator->getDiscriminatorMap($entity), fn($e) => is_instanceof($e, $entity));
         }
+
         $htmlAttributes = $actionDto->getHtmlAttributes();
-        $htmlAttributes["crud"] = urlencode(get_class($this));
-        $htmlAttributes["root-crud"] = urlencode($this->getCrudControllerFqcn($rootEntity));
-        $htmlAttributes["map"] = [];
+        // $htmlAttributes["crud"] = urlencode(get_class($this));
+        // $htmlAttributes["root-crud"] = urlencode($this->getCrudControllerFqcn($rootEntity));
+        // $htmlAttributes["map"] = [];
 
-        foreach ($discriminatorMap as $key => $class) {
+        // foreach ($discriminatorMap as $key => $class) {
 
-            if (is_abstract($class)) {
-                continue;
-            }
+        //     if (is_abstract($class)) {
+        //         continue;
+        //     }
 
-            $k = explode("_", $key);
-            $key = array_shift($k);
+        //     $k = explode("_", $key);
+        //     $key = array_shift($k);
 
-            if (($crudClassController = $this->getCrudControllerFqcn($class))) {
-                $htmlAttributes["map"][get_parent_class($class)] ?? [];
-                $htmlAttributes["map"][get_parent_class($class)][] = urlencode($crudClassController);
-            }
-        }
+        //     if (($crudClassController = $this->getCrudControllerFqcn($class))) {
+        //         $htmlAttributes["map"][get_parent_class($class)] ?? [];
+        //         $htmlAttributes["map"][get_parent_class($class)][] = urlencode($crudClassController);
+        //     }
+        // }
 
         if (count(array_filter($discriminatorMap, fn($e) => $e !== $entity)) > 0) {
             \trigger_deprecation('glitchr/base-bundle', 'v4.5.0', 'Setting the "discriminator" HTML attribute is deprecated, use the "map" attribute instead.');
@@ -324,11 +327,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureActions(Actions $actions): Actions
     {
-        $batchActionDelete = Action::new('batchActionDelete', '@' . AbstractDashboardController::TRANSLATION_DASHBOARD . '.action.batch_delete', 'fa-solid fa-user-times')
-            ->linkToCrudAction('batchActionDelete')
-            ->addCssClass('btn btn-primary text-danger');
-
+        // Index Page Actions
         if (is_instanceof($this->getEntityFqcn(), LinkableInterface::class)) {
+
             $linkToEntity = \Base\Admin\Config\Action::new(\Base\Admin\Config\Action::GOTO, "", "fa-solid fa-fw fa-plug")
                 ->renderAsTooltip()
                 ->linkToUrl(fn($e) => $e->__toLink() ?? "");
@@ -337,13 +338,34 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                 ->add(Action::INDEX, $linkToEntity);
         }
 
+        $actions
+            ->add(Crud::PAGE_INDEX, Action::NEW, 'fa-solid fa-fw fa-edit', fn(EaAction $a) => $this->setDiscriminatorMapAttribute($a))
+            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""));
+
+        // Detail Page Actions
         return $actions
-            ->update(Crud::PAGE_INDEX, Action::NEW, fn(Action $a) => $this->setDiscriminatorMapAttribute($a))
-            ->addBatchAction($batchActionDelete)
-            ->setPermission($batchActionDelete, 'ROLE_SUPERADMIN')
-            ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
-            ->setPermission(Action::EDIT, 'ROLE_ADMIN')
-            ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN');
+            ->add(Crud::PAGE_DETAIL, Action::EDIT, 'fa-solid fa-fw fa-pencil-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_DETAIL, Action::SEPARATOR)
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_DETAIL, Action::INDEX, 'fa-solid fa-fw fa-undo', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left', fn(EaAction $a) => $a->setLabel(""))
+
+            ->add(Crud::PAGE_EDIT, Action::INDEX, 'fa-solid fa-fw fa-undo') 
+            ->add(Crud::PAGE_EDIT, Action::DETAIL, 'fa-solid fa-fw fa-search') 
+            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fa-solid fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_EDIT, Action::SEPARATOR)
+            ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fa-solid fa-fw fa-angle-right', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_EDIT, Action::GOTO_SEE, 'fa-solid fa-fw fa-square-up-right', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-floppy-disk', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_EDIT, Action::GOTO_PREV, 'fa-solid fa-fw fa-solid fa-solid fa-angle-left', fn(EaAction $a) => $a->setLabel(""))
+
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN, 'fa-solid fa-share-from-square')
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER, 'fa-solid fa-fw fa-edit')
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_CONTINUE, 'fa-solid fa-fw fa-floppy-disk')
+            ->add(Crud::PAGE_NEW, Action::INDEX, 'fa-solid fa-fw fa-backspace');
     }
 
     /**

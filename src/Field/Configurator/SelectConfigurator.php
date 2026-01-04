@@ -7,6 +7,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\SelectField;
 use Base\Service\Model\Autocomplete;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\PersistentCollection;
 use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -16,9 +17,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- *
- */
 class SelectConfigurator implements FieldConfiguratorInterface
 {
     /**
@@ -57,18 +55,22 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
-        // Formatted value
         $values = $field->getValue();
         $class  = $field->getCustomOption(SelectField::OPTION_CLASS);
         if (!$class) {
 
-            if ($values instanceof Collection) {
+            if ($values instanceof PersistentCollection) {
 
                 $aliasMap = $this->classMetadataManipulator->getClassMetadataCompletor($values->getOwner());
                 $classMetadata = $this->classMetadataManipulator->getClassMetadata($values->getOwner());
-                
-                $propertyName = $aliasMap->aliasNames[$field->getProperty()] ?? $field->getProperty();
-                $class = $classMetadata->getAssociationMapping($propertyName)->declared;                
+
+                $propertyName = $aliasMap?->aliasNames[$field->getProperty()] ?? $field->getProperty();
+                $class = $classMetadata->getAssociationMapping($propertyName)->declared;
+
+            } else if ($values instanceof Collection) {
+
+                $classNames = array_map(fn($v) => is_object($v) ? get_class($v) : null, $values->toArray());
+                $class = array_class_ancestor($classNames);
             }
         }
 

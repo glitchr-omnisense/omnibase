@@ -64,10 +64,6 @@ final class CrudWidgetItem implements MenuItemInterface
      * @param $entityId
      * @return $this
      */
-    /**
-     * @param $entityId
-     * @return $this
-     */
     public function setEntityId($entityId): self
     {
         $this->dto->setRouteParameters(array_merge(
