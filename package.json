@@ -52,7 +52,7 @@
     "editorjs-code-highlight": "^1.2",
     "editorjs-cursors": "^1.0",
     "editorjs-header": "^2.7",
-    "editorjs-image": "^1.0.8",
+    "editorjs-image": "^1.0.20",
     "editorjs-mention": "^1.0",
     "editorjs-paragraph": "^1.0",
     "editorjs-undo": "^2.0",
