@@ -3,9 +3,10 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
-use Base\Database\Traits\VaultTrait;
-use Base\Database\TranslationInterface;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
+use Base\Database\Entity\EntityExtension;
+use Base\Database\Entity\Extension\VaultTrait;
+use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
@@ -30,7 +31,7 @@ use function is_file;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class Vault extends AbstractAnnotation
+class Vault extends AbstractAnnotation implements ExtensionOptionInterface
 {
     /**
      * @var string
@@ -73,7 +74,7 @@ class Vault extends AbstractAnnotation
             }
         }
 
-        return ($target == AnnotationReader::TARGET_CLASS);
+        return ($target == EntityExtension::TARGET_CLASS);
     }
 
     private function loadKeys(?string $vault = null): array
@@ -88,6 +89,7 @@ class Vault extends AbstractAnnotation
         if ($decryptionKey === null) {
             throw new Exception('Decryption key not found in "' . dirname($pathPrefix) . '".');
         }
+        
         /* Rotation keys ? Encryption key ? Probably not needed.. input very welcome here :o) */
         // if (is_file($pathPrefix.'encrypt.public.php')) {
         //     $encryptionKey = (string) include $pathPrefix.'encrypt.public.php';
@@ -180,7 +182,7 @@ class Vault extends AbstractAnnotation
         }
     }
 
-    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
     {
         $vault = $entity->getVault();
 

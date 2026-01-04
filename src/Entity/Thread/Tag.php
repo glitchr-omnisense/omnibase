@@ -8,28 +8,39 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Validator\Constraints as AssertBase;
-use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Slugify;
+use Base\Database\Annotation\Uploader;
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Traits\TranslatableTrait;
-use Base\Database\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableTrait;
+use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Database\Annotation\Cache;
-
+use Base\Database\Entity\Extension\AliasInterface;
+use Base\Database\Entity\Extension\AliasTrait;
+use Base\Database\Entity\Extension\TranslatableAliasTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Thread\TagRepository;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
 
 #[ORM\Entity(repositoryClass: TagRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
 #[ORM\DiscriminatorColumn(name: "class", type: "string")]
 #[DiscriminatorEntry(value: "abstract")]
-class Tag implements TranslatableInterface, IconizeInterface
+class Tag implements TranslatableInterface, IconizeInterface, AliasInterface
 {
-    use TranslatableTrait;
+    use TranslatableAliasTrait;
 
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getLabel() ?? $this->getSlug() ?? get_class($this);
+    }
+    
     public function __iconize(): ?array
     {
         return $this->getIcon() ? [$this->getIcon()] : null;
@@ -40,26 +51,18 @@ class Tag implements TranslatableInterface, IconizeInterface
         return ["fa-solid fa-tags"];
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getLabel() ?? $this->getSlug() ?? get_class($this);
-    }
-
     public function __construct(?string $label = null, ?string $slug = null)
     {
         $this->setLabel($label);
         $this->slug = $slug;
-
+        $this->priority = 0;
+        
         $this->threads = new ArrayCollection();
     }
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type:"integer")]
-
     protected $id;
 
     public function getId(): ?int
@@ -68,7 +71,7 @@ class Tag implements TranslatableInterface, IconizeInterface
     }
 
     #[ORM\Column(length:255, unique:true)]
-    #[Slugify(reference:"translations.label")]
+    #[Slugify(reference: "translations.label")]
     protected $slug;
 
     public function getSlug(): ?string
@@ -84,7 +87,6 @@ class Tag implements TranslatableInterface, IconizeInterface
 
     #[ORM\Column(type:"string", length:9, nullable:true)]
     protected $color;
-
     public function getColor(): ?string
     {
         return $this->color;
@@ -111,7 +113,7 @@ class Tag implements TranslatableInterface, IconizeInterface
     }
 
     #[ORM\Column(type:"text", nullable:true)]
-    #[Uploader(storage:"local.storage", max_size:"2MB", mime_types:["image/*"], missable:true)]
+    #[Uploader(max_size:"2MB", mime_types:["image/*"], missable:true)]
     #[AssertBase\File(max_size:"2MB", mime_types:["image/*"], groups:["new", "edit"])]
     protected $icon;
 

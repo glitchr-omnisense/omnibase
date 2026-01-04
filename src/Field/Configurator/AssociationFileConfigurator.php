@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 
 use Base\Field\AssociationFileField;
@@ -139,9 +139,9 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
             ->setController($crudController)
             ->setAction(Action::DETAIL)
             ->setEntityId($entityDto->getPrimaryKeyValue())
-            ->unset(EA::MENU_INDEX)
-            ->unset(EA::SUBMENU_INDEX)
-            ->includeReferrer()
+            //->unset(EA::MENU_INDEX)
+            //->unset(EA::SUBMENU_INDEX)
+            //->includeReferrer()
             ->generateUrl();
     }
 

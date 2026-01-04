@@ -1,0 +1,14 @@
+<div class="dropdown-theme-width-wrapper shrink">
+    <ul class="{{ class|default("") }}" aria-labelledby="dropdown-theme-width">
+    {% for _key, _width in available_theme_widths %}
+        {% set current = _key == current_theme_width.id ? "active" : null %}
+            <li><button class="dropdown-item {{ current }}"
+                    data-id="{{ _width.id }}" 
+                    data-class="{{ _width.class }}" 
+                    data-icon="{{ _width.icon }}">
+                <i class="{{ _width["icon"] }}"></i>
+                <span>{{ ("@themes.width." ~ _width.id ~ "._singular")|trans }}</span>
+        </button></li>
+    {% endfor %}
+    </ul>
+</div>

@@ -36,8 +36,9 @@ class Menu extends Widget implements IconizeInterface, SetInterface
     }
 
     #[ORM\ManyToMany(targetEntity:Widget::class, cascade:["persist"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy:"itemPositions")]
     protected $items;
+    protected $itemPositions;
     public function getItems(): Collection
     {
         return $this->items;

@@ -2,12 +2,12 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Base\Database\Annotation\Associate;
 use Doctrine\ORM\Mapping as ORM;
 
-use Base\Database\TranslationInterface;
-use Base\Database\Traits\TranslationTrait;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationTrait;
 
 use Base\Validator\Constraints as AssertBase;
 use League\Flysystem\FilesystemException;
@@ -25,9 +25,9 @@ class AttributeIntl implements TranslationInterface
         return $this->_isEmpty([], fn($n, $v) => is_array($v) && array_filter($v) === []);
     }
 
-    #[ORM\Column(type:"array")]
+    #[ORM\Column(type:"json")]
     #[AssertBase\File(max_size:"2MB", groups:["new", "edit"])]
-    #[Uploader(storage:"local.storage", max_size:"2MB", missable:true)]
+    #[Uploader(max_size:"2MB", missable:true)]
     #[Associate(metadata:"class")]
     protected $value;
 

@@ -33,13 +33,14 @@ locale:
         _singular: Country
         _plural: Countries
 
-backoffice:
-    title: "Go to backoffice"
+admin:
+    title: "Go to admin"
 
 profile:
     title: "See my profile"
     registered: "Registered on {0} at {1}"
     edit: "Edit my profile"
+    last_seen: "Last seen on {0} at {1}"
 
 logout:
     title: "Log out"

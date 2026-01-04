@@ -3,11 +3,10 @@
 namespace Base\Service;
 
 use Symfony\Component\Translation\TranslatableMessage;
+use \Symfony\Contracts\Translation\TranslatorInterface as SymfonyTranslatorInterface;
+use Symfony\Component\Translation\TranslatorBagInterface as SymfonyTranslatorBagInterface;
 
-/**
- *
- */
-interface TranslatorInterface extends \Symfony\Contracts\Translation\TranslatorInterface
+interface TranslatorInterface extends SymfonyTranslatorInterface, SymfonyTranslatorBagInterface
 {
     public function getFallbackLocales(): array;
 

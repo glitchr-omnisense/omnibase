@@ -1,0 +1,11 @@
+<div class="theme-default">
+    <span class="label">{{ "@themizer.mode._singular"|trans }}</span>
+    <ul class="theme">
+    {% for theme in available_theme_modes %}
+        {% set current = (theme == current_theme_mode) ? "active" : null %}
+        <li><a href="{{ path("_switch_theme", {_theme: theme|lang}) }}" {{ html_attributes({"class":current}) }}>
+            <img class="country-flag" alt="{{theme|country}}" src="{{asset('bundles/base/images/flags/'~(theme|country)~'.svg')}}" style="max-width:50px">
+        </a></li>
+    {% endfor %}
+    </ul>
+</div>

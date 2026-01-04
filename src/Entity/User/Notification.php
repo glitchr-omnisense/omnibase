@@ -538,7 +538,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * @param RecipientInterface ...$recipients
      * @return $this
      */
-    public function send(string $importance = null, RecipientInterface ...$recipients)
+    public function send(?string $importance = null, RecipientInterface ...$recipients)
     {
         $this->setImportance($importance ?? self::IMPORTANCE_DEFAULT);
 
@@ -552,9 +552,8 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             }
         }
 
-        $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
+        $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);    
         $this->getNotifier()->sendUsers($this, ...array_unique($recipients));
-
         return $this;
     }
 
@@ -596,14 +595,14 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
-    public function asSmsMessage(SmsRecipientInterface $recipient, string $transport = null): ?SmsMessage
+    public function asSmsMessage(SmsRecipientInterface $recipient, ?string $transport = null): ?SmsMessage
     {
         //throw new UnexpectedValueException("No SMS support implemented yet.");
         return null;
     }
 
 
-    public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
+    public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): ?EmailMessage
     {
         $notifier = $this->getNotifier();
         $notification = EmailMessage::fromNotification($this, $recipient);

@@ -2,30 +2,25 @@
 
 namespace Base\Validator;
 
-use Doctrine\Common\Annotations\Annotation;
-
-/**
- * @Annotation
- */
-
-#[\Attribute]
+#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::TARGET_CLASS)]
 class Constraint extends \Symfony\Component\Validator\Constraint
 {
-    public $message = "";
+    public string $message;
 
-    /**
-     * @param array $options
-     * @param array|null $groups
-     * @param $payload
-     */
-    public function __construct(array $options = [], array $groups = null, $payload = null)
-    {
-        if (empty($this->message)) {
-            $classname = explode("\\", get_called_class());
+    public function __construct(
+        ?string $message = null,
+        ?array $groups = null,
+        mixed $payload = null,
+    ) {
+        // Default message if none provided
+        if ($message === null) {
+            $classname = explode("\\", static::class);
             $classname = array_pop($classname);
-            $this->message = "@validators." . camel2snake($classname);
+            $message = "@validators." . camel2snake($classname);
         }
 
-        parent::__construct($options, $groups, $payload);
+        $this->message = $message;
+
+        parent::__construct(groups: $groups, payload: $payload);
     }
 }

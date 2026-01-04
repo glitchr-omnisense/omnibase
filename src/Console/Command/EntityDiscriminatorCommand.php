@@ -50,7 +50,6 @@ class EntityDiscriminatorCommand extends Command
             throw new Exception("Class \"" . $entity . "\" is not an entity.");
         }
 
-        dump($this->classMetadataManipulator->getClassMetadata($entity)->discriminatorMap);
         return Command::SUCCESS;
     }
 }

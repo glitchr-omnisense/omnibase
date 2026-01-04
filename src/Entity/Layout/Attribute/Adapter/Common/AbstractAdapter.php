@@ -3,9 +3,9 @@
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\Slugify;
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
+use Base\Database\Annotation\Slugify;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Base\Service\Model\AutocompleteInterface;
 use Base\Service\Model\IconizeInterface;

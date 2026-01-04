@@ -5,13 +5,13 @@ namespace Base\Database\Entity;
 use Base\Database\Entity\AggregateHydrator\PopulableInterface;
 use Base\Database\Entity\AggregateHydrator\SerializableInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Database\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Type\SetType;
 use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
-use Doctrine\DBAL\Types\ArrayType;
+use Doctrine\DBAL\Types\JsonType;
 
 use Base\Service\Localizer;
 use Doctrine\ORM\Exception\ORMException;
@@ -23,6 +23,9 @@ use ReflectionObject;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Doctrine\ORM\Mapping\AssociationMapping;
+use Doctrine\ORM\Proxy\InternalProxy;
+use Doctrine\Persistence\Proxy as PersistenceProxy;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -229,10 +232,6 @@ class EntityHydrator implements EntityHydratorInterface
      * @param bool $hydrateAssociationReferences
      * @return $this
      */
-    /**
-     * @param bool $hydrateAssociationReferences
-     * @return $this
-     */
     public function setHydrateAssociationReferences(bool $hydrateAssociationReferences)
     {
         $this->hydrateAssociationReferences = $hydrateAssociationReferences;
@@ -322,8 +321,8 @@ class EntityHydrator implements EntityHydratorInterface
 
             //
             // Default values for the specific array cases
-            $doctrineType = $this->classMetadataManipulator->getDoctrineType($fieldMapping["type"]);
-            if (is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, SetType::class)) {
+            $doctrineType = $this->classMetadataManipulator->getDoctrineType($fieldMapping->type);
+            if (is_instanceof($doctrineType, JsonType::class) || is_instanceof($doctrineType, SetType::class)) {
                 $this->setPropertyValue($entity, $fieldName, [], $reflEntity);
             }
 
@@ -395,19 +394,19 @@ class EntityHydrator implements EntityHydratorInterface
             // Default behavior
             $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
             if ($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
-                try {
-                    $this->propertyAccessor->setValue($entity, $propertyName, $value);
-                } catch (AccessException $e) {
-                }
+
+                try { $this->propertyAccessor->setValue($entity, $propertyName, $value); }
+                catch (AccessException $e) {}
                 $this->markAsHydrated($entity, $propertyName);
+
             } elseif ($aggregateModel & self::OBJECT_PROPERTIES || $aggregateFallback) {
+
                 $reflProperty = $reflEntity->hasProperty($propertyName) ? $reflEntity->getProperty($propertyName) : null;
                 if ($reflProperty !== null) {
+
                     $propertyName = $reflProperty->getName();
-                    if (!in_array($propertyName, $classMetadata->identifier, true)) {
-                        $this->setPropertyValue($entity, $propertyName, $value, $reflEntity);
-                        $this->markAsHydrated($entity, $propertyName);
-                    }
+                    $this->setPropertyValue($entity, $propertyName, $value, $reflEntity);
+                    $this->markAsHydrated($entity, $propertyName);
                 }
             }
         }
@@ -503,7 +502,7 @@ class EntityHydrator implements EntityHydratorInterface
         return $this;
     }
 
-    protected function hydrateAssociationToOne(mixed $entity, string $propertyName, array $mapping, mixed $value, int $aggregateModel): self
+    protected function hydrateAssociationToOne(mixed $entity, string $propertyName, AssociationMapping $mapping, mixed $value, int $aggregateModel): self
     {
         if ($this->isHydrated($entity, $propertyName)) {
             return $this;
@@ -533,7 +532,7 @@ class EntityHydrator implements EntityHydratorInterface
         return $this;
     }
 
-    protected function hydrateAssociationToMany(mixed $entity, string $propertyName, array $mapping, mixed $values, int $aggregateModel): self
+    protected function hydrateAssociationToMany(mixed $entity, string $propertyName, AssociationMapping $mapping, mixed $values, int $aggregateModel): self
     {
         if ($this->isHydrated($entity, $propertyName)) {
             return $this;
@@ -545,56 +544,59 @@ class EntityHydrator implements EntityHydratorInterface
 
         // Fetch or hydrate association
         $association = $values instanceof Collection ? $values : new ArrayCollection($values === null ? [] : (is_array($values) ? $values : [$values]));
+        if($aggregateModel & self::FETCH_ASSOCIATIONS) {
 
-        $array = $association->toArray();
-        $association->clear();
+            $array = $association->toArray();
+            $association->clear();
 
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $entityValue = $this->getPropertyValue($entity, $propertyName);
-                $value = $this->hydrate($entityValue->get($key) ?? $mapping['targetEntity'], $value, [], $aggregateModel);
-            } elseif ($targetEntity = $this->findAssociation($mapping['targetEntity'], $value)) {
-                $value = $targetEntity;
+            foreach ($array as $key => $value) {
+
+                if (is_array($value)) {
+                    $entityValue = $this->getPropertyValue($entity, $propertyName);
+                    $value = $this->hydrate($entityValue->get($key) ?? $mapping['targetEntity'], $value, [], $aggregateModel);
+                } elseif ($targetEntity = $this->findAssociation($mapping['targetEntity'], $value)) {
+                    $value = $targetEntity;
+                }
+
+                // Special case: the setter makes loosing the custom keyname (Perhaps one might implement an extends..)
+                if (class_implements_interface($value, TranslationInterface::class)) {
+                    $key = Localizer::normalizeLocale($key);
+                    $value->setLocale($key);
+                }
+
+                $association->set($key, $value);
             }
 
-            // Special case: the setter makes loosing the custom keyname (Perhaps one might implement an extends..)
-            if (class_implements_interface($value, TranslationInterface::class)) {
-                $key = Localizer::normalizeLocale($key);
-                $value->setLocale($key);
-            }
+            // Fix identification in owning side definition
+            $isOwningSide = $mapping["isOwningSide"];
+            if (!$isOwningSide) {
 
-            $association->set($key, $value);
+                $mappedBy = $mapping["mappedBy"];
+
+                if ($this->classMetadataManipulator->isManyToSide($entity, $propertyName)) {
+
+                    $association = $association->toArray();
+                    foreach ($association as $entry) {
+                        $collection = $this->propertyAccessor->getValue($entry, $mappedBy);
+                        if ($collection instanceof Collection) {
+                            $collection = $collection->toArray();
+                        }
+
+                        $collection[] = $entity;
+                        $this->propertyAccessor->setValue($entry, $mappedBy, array_unique_object($collection));
+                    }
+                } else {
+                    foreach ($association as $entry) {
+                        if (is_string($entry)) {
+                            continue;
+                        }
+                        $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
+                    }
+                }
+            }
         }
 
-        // $association = $associationNormalized;
-
-        // Fix identification in owning side definition
-        $isOwningSide = $mapping["isOwningSide"];
-        if (!$isOwningSide) {
-            $mappedBy = $mapping["mappedBy"];
-
-            if ($this->classMetadataManipulator->isManyToSide($entity, $propertyName)) {
-                $association = $association->toArray();
-                foreach ($association as $entry) {
-                    $collection = $this->propertyAccessor->getValue($entry, $mappedBy);
-                    if ($collection instanceof Collection) {
-                        $collection = $collection->toArray();
-                    }
-
-                    $collection[] = $entity;
-                    $this->propertyAccessor->setValue($entry, $mappedBy, array_unique_object($collection));
-                }
-            } else {
-                foreach ($association as $entry) {
-                    if (is_string($entry)) {
-                        continue;
-                    }
-                    $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
-                }
-            }
-        }
-
-        // Commit association
+        // Set association value
         $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
         if ($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
             $this->propertyAccessor->setValue($entity, $propertyName, $association);
@@ -630,6 +632,9 @@ class EntityHydrator implements EntityHydratorInterface
 
             $this->reflProperties[$reflEntity->getName()] = [];
             foreach ($reflEntity->getProperties() as $reflProperty) {
+                if ($reflProperty->isPrivate()) {
+                    continue;
+                }
                 $reflProperty->setAccessible(true);
                 $this->reflProperties[$reflEntity->getName()][$reflProperty->getName()] = $reflProperty;
             }
@@ -728,7 +733,6 @@ class EntityHydrator implements EntityHydratorInterface
         }
 
         $data = $this->getOriginalEntityData($eventOrEntity);
-
         if (!$eventOrEntity instanceof LifecycleEventArgs) {
             $className = get_class($eventOrEntity);
         } else {
@@ -745,8 +749,17 @@ class EntityHydrator implements EntityHydratorInterface
     public function getOriginalEntityData($eventOrEntity)
     {
         $entity = $this->classMetadataManipulator->isEntity($eventOrEntity) ? $eventOrEntity : $eventOrEntity->getObject();
+        $entityIdentifiers = [];
 
-        $originalEntityData = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
+        $classMetadata = $this->classMetadataManipulator->getClassMetadata($entity);
+        foreach($classMetadata->getIdentifier() as $id) {
+            $entityIdentifiers[$id] = $classMetadata->getFieldValue($entity, $id);
+        }
+
+        $originalEntityData = array_merge(
+            $entityIdentifiers, $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity)
+        );
+
         if ($eventOrEntity instanceof PreUpdateEventArgs) {
             $event = $eventOrEntity;
             foreach ($event->getEntityChangeSet() as $field => $data) {

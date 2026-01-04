@@ -2,94 +2,64 @@
 
 namespace Base\Twig\Loader;
 
-use Base\Routing\RouterInterface;
-use Base\Traits\BaseTrait;
-use Base\Twig\AppVariable;
-use Base\Twig\Variable\RandomVariable;
-use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Loader\ChainLoader;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Twig\Loader\LoaderInterface;
 
-/**
- * Loads template from the filesystem.
- *
- * @author Fabien Potencier <fabien@symfony.com>
- */
 class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 {
-    use BaseTrait;
+    protected bool $useCustomLoader = false;
+    protected \Twig\Loader\FilesystemLoader $inner;
 
-    protected Environment $twig;
-
-    protected RouterInterface $router;
-
-    /**
-     * @param \Twig\Loader\FilesystemLoader $defaultLoader
-     * @param RouterInterface $router
-     * @param Environment $twig
-     * @param AppVariable $appVariable
-     * @param RandomVariable $randomVariable
-     * @throws LoaderError
-     */
-    public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, RouterInterface $router, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable)
-    {
-        $this->twig = $twig;
-        $this->router = $router;
-
-        $baseService = $this->getService();
-
-        // Add base service to the default variables
-        $this->twig->addGlobal('server', $_SERVER);
-
-        $this->twig->addGlobal('random', $randomVariable);
-        $this->twig->addGlobal('base', $baseService);
-        $this->twig->addGlobal('app', $appVariable);
-
+    public function __construct(
+        \Twig\Loader\FilesystemLoader $inner,               // the decorated loader
+        ParameterBagInterface $parameterBag,
+        string $projectDir
+    ) {
         // Setup custom loader, to prevent the known issues of the default symfony TwigLoader
         // 1/ Cannot override <form_div_layout class="html twig">
         // 2/ Infinite loop when using {%use%}
-        $projectDir = $baseService->getProjectDir();
-        $useCustomLoader = $baseService->getParameterBag('base.twig.use_custom');
+        $this->inner = $inner;
+        $this->useCustomLoader = $parameterBag->get('base.twig.use_custom');
 
-        $bundlePath = $baseService->getParameterBag('base.twig.default_path');
+        $bundlePath = $parameterBag->get('base.twig.default_path');
         parent::__construct([], $bundlePath);
-
-        $loaders = $this->twig->getLoader();
-        if ($loaders instanceof ChainLoader) {
-            $loaders = $loaders->getLoaders();
-        } else {
-            $loaders = [$loaders];
+        foreach($this->inner->getNamespaces() as $namespace) {
+            foreach($this->inner->getPaths() as $path) {
+                $this->prependPath(trim($path), $namespace);
+            }
         }
-
-        $loaders[] = $this;
-
-        // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
-        if (!$useCustomLoader) {
-            array_unshift($loaders, $defaultLoader);
-        } else {
-            $loaders[] = $defaultLoader;
-        }
-
-        $chainLoader = new ChainLoader($loaders);
-        $twig->setLoader($chainLoader);
-
+    
         // Add @Twig, @Assets and @Layout variables
-        if (!$this->router->isProfiler()) {
-            $this->prependPath($bundlePath . '/inspector', 'WebProfiler');
-        }
-
-        $this->prependPath($bundlePath . '/easyadmin', 'EasyAdmin');
         $this->prependPath($bundlePath . '/notifier');
         $this->prependPath($bundlePath);
 
         $this->prependPath($projectDir . '/src', 'App');
         $this->prependPath($projectDir . '/src/Controller', 'Controller');
         $this->prependPath($projectDir . '/public', 'Public');
+
         $this->prependPath($projectDir . '/vendor/symfony/twig-bridge/Resources/views', 'Twig');
         $this->prependPath($projectDir . '/templates');
 
+        // Allow to override the default bundle path for any bundle but base-bundle
+        $bundlesPath = $bundlePath . '/bundles';
+        if (is_dir($bundlesPath)) {
+
+            $directories = scandir($bundlesPath);
+            foreach ($directories as $directory) {
+                if ($directory === '.' || $directory === '..' || $directory === 'BaseBundle') {
+                    continue;
+                }
+
+                $fullPath = $bundlesPath . '/' . $directory;
+                if (is_dir($fullPath)) {
+                    $namespace = str_replace('Bundle', '', $directory);
+                    $this->prependPath($fullPath, $namespace);
+                }
+            }
+        }
+        
         // Add additional @Namespace variables
-        $paths = $baseService->getParameterBag('base.twig.paths') ?? [];
+        $paths = $parameterBag->get('base.twig.paths') ?? [];
         foreach ($paths as $entry) {
             
             $namespace = $entry['namespace'] ?? self::MAIN_NAMESPACE;
@@ -101,5 +71,39 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
             $this->prependPath($path, $namespace);
         }
+    }
+
+    /**
+     * ORDER OF RESOLUTION:
+     *  1. custom loader
+     *  2. default Symfony loader (and TwigComponent delegated loaders)
+     */
+    public function getSourceContext(string $name): \Twig\Source
+    {
+        if ($this->useCustomLoader && parent::exists($name)) {
+            return parent::getSourceContext($name);
+        }
+        return $this->inner->getSourceContext($name);
+    }
+
+    public function exists(string $name): bool
+    {
+        return ($this->useCustomLoader && parent::exists($name)) || $this->inner->exists($name);
+    }
+
+    public function getCacheKey(string $name): string
+    {
+        if ($this->useCustomLoader && parent::exists($name)) {
+            return parent::getCacheKey($name);
+        }
+        return $this->inner->getCacheKey($name);
+    }
+
+    public function isFresh(string $name, int $time): bool
+    {
+        if ($this->useCustomLoader && parent::exists($name)) {
+            return parent::isFresh($name, $time);
+        }
+        return $this->inner->isFresh($name, $time);
     }
 }

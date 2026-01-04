@@ -3,7 +3,7 @@
 namespace Base\Subscriber;
 
 use App\Enum\UserRole;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ParameterBag;
 use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
@@ -50,7 +50,7 @@ class TwigSubscriber implements EventSubscriberInterface
     /** * @var bool */
     protected ?bool $autoAppend;
 
-    public function __construct(HtmlTagRenderer $htmlTagRenderer, WebpackTagRenderer $webpackTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, RouterInterface $router, string $publicDir)
+    public function __construct(HtmlTagRenderer $htmlTagRenderer, WebpackTagRenderer $webpackTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, AdvancedRouterInterface $router, string $publicDir)
     {
         $this->webpackTagRenderer = $webpackTagRenderer;
 
@@ -67,7 +67,6 @@ class TwigSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            // ConsoleEvents::COMMAND => ['onConsoleCommand'],
             KernelEvents::REQUEST => ['onKernelRequest', 8],
             KernelEvents::RESPONSE => ['onKernelResponse'],
             KernelEvents::EXCEPTION => ['onKernelException'],
@@ -101,7 +100,7 @@ class TwigSubscriber implements EventSubscriberInterface
             return false;
         }
 
-        return true;
+        return $event->getResponse()->getStatusCode() == 200;
     }
 
     protected $exceptionTriggered = false;

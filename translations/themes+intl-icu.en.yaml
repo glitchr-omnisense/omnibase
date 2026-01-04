@@ -1,0 +1,39 @@
+mode:
+    _singular: Mode
+    _plural: Modes
+
+filter:
+    _singular: Filter
+    _plural: Filters
+
+audience:
+    _singular: Audience
+    _plural: Audiences
+
+event:
+    _singular: Event
+    _plural: Events
+    night:
+        _singular: Night
+        _plural: Nights
+    summer:
+        _singular: Summer
+        _plural: Summers
+    winter:
+        _singular: Winter
+        _plural: Winters
+    spring:
+        _singular: Spring
+        _plural: Springs
+    autumn:
+        _singular: Autumn
+        _plural: Autumns
+    halloween:
+        _singular: Halloween
+        _plural: Halloweens
+    christmas:
+        _singular: Christmas
+        _plural: Christmases
+    easter:
+        _singular: Easter
+        _plural: Easters

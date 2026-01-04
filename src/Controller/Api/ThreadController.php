@@ -12,11 +12,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-use Base\Service\BaseService;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 #[Route("/api", name: "api_")]
 class ThreadController extends AbstractController
@@ -136,10 +134,7 @@ class ThreadController extends AbstractController
         $thread->removeFollower($this->getUser());
         $this->entityManager->flush();
 
-        return JsonResponse::fromJsonString(json_encode([
-            "code"    => 200,
-            "response" => "OK"
-        ]));
+        return JsonResponse::fromJsonString(json_encode(["response" => "OK"]), 200);
     }
 
 
@@ -150,9 +145,9 @@ class ThreadController extends AbstractController
         if ($this->getUser() === null) {
 
             return JsonResponse::fromJsonString(json_encode([
-                "code"  => 401, "response" => "Unknown user",
+                "response" => "Unknown user",
                 "likes" => count($thread->getLikes())
-            ]));
+            ]), 401);
         }
 
         $like = $this->likeRepository->findOneByThreadAndUser($thread, $this->getUser());
@@ -167,9 +162,9 @@ class ThreadController extends AbstractController
         $this->addFlash("info", $this->translator->trans("@controllers.thread.like"));
 
         return JsonResponse::fromJsonString(json_encode([
-            "code"  => 200, "response" => "OK",
+            "response" => "OK",
             "likes" => $nlikes
-        ]));
+        ]), 200);
     }
 
     #[Route("/thread/{slug}/unlike", name:"thread_unlike")]
@@ -178,11 +173,12 @@ class ThreadController extends AbstractController
         $thread = $this->threadRepository->findOneBySlug($slug);
         $nlikes = count($thread->getLikes());
 
-        if ($this->getUser() === null)
+        if ($this->getUser() === null) {
             return JsonResponse::fromJsonString(json_encode([
-                "code"  => 401, "response" => "Unknown user",
+                "response" => "Unknown user",
                 "likes" => $nlikes
-            ]));
+            ]), 401);
+        }
 
         $like = $this->likeRepository->findOneByThreadAndUser($thread, $this->getUser());
         $thread->removeLike($like);
@@ -191,10 +187,10 @@ class ThreadController extends AbstractController
         $this->threadRepository->flush();
 
         $this->addFlash("info", $this->translator->trans("@controllers.thread.unlike"));
-        
+
         return JsonResponse::fromJsonString(json_encode([
-            "code"  => 200, "response" => "OK",
+            "response" => "OK",
             "likes" => $nlikes
-        ]));
+        ]), 201);
     }
 }

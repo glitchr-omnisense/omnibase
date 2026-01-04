@@ -6,7 +6,7 @@ use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 /**
@@ -53,13 +53,16 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $this->classMetadataCompletor = $classMetadataManipulator->getClassMetadataCompletor($entityName ?? $this->getFqcnEntityName());
 
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
-        $this->serviceParser = new ServiceEntityParser($this, $entityManager, $classMetadataManipulator, $entityHydrator);
+        $this->serviceParser = new ServiceEntityParser(
+            $this, $entityManager, $classMetadataManipulator, 
+            $entityHydrator
+        );
     }
 
     /**
      * @return ClassMetadata|null
      */
-    public function getClassMetadata(): ?ClassMetadata
+    public function getClassMetadata(): ClassMetadata
     {
         return $this->classMetadata;
     }
@@ -115,14 +118,20 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [$criteria, $orderBy]);
     }
 
-    public function count(array $criteria): int
+    public function count(array $criteria = []): int
     {
         return $this->__call(__METHOD__, [$criteria]);
     }
 
-    public function flush()
+    public function flush(bool $autoclear = true)
     {
         $this->getEntityManager()->flush();
+        if($autoclear) $this->clear();
+    }
+
+    public function clear()
+    {
+        $this->getEntityManager()->clear();
     }
 
     /**
@@ -132,9 +141,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
      */
     public function persist($entity, bool $flush = false): void
     {
-        if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
+        $entityClass = \property_exists($this, '_entityName') ? $this->_entityName : $this->getFqcnEntityName(); // Doctrine ORM 2 vs. 3
+        if (!is_object($entity) || (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
-            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $this->_entityName . "\" entity, you passed \"" . $class . "\"");
+            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $entityClass . "\" entity, you passed \"" . $class . "\"");
         }
 
         $this->getEntityManager()->persist($entity);
@@ -146,9 +156,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     public function remove($entity, bool $flush = false): void
     {
-        if (!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
+        $entityClass = \property_exists($this, '_entityName') ? $this->_entityName : $this->getFqcnEntityName(); // Doctrine ORM 2 vs. 3
+        if (!is_object($entity) || (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
-            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $this->_entityName . "\" entity, you passed \"" . $class . "\"");
+            throw new Exception("Repository \"" . static::class . "\" is expected \"" . $entityClass . "\" entity, you passed \"" . $class . "\"");
         }
 
         $this->getEntityManager()->remove($entity);

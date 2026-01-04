@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\AssociationField;
 use Doctrine\Common\Collections\Collection;
@@ -147,9 +147,9 @@ class AssociationConfigurator implements FieldConfiguratorInterface
             ->setController($crudController)
             ->setAction(Action::DETAIL)
             ->setEntityId($entityDto->getPrimaryKeyValue())
-            ->unset(EA::MENU_INDEX)
-            ->unset(EA::SUBMENU_INDEX)
-            ->includeReferrer()
+            //->unset(EA::MENU_INDEX)
+            //->unset(EA::SUBMENU_INDEX)
+            //->includeReferrer()
             ->generateUrl();
     }
 

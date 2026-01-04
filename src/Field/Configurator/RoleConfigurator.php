@@ -2,8 +2,8 @@
 
 namespace Base\Field\Configurator;
 
-use App\Controller\Backend\Crud\UserCrudController;
-use Base\Controller\Backend\AbstractCrudController;
+use App\Controller\Admin\Crud\UserCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Field\RoleField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;

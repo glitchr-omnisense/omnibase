@@ -42,7 +42,7 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
         return $ret;
     }
 
-    #[ORM\Column(type:"array")]
+    #[ORM\Column(type:"json")]
     #[Associate(metadata:"class")]
     protected $value;
 

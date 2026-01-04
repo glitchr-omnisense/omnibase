@@ -2,7 +2,7 @@
 
 namespace Base\Form\Type;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
@@ -154,9 +154,12 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                     switch ($fieldOptions['form_type']) {
                         case DateTimePickerType::class:
                             $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
-                            if (!$datetime) {
-                                $datetime = $settingValue ? new \DateTime($settingValue) : null;
+                            if (!$datetime && is_string($settingValue)) {
+                                $datetime = new \DateTime($settingValue);
+                            } else {
+                                $datetime = null;
                             }
+
                             $settingTranslation->setValue($datetime);
                             break;
 
@@ -201,7 +204,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
             }
 
             if (count($fields) > 0) {
-                $form->add('valid', SubmitType::class, ['attr' => ['class' => 'btn btn-primary'], 'translation_domain' => 'controllers', 'label_format' => 'backoffice_settings.valid']);
+                $form->add('valid', SubmitType::class, ['attr' => ['class' => 'btn btn-primary'], 'translation_domain' => 'controllers', 'label_format' => 'admin_settings.valid']);
             }
         });
     }

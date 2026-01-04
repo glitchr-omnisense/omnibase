@@ -15,7 +15,12 @@ use Symfony\Component\Workflow\SupportStrategy\InstanceOfSupportStrategy;
  */
 class WorkflowPass extends AbstractPass
 {
-    public function taggedServiceIds(): string
+    public function serviceInterface(): ?string 
+    { 
+        return null;
+    }
+
+    public function taggedServiceIds(): ?string
     {
         return 'workflow';
     }

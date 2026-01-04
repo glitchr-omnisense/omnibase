@@ -114,10 +114,10 @@ class Command extends SymfonyCommand
         $output->getFormatter()->setStyle('magenta,bkg', new OutputFormatterStyle(null, 'magenta'));
         $output->getFormatter()->setStyle('bkg,magenta', new OutputFormatterStyle(null, 'magenta'));
 
-        $defaultDescription = get_called_class()::$defaultDescription;
-        if ($defaultDescription && $input->hasArgument("purpose")) {
+        $this->SetDescription(get_called_class()::GetDescription());
+        if ($this->GetDescription() && $input->hasArgument("purpose")) {
             $output->section()->writeln("\n // Command purpose :");
-            foreach (explode("\n", $defaultDescription) as $line) {
+            foreach (explode("\n", $this->GetDescription()) as $line) {
                 $output->section()->writeln(" // \t" . trim($line));
             }
 

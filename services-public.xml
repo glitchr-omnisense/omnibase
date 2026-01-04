@@ -14,8 +14,11 @@
         <service id="console" alias="Base\Console\Console" />
         <service id="Base\Console\ConsoleInterface" alias="console"/>
 
-        <service id="trading_market" alias="Base\Service\TradingMarket" />
-        <service id="Base\Service\TradingMarketInterface" alias="trading_market"/>
+        <service id="advanced_router" alias="Base\Routing\AdvancedRouter"/>
+        <service id="Base\Routing\AdvancedRouterInterface" alias="advanced_router"/>
+
+        <service id="trading_market" alias="Base\Service\Trading" />
+        <service id="Base\Service\TradingInterface" alias="trading_market"/>
 
         <service id="wysiwyg_enhancer" alias="Base\Service\WysiwygEnhancer" />
         <service id="Base\Service\WysiwygEnhancerInterface" alias="wysiwyg_enhancer"/>
@@ -91,6 +94,8 @@
 
         <service id="localizer" alias="Base\Service\Localizer" />
         <service id="Base\Service\LocalizerInterface" alias="localizer"/>
+        <service id="themizer" alias="Base\Service\Themizer" />
+        <service id="Base\Service\ThemizerInterface" alias="themizer"/>
 
         <service id="doctrine.orm.naming_strategy.camel" alias="Base\Database\Mapping\NamingStrategy" />
         <service id="base.database.metadata_factory"     alias="Base\Database\Mapping\ClassMetadataFactory" />
@@ -101,14 +106,15 @@
         <service id="base.database.metadata_manipulator" alias="Base\Database\Mapping\ClassMetadataManipulator" />
 
         <service id="base.annotation_reader" alias="Base\Annotations\AnnotationReader" />
+
         <service id="base.entity_extension" alias="Base\Database\Entity\EntityExtension" />
+        <service id="Base\Database\Entity\EntityExtensionInterface" alias="base.entity_extension"/>
 
         <service id="twig.loader.filesystem"   alias="Base\Twig\Loader\FilesystemLoader" />
         <service id="twig.random_variable"     alias="Base\Twig\Variable\RandomVariable" />
         <service id="twig.site_variable"       alias="Base\Twig\Variable\SiteVariable" />
         <service id="twig.email_variable"      alias="Base\Twig\Variable\EmailVariable" />
-        <service id="twig.backoffice_variable" alias="Base\Twig\Variable\BackofficeVariable" />
-        <service id="twig.ea_variable"         alias="Base\Twig\Variable\EasyAdminVariable" />
+        <service id="twig.admin_variable"      alias="Base\Twig\Variable\AdminVariable" />
 
         <service id="base.service.image" alias="Base\Service\MediaService" />
         <service id="Base\Service\MediaServiceInterface" alias="base.service.image"/>
@@ -116,7 +122,8 @@
         <service id="form.proxy"     alias="Base\Form\FormProxy" />
         <service id="Base\Form\FormProxyInterface" alias="form.proxy"/>
 
-        <service id="ea_extension" alias="Base\Backend\Config\Extension" />
+        <service id="ea_extension" alias="Base\Admin\Config\Extension" />
+        <service id="command.sessions.clear" alias="Base\Console\Command\CacheClearSessionsCommand" />
 
     </services>
 </container>

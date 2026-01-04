@@ -17,7 +17,6 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
 
     //
     // MEM Simple cache
-    //
     public static function useSimpleCacheVersion3(): bool
     {
         return
@@ -27,7 +26,6 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
 
     //
     // Adapter to PSR Simple Cache Interface
-    //
     public function get(string $key, mixed $default = null): mixed
     {
         return $this->getCache();
@@ -35,7 +33,8 @@ final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterfa
 
     public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
-        return $this->setCache($key, $value, $ttl);
+        $this->setCache($key, $value, $ttl);
+        return true;
     }
 
     public function delete(string $key): bool

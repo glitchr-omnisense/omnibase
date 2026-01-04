@@ -9,8 +9,9 @@ use Base\Entity\User as BaseUser;
 use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
 use Base\BaseBundle;
+use Base\Console\Command;
 use Base\Console\Command\CacheClearCommand;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ReferrerInterface;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\ORM\EntityNotFoundException;
@@ -26,11 +27,11 @@ use Doctrine\Persistence\ManagerRegistry;
 use ErrorException;
 use InvalidArgumentException;
 use Symfony\Component\Console\ConsoleEvents;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Process\Process;
 use TypeError;
 
 /**
@@ -38,6 +39,8 @@ use TypeError;
  */
 class IntegritySubscriber implements EventSubscriberInterface
 {
+    public const int DEFAULT_PRIORITY = 7;
+
     /**
      * @var TokenStorageInterface
      */
@@ -59,9 +62,9 @@ class IntegritySubscriber implements EventSubscriberInterface
     protected TranslatorInterface $translator;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @Vault
@@ -78,7 +81,12 @@ class IntegritySubscriber implements EventSubscriberInterface
      */
     protected ReferrerInterface $referrer;
 
-    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, RouterInterface $router, ReferrerInterface $referrer, string $secret = null)
+    /**
+     * @Process
+     */
+    protected Process $clearProcess;
+
+    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, AdvancedRouterInterface $router, ReferrerInterface $referrer, string $projectDir, string $secret = null)
     {
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
@@ -86,6 +94,9 @@ class IntegritySubscriber implements EventSubscriberInterface
         $this->doctrine = $doctrine;
         $this->router = $router;
         $this->referrer = $referrer;
+
+        $this->clearProcess = new Process(['php', 'bin/console', 'cache:clear']);
+        $this->clearProcess->setWorkingDirectory($projectDir);
 
         $this->secret = $secret;
         $this->vault = new Vault();
@@ -96,27 +107,26 @@ class IntegritySubscriber implements EventSubscriberInterface
         return
             [
                 KernelEvents::EXCEPTION => ['onException', 7],
-                RequestEvent::class => ['onKernelRequest', 7],
                 ConsoleEvents::COMMAND => ['onCommand', 2048],
-                RequestEvent::class => ['onEarlyKernelRequest', 2048]
+                RequestEvent::class => [
+                    ['onEarlyKernelRequest', 2048], 
+                    ['onKernelRequest', IntegritySubscriber::DEFAULT_PRIORITY]
+                ]
             ];
     }
 
     public function checkCacheReady()
     {
         if(CacheClearCommand::applicationNotStarted()) {
+            $this->clearProcess->mustRun();
             throw new RuntimeException("Application integrity compromised, cache clear not started yet.", 0);
-        }
-    
-        if(CacheClearCommand::isFirstClear()) {
-            throw new RuntimeException("Application integrity compromised, double cache clear required.", 0);
         }
     }
 
     public function onCommand(ConsoleEvent $event)
     { 
         $command = $event->getCommand();
-        if(!$command instanceof CacheClearCommand) {
+        if(!$command instanceof CacheClearCommand && $command instanceof Command) {
             $this->checkCacheReady();
         }
     }
@@ -137,13 +147,19 @@ class IntegritySubscriber implements EventSubscriberInterface
         $this->checkCacheReady();
 
         if ($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace())) {
-            throw new RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
+            // throw new RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
+            $this->clearProcess->mustRun();
         }
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if (BaseBundle::getInstance()->isBroken() && $event->isMainRequest()) {
+        if(! $this->router->isMainApplication()) {
+            return;
+        }
+
+        if (BaseBundle::getInstance()->isInvalid() && $event->isMainRequest()) {
+            $this->clearProcess->mustRun();
             throw new RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?");
         }
 
@@ -164,11 +180,12 @@ class IntegritySubscriber implements EventSubscriberInterface
             return;
         }
 
-        $integrity = $this->checkUserIntegrity();
+        $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
 
         if (!$integrity) {
+
             if ($token) {
                 $user = $token->getUser();
                 $notification = new Notification("integrity", [$user]);
@@ -194,7 +211,6 @@ class IntegritySubscriber implements EventSubscriberInterface
             $event->stopPropagation();
         }
     }
-
 
     /**
      * @return array|mixed|null
@@ -236,7 +252,6 @@ class IntegritySubscriber implements EventSubscriberInterface
         return md5($driver . $user . $host . $port . $dbname . $charset);
     }
 
-
     /**
      * @return bool
      */
@@ -258,7 +273,7 @@ class IntegritySubscriber implements EventSubscriberInterface
             return true;
         }
 
-        $persistentCollection = ($user->getLogs() instanceof PersistentCollection ? (array)$user->getLogs() : null);
+        $persistentCollection = ($user->getNotifications() instanceof PersistentCollection ? (array)$user->getNotifications() : null);
         if ($persistentCollection === null) {
             return false;
         }
@@ -276,6 +291,7 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         return array_intersect_key($persistentCollection, $dirtyCollection) !== $dirtyCollection;
     }
+
 
     /**
      * @return bool

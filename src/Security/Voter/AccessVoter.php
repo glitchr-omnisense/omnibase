@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 
 /**
@@ -74,7 +75,7 @@ class AccessVoter extends Voter
         $this->maintenanceProvider = $maintenanceProvider;
         $this->launcher = $launcher;
 
-        $this->urlExceptions = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
+        $this->urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocaleLang());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocale());
         $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocaleLang());
@@ -86,12 +87,13 @@ class AccessVoter extends Voter
         return in_array($attribute, [self::EXCEPTION_ACCESS, self::MAINTENANCE_ACCESS, self::LAUNCH_ACCESS, self::ANONYMOUS_ACCESS, self::USER_ACCESS, self::ADMIN_ACCESS]);
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         $user = $subject instanceof User ? $subject : null;
         $url = is_string($subject) || $subject instanceof Referrer ? $subject : get_url();
 
         switch ($attribute) {
+
             case self::ADMIN_ACCESS:
                 $access = filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= $user && $user->isGranted("ROLE_SUPERADMIN");
@@ -140,6 +142,7 @@ class AccessVoter extends Voter
 
                 $url = parse_url($url);
                 foreach ($this->urlExceptions as $urlException) {
+                    
                     $exception = true;
 
                     $environment = $urlException["env"] ?? null;

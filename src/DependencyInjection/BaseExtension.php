@@ -10,20 +10,21 @@ use Base\Service\Model\Currency\CurrencyApiInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Service\Model\Obfuscator\CompressionInterface;
-use Base\Twig\TagRendererInterface;
+use Base\Twig\Renderer\TagRendererInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\Workflow\WorkflowInterface;
-use Base\Controller\Backend\AbstractCrudController;
 
 use Base\Bundle\AbstractBaseExtension;
+use Base\Service\Model\Sharer\SharerAdapterInterface;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
 /**
  *
  */
-class BaseExtension extends AbstractBaseExtension
+class BaseExtension extends AbstractBaseExtension implements PrependExtensionInterface
 {
     /**
      * {@inheritdoc}
@@ -71,5 +72,22 @@ class BaseExtension extends AbstractBaseExtension
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "preRemove"]);
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postRemove"]);
         
+    }
+
+    public function prepend(ContainerBuilder $builder): void
+    {
+        
+        $builder->prependExtensionConfig('twig_component', [
+            'defaults' => [
+                'Base\\Twig\\Component\\' => [
+                    'template_directory' => '@Base/components/',
+                    'name_prefix' => 'base',
+                ],
+                'App\\Twig\\Component\\' => [
+                    'template_directory' => '@App/components/',
+                    'name_prefix' => 'app',
+                ],
+            ],
+        ]);
     }
 }

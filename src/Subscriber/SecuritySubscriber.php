@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\Localizer;
 use Base\Service\MaintenanceProviderInterface;
@@ -51,9 +51,9 @@ class SecuritySubscriber implements EventSubscriberInterface
     protected TokenStorageInterface $tokenStorage;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var UserRepository
@@ -108,7 +108,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         ReferrerInterface            $referrer,
         SettingBagInterface          $settingBag,
         Localizer                    $localizer,
-        RouterInterface              $router,
+        AdvancedRouterInterface              $router,
         ParameterBagInterface        $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
         LauncherInterface            $launcher,
@@ -169,6 +169,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if ($accessRestricted) {
+
             if (!$adminAccess) {
                 $restrictionType = "admin_restriction";
             } elseif (!$userAccess) {
@@ -228,9 +229,11 @@ class SecuritySubscriber implements EventSubscriberInterface
             }
 
             if (!in_array($this->router->getRouteName(), $routeRestriction)) {
+
                 if ($specialGrant) {
+
                     // If not let them know that this page is locked for others
-                    if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isBackend()) {
+                    if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isAdmin()) {
                         $notification = new Notification("access_restricted." . $restrictionType . ".message");
                         $notification->send("warning");
                     }
@@ -245,7 +248,9 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $event->stopPropagation();
 
                 return false;
+
             } elseif ($specialGrant) {
+
                 // If not let them know that this page is locked for others
                 $notification = new Notification("access_restricted." . $restrictionType . ".on_deny");
                 $notification->send("info");
@@ -349,6 +354,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if (!($user = $token->getUser())) {
             return;
         }
+
         if (!$user instanceof BaseUser) {
             return;
         }
@@ -370,15 +376,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $message = $exception->getMessage() ?? $message;
                 $importance = $exception->getMessageData()["importance"] ?? $importance;
             }
-
-            // Deeper exception that might require killing cookies
-            if($exception->getPrevious()) {
-                unsetcookies();
-            }
         }
-
-        $notification = new Notification($message);
-        $notification->send($importance);
     }
 
     public function onLoginSuccess(LoginSuccessEvent $event)

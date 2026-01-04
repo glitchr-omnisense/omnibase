@@ -10,6 +10,8 @@ use Base\Service\TranslatorInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping\InverseSideMapping;
+use Doctrine\ORM\Mapping\OwningSideMapping;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\MappingException;
 use Exception;
@@ -28,6 +30,7 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+use Doctrine\ORM\Mapping\ToManyOwningSideMapping;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
@@ -240,7 +243,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     $fieldType = $field['form_type'] ?? null;
                     unset($field['form_type']);
 
-                    $isNullable = $this->classMetadataManipulator->getMapping($dataClass, $fieldName)["nullable"] ?? false;
+                    $isNullable = $this->classMetadataManipulator->getMapping($dataClass, $fieldName)->nullable ?? false;
                     if (!array_key_exists("required", $field) && $isNullable) {
                         $field['required'] = !$isNullable;
                     }
@@ -373,25 +376,28 @@ class AssociationType extends AbstractType implements DataMapperInterface
             if (!$options["allow_null"]) {
                 $aggregateModel |= EntityHydrator::IGNORE_NULLS;
             }
+
             $viewData = $this->entityHydrator->hydrate(
                 is_object($viewData) ? $viewData : $options["class"],
                 $entries instanceof Collection ? $entries->toArray() : $entries,
                 [],
                 $aggregateModel
             );
+
         } elseif ($viewData instanceof PersistentCollection) {
-            $mappedBy = $viewData->getMapping()["mappedBy"];
-            $isOwningSide = $viewData->getMapping()["isOwningSide"];
-            $oldData = $viewData->toArray();
 
-            $fieldName = $viewData->getMapping()["fieldName"];
-            $isOwningSide = $viewData->getMapping()["isOwningSide"];
-
+            $fieldName = $viewData->getMapping()->fieldName;
+            $isOwningSide = $viewData->getMapping() instanceof ToManyOwningSideMapping;
             if ($entries->containsKey("_collection")) {
                 $entries = $entries->get("_collection");
             }
 
-            if (!$isOwningSide && $mappedBy) {
+            $mapping = $viewData->getMapping();
+            if ($mapping instanceof InverseSideMapping) {
+
+                $mappedBy = $mapping->mappedBy;
+                $oldData = $viewData->toArray();
+    
                 foreach (array_diff_object($oldData, $entries->toArray()) as $entry) {
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
@@ -403,14 +409,16 @@ class AssociationType extends AbstractType implements DataMapperInterface
             }
 
             if ($this->classMetadataManipulator->getEntityManager()->getCache()) {
+
                 $mapping = $viewData->getMapping(); // Evict caches and collection caches.
                 foreach (array_unique_object(array_union($oldData, $entries->toArray())) as $data) {
+
                     $this->classMetadataManipulator->getEntityManager()->getCache()->evictEntity(get_class($data), $data->getId());
-                    if ($mapping["inversedBy"]) {
-                        $this->classMetadataManipulator->getEntityManager()->getCache()->evictCollection(get_class($data), $mapping["inversedBy"], $data->getId());
+                    if ($mapping instanceof ToManyOwningSideMapping) {
+                        $this->classMetadataManipulator->getEntityManager()->getCache()->evictCollection(get_class($data), $mapping->inversedBy, $data->getId());
                     }
                     if (!$isOwningSide && $mappedBy) {
-                        $this->classMetadataManipulator->getEntityManager()->getCache()->evictCollection($mapping["targetEntity"], $mappedBy, $viewData->getOwner());
+                        $this->classMetadataManipulator->getEntityManager()->getCache()->evictCollection($mapping->targetEntity, $mappedBy, $viewData->getOwner());
                     }
                 }
             }
@@ -418,8 +426,12 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $viewData->clear();
 
             foreach ($entries as $entry) {
+
                 $viewData->add($entry);
-                if (!$isOwningSide && $mappedBy) {
+                $mapping = $viewData->getMapping();
+                if ($mapping instanceof InverseSideMapping) {
+
+                    $mappedBy = $mapping->mappedBy;
                     $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
                     if (!$owningSide instanceof Collection) {
                         $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
@@ -428,6 +440,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     }
                 }
             }
+
         } elseif ($options["multiple"]) {
             $viewData = new ArrayCollection();
             foreach (iterator_to_array($forms) as $fieldName => $childForm) {

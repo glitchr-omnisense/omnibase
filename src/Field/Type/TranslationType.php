@@ -3,8 +3,8 @@
 namespace Base\Field\Type;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Database\TranslatableInterface;
-use Base\Database\TranslationInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslationInterface;
 
 use Base\Service\LocalizerInterface;
 use Base\Twig\Environment;
@@ -370,7 +370,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
      * @param Traversable $forms
      * @return void
      */
-    public function mapDataToForms($viewData, Traversable $forms)
+    public function mapDataToForms($viewData, Traversable $forms): void
     {
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");
         foreach (iterator_to_array($forms) as $locale => $form) {
@@ -392,7 +392,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
      * @param $viewData
      * @return void
      */
-    public function mapFormsToData(Traversable $forms, &$viewData)
+    public function mapFormsToData(Traversable $forms, &$viewData): void
     {
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");
 

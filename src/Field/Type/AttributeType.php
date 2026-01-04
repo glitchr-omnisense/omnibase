@@ -17,7 +17,7 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvent;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\FormEvents;
-use Base\Database\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use Doctrine\Common\Collections\Collection;
@@ -38,6 +38,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractRuleAdapter;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 
 use Base\Twig\Environment;
+use Doctrine\ORM\Mapping\InverseSideMapping;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
 
@@ -337,13 +338,11 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 }
             }
 
-            if ($viewData instanceof PersistentCollection) {
+            if ($viewData instanceof PersistentCollection && $viewData->getMapping() instanceof InverseSideMapping) {
+
                 $mappedBy = $viewData->getMapping()["mappedBy"];
-                $isOwningSide = $viewData->getMapping()["isOwningSide"];
-                if (!$isOwningSide) {
-                    foreach ($viewData as $entry) {
-                        $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
-                    }
+                foreach ($viewData as $entry) {
+                    $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                 }
             }
         }

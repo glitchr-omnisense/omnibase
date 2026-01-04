@@ -7,10 +7,10 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Service\Obfuscator;
 use Base\Service\ParameterBagInterface;
-use Base\Service\TradingMarketInterface;
+use Base\Service\TradingInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Notifier\Abstract\BaseNotifierInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
@@ -135,6 +135,11 @@ trait BaseTrait
         return BaseService::getProjectDir() . "/data";
     }
 
+    public static function getFixtureDir(): string
+    {
+        return BaseService::getProjectDir() . "/fixtures";
+    }
+
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator
     {
         return (self::class === BaseService::class) ? BaseService::$classMetadataManipulator : BaseService::getClassMetadataManipulator();
@@ -175,7 +180,7 @@ trait BaseTrait
         return (self::class === BaseService::class) ? BaseService::$localizer : BaseService::getLocalizer();
     }
 
-    public static function getRouter(): ?RouterInterface
+    public static function getRouter(): ?AdvancedRouterInterface
     {
         return (self::class === BaseService::class) ? BaseService::$router : BaseService::getRouter();
     }
@@ -205,9 +210,9 @@ trait BaseTrait
         return (self::class === BaseService::class) ? BaseService::$slugger : BaseService::getSlugger();
     }
 
-    public static function getTradingMarket(): ?TradingMarketInterface
+    public static function getTrading(): ?TradingInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$tradingMarket : BaseService::getTradingMarket();
+        return (self::class === BaseService::class) ? BaseService::$tradingMarket : BaseService::getTrading();
     }
 
     /**

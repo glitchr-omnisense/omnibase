@@ -11,6 +11,6 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method AbstractExtension[]    findAll()
  * @method AbstractExtension[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class AbstractExtensionRepository extends ServiceEntityRepository
+abstract class AbstractExtensionRepository extends ServiceEntityRepository
 {
 }

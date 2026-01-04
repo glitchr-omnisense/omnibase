@@ -17,5 +17,5 @@ use Doctrine\Common\Annotations\Annotation\Target;
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class StringCaseEntity extends ConstraintEntity
 {
-    public $message = 'string_case';
+    public ?string $message = 'string_case';
 }

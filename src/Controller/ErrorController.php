@@ -4,7 +4,7 @@ namespace Base\Controller;
 
 use Base\Service\BaseService;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Error;
 use ErrorException;
 use Exception;
@@ -22,11 +22,11 @@ use Throwable;
 class ErrorController extends AbstractController
 {
     private BaseService $baseService;
-    private RouterInterface $router;
+    private AdvancedRouterInterface $router;
     private HtmlErrorRenderer $htmlErrorRenderer;
     private ?Profiler $profiler;
 
-    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, RouterInterface $router, BaseService $baseService, ?Profiler $profiler = null)
+    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, AdvancedRouterInterface $router, BaseService $baseService, ?Profiler $profiler = null)
     {
         $this->baseService = $baseService;
         $this->router = $router;

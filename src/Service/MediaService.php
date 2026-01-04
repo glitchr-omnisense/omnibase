@@ -9,9 +9,8 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
-use Base\Imagine\Filter\Format\SvgFilterInterface;
 use Base\Imagine\Filter\FormatFilterInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Imagine\Image\Palette\RGB;
 use League\Flysystem\UnableToCreateDirectory;
 use LogicException;
@@ -59,8 +58,6 @@ class MediaService extends FileService implements MediaServiceInterface
      */
     protected ?MediaController $mediaController = null;
 
-    protected string $localCache;
-
     /** @var ?int */
     protected ?int $timeout;
     /** @var ?int */
@@ -78,17 +75,17 @@ class MediaService extends FileService implements MediaServiceInterface
     protected ?bool $enableWebp;
 
     public function __construct(
-        Environment           $twig,
-        RouterInterface       $router,
-        ObfuscatorInterface   $obfuscator,
-        FlysystemInterface    $flysystem,
-        ParameterBagInterface $parameterBag,
-        ImagineInterface      $imagineBitmap,
-        ImagineInterface      $imagineSvg,
-        ?Profiler             $profiler
+        Environment             $twig,
+        AdvancedRouterInterface $router,
+        ObfuscatorInterface     $obfuscator,
+        FlysystemInterface      $flysystem,
+        ParameterBagInterface   $parameterBag,
+        ImagineInterface        $imagineBitmap,
+        ImagineInterface        $imagineSvg,
+        ?Profiler               $profiler
     )
     {
-        parent::__construct($twig, $router, $obfuscator, $flysystem);
+        parent::__construct($twig, $router, $obfuscator, $flysystem, $parameterBag);
 
         $this->profiler = $profiler;
 
@@ -104,9 +101,6 @@ class MediaService extends FileService implements MediaServiceInterface
         $this->debug = $parameterBag->get("base.images.debug");
 
         $this->twig = $twig;
-
-        // Local cache directory for filtered images
-        $this->localCache = "local.cache";
     }
 
     /**
@@ -170,7 +164,7 @@ class MediaService extends FileService implements MediaServiceInterface
     public function soundify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
-            return $path;
+            return "";
         }
 
         $sources = $this->audio($path);
@@ -185,7 +179,7 @@ class MediaService extends FileService implements MediaServiceInterface
     public function vidify(null|array|string $path, array $attributes = []): ?string
     {
         if (!$path) {
-            return $path;
+            return "";
         }
 
         $sources = $this->video($path);
@@ -354,8 +348,8 @@ class MediaService extends FileService implements MediaServiceInterface
     public function lightbox(
         null|array|string $path,
         array             $attributes = [],
-        array|string      $lightboxId = null,
-        array|string      $lightboxTitle = null,
+        null|array|string      $lightboxId = null,
+        null|array|string      $lightboxTitle = null,
         array             $lightboxAttributes = [],
                           ...$srcset
     ): null|array|string
@@ -515,8 +509,8 @@ class MediaService extends FileService implements MediaServiceInterface
 
         // NB: Encode path using hash only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over
-        // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        // $pathCache    = path_suffix($pathRelative, $pathExtras  );
+        $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+        $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
         //
         // Compute a response.. (if cache not found)
@@ -549,7 +543,6 @@ class MediaService extends FileService implements MediaServiceInterface
         $storage = $config["storage"] ?? $options["storage"] ?? null;
         $output = $config["output"] ?? $options["output"] ?? realpath($path);
 
-        //
         // Apply image resolution limitation
         if (!is_instanceof($this->maxResolution, ThumbnailFilter::class)) {
             throw new NotFoundHttpException("Resolution filter \"" . $this->maxResolution . "\" must inherit from " . ThumbnailFilter::class);
@@ -592,11 +585,11 @@ class MediaService extends FileService implements MediaServiceInterface
 
         $pathRelative = $this->flysystem->stripPrefix($output, $storage);
         $pathCache = $pathRelative;
-
+        
         // Encode path using hashid only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over. Lines below make sure suffix is applied including filter operations
-        // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        // $pathCache    = path_suffix($pathRelative, $pathExtras  );
+        $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+        $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
         if (!$pathRelative) {
 
@@ -628,7 +621,7 @@ class MediaService extends FileService implements MediaServiceInterface
                 if (!file_exists($filteredPath)) {
                     
                     if (!$this->fallback) {
-                        throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provided.");
+                        throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provide in ".$storage.".");
                     }
 
                     $filteredPath = $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension());
@@ -660,8 +653,8 @@ class MediaService extends FileService implements MediaServiceInterface
 
         //
         // GD does not support other palette than RGB..
-        //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
-        //   cmyk2rgb($pathPublic); // Not working yet..
+        // if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
+        //   cmyk2rgb($pathPublic); // @TODO: Not working yet.. to be investivated
         try {
             $image = $imagine->open($path);
         } catch (Exception $e) {

@@ -10,8 +10,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+
+
 use function array_key_exists;
 use function count;
 use function is_array;
@@ -31,9 +34,12 @@ class IsGrantedSubscriber implements EventSubscriberInterface
      */
     private AnnotationReader $annotationReader;
 
-    public function __construct(AnnotationReader $annotationReader, AuthorizationCheckerInterface $authorizationChecker = null)
+    private TokenStorageInterface $tokenStorage;
+
+    public function __construct(AnnotationReader $annotationReader, TokenStorageInterface $tokenStorage, ?AuthorizationCheckerInterface $authorizationChecker = null)
     {
         $this->authorizationChecker = $authorizationChecker;
+        $this->tokenStorage = $tokenStorage;
         $this->annotationReader = $annotationReader;
     }
 
@@ -60,7 +66,9 @@ class IsGrantedSubscriber implements EventSubscriberInterface
         }
 
         $arguments = $request->attributes->get("_route_parameters");
+
         foreach ($configurations as $configuration) {
+
             $subjectRef = $configuration->getSubject();
             $subject = null;
 
@@ -82,20 +90,29 @@ class IsGrantedSubscriber implements EventSubscriberInterface
                 }
             }
 
-            if (!$this->authorizationChecker->isGranted($configuration->getAttributes(), $subject)) {
+            $attributes = (array) $configuration->getAttributes();
+            if(!$attributes) {
                 $argsString = $this->getIsGrantedString($configuration);
+                throw new RuntimeException(sprintf('The @IsGranted annotation on "%s::%s" must have at least one attribute. Try adding @IsGranted(%s).', $class, $method, $argsString));
+            }
 
-                $message = $configuration->getMessage() ?: sprintf('Access Denied by controller annotation @IsGranted(%s)', $argsString);
+            foreach ($attributes as $attribute) {
 
-                if ($statusCode = $configuration->getStatusCode()) {
-                    throw new HttpException($statusCode, $message);
+                if (!$this->authorizationChecker->isGranted($attribute, $subject)) {
+                    $argsString = $this->getIsGrantedString($configuration);
+
+                    $message = $configuration->getMessage() ?: sprintf('Access Denied by controller annotation @IsGranted(%s)', $argsString);
+
+                    if ($statusCode = $configuration->getStatusCode()) {
+                        throw new HttpException($statusCode, $message);
+                    }
+
+                    $accessDeniedException = new AccessDeniedException($message);
+                    $accessDeniedException->setAttributes($attributes);
+                    $accessDeniedException->setSubject($subject);
+
+                    throw $accessDeniedException;
                 }
-
-                $accessDeniedException = new AccessDeniedException($message);
-                $accessDeniedException->setAttributes($configuration->getAttributes());
-                $accessDeniedException->setSubject($subject);
-
-                throw $accessDeniedException;
             }
         }
     }

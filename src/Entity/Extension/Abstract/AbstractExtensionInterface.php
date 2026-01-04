@@ -2,7 +2,8 @@
 
 namespace Base\Entity\Extension\Abstract;
 
-interface AbstractExtensionInterface
+use Base\Database\Entity\Extension\Type\EntityMetadataInterface;
+
+interface AbstractExtensionInterface extends EntityMetadataInterface
 {
-    public function supports(): bool;
 }

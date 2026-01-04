@@ -18,7 +18,7 @@ class GroupByWalker extends TreeWalkerAdapter
     /**
      * Walks down a SelectStatement AST node, thereby generating the appropriate SQL.
      */
-    public function walkSelectStatement(SelectStatement $AST)
+    public function walkSelectStatement(SelectStatement $AST): void
     {
         $parentName = null;
         foreach ($this->getQueryComponents() as $dqlAlias => $qComp) {

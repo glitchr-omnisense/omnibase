@@ -4,6 +4,7 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -25,7 +26,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Associate extends AbstractAnnotation
+class Associate extends AbstractAnnotation implements ExtensionOptionInterface
 {
     public string $metadata;
 
@@ -53,6 +54,21 @@ class Associate extends AbstractAnnotation
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
+    }
+
+    public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
+    }
+
+    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
+    }
+
+    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
 
     public function preLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
@@ -87,21 +103,6 @@ class Associate extends AbstractAnnotation
         if ($this->metadata && $propertyAccessor->isReadable($entity, $this->metadata)) {
             $propertyAccessor->setValue($entity, $this->metadata, $metadata?->name);
         }
-    }
-
-    public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
-    {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
-    }
-
-    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
-    {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
-    }
-
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
-    {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
     }
 
     public function postLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)

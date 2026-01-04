@@ -2,11 +2,12 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\SelectField;
 use Base\Service\Model\Autocomplete;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\PersistentCollection;
 use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -16,9 +17,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- *
- */
 class SelectConfigurator implements FieldConfiguratorInterface
 {
     /**
@@ -57,16 +55,25 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
-        // Formatted value
-        $class = $field->getCustomOption(SelectField::OPTION_CLASS);
+        $values = $field->getValue();
+        $class  = $field->getCustomOption(SelectField::OPTION_CLASS);
         if (!$class) {
-            $values = $field->getValue();
-            if ($values instanceof Collection) {
-                $class = is_object($values->first()) ? get_class($values->first()) : null;
+
+            if ($values instanceof PersistentCollection) {
+
+                $aliasMap = $this->classMetadataManipulator->getClassMetadataCompletor($values->getOwner());
+                $classMetadata = $this->classMetadataManipulator->getClassMetadata($values->getOwner());
+
+                $propertyName = $aliasMap?->aliasNames[$field->getProperty()] ?? $field->getProperty();
+                $class = $classMetadata->getAssociationMapping($propertyName)->declared;
+
+            } else if ($values instanceof Collection) {
+
+                $classNames = array_map(fn($v) => is_object($v) ? get_class($v) : null, $values->toArray());
+                $class = array_class_ancestor($classNames);
             }
         }
 
-        $values = $field->getValue();
         $values = is_array($values) ? new ArrayCollection($values) : $values;
         $formattedValues = [];
 
@@ -80,9 +87,14 @@ class SelectConfigurator implements FieldConfiguratorInterface
         if ($showFirst) {
             $displayLimit--;
         }
+        if($displayLimit < 0) {
+            $displayLimit = 0;
+        }
 
         if ($values instanceof Collection) {
+
             foreach ($values as $key => $value) {
+
                 $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
                 $dataClass = $dataClass ?? $defaultClass;
 
@@ -98,9 +110,10 @@ class SelectConfigurator implements FieldConfiguratorInterface
                     }
                 }
             }
-        } else {
-            $value = $field->getValue();
 
+        } else {
+
+            $value = $field->getValue();
             $field->setCustomOption(SelectField::OPTION_RENDER_FORMAT, "text");
 
             $dataClass = $class ?? (is_object($value) ? get_class($value) : null);

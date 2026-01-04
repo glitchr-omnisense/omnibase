@@ -2,48 +2,47 @@
 
 namespace Base\Validator;
 
-use function is_array;
-use function is_string;
-
-use Doctrine\Common\Annotations\Annotation;
-
-/**
- * @Annotation
- */
-
-#[\Attribute]
+#[\Attribute(\Attribute::TARGET_CLASS)]
 abstract class ConstraintEntity extends Constraint
 {
-    public $fields = [];
-    public $entity = null;
+    /** @var array<int,string>|string */
+    public array|string $fields;
+
+    /** @var mixed */
+    public mixed $entity = null;
 
     /**
-     * {@inheritdoc}
-     *
-     * @param array|string $fields the combination of fields that must contain values or a set of options
+     * @param array|string $fields   Required: the field or combination of fields
+     * @param mixed        $entity   Optional: entity class or name
      */
     public function __construct(
-        $fields,
-        array $options = [],
-        array $groups = null,
-        $payload = null
-    )
-    {
-        if (is_array($fields) && is_string(key($fields))) {
-            $options = array_merge($fields, $options);
-        } elseif (null !== $fields) {
-            $options['fields'] = $fields;
-        }
+        array|string $fields,
+        mixed $entity = null,
+        ?string $message = null,
+        ?array $groups = null,
+        mixed $payload = null,
+    ) {
+        // Normalise fields
+        $this->fields = $fields;
+        $this->entity = $entity;
 
-        if (empty($this->message)) {
-            $constraintName = explode("\\", get_called_class());
+        // Generate default message if none provided
+        if ($message === null) {
+            $constraintName = explode("\\", static::class);
             $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
-            $firstField = $fields['fields'][0] ?? "unknown";
 
-            $this->message = camel2snake($firstField) . "." . camel2snake($constraintName);
+            // First field: either array[0] or single string
+            $firstField = is_array($fields)
+                ? ($fields[0] ?? 'unknown')
+                : $fields;
+
+            $message = camel2snake($firstField) . "." . camel2snake($constraintName);
         }
 
-        parent::__construct($options, $groups, $payload);
+        $this->message = $message;
+
+        // MUST be last (Symfony 7+ requirement)
+        parent::__construct(groups: $groups, payload: $payload);
     }
 
     public function getRequiredOptions(): array
@@ -56,9 +55,6 @@ abstract class ConstraintEntity extends Constraint
         return 'fields';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTargets(): string|array
     {
         return self::CLASS_CONSTRAINT;

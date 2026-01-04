@@ -3,7 +3,7 @@
 namespace Base\Database\Walker;
 
 use Doctrine\ORM\Query\SqlWalker;
-
+use Doctrine\ORM\Query\AST;
 /**
  *
  */
@@ -17,7 +17,7 @@ class MysqlWalker extends SqlWalker
      * @param $selectClause
      * @return string The SQL.
      */
-    public function walkSelectClause($selectClause)
+    public function walkSelectClause(AST\SelectClause $selectClause): string
     {
         $sql = parent::walkSelectClause($selectClause);
 

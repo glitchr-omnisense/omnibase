@@ -62,11 +62,11 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         self::$projectDir = dirname(__FILE__, 6);
         self::$publicDir = self::$projectDir . "/public";
 
-        if (!$this->hasStorage("local.storage")) {
-            throw new InvalidArgumentException("\"local.storage\" storage not found in your Flysystem configuration.");
+        if (!$this->hasStorage("local.cache")) {
+            throw new InvalidArgumentException("\"local.cache\" storage not found in your Flysystem configuration.");
         }
 
-        $this->setDefaultStorage("local.storage");
+        $this->setDefaultStorage("local.cache");
     }
 
     /**
@@ -76,7 +76,7 @@ class Flysystem extends LazyFactory implements FlysystemInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function createStorage(string $source, ?string $storageName = null)
+    public function createStorage(string $source, ?string $storageName = null): \League\Flysystem\FilesystemOperator
     {
         if ($storageName === null) {
             $storageName = $source;
@@ -112,10 +112,6 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return $this->operator;
     }
 
-    /**
-     * @param FilesystemOperator|string $operator
-     * @return $this
-     */
     /**
      * @param FilesystemOperator|string $operator
      * @return $this
@@ -282,7 +278,6 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         try {
             $operator->createDirectory($path, $config);
         } catch (UnableToDeleteFile|UnableToDeleteDirectory $e) {
-            throw new NotDeletableException("Unable to create directory \"$path\".. " . $e->getMessage());
         }
         return true;
     }

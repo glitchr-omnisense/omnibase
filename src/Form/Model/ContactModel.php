@@ -2,7 +2,7 @@
 
 namespace Base\Form\Model;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Base\Form\Common\AbstractModel;
 use Base\Notifier\Recipient\Recipient;
 use Base\Validator\Constraints as AssertBase;
@@ -39,7 +39,8 @@ class ContactModel extends AbstractModel
 
     /**
      * @var array
-     * @Uploader(storage="local.storage", max_size="5MB", mime_types={"image/*"})
      */
+
+    #[Uploader(max_size: "5MB", mime_types: ["image/*"])]
     public array $attachments;
 }

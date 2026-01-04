@@ -12,8 +12,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use LogicException;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 class ExtensionSubscriber
 {
@@ -93,7 +91,7 @@ class ExtensionSubscriber
     public function postPersist(EventArgs $args)
     {
         $newEntity = $args->getObject();
-        if ($newEntity && $this->entityManager->getCache()) { // @WARN: Attempt to evict AbstractExtension..doesn't seems to be working.. TBD
+        if ($newEntity && $this->entityManager->getCache()) {
             $this->entityManager->getCache()->evictEntity(get_class($newEntity), $newEntity->getId());
         }
 

@@ -3,9 +3,9 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
+use Base\Database\Entity\EntityExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\Event\LifecycleEventArgs as BaseLifecycleEventArgs;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Doctrine\Common\Annotations\Annotation;
@@ -20,7 +20,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class Cache extends AbstractAnnotation
+class Cache extends AbstractAnnotation implements ExtensionOptionInterface
 {
     /**
      * @var string The concurrency strategy.
@@ -57,25 +57,25 @@ class Cache extends AbstractAnnotation
 
         switch ($associations) {
             case self::ONE_TO_ONE:
-                $this->associations = ClassMetadataInfo::ONE_TO_ONE;
+                $this->associations = ClassMetadata::ONE_TO_ONE;
                 break;
             case self::MANY_TO_ONE:
-                $this->associations = ClassMetadataInfo::MANY_TO_ONE;
+                $this->associations = ClassMetadata::MANY_TO_ONE;
                 break;
             case self::ONE_TO_MANY:
-                $this->associations = ClassMetadataInfo::ONE_TO_MANY;
+                $this->associations = ClassMetadata::ONE_TO_MANY;
                 break;
             case self::MANY_TO_MANY:
-                $this->associations = ClassMetadataInfo::MANY_TO_MANY;
+                $this->associations = ClassMetadata::MANY_TO_MANY;
                 break;
             case self::TO_MANY:
-                $this->associations = ClassMetadataInfo::ONE_TO_MANY + ClassMetadataInfo::MANY_TO_MANY;
+                $this->associations = ClassMetadata::ONE_TO_MANY + ClassMetadata::MANY_TO_MANY;
                 break;
             case self::TO_ONE:
-                $this->associations = ClassMetadataInfo::ONE_TO_ONE + ClassMetadataInfo::MANY_TO_ONE;
+                $this->associations = ClassMetadata::ONE_TO_ONE + ClassMetadata::MANY_TO_ONE;
                 break;
             case self::ALL:
-                $this->associations = ClassMetadataInfo::ONE_TO_ONE + ClassMetadataInfo::MANY_TO_ONE + ClassMetadataInfo::ONE_TO_MANY + ClassMetadataInfo::MANY_TO_MANY;
+                $this->associations = ClassMetadata::ONE_TO_ONE + ClassMetadata::MANY_TO_ONE + ClassMetadata::ONE_TO_MANY + ClassMetadata::MANY_TO_MANY;
                 break;
 
             default:
@@ -92,7 +92,7 @@ class Cache extends AbstractAnnotation
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_CLASS || $object == AnnotationReader::TARGET_PROPERTY);
+        return ($target == EntityExtension::TARGET_CLASS || $object == EntityExtension::TARGET_PROPERTY);
     }
 
     /**
@@ -114,7 +114,7 @@ class Cache extends AbstractAnnotation
         return $this->getRegion($classMetadata) . "__" . $property;
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
         $region = $this->getRegion($classMetadata);
 
@@ -133,7 +133,7 @@ class Cache extends AbstractAnnotation
 
         switch ($target) {
 
-            case AnnotationReader::TARGET_CLASS:
+            case EntityExtension::TARGET_CLASS:
 
                 $classMetadata->cache = [
                     "usage" => $usage,
@@ -146,12 +146,12 @@ class Cache extends AbstractAnnotation
                         continue;
                     }
 
-                    $this->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
+                    $this->loadClassMetadata($classMetadata, EntityExtension::TARGET_PROPERTY, $property);
                 }
 
                 break;
 
-            case AnnotationReader::TARGET_PROPERTY:
+            case EntityExtension::TARGET_PROPERTY:
 
                 if (($classMetadata->associationMappings[$targetValue]["type"] & $this->associations) == 0) {
                     return;

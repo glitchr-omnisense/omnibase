@@ -3,8 +3,8 @@
 namespace Base\Entity\Layout;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 
@@ -15,7 +15,7 @@ use Base\Database\Annotation\Cache;
 #[ORM\Entity(repositoryClass: AttributeRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 #[DiscriminatorEntry]
-class Attribute extends AbstractAttribute implements TranslatableInterface
+abstract class Attribute extends AbstractAttribute implements TranslatableInterface
 {
     use TranslatableTrait;
 

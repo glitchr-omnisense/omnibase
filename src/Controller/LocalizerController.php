@@ -2,7 +2,7 @@
 
 namespace Base\Controller;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ReferrerInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\TranslatorInterface;
@@ -23,12 +23,12 @@ class LocalizerController extends AbstractController
      */
     protected LocalizerInterface $localizer;
 
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
     protected ReferrerInterface $referrer;
     protected TranslatorInterface $translator;
     protected EntityManagerInterface $entityManager;
 
-    public function __construct(LocalizerInterface $localizer, EntityManagerInterface $entityManager, RouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
+    public function __construct(LocalizerInterface $localizer, EntityManagerInterface $entityManager, AdvancedRouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
     {
         $this->localizer = $localizer;
         $this->router = $router;
@@ -45,8 +45,9 @@ class LocalizerController extends AbstractController
         }
 
         $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
+	    
         $referrerName = $this->router->getRouteName(strval($referrer));
-	    if(!$referrerName) return $this->redirect($this->router->getUrlIndex());
+        if(!$referrerName) return $this->redirect($this->router->getUrlIndex());
 
         $referrerParameters = array_filter($this->router->match(strval($referrer)), fn($a) => !str_starts_with($a, "_"), ARRAY_FILTER_USE_KEY);
         $referrer->setUrl(null);
@@ -62,7 +63,7 @@ class LocalizerController extends AbstractController
             $this->addFlash("info", $this->translator->trans("@controllers.locale_changeto.action", [$this->localizer->getLocaleLangName($_locale)]));
 
             if (!str_starts_with($referrerName, "_switch_locale")) {
-                $referrer->setUrl(null);
+                // $referrer->setUrl(null);
                 $lang = $_locale ? "." . $this->localizer->getLocaleLang($_locale) : "";
 
                 try {

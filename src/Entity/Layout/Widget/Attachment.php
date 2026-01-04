@@ -5,8 +5,8 @@ namespace Base\Entity\Layout\Widget;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Slugify;
+use Base\Database\Annotation\Uploader;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
@@ -66,7 +66,7 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
     }
 
     #[ORM\Column(type:"text")]
-    #[Uploader(storage:"local.storage", max_size:"4096K")]
+    #[Uploader(max_size:"4096K")]
     #[AssertBase\File(max_size:"4096K", groups:["new", "edit"])]
     protected $download;
 

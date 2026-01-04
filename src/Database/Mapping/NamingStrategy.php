@@ -30,46 +30,43 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      */
     public function classToTableName($className): string
     {
-        $className = is_object($className) ? get_class($className) : $className;
-        $className = class_exists($className)
-            ? (new ReflectionClass($className))->getName()
-            : $className;
+        if(!$className) return "";
 
-        $tableName = array_search($className, $this->uniqueTableName);
+        $tableName = null;
+        $className = is_object($className) ? get_class($className) : $className;
+        $className = $className && class_exists($className) ? (new ReflectionClass($className))->getName() : $className;
 
         //
         // Search for a table name in class metadata
-        if (class_exists($className)) {
-            if (!$tableName) {
+        if ($className && class_exists($className)) {
 
-                $reflClass = new ReflectionClass($className);
-                
-                // Attributes
-                $annotations = [];
-                foreach($reflClass->getAttributes() as $attribute) {
-    
-                    $annotation = $attribute->newInstance();
-                    if (!is_serializable($annotation)) {
-                        throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
-                    }
-    
-                    $annotations[] = $annotation;
+            $reflClass = new ReflectionClass($className);
+            
+            // Attributes
+            $annotations = [];
+            foreach($reflClass->getAttributes() as $attribute) {
+
+                $annotation = $attribute->newInstance();
+                if (!is_serializable($annotation)) {
+                    throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                 }
 
-                while ($annotation = array_pop($annotations)) {
-                    if ($annotation instanceof Table && !empty($annotation->name)) {
-                        $tableName = $annotation->name;
-                        break;
-                    }
-                }
+                $annotations[] = $annotation;
+            }
 
-                // Doctrine annotations
-                $annotations = $this->annotationReader->getClassAnnotations($reflClass);
-                while ($annotation = array_pop($annotations)) {
-                    if ($annotation instanceof Table && !empty($annotation->name)) {
-                        $tableName = $annotation->name;
-                        break;
-                    }
+            while ($annotation = array_pop($annotations)) {
+                if ($annotation instanceof Table && !empty($annotation->name)) {
+                    $tableName = $annotation->name;
+                    break;
+                }
+            }
+
+            // Doctrine annotations
+            $annotations = $this->annotationReader->getClassAnnotations($reflClass);
+            while ($annotation = array_pop($annotations)) {
+                if ($annotation instanceof Table && !empty($annotation->name)) {
+                    $tableName = $annotation->name;
+                    break;
                 }
             }
         }
@@ -83,45 +80,41 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
             // Strip first occurence of \Entity\
             $entityNamespace = "Entity\\";
-            $pos = strpos($tableName, $entityNamespace);
+            $pos = $tableName ? strpos($tableName, $entityNamespace) : false;
             if ($pos !== false) $tableName = substr_replace($tableName, "", $pos, strlen($entityNamespace));
 
             // Defaulting case
             if (empty($tableName)) {
 
                 $tableName = $className;
-                if (strrpos($tableName, '\\') !== false) {
+                if ($tableName && strrpos($tableName, '\\') !== false) {
 
                     $tableName = lcfirst(substr($className, strrpos($className, '\\') + 1));
                 }
             }
 
             // Turn from namespace into camel string..
-            $tableName = str_replace("\\", "", $tableName);
-            $tableName = explode("_", camel2snake($tableName));
-            $tableName = array_unique($tableName);
+            if($tableName) {
 
-            $tableName = snake2camel(implode("_", $tableName));
-            $tableName = lcfirst($tableName);
+                $tableName = str_replace("\\", "", $tableName);
+                $tableName = explode("_", camel2snake($tableName));
+                $tableName = array_unique($tableName);
 
-            // Handle I18n case
-            $tableName = preg_replace('/' . self::TABLE_I18N_SUFFIX . '$/', self::TABLE_I18N_SUFFIX, $tableName);
+                $tableName = snake2camel(implode("_", $tableName));
+                $tableName = lcfirst($tableName);
+
+                // Handle I18n case
+                $tableName = preg_replace('/' . self::TABLE_I18N_SUFFIX . '$/', self::TABLE_I18N_SUFFIX, $tableName);
+            }
         }
 
         //
         // Make sure there is no ambiguity or issue related to SQL server
-        if (strlen($tableName) > self::TABLE_NAME_SIZE) {
+        if ($tableName && strlen($tableName) > self::TABLE_NAME_SIZE) {
             throw new Exception("Table name will be truncated for \"" . $className . "\"");
         }
 
-        // dump($className, $tableName, $this->uniqueTableName);
-        if (str_contains($className, "\\Entity\\") && array_key_exists($tableName, $this->uniqueTableName) && $className != $this->uniqueTableName[$tableName]) {
-            throw new Exception("Ambiguous table name \"" . $tableName . "\" found between \"" . $this->uniqueTableName[$tableName] . "\" and \"" . $className . "\"");
-        }
-
-        $this->uniqueTableName[$tableName] = $className;
-
-        return $tableName;
+        return $tableName ?? $className;
     }
 
     /**

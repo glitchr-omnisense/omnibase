@@ -39,9 +39,6 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
 
     protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter, ?string $buildDir = null): bool
     {
-        if (!BaseBundle::USE_CACHE) {
-            return false;
-        }
         if (!$this->cacheFile) {
             return false;
         }

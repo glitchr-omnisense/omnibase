@@ -10,6 +10,11 @@ use Base\Service\Obfuscator;
  */
 class ObfuscatorCompressionPass extends AbstractPass
 {
+    public function serviceInterface(): ?string 
+    { 
+        return null;
+    }
+
     public function taggedServiceIds(): string
     {
         return 'obfuscator.compression';

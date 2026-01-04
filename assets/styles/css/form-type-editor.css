@@ -14,6 +14,9 @@
     color:#222;
     margin-right:10px;
 }
+.ce-toolbar__actions {
+    padding-right:0;
+}
 .ce-popover-item[data-item-name="paragraph"] svg
 {
     color: #222;
@@ -23,6 +26,8 @@
 }
 
 .read-only .cdx-button { display:none; }
+.read-only .ce-popover { display:none; }
+.ce-inline-tool { height:38px; }
 .ce-inline-toolbar, .ce-toolbar
 {
     color:#222;
@@ -41,15 +46,18 @@
     left: 0px !important;
 }
 
-.ce-block__content, .ce-toolbar__content { max-width:calc(95% - 80px); }
 .cdx-block { max-width: 95%; }
-.read-only .ce-block__content, .read-only .ce-toolbar__content { max-width:calc(100% - 80px); }
+.ce-block__content, .ce-toolbar__content { max-width:calc(88%); }
+.read-only .ce-block__content, .read-only .ce-toolbar__content { max-width:calc(100%); }
+
+/* .ce-block__content, .ce-toolbar__content { max-width:calc(95% - 80px); }
+.read-only .ce-block__content, .read-only .ce-toolbar__content { max-width:calc(100% - 80px); } */
 .read-only .cdx-block { max-width: 100%; }
 
-.ce-block { margin: 0.8em 0; }
+.ce-block { margin: 1.6em 0 !important; }
 .cdx-nested-list { padding-left: 2rem !important ; }
 
-.codex-editor__redactor { padding:2em 0em !important; }
+.codex-editor__redactor { padding: 0em !important; }
 .form-editor-codex { padding:0em; margin:0; }
 
 @media all and (max-width: 470px)                  

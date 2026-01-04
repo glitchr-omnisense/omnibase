@@ -97,7 +97,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @return array
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function allRaw($useCache = BaseBundle::USE_CACHE, $onlyLinkedBag = false): array
+    public function allRaw($useCache = true, $onlyLinkedBag = false): array
     {
         return $this->getRaw(null, $useCache, $onlyLinkedBag);
     }
@@ -239,7 +239,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @return array|mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::USE_CACHE, bool $onlyLinkedBag = false)
+    public function getRaw(null|string|array $path = null, bool $useCache = true, bool $onlyLinkedBag = false)
     {
         $useSettingBag = $this->parameterBag->get("base.parameter_bag.use_setting_bag") ?? false;
         if (!$useSettingBag) {
@@ -303,7 +303,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param bool $useCache
      * @return array|mixed|null
      */
-    public function getRawScalar(null|string|array $path = null, bool $useCache = BaseBundle::USE_CACHE)
+    public function getRawScalar(null|string|array $path = null, bool $useCache = true)
     {
         if (is_array($paths = $path)) {
             $settings = [];
@@ -333,7 +333,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     protected array $settingBag = [];
 
-    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = BaseBundle::USE_CACHE): array
+    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true): array
     {
         if (is_array($paths = $path)) {
             $settings = [];
@@ -382,7 +382,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @return void
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
+    public function clear(null|string|array $path, ?string $locale = null, $useCache = true)
     {
         if (is_array($paths = $path)) {
             foreach ($paths as $path) {
@@ -418,18 +418,10 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param $value
      * @param string|null $locale
      * @param $useCache
-     * @return $this|mixed
-     * @throws Exception
-     */
-    /**
-     * @param string $path
-     * @param $value
-     * @param string|null $locale
-     * @param $useCache
      * @return $this
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function set(string $path, $value, ?string $locale = null, $useCache = BaseBundle::USE_CACHE)
+    public function set(string $path, $value, ?string $locale = null, $useCache = true)
     {
         $setting = $this->generateRaw($path, $locale);
         if ($setting->isLocked()) {
@@ -441,18 +433,14 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
         if ($this->entityManager->getCache()) {
             $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+            foreach($setting->getTranslations() as $translation)
+                $this->entityManager->getCache()->evictEntity(get_class($setting)::getTranslationEntityClass(), $translation->getId());
         }
 
         $this->entityManager->flush();
         return $this;
     }
 
-    /**
-     * @param string $path
-     * @param string|null $label
-     * @param string|null $locale
-     * @return $this
-     */
     /**
      * @param string $path
      * @param string|null $label
@@ -472,12 +460,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this;
     }
 
-    /**
-     * @param string $path
-     * @param string|null $help
-     * @param string|null $locale
-     * @return $this
-     */
     /**
      * @param string $path
      * @param string|null $help

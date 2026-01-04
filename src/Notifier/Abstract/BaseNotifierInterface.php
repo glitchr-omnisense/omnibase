@@ -3,10 +3,10 @@
 namespace Base\Notifier\Abstract;
 
 use Base\Entity\User\Notification;
+use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\NotifierInterface;
 use Twig\Environment;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
-use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -19,7 +19,7 @@ interface BaseNotifierInterface extends NotifierInterface
      * @param RecipientInterface ...$recipients
      * @return mixed
      */
-    public function sendUsers(Notification $notification, RecipientInterface ...$recipients);
+    public function sendUsers(Notification $notification, Recipient ...$recipients);
 
     /**
      * @param array $channels
@@ -27,7 +27,7 @@ interface BaseNotifierInterface extends NotifierInterface
      * @param RecipientInterface ...$recipients
      * @return mixed
      */
-    public function sendUsersBy(array $channels, Notification $notification, RecipientInterface ...$recipients);
+    public function sendUsersBy(array $channels, Notification $notification, Recipient ...$recipients);
 
     /**
      * @param Notification $notification
@@ -39,11 +39,11 @@ interface BaseNotifierInterface extends NotifierInterface
 
     public function getAdminRecipients(): array;
 
-    public function getTechnicalRecipient(): ?RecipientInterface;
+    public function getTechnicalRecipient(): ?Recipient;
 
     public function hasLoopback(): bool;
 
-    public function isTest(RecipientInterface $recipient): bool;
+    public function isTest(Recipient $recipient): bool;
 
     public function getPolicy(): ChannelPolicyInterface;
 

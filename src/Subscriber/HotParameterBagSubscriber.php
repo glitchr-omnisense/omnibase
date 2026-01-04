@@ -5,7 +5,7 @@ namespace Base\Subscriber;
 use Base\Service\HotParameterBag;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
-use PDOException;
+use Doctrine\DBAL\Exception as DBALException;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -59,22 +59,24 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
             return;
         }
 
+        \benchmark_start();
+
         $allRaw = [];
-        try {
-            $allRaw = $this->settingBag->allRaw(true, true);
-        } catch (PDOException $e) {
-            return;
-        }
+        try { $allRaw = $this->settingBag->allRaw(true, true); } 
+        catch (DBALException $e) { return; }
 
         array_map_recursive(function ($setting) {
+
             if ($setting === null) {
                 return;
             }
+
             if ($setting->getBag() === null) {
                 return;
             }
 
             $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
+
         }, $allRaw);
 
         $this->parameterBag->markAsReady();

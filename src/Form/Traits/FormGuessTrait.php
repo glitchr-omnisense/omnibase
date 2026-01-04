@@ -3,6 +3,7 @@
 namespace Base\Form\Traits;
 
 use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\Alias;
 use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -256,11 +257,97 @@ trait FormGuessTrait
                 $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
-            $annotations = AnnotationReader::getInstance()->getAnnotations($target, OrderColumn::class, [AnnotationReader::TARGET_PROPERTY]);
+            $annotations = AnnotationReader::getInstance()->getAnnotations($target, [OrderColumn::class, Alias::class], [AnnotationReader::TARGET_PROPERTY]);
             $options['sortable'] = !empty(array_filter_recursive($annotations['property'][$target][$form->getName()] ?? []));
+            if (!$options['sortable']) {
+
+                $columnAlias = $annotations['property'][$target][$form->getName()][Alias::class] ?? null;
+                if ($columnAlias) {
+                    $aliasedColumn = $columnAlias->getAlias();
+                    $options['sortable'] = !empty(array_filter_recursive($annotations['property'][$target][$aliasedColumn][OrderColumn::class] ?? []));
+                }
+            }
         }
 
         return $options['sortable'] ?? false;
+    }
+
+    /**
+     * Guess the order direction (ASC/DESC) for a sortable field, using OrderColumn or OrderBy mapping.
+     *
+     * @param FormInterface|FormEvent|FormBuilderInterface $form
+     * @param array|null $options
+     * @return string
+     * @throws \Exception
+     */
+    public function guessOrderDirection(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
+    {
+        if ($form instanceof FormEvent) {
+            $form = $form->getForm();
+        }
+
+        $options = $options ?? $form->getConfig()->getOptions();
+        if (!array_key_exists('sortable', $options)) {
+            $options['sortable'] = false;
+        }
+        if (!array_key_exists('multivalue', $options)) {
+            $options['multivalue'] = false;
+        }
+
+        if ($options['multivalue']) {
+            return false;
+        }
+
+        $order = null;
+
+        if (null === $options['sortable']) {
+            $target = null;
+            $parentForm = $form->getParent();
+            if ($parentForm) {
+                $options = $parentForm->getConfig()->getOptions();
+                $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
+            }
+
+            if (null == $target) {
+                $options = $options ?? $form->getConfig()->getOptions();
+                $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
+            }
+
+            $annotations = AnnotationReader::getInstance()->getAnnotations(
+                $target,
+                [OrderColumn::class, Alias::class],
+                [AnnotationReader::TARGET_PROPERTY]
+            );
+
+            $orderColumn = $annotations['property'][$target][$form->getName()][OrderColumn::class] ?? null;
+            if ($orderColumn) {
+                $order = strtoupper($orderColumn->getOrder() ?? 'ASC');
+            } else {
+                $columnAlias = $annotations['property'][$target][$form->getName()][Alias::class] ?? null;
+                if ($columnAlias) {
+                    $aliasedColumn = $columnAlias->getAlias();
+                    $orderColumn = $annotations['property'][$target][$aliasedColumn][OrderColumn::class] ?? null;
+                    if ($orderColumn) {
+                        $order = strtoupper($orderColumn->getOrder() ?? 'ASC');
+                    }
+                }
+            }
+
+            // Try to guess from Doctrine OrderBy mapping if annotation not found
+            if (!$order && $this->classMetadataManipulator && $this->classMetadataManipulator->isEntity($target)) {
+                $mapping = $this->classMetadataManipulator->getMapping($target, $form->getName());
+                if (isset($mapping->orderBy) && is_array($mapping->orderBy)) {
+                    // Get the first order direction for this field
+                    $orderDirections = array_values($mapping->orderBy);
+                    if (count($orderDirections)) {
+                        $order = strtoupper($orderDirections[0]);
+                    }
+                }
+            }
+        }
+
+        // Return 'DESC' if found, otherwise 'ASC' or null
+        return $order ?: 'ASC';
     }
 
     /**

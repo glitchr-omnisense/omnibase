@@ -1,0 +1,40 @@
+{% include '@!WebProfiler/Profiler/toolbar_js.html.twig' %}
+
+<script{% if csp_script_nonce is defined and csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>/*<![CDATA[*/
+
+{# @TODO: Improve the toolbar drag and drop #}
+{# function makeToolbarDraggable() {
+
+       setTimeout(() => {
+        const block = document.querySelector('.sf-toolbarreset');
+        if (!block) return;
+
+        let offsetX = 0, offsetY = 0;
+
+        block.draggable = true;
+
+        block.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', '');
+            block.classList.add('dragging');
+            const rect = block.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            console.log(offsetX, offsetY);
+        });
+
+        block.addEventListener('dragend', e => {
+            block.classList.remove('dragging');
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            block.style.transform = `translate(${x}px, ${y}px)`;
+            console.log(x,y);
+        });
+
+        document.addEventListener('dragover', e => e.preventDefault());
+        document.addEventListener('drop', e => e.preventDefault());
+    }, 1000);
+}
+
+makeToolbarDraggable(); #}
+
+</script>

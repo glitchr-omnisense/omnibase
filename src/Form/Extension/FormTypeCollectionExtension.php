@@ -3,8 +3,6 @@
 namespace Base\Form\Extension;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Form\FormFactory;
-use Base\Service\BaseService;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 
@@ -19,24 +17,12 @@ use Symfony\Component\Form\FormView;
 class FormTypeCollectionExtension extends AbstractTypeExtension
 {
     /**
-     * @var BaseService
-     */
-    protected BaseService $baseService;
-
-    /**
-     * @var FormFactory
-     */
-    protected FormFactory $formFactory;
-
-    /**
      * @var ClassMetadataManipulator
      */
     protected ClassMetadataManipulator $classMetadataManipulator;
 
-    public function __construct(BaseService $baseService, FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator)
     {
-        $this->baseService = $baseService;
-        $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 

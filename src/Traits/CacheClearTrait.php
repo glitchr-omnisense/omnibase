@@ -8,6 +8,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Process\Process;
 
 /**
  *
@@ -19,19 +20,91 @@ trait CacheClearTrait
         $io->write("<info> [INFO] Cache directory:</info> " . $this->cacheDir . PHP_EOL, true);
     }
 
+    protected function checkVirtualization(SymfonyStyle $io): void
+    {
+        $isDocker = file_exists('/.dockerenv') || (file_exists('/proc/1/cgroup') && strpos(file_get_contents('/proc/1/cgroup'), 'docker') !== false);
+
+        if ($isDocker) {
+            $io->write("<info> [INFO]</info> Docker environment used." . PHP_EOL, true);
+        } else {
+            $io->write("<warning> [WARNING] No Docker environment detected.</warning>" . PHP_EOL, true);
+        }
+    }
+
     protected function checkExtensions(SymfonyStyle $io): void
     {
-        $Xdebug = extension_loaded('xdebug') ? '<info>✓</info>' : '<error>✗</error>';
-        $Blackfire = extension_loaded('blackfire') ? '<info>✓</info>' : '<error>✗</error>';
-        $APCu = extension_loaded('apc') && ini_get('apc.enabled') ? '<info>✓</info>' : '<error>✗</error>';
-        $OPcache = extension_loaded('Zend OPcache') ? '<info>✓</info>' : '<error>✗</error>';
-
+        $extensions = [
+            'xdebug' => 'Xdebug',
+            'blackfire' => 'Blackfire',
+            'git2' => 'Git',
+            'amqp' => 'AMQP',
+            'Zend OPcache' => 'OPcache',
+            'apcu' => 'APCu',
+            'igbinary' => 'Igbinary',
+            'imagick' => 'Imagick',
+            'gd' => 'GD',
+        ];
+    
         $io->write("<info> [INFO] PHP Extensions:</info> (cli and webserver extensions might differ)", true);
-        $io->write("        [" . $Xdebug . "] Xdebug; ");
-        $io->write("        [" . $APCu . "] APCu", true);
-        $io->write("        [" . $Blackfire . "] Blackfire; ");
-        $io->write("     [" . $OPcache . "] OPcache", true);
-    }
+
+        
+        $currentLineCount = 0;
+        $lineBreakCount = (int) ceil(sqrt(count($extensions))); 
+        $maxLength = max(array_map('strlen', $extensions));
+
+        foreach ($extensions as $extension => $name) {
+            // Default check if the extension is loaded
+            $isLoaded = extension_loaded($extension);
+    
+            switch ($extension) {
+                case 'apcu':
+                    $isLoaded = $isLoaded && ini_get('apc.enabled');
+                    break;
+    
+                case 'gd':
+                    $isLoaded = $isLoaded && function_exists('gd_info') && gd_info();
+                    break;
+    
+                case 'xdebug':
+                    $isLoaded = $isLoaded && ini_get('xdebug.mode') !== '';
+                    break;
+    
+                case 'blackfire':
+                    $isLoaded = $isLoaded && getenv('BLACKFIRE_SERVER_ID') && getenv('BLACKFIRE_SERVER_TOKEN');
+                    break;
+    
+                case 'Zend OPcache':
+                    $isLoaded = $isLoaded && ini_get('opcache.enable') == 1;
+                    break;
+    
+                case 'amqp':
+                    $isLoaded = $isLoaded && class_exists('AMQPConnection');
+                    break;
+    
+                case 'imagick':
+                    $isLoaded = $isLoaded && class_exists('Imagick');
+                    break;
+    
+                case 'igbinary':
+                    $isLoaded = $isLoaded && function_exists('igbinary_serialize');
+                    break;
+    
+                default:
+                    // No special handling required for other extensions
+                    break;
+            }
+    
+            // Determine the status and output the result
+            $status = $isLoaded ? '<info>✓</info>' : '<error>✗</error>';
+
+            // Pad the extension name to align it based on the max length
+            $paddedName = str_pad($name, $maxLength);
+
+            // Output the result with aligned names
+            $io->write("        [$status] $paddedName\t", ++$currentLineCount % $lineBreakCount == 0);
+
+        }
+    }    
 
     protected function customFeatureWarnings(SymfonyStyle $io): void
     {
@@ -60,14 +133,14 @@ trait CacheClearTrait
         ;
         $table->render();
 
-        if ($useCustomRouter === true) {
+        if ($useCustomRouter === true && $this->parameterBag->get("base.router.use_fallback") === true) {
             if ($this->parameterBag->get("base.router.fallback_warning") && !$this->router->getHostFallback()) {
                 $io->warning("No host fallback configured in `base.yaml`" . PHP_EOL . "(configure 'base.router.fallbacks' to remove this message or disable `base.router.fallback_warning` warning).");
             }
-        }
 
-        if ($this->parameterBag->get("base.database.fallback_warning") && !$this->entityManager->getMetadataFactory() instanceof ClassMetadataFactory) {
-            $io->warning("Custom ClassMetadataFactory is configured. No fallback configured in `base.yaml`" . PHP_EOL . "(configure 'doctrine.orm.class_metadata_factory_name' to remove this message or disable `base.database.fallback_warning` warning).");
+            if ($this->parameterBag->get("base.database.fallback_warning") && !$this->entityManager->getMetadataFactory() instanceof ClassMetadataFactory) {
+                $io->warning("Custom ClassMetadataFactory is configured. No fallback configured in `base.yaml`" . PHP_EOL . "(configure 'doctrine.orm.class_metadata_factory_name' to remove this message or disable `base.database.fallback_warning` warning).");
+            }
         }
     }
 
@@ -83,13 +156,27 @@ trait CacheClearTrait
         }
     }
 
+    protected function clearOPCache(SymfonyStyle $io): void
+    {
+        if (extension_loaded('Zend OPcache')) {
+            \opcache_reset();
+        }
+    }
+    
     //
     // Run second cache clear command
-    protected function doubleCacheClearCheck(SymfonyStyle $io)
+    protected function doubleCacheClear(SymfonyStyle $io)
     {
-        if (CacheClearCommand::isFirstClear()) {
-            $io->warning('Cache requires to run a second `cache:clear` to account for custom bundle features.');
+        $autoClear = $this->parameterBag->get("base.autoclear");
+        if (CacheClearCommand::isFirstClear() && $autoClear) {
+
+           $io->warning('Automatic double `cache:clear` is now running to account for base bundle features.');
+           $clearProcess = new Process(['php', 'bin/console', 'cache:clear']);
+           $clearProcess->setWorkingDirectory($this->projectDir);
+           $clearProcess->mustRun();
         }
+
+        return false;
     }
 
     //
@@ -150,6 +237,74 @@ trait CacheClearTrait
         }
     }
 
+    /**
+     * Generates or deletes a phpinfo.php file in the public directory.
+     *
+     * @param SymfonyStyle $io
+     * @param bool $delete If true, deletes the file instead of generating it.
+     */
+    protected function generatePhpInfo(SymfonyStyle $io, bool $delete = false): void
+    {
+        $targetFile = $this->projectDir . '/public/phpinfo.php';
+
+        // Detect storage backends if available
+        $storageNames = method_exists($this->flysystem, 'getStorageNames')
+            ? $this->flysystem->getStorageNames(false)
+            : [];
+
+        if (!is_file($targetFile)) {
+            if (!empty($storageNames)) {
+                $io->note(sprintf(
+                    "PHP Info file will be generated in the public directory at '%s'.\nDetected storage backends: %s",
+                    $targetFile,
+                    implode(', ', $storageNames)
+                ));
+            }
+        }
+
+        $alreadyExists = is_file($targetFile);
+        if ($delete) {
+            if ($alreadyExists) {
+                if (@unlink($targetFile)) {
+                    $io->success(sprintf('phpinfo.php successfully removed from %s', $targetFile));
+                } else {
+                    $io->error(sprintf('Failed to remove phpinfo.php from %s', $targetFile));
+                }
+            } else {
+                $io->warning(sprintf('phpinfo.php does not exist at %s', $targetFile));
+            }
+            return;
+        }
+
+        $content = <<<'PHP'
+<?php
+use App\Kernel;
+
+$_SERVER["APP_TIMER"] = microtime(true);
+require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
+
+return function (array $context) {
+    if (! (bool) ($context['APP_DEBUG'] ?? false)) {
+        header("Location: .");
+        exit;
+    }
+
+    phpinfo();
+    phpinfo(INFO_MODULES);
+};
+PHP;
+
+        // Try to write the file, handle errors
+        if (@file_put_contents($targetFile, $content) === false) {
+            $io->error(sprintf('Could not write phpinfo.php to %s', $targetFile));
+            return;
+        }
+
+        if(!$alreadyExists && \file_exists($targetFile)) {
+            $io->success(sprintf('phpinfo.php successfully generated at %s', $targetFile));
+        }
+    }
+
     protected function generateSymlinks(SymfonyStyle $io): void
     {
         //
@@ -160,6 +315,7 @@ trait CacheClearTrait
         }
 
         foreach ($storageNames as $storageName) {
+
             if (!$this->flysystem->hasStorage($storageName . ".public")) {
                 continue;
             }
@@ -172,17 +328,31 @@ trait CacheClearTrait
                 continue;
             }
 
-            if (is_link($publicPath) || file_exists($publicPath)) {
-                if (is_link($publicPath)) {
+            if (is_link($publicPath)) {
+                unlink($publicPath);
+            }
+
+            if (file_exists($publicPath)) {
+                
+                if (is_dir($publicPath)) {
+                    if (is_emptydir($publicPath)) {
+                        
+                        try { rmdir($publicPath); }
+                        catch(\Exception $exception) { 
+                            exit("Directory \"$publicPath\" exists, but you don't have the permissions.");
+                        }
+
+                    } else {
+                        exit("Directory \"$publicPath\" exists and is not empty.\n");
+                    }
+                } elseif (is_file($publicPath)) {
                     unlink($publicPath);
-                } elseif (is_emptydir($publicPath)) {
-                    rmdir($publicPath);
                 } else {
-                    exit("Public path \"$publicPath\" already exists but it is not a symlink\n");
+                    exit("Cannot safely remove \"$publicPath\" — unknown file type.\n");
                 }
             }
 
-            symlink($realPath, $publicPath);
+            symlink(relative_path($realPath, dirname($publicPath)), $publicPath);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace Base\Field\Configurator;
 
 use Base\Entity\User;
 use Base\Field\IdField;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Security\LoginRestrictionInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -33,11 +33,11 @@ class IdConfigurator implements FieldConfiguratorInterface
     private AdminUrlGenerator $adminUrlGenerator;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    private RouterInterface $router;
+    private AdvancedRouterInterface $router;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, RouterInterface $router)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, AdvancedRouterInterface $router)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->adminUrlGenerator = $adminUrlGenerator;

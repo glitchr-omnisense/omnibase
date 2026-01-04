@@ -9,7 +9,7 @@ use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use ErrorException;
 
 /**
@@ -30,11 +30,11 @@ class IconProvider extends AbstractLocalCache
      */
     protected LocalizerInterface $localizer;
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
-    public function __construct(AnnotationReader $annotationReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, RouterInterface $router, string $cacheDir, ?string $buildDir = null)
+    public function __construct(AnnotationReader $annotationReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, AdvancedRouterInterface $router, string $cacheDir, ?string $buildDir = null)
     {
         $this->annotationReader = $annotationReader;
         $this->mediaService = $mediaService;
@@ -44,34 +44,37 @@ class IconProvider extends AbstractLocalCache
         parent::__construct($cacheDir, $buildDir);
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $this->routeIcons = $this->getCache("/RouteIcons", function () {
             return array_transforms(function ($route, $controller): ?array {
+                
                 $controller = $controller->getDefault("_controller");
                 if (!$controller) {
-                    return null;
+                    return [];
                 }
 
-                try {
-                    list($class, $method) = explode("::", $controller);
-                } catch (ErrorException $e) {
-                    return null;
+                $parts = explode("::", $controller);
+                if (count($parts) !== 2) {
+                    return [];
                 }
+
+                list($class, $method) = $parts;
                 if (!class_exists($class)) {
-                    return null;
+                    return [];
                 }
 
                 $iconAnnotations = $this->annotationReader->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
                 if (!$iconAnnotations) {
-                    return null;
+                    return [];
                 }
 
                 return [$route, end($iconAnnotations)->getIcons()];
+
             }, $this->router->getRouteCollection()->all());
         });
 
-        return true;
+        return [];
     }
 
     protected ?array $routeIcons = null;
@@ -139,7 +142,7 @@ class IconProvider extends AbstractLocalCache
         if (!$icon) {
             return $icon;
         }
-
+   
         if ($icon instanceof IconizeInterface) {
             $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
         } elseif (($routeIcons = $this->getRouteIcons($icon))) {

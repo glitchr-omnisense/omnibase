@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use AsyncAws\Core\Exception\LogicException;
-use Base\Service\TradingMarketInterface;
+use Base\Service\TradingInterface;
 use Exception;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -23,11 +23,11 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     public const LABELCODE_ONLY = 2;
 
     /**
-     * @var TradingMarketInterface
+     * @var TradingInterface
      */
-    protected TradingMarketInterface $tradingMarket;
+    protected TradingInterface $tradingMarket;
 
-    public function __construct(TradingMarketInterface $tradingMarket)
+    public function __construct(TradingInterface $tradingMarket)
     {
         $this->tradingMarket = $tradingMarket;
     }

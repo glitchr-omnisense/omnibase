@@ -1,0 +1,60 @@
+title: "BO"
+subtitle: "Administre ton site internet d'ici !"
+
+Home: Accueil
+Back to website: Retour au site
+Valid: Valider
+
+MARKETPLACES: BOUTIQUE EN LIGNE
+LAYOUT: MISE EN FORME
+ROLES: "ROLES"
+MEMBERSHIP: "ESPACE MEMBRE"
+THREADS: FILS ROUGE
+EXTENSIONS: EXTENSIONS
+ATTRIBUTES: ATTRIBUTS
+
+Cart: Panier
+All users: "Tous les utilisateurs"
+Add user: Ajouter un utilisateur
+
+settings:
+  filter:
+    mono: "Monochrome"
+  appearance:
+    light: "Clair"
+    dark: "Sombre"
+    auto: "Automatique"
+
+# CRUD controllers
+crud:
+  user:
+    # title: "User page"
+    # text: "This page is meant for user administration"
+    since: depuis {0}
+
+    group:
+      # title: "User Edit TITLE"
+      # text: "User Edit TEXT"
+      # help: "User Edit HELP"
+
+  short:
+    url:
+      placeholder: "{0} ou /vers/page/local"
+  semantic:
+    url:
+      placeholder: "{0} ou /vers/page/local"
+
+# ACTION buttons
+
+action:
+  batch_approve: "Approuver"
+  batch_publish: "Publier"
+  batch_delete: "Supprimer"
+
+  index: "Index"
+  create_and_continue: 'Créer et continuer'
+  save: 'Enregistrer'
+  save_and_continue: 'Enregistrer et continuer'
+  goto_next: "Suivant"
+  goto_see: "Voir la page"
+  goto_prev: "Précédent"

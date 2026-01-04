@@ -2,8 +2,8 @@
 
 namespace Base\Entity\User;
 
-use Base\Annotations\Annotation\Blameable;
-use Base\Annotations\Annotation\Timestamp;
+use Base\Database\Annotation\Blameable;
+use Base\Database\Annotation\Timestamp;
 use Base\Entity\User;
 use Base\Enum\ConnectionState;
 use Base\Repository\User\ConnectionRepository;

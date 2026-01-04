@@ -5,7 +5,7 @@ namespace Base\Console\Command;
 use Base\Annotations\Annotation\Iconize;
 use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController as EaCrudController;
 use ReflectionClass;
@@ -31,8 +31,8 @@ class IconCrudCommand extends Command
         $crudRestriction = $input->getOption('crud') ?? "";
         $cruds = array_filter(
             array_merge(
-                BaseBundle::getInstance()->getAllClasses($baseLocation . "/Controller/Backend/Crud"),
-                BaseBundle::getInstance()->getAllClasses("./src/Controller/Backend/Crud"),
+                BaseBundle::getInstance()->getAllClasses($baseLocation . "/Controller/Admin/Crud"),
+                BaseBundle::getInstance()->getAllClasses("./src/Controller/Admin/Crud"),
             ),
             fn($c) => !($c instanceof EaCrudController)
         );

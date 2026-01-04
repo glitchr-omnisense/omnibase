@@ -45,9 +45,9 @@ class HeadingEnhancer implements HeadingEnhancerInterface
         $maxLevel ??= 6;
         $maxLevel = max(1, $maxLevel);
 
-        $encoding = mb_detect_encoding($html);
-        $dom = new DOMDocument('1.0', $encoding);
-        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="UTF-8">' . mb_utf8($html), LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NONET);
 
         $headlines = [];
         for ($i = 1; $i <= $maxLevel; $i++) {
@@ -57,7 +57,7 @@ class HeadingEnhancer implements HeadingEnhancerInterface
             foreach ($tags as $tag) {
     
                 $content = str_replace("&nbsp;", " ", $tag->nodeValue);
-                $content = trim(str_strip_nonprintable(strip_tags($content)));
+                
                 $id = strtolower($this->slugger->slug($content));
                 $headlines[] = [
                     "tag" => $tagName,
@@ -88,9 +88,9 @@ class HeadingEnhancer implements HeadingEnhancerInterface
         $maxLevel ??= 6;
         $maxLevel = max(1, $maxLevel);
 
-        $encoding = mb_detect_encoding($html);
-        $dom = new DOMDocument('1.0', $encoding);
-        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="UTF-8">' . mb_utf8($html), LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NONET);
 
         $attrs ??= [];
         $attrs["class"] = $attrs["class"] ?? "";

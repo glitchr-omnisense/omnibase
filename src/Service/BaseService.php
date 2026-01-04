@@ -7,12 +7,11 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\Routing\Route;
 use App\Entity\User;
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Traits\BaseTrait;
-use Symfony\Component\HttpKernel\RebootableInterface;
 
 use Symfony\Component\Form\FormInterface;
 
@@ -138,13 +137,13 @@ class BaseService implements RuntimeExtensionInterface
         NotifierInterface             $notifier,
         FormFactoryInterface          $formFactory,
         LocalizerInterface            $localizer,
-        TradingMarketInterface        $tradingMarket,
+        TradingInterface        $tradingMarket,
         Obfuscator                    $obfuscator,
         SettingBag                    $settingBag,
         MediaService                  $mediaService,
         IconProvider                  $iconProvider,
         TranslatorInterface           $translator,
-        RouterInterface               $router,
+        AdvancedRouterInterface               $router,
         EntityHydratorInterface       $entityHydrator,
         ClassMetadataManipulator      $classMetadataManipulator,
         AdminUrlGenerator             $adminUrlGenerator,
@@ -171,7 +170,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->setIconProvider($iconProvider);
         $this->setSettingBag($settingBag);
         $this->setLocalizer($localizer);
-        $this->setTradingMarket($tradingMarket);
+        $this->setTrading($tradingMarket);
         $this->setTwig($twig);
         $this->setRouter($router);
         $this->setFirewallMap($firewallMap);
@@ -211,12 +210,12 @@ class BaseService implements RuntimeExtensionInterface
     /**
      * @return array
      */
-    public function getBackoffice()
+    public function getAdmin()
     {
         return [
-            "title" => $this->getSettingBag()->getScalar("base.settings.title.backoffice"),
-            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.backoffice"),
-            "logo" => $this->getSettingBag()->getScalar("base.settings.logo.backoffice")
+            "title" => $this->getSettingBag()->getScalar("base.settings.title.admin"),
+            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.admin"),
+            "logo" => $this->getSettingBag()->getScalar("base.settings.logo.admin")
         ];
     }
 
@@ -281,7 +280,7 @@ class BaseService implements RuntimeExtensionInterface
             ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
             ->setEntityId($entity->getId())
             ->setAction(Crud::PAGE_EDIT)
-            ->includeReferrer()
+            //->includeReferrer()
             ->generateUrl();
     }
 

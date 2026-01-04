@@ -10,7 +10,12 @@ use Base\DependencyInjection\Compiler\AbstractPass;
  */
 class AnnotationPass extends AbstractPass
 {
-    public function taggedServiceIds(): string
+    public function serviceInterface(): ?string 
+    { 
+        return null;
+    }
+
+    public function taggedServiceIds(): ?string
     {
         return 'base.annotation';
     }

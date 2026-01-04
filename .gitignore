@@ -6,3 +6,6 @@ yarn.lock
 yarn-error.log
 .DS_Store
 .tmp
+var
+stubs
+.cache

@@ -10,7 +10,12 @@ use Base\Service\Sharer;
  */
 class SharerPass extends AbstractPass
 {
-    public function taggedServiceIds(): string
+    public function serviceInterface(): ?string 
+    { 
+        return null;
+    }
+
+    public function taggedServiceIds(): ?string
     {
         return 'base.service.sharer';
     }

@@ -3,6 +3,7 @@
 namespace Base\Traits;
 
 use Symfony\Component\Intl\Timezones;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  *
@@ -15,7 +16,7 @@ trait UserInfoTrait
      * @param string|null $key
      * @return array|mixed|string|null
      */
-    public static function getCookie(string $key = null)
+    public static function getCookie(?string $key = null)
     {
         $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
         if (array_key_exists("timezone", $cookie)) {
@@ -66,13 +67,17 @@ trait UserInfoTrait
         return null;
     }
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
     protected $timezone;
-    public function getCountryCode(): string
+    public function getCountryCode(): ?string
     {
-        return Timezones::getCountryCode($this->getTimezone());
+        try {
+            $countryCode = Timezones::getCountryCode($this->getTimezone());
+        } catch (\Exception $e) {
+            $countryCode = null;
+        }
+
+        return $countryCode;
     }
 
     public function getTimezone(): string
@@ -80,7 +85,7 @@ trait UserInfoTrait
         return $this->timezone ?? "UTC";
     }
 
-    public function setTimezone(string $timezone = null): self
+    public function setTimezone(?string $timezone = null): self
     {
         if (empty($timezone)) {
             $timezone = $this->timezone ?? null;

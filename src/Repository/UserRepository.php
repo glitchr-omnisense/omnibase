@@ -6,6 +6,7 @@ use App\Entity\User;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 
 use Base\Database\Repository\ServiceEntityRepository;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -34,10 +35,18 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $user;
     }
 
-    public function refreshUser(UserInterface $user): ?UserInterface
+    public function refreshUser(UserInterface $user): UserInterface
     {
         $user = $this->cacheOneByEmail($user->getEmail());
-        return $user?->isKicked() ? null : $user;
+        if (!$user instanceof User || $user === null) {
+            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+        }
+
+        if ($user?->isKicked()) {
+            throw new UnsupportedUserException('You have been kicked..');
+        }
+
+        return $user;
     }
 
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void

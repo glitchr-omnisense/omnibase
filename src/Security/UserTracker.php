@@ -6,7 +6,7 @@ use App\Entity\User;
 use Base\Repository\User\ConnectionRepository;
 use Base\Entity\User\Connection;
 use Base\Enum\ConnectionState;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -33,11 +33,11 @@ class UserTracker
     protected $requestStack;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
     protected $router;
 
-    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack, RouterInterface $router, ConnectionRepository $connectionRepository)
+    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack, AdvancedRouterInterface $router, ConnectionRepository $connectionRepository)
     {
         $this->entityManager = $entityManager;
         $this->requestStack = $requestStack;

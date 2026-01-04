@@ -113,7 +113,7 @@ class MediaController extends AbstractController
 
     #[Route("/images/cacheless/cropper/{identifier}/{data}/image.{extension}", name: "imageCropExtension_cacheless", requirements: ["data" => ".+"])]
     #[Route("/images/cacheless/cropper/{identifier}/{data}", name: "imageCrop_cacheless", requirements: ["data" => ".+"])]
-    public function ImageCropCacheless($data, string $identifier, string $extension = null): Response
+    public function ImageCropCacheless($data, string $identifier, ?string $extension = null): Response
     {
         $this->localCache = false;
         return $this->ImageCrop($data, $identifier, $extension);
@@ -121,7 +121,7 @@ class MediaController extends AbstractController
 
     #[Route("/images/cropper/{identifier}/{data}/image.{extension}", name: "imageCropExtension", requirements: ["data" => ".+"])]
     #[Route("/images/cropper/{identifier}/{data}", name: "imageCrop", requirements: ["data" => ".+"])]
-    public function ImageCrop($data, string $identifier, string $extension = null): Response
+    public function ImageCrop($data, string $identifier, ?string $extension = null): Response
     {
         //
         // Extract parameters
@@ -204,7 +204,7 @@ class MediaController extends AbstractController
             ));
         }
 
-        // This has been removed, otherwise users might overload the server changing the size in the URL..
+        // WARN: This has been removed, otherwise users might overload the server changing the size in the URL..
         // if($width && $height)
         //     array_prepend($filters, new ThumbnailFilter($height, $width));
         $localCache = array_pop_key("local_cache", $options);
@@ -223,6 +223,7 @@ class MediaController extends AbstractController
 
         $request = $this->requestStack->getCurrentRequest();
         $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
@@ -236,14 +237,14 @@ class MediaController extends AbstractController
     #[Route("/images/debug/{data}/image.{extension}", name: "debug_imageExtension", requirements: ["data" => ".+"])]
     #[Route("/images/debug/{data}", name: "debug_image", requirements: ["data" => ".+"])]
     #[IsGranted("ROLE_EDITOR")]
-    public function ImageDebug($data, string $extension = null): Response
+    public function ImageDebug($data, ?string $extension = null): Response
     {
         return $this->Image($data, $extension, true);
     }
 
     #[Route("/images/cacheless/{data}/image.{extension}", name: "imageExtension_cacheless", requirements: ["data" => ".+"])]
     #[Route("/images/cacheless/{data}", name: "image_cacheless", requirements: ["data" => ".+"])]
-    public function ImageCacheless($data, string $extension = null): Response
+    public function ImageCacheless($data, ?string $extension = null): Response
     {
         $this->localCache = false;
         return $this->Image($data, $extension);
@@ -256,7 +257,7 @@ class MediaController extends AbstractController
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();
         }
-
+       
         $webp = $config["webp"] ?? $this->mediaService->isWebpEnabled();
         if (!$webp) {
             return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
@@ -282,6 +283,7 @@ class MediaController extends AbstractController
 
         $request = $this->requestStack->getCurrentRequest();
         $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
@@ -314,11 +316,12 @@ class MediaController extends AbstractController
 
     #[Route("/images/{data}/image.{extension}", name: "imageExtension", requirements: ["data" => ".+"])]
     #[Route("/images/{data}", name: "image", requirements: ["data" => ".+"])]
-    public function Image($data, string $extension = null, bool $debug = false): Response
+    public function Image($data, ?string $extension = null, bool $debug = false): Response
     {
         //
         // Extract parameters
         $config = $this->mediaService->resolve($data);
+
         $filters = $config["filters"] ?? [];
         $options = $config["options"] ?? [];
         $path = $config["path"] ?? null;

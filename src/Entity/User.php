@@ -8,7 +8,6 @@ use Base\Exception\MissingLocaleException;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
-use Base\Entity\Extension\Log;
 use Base\Entity\User\Connection;
 
 use App\Entity\User\Token;
@@ -34,9 +33,9 @@ use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\Timestamp;
-use Base\Annotations\Annotation\Uploader;
-use Base\Annotations\Annotation\Hashify;
+use Base\Database\Annotation\Timestamp;
+use Base\Database\Annotation\Uploader;
+use Base\Database\Annotation\Hashify;
 
 use Base\Service\Localizer;
 use Base\Notifier\Recipient\Recipient;
@@ -55,6 +54,7 @@ use App\Enum\UserState;
 use Base\Service\Model\AutocompleteInterface;
 
 use Base\Traits\UserInfoTrait;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass:UserRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -64,6 +64,8 @@ use Base\Traits\UserInfoTrait;
 #[DiscriminatorEntry( value: "common" )]
 
 #[AssertBase\UniqueEntity(fields:["email"], groups:["new", "edit"])]
+
+#[ApiResource]
 class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
 {
     use BaseTrait;
@@ -131,7 +133,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->states = [UserState::ENABLED, UserState::NEWCOMER];
 
         $this->tokens = new ArrayCollection();
-        $this->logs = new ArrayCollection();
         $this->permissions = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->groups = new ArrayCollection();
@@ -273,7 +274,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     #[ORM\Column(type:"text", nullable:true)]
-    #[Uploader(storage:"local.storage", max_size:"5MB", mime_types:["image/*"], fetch:true)]
+    #[Uploader(max_size:"5MB", mime_types:["image/*"], fetch:true)]
     #[AssertBase\File(max_size:"5MB", mime_types:["image/*"])]
     protected $avatar;
 
@@ -346,9 +347,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->updatedAt = new DateTime("now"); // Plain password is not an ORM variable..
     }
 
-    public function eraseCredentials(): void
+    public function __serialize(): array
     {
-        $this->plainPassword = null;
+        $this->erasePlainPassword();
+        return (array) $this;
     }
 
     /**
@@ -360,6 +362,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
+    public function eraseCredentials(): void { } // @TODO: deprecated to be removed in Symfony >7.3
+    
     /**
      * @var string The hashed password
      */
@@ -382,9 +386,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     #[ORM\Column(type: "user_role")]
     #[Assert\NotBlank(groups: ["new", "edit"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy: "rolesPositions")]
     protected $roles = [];
-
+    protected $rolesPositions;
     public function isSocial(): bool
     {
         return in_array(UserRole::SOCIAL, $this->roles);
@@ -411,37 +415,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         }
 
         $this->roles = array_filter(array_unique($roles));
-        return $this;
-    }
-
-    #[ORM\OneToMany(targetEntity:Log::class, mappedBy:"user")]
-    #[ORM\JoinColumn(onDelete:"SET NULL")]
-    protected $logs;
-
-    public function getLogs(): Collection
-    {
-        return $this->logs;
-    }
-
-    public function addLog(Log $log): self
-    {
-        if (!$this->logs->contains($log)) {
-            $this->logs[] = $log;
-            $log->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeLog(Log $log): self
-    {
-        if ($this->logs->removeElement($log)) {
-            // set the owning side to null (unless already changed)
-            if ($log->getUser() === $this) {
-                $log->setUser(null);
-            }
-        }
-
         return $this;
     }
 
@@ -976,10 +949,33 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
+    #[ORM\Column(type:"datetime", nullable:true)]
+    protected $birthdate;
+    public function getBirthdate(): ?DateTimeInterface
+    {
+        return $this->birthdate;
+    }
+    public function setBirthdate(?DateTimeInterface $birthdate): self
+    {
+        $this->birthdate = $birthdate;
+        return $this;
+    }
+
+    public function getAge(): ?int
+    {
+        if ($this->birthdate === null) {
+            return null;
+        }
+
+        $today = new DateTime('now');
+        $age = $today->diff($this->birthdate);
+
+        return $age->y;
+    }
+
     #[ORM\Column(type:"datetime")]
     #[Timestamp(on:"create")]
     protected $createdAt;
-
     public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
@@ -988,7 +984,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     #[ORM\Column(type:"datetime")]
     #[Timestamp(on:["create", "update"])]
     protected $updatedAt;
-
     public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
@@ -996,7 +991,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     #[ORM\Column(type:"datetime", nullable:true)]
     protected $activeAt;
-
     public function getActiveAt(): ?DateTimeInterface
     {
         return $this->activeAt;

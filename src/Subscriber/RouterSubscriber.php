@@ -63,6 +63,8 @@ class RouterSubscriber implements EventSubscriberInterface
         $url = get_url();
 
         $ipRestriction = !$this->parameterBag->get("base.router.ip_access") && $this->authorizationChecker->isGranted("VALIDATE_IP", $route);
+        $reductionRequired = $this->router->reducesOnFallback();
+
         if ($ipRestriction) {
 
             $ipFallback = array_key_exists("ip", parse_url2($this->router->getHostFallback()));
@@ -71,31 +73,31 @@ class RouterSubscriber implements EventSubscriberInterface
             }
 
             $parsedUrl = parse_url2(get_url());
-            //$parsedUrl["scheme"] = $this->router->getScheme(); //NB: Some server returns http when connection is not secured
-            $parsedUrl["host"] = $this->router->getHostFallback();
+            $parsedUrl["scheme"] = $this->router->getScheme();
+	        $parsedUrl["host"] = $this->router->getHostFallback();
+            $parsedUrl["port"] = $this->router->getPortFallback();
 
             $url = compose_url(
-                $parsedUrl["scheme"] ?? null,
-                null,
-                null,
-                null,
-                null,
-                $parsedUrl["host"] ?? null,
-                null,
-                $parsedUrl["path"] ?? null,
-                $parsedUrl["query"] ?? null,
-                $parsedUrl["fragment"] ?? null
-            );
+                 $parsedUrl["scheme"] ?? null,
+                 null,
+                 null,
+                 null,
+                 null,
+                 $parsedUrl["host"] ?? null,
+                 $parsedUrl["port"] ?? null,
+                 $parsedUrl["path"] ?? null,
+                 $parsedUrl["query"] ?? null,
+                 $parsedUrl["fragment"] ?? null
+             );
 
-        } elseif (!$route->getHost() && $this->router->reducesOnFallback()) {
+        } elseif ($reductionRequired) {
 
             $parsedUrl = parse_url2(get_url());
-            //$parsedUrl["scheme"] = $this->router->getScheme(); //NB: Some server returns http when connection is not secured
             $parsedUrl["machine"] = $this->router->getMachine() ?? null;
             $parsedUrl["subdomain"] = $this->router->getSubdomain() ?? null;
             $parsedUrl["domain"] = $this->router->getDomain() ?? null;
             $parsedUrl["port"] = $this->router->getPort() ?? null;
-
+            
             $url = compose_url(
                 $parsedUrl["scheme"] ?? null,
                 null,
@@ -111,7 +113,7 @@ class RouterSubscriber implements EventSubscriberInterface
         }
 
         // Redirect to sanitized url
-        if ($url != get_url()) {
+        if ($url != get_url("http") && $url != get_url("https")) {
             $event->setResponse(new RedirectResponse($url));
             $event->stopPropagation();
         }

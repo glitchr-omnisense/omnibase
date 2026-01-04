@@ -5,9 +5,6 @@ namespace Base\Service;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
 
-/**
- *
- */
 interface FlysystemInterface
 {
     public static function getProjectDir();

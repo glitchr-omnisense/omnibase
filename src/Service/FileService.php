@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Routing\AdvancedRouter;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use finfo;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
@@ -36,9 +36,9 @@ class FileService implements FileServiceInterface
     protected FlysystemInterface $flysystem;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var Environment
@@ -51,7 +51,10 @@ class FileService implements FileServiceInterface
     /** * @var string */
     protected string $publicDir;
 
-    public function __construct(Environment $twig, RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
+    /** @var string     */
+    protected string $localCache;
+
+    public function __construct(Environment $twig, AdvancedRouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem, ParameterBagInterface $parameterBag)
     {
         $this->twig = $twig;
         $this->router = $router;
@@ -61,6 +64,7 @@ class FileService implements FileServiceInterface
         $this->publicDir = $flysystem->getPublicDir();
 
         $this->mimeTypes = new MimeTypes();
+        $this->localCache = "local.cache";
     }
 
     /**
@@ -118,7 +122,7 @@ class FileService implements FileServiceInterface
         }
 
         // Attempt to read from flysystem
-        $mimeType = $this->flysystem->mimeType($fileOrContentsOrArray);
+        $mimeType = $this->flysystem->mimeType($fileOrContentsOrArray, $this->localCache);
         if ($mimeType && $mimeType !== "application/x-empty") {
             return $mimeType;
         }
@@ -228,13 +232,13 @@ class FileService implements FileServiceInterface
         $config["options"] = $config["options"] ?? [];
         $config["local_cache"] = $config["local_cache"] ?? null;
 
-        while (($pathConfig = $this->obfuscator->decode(basename($path), FileService::USE_SHORT))) {
+        while (($pathConfig = $this->obfuscator->decode(basename($path)/*, FileService::USE_SHORT*/))) {
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        return $this->obfuscator->encode($config, FileService::USE_SHORT);
+        return $this->obfuscator->encode($config/*, FileService::USE_SHORT*/);
     }
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
@@ -245,7 +249,7 @@ class FileService implements FileServiceInterface
             $config["options"] = $config["options"] ?? [];
             $config["local_cache"] = $config["local_cache"] ?? null;
 
-            if (($pathConfig = $this->obfuscator->decode($data, FileService::USE_SHORT))) {
+            if (($pathConfig = $this->obfuscator->decode($data/*, FileService::USE_SHORT*/))) {
                 $path = $pathConfig["path"] ?? $path;
                 $config["path"] = $path;
                 $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
@@ -289,7 +293,7 @@ class FileService implements FileServiceInterface
         $match = $this->router->getRouteMatch($data);
         $data = $match && array_key_exists("data", $match) ? $match["data"] : $data;
 
-        $uuid = format_uuid(str_replace("/", "-", $data));
+        $uuid = format_uuid(str_replace("/", "-", $data), true);
         if (Uuid::isValid($uuid)) {
             $data = $uuid;
         } else {
@@ -297,7 +301,6 @@ class FileService implements FileServiceInterface
         }
 
         $data = $this->obfuscator->decode($data, FileService::USE_SHORT);
-
         foreach ($data ?? [] as $key => $el) {
             $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;
         }

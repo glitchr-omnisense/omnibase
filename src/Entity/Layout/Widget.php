@@ -7,11 +7,11 @@ use Base\Traits\CacheableTrait;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\GenerateUuid;
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\GenerateUuid;
+use Base\Database\Annotation\Uploader;
 use Base\Database\Annotation\OrderColumn;
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -21,7 +21,7 @@ use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Base\Database\Annotation\Cache;
-use Base\Annotations\Annotation\Timestamp;
+use Base\Database\Annotation\Timestamp;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 
@@ -121,7 +121,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
     }
 
     #[ORM\Column(type:"text", nullable:true)]
-    #[Uploader(storage:"local.storage", max_size:"1024KB", mime_types:["image/*"])]
+    #[Uploader(max_size:"1024KB", mime_types:["image/*"])]
     #[AssertBase\File(max_size:"1024KB", mime_types:["image/*"], groups:["new", "edit"])]
     protected $thumbnail;
 
@@ -155,8 +155,9 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
 
     #[ORM\ManyToMany(targetEntity:Widget::class)]
     #[ORM\JoinColumn(onDelete:"SET NULL")]
-    #[OrderColumn]
+    #[OrderColumn(orderBy:"connexPositions")]
     protected $connexes;
+    protected $connexPositions;
 
     public function getConnexes(): Collection
     {
@@ -179,7 +180,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
     }
 
     #[ORM\Column(type:"datetime", nullable:true)]
-    #Timestamp(on:"create")]
+    #[Timestamp(on:"create")]
     protected $createdAt;
 
     public function getCreatedAt(): ?DateTimeInterface

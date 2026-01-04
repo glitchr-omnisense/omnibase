@@ -3,8 +3,8 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
-use Base\Database\Entity\EntityExtensionInterface;
+use Base\Database\Entity\EntityExtension;
+use Base\Database\Annotation\Extension\ExtensionMetadataInterface;
 use Base\Entity\Extension\Revision;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Versionable extends AbstractAnnotation implements EntityExtensionInterface
+class Versionable extends AbstractAnnotation implements ExtensionMetadataInterface
 {
     /**
      * @param string $target
@@ -28,7 +28,7 @@ class Versionable extends AbstractAnnotation implements EntityExtensionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == EntityExtension::TARGET_PROPERTY);
     }
 
     public static $trackedColumns = []; // @TODO TO BE IMPLEMENTED

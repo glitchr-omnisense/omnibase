@@ -157,6 +157,6 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
             return $htmlRet;
         }
 
-        return $this->mentionEnhancer->enhance($html, $config, $filters, $attrs);
+        return $this->mediaEnhancer->enhance($html, $config, $filters, $attrs);
     }
 }

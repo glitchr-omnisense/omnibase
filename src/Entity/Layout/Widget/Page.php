@@ -5,7 +5,7 @@ namespace Base\Entity\Layout\Widget;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\Slugify;
+use Base\Database\Annotation\Slugify;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
@@ -14,6 +14,7 @@ use Base\Repository\Layout\Widget\PageRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Base\Database\Annotation\Cache;
+use Base\Entity\Layout\Widget\Set\Book;
 
 #[ORM\Entity(repositoryClass:PageRepository::class)]
 #[DiscriminatorEntry]
@@ -37,7 +38,6 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
 
         return $this->getRouter()->generate("widget_page", $routeParameters, $referenceType);
     }
-
     /**
      * @return string
      */
@@ -65,6 +65,21 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
+        return $this;
+    }
+
+    #[ORM\ManyToOne(targetEntity: Book::class, inversedBy: "pages")]
+    #[ORM\JoinColumn(nullable: true)]
+    protected $book;
+
+    public function getBook(): ?Book
+    {
+        return $this->book;
+    }
+
+    public function setBook(?Book $book): self
+    {
+        $this->book = $book;
         return $this;
     }
 }

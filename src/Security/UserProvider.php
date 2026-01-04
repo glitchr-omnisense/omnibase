@@ -3,7 +3,6 @@
 namespace Base\Security;
 
 use App\Entity\User;
-use App\Enum\UserRole;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -49,7 +48,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      *
      * @return UserInterface
      */
-    public function refreshUser(UserInterface $user)
+    public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof User) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));

@@ -3,9 +3,9 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
+use Base\Database\Entity\EntityExtension;
 use Base\Database\Entity\EntityExtensionInterface;
-use Base\Database\Traits\TrasheableTrait;
+use Base\Database\Entity\Extension\TrasheableTrait;
 use Base\Entity\Extension\TrashBall;
 use Base\Enum\EntityAction;
 use DateTime;
@@ -50,7 +50,7 @@ class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
             }
         }
 
-        return ($target == AnnotationReader::TARGET_CLASS);
+        return ($target == EntityExtension::TARGET_CLASS);
     }
 
     public static $trackedEntities = []; // @TODO TO BE IMPLEMENTED

@@ -5,7 +5,7 @@ namespace Base\Subscriber;
 use App\Entity\User;
 use Base\Entity\User as BaseUser;
 use Base\Entity\User\Notification;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\LocalizerInterface;
 
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -29,16 +29,16 @@ class LocalizerSubscriber implements EventSubscriberInterface
     protected LocalizerInterface $localizer;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var TokenStorageInterface
      */
     protected $tokenStorage;
 
-    public function __construct(LocalizerInterface $localizer, RouterInterface $router, TokenStorageInterface $tokenStorage)
+    public function __construct(LocalizerInterface $localizer, AdvancedRouterInterface $router, TokenStorageInterface $tokenStorage)
     {
         $this->localizer = $localizer;
         $this->router = $router;

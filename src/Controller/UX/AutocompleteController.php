@@ -7,7 +7,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\Model\Autocomplete;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\PaginatorInterface;
-use Base\Service\TradingMarketInterface;
+use Base\Service\TradingInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Exchanger\Exception\ChainException;
@@ -49,9 +49,9 @@ class AutocompleteController extends AbstractController
     protected Autocomplete $autocomplete;
 
     /**
-     * @var TradingMarketInterface
+     * @var TradingInterface
      */
-    protected TradingMarketInterface $tradingMarket;
+    protected TradingInterface $tradingMarket;
 
     /**
      * @var Profiler|null
@@ -63,7 +63,7 @@ class AutocompleteController extends AbstractController
      */
     private RequestStack $requestStack;
 
-    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingMarketInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
+    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
     {
         $this->requestStack = $requestStack;
         $this->obfuscator = $obfuscator;

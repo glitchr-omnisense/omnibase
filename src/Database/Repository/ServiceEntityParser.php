@@ -2,19 +2,15 @@
 
 namespace Base\Database\Repository;
 
-use AsyncAws\Core\Exception\LogicException;
-use Base\BaseBundle;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Database\TranslatableInterface;
-
-use Base\Database\Walker\TranslatableWalker;
+use Base\Database\Event\DoctrineQueryEventArgs;
+use Base\Database\Events;
 use Base\Service\Model\IntlDateTime;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\PersistentCollection;
@@ -546,58 +542,65 @@ class ServiceEntityParser
         $magicFn = null;
         $magicArgs = [];
 
-        // TODO: Safety check in dev mode only (maybe..)
         foreach ($this->classMetadataManipulator->getFieldNames($this->classMetadata->name) as $field) {
-            if (str_contains($field, self::OPTION_WITH_ROUTE) ||
-                str_contains($field, self::OPTION_BUT) ||
-                str_contains($field, self::OPTION_MODEL) ||
-
-                str_contains($field, self::OPTION_INSTANCEOF) ||
-                str_contains($field, self::OPTION_NOT_INSTANCEOF) ||
-                str_contains($field, self::OPTION_CLASSOF) ||
-                str_contains($field, self::OPTION_NOT_CLASSOF) ||
-                str_contains($field, self::OPTION_MEMBEROF) ||
-                str_contains($field, self::OPTION_NOT_MEMBEROF) ||
-
-                str_contains($field, self::OPTION_PARTIAL) ||
-                str_contains($field, self::OPTION_INSENSITIVE) ||
-                str_contains($field, self::OPTION_CLOSESTTO) ||
-                str_contains($field, self::OPTION_FARESTTO) ||
-                str_contains($field, self::OPTION_STARTING_WITH) ||
-                str_contains($field, self::OPTION_ENDING_WITH) ||
-                str_contains($field, self::OPTION_NOT_STARTING_WITH) ||
-                str_contains($field, self::OPTION_NOT_ENDING_WITH) ||
-
-                str_contains($field, self::OPTION_LOWER) ||
-                str_contains($field, self::OPTION_GREATER) ||
-                str_contains($field, self::OPTION_LOWER_EQUAL) ||
-                str_contains($field, self::OPTION_GREATER_EQUAL) ||
-
-                str_contains($field, self::OPTION_OVER) ||
-                str_contains($field, self::OPTION_NOT_OVER) ||
-                str_contains($field, self::OPTION_YOUNGER) ||
-                str_contains($field, self::OPTION_OLDER) ||
-                str_contains($field, self::OPTION_WITHIN) ||
-                str_contains($field, self::OPTION_YOUNGER_EQUAL) ||
-                str_contains($field, self::OPTION_OLDER_EQUAL) ||
-
-                str_contains($field, self::OPTION_EQUAL) ||
-                str_contains($field, self::OPTION_NOT_EQUAL) ||
-                str_contains($field, self::OPTION_NULL) ||
-                str_contains($field, self::OPTION_NOT_NULL) ||
-                str_contains($field, self::OPTION_EMPTY) ||
-                str_contains($field, self::OPTION_NOT_EMPTY) ||
-                str_contains($field, self::OPTION_TRUE) ||
-                str_contains($field, self::OPTION_NOT_TRUE) ||
-                str_contains($field, self::OPTION_FALSE) ||
-                str_contains($field, self::OPTION_NOT_FALSE) ||
-
-                str_contains($field, self::SEPARATOR_AND) ||
-                str_contains($field, self::SEPARATOR_OR) ||
-                str_contains($field, self::SEPARATOR)) {
+            $conflictingOption = null;
+            $optionsToCheck = [
+                self::OPTION_WITH_ROUTE,
+                self::OPTION_BUT,
+                self::OPTION_MODEL,
+                self::OPTION_INSTANCEOF,
+                self::OPTION_NOT_INSTANCEOF,
+                self::OPTION_CLASSOF,
+                self::OPTION_NOT_CLASSOF,
+                self::OPTION_MEMBEROF,
+                self::OPTION_NOT_MEMBEROF,
+                self::OPTION_PARTIAL,
+                self::OPTION_INSENSITIVE,
+                self::OPTION_CLOSESTTO,
+                self::OPTION_FARESTTO,
+                self::OPTION_STARTING_WITH,
+                self::OPTION_ENDING_WITH,
+                self::OPTION_NOT_STARTING_WITH,
+                self::OPTION_NOT_ENDING_WITH,
+                self::OPTION_LOWER,
+                self::OPTION_GREATER,
+                self::OPTION_LOWER_EQUAL,
+                self::OPTION_GREATER_EQUAL,
+                self::OPTION_OVER,
+                self::OPTION_NOT_OVER,
+                self::OPTION_YOUNGER,
+                self::OPTION_OLDER,
+                self::OPTION_WITHIN,
+                self::OPTION_YOUNGER_EQUAL,
+                self::OPTION_OLDER_EQUAL,
+                self::OPTION_EQUAL,
+                self::OPTION_NOT_EQUAL,
+                self::OPTION_NULL,
+                self::OPTION_NOT_NULL,
+                self::OPTION_EMPTY,
+                self::OPTION_NOT_EMPTY,
+                self::OPTION_TRUE,
+                self::OPTION_NOT_TRUE,
+                self::OPTION_FALSE,
+                self::OPTION_NOT_FALSE,
+                self::SEPARATOR_AND,
+                self::SEPARATOR_OR,
+                self::SEPARATOR
+            ];
+            foreach ($optionsToCheck as $option) {
+                $pos = strpos($field, $option);
+                if ($pos !== false) {
+                    $nextChar = substr($field, $pos + strlen($option), 1);
+                    if ($nextChar !== '' && ctype_upper($nextChar)) {
+                        $conflictingOption = $option;
+                        break;
+                    }
+                }
+            }
+            if ($conflictingOption !== null) {
                 throw new Exception(
                     "\"" . $this->serviceEntity->getFqcnEntityName() . "\" entity has a field called \"$field\". " .
-                    "This is unfortunate, because this word is used to customize DQL queries. " .
+                    "This is unfortunate, because this word (\"$conflictingOption\") is used to customize DQL queries. " .
                     "Please build your own DQL query or change your database field name"
                 );
             }
@@ -1153,7 +1156,7 @@ class ServiceEntityParser
                 $magicFn = self::REQUEST_FIND . ucfirst($magicFn);
             } // find <-> cache, findOne <-> cacheOne, [...]
 
-            $this->cacheable = BaseBundle::USE_CACHE && !is_cli();
+            $this->cacheable = !is_cli();
         }
 
         if (str_starts_with($magicFn, self::REQUEST_FIND . self::SPECIAL_ALL)) {
@@ -1614,7 +1617,7 @@ class ServiceEntityParser
                 $tableColumn = "LOWER(" . $tableColumn . ")";
             }
 
-            if ($isPartial) { // @TODO: THIS PARTIAL OPTION HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
+            if ($isPartial) {
 
                 if ($tableOperator != self::OPTION_EQUAL && $tableOperator != self::OPTION_NOT_EQUAL) {
                     throw new Exception("Invalid operator for association field \"$fieldName\": " . $tableOperator);
@@ -1875,7 +1878,7 @@ class ServiceEntityParser
         }
 
         foreach ($classMetadata->getAssociationMappings() as $associationMapping) {
-            if ($associationMapping["fetch"] == ClassMetadataInfo::FETCH_EAGER) {
+            if ($associationMapping["fetch"] == ClassMetadata::FETCH_EAGER) {
                 continue;
             }
             $aliasExpr = $aliasRoot . "." . $associationMapping["fieldName"];
@@ -1921,25 +1924,26 @@ class ServiceEntityParser
                 throw new Exception("\"" . $sourceEntity . "\" cannot be cached eagerly because of target entity is not configured as a second level cache.");
             }
 
-            if (class_implements_interface($sourceEntity, TranslatableInterface::class) && $associationMapping["fieldName"] == TranslatableWalker::COLUMN_NAME) {
-                continue;
-            } // This is to make sure Translations are not eagerly loaded... see @WARN below.
+            // if (class_implements_interface($sourceEntity, TranslatableInterface::class) && $associationMapping["fieldName"] == TranslatableWalker::COLUMN_NAME) {
+            //     continue;
+            // } // This is to make sure Translations are not eagerly loaded... see @WARN below.
 
             $targetEntity = $associationMapping["targetEntity"];
             if ($targetEntityCacheable && array_key_exists($associationMapping["fieldName"], $joinList)) {
+
                 $this->leftJoin($queryBuilder, $aliasExpr);
                 $queryBuilder->addSelect($aliasIdentifier);
 
-                $newOptions = [
-                    "alias" => $aliasIdentifier,
-                    "required" => $required,
-                    "depth" => $depth,
-                    "join" => $joinList[$associationMapping["fieldName"]]
-                ];
+                // $newOptions = [
+                //     "alias" => $aliasIdentifier,
+                //     "required" => $required,
+                //     "depth" => $depth,
+                //     "join" => $joinList[$associationMapping["fieldName"]]
+                // ];
 
-                // Map associations
-                $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
-                $this->getEagerQuery($queryBuilder, array_merge($options, $newOptions), $targetClassMetadata);
+                // Map associations (eagerly loaded) to the query builder to make sure they are cached
+                // $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
+                // $this->getEagerQuery($queryBuilder, array_merge($options, $newOptions), $targetClassMetadata);
             }
         }
 
@@ -1960,37 +1964,32 @@ class ServiceEntityParser
     {
         $queryBuilder = $this->getQueryBuilder($criteria, $orderBy ?? [], $limit, $offset, $groupBy ?? [], $selectAs ?? []);
 
-        //
-        // Eagerly load translations
-        $entityName = $this->classMetadata->getName();
-
-        //
-        // Eager load feature
-        if ($this->eagerly === false && class_implements_interface($entityName, TranslatableInterface::class)) {
-            $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . TranslatableWalker::COLUMN_NAME);
-            // @TODO this is commented because it generates more queries as no cache result is used..
-            // $queryBuilder->addSelect(self::ALIAS_ENTITY."_".TranslatableWalker::COLUMN_NAME);
-
-            //
-            // @WARN: The above line is commented because of a conflict with __findOneBy..
-            // Joining translations in DQL that way create one entry (Translation) per locale
-            // It would be good to consider loading 3 language max:
-            // - Default one, Lang fallback, and the requested one.
-            // If not make sure (in TranslatableWalker?) every request returns exactly 3 entries (NULL entries if not found?)
+        $dispatcher = $this->entityManager->getEventManager();
+        if ($dispatcher->hasListeners(Events::preQuery)) {
+            $eventArgs = new DoctrineQueryEventArgs($this->classMetadata, $queryBuilder, null);
+            $dispatcher->dispatchEvent(Events::preQuery, $eventArgs);
+            $queryBuilder = $eventArgs->getQueryBuilder();
         }
 
         $query = $this->eagerly === false ? $queryBuilder->getQuery() : $this->getEagerQuery($queryBuilder);
-        if ($groupBy) {
-            $query->setCacheable(false);
-        } // @TODO, if groupBy is used, cache is disabled.. id column not stored for some reasons.
+        if ($dispatcher->hasListeners(Events::onQuery)) {
+            $eventArgs = new DoctrineQueryEventArgs($this->classMetadata, $queryBuilder, $query);
+            $dispatcher->dispatchEvent(Events::onQuery, $eventArgs);
+            $query = $eventArgs->getQuery();
+        }        
+
+        // @WARN, if groupBy is used, cache must be disabled.. id column not stored for some reasons.
+        if ($groupBy) $query->setCacheable(false);
 
         $query->useQueryCache($this->cacheable);
-        $query->setCacheRegion($this->classMetadata->cache["region"] ?? null);
+    	if($this->classMetadata->cache !== null && array_key_exists("region", $this->classMetadata->cache)) {
+            $query->setCacheRegion($this->classMetadata->cache["region"]);
+        }
 
-        //
-        // Apply custom output walker to all entities (some join may relates to translatable entities)
-        if (class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class)) {
-            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
+        if ($dispatcher->hasListeners(Events::postQuery)) {
+            $eventArgs = new DoctrineQueryEventArgs($this->classMetadata, null, $query);
+            $dispatcher->dispatchEvent(Events::postQuery, $eventArgs);
+            $query = $eventArgs->getQuery();
         }
 
         return $query;

@@ -3,7 +3,7 @@
 namespace Base\Controller;
 
 use Base\Annotations\Annotation\Iconize;
-use Base\Controller\Backend\AbstractDashboardController;
+use Base\Controller\Admin\AbstractDashboardController;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
 use Base\Form\Type\SecurityLoginType;
@@ -20,9 +20,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-/**
- *
- */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
     /**
@@ -66,15 +63,9 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
         $this->formProxy = $formProxy;
     }
 
-    #[Route(["fr" => "/rescue-request", "en" => "/rescue-request"], name: "backoffice_rescue", priority: -1)]
-    public function index(): Response
-    {
-        return $this->redirectToRoute("security_rescue");
-    }
-
     public function configureDashboard(): Dashboard
     {
-        $logo = $this->settingBag->getScalar("base.settings.logo.backoffice");
+        $logo = $this->settingBag->getScalar("base.settings.logo.admin");
         if (!$logo) {
             $logo = $this->settingBag->getScalar("base.settings.logo");
         }
@@ -82,7 +73,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
             $logo = "bundles/base/images/logo.svg";
         }
 
-        $title = $this->settingBag->getScalar("base.settings.title") ?? $this->translator->trans("backoffice.title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
+        $title = $this->settingBag->getScalar("base.settings.title") ?? $this->translator->trans("admin.title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
         return Dashboard::new()
             ->setFaviconPath("favicon.ico")
             ->setTitle($title);
@@ -101,7 +92,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
 
         // Redirect to the right page when access denied
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            $targetUrl = $referrer->getUrl() ?? $this->router->generate("backoffice");
+            $targetUrl = $referrer->getUrl() ?? $this->router->generate("admin");
             $referrer->clear();
 
             return $this->redirect($targetUrl);
@@ -112,13 +103,13 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
             ->createProcessor("form:login:rescue", SecurityLoginType::class, ["identifier" => $lastUsername])
             ->onDefault(function (FormProcessorInterface $formProcessor) use ($authenticationUtils) {
                 $lastUsername = $authenticationUtils->getLastUsername();
-                $logo = $this->settingBag->get("base.settings.logo.backoffice")["_self"] ?? null;
+                $logo = $this->settingBag->get("base.settings.logo.admin")["_self"] ?? null;
                 $logo = $logo ?? $this->settingBag->get("base.settings.logo")["_self"] ?? null;
 
                 return $this->render('@EasyAdmin/page/login.html.twig', [
                     'last_username' => $lastUsername,
                     'translation_domain' => 'forms',
-                    'target_path' => $this->router->generate('backoffice'),
+                    'target_path' => $this->router->generate('admin'),
                     'identifier_label' => '@forms.login.identifier',
                     'password_label' => '@forms.login.password',
                     'logo' => $logo,
@@ -129,5 +120,11 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
             ->handleRequest($request);
 
         return $formProcessor->getResponse();
+    }
+
+    #[Route("/rescue-request", name: "admin_rescue", priority: -1)]
+    public function index(): Response
+    {
+        return $this->redirectToRoute("security_rescue");
     }
 }

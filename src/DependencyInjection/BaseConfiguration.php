@@ -9,9 +9,6 @@ use Symfony\Component\Uid\Uuid;
 
 use Base\Bundle\AbstractBaseConfiguration;
 
-/**
- *
- */
 class BaseConfiguration extends AbstractBaseConfiguration
 {
     public function getConfigTreeBuilder(): TreeBuilder
@@ -19,6 +16,11 @@ class BaseConfiguration extends AbstractBaseConfiguration
         $treeBuilder = $this->getTreeBuilder();
         $treeBuilder->getRootNode()
         ->children()
+            ->booleanNode('autoclear')
+                ->info('Automatically clear cache in case of integrity issue')
+                ->defaultValue(true)
+            ->end()
+
             ->arrayNode('database')->addDefaultsIfNotSet()
             ->children()
 
@@ -234,7 +236,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                                     ->defaultValue('%env(APP_ENV)%')
                                 ->end()
                                 ->booleanNode('reduction')
-                                    ->defaultValue(false)
+                                    ->defaultValue(null)
                                 ->end()
                                 ->variableNode('subdomain')
                                     ->info('Sub-domain')
@@ -361,6 +363,10 @@ class BaseConfiguration extends AbstractBaseConfiguration
                     ->info('Automatic image uploader warmup')
                     ->defaultValue(true)
                     ->end()
+                ->scalarNode('storage')
+                    ->info('Upload storage location')
+                    ->defaultValue(null)
+                    ->end()
                 ->arrayNode('formats')
                     ->arrayPrototype()
                         ->info("Specific formats")
@@ -372,6 +378,14 @@ class BaseConfiguration extends AbstractBaseConfiguration
                             ->end()
                         ->end()
                     ->end()
+                    ->end()
+                ->end()
+
+            ->arrayNode('files')->addDefaultsIfNotSet()
+                ->children()
+                    ->scalarNode('storage')
+                        ->defaultValue(null)
+                        ->end()
                     ->end()
                 ->end()
 
@@ -489,6 +503,68 @@ class BaseConfiguration extends AbstractBaseConfiguration
                         ->end()
                     ->end()
 
+                    ->arrayNode('themes')->addDefaultsIfNotSet()
+                        ->children()
+                            ->arrayNode('audiences')
+                                ->useAttributeAsKey('name')
+                                ->arrayPrototype()
+                                    ->children()
+                                        ->integerNode('age')->defaultNull()->end()
+                                        ->scalarNode('icon')->defaultNull()->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                            ->arrayNode('widths')
+                                ->useAttributeAsKey('name')
+                                ->arrayPrototype()
+                                    ->children()
+                                        ->scalarNode('icon')->defaultNull()->end()
+                                        ->scalarNode('class')->defaultNull()->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                            ->scalarNode('default_audience')
+                                ->info('Default audience key among valid audiences')
+                                ->defaultValue(null)
+                                ->end()
+                            ->arrayNode('events')
+                                ->useAttributeAsKey('name')
+                                ->arrayPrototype()
+                                    ->children()
+                                        ->scalarNode('begin')->defaultNull()->end()
+                                        ->scalarNode('end')->defaultNull()->end()
+                                        ->integerNode('priority')->defaultValue(0)->end()
+                                        ->scalarNode('icon')->defaultNull()->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                            ->arrayNode('modes')
+                                ->useAttributeAsKey('name')
+                                ->arrayPrototype()
+                                    ->children()
+                                        ->scalarNode('class')->defaultNull()->end()
+                                        ->scalarNode('icon')->defaultNull()->end()
+                                        ->scalarNode('prefers')->defaultNull()->end()
+                                    ->end()
+                                ->end()
+                                ->defaultValue([
+                                    ['name' => 'auto', 'icon' => 'fa-solid fa-fw fa-circle-half-stroke'],
+                                    ['name' => 'dark', 'icon' => 'fa-solid fa-fw fa-moon'],
+                                    ['name' => 'light', 'icon' => 'fa-solid fa-fw fa-sun']
+                                ])
+                            ->end()
+                            ->arrayNode('filters')
+                                ->useAttributeAsKey('name')
+                                ->arrayPrototype()
+                                    ->children()
+                                        ->scalarNode('icon')->defaultNull()->end()
+                                        ->scalarNode('filter')->defaultNull()->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+
                     ->arrayNode('script_attributes')->addDefaultsIfNotSet()
                         ->children()
                             ->scalarNode('defer')
@@ -543,7 +619,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
 
                     ->arrayNode('editor')->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('operator')
+                        ->scalarNode('storage')
                             ->defaultValue(null)
                             ->end()
                         ->end()
@@ -586,21 +662,9 @@ class BaseConfiguration extends AbstractBaseConfiguration
                     ->defaultValue(5)
                     ->end()
                 ->scalarNode('logging_default_expiry')
-                    ->info('Default logging expirty')
+                    ->info('Default logging expiry')
                     ->defaultValue(3*60)
                     ->end()
-                ->arrayNode('logging')
-                    ->arrayPrototype()
-                        ->children()
-                            ->scalarNode("event")->end()
-                            ->scalarNode("pretty")->end()
-                            ->scalarNode("statusCode")->end()
-                            ->scalarNode("expiry")->end()
-                            ->end()
-                        ->end()
-                        ->end()
-                    ->end()
-                ->end()
         ->end();
 
         return $treeBuilder;

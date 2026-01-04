@@ -12,5 +12,5 @@ use Doctrine\Common\Annotations\Annotation;
 #[\Attribute]
 class Hexcode extends Constraint
 {
-    public $message = 'hexcode';
+    public string $message = 'hexcode';
 }

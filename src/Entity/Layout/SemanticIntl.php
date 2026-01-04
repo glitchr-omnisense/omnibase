@@ -5,8 +5,8 @@ namespace Base\Entity\Layout;
 use Base\Database\Annotation\OrderColumn;
 use Doctrine\ORM\Mapping as ORM;
 
-use Base\Database\TranslationInterface;
-use Base\Database\Traits\TranslationTrait;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Traits\BaseTrait;
 
 #[ORM\Entity]
@@ -34,9 +34,7 @@ class SemanticIntl implements TranslationInterface
     }
 
     #[ORM\Column(type:"json")]
-    #[OrderColumn]
     protected $keywords = [];
-
     public function getKeywords(): array
     {
         return $this->keywords ?? [];

@@ -124,7 +124,7 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
             }
 
             if (count($options["widgets"]) > 0) {
-                $form->add('valid', SubmitType::class, ["attr" => ["class" => "btn btn-primary"], "translation_domain" => "controllers", "label_format" => "backoffice_widgets.valid"]);
+                $form->add('valid', SubmitType::class, ["attr" => ["class" => "btn btn-primary"], "translation_domain" => "controllers", "label_format" => "admin_widgets.valid"]);
             }
         });
     }

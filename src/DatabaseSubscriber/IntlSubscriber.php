@@ -3,17 +3,23 @@
 namespace Base\DatabaseSubscriber;
 
 use Base\BaseBundle;
-use Base\Database\TranslatableInterface;
-use Base\Database\TranslationInterface;
-use Base\Database\Walker\TranslatableWalker;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Event\DoctrineQueryEventArgs;
+use Base\Database\Event\ResolveDiscriminatorEventArgs;
+use Base\Database\Mapping\NamingStrategy;
+use Base\Exception\MissingDiscriminatorMapException;
+use Base\Exception\MissingDiscriminatorValueException;
 use Base\Service\LocalizerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
-
+use Base\Database\Walker\TranslatableWalker;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Query;
+
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Exception;
 
 class IntlSubscriber
 {
@@ -35,12 +41,71 @@ class IntlSubscriber
         $this->localizer = $localizer;
     }
 
+    public function onQuery(DoctrineQueryEventArgs $args)
+    {
+        if (!class_implements_interface($args->getClassMetadata()->getName(), TranslatableInterface::class)) return;
+        
+        $args->getQuery()->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
+    }
+
+    public function resolveDiscriminator(ResolveDiscriminatorEventArgs $resolveDiscriminatorEventArgs)
+    {
+        $classMetadata = $resolveDiscriminatorEventArgs->getClassMetadata();
+        if (!is_subclass_of($classMetadata->getName(), TranslationInterface::class)) return;
+
+        $classMetadataFactory = $this->entityManager->getMetadataFactory();
+        if (!str_ends_with($classMetadata->getName(), NamingStrategy::TABLE_I18N_SUFFIX)) {
+            throw new Exception("Invalid class name for \"" . $classMetadata->getName() . "\"");
+        }
+
+        $translatableClass = $classMetadata->getName()::getTranslatableEntityClass();
+        $translatableMetadata = $classMetadataFactory->getMetadataFor($translatableClass);
+
+        //
+        // Handle translation discriminator map
+        if (!$classMetadata->discriminatorMap) {
+            $classMetadata->discriminatorMap = array_filter(array_map(function ($className) {
+                return (is_subclass_of($className, TranslatableInterface::class))
+                    ? $className::getTranslationEntityClass(false)
+                    : null;
+            }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
+        }
+
+        //
+        // Handle translation subclasses
+        $subClasses = [];
+        foreach ($translatableMetadata->subClasses as $translatableSubclass) {
+            $translationClass = $translatableSubclass::getTranslationEntityClass();
+            if ($translationClass !== null && $translationClass != $classMetadata->getName()) {
+                $subClasses[] = $translationClass;
+            }
+        }
+
+        // Apply values..
+        $classMetadata->subClasses = array_unique($subClasses);
+        $classMetadata->inheritanceType = $translatableMetadata->inheritanceType;
+        $classMetadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
+        if ($classMetadata->discriminatorMap) {
+            if (!in_array($classMetadata->getName(), $classMetadata->discriminatorMap)) {
+                throw new MissingDiscriminatorMapException(
+                    "Discriminator map missing for \"" . $classMetadata->getName() .
+                    "\". Did you forgot to implement \"" . TranslatableInterface::class .
+                    "\" in \"" . $classMetadata->getName()::getTranslatableEntityClass() . "\"."
+                );
+            }
+
+            $classMetadata->discriminatorValue = array_flip($translatableMetadata->discriminatorMap)[$translatableMetadata->getName()] ?? null;
+            if (!$classMetadata->discriminatorValue) {
+                throw new MissingDiscriminatorValueException("Discriminator value missing for \"" . $className->getName() . "\".");
+            }
+        }
+    }
+
     public function postLoad(LifecycleEventArgs $args)
     {
         $uow = $this->entityManager->getUnitOfWork();
-
+        
         $object = $args->getObject();
-        $this->upgradeIntl($object);
 
         if (is_subclass_of($object, TranslationInterface::class)) {
             if ($object->isEmpty()) { // Mark as removal for mispersistent translations..
@@ -124,6 +189,7 @@ class IntlSubscriber
 
         if ($entity instanceof TranslationInterface) {
             if ($entity->isEmpty()) {
+
                 $translatable = $entity->getTranslatable();
                 if ($translatable) {
                     $translatable->removeTranslation($entity);
@@ -133,6 +199,7 @@ class IntlSubscriber
                 if ($this->entityManager->contains($entity)) {
                     $this->entityManager->remove($entity);
                 }
+
             } else {
                 $uow->cancelOrphanRemoval($entity);
             }
@@ -184,34 +251,19 @@ class IntlSubscriber
             case 'LAZY':
                 return ClassMetadata::FETCH_LAZY;
         }
+
+        return ClassMetadata::FETCH_LAZY;
     }
 
     private function mapTranslatable(ClassMetadata $classMetadata): void
     {
         $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslationEntityClass')->invoke(null);
-        if ($classMetadata->hasAssociation('translations')) {
-            $mapping = $classMetadata->getAssociationMapping('translations');
-            if (is_subclass_of($targetEntity, $mapping['targetEntity'] ?? null)) {
-                $classMetadata->associationMappings['translations']['targetEntity'] = $targetEntity;
-                $classMetadata->associationMappings['translations']['sourceEntity'] = $classMetadata->getName();
+        
+        if (!$classMetadata->hasAssociation('translations')) {
 
-                $classMetadata->cache = $classMetadata->cache ?? null;
-                $classMetadata->cache = [
-                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
-                ];
-
-                $classMetadata->associationMappings['translations']['cache'] = $classMetadata->cache ?? null;
-                $classMetadata->associationMappings['translations']['cache'] = [
-                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
-                ];
-            }
-        } else {
-            $classMetadata->cache = $classMetadata->cache ?? null;
             $classMetadata->cache = [
                 'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
             ];
 
             $classMetadata->mapOneToMany([
@@ -219,10 +271,10 @@ class IntlSubscriber
                 'mappedBy' => 'translatable',
                 'cache' => [
                     'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translations',
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
                 ],
                 'indexBy' => TranslatableWalker::LOCALE,
-                'cascade' => ['persist', 'merge', 'remove'],
+                'cascade' => ['persist', 'refresh', 'remove'],
                 'fetch' => $this->convertFetchString('LAZY'),
                 'targetEntity' => $targetEntity,
                 'orphanRemoval' => true,
@@ -235,30 +287,21 @@ class IntlSubscriber
         $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslatableEntityClass')->invoke(null);
         $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
 
-        if ($classMetadata->hasAssociation('translatable')) {
-            $mapping = $classMetadata->getAssociationMapping('translatable');
-            if (is_subclass_of($targetEntity, $mapping['targetEntity'] ?? null)) {
-                $classMetadata->associationMappings['translatable']['targetEntity'] = $targetEntity;
-                $classMetadata->associationMappings['translatable']['sourceEntity'] = $classMetadata->getName();
-                $classMetadata->cache = [
-                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
-                ];
-            }
-        } else {
+        if (!$classMetadata->hasAssociation('translatable')) {
+
             $classMetadata->cache = [
                 'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
-                'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
             ];
 
             $classMetadata->mapManyToOne([
                 'fieldName' => 'translatable',
                 'inversedBy' => 'translations',
-                'cache' => BaseBundle::USE_CACHE ? [
+                'cache' => [
                     'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translatable',
-                    'usage' => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
-                ] : null,
-                'cascade' => ['persist', 'merge'],
+                    'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                ],
+                'cascade' => ['persist', 'refresh'],
                 'fetch' => $this->convertFetchString('LAZY'),
                 'joinColumns' => [[
                     'name' => TranslatableWalker::FOREIGN_KEY,

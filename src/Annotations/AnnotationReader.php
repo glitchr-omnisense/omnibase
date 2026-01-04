@@ -16,7 +16,7 @@ use Base\BaseBundle;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\FlysystemInterface;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -28,9 +28,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- *
- */
 class AnnotationReader extends AbstractLocalCache
 {
     use SingletonTrait;
@@ -176,13 +173,13 @@ class AnnotationReader extends AbstractLocalCache
     protected EventDispatcherInterface $eventDispatcher;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
-        RouterInterface          $router,
+        AdvancedRouterInterface          $router,
         EntityManager            $entityManager,
         ParameterBagInterface    $parameterBag,
         FlysystemInterface       $flysystem,
@@ -725,6 +722,7 @@ class AnnotationReader extends AbstractLocalCache
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
         if (!array_key_exists($reflClass->name, $this->propertyAnnotations)) {
+
             // Force to get all known annotations when buffering
             $this->propertyAnnotations[$reflClass->name] = [];
             foreach ($reflClass->getProperties() as $reflProperty) {
@@ -876,7 +874,7 @@ class AnnotationReader extends AbstractLocalCache
         return $annotationTargets;
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $this->annotationTargets = $this->getCache("/Targets") ?? [];
         $this->classHierarchies = $this->getCache("/Hierarchies") ?? [];
@@ -906,7 +904,7 @@ class AnnotationReader extends AbstractLocalCache
             $this->commitCache();
         });
 
-        return true;
+        return [];
     }
 
     /**
@@ -924,7 +922,6 @@ class AnnotationReader extends AbstractLocalCache
         }
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-
         $annotations = [self::TARGET_CLASS => [], self::TARGET_METHOD => [], self::TARGET_PROPERTY => []];
         $annotationNames = $this->normalizeNames($annotationNames);
         $annotationTargets = $this->normalizeTargets($annotationTargets, $annotationNames);

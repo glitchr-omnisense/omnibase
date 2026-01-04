@@ -2,8 +2,8 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -68,7 +68,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    #[ORM\Column(type:"array", nullable:true)]
+    #[ORM\Column(type:"json", nullable:true)]
     protected $routeParameters;
 
     public function getRouteParameters(): ?array
@@ -139,7 +139,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
         $dom = new DomDocument();
         $encoding = mb_detect_encoding($text);
-        $dom->loadHTML(mb_convert_encoding($text, 'HTML-ENTITIES', $encoding), LIBXML_NOERROR);
+        $dom->loadHTML(mb_convert_encoding($text, 'UTF-8', $encoding), LIBXML_NOERROR);
 
         $xpath = new DOMXPath($dom);
         foreach ($xpath->query('//text()') as $text) {

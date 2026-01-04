@@ -13,7 +13,12 @@ $(window).on("onbeforeunload.popover",function() { $('[data-toggle="popover"]').
 
 import Tooltip from 'bootstrap/js/dist/tooltip';
 $(window).off("load.tooltip");
-$(window).on("load.tooltip", function() { $('[data-toggle="tooltip"]').each(function() { $(this).tooltip({"html": $(this).data("html") ?? false}); }); });
+$(window).on("load.tooltip", function() { 
+    $('[data-toggle="tooltip"]').each(function() { 
+        $(this).tooltip({"html": $(this).data("html") ?? false}); 
+        $(this).click(function() { $(this).tooltip("hide"); });
+    }); 
+});
 
 $(window).off("onbeforeunload.tooltip");
 $(window).on("onbeforeunload.tooltip",function() { $('[data-toggle="tooltip"]').tooltip("hide"); });

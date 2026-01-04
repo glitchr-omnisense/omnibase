@@ -66,9 +66,9 @@ layout:
   image_crop:
     _singular: "découpage d'image"
     _plural: "découpages d'images"
-  short:
-    _singular: "raccourci"
-    _plural: "raccourcis"
+  shlink:
+    _singular: "lien raccourci"
+    _plural: "lien raccourcis"
   semantic:
     _singular: "champ lexical"
     _plural: "champs lexicaux"

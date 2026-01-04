@@ -3,8 +3,8 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\Timestamp;
+use Base\Database\Annotation\Slugify;
+use Base\Database\Annotation\Timestamp;
 use Base\Service\Model\IconizeInterface;
 
 use DateTime;

@@ -6,7 +6,7 @@ use App\Entity\User;
 use Base\Entity\User as BaseUser;
 
 use App\Repository\UserRepository;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\TranslatorInterface;
 use Google\Service\GaService;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -25,9 +25,9 @@ class AnalyticsSubscriber implements EventSubscriberInterface
      */
     protected TokenStorageInterface $tokenStorage;
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
     /**
      * @var TranslatorInterface
      */
@@ -47,7 +47,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
 
     public function __construct(
         TokenStorageInterface $tokenStorage,
-        RouterInterface       $router,
+        AdvancedRouterInterface       $router,
         TranslatorInterface   $translator,
         Environment           $twig,
         UserRepository        $userRepository,

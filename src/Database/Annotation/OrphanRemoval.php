@@ -3,7 +3,8 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
+use Base\Database\Entity\EntityExtension;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 use Doctrine\Common\Annotations\Annotation;
@@ -24,7 +25,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class OrphanRemoval extends AbstractAnnotation
+class OrphanRemoval extends AbstractAnnotation implements ExtensionOptionInterface
 {
     /** @Required */
     protected string $column;
@@ -44,10 +45,10 @@ class OrphanRemoval extends AbstractAnnotation
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == EntityExtension::TARGET_CLASS || $target == EntityExtension::TARGET_PROPERTY);
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
         if ($target == "property") {
             $column = $targetValue;
@@ -55,7 +56,7 @@ class OrphanRemoval extends AbstractAnnotation
             $column = $this->column;
         }
 
-        $columnAlias = $this->getAnnotation($classMetadata, $column, ColumnAlias::class);
+        $columnAlias = $this->getAnnotation($classMetadata, $column, Alias::class);
         if ($columnAlias) {
             $column = $columnAlias->column;
         }

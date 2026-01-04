@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Currencies;
 use Symfony\Component\Intl\Exception\MissingResourceException;
-use Symfony\Component\Intl\Exception\ResourceBundleNotFoundException;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 use Symfony\Component\Intl\Timezones;
@@ -69,13 +68,13 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     protected static ?string $defaultLocale = null;
     protected static ?array $fallbackLocales = null;
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         self::$locales = $this->getCache("/Localize/Locales", self::getLocales());
         self::$fallbackLocales = self::$fallbackLocales ?? self::normalizeLocale($this->translator->getFallbackLocales());
         self::$defaultLocale = self::$defaultLocale ?? self::normalizeLocale($this->parameterBag->get("kernel.default_locale"));
 
-        return true;
+        return [];
     }
 
     /**
@@ -133,6 +132,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     public static function getLocales()
     {
         if (self::$locales === null) {
+
             self::$locales = [];
             foreach (Locales::getLocales() as $locale) {
                 // NB: Only keep xx-YY locale format
@@ -195,11 +195,13 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     {
         $currentLocale = $this->getLocale();
         if ($request !== null) {
-            if (self::isLate()) {
-                $method = __CLASS__ . "::" . __FUNCTION__;
-                $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
-                throw new Exception("You cannot call " . $method . ", after \"" . $location . "\" got triggered.");
-            }
+
+            // Conflict with FrankenPHP request lifecycle
+            // if (self::isLate()) {
+            //     $method = __CLASS__ . "::" . __FUNCTION__;
+            //     $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
+            //     throw new Exception("You cannot call " . $method . ", after \"" . $location . "\" got triggered.");
+            // }
 
             // Symfony request needs underscore separator, regardless of the constant defined above
             $request->setLocale(substr_replace($locale, "_", 2, 1));

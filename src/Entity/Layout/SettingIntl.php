@@ -6,10 +6,10 @@ use Base\Database\Annotation\Associate;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Database\Annotation\Vault;
-use Base\Annotations\Annotation\Uploader;
-use Base\Database\TranslationInterface;
-use Base\Database\Traits\TranslationTrait;
-use Base\Database\Traits\VaultTrait;
+use Base\Database\Annotation\Uploader;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationTrait;
+use Base\Database\Entity\Extension\VaultTrait;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 
@@ -63,8 +63,8 @@ class SettingIntl implements TranslationInterface
         return $this;
     }
 
-    #[ORM\Column(type:"array")]
-    #[Uploader(storage:"local.storage", max_size:"2MB", missable:true)]
+    #[ORM\Column(type:"json")]
+    #[Uploader(max_size:"2MB", missable:true)]
     #[Associate(metadata:"class")]
     protected $value = null;
 

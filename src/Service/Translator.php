@@ -5,19 +5,17 @@ namespace Base\Service;
 use Base\Database\Type\SetType;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Component\Translation\Translator as SymfonyTranslator;
 
-/**
- *
- */
 class Translator implements TranslatorInterface
 {
     public const PARSE_EXTENDS = "extends";
     public const PARSE_NAMESPACE = "namespace";
 
     public const DOMAIN_DEFAULT = "messages";
-    public const DOMAIN_BACKEND = "backoffice";
+    public const DOMAIN_BACKEND = "admin";
     public const DOMAIN_ENTITY = "entities";
     public const DOMAIN_ENUM = "enums";
 
@@ -64,15 +62,21 @@ class Translator implements TranslatorInterface
         $this->isDebug = $kernel->isDebug();
     }
 
+    public function getCatalogue(?string $locale = null): MessageCatalogueInterface
+    {
+        return $this->translator->getCatalogue($locale ?? $this->getLocale());
+    }
+
+    public function getCatalogues(): array
+    {
+        return $this->translator->getCatalogues();
+    }
+
     public function getLocale(): string
     {
         return $this->translator->getLocale();
     }
 
-    /**
-     * @param string $locale
-     * @return $this
-     */
     /**
      * @param string $locale
      * @return $this
@@ -114,15 +118,17 @@ class Translator implements TranslatorInterface
         $domain = $domain && str_starts_with($domain, "@") ? substr($domain, 1) : ($domain ?? null);
         $domainFallback = $domainFallback && str_starts_with($domainFallback, "@") ? substr($domainFallback, 1) : ($domainFallback ?? null);
         if ($id && $customId) {
+
             $array = explode(".", $id);
             if ($startsWithDomainTag) {
                 $domain = substr(array_shift($array), 1);
                 $id = implode(".", $array);
             }
+
         } elseif ($recursive) { // Check if recursive dot structure
+
             $count = 0;
             $fn = fn($k) => $this->trans($k, $parameters, $domain, $locale, false);
-
             $ret = preg_replace_callback("/" . self::STRUCTURE_DOT . "|" . self::STRUCTURE_DOTBRACKET . "/", $fn, $id, -1, $count);
             if ($ret != $id) {
                 return $ret;
@@ -138,7 +144,6 @@ class Translator implements TranslatorInterface
 
             return $ret;
         }
-
 
         // Replace parameter between brackets
         $bracketList = self::STRUCTURE_BRACKETLIST;
@@ -234,7 +239,7 @@ class Translator implements TranslatorInterface
             default:
             case self::PARSE_NAMESPACE:
 
-                $bundleEntityNamespaces = array_map(fn($b) => dirname_namespace($b)."\\Entity\\", \Base\BaseBundle::getBundles());
+                $bundleEntityNamespaces = array_map(fn($b) => dirname_namespace($b)."\\Entity\\", \Base\BaseBundle::getInstance()->getBundles());
                 $entityNamespaces = array_merge(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], $bundleEntityNamespaces);
 
                 $entityPrefix = array_fill(0, 3, "");
@@ -248,6 +253,8 @@ class Translator implements TranslatorInterface
 
                 return camel2snake(implode(".", array_unique(explode("\\", $class))));
         }
+
+        return "";
     }
 
     public function transExists(TranslatableMessage|string $id, ?string $domain = null, ?string $locale = null, bool $localeCountry = true): bool

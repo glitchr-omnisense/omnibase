@@ -1,0 +1,9 @@
+<div class="locale-text">
+    <span class="label">{{ "@themizer.mode._singular"|trans }}</span>
+    <ul class="locale">
+    {# {% for locale in available_theme_modes %}
+        {% set current = (locale == current_theme_mode) ? "active" : null %}
+        <li><a href="{{ path("_switch_locale", {_locale: locale|lang}) }}" {{ html_attributes({"class":current}) }}>{{ locale|country }} | {{ locale|lang_name|capitalize}}</a></li>
+    {% endfor %} #}
+    </ul>
+</div>

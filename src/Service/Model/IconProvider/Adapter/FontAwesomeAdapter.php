@@ -50,7 +50,7 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         ]);
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         parent::warmUp($cacheDir, $buildDir);
 
@@ -65,7 +65,7 @@ class FontAwesomeAdapter extends AbstractIconAdapter
             return $version ?? "unk.";
         });
 
-        return true;
+        return [];
     }
 
     public function supports(IconizeInterface|string|null $icon): bool

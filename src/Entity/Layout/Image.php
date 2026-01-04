@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -116,7 +116,7 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     }
 
     #[ORM\Column(type:"text")]
-    #[Uploader(storage:"local.storage", max_size:"32MB", mime_types:["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"])]
+    #[Uploader(max_size:"32MB", mime_types:["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"])]
     protected $source;
 
     /**

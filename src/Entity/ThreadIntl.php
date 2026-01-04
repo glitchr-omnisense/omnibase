@@ -3,8 +3,8 @@
 namespace Base\Entity;
 
 use Base\Database\Annotation\OrderColumn;
-use Base\Database\TranslationInterface;
-use Base\Database\Traits\TranslationTrait;
+use Base\Database\Entity\Extension\TranslationInterface;
+use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Traits\BaseTrait;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -54,10 +54,10 @@ class ThreadIntl implements TranslationInterface
         return $this;
     }
 
-    #[ORM\Column(type:"array")]
-    #[OrderColumn]
+    #[ORM\Column(type:"json")]
+    #[OrderColumn(orderBy: "keywordPositions")]
     protected $keywords = [];
-
+    protected $keywordPositions;
     public function getKeywords(): array
     {
         return $this->keywords ?? [];
@@ -76,7 +76,6 @@ class ThreadIntl implements TranslationInterface
 
     #[ORM\Column(type:"text", nullable:true)]
     protected $excerpt;
-
     public function getExcerpt(): ?string
     {
         return $this->excerpt;

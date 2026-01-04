@@ -102,7 +102,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         }
 
         $identifier = $this->getUuid($data);
-        if (BaseBundle::USE_CACHE && $this->hasCache("/Identifiers/" . $identifier)) {
+        if ($this->hasCache("/Identifiers/" . $identifier)) {
             return $identifier;
         }
 
@@ -113,7 +113,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
     public function decode(string $hash, bool $short = Obfuscator::NO_SHORT): ?array
     {
         $uuid = $hash;
-        if ($short && Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
+        if ($short && Uuid::isValid($uuid)) {
             $_ = $this->getCache("/Identifiers/" . $uuid);
             if ($_) {
                 $hash = $_;
@@ -129,10 +129,9 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 
             return $hash ?: null;
 
-        } catch (ErrorException $e) {
-        }
+        } catch (ErrorException $e) {}
 
-        if ($short && Uuid::isValid($uuid) && BaseBundle::USE_CACHE) {
+        if ($short && Uuid::isValid($uuid)) {
             $this->deleteCache("/Identifiers/" . $uuid);
         }
 

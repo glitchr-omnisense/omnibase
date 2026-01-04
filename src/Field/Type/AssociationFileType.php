@@ -2,8 +2,8 @@
 
 namespace Base\Field\Type;
 
-use Base\Annotations\Annotation\Uploader;
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Database\Annotation\Uploader;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Enum\UserRole;

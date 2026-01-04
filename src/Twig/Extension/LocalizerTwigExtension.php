@@ -60,7 +60,7 @@ final class LocalizerTwigExtension extends AbstractExtension
     {
         return $twig->render($template, array_merge($options, [
             'available_countries' => $this->localizer->getAvailableLocaleCountries(),
-            'country' => $this->localizer->getLocaleCountry(),
+            'current_country' => $this->localizer->getLocaleCountry(),
         ]));
     }
 

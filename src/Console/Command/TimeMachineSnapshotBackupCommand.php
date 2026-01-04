@@ -34,6 +34,7 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
         $cycle     = $input->getOption('cycle')      ?? -1;
 
         if (!$storages) {
+            $output?->section()->writeln("Please select a storage. aborted.");
             return Command::FAILURE;
         }
 

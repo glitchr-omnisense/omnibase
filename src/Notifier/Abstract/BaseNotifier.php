@@ -2,13 +2,13 @@
 
 namespace Base\Notifier\Abstract;
 
-use App\Entity\User;
+use Base\Entity\User;
 use BadMethodCallException;
 use Base\Entity\User\Notification;
-use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
+use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\TimezoneRecipientInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\SettingBagInterface;
 use DateTime;
@@ -19,6 +19,7 @@ use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Notifier\Notification\Notification as SymfonyNotification;
+use Symfony\Component\Notifier\Notifier as SymfonyNotifier;
 use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
 use Twig\Environment;
 
@@ -111,9 +112,9 @@ abstract class BaseNotifier implements BaseNotifierInterface
     protected ParameterBagInterface $parameterBag;
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var LocalizerInterface
@@ -176,7 +177,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this->twig;
     }
 
-    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, RouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
+    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, AdvancedRouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
     {
         $this->twig = $twig;
         $this->notifier = $notifier;
@@ -214,7 +215,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this->technicalLoopback;
     }
 
-    public function isTest(RecipientInterface $recipient): bool
+    public function isTest(Recipient $recipient): bool
     {
         if ($this->technicalLoopback) {
             return true;
@@ -250,13 +251,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
     public function getAdminRecipient($i = 0): ?RecipientInterface
     {
         $this->initializeAdminRecipients();
-        return $this->notifier->getAdminRecipients()[$i] ?? null;
+
+        return $this->notifier instanceof SymfonyNotifier ? $this->notifier->getAdminRecipients()[$i] ?? null : null;
     }
 
     public function getAdminRecipients(): array
     {
         $this->initializeAdminRecipients();
-        return $this->notifier->getAdminRecipients();
+        return $this->notifier instanceof SymfonyNotifier ? $this->notifier->getAdminRecipients() : null;
     }
 
     /**
@@ -297,12 +299,17 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $adminUsers;
     }
 
-    public function getTechnicalRecipient(): RecipientInterface
+    public function getTechnicalRecipient(): Recipient
     {
         $defaultMail = mailparse($this->technicalRecipient->getEmail());
 
-        $mail = $this->settingBag->getScalar("base.settings.mail");
-        if (!$mail) {
+        try {
+            $mail = $this->settingBag->getScalar("base.settings.mail");
+        } catch (Exception $e) {
+            $mail = null;
+        }
+
+        if (!$mail && $this->getAdminRecipient() instanceof EmailRecipientInterface) {
             $mail = $this->getAdminRecipient()?->getEmail();
         }
         if (!$mail) {
@@ -312,8 +319,14 @@ abstract class BaseNotifier implements BaseNotifierInterface
             return new NoRecipient();
         }
 
+
         $mail = trim(explode("<", $mail)[1] ?? $mail, ">");
-        $mailName = $this->settingBag->getScalar("base.settings.mail.name");
+        try {
+            $mailName = $this->settingBag->getScalar("base.settings.mail.name");
+        } catch (Exception $e) {
+            $mailName = null;
+        }
+
         if(!$mailName) {
             $mailName = trim(explode("<", $mail)[0]);
         }
@@ -330,8 +343,13 @@ abstract class BaseNotifier implements BaseNotifierInterface
             ));
         }
 
-        $phone = $this->settingBag->getScalar("base.settings.phone");
-        if (!$phone) {
+        try {
+            $phone = $this->settingBag->getScalar("base.settings.phone");
+        } catch (Exception $e) {
+            $phone = null;
+        }
+
+        if (!$phone && $this->getAdminRecipient() instanceof SmsRecipientInterface) {
             $phone = $this->getAdminRecipient()?->getPhone();
         }
         if (!$phone) {
@@ -359,7 +377,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
      * @param Notification|null $notification
      * @return $this
      */
-    public function markAsAdmin(bool $markAsAdmin, Notification $notification = null)
+    public function markAsAdmin(bool $markAsAdmin, ?Notification $notification = null)
     {
         $this->markAsAdmin = $markAsAdmin;
 
@@ -406,16 +424,16 @@ abstract class BaseNotifier implements BaseNotifierInterface
         return $this;
     }
 
-    public function getRouter(): RouterInterface
+    public function getRouter(): AdvancedRouterInterface
     {
         return $this->router;
     }
 
     /**
-     * @param RouterInterface $router
+     * @param AdvancedRouterInterface $router
      * @return $this
      */
-    public function setRouter(RouterInterface $router)
+    public function setRouter(AdvancedRouterInterface $router)
     {
         $this->router = $router;
         return $this;
@@ -427,7 +445,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
      */
     public function getDefaultChannels(string $importance)
     {
-        return BaseService::getNotifier()->getPolicy()->getChannels($importance);
+        return $this->getPolicy()->getChannels($importance);
     }
 
     /**

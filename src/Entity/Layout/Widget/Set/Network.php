@@ -38,8 +38,9 @@ class Network extends Widget implements IconizeInterface, SetInterface
     }
 
     #[ORM\ManyToMany(targetEntity:Route::class, orphanRemoval:true, cascade:["persist"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy:"routePositions")]
     protected $routes;
+    protected $routePositions;
     public function getRoutes(): Collection
     {
         return $this->routes;

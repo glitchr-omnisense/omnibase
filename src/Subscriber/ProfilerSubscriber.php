@@ -2,7 +2,7 @@
 
 namespace Base\Subscriber;
 
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -16,11 +16,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ProfilerSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
-    public function __construct(RouterInterface $router)
+    public function __construct(AdvancedRouterInterface $router)
     {
         $this->router = $router;
     }

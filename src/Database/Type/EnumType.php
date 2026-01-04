@@ -129,19 +129,6 @@ abstract class EnumType extends Type implements SelectInterface
         return in_array($value, self::getPermittedValues($inheritance, true));
     }
 
-    public static function getOrderingKeys(array $array): array
-    {
-        $permittedValues = self::getPermittedValues();
-
-        $ordering = array_filter(
-            array_map(fn($a) => ($pos = array_search($a, $permittedValues)) !== false ? $pos : null, $array),
-            fn($c) => $c !== null
-        );
-
-        asort($ordering);
-        return $ordering;
-    }
-
     public static function getPermittedValues(bool $inheritance = true, bool $preserve_keys = false): array
     {
         $refl = new ReflectionClass(get_called_class());
@@ -230,11 +217,6 @@ abstract class EnumType extends Type implements SelectInterface
         }
 
         return $values;
-    }
-
-    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-    {
-        return true;
     }
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string

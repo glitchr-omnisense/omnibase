@@ -2,11 +2,11 @@
 
 namespace Base\Field\Type;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Form\FormFactoryInterface;
-use Base\Routing\RouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\FileService;
 use Base\Service\FileServiceInterface;
 use Base\Service\MediaService;
@@ -39,9 +39,9 @@ use Traversable;
 class FileType extends AbstractType implements DataMapperInterface
 {
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
-    protected RouterInterface $router;
+    protected AdvancedRouterInterface $router;
 
     /**
      * @var TranslatorInterface
@@ -99,7 +99,7 @@ class FileType extends AbstractType implements DataMapperInterface
         ClassMetadataManipulator  $classMetadataManipulator,
         CsrfTokenManagerInterface $csrfTokenManager,
         FormFactory               $formFactory,
-        RouterInterface           $router,
+        AdvancedRouterInterface           $router,
         MediaService              $mediaService,
         ObfuscatorInterface       $obfuscator,
         string                    $cacheDir
@@ -214,7 +214,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
                     "required" => $options["required"] && (!$options["allow_url"] && $data === null) && ($options["cropper"] ?? null) === null,
                     "multiple" => $options["multiple"],
-                    "constraints" => [new File(["max_size" => $maxFilesize, "mime_types" => $mimeTypes])],
+                    "constraints" => [new File($maxFilesize, $mimeTypes)],
                     "disabled" => !$options["allow_reupload"] && $data !== null
                 ]);
             }

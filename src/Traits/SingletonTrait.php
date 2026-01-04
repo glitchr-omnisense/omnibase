@@ -10,7 +10,7 @@ use Exception;
  */
 trait SingletonTrait
 {
-    private static $_instance = null;
+    protected static $_instance = null;
 
     protected function __construct()
     {

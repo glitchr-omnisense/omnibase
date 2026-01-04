@@ -7,6 +7,7 @@ use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use InvalidArgumentException;
+use LogicException;
 use Psr\Cache\CacheItemInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -30,7 +31,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  *
  */
-class AdvancedRouter extends Router implements RouterInterface
+class AdvancedRouter implements AdvancedRouterInterface
 {
     /**
      * @var Router
@@ -164,16 +165,16 @@ class AdvancedRouter extends Router implements RouterInterface
         return $this->debug;
     }
 
-    public function isBackend(mixed $request = null): bool
+    public function isAdmin(mixed $request = null): bool
     {
         return $this->isEasyAdmin($request) || $this->isProfiler($request);
     }
-
     public function isProfiler(mixed $request = null): bool
     {
         if (!$request) {
             $request = $this->requestStack->getCurrentRequest();
         }
+
         if ($request instanceof KernelEvent) {
             $request = $request->getRequest();
         } elseif ($request instanceof RequestStack) {
@@ -209,6 +210,32 @@ class AdvancedRouter extends Router implements RouterInterface
         return str_starts_with($route, "ux_");
     }
 
+    public function isAPI(mixed $request = null): bool
+    {
+        if (!$request) {
+            $request = $this->requestStack->getCurrentRequest();
+        }
+        if ($request instanceof KernelEvent) {
+            $request = $request->getRequest();
+        } elseif ($request instanceof RequestStack) {
+            $request = $request->getCurrentRequest();
+        } elseif (!$request instanceof Request) {
+            return false;
+        }
+
+        return str_starts_with($request->getPathInfo(), '/api');
+    }
+
+    public function isMainApplication(mixed $request = null): bool
+    {
+        if ($this->isProfiler($request)) return false;
+        if ($this->isEasyAdmin($request)) return false;
+        if ($this->isUX($request)) return false;
+        if ($this->isAPI($request)) return false;
+
+        return true;
+    }   
+    
     public function isSecured(mixed $request = null): bool
     {
         if (!$request) {
@@ -292,7 +319,8 @@ class AdvancedRouter extends Router implements RouterInterface
 
         if (filter_var($nameOrUrl, FILTER_VALIDATE_URL) || str_contains($nameOrUrl, "/")) {
             if (!str_contains($nameOrUrl, "://") && $referenceType == self::ABSOLUTE_URL) {
-                return $this->getScheme() . "://" . $this->getHost() . "/" . str_lstrip($this->getBaseDir(), "/") . str_lstrip($nameOrUrl, "/");
+
+                return compose_url(null, null, null, $this->getMachine(), $this->getSubdomain(), $this->getDomain(), $this->getPort(), $this->getBaseDir(), $nameOrUrl);
             }
 
             return $nameOrUrl;
@@ -367,7 +395,7 @@ class AdvancedRouter extends Router implements RouterInterface
     }
 
     //
-    // NB: Don't get confused, here. This route is not same as annotations and...
+    // NB: This route variable is not same as annotations and...
     // ... it is computed based on compiled routes from generator (not matcher)
     protected array $routes = [];
 
@@ -390,6 +418,7 @@ class AdvancedRouter extends Router implements RouterInterface
         $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName . "." . $lang] ?? null;
 
         if ($compiledRoute !== null) {
+
             $args = array_transforms(fn($k, $v): array => [$k, in_array($k, [3, 4]) ? $matcher->getCompiledPath($v) : $v], $compiledRoute);
             $locale = $args[1]["_locale"] ?? null;
             $locale = $locale ? ["_locale" => $locale] : [];
@@ -414,42 +443,6 @@ class AdvancedRouter extends Router implements RouterInterface
         return null;
     }
 
-    public function reducesOnFallback(?string $locale = null, ?string $environment = null): bool
-    {
-        $fallbacks = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale());
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocaleLang());
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", null) ?? [];
-
-        if ($environment) {
-            $fallbacks = array_filter($fallbacks, fn($h) => ($h["env"] ?? null) == $environment);
-        }
-
-        $fallback = first($fallbacks);
-        return $fallback["reduction"] ?? false;
-    }
-
-    protected function getFallbackParameters(?string $locale = null, ?string $environment = null): ?array
-    {
-        if (!$this->useFallbacks()) {
-            return null;
-        }
-
-        $fallbacks = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale());
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocaleLang());
-        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", null) ?? [];
-
-        if ($environment) {
-            $fallbacks = array_filter($fallbacks, fn($h) => ($h["env"] ?? null) == $environment);
-        }
-
-        $fallback = first($fallbacks);
-        return array_map(fn($h) => is_array($h) || $h === null ? $h : [$h], $fallback);
-    }
-
     public function getScheme(?string $locale = null, ?string $environment = null): string
     {
         $use_https ??= $_SERVER["REQUEST_SCHEME"] ?? true;
@@ -467,8 +460,80 @@ class AdvancedRouter extends Router implements RouterInterface
             $baseDir = $_SERVER['PHP_SELF'] ? dirname($_SERVER['PHP_SELF']) : null;
         }
 
-        $baseDir ??= first($host["base_dir"]) ?? "";
+        $baseDir ??= first($host["base_dir"] ?? []) ?? "";
         return $baseDir;
+    }
+
+    protected function getFallbackParameters(?string $locale = null, ?string $environment = null): ?array
+    {
+        if (!$this->useFallbacks()) {
+            return null;
+        }
+
+        $fallbacks   = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale());
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocaleLang());
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", null) ?? [];
+
+        if ($environment) {
+            $fallbacks = array_filter($fallbacks, fn($h) => ($h["env"] ?? null) == $environment);
+        }
+
+        $fallback = first($fallbacks);
+        $result = array_map(fn($h) => is_array($h) || $h === null ? $h : [$h], $fallback);
+
+        // Check if port needs replacement due to HTTP/HTTPS vs current scheme
+        if (isset($result['port'])) {
+            $scheme = $this->getScheme($locale, $environment);
+            $ports = is_array($result['port']) ? $result['port'] : [$result['port']];
+
+            // Get valid ports from $_SERVER if available, fallback to defaults
+            $validHttpPort = isset($_SERVER['HTTP_PORT']) ? \json_decode($_SERVER['HTTP_PORT'], true) : [80];
+            $validHttpsPort = isset($_SERVER['HTTPS_PORT']) ? \json_decode($_SERVER['HTTPS_PORT'], true) : [443];
+
+            // Filter out default ports for the current scheme
+            $filteredPorts = array_filter($ports, function ($port) use ($scheme, $validHttpPort, $validHttpsPort) {
+                $port = (int)$port;
+                if ($scheme === 'https') {
+                    return in_array($port, $validHttpsPort, true);
+                } elseif ($scheme === 'http') {
+                    return in_array($port, $validHttpPort, true);
+                }
+                return true;
+            });
+
+            // Pick the first valid port, or fallback to the first valid port for the scheme, or null
+            if (!empty($filteredPorts)) {
+                $result['port'] = $filteredPorts;
+            } else {
+                if ($scheme === 'https' && !empty($validHttpsPort)) {
+                    $result['port'] = $validHttpsPort;
+                } elseif ($scheme === 'http' && !empty($validHttpPort)) {
+                    $result['port'] = $validHttpPort;
+                } else {
+                    $result['port'] = $ports;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    public function reducesOnFallback(?string $locale = null, ?string $environment = null): bool
+    {
+        $fallbacks   = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale());
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocaleLang());
+        $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", null) ?? [];
+
+        if ($environment) {
+            $fallbacks = array_filter($fallbacks, fn($h) => ($h["env"] ?? null) == $environment);
+        }
+
+        $fallback = first($fallbacks);
+        return strtobool($fallback["reduction"] ?? $_SERVER["HTTP_REDUCTION"] ?? false);
     }
 
     public function getHostFallback(?string $locale = null, ?string $environment = null): string
@@ -484,15 +549,12 @@ class AdvancedRouter extends Router implements RouterInterface
         $domain = $host["domain"] ?? null;
         $domain = is_array($domain) && first($domain) != false ? first($domain) : "";
 
-        $port = $host["port"] ?? null;
-        $port = is_array($port) && first($port) != false && !in_array(first($port), [80, 443]) ? ":" . first($port) : "";
-
-        return $machine . $subdomain . $domain . $port;
+        return $machine . $subdomain . $domain ;
     }
 
     public function getHost(?string $locale = null, ?string $environment = null): string
     {
-        $host = compose_url(null, null, null, $this->getMachine(), $this->getSubdomain(), $this->getDomain(), $this->getPort());
+        $host = compose_url(null, null, null, $this->getMachine(), $this->getSubdomain(), $this->getDomain());
         return $host ?: $this->getHostFallback();
     }
 
@@ -504,7 +566,14 @@ class AdvancedRouter extends Router implements RouterInterface
     public function getPortFallback(?string $locale = null, ?string $environment = null): ?int
     {
         $portFallback = first($this->getPortFallbacks($locale, $environment));
-        $portFallback = in_array($portFallback ?? 80, [80, 443]) ? null : $portFallback;
+        $scheme = $this->getScheme($locale, $environment);
+
+        if ($scheme === 'https' && ($portFallback === null || $portFallback == 443)) {
+            return null;
+        }
+        if ($scheme === 'http' && ($portFallback === null || $portFallback == 80)) {
+            return null;
+        }
         return $portFallback ? intval($portFallback) : null;
     }
 
@@ -512,11 +581,27 @@ class AdvancedRouter extends Router implements RouterInterface
     {
         $parsedUrl = parse_url2(get_url());
         $port = $parsedUrl["port"] ?? null;
-        if (!in_array($port, $this->getPortFallbacks())) {
-            $port = $this->getPortFallback();
+        $scheme = $this->getScheme($locale, $environment);
+        
+        $fallbackPorts = $this->getPortFallbacks($locale, $environment);
+        if (count($fallbackPorts) && !in_array($port, $fallbackPorts, true)) {
+            $port = $this->getPortFallback($locale, $environment);
         }
 
-        return in_array($port ?? 80, [80, 443]) ? null : $port;
+        $httpsPorts = isset($_SERVER['HTTPS_PORT']) ? (array) json_decode($_SERVER['HTTPS_PORT'], true) : [443];
+        $httpPorts  = isset($_SERVER['HTTP_PORT'])  ? (array) json_decode($_SERVER['HTTP_PORT'],  true) : [80];
+
+        if ($port === null) {
+            if ($scheme === 'https') $port = first($httpsPorts) ?? 443;
+            else $port = first($httpPorts) ?? 80;
+        }
+
+        // Remove default ports for the scheme or if in the allowed list
+        if($scheme === 'https' && count($httpsPorts) && !in_array((int) $port, $httpsPorts, true)) $port = first($httpsPorts);
+        if($scheme === 'http'  && count($httpPorts)  && !in_array((int) $port, $httpPorts,  true)) $port = first($httpPorts);
+        if (in_array($port, [80, 443], true)) $port = null;
+
+        return (int) $port;
     }
 
     public function getMachineFallbacks(?string $locale = null, ?string $environment = null): array
@@ -563,7 +648,7 @@ class AdvancedRouter extends Router implements RouterInterface
 
     public function getDomainFallbacks(?string $locale = null, ?string $environment = null): array
     {
-        return $this->getFallbackParameters($locale, $environment)["domain"] ?? [];
+        return $this->getFallbackParameters($locale, $environment)["domain"] ?? ["localhost"];
     }
 
     public function getDomainFallback(?string $locale = null, ?string $environment = null): ?string

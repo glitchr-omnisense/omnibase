@@ -3,16 +3,23 @@
 namespace Base\DependencyInjection\Compiler\Pass;
 
 use Base\Database\Entity\EntityExtension;
+use Base\Database\Entity\EntityExtensionInterface;
 use Base\DependencyInjection\Compiler\AbstractPass;
+use Dom\Entity;
 
 /**
  *
  */
 class EntityExtensionPass extends AbstractPass
 {
-    public function taggedServiceIds(): string
+    public function serviceInterface(): ?string 
+    { 
+        return EntityExtensionInterface::class;
+    }
+
+    public function taggedServiceIds(): ?string
     {
-        return 'base.entity_extension';
+        return null;
     }
 
     public function classFqcn(): string

@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
-use Base\Database\Annotation\ColumnAlias;
+use Base\Database\Annotation\Alias;
 
 use Base\Database\Annotation\OrderColumn;
 use DateTimeInterface;
@@ -16,18 +16,17 @@ use Doctrine\Common\Collections\Collection;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\GenerateUuid;
-use Base\Annotations\Annotation\Timestamp;
-use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\Hierarchify;
+use Base\Database\Annotation\GenerateUuid;
+use Base\Database\Annotation\Timestamp;
+use Base\Database\Annotation\Slugify;
+use Base\Database\Annotation\Hierarchify;
 use Base\Database\Annotation\Cache;
 use Base\Database\Annotation\Trasheable;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
-use Base\Database\Traits\TrasheableTrait;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TrasheableTrait;
 use Base\Entity\Thread\Taxon;
 use Base\Service\Model\CacheableInterface;
 use Base\Service\Model\IconizeInterface;
@@ -38,6 +37,8 @@ use Base\Repository\ThreadRepository;
 use DateTime;
 
 use Base\Traits\CacheableTrait;
+use ApiPlatform\Metadata\ApiResource;
+use Base\Database\Entity\Extension\TranslatableAliasTrait;
 
 #[ORM\Entity(repositoryClass:ThreadRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -48,15 +49,14 @@ use Base\Traits\CacheableTrait;
 #[Hierarchify(null, separator: "/" )]
 #[Trasheable]
 
+#[ApiResource]
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface, CacheableInterface
 {
     use BaseTrait;
     use TrasheableTrait;
-    use TranslatableTrait;
-    use CacheableTrait {
-        CacheableTrait::__toKey as __toDefaultKey;
-    }
+    use TranslatableAliasTrait;
 
+    use CacheableTrait { CacheableTrait::__toKey as __toDefaultKey; }
     public function __toKey(mixed ...$variadic): string
     {
         $variadic[] = $this->getId();
@@ -92,6 +92,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         $this->owners = new ArrayCollection();
         $this->connexes = new ArrayCollection();
         $this->taxa = new ArrayCollection();
+        $this->translations = new ArrayCollection();
 
         $this->setParent($parent);
         $this->addOwner($owner);
@@ -334,8 +335,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy:"threads")]
-    #[OrderColumn]
+    #[OrderColumn(orderBy: "ownerPositions")]
     protected $owners;
+    protected $ownerPositions;
 
     /**
      * @param int $i
@@ -399,8 +401,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy:"threads", cascade:["persist"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy: "tagPositions")]
     protected $tags;
+    protected $tagPositions;
 
     /**
      * @return false|mixed|null
@@ -438,8 +441,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     #[ORM\ManyToMany(targetEntity:Taxon::class, inversedBy:"threads", cascade:["persist"])]
-    #[OrderColumn]
+    #[OrderColumn(orderBy:"taxonPositions")]
     protected $taxa;
+    protected $taxonPositions;
 
     public function getTaxa(): Collection
     {
@@ -474,13 +478,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return $this;
     }
 
-    #[ColumnAlias(column: "taxa")]
+    #[Alias(column: "taxa")]
     protected $taxons;
-
-    public function getTaxons(): Collection
-    {
-        return $this->taxons;
-    }
 
     #[ORM\OneToMany(targetEntity: Mention::class, mappedBy:"thread", orphanRemoval:true, cascade:["persist", "remove"])]
     protected $mentions;

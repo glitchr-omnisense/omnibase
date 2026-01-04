@@ -3,7 +3,8 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\Extension\ExtensionOptionInterface;
+use Base\Database\Entity\EntityExtension;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\Common\Annotations\Annotation\Target;
@@ -17,7 +18,7 @@ use Exception;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class DiscriminatorEntry extends AbstractAnnotation
+class DiscriminatorEntry extends AbstractAnnotation implements ExtensionOptionInterface
 {
     /** @Required */
     protected ?string $value;
@@ -70,10 +71,12 @@ class DiscriminatorEntry extends AbstractAnnotation
         $parentValue = null;
         $parentNamespace = null;
         if ($parentClassName = get_parent_class($className)) {
+
             $parentNamespace = explodeByArray("\\Entity\\", $parentClassName)[1] ?? null;
             $parentMetadata = $this->getAnnotationReader()->getAnnotations($parentClassName, $this);
-            $parentMetadata = $parentMetadata[AnnotationReader::TARGET_CLASS][$parentClassName];
+            $parentMetadata = $parentMetadata[EntityExtension::TARGET_CLASS][$parentClassName];
             if (($parentAttribute = $parentMetadata ? end($parentMetadata) : null)) {
+
                 $parentValue = $parentAttribute->getValue($parentClassName);
                 $parentValue = in_array($parentValue, ["abstract", "common"]) ? null : $parentValue;
             }
@@ -123,13 +126,14 @@ class DiscriminatorEntry extends AbstractAnnotation
         return empty($classMetadata->parentClasses) && count($classMetadata->discriminatorMap) > 0;
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, ?string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
         // Recompute the map discriminator
         $discriminatorValues = [];
         foreach ($classMetadata->discriminatorMap as $className) {
+
             $metadata = $this->getAnnotationReader()->getAnnotations($className, $this);
-            $metadata = $metadata[AnnotationReader::TARGET_CLASS][$className];
+            $metadata = $metadata[EntityExtension::TARGET_CLASS][$className];
             $metadata = $metadata ? end($metadata) : null;
             if ($metadata === null) {
                 throw new Exception("@DiscriminatorEntry metadata not found for \"" . $className . "\". Have you doom the cache ?");

@@ -100,7 +100,14 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $builder->add('plain', SymfonyPasswordType::class, array_merge([
             "label" => $options["label"] ?? $this->translator->trans("@fields.password.first"),
             "mapped" => true,
-            "constraints" => [new Password(["min_strength" => $options["min_strength"], "min_length" => $options["min_length"]])]
+            "constraints" => [new Password(
+                $options["require_uppercase"] ?? true,
+                $options["require_lowercase"] ?? true,
+                $options["require_numbers"] ?? true,
+                $options["require_specials"] ?? true,
+                $options["require_length"] ?? true,
+                $options["min_strength"],
+                $options["min_length"])]
         ], $options["options"]));
 
         if ($options["repeater"]) {

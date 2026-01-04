@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Controller\Backend\AbstractCrudController;
+use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Type\EnumType;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
@@ -26,6 +26,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Extension\AbstractExtension;
+use Twig\Extension\CoreExtension;
 use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -76,6 +77,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('excerpt', [$this, 'excerpt'], ['is_safe' => ['all']]),
             new TwigFunction('get_class', [$this, 'get_class']),
             new TwigFunction('is_json', 'is_json'),
+            new TwigFunction('is_string', 'is_string'),
             new TwigFunction('is_linkable', [$this, 'is_linkable']),
             new TwigFunction('is_countable', [$this, 'is_countable']),
             new TwigFunction('is_callable', [$this, 'is_callable']),
@@ -93,9 +95,9 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('render_stylesheet', [$this, 'render_stylesheet'], ['is_safe' => ['all']]),
             new TwigFunction('render_javascript', [$this, 'render_javascript'], ['is_safe' => ['all']]),
 
-            new TwigFunction('str_starts_with', 'str_starts_with'),
-            new TwigFunction('str_ends_with', 'str_ends_with'),
-            new TwigFunction('empty', 'empty'),
+            new TwigFunction('str_starts_with', fn(string $haystack, string $needle): bool => str_starts_with($haystack, $needle)),
+            new TwigFunction('str_ends_with', fn(string $haystack, string $needle): bool => str_starts_with($haystack, $needle)),
+            new TwigFunction('empty', fn( mixed $var): bool => empty($var)),
             new TwigFunction('property_accessor', [$this, 'property_accessor']),
             new TwigFunction('cast', 'cast'),
 
@@ -151,7 +153,6 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('array_flatten', [$this, 'array_flatten']),
                 new TwigFilter('less_than', [$this, 'less_than']),
                 new TwigFilter('greater_than', [$this, 'greater_than']),
-                new TwigFilter('filter', [$this, 'filter'], ['needs_environment' => true]),
                 new TwigFilter('transforms', [$this, 'transforms'], ['needs_environment' => true]),
                 new TwigFilter('pad', [$this, 'pad']),
                 new TwigFilter('mb_ucfirst', 'mb_ucfirst'),
@@ -191,7 +192,7 @@ final class FunctionTwigExtension extends AbstractExtension
                 ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
                 ->setEntityId($entity->getId())
                 ->setAction(Crud::PAGE_EDIT)
-                ->includeReferrer()
+                //->includeReferrer()
                 ->generateUrl(),
         ]);
     }
@@ -336,24 +337,6 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         return null;
-    }
-
-    /**
-     * @param Environment $env
-     * @param $array
-     * @param $arrow
-     * @return array|\CallbackFilterIterator
-     * @throws RuntimeError
-     */
-    public function filter(Environment $env, $array = [], $arrow = null)
-    {
-        if (null === $arrow) {
-            $arrow = function ($el) {
-                return null !== $el && false !== $el && '' !== $el;
-            };
-        }
-
-        return twig_array_filter($env, $array, $arrow);
     }
 
     /**

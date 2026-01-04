@@ -4,6 +4,8 @@ namespace Base\Annotations;
 
 use App\Entity\User;
 use Base\Database\Entity\EntityHydratorInterface;
+use Base\Database\Event\DoctrineQueryEventArgs;
+use Base\Database\Event\ResolveDiscriminatorEventArgs;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\FlysystemInterface;
@@ -46,14 +48,6 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getEnvironment(): string
     {
         return AnnotationReader::getInstance()->getEnvironment();
-    }
-
-    /**
-     * @return mixed
-     */
-    public static function getService()
-    {
-        return AnnotationReader::getInstance()->getService();
     }
 
     /**
@@ -321,7 +315,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $fields = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
-        return AnnotationReader::getInstance()->getEntityHydrator()->hydrate($classname, array_merge($fields, $associations));
+        return object_hydrate(new $classname, array_merge($fields, $associations));
     }
 
     /**
@@ -402,7 +396,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getFieldValue($entity, string $property)
     {
-        return self::getClassMetadataManipulator()->getFieldValue($entity, $property);
+	return self::getClassMetadataManipulator()->getFieldValue($entity, $property);
     }
 
     /**
@@ -447,13 +441,27 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return self::getClassMetadataManipulator()->setPropertyValue($entity, $property, $value);
     }
 
-    abstract public function supports(string $target, ?string $targetValue = null, mixed $object = null): bool;
-
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
     }
 
-    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function resolveDiscriminator(ResolveDiscriminatorEventArgs $args): void
+    {
+    }
+
+    public function preQuery(DoctrineQueryEventArgs $args): void
+    {
+    }
+
+    public function onQuery(DoctrineQueryEventArgs $args): void
+    {
+    }
+    
+    public function postQuery(DoctrineQueryEventArgs $args): void
+    {
+    }
+
+    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
     {
     }
 

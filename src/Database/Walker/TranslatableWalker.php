@@ -3,20 +3,21 @@
 namespace Base\Database\Walker;
 
 use Base\Database\Mapping\NamingStrategy;
-use Base\Database\TranslatableInterface;
-use Base\Database\TranslationInterface;
+use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Entity\Extension\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;
 use Base\Service\Localizer;
 use Doctrine\ORM\Query\QueryException;
-use Doctrine\ORM\Query\SqlWalker;
+use Doctrine\ORM\Query\OutputWalker;
 use Doctrine\ORM\Query\AST;
 use RuntimeException;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\Query\SqlOutputWalker;
 
 /**
  *
  */
-class TranslatableWalker extends SqlWalker
+class TranslatableWalker extends SqlOutputWalker implements OutputWalker
 {
     /**
      * @var Localizer

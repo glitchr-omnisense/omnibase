@@ -4,23 +4,20 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\Extension\ExtensionInlineInterface;
 use Base\Database\Common\Collections\OrderedArrayCollection;
-use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Type\SetType;
-use Base\Entity\Extension\Ordering;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-use Base\Enum\EntityAction;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\ArrayType;
 use Doctrine\DBAL\Types\JsonType;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
-use Doctrine\ORM\PersistentCollection;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Exception;
+use Doctrine\DBAL\Types\StringType;
+use Doctrine\ORM\PersistentCollection;
 use ReflectionProperty;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -31,16 +28,17 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
+class OrderColumn extends AbstractAnnotation implements ExtensionInlineInterface
 {
     public const ASC = "ASC";
     public const DESC = "DESC";
 
-    public string $order;
-
-    public function __construct(string $order = self::ASC)
-    {
-        $this->order = $order;
+    public ?string $orderBy;
+    public string $type;
+    public function __construct(?string $orderBy = null, string $type = self::ASC)
+    {  
+        $this->orderBy = $orderBy;
+        $this->type    = $type;
     }
 
     /**
@@ -53,207 +51,172 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         if ($object instanceof ClassMetadata) {
+
+            // field/type checks
             $type = $this->getClassMetadataManipulator()->getTypeOfField($object, $targetValue);
             $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
 
-            $isArray = is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, JsonType::class);
+            $isSet    = is_instanceof($doctrineType, SetType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
-            $isSet = is_instanceof($doctrineType, SetType::class);
 
-            if (!$isSet && !$isArray && !$isToMany) {
+            if (!$isSet && !$isToMany) {
                 return false;
             }
 
+            // Disallow using both @OrderColumn and @OrderBy?
             $siblingAnnotations = $this->getAnnotationReader()->getPropertyAnnotations($object->getName(), OrderBy::class);
             if (array_key_exists($targetValue, $siblingAnnotations)) {
-                throw new Exception("@OrderBy metadata is in conflict with @OrderColum for \"" . $object->getName() . "::$targetValue\"");
+                throw new Exception(
+                    "@OrderBy metadata conflicts with @OrderColumn for \"" 
+                    . $object->getName() . "::$targetValue\""
+                );
             }
         }
 
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target === AnnotationReader::TARGET_PROPERTY);
     }
 
-    public static array $orderedColumns = [];
-
-    public static function get(): array
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
-        return self::$orderedColumns;
-    }
+        if (!$this->supports($target, $targetValue, $classMetadata)) return;
 
-    public static function has(string $className, ?string $property = null): bool
-    {
-        return isset(self::$orderedColumns[$className]) && in_array($property, self::$orderedColumns[$className]);
-    }
+        // For associations/set, orderBy is mandatory and must be JSON or string
+        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $targetValue);
+        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
+        $isSet    = is_instanceof($doctrineType, SetType::class);
+        $isToMany = $this->getClassMetadataManipulator()->isToManySide($classMetadata, $targetValue);
+    
+        if ($isSet || $isToMany) {
 
-    protected array $ordering = [];
+            if (!$this->orderBy) {
+                throw new Exception("The '".$classMetadata->name."::orderBy' field is mandatory for association '{$targetValue}'.");
+            }
 
-    /**
-     * @param mixed $entity
-     * @return array
-     * @throws Exception
-     */
-    public function getOrderedColumns(mixed $entity)
-    {
-        $orderedColumns = [];
-        foreach (self::$orderedColumns as $column) {
-            list($className, $_) = explode("::", $column);
-            if (is_instanceof($entity, $className)) {
-                $orderedColumns[] = $column;
+            $orderByType = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $this->orderBy);
+            if(!$orderByType) $orderByType = "json";
+
+            // Check if orderBy is mapped as JSON or string
+            $doctrineOrderByType = $this->getClassMetadataManipulator()->getDoctrineType($orderByType);
+            if($doctrineOrderByType === null) return;
+
+            $isJson = is_instanceof($doctrineOrderByType, JsonType::class) || $doctrineOrderByType === 'json' || $doctrineOrderByType === JsonType::class;
+            $isString = is_instanceof($doctrineOrderByType, StringType::class) || $doctrineOrderByType === 'string' || $doctrineOrderByType === StringType::class;
+            if (!$isJson && !$isString) {
+                throw new Exception("The '".$classMetadata->name."::orderBy' field '{$this->orderBy}' must be of type JSON or string for association '{$targetValue}'.");
+            }
+
+            // Map the orderBy column if not already mapped
+            if (!$classMetadata->hasField($this->orderBy)) {
+                $classMetadata->mapField([
+                    'fieldName' => $this->orderBy,
+                    'type' => $orderByType,
+                    'nullable' => true
+                ]);
             }
         }
-
-        return $orderedColumns;
     }
-
-    public function addOrderedColumnIfNotSet(ClassMetadata $classMetadata, ?string $property = null)
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
-        $className = $classMetadata->getReflectionProperty($property)->getDeclaringClass()->getName();
-        if (!in_array($className . "::" . $property, self::$orderedColumns)) {
-            self::$orderedColumns[] = $className . "::" . $property;
+        // For associations/set, orderBy is mandatory and must be JSON or string
+        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $property);
+        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
+        $isSet    = is_instanceof($doctrineType, SetType::class);
+        $isToMany = $this->getClassMetadataManipulator()->isToManySide($classMetadata, $property);
+        if (!$isSet && !$isToMany) {
+            return;
         }
-    }
 
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
-    {
         $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
-        $this->addOrderedColumnIfNotSet($classMetadata, $property);
+        $reflProp = new ReflectionProperty($classMetadata->name, $property);
+        $reflProp->setAccessible(true);
+        if (!$reflProp->isInitialized($entity)) {
+            return; // skip if the property is not initialized
+        }
 
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $orderingRepository = $this->getRepository(Ordering::class);
+        if($isToMany) $orderBy = $reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray();
+        else $orderBy = array_keys($doctrineType->getOrderingKeys($reflProp->getValue($entity)));
 
-        $className = array_transforms(function ($k, $e) use ($property): ?array {
-            list($c, $p) = explode("::", $e);
-            return $p === $property ? [$k, $c] : null;
-        }, $this->getOrderedColumns($entity));
+        $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
+        object_hydrate($entity, [$this->orderBy => json_encode($orderBy)]);
+    }
 
-        $className = first($className);
-        if ($className === null) {
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
+    {
+        // For associations/set, orderBy is mandatory and must be JSON or string
+        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $property);
+        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
+        $isSet    = is_instanceof($doctrineType, SetType::class);
+        $isToMany = $this->getClassMetadataManipulator()->isToManySide($classMetadata, $property);
+        if (!$isSet && !$isToMany) {
             return;
         }
 
+        $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
+        $reflProp = new ReflectionProperty($classMetadata->name, $property);
+        $reflProp->setAccessible(true);
+        if (!$reflProp->isInitialized($entity)) {
+            return; // skip if the property is not initialized
+        }
+
+        if($isToMany) $orderBy = $reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray();
+        else $orderBy = array_keys($doctrineType->getOrderingKeys($reflProp->getValue($entity)));
+
+        if(\is_identity($orderBy)) $orderBy = []; // avoid serializing large arrays of integers
+
+        $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
+        object_hydrate($entity, [$this->orderBy => json_encode($orderBy)]);
+
+        $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+    }
+
+    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
+    {
+         // For associations/set, orderBy is mandatory and must be JSON or string
+        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $property);
+        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
+        $isSet    = is_instanceof($doctrineType, SetType::class);
+        $isToMany = $this->getClassMetadataManipulator()->isToManySide($classMetadata, $property);
+        if (!$isSet && !$isToMany) {
+            return;
+        }
+
+        $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
+        try { $entityValue = $classMetadata->getFieldValue($entity, $property) ?? []; }
+        catch (Exception $e) { return; }
+        
+        $reflProp = new ReflectionProperty($classMetadata->name, $this->orderBy);
+        $reflProp->setAccessible(true);
+
+        $orderingValue = $reflProp->getValue($entity);
         try {
-            $entityValue = $classMetadata->getFieldValue($entity, $property);
-        } catch (Exception $e) {
-            return;
-        }
 
-        $shift = 0;
-        $orderedIndexes = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
-        $orderedIndexes = $orderedIndexes?->getEntityData()[$property] ?? [];
-        $orderedIndexes = array_transforms(function ($k, $v) use (&$shift): ?array {
-            if (is_int($v)) {
-                return [$k - $shift, $v];
+            if (is_string($orderingValue)) {
+                // throw exception on invalid JSON
+                $decoded = json_decode($orderingValue, true, 512, JSON_THROW_ON_ERROR);
+                $orderBy = is_array($decoded) ? $decoded : [];
+            } else {
+                $orderBy = [];
             }
 
-            $shift++;
-            return null;
-        }, array_values($orderedIndexes));
-
-        if (!$entityValue) {
-            $entityValue = [];
+        } catch (\JsonException $e) {
+            // fallback on parse error
+            $orderBy = [];
         }
-        $nEntries = $entityValue instanceof Collection ? $entityValue->count() : count($entityValue ?? []);
-        while (count($orderedIndexes) < $nEntries) {
-            $orderedIndexes[] = count($orderedIndexes);
-        }
-
-        if (is_array($entityValue)) {
-            $entityValue = array_flip(array_transforms(fn($k, $v): array => [$entityValue[$k], $v], $orderedIndexes));
-            ksort($entityValue);
-
-            if ($this->order == "DESC") {
-                $entityValue = array_reverse($entityValue);
-            }
-
-            $propertyAccessor->setValue($entity, $property, $entityValue);
-        } elseif ($entityValue instanceof PersistentCollection && $entityValue->getOwner() == $entity) {
-            $orderedIndexes = $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes;
+        
+        $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
+        if ($entityValue instanceof PersistentCollection && $entityValue->getOwner() == $entity) {
 
             $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
             $reflProp->setAccessible(true);
-            $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap() ?? [], $orderedIndexes));
-        }
-    }
+            $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue ?? [], $orderBy));
 
-    public function payload(string $action, string $className, array $properties, object $entity): array
-    {
-        $cache = $this->getEntityManager()->getCache();
-        $orderingRepository = $this->getEntityManager()->getRepository(Ordering::class);
-        $classMetadataManipulator = $this->getClassMetadataManipulator();
+        } else {
 
-        $id = spl_object_id($entity);
-        switch ($action) {
-            case EntityAction::INSERT:
-            case EntityAction::UPDATE:
-
-                $propertyAccessor = PropertyAccess::createPropertyAccessor();
-
-                $data = [];
-                foreach ($properties as $property) {
-                    //NB: Evict in AbstractExtension doesn't seems to be working.. TBC
-                    if ($cache) {
-                        $cache->evictEntity($className, $entity->getId());
-                        if ($this->getClassMetadata($className)->hasAssociation($property)) {
-                            $cache->evictCollection($className, $property, $entity->getId());
-                        }
-                    }
-
-                    $value = $propertyAccessor->getValue($entity, $property);
-                    if ($classMetadataManipulator->hasField($className, $property) && !$classMetadataManipulator->hasAssociation($className, $property)) {
-                        $fieldType = $classMetadataManipulator->getTypeOfField($className, $property);
-                        $doctrineType = $classMetadataManipulator->getDoctrineType($fieldType);
-
-                        if ($classMetadataManipulator->isSetType($doctrineType)) {
-                            $data[$property] = array_values(array_flip($doctrineType::getOrderingKeys($value)));
-                        }
-                    } elseif ($value instanceof Collection) {
-                        $data[$property] = $value->toArray();
-                        $nData = count($data[$property]);
-
-                        $dataIdentifier = array_filter(array_map(fn($e) => $e->getId(), $data[$property]));
-                        uasort($dataIdentifier, fn($a, $b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1)));
-
-                        $data[$property] = array_flip($dataIdentifier);
-                        ksort($data[$property]);
-
-                        $data[$property] = array_pad(array_values($data[$property]), $nData, null);
-                    }
-
-                    if (array_key_exists($property, $data) && is_identity(array_filter($data[$property]))) {
-                        unset($data[$property]);
-                    }
-                }
-
-                if (!array_key_exists($className, $this->ordering)) {
-                    $this->ordering[$className] = [];
-                }
-
-                $this->ordering[$className][$id] ??= $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
-                if ($this->ordering[$className][$id] !== null && empty($data)) {
-                    $this->ordering[$className][$id]->setEntityData([]);
-
-                    $orderingId = $this->ordering[$className][$id]->getId();
-                    if ($orderingId) {
-                        $cache->evictEntity(Ordering::class, $orderingId);
-                    }
-                } elseif (!empty($data)) {
-                    $this->ordering[$className][$id] ??= new Ordering();
-                    $this->ordering[$className][$id]->setEntityData($data);
-
-                    $orderingId = $this->ordering[$className][$id]->getId();
-                    if ($orderingId) {
-                        $cache->evictEntity(Ordering::class, $orderingId);
-                    }
-                }
-
-            // no break
-            case EntityAction::DELETE:
-                break;
-
-            default:
-                throw new Exception("Unknown action \"$action\" passed to " . __CLASS__);
+            $entityValue = array_values(usort_key($entityValue, $orderBy));
+            $propertyAccessor = PropertyAccess::createPropertyAccessor();
+            $propertyAccessor->setValue($entity, $property, $entityValue);
+            object_hydrate($entity, [$this->orderBy => json_encode([])]);
         }
 
-        return isset($this->ordering[$className][$id]) ? [$this->ordering[$className][$id]] : [];
     }
 }

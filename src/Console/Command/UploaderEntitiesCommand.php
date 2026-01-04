@@ -2,7 +2,7 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\Uploader;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
 use League\Flysystem\FileAttributes;
@@ -169,7 +169,7 @@ class UploaderEntitiesCommand extends Command
         $path = "";
         if(str_starts_with($namespace, "App\Entity")) {
         
-            $path = BaseBundle::getBundleLocation()."/src/Entity";
+            $path = BaseBundle::getInstance()->getBundleLocation()."/src/Entity";
         
         } else if(str_starts_with($namespace, "Base\Entity")) {
         
@@ -188,7 +188,7 @@ class UploaderEntitiesCommand extends Command
         }
 
         $path = $path."/".($this->entityName ? str_replace("\\", "/", $this->entityName).".php" : "");
-        $classes = BaseBundle::getAllClasses($path, "");
+        $classes = BaseBundle::getInstance()->getAllClasses($path, "");
 
         $metadataClasses = [];
         foreach ($classes as $class) {

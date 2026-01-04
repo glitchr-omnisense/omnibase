@@ -19,24 +19,24 @@ use Doctrine\Common\Annotations\Annotation\Target;
 class Route extends \Symfony\Component\Routing\Attribute\Route
 {
     public function __construct(
-        string|array    $path = null,
-        private ?string $name = null,
-        private array   $requirements = [],
-        private array   $options = [],
-        private array   $defaults = [],
-        private ?string $host = null,
-        private ?string $domain = null,
-        private ?string $subdomain = null,
-        private ?string $machine = null,
-        array|string    $methods = [],
-        array|string    $schemes = [],
-        private ?string $condition = null,
-        private ?int    $priority = null,
-        string          $locale = null,
-        string          $format = null,
-        bool            $utf8 = null,
-        bool            $stateless = null,
-        private ?string $env = null
+        string|array|null $path = null,
+        ?string           $name = null,
+        array             $requirements = [],
+        array             $options = [],
+        array             $defaults = [],
+        ?string           $host = null,
+        ?string           $domain = null,
+        ?string           $subdomain = null,
+        ?string           $machine = null,
+        array|string      $methods = [],
+        array|string      $schemes = [],
+        ?string           $condition = null,
+        ?int              $priority = null,
+        ?string           $locale = null,
+        ?string           $format = null,
+        ?bool             $utf8 = null,
+        ?bool             $stateless = null,
+        ?string           $env = null
     )
     {
         $parsedUrl = parse_url2($host ?? "");

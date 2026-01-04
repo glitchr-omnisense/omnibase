@@ -21,7 +21,7 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
         $this->warmUp($cacheDir, $buildDir);
     }
 
-    public function warmUp(string $cacheDir, ?string $buildDir = null): bool
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $this->contents = $this->getCache("/Contents", function () {
             if (!file_exists($this->metadata)) {
@@ -41,7 +41,7 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
             return [];
         });
 
-        return true;
+        return [];
     }
 
     protected string $version;

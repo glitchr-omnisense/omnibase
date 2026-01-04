@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Annotations\Annotation\Slugify;
+use Base\Database\Annotation\Slugify;
 use Base\Service\Model\LinkableInterface;
 use Base\Traits\BaseTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;

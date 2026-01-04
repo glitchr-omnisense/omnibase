@@ -12,5 +12,5 @@ use Doctrine\Common\Annotations\Annotation;
 #[\Attribute]
 class AlphanumericPlus extends Constraint
 {
-    public $message = 'alphanumeric_plus';
+    public string $message = 'alphanumeric_plus';
 }

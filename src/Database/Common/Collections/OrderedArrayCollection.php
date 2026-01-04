@@ -6,6 +6,8 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\ReadableCollection;
+use Doctrine\Common\Collections\Selectable;
 use Traversable;
 
 /**
@@ -14,292 +16,240 @@ use Traversable;
 class OrderedArrayCollection extends ArrayCollection
 {
     /**  * @var array */
-    protected array $ordering;
-
-    public function __construct(ArrayCollection|array $array = [], array $ordering = [])
+    protected array $positions;
+    // NB: position is not called in clear(), add(), remove() or removeElement(); it is computed only when in reorder()
+    //     it would not remember in such case.
+    
+    public function __construct(Collection|array $array = [], array $positions = [])
     {
-        parent::__construct($array instanceof ArrayCollection ? $array->toArray() : $array);
+        if($array instanceof Collection) object_hydrate($this, $array);
+        else parent::__construct($array);
 
-        $this->ordering = $ordering;
+        $this->positions = $positions;
     }
 
     /**
      * @return array
      */
-    public function getOrdering()
+    public function getPositions()
     {
-        return $this->ordering;
+        return $this->positions;
     }
 
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
-    public function applyOrdering()
+    public function reorder()
     {
-        if (!is_identity($this->ordering)) {
-
-            $elements = parent::toArray();
-            uksort($elements, fn($a, $b) => $elements[$a]->getId() <=> $elements[$b]->getId());
-
-            if (empty($elements)) {
-                return $this;
-            }
-
-            if (count($elements) < count($this->ordering)) {
-                $elements = array_pad($elements, count($this->ordering), null);
-            }
-
-            $values = array_values($elements);
-            $elements = usort_key($values, $this->ordering);
-            $elements = array_filter($elements, fn($e) => $e !== null);
-
-            parent::clear();
-            foreach ($elements as $element) {
-                parent::add($element);
-            }
-
-            $this->ordering = array_keys(parent::toArray());
+        if (empty($this->positions)) {
+            return $this;
         }
 
+        $elements = parent::toArray();
+        $positionMap = array_flip($this->positions);
+
+        // sort by the map (unknown ids go to the end)
+        usort($elements, function($a, $b) use ($positionMap) {
+            $posA = $positionMap[$a->getId()] ?? PHP_INT_MAX;
+            $posB = $positionMap[$b->getId()] ?? PHP_INT_MAX;
+            return $posA <=> $posB;
+        });
+
+        $this->clear();
+        foreach ($elements as $element) {
+            $this->add($element);
+        }
+
+        $this->positions = [];
         return $this;
     }
 
     public function toArray(): array
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::toArray();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function first(): mixed
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::first();
     }
 
+    protected function createFrom(array $elements): static 
+    {
+        $this->reorder();
+        return parent::createFrom($elements);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function last(): mixed
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::last();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function key(): int|string|null
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::key();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function next(): mixed
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::next();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function current(): mixed
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::current();
     }
 
     /**
-     * @param $key
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function remove($key): mixed
+    public function offsetExists(mixed $offset): bool
     {
-        $this->applyOrdering();
-        return parent::remove($key);
-    }
-
-    /**
-     * @param $element
-     * @return bool
-     */
-    public function removeElement($element): bool
-    {
-        $this->applyOrdering();
-        return parent::removeElement($element);
-    }
-
-    /**
-     * @param $offset
-     * @return bool
-     */
-    public function offsetExists($offset): bool
-    {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::offsetExists($offset);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function offsetGet(mixed $offset): mixed
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::offsetGet($offset);
     }
 
     /**
-     * @param $offset
-     * @param $value
-     * @return void
+     * {@inheritDoc}
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
-        $this->applyOrdering();
+        $this->reorder();
         parent::offsetSet($offset, $value);
     }
 
     /**
-     * @param $offset
-     * @return void
+     * {@inheritDoc}
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
-        $this->applyOrdering();
+        $this->reorder();
         parent::offsetUnset($offset);
     }
 
     /**
-     * @param $key
-     * @return bool
+     * {@inheritDoc}
      */
-    public function containsKey($key): bool
+    public function indexOf($element): string|int|false
     {
-        $this->applyOrdering();
-        return parent::containsKey($key);
-    }
-
-    /**
-     * @param $element
-     * @return bool
-     */
-    public function contains($element): bool
-    {
-        $this->applyOrdering();
-        return parent::contains($element);
-    }
-
-    public function exists(Closure $p): bool
-    {
-        $this->applyOrdering();
-        return parent::exists($p);
-    }
-
-    /**
-     * @param $element
-     * @return int|string|bool
-     */
-    public function indexOf($element): int|string|bool
-    {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::indexOf($element);
     }
 
     /**
-     * @param $key
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function get($key): mixed
+    public function get(string|int $key): mixed
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::get($key);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getKeys(): array
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::getKeys();
     }
 
-    public function getValues(): array
+    /**
+     * {@inheritDoc}
+     */
+    public function getValues(): array 
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::getValues();
     }
 
-    /**
-     * @param $key
-     * @param $value
-     * @return void
-     */
-    public function set($key, $value): void
+    public function set(string|int $key, mixed $value): void
     {
-        $this->applyOrdering();
+        $this->reorder();
         parent::set($key, $value);
-    }
-
-    public function count(): int
-    {
-        $this->applyOrdering();
-        return parent::count();
-    }
-
-    public function isEmpty(): bool
-    {
-        $this->applyOrdering();
-        return parent::isEmpty();
     }
 
     public function getIterator(): Traversable
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::getIterator();
     }
 
-    public function map(Closure $func): static
+    public function map(Closure $func): static 
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::map($func);
+    }
+
+    public function reduce(Closure $func, $initial = null): mixed
+    {
+        $this->reorder();
+        return parent::reduce($func, $initial);
     }
 
     public function filter(Closure $p): static
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::filter($p);
+    }
+
+    public function findFirst(Closure $p): mixed
+    {
+        $this->reorder();
+        return parent::findFirst($p);
     }
 
     public function forAll(Closure $p): bool
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::forAll($p);
     }
 
     public function partition(Closure $p): array
     {
-        $this->applyOrdering();
-        return parent::partition($p);
+        $this->reorder();
+        return parent::partition($p);   
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function slice(int $offset, int|null $length = null): array
     {
-        $this->applyOrdering();
-        return parent::__toString();
-    }
-
-    public function clear(): void
-    {
-        $this->applyOrdering();
-        parent::clear();
-    }
-
-    /**
-     * @param $offset
-     * @param $length
-     * @return array|mixed[]
-     */
-    public function slice($offset, $length = null): array
-    {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::slice($offset, $length);
     }
 
-    public function matching(Criteria $criteria): Collection
+    public function matching(Criteria $criteria): ReadableCollection&Selectable
     {
-        $this->applyOrdering();
+        $this->reorder();
         return parent::matching($criteria);
     }
 }
