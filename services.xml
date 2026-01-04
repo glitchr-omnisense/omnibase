@@ -20,6 +20,7 @@
         <service id="Base\Service\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="advanced_router" />
+            <argument type="service" id="localizer" />
         </service>
 
         <service id="Base\Console\Command\CacheClearSessionsCommand" parent="Base\Console\Command" public="true">
