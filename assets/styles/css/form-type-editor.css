@@ -26,6 +26,8 @@
 }
 
 .read-only .cdx-button { display:none; }
+.read-only .ce-popover { display:none; }
+.ce-inline-tool { height:38px; }
 .ce-inline-toolbar, .ce-toolbar
 {
     color:#222;

@@ -59,8 +59,7 @@ function edjs(inputEl, holderId, value = {}, options = {})
 
     holder.innerHTML = ""; // delete existing editorjs instance
 
-    var options  = {};
-    if(holder) JSON.parse(holder.getAttribute("data-editor-options")) || {};
+    var options  = JSON.parse(holder.getAttribute("data-editor-options")) || {};
 
     var endpointByFile    = holder.getAttribute("data-editor-upload-file") || undefined;
     var endpointByUrl     = holder.getAttribute("data-editor-upload-url")  || undefined;

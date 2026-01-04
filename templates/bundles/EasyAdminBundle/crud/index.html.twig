@@ -157,6 +157,7 @@
 
                         {% block entity_actions %}
                             <td class="actions {{ ea.crud.showEntityActionsAsDropdown ? 'actions-as-dropdown' }}">
+                            <div class="action-inline">
                                 {% if entity.actions.count > 0 %}
                                     {% if ea.crud.showEntityActionsAsDropdown %}
                                         {% set hasAnyActionWithIcon = entity.actions|filter(item => item.isActionGroup ? false : item.icon is not null)|length > 0 %}
@@ -196,6 +197,7 @@
                                         {% endfor %}
                                     {% endif %}
                                 {% endif %}
+                            </div>
                             </td>
                         {% endblock entity_actions %}
                     </tr>

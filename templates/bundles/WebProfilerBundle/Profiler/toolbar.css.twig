@@ -176,13 +176,14 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
 .sf-toolbar-info { table-layout: fixed; }
 
 
-.sf-toolbar-info .sf-toolbar-info-piece:first-child > *:first-child { border-top-left-radius: 1em; }
-.sf-toolbar-info .sf-toolbar-info-piece:first-child > *:last-child { border-top-right-radius: 1em; }
-.sf-toolbar-info .sf-toolbar-info-piece:last-child > *:first-child { border-bottom-left-radius: 1em; }
-.sf-toolbar-info .sf-toolbar-info-piece:last-child > *:last-child { border-bottom-right-radius: 1em; }
+.sf-toolbar-info .sf-toolbar-info-piece:first-child > *:first-child { border-top-left-radius: 0.8em; }
+.sf-toolbar-info .sf-toolbar-info-piece:first-child > *:last-child { border-top-right-radius: 0.8em; }
+.sf-toolbar-info .sf-toolbar-info-piece:last-child > *:first-child { border-bottom-left-radius: 0.8em; }
+.sf-toolbar-info .sf-toolbar-info-piece:last-child > *:last-child { border-bottom-right-radius: 0.8em; }
 
 .sf-toolbar-info .sf-toolbar-info-piece > *:last-child { 
     line-height: 1.9;
+    padding: 0.25em 1em 0.25em 1em;
 }
 
 .sf-toolbar-block-right .sf-toolbar-info { margin-right: 8em !important; }
@@ -190,9 +191,6 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
 .sf-toolbar-info .sf-toolbar-info-piece > *:first-child
 {
     padding: 0.25em 0.5em 0.25em 1em;
-}
-.sf-toolbar-info .sf-toolbar-info-piece > *:last-child { 
-    padding: 0.25em 1em 0.25em 0.5em;
 }
 .sf-toolbar-info .sf-toolbar-info-piece:first-child > *:first-child { 
     padding-top: 0.75em !important;
@@ -204,7 +202,7 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
     padding-top: 0.75em !important;
     padding-right: 1em !important;
     padding-bottom: 0.5em;
-    padding-left: 0.5em;
+    padding-left: 1em;
 }
 .sf-toolbar-info .sf-toolbar-info-piece:last-child > *:first-child { 
     padding-bottom: 0.75em !important;
@@ -215,7 +213,7 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
 .sf-toolbar-info .sf-toolbar-info-piece:last-child > *:last-child { 
     padding-bottom: 0.75em !important;
     padding-right: 1em !important;
-    padding-left: 0.5em;
+    padding-left: 1em;
     padding-top: 0.5em;
 }
 .sf-toolbar-block .sf-toolbar-info-piece { 
@@ -255,7 +253,7 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
 }
 .sf-toolbar-block .sf-toolbar-info-piece .sf-toolbar-ajax-requests .sf-toolbar-status
 {
-    border-radius: 8px;
+    border-radius: 1em;
 }
 .sf-toolbar-info-piece:first-child
 {

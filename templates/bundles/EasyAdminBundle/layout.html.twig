@@ -326,71 +326,74 @@
                         <section class="content-header">
 
                             {% block content_header %}
+                            <div class="content-header-group">
 
-                            <div class="content-header-icon">
-                            {% set url = ea.crud is not null and ea.crud.paginator.pageNumber != 1 ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
+                                <div class="content-header-icon">
+                                {% set url = ea.crud is not null and ea.crud.paginator.pageNumber != 1 ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
 
-                            {% set _content_icon = block('content_icon') ?? null %}
-                            {% if _content_icon is not empty %}
-                                {{ _content_icon|raw }}
-                            {% else %}
-                                {% set image = ea_extra.image(ea.crud.getCurrentPage() ?? null)|default(null) %}
-                                {% set image_attributes = ea_extra.imageAttributes(ea.crud.getCurrentPage() ?? null)|default([]) %}
-                                {% if image is not null %}
-                                    {%- set image_attributes = image_attributes|merge({class:"ea-extra-image" ~ (row_attr.class is defined ? ' ' ~ row_attr.class : ''), "lazy":true} ) -%}
-                                    {{ asset(image)|thumbnail(500,500)|lightbox(image_attributes, null, null, {class:"ea-extra"}) }}
+                                {% set _content_icon = block('content_icon') ?? null %}
+                                {% if _content_icon is not empty %}
+                                    {{ _content_icon|raw }}
                                 {% else %}
-                                    {% if url is not empty %}<a href="{{url}}">{% endif %}
-                                    <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fa-solid fa-icons") }}"></i>
+                                    {% set image = ea_extra.image(ea.crud.getCurrentPage() ?? null)|default(null) %}
+                                    {% set image_attributes = ea_extra.imageAttributes(ea.crud.getCurrentPage() ?? null)|default([]) %}
+                                    {% if image is not null %}
+                                        {%- set image_attributes = image_attributes|merge({class:"ea-extra-image" ~ (row_attr.class is defined ? ' ' ~ row_attr.class : ''), "lazy":true} ) -%}
+                                        {{ asset(image)|thumbnail(500,500)|lightbox(image_attributes, null, null, {class:"ea-extra"}) }}
+                                    {% else %}
+                                        {% if url is not empty %}<a href="{{url}}">{% endif %}
+                                        <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fa-solid fa-icons") }}"></i>
+                                        {% if url is not empty %}</a>{% endif %}
+                                    {% endif %}
+                                {% endif %}
+
+                                </div>
+
+                                <div class="content-header-title">
+                                    <h1 class="title">
+                                    {% set url = ea.crud is not null and ea.crud.getCurrentPage() == "detail" ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
+                                    {% set isHtml = _content_title != (_content_title|striptags) %}
+
+                                    {% if url is not empty and not isHtml %}<a href="{{url}}">{% endif %}
+                                        {{ _content_title|raw }}
                                     {% if url is not empty %}</a>{% endif %}
-                                {% endif %}
-                            {% endif %}
 
-                            </div>
+                                    {% set _content_help = block('content_help') ?? null %}
+                                    {% if _content_help is not empty %}
+                                        {{ _content_help|raw }}
+                                    {% else %}
+                                        {% set helpMessage = "" %}
+                                        {% if ea.crud is not null %}
+                                            {% set helpMessage = ea.crud.helpMessage %}
+                                        {% endif %}
+                                        {% if helpMessage is empty %}
+                                            {% set helpMessage = ea_extra.help(ea.crud.getCurrentPage() ?? null) %}
+                                        {% endif %}
+                                        {% set has_help_message = (helpMessage is not empty) %}
 
-                            <div class="content-header-title">
-                                <h1 class="title">
-                                {% set url = ea.crud is not null and ea.crud.getCurrentPage() == "detail" ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
-                                {% set isHtml = _content_title != (_content_title|striptags) %}
+                                        {% if has_help_message %}
+                                        <span class="content-header-help">
+                                            <i class="fa-regular fa-question-circle" data-toggle="tooltip" title="{{ helpMessage|e('html_attr') }}"></i>
+                                        </span>
+                                        {% endif %}
 
-                                {% if url is not empty and not isHtml %}<a href="{{url}}">{% endif %}
-                                    {{ _content_title|raw }}
-                                {% if url is not empty %}</a>{% endif %}
-
-                                {% set _content_help = block('content_help') ?? null %}
-                                {% if _content_help is not empty %}
-                                    {{ _content_help|raw }}
-                                {% else %}
-                                    {% set helpMessage = "" %}
-                                    {% if ea.crud is not null %}
-                                        {% set helpMessage = ea.crud.helpMessage %}
                                     {% endif %}
-                                    {% if helpMessage is empty %}
-                                        {% set helpMessage = ea_extra.help(ea.crud.getCurrentPage() ?? null) %}
-                                    {% endif %}
-                                    {% set has_help_message = (helpMessage is not empty) %}
+                                    </h1>
 
-                                    {% if has_help_message %}
-                                    <span class="content-header-help">
-                                        <i class="fa-regular fa-question-circle" data-toggle="tooltip" title="{{ helpMessage|e('html_attr') }}"></i>
-                                    </span>
+                                    {% set _content_excerpt = block('content_excerpt') ?? null %}
+                                    {% if _content_excerpt is not empty %}
+                                        <span>{{ _content_excerpt|raw }}</span>
+                                    {% else %}
+                                        <span>{{ ea_extra.text(ea.crud.getCurrentPage() ?? null)|raw }}</span>
                                     {% endif %}
 
-                                {% endif %}
-                                </h1>
-
-                                {% set _content_excerpt = block('content_excerpt') ?? null %}
-                                {% if _content_excerpt is not empty %}
-                                    <span>{{ _content_excerpt|raw }}</span>
-                                {% else %}
-                                    <span>{{ ea_extra.text(ea.crud.getCurrentPage() ?? null)|raw }}</span>
-                                {% endif %}
-
+                                </div>
                             </div>
 
                             {% block page_actions_wrapper %}
-                                <div class="page-actions">{% block page_actions %}{% endblock %}</div>
+                            <div class="page-actions">{% block page_actions %}{% endblock %}</div>
                             {% endblock %}
+
                             {% endblock content_header %}
                         </section>
                     {% endblock content_header_wrapper %}
