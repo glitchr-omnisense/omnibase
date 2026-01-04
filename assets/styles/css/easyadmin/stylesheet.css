@@ -1244,15 +1244,15 @@ ul.sidebar-menu {
 form .row > div.form-group { padding: 1em 0;}
 form .row button[type="submit"] { margin: 1em 0; }
 
-.btn.text-danger { color: white !important; background: rgba(var(--bs-danger-rgb),var(--bs-text-opacity))!important; }
-.btn.text-success { color: white !important; background: rgba(var(--bs-success-rgb),var(--bs-text-opacity))!important; }
+.btn.text-danger { color: white !important; background: rgba(var(--bs-danger-rgb),var(--bs-text-opacity)) !important; }
+.btn.text-success { color: white !important; background: rgba(var(--bs-success-rgb),var(--bs-text-opacity)) !important; }
 .btn.text-danger .btn-icon { color: white !important; }
 .btn.text-success .btn-icon { color: white !important; }
 
 .btn-icon { color: var(--button-primary-color) !important;}
 .action-goto.btn > .btn-icon, .action-goto.btn, .action-see .btn-icon {
     background: var(--bs-info) !important;
-    color: #fff;
+    color: #fff !important;
 }
 
 .action-separator { 
