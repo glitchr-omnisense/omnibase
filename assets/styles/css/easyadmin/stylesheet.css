@@ -7,13 +7,21 @@
     --select2-bg: var(--gray-100);
     --font-size-base:15px;
     --sidebar-max-width:300px;
+    --button-primary-color: black;
 }
+
 .ea-dark-scheme {
     --sidebar-menu-active-item-color: var(--button-primary-bg);
+    --button-primary-color: white;
 }
 
 html, body { scroll-padding-top: 11em; font-family: var(--font-family-base); }
 
+body.ea-edit .content-header, body.ea-new .content-header
+{
+    flex-direction: wrap;
+    align-items: start;
+}
 
 .row {
     margin-left:0 !important;
@@ -332,7 +340,7 @@ fieldset>legend
 .d-inline .dropdown-menu { margin-top: 10px; }
 .d-inline .dropdown-menu
 {
-transform:translate3d(39px, 10px, 0px);
+    transform:translate3d(39px, 10px, 0px);
 }
 
 .ea-dark-scheme .ql-html { filter: invert(100%); }
@@ -1115,6 +1123,10 @@ form .row button[type="submit"] { margin: 1em 0; }
 .btn.text-danger { color: white !important; background-color: rgba(var(--bs-danger-rgb),var(--bs-text-opacity))!important; }
 .btn.text-success { color: white !important; background-color: rgba(var(--bs-success-rgb),var(--bs-text-opacity))!important; }
 
+.btn-icon {
+    color: var(--button-primary-color) !important
+}
+
 .ea-dark-scheme .form-switch .form-check-input:checked, .ea-dark-scheme .form-switch .form-check-input:checked { border-color:unset; }
 .ea-dark-scheme .form-switch .form-check-input:checked, .ea-dark-scheme .form-switch .form-check-input:checked { background-color: var(--form-switch-checked-bg); }
 
@@ -1484,7 +1496,7 @@ ul.sidebar-menu a:hover { color: var(--sidebar-menu-icon-color); }
 .form-array { border:1px solid var(--sidebar-border-color); }
 .form-array .form-array-inline{ border:1px solid var(--sidebar-border-color); }
 .form-attribute .form-attribute-items { border:  1px solid var(--sidebar-border-color); }
-.content-header .page-actions { max-width: 750px; flex-wrap:wrap; justify-content:flex-end; }
+.content-header .page-actions { max-width: 750px; flex-wrap:wrap; justify-content:flex-end; padding-left:1em; }
 .content-header .page-actions .btn-group { margin:0.25em; }
 .content-header .page-actions .btn { margin:0.25em 0; }
 
