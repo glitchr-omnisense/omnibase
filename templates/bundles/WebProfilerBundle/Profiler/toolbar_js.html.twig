@@ -1,40 +1,123 @@
 {% include '@!WebProfiler/Profiler/toolbar_js.html.twig' %}
 
-<script{% if csp_script_nonce is defined and csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>/*<![CDATA[*/
+<script{% if csp_script_nonce is defined and csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>
 
-{# @TODO: Improve the toolbar drag and drop #}
-{# function makeToolbarDraggable() {
+function makeToolbarDraggable() {
 
-       setTimeout(() => {
-        const block = document.querySelector('.sf-toolbarreset');
-        if (!block) return;
+    const toolbar = document.querySelector('.sf-toolbar');
+    const handle  = document.querySelector('.sf-toolbarreset');
+    if (!toolbar || !handle) return;
 
-        let offsetX = 0, offsetY = 0;
+    const STORAGE_KEY = 'sf-toolbar-position';
+    const DRAG_THRESHOLD = 5;
+    const PADDING = 16;
 
-        block.draggable = true;
+    let dragging = false;
+    let suppressClick = false;
+    let startX = 0, startY = 0;
+    let currentX = 0, currentY = 0;
 
-        block.addEventListener('dragstart', e => {
-            e.dataTransfer.setData('text/plain', '');
-            block.classList.add('dragging');
-            const rect = block.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-            console.log(offsetX, offsetY);
-        });
+    function clampPosition(x, y) {
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const handleRect  = handle.getBoundingClientRect();
 
-        block.addEventListener('dragend', e => {
-            block.classList.remove('dragging');
-            const x = e.clientX - offsetX;
-            const y = e.clientY - offsetY;
-            block.style.transform = `translate(${x}px, ${y}px)`;
-            console.log(x,y);
-        });
+        const maxX = 0;
+        const maxY = 0;
 
-        document.addEventListener('dragover', e => e.preventDefault());
-        document.addEventListener('drop', e => e.preventDefault());
-    }, 1000);
+        const minX = -(window.innerWidth  - 2*PADDING);
+        const minY = -(window.innerHeight - handleRect.height - 4*PADDING);
+
+        return {
+            x: Math.min(maxX, Math.max(minX, x)),
+            y: Math.min(maxY, Math.max(minY, y))
+        };
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            const pos = JSON.parse(saved);
+            const clamped = clampPosition(pos.x || 0, pos.y || 0);
+            currentX = clamped.x;
+            currentY = clamped.y;
+            toolbar.style.transform =
+                `translate(${currentX}px, ${currentY}px)`;
+        } catch (e) {}
+    }
+
+    handle.style.cursor = 'move';
+
+    handle.addEventListener('mousedown', e => {
+        dragging = true;
+        suppressClick = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+            suppressClick = true;
+        }
+
+        const clamped = clampPosition(currentX + dx, currentY + dy);
+
+        toolbar.style.transform =
+            `translate(${clamped.x}px, ${clamped.y}px)`;
+    });
+
+    document.addEventListener('mouseup', e => {
+        if (!dragging) return;
+        dragging = false;
+
+        if (!suppressClick) return;
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        const clamped = clampPosition(currentX + dx, currentY + dy);
+
+        currentX = clamped.x;
+        currentY = clamped.y;
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ x: currentX, y: currentY })
+        );
+    });
+
+    handle.addEventListener(
+        'click',
+        e => {
+            if (!suppressClick) return;
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            suppressClick = false;
+        },
+        true
+    );
+
+    var minimize = (currentX != 0);
+    handle.addEventListener('dblclick', () => {
+
+        const clamped = clampPosition(minimize ? -window.innerWidth : 0, 0);
+        currentX = clamped.x;
+        currentY = clamped.y;
+
+        toolbar.style.transform =
+            `translate(${clamped.x}px, ${clamped.y}px)`;
+
+        localStorage.removeItem(STORAGE_KEY);
+        minimize = !minimize;
+    });
 }
 
-makeToolbarDraggable(); #}
+setTimeout(makeToolbarDraggable, 1000);
+makeToolbarDraggable();
 
 </script>

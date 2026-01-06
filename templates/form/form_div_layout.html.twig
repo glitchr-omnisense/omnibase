@@ -24,12 +24,12 @@
 {%- block form2_label  -%}
 
     {% set badges = "" %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_dbcolumn   ?? false) ? "fa-solid fa-fw fa-database"               |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn"  |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_multiple   ?? false) ? "fa-solid fa-fw fa-clipboard-list"         |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple"  |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_alias      ?? false) ? "fa-solid fa-fw fa-hashtag"                |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"     |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_inherited  ?? false) ? "fa-solid fa-fw fa-sitemap"                |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (not form.vars.is_descending ?? false) ? "fa-solid fa-fw fa-arrow-up-wide-short"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_descending"|trans)})|first|raw : "") %}
-    {% set badges = badges ~ (                                  (form.vars.is_sortable   ?? false) ? "fa-solid fa-fw fa-repeat"                 |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable"  |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and     (form.vars.is_dbcolumn    ?? false) ? "fa-solid fa-fw fa-database"           |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn"  |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and     (form.vars.is_multiple    ?? false) ? "fa-solid fa-fw fa-clipboard-list"     |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple"  |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and     (form.vars.is_alias       ?? false) ? "fa-solid fa-fw fa-hashtag"            |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"     |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and     (form.vars.is_inherited   ?? false) ? "fa-solid fa-fw fa-sitemap"            |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and not (form.vars.is_descending  ?? false) ? "fa-solid fa-fw fa-arrow-up-wide-short"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_descending"|trans)})|first|raw : "") %}
+    {% set badges = badges ~ (                                      (form.vars.is_sortable    ?? false) ? "fa-solid fa-fw fa-repeat"             |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable"  |trans)})|first|raw : "") %}
 
     {% set label     = form_label(form, null, {'label_html': true}) %}
     {% set labelTrim = (label|trim(" ")|trim("&nbsp;")) %}
@@ -648,7 +648,7 @@
 
         {% if form.alt is defined %}
             {%- set row_attr = row_attr|merge({'class': 'alt' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')}) -%}
-            {{ form_row(form.alt, {'label': form.alt.vars.label ?? "@fields.imageupload.alt"|trans, row_attr:row_attr})}}
+            {{ form_row(form.alt, {'label': (form.alt.vars.label ?? "@fields.imageupload.alt")|trans, row_attr:row_attr})}}
         {% endif %}
 
     {% endif %}
@@ -891,7 +891,7 @@
                         {{form.vars.value.__autocomplete|raw }}
                     {% else %}
                         {% set label = form_parent(form).vars.entry_label ?? null %}
-                        {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? form_parent(form).vars.entry_options.data_class ?? null) : null %}
+                        {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? (form_parent(form).vars.entry_options.data_class ?? null)) : null %}
                         {% if  label != false %}{{ label|default(value)|stringify }}{% endif %}
                     {% endif %}
 

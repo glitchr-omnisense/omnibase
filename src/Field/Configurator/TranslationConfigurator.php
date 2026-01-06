@@ -62,7 +62,7 @@ class TranslationConfigurator implements FieldConfiguratorInterface
                 throw new Exception("Failed to access \"$fieldName\" in \"" . $entityDto->getName() . "\".");
             }
 
-            $field->setLabel($field->getLabel() == mb_ucfirst($fieldName) ? $field->getLabel() : mb_ucfirst($fieldName));
+            $field->setLabel($field->getLabel() instanceof TranslatableMessage ? $field->getLabel()->getMessage() : $field->getLabel());
             $field->setFormattedValue("-");
 
             $childField = $field->getValue();
