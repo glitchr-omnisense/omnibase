@@ -62,11 +62,6 @@ class Extension
      * @param string|null $pageName
      * @return $this
      */
-    /**
-     * @param $title
-     * @param string|null $pageName
-     * @return $this
-     */
     public function setTitle($title, ?string $pageName = null)
     {
         $this->title[$pageName ?? self::PAGE_DEFAULT] = $title;
@@ -103,11 +98,6 @@ class Extension
      * @param string|null $pageName
      * @return $this
      */
-    /**
-     * @param string $help
-     * @param string|null $pageName
-     * @return $this
-     */
     public function setHelp(string $help, ?string $pageName = null)
     {
         $this->help[$pageName ?? self::PAGE_DEFAULT] = $help;
@@ -121,11 +111,6 @@ class Extension
         return $this->getFallback("text", $pageName);
     }
 
-    /**
-     * @param string $text
-     * @param string|null $pageName
-     * @return $this
-     */
     /**
      * @param string $text
      * @param string|null $pageName
@@ -188,11 +173,6 @@ class Extension
         return $this->getFallback("widgets", $pageName);
     }
 
-    /**
-     * @param array $widgets
-     * @param string|null $pageName
-     * @return $this
-     */
     /**
      * @param array $widgets
      * @param string|null $pageName

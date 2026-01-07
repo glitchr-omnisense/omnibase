@@ -202,20 +202,12 @@ class Pagination implements PaginationInterface, Iterator, Countable
      * @param string $template
      * @return $this
      */
-    /**
-     * @param string $template
-     * @return $this
-     */
     public function setTemplate(string $template)
     {
         $this->template = $template;
         return $this;
     }
 
-    /**
-     * @param $parameterName
-     * @return $this
-     */
     /**
      * @param $parameterName
      * @return $this
@@ -246,10 +238,6 @@ class Pagination implements PaginationInterface, Iterator, Countable
      * @param int $pageRange
      * @return $this
      */
-    /**
-     * @param int $pageRange
-     * @return $this
-     */
     public function setPageRange(int $pageRange)
     {
         $this->pageRange = $pageRange;
@@ -264,10 +252,6 @@ class Pagination implements PaginationInterface, Iterator, Countable
         return $this->pageSize;
     }
 
-    /**
-     * @param $pageSize
-     * @return $this
-     */
     /**
      * @param $pageSize
      * @return $this
@@ -291,10 +275,6 @@ class Pagination implements PaginationInterface, Iterator, Countable
         return $this->page;
     }
 
-    /**
-     * @param $page
-     * @return $this
-     */
     /**
      * @param $page
      * @return $this

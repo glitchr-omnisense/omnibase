@@ -413,10 +413,6 @@ class ServiceEntityParser
      * @param string $column
      * @return $this
      */
-    /**
-     * @param string $column
-     * @return $this
-     */
     protected function setColumn(string $column)
     {
         $this->column = $column;
@@ -431,10 +427,6 @@ class ServiceEntityParser
         return $this->operator;
     }
 
-    /**
-     * @param $operator
-     * @return $this
-     */
     /**
      * @param $operator
      * @return $this

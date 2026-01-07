@@ -45,10 +45,6 @@ class EmailField implements FieldInterface
      * @param string $faIcon
      * @return $this
      */
-    /**
-     * @param string $faIcon
-     * @return $this
-     */
     public function setCustomIcon(string $faIcon)
     {
         $this->setCustomOption(self::OPTION_ICON_CUSTOM, $faIcon);
@@ -56,9 +52,6 @@ class EmailField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -72,9 +65,6 @@ class EmailField implements FieldInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function renderAll()
     {
         $this->setCustomOption(self::OPTION_SHOW, self::SHOW_ALL);
@@ -82,9 +72,6 @@ class EmailField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */

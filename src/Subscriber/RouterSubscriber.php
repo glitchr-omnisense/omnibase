@@ -77,6 +77,7 @@ class RouterSubscriber implements EventSubscriberInterface
 	        $parsedUrl["host"] = $this->router->getHostFallback();
             $parsedUrl["port"] = $this->router->getPortFallback();
 
+
             $url = compose_url(
                  $parsedUrl["scheme"] ?? null,
                  null,

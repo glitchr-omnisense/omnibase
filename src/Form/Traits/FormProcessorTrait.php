@@ -73,11 +73,6 @@ trait FormProcessorTrait
      * @param SessionInterface|null $session
      * @return $this
      */
-    /**
-     * @param array $entry
-     * @param SessionInterface|null $session
-     * @return $this
-     */
     protected function setSession(array $entry, ?SessionInterface $session = null)
     {
         return $this;
@@ -90,10 +85,6 @@ trait FormProcessorTrait
         // $session->set("_form_flow", $flowForm);
     }
 
-    /**
-     * @param Request $request
-     * @return $this
-     */
     /**
      * @param Request $request
      * @return $this
@@ -111,10 +102,6 @@ trait FormProcessorTrait
         return $this->setSession($formSession);
     }
 
-    /**
-     * @param Request $request
-     * @return $this
-     */
     /**
      * @param Request $request
      * @return $this

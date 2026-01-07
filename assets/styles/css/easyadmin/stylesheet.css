@@ -1608,6 +1608,14 @@ html {
     overflow: hidden;
     height: 100vh;
 }
+
+.ea #flash-messages { 
+    position: absolute;
+    margin-left: var(--sidebar-max-width);
+    z-index: 9999;
+    width: calc(100% - var(--sidebar-max-width));
+}
+
 .menu-without-section
 {
     font-style: italic;

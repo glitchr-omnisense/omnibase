@@ -49,10 +49,6 @@ class AnnotationReader extends AbstractLocalCache
      * @param $annotations
      * @return $this
      */
-    /**
-     * @param $annotations
-     * @return $this
-     */
     public function addAnnotation($annotations): self
     {
         $this->annotations[get_class($annotations)] = $annotations;
@@ -328,10 +324,6 @@ class AnnotationReader extends AbstractLocalCache
      * @param string $annotationName
      * @return $this
      */
-    /**
-     * @param string $annotationName
-     * @return $this
-     */
     public function addAnnotationName(string $annotationName)
     {
         if (!is_subclass_of($annotationName, AbstractAnnotation::class)) {
@@ -345,10 +337,6 @@ class AnnotationReader extends AbstractLocalCache
         return $this;
     }
 
-    /**
-     * @param string $annotationName
-     * @return $this
-     */
     /**
      * @param string $annotationName
      * @return $this

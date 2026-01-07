@@ -55,10 +55,6 @@ class SvgFilter implements SvgFilterInterface
      * @param FilterInterface $filter
      * @return $this
      */
-    /**
-     * @param FilterInterface $filter
-     * @return $this
-     */
     public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;

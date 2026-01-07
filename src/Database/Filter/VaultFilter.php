@@ -27,10 +27,6 @@ class VaultFilter extends SQLFilter
      * @param string $environment
      * @return $this
      */
-    /**
-     * @param string $environment
-     * @return $this
-     */
     public function setEnvironment(string $environment)
     {
         $this->environment = $environment;

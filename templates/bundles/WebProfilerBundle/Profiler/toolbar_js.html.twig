@@ -7,153 +7,151 @@
     if (window.__sfToolbarDraggableInitialized) return;
     window.__sfToolbarDraggableInitialized = true;
 
-    document.addEventListener('DOMContentLoaded', e => {
-        const toolbar = document.querySelector('.sf-toolbar');
-        const toolbarReset = document.querySelector('.sf-toolbarreset');
-        if (!toolbar || !toolbarReset) return;
+    const toolbar = document.querySelector('.sf-toolbar');
+    const toolbarReset = document.querySelector('.sf-toolbarreset');
+    if (!toolbar || !toolbarReset) return;
 
-        const STORAGE_KEY = 'sf-toolbar-position';
-        const DRAG_THRESHOLD = 5;
-        const PADDING = 16;
+    const STORAGE_KEY = 'sf-toolbar-position';
+    const DRAG_THRESHOLD = 5;
+    const PADDING = 16;
 
-        let dragging = false;
-        let resizing = false;
-        let suppressClick = false;
-        let startX = 0, startY = 0;
-        let offsetX = 30;
-        let currentX = 0, currentY = 0;
-        let currentWidth = toolbarReset.offsetWidth;
-        let minimize = false;
+    let dragging = false;
+    let resizing = false;
+    let suppressClick = false;
+    let startX = 0, startY = 0;
+    let offsetX = 30;
+    let currentX = 0, currentY = 0;
+    let currentWidth = toolbarReset.offsetWidth;
+    let minimize = false;
 
-        var initialWidth = toolbarReset.offsetWidth;
+    var initialWidth = toolbarReset.offsetWidth;
 
-        function clampPosition(x, y) {
-            const toolbarRect = toolbar.getBoundingClientRect();
-            const maxX = 2*PADDING;
-            const maxY = 0;
-            const minX = -(window.innerWidth - 5*PADDING);
-            const minY = -(window.innerHeight - toolbarRect.height - 2 * PADDING);
+    function clampPosition(x, y) {
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const maxX = 2*PADDING;
+        const maxY = 0;
+        const minX = -(window.innerWidth - 5*PADDING);
+        const minY = -(window.innerHeight - toolbarRect.height - 2 * PADDING);
 
-            return { x: Math.min(maxX, Math.max(minX, x)), y: Math.min(maxY, Math.max(minY, y)) };
-        }
+        return { x: Math.min(maxX, Math.max(minX, x)), y: Math.min(maxY, Math.max(minY, y)) };
+    }
 
-        function clampWidth(width) {
-            const minWidth = 200;
-            const maxWidth = initialWidth;
-            return Math.min(maxWidth, Math.max(minWidth, width));
-        }
+    function clampWidth(width) {
+        const minWidth = 200;
+        const maxWidth = initialWidth;
+        return Math.min(maxWidth, Math.max(minWidth, width));
+    }
 
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                const pos = JSON.parse(saved);
-                const clamped = clampPosition(pos.x || 0, pos.y || 0);
-                currentX = clamped.x;
-                currentY = clamped.y;
-                toolbar.style.transform = `translate(${currentX}px, ${currentY}px)`;
-                offsetX = currentX;
-            } catch (e) {}
-        }
-
-        if (toolbar._draggableListeners) {
-            const { mousedown, mousemove, mouseup, click, dblclick, resizeStart } = toolbar._draggableListeners;
-            document.removeEventListener('mousedown', mousedown);
-            document.removeEventListener('mousemove', mousemove);
-            document.removeEventListener('mouseup', mouseup);
-            document.removeEventListener('click', click, true);
-            document.removeEventListener('dblclick', dblclick);
-            document.removeEventListener('mousedown', resizeStart);
-        }
-
-        const mousedown = e => {
-            if (!e.target.closest('.sf-toolbar-toggle-button')) return;
-            dragging = true;
-            suppressClick = false;
-            startX = e.clientX;
-            startY = e.clientY;
-            e.preventDefault();
-            e.stopPropagation();
-        };
-
-        const resizeStart = e => {
-
-            const toolbarRect = toolbar.getBoundingClientRect();
-
-            const beforeWidth = 15;
-            const beforeLeft = toolbarRect.left;
-            const beforeRight = beforeLeft + beforeWidth;
-
-            const beforeTop = toolbarRect.top;
-            const beforeBottom = toolbarRect.bottom;
-            
-            if (e.clientX >= beforeLeft && e.clientX <= beforeRight && e.clientY >= beforeTop && e.clientY <= beforeBottom && !resizing) {
-                resizing = true;
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        };
-
-        const mousemove = e => {
-            if (dragging) {
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) suppressClick = true;
-                const clamped = clampPosition(currentX + dx, currentY + dy);
-                toolbar.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`;
-
-                const toolbarReset0 = document.querySelector('.sf-toolbarreset');
-                offsetX = clamped.x;
-
-            } else if (resizing) {
-                const dx = e.clientX - (offsetX + 10);
-                let newWidth = clampWidth(initialWidth - dx);
-
-                const toolbarReset0 = document.querySelector('.sf-toolbarreset');
-                      toolbarReset0.style.width = newWidth + 'px';
-            }
-        };
-
-        const mouseup = e => {
-            if (dragging) {
-                dragging = false;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                const clamped = clampPosition(currentX + dx, currentY + dy);
-                currentX = clamped.x;
-                currentY = clamped.y;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ x: currentX, y: currentY }));
-            }
-           
-            resizing = false;
-        };
-
-        const click = e => {
-            if (!e.target.closest('.sf-toolbar-toggle-button')) return;
-            if (!suppressClick) return;
-            e.stopImmediatePropagation();
-            e.preventDefault();
-            suppressClick = false;
-        };
-
-        const dblclick = e => {
-            if (!e.target.closest('.sf-toolbar-toggle-button')) return;
-            const clamped = clampPosition(minimize ? 2*PADDING : -(window.innerWidth - 5*PADDING), 0);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            const pos = JSON.parse(saved);
+            const clamped = clampPosition(pos.x || 0, pos.y || 0);
             currentX = clamped.x;
             currentY = clamped.y;
+            toolbar.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            offsetX = currentX;
+        } catch (e) {}
+    }
+
+    if (toolbar._draggableListeners) {
+        const { mousedown, mousemove, mouseup, click, dblclick, resizeStart } = toolbar._draggableListeners;
+        document.removeEventListener('mousedown', mousedown);
+        document.removeEventListener('mousemove', mousemove);
+        document.removeEventListener('mouseup', mouseup);
+        document.removeEventListener('click', click, true);
+        document.removeEventListener('dblclick', dblclick);
+        document.removeEventListener('mousedown', resizeStart);
+    }
+
+    const mousedown = e => {
+        if (!e.target.closest('.sf-toolbar-toggle-button')) return;
+        dragging = true;
+        suppressClick = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const resizeStart = e => {
+
+        const toolbarRect = toolbar.getBoundingClientRect();
+
+        const beforeWidth = 15;
+        const beforeLeft = toolbarRect.left;
+        const beforeRight = beforeLeft + beforeWidth;
+
+        const beforeTop = toolbarRect.top;
+        const beforeBottom = toolbarRect.bottom;
+        
+        if (e.clientX >= beforeLeft && e.clientX <= beforeRight && e.clientY >= beforeTop && e.clientY <= beforeBottom && !resizing) {
+            resizing = true;
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    };
+
+    const mousemove = e => {
+        if (dragging) {
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) suppressClick = true;
+            const clamped = clampPosition(currentX + dx, currentY + dy);
             toolbar.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`;
+
+            const toolbarReset0 = document.querySelector('.sf-toolbarreset');
+            offsetX = clamped.x;
+
+        } else if (resizing) {
+            const dx = e.clientX - (offsetX + 10);
+            let newWidth = clampWidth(initialWidth - dx);
+
+            const toolbarReset0 = document.querySelector('.sf-toolbarreset');
+                    toolbarReset0.style.width = newWidth + 'px';
+        }
+    };
+
+    const mouseup = e => {
+        if (dragging) {
+            dragging = false;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const clamped = clampPosition(currentX + dx, currentY + dy);
+            currentX = clamped.x;
+            currentY = clamped.y;
             localStorage.setItem(STORAGE_KEY, JSON.stringify({ x: currentX, y: currentY }));
-            minimize = !minimize;
-        };
+        }
+        
+        resizing = false;
+    };
 
-        document.addEventListener('mousedown', mousedown);
-        document.addEventListener('mousedown', resizeStart);
-        document.addEventListener('mousemove', mousemove);
-        document.addEventListener('mouseup', mouseup);
-        document.addEventListener('click', click, true);
-        document.addEventListener('dblclick', dblclick);
+    const click = e => {
+        if (!e.target.closest('.sf-toolbar-toggle-button')) return;
+        if (!suppressClick) return;
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        suppressClick = false;
+    };
 
-        toolbar._draggableListeners = { mousedown, mousemove, mouseup, click, dblclick, resizeStart };
-    });
+    const dblclick = e => {
+        if (!e.target.closest('.sf-toolbar-toggle-button')) return;
+        const clamped = clampPosition(minimize ? 2*PADDING : -(window.innerWidth - 5*PADDING), 0);
+        currentX = clamped.x;
+        currentY = clamped.y;
+        toolbar.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ x: currentX, y: currentY }));
+        minimize = !minimize;
+    };
+
+    document.addEventListener('mousedown', mousedown);
+    document.addEventListener('mousedown', resizeStart);
+    document.addEventListener('mousemove', mousemove);
+    document.addEventListener('mouseup', mouseup);
+    document.addEventListener('click', click, true);
+    document.addEventListener('dblclick', dblclick);
+
+    toolbar._draggableListeners = { mousedown, mousemove, mouseup, click, dblclick, resizeStart };
 
 })();
 </script>

@@ -417,9 +417,6 @@ class EntityHydrator implements EntityHydratorInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     protected function resetHydratationMapping()
     {
         $this->hydratationMapping = [];
@@ -436,11 +433,6 @@ class EntityHydrator implements EntityHydratorInterface
         return in_array(spl_object_hash($entity) . "::" . $propertyName, $this->hydratationMapping);
     }
 
-    /**
-     * @param mixed $entity
-     * @param string $propertyName
-     * @return $this
-     */
     /**
      * @param mixed $entity
      * @param string $propertyName

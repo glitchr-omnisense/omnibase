@@ -121,11 +121,6 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
      * @return $this
      * @throws Exception
      */
-    /**
-     * @param Request|null $request
-     * @return $this
-     * @throws Exception
-     */
     public function compute(?Request $request = null)
     {
         if ($this->computed) {
@@ -307,10 +302,6 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
      * @param AdvancedRouterInterface $router
      * @return $this
      */
-    /**
-     * @param AdvancedRouterInterface $router
-     * @return $this
-     */
     public function setRouter(AdvancedRouterInterface $router)
     {
         $this->router = $router;
@@ -326,10 +317,6 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
      * @param TranslatorInterface $translator
      * @return $this
      */
-    /**
-     * @param TranslatorInterface $translator
-     * @return $this
-     */
     public function setTranslator(TranslatorInterface $translator)
     {
         $this->translator = $translator;
@@ -341,10 +328,6 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         return $this->template;
     }
 
-    /**
-     * @param string $template
-     * @return $this
-     */
     /**
      * @param string $template
      * @return $this
@@ -371,10 +354,6 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
      * @param array $options
      * @return $this
      */
-    /**
-     * @param array $options
-     * @return $this
-     */
     public function setOptions(array $options)
     {
         $this->options = $options;
@@ -395,21 +374,12 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
      * @param $value
      * @return $this
      */
-    /**
-     * @param string $name
-     * @param $value
-     * @return $this
-     */
     public function addOption(string $name, $value)
     {
         $this->options[$name] = $value;
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @return $this
-     */
     /**
      * @param string $name
      * @return $this
@@ -454,24 +424,12 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
      * @param array $routeParameters
      * @return $this
      */
-    /**
-     * @param string $label
-     * @param string|null $route
-     * @param array $routeParameters
-     * @return $this
-     */
     public function prependItem(string $label, ?string $route = null, array $routeParameters = [])
     {
         array_unshift($this->items, $this->getFormattedItem($label, $route, $routeParameters));
         return $this;
     }
 
-    /**
-     * @param string $label
-     * @param string|null $route
-     * @param array $routeParameters
-     * @return $this
-     */
     /**
      * @param string $label
      * @param string|null $route

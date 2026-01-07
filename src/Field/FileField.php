@@ -50,10 +50,6 @@ class FileField implements FieldInterface
      * @param int $filesize
      * @return $this
      */
-    /**
-     * @param int $filesize
-     * @return $this
-     */
     public function setMaxSize(int $filesize)
     {
         $this->setFormTypeOption('max_size', $filesize);
@@ -65,10 +61,6 @@ class FileField implements FieldInterface
      * @param int $nFiles
      * @return $this
      */
-    /**
-     * @param int $nFiles
-     * @return $this
-     */
     public function setMaxFiles(int $nFiles)
     {
         $this->setFormTypeOption('max_files', $nFiles);
@@ -76,10 +68,6 @@ class FileField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param array $mimeTypes
-     * @return $this
-     */
     /**
      * @param array $mimeTypes
      * @return $this

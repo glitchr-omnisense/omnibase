@@ -29,10 +29,6 @@ class Palette implements Countable, IteratorAggregate
      * @param int|null $colorKey
      * @return $this
      */
-    /**
-     * @param int|null $colorKey
-     * @return $this
-     */
     public function setColorKey(int|null $colorKey)
     {
         $this->colorKey = $colorKey;
@@ -68,11 +64,6 @@ class Palette implements Countable, IteratorAggregate
         $this->load($filename, $colorKey);
     }
 
-    /**
-     * @param $filenameOrImage
-     * @param int|null $colorKey
-     * @return $this
-     */
     /**
      * @param $filenameOrImage
      * @param int|null $colorKey

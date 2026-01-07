@@ -187,7 +187,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         WidgetItem::$translator = $translator;
         WidgetItem::$adminUrlGenerator = $this->adminUrlGenerator;
         WidgetItem::$adminContextProvider = $this->adminContextProvider;
-
+        
         MenuItem::$translator = $translator;
         MenuItem::$router = $router;
         MenuItem::$iconProvider = $iconProvider;

@@ -64,10 +64,6 @@ final class AssociationField implements FieldInterface
      * @param $autoload
      * @return $this
      */
-    /**
-     * @param $autoload
-     * @return $this
-     */
     public function autoload($autoload = true): self
     {
         $this->setFormTypeOption('autoload', $autoload);
@@ -93,10 +89,6 @@ final class AssociationField implements FieldInterface
      * @param string $textAlign
      * @return $this
      */
-    /**
-     * @param string $textAlign
-     * @return $this
-     */
     public function setTextAlign(string $textAlign)
     {
         $this->setIconAlign($textAlign);
@@ -105,10 +97,6 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param string $iconAlign
-     * @return $this
-     */
     /**
      * @param string $iconAlign
      * @return $this
@@ -124,10 +112,6 @@ final class AssociationField implements FieldInterface
      * @param bool $allow
      * @return $this
      */
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     public function allowMultipleChoices(bool $allow = true)
     {
         $this->setFormTypeOptionIfNotSet('multiple', $allow);
@@ -135,10 +119,6 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     /**
      * @param bool $allow
      * @return $this
@@ -172,10 +152,6 @@ final class AssociationField implements FieldInterface
      * @param int $limit
      * @return $this
      */
-    /**
-     * @param int $limit
-     * @return $this
-     */
     public function setDisplayLimit(int $limit = 2)
     {
         $this->setCustomOption(self::OPTION_DISPLAY_LIMIT, $limit);
@@ -183,10 +159,6 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param array $icons
-     * @return $this
-     */
     /**
      * @param array $icons
      * @return $this
@@ -202,10 +174,6 @@ final class AssociationField implements FieldInterface
      * @param string|null $class
      * @return $this
      */
-    /**
-     * @param string|null $class
-     * @return $this
-     */
     public function setClass(?string $class = null)
     {
         $this->setFormTypeOption(self::OPTION_CLASS, $class);
@@ -213,10 +181,6 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param int $show
-     * @return $this
-     */
     /**
      * @param int $show
      * @return $this
@@ -232,10 +196,6 @@ final class AssociationField implements FieldInterface
      * @param int $show
      * @return $this
      */
-    /**
-     * @param int $show
-     * @return $this
-     */
     public function show(int $show = self::SHOW_ALL)
     {
         $this->setCustomOption(self::OPTION_SHOW, $show);
@@ -243,10 +203,6 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $useHtml
-     * @return $this
-     */
     /**
      * @param bool $useHtml
      * @return $this
@@ -261,9 +217,6 @@ final class AssociationField implements FieldInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function renderAsCount()
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, 'count');
@@ -271,9 +224,6 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -295,10 +245,6 @@ final class AssociationField implements FieldInterface
      * @param $embed
      * @return $this
      */
-    /**
-     * @param $embed
-     * @return $this
-     */
     public function showEmbedded($embed = true): self
     {
         $this->setFormTypeOption('group', $embed);
@@ -310,10 +256,6 @@ final class AssociationField implements FieldInterface
      * @param $embed
      * @return $this
      */
-    /**
-     * @param $embed
-     * @return $this
-     */
     public function showEmbeddedRow($embed = true): self
     {
         $this->setFormTypeOption('row_group', $embed);
@@ -321,10 +263,6 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param $collapsed
-     * @return $this
-     */
     /**
      * @param $collapsed
      * @return $this

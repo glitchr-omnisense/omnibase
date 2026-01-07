@@ -257,18 +257,12 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function allowInstantiation(): static
     {
         self::$instantiationMap[static::class] = true;
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */

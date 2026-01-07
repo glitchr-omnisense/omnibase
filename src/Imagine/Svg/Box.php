@@ -92,10 +92,6 @@ class Box implements ImageBoxInterface
      * @param $ratio
      * @return $this
      */
-    /**
-     * @param $ratio
-     * @return $this
-     */
     public function scale($ratio): self
     {
         $box = $this->box->scale($ratio);
@@ -103,10 +99,6 @@ class Box implements ImageBoxInterface
         return new self($box->getWidth(), $box->getHeight(), $this->type);
     }
 
-    /**
-     * @param $size
-     * @return $this
-     */
     /**
      * @param $size
      * @return $this
@@ -132,10 +124,6 @@ class Box implements ImageBoxInterface
      * @param $width
      * @return $this
      */
-    /**
-     * @param $width
-     * @return $this
-     */
     public function widen($width): self
     {
         $box = $this->box->widen($width);
@@ -143,10 +131,6 @@ class Box implements ImageBoxInterface
         return new self($box->getWidth(), $box->getHeight(), $this->type);
     }
 
-    /**
-     * @param $height
-     * @return $this
-     */
     /**
      * @param $height
      * @return $this

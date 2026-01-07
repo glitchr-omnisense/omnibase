@@ -45,10 +45,6 @@ final class QuadrantField implements FieldInterface
      * @param string $textAlign
      * @return $this
      */
-    /**
-     * @param string $textAlign
-     * @return $this
-     */
     public function setTextAlign(string $textAlign)
     {
         $this->setIconAlign($textAlign);
@@ -57,10 +53,6 @@ final class QuadrantField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param string $iconAlign
-     * @return $this
-     */
     /**
      * @param string $iconAlign
      * @return $this
@@ -76,10 +68,6 @@ final class QuadrantField implements FieldInterface
      * @param int $show
      * @return $this
      */
-    /**
-     * @param int $show
-     * @return $this
-     */
     public function show(int $show = self::SHOW_ALL)
     {
         $this->setCustomOption(self::OPTION_SHOW, $show);
@@ -87,9 +75,6 @@ final class QuadrantField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -101,9 +86,6 @@ final class QuadrantField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
