@@ -196,7 +196,7 @@
             const toolbarReset = document.querySelector('.sf-toolbarreset');
             if (!toolbarReset) return;
 
-            var width = minimizeWidth ? initialWidth-Math.abs(offsetX) : 65;
+            var width = minimizeWidth ? initialWidth-Math.abs(offsetX)+2*PADDING : 65;
             toolbarReset.style.width = (width) + 'px';
             localStorage.setItem(WIDTH_STORAGE_KEY, width);
             minimizeWidth = !minimizeWidth;
