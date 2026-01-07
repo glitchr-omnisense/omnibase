@@ -1604,6 +1604,10 @@ legend { margin-bottom: 0px; }
     overflow: scroll;
 }
 
+html {
+    overflow: hidden;
+    height: 100vh;
+}
 .menu-without-section
 {
     font-style: italic;
@@ -1611,9 +1615,9 @@ legend { margin-bottom: 0px; }
 }
 
 .content-panel-body.with-background, .content-panel-body.without-footer {
-    padding: 18px 25px;
+    padding: 0;
     width:100%;
-    border: var(--border-width) var(--border-style) var(--sidebar-border-color);
+    border: 0;
 }
 
 input.form-control:not(.form-check-input):focus, textarea.form-control:focus, select.form-control:focus,
