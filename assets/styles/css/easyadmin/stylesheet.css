@@ -1070,6 +1070,8 @@ body.ea-edit .content-header, body.ea-new .content-header {
 
 .main-content {
     max-width: calc(100vw - var(--sidebar-max-width));
+    height:100vh;
+    overflow:scroll;
 }
 
 #modal-filters .modal-header
@@ -1571,6 +1573,15 @@ legend { margin-bottom: 0px; }
     border: 1px solid var(--sidebar-border-color);
     border-radius: 1em;
 }
+
+.action-filters span.icon { 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.thumbnail-avatar, .thumbnail-image { border: 1px solid var(--sidebar-border-color); }
+.thumbnail-avatar img, .thumbnail-image img { background-color: hsla(0,0%,100%,.333); }
 
 .online-user-wrapper img.user-avatar, .user-menu-wrapper img.user-avatar { border-radius:1em; }
 

@@ -1,6 +1,5 @@
-@use "sass:meta";
-$bootstrap-icons-font-path: "~bootstrap-icons/font/fonts";
-@include meta.load-css("bootstrap-icons/font/bootstrap-icons");
+$bootstrap-icons-font-dir: "~bootstrap-icons/font/fonts";
+@import "~bootstrap-icons/font/bootstrap-icons.scss";
 
 @font-face {
     font-family: 'Roboto';

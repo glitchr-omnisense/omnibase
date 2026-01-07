@@ -52,11 +52,11 @@
                 {% set applied_filters = ea.request.query.all['filters']|default([])|keys %}
                 <div class="btn-group action-filters">
                     <a href="#" data-href="{{ ea_url().setAction('renderFilters') }}" class="btn btn-secondary btn-labeled btn-labeled-right action-filters-button disabled {{ applied_filters ? 'action-filters-applied' }}" data-bs-toggle="modal" data-bs-target="#modal-filters">
-                        <i class="fa-solid fa-filter fa-fw"></i> {{ t('filter.title', ea.i18n.translationParameters, 'EasyAdminBundle')|trans }}{% if applied_filters %} <span class="action-filters-button-count">({{ applied_filters|length }})</span>{% endif %}
+                        <twig:ea:Icon name="internal:filter" /> {{ t('filter.title', ea.i18n.translationParameters, 'EasyAdminBundle')|trans }}{% if applied_filters %} <span class="action-filters-button-count">({{ applied_filters|length }})</span>{% endif %}
                     </a>
                     {% if applied_filters %}
-                        <a href="{{ ea_url().unset('filters') }}" class="btn btn-secondary action-filters-reset">
-                            <i class="fa-solid fa-close"></i>
+                        <a href="{{ ea_url().unset('filters').setAction('index') }}" class="btn btn-secondary action-filters-reset">
+                            <twig:ea:Icon name="internal:xmark" />
                         </a>
                     {% endif %}
                 </div>

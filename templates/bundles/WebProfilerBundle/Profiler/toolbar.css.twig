@@ -159,6 +159,11 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
     margin-right: 0em;
 }
 
+.sf-cancel-button {
+    border-radius: 1em;
+    border: 0;
+}
+
 .sf-toolbarreset {
     width: calc(95vw - 4em);
     transition: all 0.1s, width 0s;
@@ -167,16 +172,17 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
     cursor: -moz-grab;
     cursor: -webkit-grab;
 }
+.sf-toolbar-block-request .sf-toolbar-info-piece { padding: 0 1em; }
 .sf-toolbar-closed .sf-toolbarreset::before { display:none; }
 .sf-toolbarreset::before {
     content: '';
-    width: 4px;
-    margin: 6px 0;
+    width: 5px;
+    margin: 6.5px 0;
     cursor: ew-resize;
     background: linear-gradient(to right, #999 0 1px, transparent 0px 6px, #999 6px 9px);
     z-index: 1000;
     pointer-events: auto;
-    min-width:4px;
+    min-width:5px;
 }
 
 .sf-toolbarreset::-webkit-scrollbar { display: none; }

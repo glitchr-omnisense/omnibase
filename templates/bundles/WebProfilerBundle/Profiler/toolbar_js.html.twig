@@ -7,11 +7,12 @@
     if (window.__sfToolbarDraggableInitialized) return;
     window.__sfToolbarDraggableInitialized = true;
 
-    const toolbar = document.querySelector('.sf-toolbar');
-    const toolbarReset = document.querySelector('.sf-toolbarreset');
+    var toolbar = document.querySelector('.sf-toolbar');
+    var toolbarReset = document.querySelector('.sf-toolbarreset');
     if (!toolbar || !toolbarReset) return;
 
     const STORAGE_KEY = 'sf-toolbar-position';
+    const WIDTH_STORAGE_KEY = 'sf-toolbar-width';
     const DRAG_THRESHOLD = 5;
     const PADDING = 16;
 
@@ -25,7 +26,33 @@
     let minimize = false;
 
     var initialWidth = toolbarReset.offsetWidth;
+    function restoreToolbarWidth() {
 
+        const savedWidth = localStorage.getItem(WIDTH_STORAGE_KEY);
+        if (!savedWidth) return;
+
+        const w = clampWidth(parseInt(savedWidth, 10));
+        toolbarReset.style.width = w + 'px';
+    }
+
+    const observer = new MutationObserver(() => {
+
+        var _toolbarReset = document.querySelector('.sf-toolbarreset');
+        if(!_toolbarReset) return;
+
+        if (toolbarReset != _toolbarReset) {
+            toolbarReset = _toolbarReset;
+            observer.disconnect();
+        }
+
+        restoreToolbarWidth();
+    });
+
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+    
     function clampPosition(x, y) {
         const toolbarRect = toolbar.getBoundingClientRect();
         const maxX = 2*PADDING;
@@ -65,11 +92,15 @@
     }
 
     const mousedown = e => {
+        
         if (!e.target.closest('.sf-toolbar-toggle-button')) return;
+        
         dragging = true;
         suppressClick = false;
+        
         startX = e.clientX;
         startY = e.clientY;
+        
         e.preventDefault();
         e.stopPropagation();
     };
@@ -93,22 +124,22 @@
     };
 
     const mousemove = e => {
+
         if (dragging) {
+            
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
             if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) suppressClick = true;
+            
             const clamped = clampPosition(currentX + dx, currentY + dy);
             toolbar.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`;
-
-            const toolbarReset0 = document.querySelector('.sf-toolbarreset');
             offsetX = clamped.x;
 
         } else if (resizing) {
             const dx = e.clientX - (offsetX + 10);
             let newWidth = clampWidth(initialWidth - dx);
 
-            const toolbarReset0 = document.querySelector('.sf-toolbarreset');
-                    toolbarReset0.style.width = newWidth + 'px';
+            toolbarReset.style.width = newWidth + 'px';
         }
     };
 
@@ -123,7 +154,10 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify({ x: currentX, y: currentY }));
         }
         
-        resizing = false;
+        if(resizing) {
+            localStorage.setItem(WIDTH_STORAGE_KEY, toolbarReset.offsetWidth-Math.abs(offsetX)-PADDING);
+            resizing = false;
+        }
     };
 
     const click = e => {
@@ -141,7 +175,36 @@
         currentY = clamped.y;
         toolbar.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`;
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ x: currentX, y: currentY }));
+        localStorage.removeItem(WIDTH_STORAGE_KEY);
         minimize = !minimize;
+    };
+
+    var minimizeWidth = false;
+    const resizeDblClick = e => {
+        const rect = toolbar.getBoundingClientRect();
+
+        const edgeWidth = 15;
+        const left = rect.left;
+        const right = left + edgeWidth;
+
+        if (
+            e.clientX >= left &&
+            e.clientX <= right &&
+            e.clientY >= rect.top &&
+            e.clientY <= rect.bottom
+        ) {
+            const toolbarReset = document.querySelector('.sf-toolbarreset');
+            if (!toolbarReset) return;
+
+            var width = minimizeWidth ? initialWidth-Math.abs(offsetX) : 65;
+            toolbarReset.style.width = (width) + 'px';
+            localStorage.setItem(WIDTH_STORAGE_KEY, width);
+            minimizeWidth = !minimizeWidth;
+
+            resizing = false;
+            e.preventDefault();
+            e.stopPropagation();
+        }
     };
 
     document.addEventListener('mousedown', mousedown);
@@ -150,6 +213,7 @@
     document.addEventListener('mouseup', mouseup);
     document.addEventListener('click', click, true);
     document.addEventListener('dblclick', dblclick);
+    document.addEventListener('dblclick', resizeDblClick);
 
     toolbar._draggableListeners = { mousedown, mousemove, mouseup, click, dblclick, resizeStart };
 
