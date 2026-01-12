@@ -306,26 +306,55 @@ class AdvancedRouter implements AdvancedRouterInterface
         return !empty($eaParents);
     }
 
-    public function getUrl(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
-    {
+    public function getUrl(
+        ?string $nameOrUrl = null,
+        array $parameters = [],
+        int $referenceType = self::ABSOLUTE_PATH
+    ): string {
         $nameOrUrl ??= get_url();
         $nameOrUrl = trim($nameOrUrl);
-        if ($referenceType == self::ABSOLUTE_PATH) {
-            $host = $this->getScheme() . "://" . $this->getHost();
+
+        /* strip host if ABSOLUTE_PATH requested */
+        if ($referenceType === self::ABSOLUTE_PATH) {
+            $host = $this->getScheme() . '://' . $this->getHost();
             if (str_starts_with($nameOrUrl, $host)) {
                 $nameOrUrl = preg_replace('#^.+://[^/]+#', '', $nameOrUrl);
             }
         }
 
-        if (filter_var($nameOrUrl, FILTER_VALIDATE_URL) || str_contains($nameOrUrl, "/")) {
-            if (!str_contains($nameOrUrl, "://") && $referenceType == self::ABSOLUTE_URL) {
-
-                return compose_url(null, null, null, $this->getMachine(), $this->getSubdomain(), $this->getDomain(), $this->getPort(), $this->getBaseDir(), $nameOrUrl);
-            }
-
+        /* full URL already */
+        if (filter_var($nameOrUrl, FILTER_VALIDATE_URL)) {
             return $nameOrUrl;
         }
 
+        /* path handling */
+        if (str_contains($nameOrUrl, '/')) {
+
+            /* ABSOLUTE_URL + path */
+            if ($referenceType === self::ABSOLUTE_URL) {
+
+                // relative path → prepend baseDir
+                if (!str_starts_with($nameOrUrl, '/')) {
+                    $nameOrUrl = rtrim($this->getBaseDir(), '/') . '/' . $nameOrUrl;
+                }
+
+                // normalize
+                $path = '/' . ltrim($nameOrUrl, '/');
+
+                return compose_url(
+                    machine: $this->getMachine(),
+                    subdomain: $this->getSubdomain(),
+                    domain: $this->getDomain(),
+                    port: $this->getPort(),
+                    path: $path
+                );
+            }
+
+            /* ABSOLUTE_PATH */
+            return '/' . ltrim($nameOrUrl, '/');
+        }
+
+        /* route name */
         return trim($this->generate($nameOrUrl, $parameters, $referenceType));
     }
 

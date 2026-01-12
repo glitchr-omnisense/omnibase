@@ -494,6 +494,11 @@ namespace {
             );
         }
 
+        // Default scheme according to Symfony semantics
+        if ($domain && !$scheme) {
+            $scheme = boolval($_SERVER["HTTPS"]) ? 'https' : 'http';
+        }
+
         // Only build scheme if domain is provided
         $schemePart = ($domain && $scheme) ? $scheme . "://" : '';
 

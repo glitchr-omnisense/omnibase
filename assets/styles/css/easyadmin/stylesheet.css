@@ -12,6 +12,10 @@
     --button-color: var(--text-color-dark);
 }
 
+.btn.btn-primary {
+    --button-color: white;
+}
+
 a.btn[href=""] {
     display: none;
 }
@@ -1261,7 +1265,6 @@ form .row button[type="submit"] { margin: 1em 0; }
 .btn.text-danger .btn-icon { color: white !important; }
 .btn.text-success .btn-icon { color: white !important; }
 
-.btn-icon { color: var(--button-primary-color) !important;}
 .action-goto.btn > .btn-icon, .action-goto.btn, .action-see .btn-icon {
     background: var(--bs-info) !important;
     color: #fff !important;
@@ -1717,8 +1720,8 @@ fieldset .sidebar-menu li {
 
 #main-menu .menu .submenu a:hover { color: var(--sidebar-menu-submenu-color); }
 
-ul.sidebar-menu a{ color: var(--sidebar-menu-color); }
-
+ul.sidebar-menu a{ color: var(--sidebar-menu-active-item-color); }
+ul.sidebar-menu a span { color: var(--text-color); }
 .field-avatar .image-avatar i, img.image-avatar
 {
     border-radius: 50%;

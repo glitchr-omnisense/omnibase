@@ -181,6 +181,7 @@ abstract class BaseNotifier implements BaseNotifierInterface
     {
         $this->twig = $twig;
         $this->notifier = $notifier;
+
         $this->policy = $policy;
         $this->router = $router;
 

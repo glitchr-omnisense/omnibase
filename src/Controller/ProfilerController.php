@@ -9,9 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- *
- */
 class ProfilerController extends AbstractController
 {
     /**
