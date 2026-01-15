@@ -279,6 +279,7 @@ class MediaController extends AbstractController
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data . "/image", "webp");
+        
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new WebpFilter(null, $options, $filters));
 
         $request = $this->requestStack->getCurrentRequest();

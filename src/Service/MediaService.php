@@ -584,7 +584,6 @@ class MediaService extends FileService implements MediaServiceInterface
         }
 
         $pathRelative = $this->flysystem->stripPrefix($output, $storage);
-        $pathCache = $pathRelative;
         
         // Encode path using hashid only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over. Lines below make sure suffix is applied including filter operations
@@ -631,6 +630,15 @@ class MediaService extends FileService implements MediaServiceInterface
                     
                     $this->flysystem->mkdir(dirname($pathCache), $localCache);
                     $this->flysystem->write($pathCache, file_get_contents($filteredPath), $localCache);
+
+                    // if on disk
+                    $prefixedRelativePath = $this->flysystem->prefixPath($pathRelative, $localCache);
+                    $prefixDir = dirname($prefixedRelativePath);
+                    $prefixedCache = $this->flysystem->prefixPath($pathCache, $localCache);
+                    $prefixedRelativeCache = relative_path($prefixedCache, $prefixDir);
+                    if(file_exists($prefixedCache) && !file_exists($prefixedRelativePath)) {
+                        symlink($prefixedRelativeCache, $prefixedRelativePath);
+                    }
 
                 } catch (UnableToCreateDirectory $e) {
                     $localDir = $this->flysystem->prefixPath("", $localCache);
