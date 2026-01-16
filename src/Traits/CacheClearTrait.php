@@ -158,6 +158,7 @@ trait CacheClearTrait
 
     protected function clearOPCache(SymfonyStyle $io): void
     {
+        dump("!ah?", extension_loaded('Zend OPcache'), $_SERVER);
         if (extension_loaded('Zend OPcache')) {
             $io->note("Zend OPcache Cleared");
             \opcache_reset();
@@ -271,9 +272,8 @@ trait CacheClearTrait
                 } else {
                     $io->error(sprintf('Failed to remove phpinfo.php from %s', $targetFile));
                 }
-            } else {
-                $io->warning(sprintf('phpinfo.php does not exist at %s', $targetFile));
             }
+
             return;
         }
 
