@@ -1423,7 +1423,7 @@ ul.sidebar-menu a { white-space: nowrap; }
 }
 
 
-.ea-index .flash-messages, .ea-edit .flash-messages, .ea-details .flash-messages
+.ea-index .flash-messages, .ea-edit .flash-messages, .ea-details .flash-messages, .ea.ea-generic .flash-messages
 { 
     margin-left: calc(var(--sidebar-max-width));
     position: absolute;
@@ -1431,7 +1431,9 @@ ul.sidebar-menu a { white-space: nowrap; }
     z-index: 10000;
 }
 .ea.ea-generic > .wrapper { overflow: hidden; height:100vh; }
-.main-header
+
+.ea-index .main-header, .ea-edit .main-header, .ea-details .main-header, .ea.ea-generic .main-header
+
 { 
     background-color: var(--sidebar-bg);
     z-index:1;
