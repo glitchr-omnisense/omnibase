@@ -1422,7 +1422,9 @@ ul.sidebar-menu a { white-space: nowrap; }
     bottom: 0;
 }
 
-.flash-messages { 
+
+.ea-index .flash-messages, .ea-edit .flash-messages, .ea-details .flash-messages
+{ 
     margin-left: calc(var(--sidebar-max-width));
     position: absolute;
     width: calc(100% - var(--sidebar-max-width));
