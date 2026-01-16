@@ -636,6 +636,7 @@ class MediaService extends FileService implements MediaServiceInterface
                     $prefixDir = dirname($prefixedRelativePath);
                     $prefixedCache = $this->flysystem->prefixPath($pathCache, $localCache);
                     $prefixedRelativeCache = relative_path($prefixedCache, $prefixDir);
+
                     if(file_exists($prefixedCache) && !file_exists($prefixedRelativePath)) {
                         symlink($prefixedRelativeCache, $prefixedRelativePath);
                     }
