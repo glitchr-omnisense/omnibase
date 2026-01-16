@@ -185,12 +185,6 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
      * @return $this
      * @throws Exception
      */
-    /**
-     * @param string $locale
-     * @param Request|null $request
-     * @return $this
-     * @throws Exception
-     */
     public function setLocale(string $locale, ?Request $request = null)
     {
         $currentLocale = $this->getLocale();

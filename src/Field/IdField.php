@@ -49,9 +49,6 @@ final class IdField implements FieldInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function enableImpersonation()
     {
         $this->setCustomOption(self::OPTION_IMPERSONATE, true);
@@ -59,9 +56,6 @@ final class IdField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -75,9 +69,6 @@ final class IdField implements FieldInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function enableLink()
     {
         $this->setCustomOption(self::OPTION_ADD_LINK, true);
@@ -85,9 +76,6 @@ final class IdField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */

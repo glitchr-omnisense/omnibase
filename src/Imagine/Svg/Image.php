@@ -152,12 +152,6 @@ class Image extends AbstractImage
      * @param $alpha
      * @return $this
      */
-    /**
-     * @param ImageInterface $image
-     * @param PointInterface $start
-     * @param $alpha
-     * @return $this
-     */
     public function paste(ImageInterface $image, PointInterface $start, $alpha = 100): self
     {
         throw new NotSupportedException('This method is not implemented');
@@ -171,11 +165,6 @@ class Image extends AbstractImage
         return $this->document;
     }
 
-    /**
-     * @param BoxInterface $size
-     * @param $filter
-     * @return $this
-     */
     /**
      * @param BoxInterface $size
      * @param $filter
@@ -230,12 +219,6 @@ class Image extends AbstractImage
      * @param $filter
      * @return $this
      */
-    /**
-     * @param BoxInterface $size
-     * @param $settings
-     * @param $filter
-     * @return $this
-     */
     public function thumbnail(BoxInterface $size, $settings = ImageInterface::THUMBNAIL_INSET, $filter = ImageInterface::FILTER_UNDEFINED): self
     {
         $newSizeType = $size instanceof Box ? $size->getType() : Box::TYPE_ABSOLUTE;
@@ -282,11 +265,6 @@ class Image extends AbstractImage
         return $thumb->resize($size, $filter);
     }
 
-    /**
-     * @param $angle
-     * @param ColorInterface|null $background
-     * @return $this
-     */
     /**
      * @param $angle
      * @param ColorInterface|null $background
@@ -478,10 +456,6 @@ class Image extends AbstractImage
         throw new NotSupportedException('This method is not implemented');
     }
 
-    /**
-     * @param $scheme
-     * @return $this
-     */
     /**
      * @param $scheme
      * @return $this

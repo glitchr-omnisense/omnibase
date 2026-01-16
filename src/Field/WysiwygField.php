@@ -35,10 +35,6 @@ final class WysiwygField implements FieldInterface
      * @param bool $asBool
      * @return $this
      */
-    /**
-     * @param bool $asBool
-     * @return $this
-     */
     public function renderAsBoolean(bool $asBool = true)
     {
         $this->setCustomOption(self::OPTION_RENDER_AS_BOOLEAN, $asBool);
@@ -55,10 +51,6 @@ final class WysiwygField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $stripTags
-     * @return $this
-     */
     /**
      * @param bool $stripTags
      * @return $this

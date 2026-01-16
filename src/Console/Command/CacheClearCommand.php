@@ -203,7 +203,7 @@ EOF);
         }
 
         try {
-            $alreadyStarted = !self::applicationNotStarted();
+
             $noExtension = $input->getOption('no-extension') ?? true;
             if (!$noExtension) {
                 $this->phpConfigCheck($io);
@@ -237,13 +237,15 @@ EOF);
                 $this->clearOPCache($io);
 
                 $this->generatePhpInfo($io, !$this->router->isDebug());
-                if ($alreadyStarted) {
+                if (!self::applicationNotStarted()) {
                     $this->generateSymlinks($io);
                 }
             }
 
             return $ret;
+
         } finally {
+
             $this->releaseLock();
         }
     }

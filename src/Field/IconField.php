@@ -29,20 +29,12 @@ class IconField extends SelectField implements FieldInterface
      * @param string $fieldName
      * @return $this
      */
-    /**
-     * @param string $fieldName
-     * @return $this
-     */
     public function setTargetColor(string $fieldName)
     {
         $this->setCustomOption(self::OPTION_TARGET_FIELD_NAME, $fieldName);
         return $this;
     }
 
-    /**
-     * @param IconAdapterInterface|string $objectOrClass
-     * @return $this
-     */
     /**
      * @param IconAdapterInterface|string $objectOrClass
      * @return $this

@@ -57,10 +57,6 @@ final class AssociationFileField implements FieldInterface
      * @param string|null $class
      * @return $this
      */
-    /**
-     * @param string|null $class
-     * @return $this
-     */
     public function setClass(?string $class = null)
     {
         $this->setFormTypeOption(self::OPTION_CLASS, $class);
@@ -113,10 +109,6 @@ final class AssociationFileField implements FieldInterface
      * @param string $textAlign
      * @return $this
      */
-    /**
-     * @param string $textAlign
-     * @return $this
-     */
     public function setTextAlign(string $textAlign)
     {
         $this->setIconAlign($textAlign);
@@ -124,10 +116,6 @@ final class AssociationFileField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param string $iconAlign
-     * @return $this
-     */
     /**
      * @param string $iconAlign
      * @return $this
@@ -142,20 +130,12 @@ final class AssociationFileField implements FieldInterface
      * @param bool $allow
      * @return $this
      */
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     public function allowMultipleChoices(bool $allow = true)
     {
         $this->setFormTypeOptionIfNotSet("multiple", $allow);
         return $this;
     }
 
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     /**
      * @param bool $allow
      * @return $this
@@ -170,20 +150,12 @@ final class AssociationFileField implements FieldInterface
      * @param int $filesize
      * @return $this
      */
-    /**
-     * @param int $filesize
-     * @return $this
-     */
     public function setMaxSize(int $filesize)
     {
         $this->setFormTypeOption("max_size", $filesize);
         return $this;
     }
 
-    /**
-     * @param int $nFiles
-     * @return $this
-     */
     /**
      * @param int $nFiles
      * @return $this
@@ -198,20 +170,12 @@ final class AssociationFileField implements FieldInterface
      * @param array $mimeTypes
      * @return $this
      */
-    /**
-     * @param array $mimeTypes
-     * @return $this
-     */
     public function setMimeTypes(array $mimeTypes)
     {
         $this->setFormTypeOption("mime_types", $mimeTypes);
         return $this;
     }
 
-    /**
-     * @param int $limit
-     * @return $this
-     */
     /**
      * @param int $limit
      * @return $this
@@ -226,10 +190,6 @@ final class AssociationFileField implements FieldInterface
      * @param array $icons
      * @return $this
      */
-    /**
-     * @param array $icons
-     * @return $this
-     */
     public function setIcons(array $icons)
     {
         $this->setCustomOption(self::OPTION_ICONS, $icons);
@@ -240,20 +200,12 @@ final class AssociationFileField implements FieldInterface
      * @param int $show
      * @return $this
      */
-    /**
-     * @param int $show
-     * @return $this
-     */
     public function showFirst(int $show = self::SHOW_ALL)
     {
         $this->setCustomOption(self::OPTION_SHOW_FIRST, $show);
         return $this;
     }
 
-    /**
-     * @param int $show
-     * @return $this
-     */
     /**
      * @param int $show
      * @return $this

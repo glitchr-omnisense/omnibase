@@ -38,10 +38,6 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
      * @param FilterInterface $filter
      * @return $this
      */
-    /**
-     * @param FilterInterface $filter
-     * @return $this
-     */
     public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;

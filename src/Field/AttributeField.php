@@ -56,10 +56,6 @@ final class AttributeField implements FieldInterface
      * @param string|null $class
      * @return $this
      */
-    /**
-     * @param string|null $class
-     * @return $this
-     */
     public function setClass(?string $class = null)
     {
         $this->setFormTypeOption(self::OPTION_CLASS, $class);
@@ -92,10 +88,6 @@ final class AttributeField implements FieldInterface
      * @param string $textAlign
      * @return $this
      */
-    /**
-     * @param string $textAlign
-     * @return $this
-     */
     public function setTextAlign(string $textAlign)
     {
         $this->setIconAlign($textAlign);
@@ -104,10 +96,6 @@ final class AttributeField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param string $iconAlign
-     * @return $this
-     */
     /**
      * @param string $iconAlign
      * @return $this
@@ -123,10 +111,6 @@ final class AttributeField implements FieldInterface
      * @param bool $allow
      * @return $this
      */
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     public function allowMultipleChoices(bool $allow = true)
     {
         $this->setFormTypeOption('multiple', $allow);
@@ -138,10 +122,6 @@ final class AttributeField implements FieldInterface
      * @param bool $allow
      * @return $this
      */
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     public function allowMultiValues(bool $allow = true)
     {
         $this->setFormTypeOption('multivalue', $allow);
@@ -149,10 +129,6 @@ final class AttributeField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param $choiceGenerator
-     * @return $this
-     */
     /**
      * @param $choiceGenerator
      * @return $this
@@ -172,10 +148,6 @@ final class AttributeField implements FieldInterface
      * @param ...$filter
      * @return $this
      */
-    /**
-     * @param ...$filter
-     * @return $this
-     */
     public function setFilter(...$filter)
     {
         $this->setFormTypeOptionIfNotSet(self::OPTION_FILTER, $filter);
@@ -183,10 +155,6 @@ final class AttributeField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param int $limit
-     * @return $this
-     */
     /**
      * @param int $limit
      * @return $this
@@ -202,10 +170,6 @@ final class AttributeField implements FieldInterface
      * @param array $icons
      * @return $this
      */
-    /**
-     * @param array $icons
-     * @return $this
-     */
     public function setIcons(array $icons)
     {
         $this->setCustomOption(self::OPTION_ICONS, $icons);
@@ -213,10 +177,6 @@ final class AttributeField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param int $show
-     * @return $this
-     */
     /**
      * @param int $show
      * @return $this
@@ -232,10 +192,6 @@ final class AttributeField implements FieldInterface
      * @param int $show
      * @return $this
      */
-    /**
-     * @param int $show
-     * @return $this
-     */
     public function show(int $show = self::SHOW_ALL)
     {
         $this->setCustomOption(self::OPTION_SHOW, $show);
@@ -243,9 +199,6 @@ final class AttributeField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */

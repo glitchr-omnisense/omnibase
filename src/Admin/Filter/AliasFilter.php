@@ -39,10 +39,6 @@ class AliasFilter implements FilterInterface
      * @param $alias
      * @return $this
      */
-    /**
-     * @param $alias
-     * @return $this
-     */
     public function setAlias($alias)
     {
         $this->alias = $alias;

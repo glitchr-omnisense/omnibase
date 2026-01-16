@@ -30,10 +30,6 @@ class Console implements ConsoleInterface
      * @param int $verbosity
      * @return $this
      */
-    /**
-     * @param int $verbosity
-     * @return $this
-     */
     public function verbosity(int $verbosity)
     {
         $this->verbosity = $verbosity;

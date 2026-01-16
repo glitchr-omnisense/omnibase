@@ -68,10 +68,6 @@ class SelectField implements FieldInterface
      * @param bool $useColor
      * @return $this
      */
-    /**
-     * @param bool $useColor
-     * @return $this
-     */
     public function useColor(bool $useColor = true)
     {
         $this->setCustomOption(self::OPTION_USE_COLOR, $useColor);
@@ -79,10 +75,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $useHtml
-     * @return $this
-     */
     /**
      * @param bool $useHtml
      * @return $this
@@ -98,10 +90,6 @@ class SelectField implements FieldInterface
      * @param string $endpoint
      * @return $this
      */
-    /**
-     * @param string $endpoint
-     * @return $this
-     */
     public function autocomplete(string $endpoint)
     {
         $this->setFormTypeOption('autocomplete_endpoint', $endpoint);
@@ -109,10 +97,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param string $textAlign
-     * @return $this
-     */
     /**
      * @param string $textAlign
      * @return $this
@@ -129,10 +113,6 @@ class SelectField implements FieldInterface
      * @param string $iconAlign
      * @return $this
      */
-    /**
-     * @param string $iconAlign
-     * @return $this
-     */
     public function setIconAlign(string $iconAlign)
     {
         $this->setCustomOption(self::OPTION_ICON_ALIGN, $iconAlign);
@@ -140,10 +120,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     /**
      * @param bool $allow
      * @return $this
@@ -159,10 +135,6 @@ class SelectField implements FieldInterface
      * @param bool $allow
      * @return $this
      */
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     public function allowMultipleChoices(bool $allow = true)
     {
         $this->setFormTypeOptionIfNotSet('multiple', $allow);
@@ -174,10 +146,6 @@ class SelectField implements FieldInterface
      * @param bool $allow
      * @return $this
      */
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     public function allowDelete(bool $allow = true)
     {
         $this->setFormTypeOption('allow_delete', $allow);
@@ -185,10 +153,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $allow
-     * @return $this
-     */
     /**
      * @param bool $allow
      * @return $this
@@ -222,10 +186,6 @@ class SelectField implements FieldInterface
      * @param bool|array $tokenSeparators
      * @return $this
      */
-    /**
-     * @param bool|array $tokenSeparators
-     * @return $this
-     */
     public function allowTags(bool|array $tokenSeparators = [])
     {
         $this->setFormTypeOption('tags', !empty($tokenSeparators) || false === $tokenSeparators);
@@ -236,10 +196,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param $choiceGenerator
-     * @return $this
-     */
     /**
      * @param $choiceGenerator
      * @return $this
@@ -258,9 +214,6 @@ class SelectField implements FieldInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function setAutoFilter()
     {
         $this->setCustomOption(self::OPTION_FILTER, null);
@@ -268,10 +221,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param ...$filter
-     * @return $this
-     */
     /**
      * @param ...$filter
      * @return $this
@@ -287,10 +236,6 @@ class SelectField implements FieldInterface
      * @param int $limit
      * @return $this
      */
-    /**
-     * @param int $limit
-     * @return $this
-     */
     public function setDisplayLimit(int $limit = 2)
     {
         $this->setCustomOption(self::OPTION_DISPLAY_LIMIT, $limit);
@@ -298,10 +243,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param array $icons
-     * @return $this
-     */
     /**
      * @param array $icons
      * @return $this
@@ -317,10 +258,6 @@ class SelectField implements FieldInterface
      * @param string|null $class
      * @return $this
      */
-    /**
-     * @param string|null $class
-     * @return $this
-     */
     public function setClass(?string $class = null)
     {
         $this->setFormTypeOption(self::OPTION_CLASS, $class);
@@ -328,10 +265,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param int $show
-     * @return $this
-     */
     /**
      * @param int $show
      * @return $this
@@ -347,10 +280,6 @@ class SelectField implements FieldInterface
      * @param int $show
      * @return $this
      */
-    /**
-     * @param int $show
-     * @return $this
-     */
     public function show(int $show = self::SHOW_ALL)
     {
         $this->setCustomOption(self::OPTION_SHOW, $show);
@@ -358,9 +287,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -375,9 +301,6 @@ class SelectField implements FieldInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function showNameOnly()
     {
         $this->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_NAME_ONLY);
@@ -386,9 +309,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -403,9 +323,6 @@ class SelectField implements FieldInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function renderAsText()
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, 'text');
@@ -413,10 +330,6 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param $defaultChoices
-     * @return $this
-     */
     /**
      * @param $defaultChoices
      * @return $this

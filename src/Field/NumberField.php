@@ -113,10 +113,6 @@ final class NumberField implements FieldInterface
      * @param float $stepUp
      * @return $this
      */
-    /**
-     * @param float $stepUp
-     * @return $this
-     */
     public function stepUp(float $stepUp)
     {
         $this->setFormTypeOption('stepUp', $stepUp);
@@ -124,10 +120,6 @@ final class NumberField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param float $stepDown
-     * @return $this
-     */
     /**
      * @param float $stepDown
      * @return $this
@@ -152,10 +144,6 @@ final class NumberField implements FieldInterface
      * @param float $throttleUp
      * @return $this
      */
-    /**
-     * @param float $throttleUp
-     * @return $this
-     */
     public function throttleUp(float $throttleUp)
     {
         $this->setFormTypeOption('throttleUp', $throttleUp);
@@ -163,10 +151,6 @@ final class NumberField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param float $throttleDown
-     * @return $this
-     */
     /**
      * @param float $throttleDown
      * @return $this

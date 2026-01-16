@@ -1,4 +1,6 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{% set ea = ea() %}
+
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% set render_as_html = field.customOptions.get('renderAsHtml') %}

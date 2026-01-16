@@ -83,10 +83,6 @@ class Trading implements TradingInterface
      * @param string|null $renderedCurrency
      * @return $this
      */
-    /**
-     * @param string|null $renderedCurrency
-     * @return $this
-     */
     public function setRenderedCurrency(?string $renderedCurrency)
     {
         $this->renderedCurrency = $renderedCurrency;

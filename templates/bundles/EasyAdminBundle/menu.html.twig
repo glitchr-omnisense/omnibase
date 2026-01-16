@@ -5,7 +5,7 @@
         <span class="menu-header-contents">
             {% if item.icon is not empty %}<i class="menu-icon fa-fw {{ item.icon }}"></i>{% endif %}
             <span class="menu-item-label position-relative {{ item.cssClass }}">
-                {{ item.label|trans_quiet(nullable = false, domain = ea.getTranslationDomain())|default(item.label)|raw }}
+                {{ item.label|trans_quiet(domain = ea.getTranslationDomain(), nullable = false)|raw }}
             </span>
             {% if item.badge %}
                 <span class="menu-item-badge rounded-pill badge {{ item.badge.cssClass }}" style="{{ item.badge.htmlStyle }}">{{ item.badge.content }}</span>
@@ -18,7 +18,7 @@
                 <span class="menu-item-badge rounded-pill badge {{ item.badge.cssClass }}" style="{{ item.badge.htmlStyle }}">{{ item.badge.content }}</span>
             {% endif %}
             <span class="menu-item-label position-relative">
-                {{ item.label|trans_quiet(nullable = false, domain = ea.getTranslationDomain())|default(item.label)|raw }}
+                {{ item.label|trans_quiet(domain = ea.getTranslationDomain(), nullable = false)|raw }}
             </span>
             <span class="submenu-toggler">
             {% if item.hasSubItems %}<i class="fa-solid fa-fw fa-angle-right  {{ item.hasSubItems ? 'submenu-toggle' }} submenu-toggle-icon"></i>{% endif %}
@@ -43,7 +43,7 @@
         {% block main_menu %}
             {% for menuItem in ea.mainMenu.items %}
                 {% block menu_item %}
-                    {% if menuItem.label is not empty %}
+                    {% if menuItem.label is not null %}
 
                     <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.hasSubItems ? 'has-submenu' }} {{ ea.mainMenu.isSelected(menuItem) or ea.isActive(menuItem.linkUrl) ? 'active' }} {{ ea.mainMenu.isExpanded(menuItem) ? 'expanded' }}">
                         {{ _self.render_menu_item(menuItem, ea.getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea.getTranslationDomain())|raw }}

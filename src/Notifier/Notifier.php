@@ -2,6 +2,8 @@
 
 namespace Base\Notifier;
 
+use Base\Routing\AdvancedRouter;
+
 use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;

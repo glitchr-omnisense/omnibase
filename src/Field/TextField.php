@@ -57,10 +57,6 @@ class TextField implements FieldInterface
      * @param bool $asHtml
      * @return $this
      */
-    /**
-     * @param bool $asHtml
-     * @return $this
-     */
     public function renderAsHtml(bool $asHtml = true)
     {
         $this->setCustomOption(self::OPTION_RENDER_AS_HTML, $asHtml);
@@ -72,10 +68,6 @@ class TextField implements FieldInterface
      * @param bool $asBool
      * @return $this
      */
-    /**
-     * @param bool $asBool
-     * @return $this
-     */
     public function renderAsBoolean(bool $asBool = true)
     {
         $this->setCustomOption(self::OPTION_RENDER_AS_BOOLEAN, $asBool);
@@ -83,10 +75,6 @@ class TextField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $stripTags
-     * @return $this
-     */
     /**
      * @param bool $stripTags
      * @return $this

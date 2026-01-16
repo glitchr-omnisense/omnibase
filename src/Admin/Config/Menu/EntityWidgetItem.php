@@ -65,10 +65,6 @@ final class EntityWidgetItem implements MenuItemInterface
      * @param $entityId
      * @return $this
      */
-    /**
-     * @param $entityId
-     * @return $this
-     */
     public function setEntityId($entityId): self
     {
         $this->dto->setRouteParameters(array_merge(
@@ -130,7 +126,7 @@ final class EntityWidgetItem implements MenuItemInterface
             if (null !== $crudControllerFqcn) {
                 WidgetItem::$adminUrlGenerator->setController($crudControllerFqcn);
                 // 2. ...otherwise, find the CRUD controller from the entityFqcn
-            } else {
+            } else if(WidgetItem::$adminContextProvider->getContext()) {
                 $crudControllers = WidgetItem::$adminContextProvider->getContext()->getCrudControllers();
                 if (null === $controllerFqcn = AbstractCrudController::getCrudControllerFqcn($entityFqcn)) {
                     throw new RuntimeException(sprintf('Unable to find the controller related to the "%s" Entity; did you forget to extend "%s"?', $entityFqcn, AbstractCrudController::class));

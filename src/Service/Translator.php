@@ -94,7 +94,9 @@ class Translator implements TranslatorInterface
 
     public function transQuiet(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true, bool $nullable = true): ?string
     {
-        return $this->transExists($id, $domain, $locale) ? $this->trans($id, $parameters, $domain, $locale, $recursive) : ($nullable ? null : $id);
+        $id = $this->transExists($id, $domain, $locale) ? $this->trans($id, $parameters, $domain, $locale, $recursive) : ($nullable ? null : $id);
+        $id = $id instanceof TranslatableMessage ? $id->getMessage() : $id;
+        return $id;
     }
 
     public function trans(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true): string
@@ -111,7 +113,7 @@ class Translator implements TranslatorInterface
             $id = $id->getMessage();
         }
 
-        $id = trim($id);
+        $id = trim($id instanceof TranslatableMessage ? $id->getMessage() : $id);
         $customId = preg_match("/" . self::STRUCTURE_DOT . "|" . self::STRUCTURE_DOTBRACKET . "/", $id);
         $startsWithDomainTag = str_starts_with($id, "@");
 

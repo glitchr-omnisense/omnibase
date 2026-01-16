@@ -257,18 +257,12 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function allowInstantiation(): static
     {
         self::$instantiationMap[static::class] = true;
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     /**
      * @return $this
      */
@@ -295,6 +289,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $discriminatorMap = array_filter($this->classMetadataManipulator->getDiscriminatorMap($entity), fn($e) => is_instanceof($e, $entity));
         }
 
+        // @TODO: Discriminator map has been commented because button is not working properly with EasyAdmin since twig component has been introduced.
+        //        This needs to be reworked.
         $htmlAttributes = $actionDto->getHtmlAttributes();
         // $htmlAttributes["crud"] = urlencode(get_class($this));
         // $htmlAttributes["root-crud"] = urlencode($this->getCrudControllerFqcn($rootEntity));
@@ -316,8 +312,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         // }
 
         if (count(array_filter($discriminatorMap, fn($e) => $e !== $entity)) > 0) {
-            \trigger_deprecation('glitchr/base-bundle', 'v4.5.0', 'Setting the "discriminator" HTML attribute is deprecated, use the "map" attribute instead.');
-            // $actionDto->setHtmlElement("discriminator"); // @TODO Consider replacement
+        
+            $htmlAttributes["class"] = "action-discriminator";
+
             $actionDto->setHtmlElement("button");
             $actionDto->setHtmlAttributes($htmlAttributes);
         }

@@ -240,10 +240,6 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @param string|null $compression
      * @return $this
      */
-    /**
-     * @param string|null $compression
-     * @return $this
-     */
     public function setCompression(?string $compression)
     {
         $this->compression = $compression;

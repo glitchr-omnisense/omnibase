@@ -32,10 +32,6 @@ abstract class AbstractCompression implements CompressionInterface
      * @param int $level
      * @return $this
      */
-    /**
-     * @param int $level
-     * @return $this
-     */
     public function setLevel(int $level): static
     {
         $this->level = $level;
@@ -51,10 +47,6 @@ abstract class AbstractCompression implements CompressionInterface
      * @param string|null $encoding
      * @return $this
      */
-    /**
-     * @param string|null $encoding
-     * @return $this
-     */
     public function setEncoding(?string $encoding): static
     {
         $this->encoding = $encoding;
@@ -66,10 +58,6 @@ abstract class AbstractCompression implements CompressionInterface
         return $this->maxLength;
     }
 
-    /**
-     * @param int $maxLength
-     * @return $this
-     */
     /**
      * @param int $maxLength
      * @return $this

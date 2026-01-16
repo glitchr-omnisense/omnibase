@@ -59,10 +59,6 @@ final class StockField implements FieldInterface
      * @param float $stepUp
      * @return $this
      */
-    /**
-     * @param float $stepUp
-     * @return $this
-     */
     public function stepUp(float $stepUp)
     {
         $this->setFormTypeOption('stepUp', $stepUp);
@@ -70,10 +66,6 @@ final class StockField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param float $stepDown
-     * @return $this
-     */
     /**
      * @param float $stepDown
      * @return $this
@@ -96,10 +88,6 @@ final class StockField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $nullable
-     * @return $this
-     */
     /**
      * @param bool $nullable
      * @return $this

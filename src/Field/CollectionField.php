@@ -82,10 +82,6 @@ class CollectionField implements FieldInterface
      * @param $entryLabel
      * @return $this
      */
-    /**
-     * @param $entryLabel
-     * @return $this
-     */
     public function setEntryLabel($entryLabel): self
     {
         $this->setFormTypeOption(self::OPTION_ENTRY_LABEL, $entryLabel);
@@ -110,10 +106,6 @@ class CollectionField implements FieldInterface
      * @param $embed
      * @return $this
      */
-    /**
-     * @param $embed
-     * @return $this
-     */
     public function showEmbedded($embed = true): self
     {
         $this->setFormTypeOption("group", $embed);
@@ -124,20 +116,12 @@ class CollectionField implements FieldInterface
      * @param $embed
      * @return $this
      */
-    /**
-     * @param $embed
-     * @return $this
-     */
     public function showEmbeddedRow($embed = true): self
     {
         $this->setFormTypeOption("row_group", $embed);
         return $this;
     }
 
-    /**
-     * @param $collapsed
-     * @return $this
-     */
     /**
      * @param $collapsed
      * @return $this

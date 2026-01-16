@@ -42,10 +42,6 @@ class LocaleField implements FieldInterface
      * @param bool $isShown
      * @return $this
      */
-    /**
-     * @param bool $isShown
-     * @return $this
-     */
     public function showCode(bool $isShown = true)
     {
         $this->setCustomOption(self::OPTION_SHOW_CODE, $isShown);
@@ -53,10 +49,6 @@ class LocaleField implements FieldInterface
         return $this;
     }
 
-    /**
-     * @param bool $isShown
-     * @return $this
-     */
     /**
      * @param bool $isShown
      * @return $this

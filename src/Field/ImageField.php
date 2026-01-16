@@ -34,10 +34,6 @@ class ImageField extends FileField implements FieldInterface
      * @param array|bool|null $cropper
      * @return $this
      */
-    /**
-     * @param array|bool|null $cropper
-     * @return $this
-     */
     public function setCropper(null|array|bool $cropper = true)
     {
         if (is_bool($cropper)) {

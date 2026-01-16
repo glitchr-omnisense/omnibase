@@ -86,7 +86,7 @@ class EditorType extends AbstractType
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
 
             $data = $event->getData();
-
+            
             $json = json_decode($data);
             if($json && count($json->blocks) < 1) {
                 $event->setData(null);
@@ -106,19 +106,22 @@ class EditorType extends AbstractType
         $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
         $data = $this->obfuscator->encode(["token" => $token], ObfuscatorInterface::NO_SHORT);
 
-        $value = \json_decode($view->vars["value"] ?? "{}");
-        if(!$value || !property_exists($value, "blocks")) {
-            $value = (object) ["time" => time(), "blocks" => []];
-        }
-        
-        foreach($value->blocks as $k => $block) {
-            if ($block->type === "image" && property_exists($block->data, "file") && property_exists($block->data->file, "url")) {
-                $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->url, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
-                $value->blocks[$k] = $block;
+        $value = $view->vars["value"];
+        if(is_json($value)) {
+            $value = \json_decode($value ?? "{}");
+            if(!$value || !property_exists($value, "blocks")) {
+                $value = (object) ["time" => time(), "blocks" => []];
+            }
+            
+            foreach($value->blocks as $k => $block) {
+                if ($block->type === "image" && property_exists($block->data, "file") && property_exists($block->data->file, "url")) {
+                    $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->url, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
+                    $value->blocks[$k] = $block;
+                }
             }
         }
-        
-        $view->vars["value"] = json_encode($value);
+
+        $view->vars["value"] = is_json($value) ? json_encode($value) : $view->vars["value"];
         $view->vars["uploadByFile"] = $this->router->generate("ux_editorjs_uploadByFile", ["data" => $data]);
         $view->vars["uploadByUrl"]  = $this->router->generate("ux_editorjs_uploadByUrl", ["data" => $data]);
 

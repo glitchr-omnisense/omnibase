@@ -484,11 +484,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param string|null $parameterName
      * @return $this
      */
-    /**
-     * @param string $path
-     * @param string|null $parameterName
-     * @return $this
-     */
     public function setBag(string $path, ?string $parameterName = null)
     {
         $setting = $this->generateRaw($path);
@@ -516,10 +511,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param string $path
      * @return $this
      */
-    /**
-     * @param string $path
-     * @return $this
-     */
     public function remove(string $path)
     {
         $setting = $this->settingRepository->findOneByInsensitivePath($path);
@@ -537,10 +528,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param string $path
      * @return $this
      */
-    /**
-     * @param string $path
-     * @return $this
-     */
     public function lock(string $path)
     {
         return $this->setLock($path);
@@ -550,20 +537,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param string $path
      * @return $this
      */
-    /**
-     * @param string $path
-     * @return $this
-     */
     public function unlock(string $path)
     {
         return $this->setLock($path, false);
     }
 
-    /**
-     * @param string $path
-     * @param bool $flag
-     * @return $this
-     */
     /**
      * @param string $path
      * @param bool $flag
@@ -582,10 +560,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param string $path
      * @return $this
      */
-    /**
-     * @param string $path
-     * @return $this
-     */
     public function secure(string $path)
     {
         return $this->setSecure($path);
@@ -595,20 +569,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @param string $path
      * @return $this
      */
-    /**
-     * @param string $path
-     * @return $this
-     */
     public function unsecure(string $path)
     {
         return $this->setSecure($path, false);
     }
 
-    /**
-     * @param string $path
-     * @param bool $flag
-     * @return $this
-     */
     /**
      * @param string $path
      * @param bool $flag

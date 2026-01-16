@@ -34,10 +34,6 @@ class Effects implements EffectsInterface
      * @param $correction
      * @return $this
      */
-    /**
-     * @param $correction
-     * @return $this
-     */
     public function gamma($correction): self
     {
         $gamma = (float)$correction;
@@ -122,10 +118,6 @@ class Effects implements EffectsInterface
      * @param $sigma
      * @return $this
      */
-    /**
-     * @param $sigma
-     * @return $this
-     */
     public function blur($sigma = 1): self
     {
         $deviation = (float)$sigma;
@@ -141,10 +133,6 @@ class Effects implements EffectsInterface
         return $this;
     }
 
-    /**
-     * @param $brightness
-     * @return $this
-     */
     /**
      * @param $brightness
      * @return $this

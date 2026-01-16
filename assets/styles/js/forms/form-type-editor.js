@@ -163,6 +163,10 @@ function edjs(inputEl, holderId, value = {}, options = {})
         onReady : () => { 
             if(data == undefined && value != '') editor.blocks.renderFromHTML(value);
             // if(inputEl != undefined) new Undo({ editor }); // issue 
+
+            if(options.readOnly ?? false) {
+                $("#" + holderId).children(".codex-editor").addClass("read-only");
+            }
         },
         onChange: async (api, event) => {
 
@@ -172,9 +176,6 @@ function edjs(inputEl, holderId, value = {}, options = {})
     });
 
     var editor = new EditorJs(options);
-    if(options.readOnly ?? false) {
-        $("#"+holderId).addClass("read-only");
-    }
 }
 
 window.addEventListener("load.form_type", function (el) {

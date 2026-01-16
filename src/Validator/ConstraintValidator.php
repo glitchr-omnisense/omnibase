@@ -33,11 +33,6 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
      * @param string|null $parameterValue
      * @return $this
      */
-    /**
-     * @param string $parameterName
-     * @param string|null $parameterValue
-     * @return $this
-     */
     public function setParameter(string $parameterName, ?string $parameterValue = null)
     {
         if ($this->buildViolation == null) {

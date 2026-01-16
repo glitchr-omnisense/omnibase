@@ -182,9 +182,6 @@ final class DateTimePickerField implements FieldInterface
     /**
      * @return $this
      */
-    /**
-     * @return $this
-     */
     public function now()
     {
         return $this->setDefault(new \DateTime());

@@ -245,10 +245,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                         }
                     }
                 }
-
-                $routeParameters = $this->resolveParameters($routeParameters);
             }
         }
+
+        $routeParameters = $this->resolveParameters($routeParameters);
 
         // Check whether the route is already cached
         $hash = self::$router->getRouteHash($routeName, $routeParameters, $referenceType);
