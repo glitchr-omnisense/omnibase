@@ -11,6 +11,10 @@
     --button-bg: white;
     --button-color: var(--text-color-dark);
 }
+.ea-sidebar-width-compact
+{
+    --sidebar-max-width:40px;
+}
 
 .btn.btn-primary {
     --button-color: white;
@@ -353,10 +357,7 @@ body.ea-sidebar-width-compact #main-menu .menu-after .menu-item .menu-icon
     height: 21px !important;
     max-width: 21px !important;
 }
-body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover, body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover .menu-item-contents
-{
-    background: white !important;
-}
+
 #main-menu .menu .menu-header
 {
     line-height:23px;
@@ -1270,6 +1271,7 @@ form .row button[type="submit"] { margin: 1em 0; }
     color: #fff !important;
 }
 
+
 .action-separator { 
     background: none;
     border: none;
@@ -1549,11 +1551,26 @@ body.ea-sidebar-width-compact #main-menu .menu .menu-item .menu-item-label
     padding: 0 1em;
     margin: 2px 0;
 }
+
 body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover,
 body.ea-sidebar-width-compact #main-menu .menu .menu-item:hover .menu-item-contents {
 
-    background: var(--sidebar-bg);
+    background: white;
     color: var(--sidebar-menu-active-item-color);
+    box-shadow: none; 
+}
+
+body.ea-sidebar-width-compact #main-menu .menu span { display: none !important; }
+body.ea-sidebar-width-compact #main-menu .menu
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#main-menu .menu .menu-item:hover > a .menu-icon, #main-menu .menu .menu-item:hover
+{
+    background: white;
 }
 
 fieldset h3 {
