@@ -159,6 +159,7 @@ trait CacheClearTrait
     protected function clearOPCache(SymfonyStyle $io): void
     {
         if (extension_loaded('Zend OPcache')) {
+            $io->note("Zend OPcache Cleared");
             \opcache_reset();
         }
     }

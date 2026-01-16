@@ -46,6 +46,7 @@
         }
 
         restoreToolbarWidth();
+        updateToolbarInversion();
     });
 
     observer.observe(document.documentElement, {
@@ -135,6 +136,8 @@
             toolbar.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`;
             offsetX = clamped.x;
 
+            updateToolbarInversion();
+
         } else if (resizing) {
             const dx = e.clientX - (offsetX + 10);
             let newWidth = clampWidth(initialWidth - dx);
@@ -207,6 +210,12 @@
         }
     };
 
+    function updateToolbarInversion() {
+        const rect = toolbarReset.getBoundingClientRect();
+        const halfY = rect.top + rect.height / 2;
+        toolbarReset.classList.toggle('inverted', halfY < window.innerHeight / 2);
+    }
+
     document.addEventListener('mousedown', mousedown);
     document.addEventListener('mousedown', resizeStart);
     document.addEventListener('mousemove', mousemove);
@@ -214,6 +223,7 @@
     document.addEventListener('click', click, true);
     document.addEventListener('dblclick', dblclick);
     document.addEventListener('dblclick', resizeDblClick);
+    document.addEventListener('resize', updateToolbarInversion);
 
     toolbar._draggableListeners = { mousedown, mousemove, mouseup, click, dblclick, resizeStart };
 
