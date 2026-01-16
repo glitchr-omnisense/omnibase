@@ -29,6 +29,10 @@ a.btn[href=""] {
     margin-top: 0.5em;
 }
 
+a.btn[href=""] {
+    display: none;
+}
+
 .ea-dark-scheme {
     --sidebar-menu-active-item-color: var(--button-primary-bg);
     --select2-bg: var(--gray-700);
