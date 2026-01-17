@@ -69,15 +69,6 @@ body.ea-edit .content-header, body.ea-new .content-header
     align-items: start;
 }
 
-/*
-.row {
-    margin-left:0 !important;
-    margin-right:0 !important;
-    margin-top:0 !important;
-}
-
-/* .row>* { padding-left:0;} */
-
 textarea.form-control {
     min-height: calc(8.5em + .75rem + 2px);
 }
@@ -1433,7 +1424,6 @@ ul.sidebar-menu a { white-space: nowrap; }
 .ea.ea-generic > .wrapper { overflow: hidden; height:100vh; }
 
 .ea-index .main-header, .ea-edit .main-header, .ea-details .main-header, .ea.ea-generic .main-header
-
 { 
     background-color: var(--sidebar-bg);
     z-index:1;

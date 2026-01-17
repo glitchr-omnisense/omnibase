@@ -3,9 +3,8 @@
 namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Database\Annotation\Extension\ExtensionOptionInterface;
-use Base\Database\Entity\EntityExtension;
-use Base\Database\Entity\Extension\VaultTrait;
+use Base\Annotations\AnnotationReader;
+use Base\Database\Traits\VaultTrait;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
 use Doctrine\ORM\Event\PostFlushEventArgs;
@@ -31,7 +30,7 @@ use function is_file;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class Vault extends AbstractAnnotation implements ExtensionOptionInterface
+class Vault extends AbstractAnnotation
 {
     /**
      * @var string
@@ -74,32 +73,28 @@ class Vault extends AbstractAnnotation implements ExtensionOptionInterface
             }
         }
 
-        return ($target == EntityExtension::TARGET_CLASS);
+        return ($target == AnnotationReader::TARGET_CLASS);
     }
 
-    private function loadKeys(?string $vault = null): array
+    public function loadKeys(?string $vault = null): array
     {
-        if ($vault === null) {
-            $vault = $this->getEnvironment();
+        $vault ??= $this->getEnvironment();
+
+        $path = $this->getProjectDir()
+            . "/config/secrets/{$vault}/{$vault}.decrypt.private.php";
+
+        if (!is_file($path)) {
+            throw new Exception("Vault keypair not found");
         }
 
-        $pathPrefix = $this->getProjectDir() . "/config/secrets/" . $vault . "/" . $vault . ".";
-        $decryptionKey = is_file($pathPrefix . 'decrypt.private.php') ? (string)include $pathPrefix . 'decrypt.private.php' : null;
+        $keypair = include $path;
 
-        if ($decryptionKey === null) {
-            throw new Exception('Decryption key not found in "' . dirname($pathPrefix) . '".');
+        if (!is_string($keypair) ||
+            strlen($keypair) !== SODIUM_CRYPTO_BOX_KEYPAIRBYTES) {
+            throw new Exception('Invalid sodium keypair');
         }
-        
-        /* Rotation keys ? Encryption key ? Probably not needed.. input very welcome here :o) */
-        // if (is_file($pathPrefix.'encrypt.public.php')) {
-        //     $encryptionKey = (string) include $pathPrefix.'encrypt.public.php';
-        // } elseif ('' !== $decryptionKey) {
-        //     $encryptionKey = sodium_crypto_box_publickey($decryptionKey);
-        // } else {
-        //     throw new \RuntimeException(sprintf('Encryption key not found in "%s".', \dirname($pathPrefix)));
-        // }
 
-        return [$decryptionKey];
+        return [$keypair];
     }
 
     public function getMarshaller(?string $vault = null): ?MarshallerInterface
@@ -118,19 +113,19 @@ class Vault extends AbstractAnnotation implements ExtensionOptionInterface
      * @param string|null $value
      * @return array|mixed|null
      */
-    public function seal(?MarshallerInterface $marshaller, ?string $value)
+    public function seal(MarshallerInterface $marshaller, mixed $value): string
     {
-        try {
-            $failed = [];
-            $encryptedValues = $marshaller?->marshall([$value], $failed)[0] ?? [];
-            if (count($failed)) {
-                return null;
-            }
-
-            return $encryptedValues;
-        } catch (Exception $e) {
-            return null;
+        if (is_array($value) || is_object($value)) {
+            $value = serialize($value);
         }
+
+        $failed = [];
+        $values = $marshaller->marshall([$value], $failed);
+        if ($failed) {
+            return $value;
+        }
+
+        return (string) base64_encode($values[0]);
     }
 
     /**
@@ -138,17 +133,16 @@ class Vault extends AbstractAnnotation implements ExtensionOptionInterface
      * @param string|null $value
      * @return mixed|null
      */
-    public function reveal(?MarshallerInterface $marshaller, ?string $value)
+    public function reveal(MarshallerInterface $marshaller, ?string $value): ?string
     {
         if ($value === null) {
             return null;
         }
 
-        try {
-            return $marshaller?->unmarshall($value);
-        } catch (Exception $e) {
-            return null;
-        }
+        try { $value = $marshaller->unmarshall(base64_decode($value)); }
+        catch (Exception $e) { }
+
+        return is_serialized($value) ? unserialize($value) : $value;
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
@@ -211,12 +205,12 @@ class Vault extends AbstractAnnotation implements ExtensionOptionInterface
         }
     }
 
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
     {
         $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
     }
@@ -228,27 +222,26 @@ class Vault extends AbstractAnnotation implements ExtensionOptionInterface
      * @param string|null $property
      * @return void
      */
-    public function preLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function preLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
+
             if (!$entity->isSecured()) {
                 continue;
             }
+
             if ($propertyAccessor->isReadable($entity, $field)) {
+
                 $plainValue = $propertyAccessor->getValue($entity, $field);
                 if ($plainValue === null) {
                     continue;
                 }
 
-                if (is_array($plainValue) || is_object($plainValue)) {
-                    $plainValue = serialize($plainValue);
-                }
-
-                $sealedValue = base64_encode($this->seal($marshaller, $plainValue));
+                $sealedValue = $this->seal($marshaller, $plainValue);
                 $propertyAccessor->setValue($entity, $field, $sealedValue);
                 $entity->setVaultBag($field, $sealedValue, $plainValue);
             }
@@ -279,24 +272,21 @@ class Vault extends AbstractAnnotation implements ExtensionOptionInterface
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
+
             if (!$entity->isSecured()) {
                 continue;
             }
 
             if ($propertyAccessor->isReadable($entity, $field)) {
-                $sealedValue = $propertyAccessor->getValue($entity, $field);
-                $plainValue = is_string($sealedValue) && !empty($sealedValue) ? base64_decode($sealedValue) : false;
 
-                if ($plainValue === false) {
-                    $plainValue = null;
+                $sealedValue = $propertyAccessor->getValue($entity, $field);
+                if (!is_string($sealedValue) || empty($sealedValue)) {
+                    $sealedValue = null;
                 }
 
-                if (is_string($plainValue)) {
-                    $plainValue = $this->reveal($marshaller, $plainValue);
-                    if (is_serialized($plainValue)) {
-                        $plainValue = unserialize($plainValue);
-                    }
+                if (is_string($sealedValue)) {
 
+                    $plainValue = $this->reveal($marshaller, $sealedValue);
                     $propertyAccessor->setValue($entity, $field, $plainValue);
                     $entity->setVaultBag($field, $sealedValue, $plainValue);
                 }
