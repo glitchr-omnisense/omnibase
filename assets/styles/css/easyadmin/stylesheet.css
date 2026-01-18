@@ -81,12 +81,6 @@ textarea.form-control {
     width:auto;
 }
 
-#main-menu
-{
-    max-height: 100vh;
-    overflow: scroll;
-}
-
 form.ea-edit-form {
     padding: 0 5em;
 }
@@ -1033,7 +1027,6 @@ body.ea-edit .content-header, body.ea-new .content-header {
 }
 .ea-detail .thumbnail-avatar, .ea-detail .thumbnail-image {
 
-    overflow:hidden;
     box-shadow: var(--button-shadow);
     margin: 10px 5px;
 
@@ -1070,10 +1063,7 @@ body.ea-edit .content-header, body.ea-new .content-header {
 
 .main-content {
     max-width: calc(100vw - var(--sidebar-max-width));
-    height:100vh;
-    overflow:scroll;
 }
-
 #modal-filters .modal-header
 {
     display:flex;
@@ -1214,9 +1204,6 @@ body > .modal-backdrop { display:block !important; }
     height: 200px;
     max-width: 200px;
     width: 200px;
-
-    overflow:hidden;
-
 }
 .main-header .navbar { padding:0; }
 .sidebar {
@@ -1421,7 +1408,6 @@ ul.sidebar-menu a { white-space: nowrap; }
     width: calc(100% - var(--sidebar-max-width));
     z-index: 10000;
 }
-.ea.ea-generic > .wrapper { overflow: hidden; height:100vh; }
 
 .ea-index .main-header, .ea-edit .main-header, .ea-details .main-header, .ea.ea-generic .main-header
 { 
@@ -1607,6 +1593,7 @@ legend { margin-bottom: 0px; }
     background-color: var(--sidebar-bg);
     border: 1px solid var(--sidebar-border-color);
     height:300px;
+    overflow:scroll;
 }
 
 .content-wrapper article {
@@ -1621,7 +1608,6 @@ legend { margin-bottom: 0px; }
 .ea-generic section.content-extra, .ea-generic section.content-body {
 
     border-radius:1em;
-    overflow-y: scroll;
     margin-bottom:1em;
     padding:1em;
     padding-left: 75px;
@@ -1630,12 +1616,6 @@ legend { margin-bottom: 0px; }
 .dropdown-menu
 {
     max-height:75vh;
-    overflow: scroll;
-}
-
-html {
-    overflow: hidden;
-    height: 100vh;
 }
 
 .ea #flash-messages { 
@@ -1692,7 +1672,6 @@ select.form-control:disabled, select.form-control[readonly]
 .thumbnail-avatar { border-radius:50%; }
 .ea-index .thumbnail-avatar, .ea-index .thumbnail-image {
 
-    overflow:hidden;
     box-shadow: var(--button-shadow);
     margin: 10px auto;
 
