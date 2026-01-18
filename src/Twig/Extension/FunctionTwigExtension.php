@@ -169,7 +169,21 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('colorify', [$this, 'colorify']),
                 new TwigFilter('crudify', [$this, 'crudify'], ['is_safe' => ['all']]),
                 new TwigFilter('htmlify', [$this, 'htmlify'], ['is_safe' => ['all']]),
+
+                new TwigFilter('emoji_only', [$this, 'isEmojiOnly'], ['is_safe' => ['all']]),
             ];
+    }
+
+    public function isEmojiOnly(?string $value): bool
+    {
+        if ($value === null || $value === '') {
+            return false;
+        }
+
+        return (bool) preg_match(
+            '/^[\p{Extended_Pictographic}\x{200D}\x{FE0F}\s]+$/u',
+            $value
+        );
     }
 
     public function at(array $array, int|string $index) 
