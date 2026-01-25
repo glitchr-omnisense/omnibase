@@ -4,6 +4,12 @@ namespace Base\Admin\Config;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
+
+use Base\Admin\Factory\MenuFactory;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\MainMenuDto;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
+
 use Twig\Environment;
 
 class Extension
@@ -18,10 +24,59 @@ class Extension
      */
     protected Environment $twig;
 
-    public function __construct(Environment $twig)
+    /**
+     * @var ControllerResolverInterface
+     */
+    protected ControllerResolverInterface $controllerResolver;
+    
+    /**
+     * @var MenuFactory
+     */
+    protected MenuFactory $menuFactory;
+    
+    public function __construct(Environment $twig, ControllerResolverInterface $controllerResolver, MenuFactory $menuFactory)
     {
         $this->twig = $twig;
         $this->twig->addGlobal("ea_extra", $this);
+
+        $this->controllerResolver = $controllerResolver;
+        $this->menuFactory = $menuFactory;
+    }
+
+    public function createMainMenu(array $menuItems = []): MainMenuDto
+    {
+        return $this->menuFactory->createMainMenu($menuItems);
+    }
+
+    public function getController(string $controllerInterface, ?string $controllerFqcn, ?string $controllerAction, Request $request): ?object
+    {
+        if (null === $controllerFqcn || null === $controllerAction) {
+            return null;
+        }
+
+        // needed to fix the double encoding of URLs that might happen (https://github.com/EasyCorp/EasyAdminBundle/pull/6902)
+        $controllerFqcn = str_replace('%5C', '\\', $controllerFqcn);
+        $newRequest = $request->duplicate(null, null, ['_controller' => [$controllerFqcn, $controllerAction]]);
+        try {
+            $controllerCallable = $this->controllerResolver->getController($newRequest);
+        } catch (\InvalidArgumentException $e) {
+            $controllerCallable = false;
+        }
+
+        if (false === $controllerCallable) {
+            throw new NotFoundHttpException(sprintf('Unable to find the controller "%s::%s".', $controllerFqcn, $controllerAction));
+        }
+
+        if (!\is_array($controllerCallable)) {
+            return null;
+        }
+
+        $controllerInstance = $controllerCallable[0];
+        if (!\is_object($controllerInstance)) {
+            return null;
+        }
+
+        return is_subclass_of($controllerInstance, $controllerInterface) ? $controllerInstance : null;
     }
 
     /**

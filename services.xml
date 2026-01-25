@@ -1309,7 +1309,11 @@
             <argument type="service" id="base.service.icon" />
         </service>
 
-        <service id="Base\Admin\Config\Extension" public="true"><argument type="service" id="twig" /></service>
+        <service id="Base\Admin\Config\Extension" public="true">
+            <argument type="service" id="twig" />
+            <argument type="service" id="controller_resolver" />
+            <argument type="service" id="ea_menu_factory" />
+        </service>
         <service id="Base\Controller\Admin\AbstractDashboardController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
