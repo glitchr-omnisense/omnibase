@@ -16,7 +16,7 @@ use function is_resource;
 
 class Imagine extends AbstractImagine
 {
-    public function create(ImageBoxInterface $size, ColorInterface $color = null): Image
+    public function create(ImageBoxInterface $size, ?ColorInterface $color = null): Image
     {
         if (null !== $color) {
             throw new InvalidArgumentException('Imagine SVG does not support colors');

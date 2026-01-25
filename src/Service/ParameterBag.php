@@ -30,7 +30,7 @@ class ParameterBag extends ContainerBag implements ParameterBagInterface
      * @param array|null $bag
      * @return void
      **/
-    public function set(string $path, $value, array &$bag = null): void
+    public function set(string $path, $value, ?array &$bag = null): void
     {
         $this->write($path, $value, $bag);
     }

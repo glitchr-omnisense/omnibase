@@ -77,7 +77,7 @@ abstract class AbstractIconAdapter extends AbstractLocalCache implements IconAda
         return $this->contents ?? [];
     }
 
-    public function getEntry(string $value = null): string
+    public function getEntry(?string $value = null): string
     {
         return $this->contents[$value] ?? "";
     }

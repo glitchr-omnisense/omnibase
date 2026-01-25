@@ -551,7 +551,7 @@ final class FunctionTwigExtension extends AbstractExtension
      * @return array|string
      * @throws RuntimeError
      */
-    public function datetime(Environment $env, \DateTime|\DateInterval|int|string|null $datetime, array|string $pattern = 'YYYY-MM-dd HH:mm:ss', ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
+    public function datetime(Environment $env, \DateTime|\DateInterval|int|string|null $datetime, array|string $pattern = 'YYYY-MM-dd HH:mm:ss', ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', ?string $locale = null): array|string
     {
         if (null === $locale) {
             $locale = $this->translator->getLocale();
