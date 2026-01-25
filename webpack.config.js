@@ -57,8 +57,12 @@ Encore.addPlugin(new WebpackBar())
     .addEntry('form-defer.emoji', './assets/form-defer.emoji.js')
     .addEntry('form-defer.dropzone', './assets/form-defer.dropzone.js')
 
-    .enableSassLoader()
     .enablePostCssLoader()
+    .enableSassLoader((options) => {
+        options.sassOptions = {
+            quietDeps: true
+        };
+    })
     
     .addLoader({
         test: /\.scss$/,
@@ -87,3 +91,6 @@ Encore.addPlugin(new WebpackBar())
 module.exports = Encore.getWebpackConfig();
 module.exports.watchOptions = { };
 module.exports.snapshot = { managedPaths: [/^(.+?[\\/]node_modules)[\\/]((?!.*)).*[\\/]*/] };
+module.exports.ignoreWarnings = [{
+    module: /node_modules/
+}];
