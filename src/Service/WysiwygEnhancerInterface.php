@@ -4,9 +4,6 @@ namespace Base\Service;
 
 use Base\Imagine\FilterInterface;
 
-/**
- *
- */
 interface WysiwygEnhancerInterface
 {
     public function supports(mixed $json): bool;

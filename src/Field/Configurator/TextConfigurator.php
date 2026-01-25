@@ -14,9 +14,6 @@ use function Symfony\Component\String\u;
 use const ENT_NOQUOTES;
 use const PHP_INT_MAX;
 
-/**
- *
- */
 class TextConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool

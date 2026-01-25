@@ -18,9 +18,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Traversable;
 
-/**
- *
- */
 class PasswordType extends AbstractType implements AutovalidateInterface, DataMapperInterface
 {
     /**

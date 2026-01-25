@@ -11,9 +11,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
 
-/**
- *
- */
 class HyperlinkCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

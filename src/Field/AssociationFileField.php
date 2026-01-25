@@ -10,9 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 final class AssociationFileField implements FieldInterface
 {
     use FieldTrait;

@@ -7,9 +7,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use Base\Field\Type\CollectionType;
 
-/**
- *
- */
 class CollectionField implements FieldInterface
 {
     use FieldTrait;

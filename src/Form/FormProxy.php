@@ -6,9 +6,6 @@ use Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
 
-/**
- *
- */
 class FormProxy implements FormProxyInterface
 {
     /**

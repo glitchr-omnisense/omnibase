@@ -10,9 +10,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\FormBuilderInterface;
 
-/**
- *
- */
 final class EmojiPickerType extends AbstractType
 {
     public function getBlockPrefix(): string

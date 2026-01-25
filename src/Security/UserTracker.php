@@ -10,9 +10,6 @@ use Base\Routing\AdvancedRouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-/**
- *
- */
 class UserTracker
 {
     public const PHPUSERID = "PHPUSERID";

@@ -7,9 +7,6 @@ use Symfony\Component\Routing\RouterInterface;
 use Base\Service\Model\Pagination;
 use Doctrine\ORM\Query;
 
-/**
- *
- */
 class Paginator implements PaginatorInterface
 {
     /**

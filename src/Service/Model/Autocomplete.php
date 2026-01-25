@@ -6,9 +6,6 @@ use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-/**
- *
- */
 class Autocomplete
 {
     /** @var TranslatorInterface */

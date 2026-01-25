@@ -23,9 +23,6 @@ use Imagine\Image\PointInterface;
 use Imagine\Image\ProfileInterface;
 use function in_array;
 
-/**
- *
- */
 class Image extends AbstractImage
 {
     /**

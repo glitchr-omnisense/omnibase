@@ -10,9 +10,6 @@ use Base\Entity\Layout\ShortLink;
 use Base\Field\SlugField;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
-/**
- *
- */
 class ShortLinkCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

@@ -8,9 +8,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 use Symfony\Component\Form\AbstractType;
 
-/**
- *
- */
 class SecurityResetPasswordConfirmType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

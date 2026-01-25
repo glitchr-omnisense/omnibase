@@ -8,9 +8,6 @@ use GdImage;
 use InvalidArgumentException;
 use IteratorAggregate;
 
-/**
- *
- */
 class Palette implements Countable, IteratorAggregate
 {
     protected array $colors = [];

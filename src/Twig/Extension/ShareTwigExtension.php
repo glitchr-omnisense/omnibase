@@ -7,9 +7,6 @@ use Base\Service\Sharer;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- *
- */
 final class ShareTwigExtension extends AbstractExtension
 {
     /**

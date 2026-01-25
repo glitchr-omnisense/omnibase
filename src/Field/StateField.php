@@ -6,9 +6,6 @@ use Base\Enum\ThreadState;
 use Base\Field\Type\StateType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
-/**
- *
- */
 class StateField extends SelectField
 {
     public const OPTION_CLASS = 'class';

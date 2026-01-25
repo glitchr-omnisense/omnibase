@@ -6,9 +6,6 @@ use Base\Serializer\Aco;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
-/**
- *
- */
 class AcoEncoder implements EncoderInterface, DecoderInterface
 {
     public const FORMAT = 'aco';

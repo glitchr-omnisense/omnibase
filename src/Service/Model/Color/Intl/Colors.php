@@ -6,9 +6,6 @@ use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\Intl\ResourceBundle;
 
-/**
- *
- */
 final class Colors extends ResourceBundle
 {
     public const COLOR_DIR = "colors";

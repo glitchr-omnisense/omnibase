@@ -11,9 +11,6 @@ use Base\Field\ArrayField;
 use Base\Field\RouteField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 
-/**
- *
- */
 class SemanticCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

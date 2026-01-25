@@ -9,9 +9,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-/**
- *
- */
 class CountryType extends SelectType implements SelectInterface
 {
     private static array $additionalList = [];

@@ -44,9 +44,6 @@ use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 
-/**
- *
- */
 class SecurityController extends AbstractController
 {
     /**

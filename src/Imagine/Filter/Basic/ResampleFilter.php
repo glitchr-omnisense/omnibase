@@ -15,9 +15,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use function constant;
 use function defined;
 
-/**
- *
- */
 class ResampleFilter implements FilterInterface
 {
     /**

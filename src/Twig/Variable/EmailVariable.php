@@ -5,9 +5,6 @@ namespace Base\Twig\Variable;
 use Base\Service\BaseService;
 use Base\Service\LauncherInterface;
 
-/**
- *
- */
 class EmailVariable
 {
     protected LauncherInterface $launcher;

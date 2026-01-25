@@ -8,9 +8,6 @@ use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use InvalidArgumentException;
 
-/**
- *
- */
 class ScaleFilter implements FilterInterface
 {
     /**

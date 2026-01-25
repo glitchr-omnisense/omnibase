@@ -7,9 +7,6 @@ use DateTime;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 final class DateTimePickerField implements FieldInterface
 {
     use FieldTrait;

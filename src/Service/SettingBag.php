@@ -16,9 +16,6 @@ use InvalidArgumentException;
 use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
-/**
- *
- */
 class SettingBag implements SettingBagInterface, WarmableInterface
 {
     /**

@@ -6,9 +6,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
-/**
- *
- */
 final class IdField implements FieldInterface
 {
     use FieldTrait;

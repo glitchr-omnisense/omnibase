@@ -4,9 +4,6 @@ namespace Base\Service\Model\Wysiwyg;
 
 use Base\Repository\Layout\SemanticRepository;
 
-/**
- *
- */
 class SemanticEnhancer implements SemanticEnhancerInterface
 {
     protected SemanticRepository $semanticRepository;

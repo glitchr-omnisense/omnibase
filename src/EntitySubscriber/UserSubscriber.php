@@ -15,9 +15,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-/**
- *
- */
 class UserSubscriber implements EventSubscriberInterface
 {
     /**

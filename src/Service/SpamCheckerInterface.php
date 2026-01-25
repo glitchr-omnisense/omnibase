@@ -5,9 +5,6 @@ namespace Base\Service;
 use Base\Enum\SpamApi;
 use Base\Service\Model\SpamProtectionInterface;
 
-/**
- *
- */
 interface SpamCheckerInterface
 {
     /**

@@ -9,9 +9,6 @@ use Twig\Environment;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- *
- */
 interface BaseNotifierInterface extends NotifierInterface
 {
     /**

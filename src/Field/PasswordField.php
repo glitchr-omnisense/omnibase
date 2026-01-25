@@ -6,9 +6,6 @@ use Base\Field\Type\PasswordType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 final class PasswordField implements FieldInterface
 {
     use FieldTrait;

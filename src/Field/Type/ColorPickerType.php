@@ -14,9 +14,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 
-/**
- *
- */
 final class ColorPickerType extends AbstractType
 {
     public const THEME_CLASSIC = 'classic';

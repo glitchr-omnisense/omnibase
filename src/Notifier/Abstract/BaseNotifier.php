@@ -39,9 +39,6 @@ use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- *
- */
 abstract class BaseNotifier implements BaseNotifierInterface
 {
     /**

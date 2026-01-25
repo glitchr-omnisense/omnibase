@@ -2,9 +2,6 @@
 
 namespace Base\Enum\Quadrant;
 
-/**
- *
- */
 class Quadrant16 extends Quadrant8
 {
     public const NNE = "NORTH_NORTHEAST";

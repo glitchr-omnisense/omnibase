@@ -8,9 +8,6 @@ use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class PaginatorTwigExtension extends AbstractExtension
 {
     protected TranslatorInterface $translator;

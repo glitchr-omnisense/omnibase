@@ -12,9 +12,6 @@ use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\AdvancedRouterInterface;
 use ErrorException;
 
-/**
- *
- */
 class IconProvider extends AbstractLocalCache
 {
     /**

@@ -14,9 +14,6 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
 use Twig\Environment;
 
-/**
- *
- */
 class Sitemapper implements SitemapperInterface
 {
     /**

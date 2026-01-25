@@ -5,9 +5,6 @@ namespace Base\Enum\SystemOfUnits;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class BritishImperialUnits extends EnumType implements IconizeInterface
 {
     // const ...   = "";

@@ -5,9 +5,6 @@ namespace Base\Service;
 use Base\Traits\BagTrait;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 
-/**
- *
- */
 class ParameterBag extends ContainerBag implements ParameterBagInterface
 {
     use BagTrait;

@@ -4,9 +4,6 @@ namespace Base\Security\Session;
 
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
-/**
- *
- */
 class DynamicSessionStorage extends NativeSessionStorage
 {
     public function setOptions(array $options): void

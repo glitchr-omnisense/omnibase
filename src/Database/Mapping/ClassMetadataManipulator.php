@@ -42,9 +42,6 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use function count;
 use function in_array;
 
-/**
- *
- */
 class ClassMetadataManipulator extends AbstractLocalCache
 {
     /**

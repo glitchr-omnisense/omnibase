@@ -5,9 +5,6 @@ namespace Base\Cache;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Symfony\Contracts\Cache\CacheInterface;
 
-/**
- *
- */
 final class SimpleCache extends AbstractLocalCache implements SimpleCacheInterface
 {
     public function warmUp(string $cacheDir, ?string $buildDir = null): array

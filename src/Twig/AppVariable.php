@@ -18,9 +18,6 @@ use Twig\Environment;
 
 use Symfony\Bridge\Twig\AppVariable as SymfonyAppVariable;
 
-/**
- *
- */
 class AppVariable
 {
     use ProxyTrait;

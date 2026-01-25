@@ -8,9 +8,6 @@ use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 
-/**
- *
- */
 trait SimpleCacheTrait
 {
     public function __construct(string $cacheDir, ?string $buildDir = null)

@@ -7,9 +7,6 @@ use Base\Service\Model\Wysiwyg\SemanticEnhancerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- *
- */
 final class SemanticTwigExtension extends AbstractExtension
 {
     /**

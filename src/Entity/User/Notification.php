@@ -758,7 +758,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $notification;
     }
 
-    public function asChatMessage(RecipientInterface $recipient, string $transport = null): ?ChatMessage
+    public function asChatMessage(RecipientInterface $recipient, ?string $transport = null): ?ChatMessage
     {
         $chatMessage = ChatMessage::fromNotification($this->__toPrune());
 

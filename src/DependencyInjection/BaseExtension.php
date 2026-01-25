@@ -21,9 +21,6 @@ use Base\Bundle\AbstractBaseExtension;
 use Base\Service\Model\Sharer\SharerAdapterInterface;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
-/**
- *
- */
 class BaseExtension extends AbstractBaseExtension implements PrependExtensionInterface
 {
     /**

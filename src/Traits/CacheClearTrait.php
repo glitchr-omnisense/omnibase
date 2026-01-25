@@ -10,9 +10,6 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Process\Process;
 
-/**
- *
- */
 trait CacheClearTrait
 {
     protected function checkCache(SymfonyStyle $io): void

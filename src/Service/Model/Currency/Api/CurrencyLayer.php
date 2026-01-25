@@ -7,9 +7,6 @@ use Base\Service\SettingBagInterface;
 
 // Endpoint : https://currencylayer.com/
 
-/**
- *
- */
 class CurrencyLayer extends AbstractCurrencyApi
 {
     protected bool $enterprise;

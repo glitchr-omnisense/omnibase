@@ -2,9 +2,6 @@
 
 namespace Base\Imagine\Filter\Basic;
 
-/**
- *
- */
 class UpscaleFilter extends ScaleFilter
 {
     /**

@@ -14,9 +14,6 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDi
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
-/**
- *
- */
 abstract class AbstractEventDispatcher implements EventDispatcherInterface
 {
     protected array $events;

@@ -6,9 +6,6 @@ use Dompdf\Dompdf;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-/**
- *
- */
 class PdfResponse extends Response
 {
     public function __construct(string|Response $data = null, int $status = 200, array $headers = [])

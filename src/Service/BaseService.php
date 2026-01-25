@@ -60,9 +60,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use function is_object;
 
-/**
- *
- */
 class BaseService implements RuntimeExtensionInterface
 {
     use BaseTrait;

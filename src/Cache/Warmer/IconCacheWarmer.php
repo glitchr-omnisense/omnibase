@@ -7,9 +7,6 @@ use Base\Cache\Abstract\AbstractLocalCacheWarmer;
 use Base\Service\IconProvider;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-/**
- *
- */
 class IconCacheWarmer extends AbstractLocalCacheWarmer
 {
     /**

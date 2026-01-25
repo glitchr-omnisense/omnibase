@@ -14,9 +14,6 @@ use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
-/**
- *
- */
 class AdminVariable extends SiteVariable
 {
     protected AdminUrlGenerator $adminUrlGenerator;

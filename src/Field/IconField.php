@@ -7,9 +7,6 @@ use Base\Service\Model\IconProvider\IconAdapterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-/**
- *
- */
 class IconField extends SelectField implements FieldInterface
 {
     public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';

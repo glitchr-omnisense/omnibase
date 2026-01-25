@@ -6,9 +6,6 @@ use Base\Form\Common\AbstractType;
 use Symfony\Component\Form\SubmitButtonTypeInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- *
- */
 class SubmitType extends AbstractType implements SubmitButtonTypeInterface
 {
     /**

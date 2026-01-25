@@ -13,9 +13,6 @@ use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-/**
- *
- */
 class DateTimePickerType extends AbstractType
 {
     /** @var ParameterBagInterface */

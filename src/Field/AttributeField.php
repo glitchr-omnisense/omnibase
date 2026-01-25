@@ -6,9 +6,6 @@ use Base\Field\Type\AttributeType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 final class AttributeField implements FieldInterface
 {
     use FieldTrait;

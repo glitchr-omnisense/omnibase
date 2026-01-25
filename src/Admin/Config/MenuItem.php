@@ -14,9 +14,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SectionMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
 use Symfony\Component\Routing\RouterInterface;
 
-/**
- *
- */
 class MenuItem
 {
     public static IconProvider $iconProvider;

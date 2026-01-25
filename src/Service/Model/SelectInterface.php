@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model;
 
-/**
- *
- */
 interface SelectInterface
 {
     public static function getIcon(string $id, int $index = -1): ?string;

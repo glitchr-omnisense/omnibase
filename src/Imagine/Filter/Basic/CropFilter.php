@@ -10,9 +10,6 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\Point;
 use InvalidArgumentException;
 
-/**
- *
- */
 class CropFilter implements FilterInterface
 {
     /** @var string */

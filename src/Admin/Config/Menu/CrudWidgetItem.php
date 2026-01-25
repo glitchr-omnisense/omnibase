@@ -19,9 +19,6 @@ use function gettype;
 use function in_array;
 use function is_string;
 
-/**
- *
- */
 final class CrudWidgetItem implements MenuItemInterface
 {
     use MenuItemTrait;

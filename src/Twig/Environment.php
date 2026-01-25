@@ -14,9 +14,6 @@ use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Loader\LoaderInterface;
 
-/**
- *
- */
 class Environment extends TwigEnvironment
 {
     protected RequestStack $requestStack;

@@ -4,9 +4,6 @@ namespace Base\Traits;
 
 use Exception;
 
-/**
- *
- */
 trait BagTrait
 {
     /**

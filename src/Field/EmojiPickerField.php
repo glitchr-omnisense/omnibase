@@ -8,9 +8,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Base\Field\Type\EmojiPickerType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
-/**
- *
- */
 final class EmojiPickerField implements FieldInterface
 {
     use FieldTrait;

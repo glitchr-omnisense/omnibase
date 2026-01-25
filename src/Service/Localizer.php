@@ -15,9 +15,6 @@ use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 use Symfony\Component\Intl\Timezones;
 
-/**
- *
- */
 class Localizer extends AbstractLocalCache implements LocalizerInterface
 {
     public const LOCALE_FORMAT = "xx-XX";

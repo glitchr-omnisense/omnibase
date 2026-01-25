@@ -10,9 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
 use NumberFormatter;
 
-/**
- *
- */
 final class StockConfigurator implements FieldConfiguratorInterface
 {
     private $intlFormatter;

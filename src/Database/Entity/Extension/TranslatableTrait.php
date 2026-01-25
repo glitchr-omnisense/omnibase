@@ -14,9 +14,6 @@ use Exception;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 
-/**
- *
- */
 trait TranslatableTrait
 {
     private static $translationClass;

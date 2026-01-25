@@ -6,9 +6,6 @@ use Base\Field\Type\VideoType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-/**
- *
- */
 class VideoField extends FileField implements FieldInterface
 {
     public const OPTION_RENDER_FORMAT = 'renderFormat';

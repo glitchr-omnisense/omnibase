@@ -5,9 +5,6 @@ namespace Base\Enum;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class WorkflowState extends EnumType implements IconizeInterface
 {
     public const SUBMITTED = "WORKFLOW_SUBMITTED";

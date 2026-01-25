@@ -10,9 +10,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- *
- */
 #[AsCommand(name: 'app:notifier', aliases: [], description: 'This command gives an overview of the templated notifications')]
 class NotifierCommand extends Command
 {

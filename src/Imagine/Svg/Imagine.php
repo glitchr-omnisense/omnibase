@@ -14,9 +14,6 @@ use Imagine\Image\Palette\Color\ColorInterface;
 use function in_array;
 use function is_resource;
 
-/**
- *
- */
 class Imagine extends AbstractImagine
 {
     public function create(ImageBoxInterface $size, ColorInterface $color = null): Image

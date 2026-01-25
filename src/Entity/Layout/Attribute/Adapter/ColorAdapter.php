@@ -34,7 +34,7 @@ class ColorAdapter extends AbstractAdapter
         return $value;
     }
 
-    public function getName(string $locale = null): string
+    public function getName(?string $locale = null): string
     {
         return Colors::getName($this->color, $locale);
     }

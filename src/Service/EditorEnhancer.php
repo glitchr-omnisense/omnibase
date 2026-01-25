@@ -4,9 +4,6 @@ namespace Base\Service;
 
 use Base\Imagine\FilterInterface;
 
-/**
- *
- */
 class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
 {
     public function supports(mixed $json): bool

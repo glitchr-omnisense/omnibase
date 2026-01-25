@@ -7,9 +7,6 @@ use Base\Controller\Admin\Crud\Layout\WidgetCrudController;
 use Base\Field\ArrayField;
 use Base\Field\RouteField;
 
-/**
- *
- */
 class RouteCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }

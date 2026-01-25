@@ -7,9 +7,6 @@ use Imagine\Filter\Basic\Autorotate;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
 
-/**
- *
- */
 class BitmapFilter implements BitmapFilterInterface
 {
     protected array $filters;

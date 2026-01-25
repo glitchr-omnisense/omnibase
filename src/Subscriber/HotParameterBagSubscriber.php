@@ -11,9 +11,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-/**
- *
- */
 class HotParameterBagSubscriber implements EventSubscriberInterface
 {
     /**

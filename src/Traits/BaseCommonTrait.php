@@ -26,9 +26,6 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 
-/**
- *
- */
 trait BaseCommonTrait
 {
     /**

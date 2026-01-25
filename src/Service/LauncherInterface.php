@@ -5,9 +5,6 @@ namespace Base\Service;
 use DateTime;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
-/**
- *
- */
 interface LauncherInterface
 {
     public function getLaunchdate(?string $locale = null): ?DateTime;

@@ -2,9 +2,6 @@
 
 namespace Base\Database\Entity\Extension;
 
-/**
- *
- */
 interface TranslatableInterface
 {
     public function translate(?string $locale);

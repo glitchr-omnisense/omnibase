@@ -7,9 +7,6 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 
-/**
- *
- */
 class PasteFilter implements FilterInterface
 {
     /**

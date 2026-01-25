@@ -5,9 +5,6 @@ namespace Base\Enum;
 use Base\Database\Type\SetType;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class UserState extends SetType implements IconizeInterface
 {
     public const NEWCOMER = "USER_NEWCOMER";

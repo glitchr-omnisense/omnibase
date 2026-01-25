@@ -13,9 +13,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Mime\FileinfoMimeTypeGuesser;
 
-/**
- *
- */
 class WidgetController extends AbstractController
 {
     private AttachmentRepository $attachmentRepository;

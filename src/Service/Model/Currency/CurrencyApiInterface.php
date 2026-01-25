@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model\Currency;
 
-/**
- *
- */
 interface CurrencyApiInterface
 {
     public function supports(string $key): bool;

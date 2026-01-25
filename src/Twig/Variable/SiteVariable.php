@@ -11,9 +11,6 @@ use Base\Service\MaintenanceProviderInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
 
-/**
- *
- */
 class SiteVariable
 {
     /**

@@ -14,9 +14,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
-/**
- *
- */
 class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAccess
 {
     protected bool $computed = false;

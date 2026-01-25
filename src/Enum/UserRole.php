@@ -6,9 +6,6 @@ use Base\Controller\Admin\Crud\UserCrudController;
 use Base\Database\Type\SetType;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class UserRole extends SetType implements IconizeInterface
 {
     public const EDITOR = "ROLE_EDITOR";

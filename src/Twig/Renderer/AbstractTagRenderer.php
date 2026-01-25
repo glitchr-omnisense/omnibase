@@ -7,9 +7,6 @@ use Base\Service\ParameterBagInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Twig\Environment;
 
-/**
- *
- */
 abstract class AbstractTagRenderer implements TagRendererInterface
 {
     protected Environment $twig;

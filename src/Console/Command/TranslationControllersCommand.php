@@ -10,9 +10,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- *
- */
 #[AsCommand(name: 'translation:controllers', aliases: [], description: '')]
 class TranslationControllersCommand extends Command
 {

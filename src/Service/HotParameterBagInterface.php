@@ -4,9 +4,6 @@ namespace Base\Service;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-/**
- *
- */
 interface HotParameterBagInterface extends ParameterBagInterface
 {
     /**

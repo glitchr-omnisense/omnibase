@@ -4,9 +4,6 @@ namespace Base\Annotations\Traits;
 
 use Exception;
 
-/**
- *
- */
 trait HierarchifyTrait
 {
     /**

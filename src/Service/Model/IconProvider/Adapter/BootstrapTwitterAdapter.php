@@ -5,9 +5,6 @@ namespace Base\Service\Model\IconProvider\Adapter;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 
-/**
- *
- */
 class BootstrapTwitterAdapter extends AbstractIconAdapter
 {
     public const STYLE_REGULAR = "regular";

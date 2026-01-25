@@ -22,9 +22,6 @@ use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
 use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
 use Twig\Environment;
 
-/**
- *
- */
 class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCacheInterface
 {
     use SimpleCacheTrait;

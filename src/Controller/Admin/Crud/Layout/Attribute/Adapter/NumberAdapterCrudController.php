@@ -5,9 +5,6 @@ namespace Base\Controller\Admin\Crud\Layout\Attribute\Adapter;
 use Base\Controller\Admin\Crud\Layout\Attribute\Adapter\Common\AbstractAdapterCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 
-/**
- *
- */
 class NumberAdapterCrudController extends AbstractAdapterCrudController
 {
     public static function getPreferredIcon(): ?string

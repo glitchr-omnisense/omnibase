@@ -11,9 +11,6 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class HtmlTwigExtension extends AbstractExtension
 {
     protected HtmlTagRenderer $htmlTagRenderer;

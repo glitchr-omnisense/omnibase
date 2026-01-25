@@ -6,9 +6,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use DOMDocument;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-/**
- *
- */
 class HeadingEnhancer implements HeadingEnhancerInterface
 {
     /**

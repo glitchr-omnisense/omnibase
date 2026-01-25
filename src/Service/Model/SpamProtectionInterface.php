@@ -5,9 +5,6 @@ namespace Base\Service\Model;
 use App\Entity\User;
 use DateTime;
 
-/**
- *
- */
 interface SpamProtectionInterface
 {
     public function getSpamBlameable(): ?User;

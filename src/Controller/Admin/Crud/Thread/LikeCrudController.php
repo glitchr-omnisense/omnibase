@@ -7,9 +7,6 @@ use Base\Field\IconField;
 use Base\Field\SelectField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
-/**
- *
- */
 class LikeCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

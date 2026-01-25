@@ -9,9 +9,6 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class LocalizerTwigExtension extends AbstractExtension
 {
     protected LocalizerInterface $localizer;

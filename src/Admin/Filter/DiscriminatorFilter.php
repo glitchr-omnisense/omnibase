@@ -12,9 +12,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\FilterTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Form\Filter\Type\ChoiceFilterType;
 use EasyCorp\Bundle\EasyAdminBundle\Form\Filter\Type\TextFilterType;
 
-/**
- *
- */
 class DiscriminatorFilter implements FilterInterface
 {
     use FilterTrait;

@@ -8,9 +8,6 @@ use InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
-/**
- *
- */
 class TextField implements FieldInterface
 {
     use FieldTrait;

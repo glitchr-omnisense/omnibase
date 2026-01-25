@@ -20,9 +20,6 @@ use Twig\TwigFilter;
 use Twig\TwigFunction;
 use Twig\TwigTest;
 
-/**
- *
- */
 final class MediaTwigExtension extends AbstractExtension
 {
     protected AdvancedRouterInterface $router;

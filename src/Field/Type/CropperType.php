@@ -22,9 +22,6 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-/**
- *
- */
 class CropperType extends AbstractType implements DataMapperInterface
 {
     /**

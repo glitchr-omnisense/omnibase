@@ -15,9 +15,6 @@ use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
 
-/**
- *
- */
 class ConnectionSubscriber implements EventSubscriberInterface
 {
     /**

@@ -7,9 +7,6 @@ use enshrined\svgSanitize\Sanitizer;
 use Base\Imagine\FilterInterface;
 use Imagine\Image\ImageInterface;
 
-/**
- *
- */
 class SanitizeFilter implements FilterInterface
 {
     private Sanitizer $sanitizer;

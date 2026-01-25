@@ -5,9 +5,6 @@ namespace Base\Service;
 use Exception;
 use RuntimeException;
 
-/**
- *
- */
 class HotParameterBag extends ParameterBag implements HotParameterBagInterface
 {
     public const HOT_N_READY = false; // Debugging

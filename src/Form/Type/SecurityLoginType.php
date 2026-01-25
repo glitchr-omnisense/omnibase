@@ -14,9 +14,6 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Util\StringUtil;
 
-/**
- *
- */
 class SecurityLoginType extends AbstractType
 {
     public function getBlockPrefix(): string

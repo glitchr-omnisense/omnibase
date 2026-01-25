@@ -8,9 +8,6 @@ use Imagine\Image\PointInterface;
 use InvalidArgumentException;
 use function in_array;
 
-/**
- *
- */
 class Box implements ImageBoxInterface
 {
     public const TYPE_ABSOLUTE = 0;

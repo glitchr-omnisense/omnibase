@@ -34,9 +34,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Process\Process;
 use TypeError;
 
-/**
- *
- */
 class IntegritySubscriber implements EventSubscriberInterface
 {
     public const int DEFAULT_PRIORITY = 7;

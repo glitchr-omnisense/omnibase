@@ -6,9 +6,6 @@ use Base\Imagine\FilterInterface;
 
 use Base\Controller\UX\MediaController;
 
-/**
- *
- */
 interface MediaServiceInterface extends FileServiceInterface
 {
     public function isCached(?string $path, array $config = [], FilterInterface|array $filters = []): bool;

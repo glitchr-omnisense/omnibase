@@ -31,9 +31,6 @@ use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class FunctionTwigExtension extends AbstractExtension
 {
     protected TranslatorInterface $translator;

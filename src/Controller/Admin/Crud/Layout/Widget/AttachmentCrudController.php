@@ -14,9 +14,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- *
- */
 class AttachmentCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }

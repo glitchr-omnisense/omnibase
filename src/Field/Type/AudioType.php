@@ -7,9 +7,6 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- *
- */
 class AudioType extends FileType
 {
     public function getBlockPrefix(): string

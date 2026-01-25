@@ -5,9 +5,6 @@ namespace Base\Service\Model\Obfuscator\Compression;
 use Base\Service\Model\Obfuscator\AbstractCompression;
 use Hashids\Hashids;
 
-/**
- *
- */
 class HashidsCompression extends AbstractCompression
 {
     /**

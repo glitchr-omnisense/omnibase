@@ -12,9 +12,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-/**
- *
- */
 class WysiwygType extends AbstractType
 {
     /** @var Environment */

@@ -5,9 +5,6 @@ namespace Base\Response;
 use DOMDocument;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- *
- */
 class XmlResponse extends Response
 {
     /**

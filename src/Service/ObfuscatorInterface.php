@@ -2,9 +2,6 @@
 
 namespace Base\Service;
 
-/**
- *
- */
 interface ObfuscatorInterface
 {
     public const NO_SHORT  = false;

@@ -6,9 +6,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-/**
- *
- */
 trait FormProcessorTrait
 {
     protected function getPost(): array

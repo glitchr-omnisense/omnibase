@@ -10,9 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
-/**
- *
- */
 class RoleConfigurator extends SelectConfigurator
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool

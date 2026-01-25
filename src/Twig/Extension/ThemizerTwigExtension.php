@@ -9,9 +9,6 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class ThemizerTwigExtension extends AbstractExtension
 {
     protected ThemizerInterface $themizer;

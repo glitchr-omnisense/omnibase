@@ -14,9 +14,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- *
- */
 class DiscriminatorConfigurator implements FieldConfiguratorInterface
 {
     /**

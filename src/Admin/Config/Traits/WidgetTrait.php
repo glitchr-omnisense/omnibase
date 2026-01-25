@@ -7,9 +7,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 use Exception;
 use const ARRAY_FILTER_USE_BOTH;
 
-/**
- *
- */
 trait WidgetTrait
 {
     /**

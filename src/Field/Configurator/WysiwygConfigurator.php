@@ -10,9 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use const ENT_NOQUOTES;
 
-/**
- *
- */
 class WysiwygConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool

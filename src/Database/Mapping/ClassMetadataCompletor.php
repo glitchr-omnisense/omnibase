@@ -2,9 +2,6 @@
 
 namespace Base\Database\Mapping;
 
-/**
- *
- */
 class ClassMetadataCompletor
 {
     protected ?string $className = null;

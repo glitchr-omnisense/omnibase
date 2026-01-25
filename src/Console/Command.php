@@ -16,9 +16,6 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
-/**
- *
- */
 class Command extends SymfonyCommand
 {
     /**

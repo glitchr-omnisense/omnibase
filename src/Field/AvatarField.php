@@ -6,9 +6,6 @@ use Base\Field\Type\AvatarType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-/**
- *
- */
 class AvatarField extends ImageField implements FieldInterface
 {
     public const OPTION_RENDER_FORMAT = 'renderFormat';

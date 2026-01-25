@@ -10,9 +10,6 @@ use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 use InvalidArgumentException;
 
-/**
- *
- */
 class BackgroundFilter implements FilterInterface
 {
     /**

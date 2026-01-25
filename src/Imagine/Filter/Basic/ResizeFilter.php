@@ -7,9 +7,6 @@ use Base\Imagine\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 
-/**
- *
- */
 class ResizeFilter implements FilterInterface
 {
     private ?int $height;

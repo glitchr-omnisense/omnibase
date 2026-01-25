@@ -35,9 +35,6 @@ use Base\Service\SettingBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
-/**
- *
- */
 class SecuritySubscriber implements EventSubscriberInterface
 {
     /**

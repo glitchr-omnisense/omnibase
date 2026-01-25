@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model;
 
-/**
- *
- */
 class SitemapEntry
 {
     protected string $loc;

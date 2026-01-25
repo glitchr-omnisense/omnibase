@@ -11,9 +11,6 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
 
-/**
- *
- */
 class FileService implements FileServiceInterface
 {
     public const USE_SHORT = Obfuscator::USE_SHORT;

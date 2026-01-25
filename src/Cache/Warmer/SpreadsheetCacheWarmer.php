@@ -7,9 +7,6 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
-/**
- *
- */
 class SpreadsheetCacheWarmer implements CacheWarmerInterface
 {
     protected int $shellVerbosity;

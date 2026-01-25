@@ -13,9 +13,6 @@ use Countable;
 use Iterator;
 use UnexpectedValueException;
 
-/**
- *
- */
 class Pagination implements PaginationInterface, Iterator, Countable
 {
     protected RouterInterface $router;

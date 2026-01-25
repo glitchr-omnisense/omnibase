@@ -7,9 +7,6 @@ use Base\Database\Entity\EntityExtensionInterface;
 use Base\DependencyInjection\Compiler\AbstractPass;
 use Dom\Entity;
 
-/**
- *
- */
 class EntityExtensionPass extends AbstractPass
 {
     public function serviceInterface(): ?string 

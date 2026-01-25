@@ -7,9 +7,6 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 
-/**
- *
- */
 class AdminVoter extends Voter
 {
     public const BACKEND = "BACKEND";

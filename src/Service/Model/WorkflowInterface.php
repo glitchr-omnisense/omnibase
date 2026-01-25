@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model;
 
-/**
- *
- */
 interface WorkflowInterface extends \Symfony\Component\Workflow\WorkflowInterface
 {
     public static function getWorkflowName(): string;

@@ -28,9 +28,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Base\Controller\UX\MediaController;
 
-/**
- *
- */
 class MediaService extends FileService implements MediaServiceInterface
 {
     /**

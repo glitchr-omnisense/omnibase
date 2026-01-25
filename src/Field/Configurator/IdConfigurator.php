@@ -17,9 +17,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use function Symfony\Component\String\u;
 
-/**
- *
- */
 class IdConfigurator implements FieldConfiguratorInterface
 {
     /**

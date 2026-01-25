@@ -7,9 +7,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use Base\Field\Type\ImageType;
 
-/**
- *
- */
 class ImageField extends FileField implements FieldInterface
 {
     public const OPTION_RENDER_FORMAT = "renderFormat";

@@ -12,9 +12,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-/**
- *
- */
 abstract class ThreadActionCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

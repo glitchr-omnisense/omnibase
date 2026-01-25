@@ -21,9 +21,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SubMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
 use Exception;
 
-/**
- *
- */
 class WidgetItem
 {
     public static $adminUrlGenerator;

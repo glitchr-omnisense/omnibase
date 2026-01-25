@@ -39,9 +39,6 @@ use League\Flysystem\Filesystem;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-/**
- *
- */
 class TimeMachine extends BackupManager implements TimeMachineInterface
 {
     /** @var CompressorProvider */

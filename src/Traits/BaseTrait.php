@@ -27,9 +27,6 @@ use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-/**
- *
- */
 trait BaseTrait
 {
     public static function getAnnotationReader(): ?AnnotationReader

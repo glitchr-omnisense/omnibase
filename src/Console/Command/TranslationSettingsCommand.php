@@ -15,9 +15,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- *
- */
 #[AsCommand(name: 'translation:settings', aliases: [], description: '')]
 class TranslationSettingsCommand extends Command
 {

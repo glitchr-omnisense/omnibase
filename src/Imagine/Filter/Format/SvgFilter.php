@@ -8,9 +8,6 @@ use Exception;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
 
-/**
- *
- */
 class SvgFilter implements SvgFilterInterface
 {
     protected array $filters;

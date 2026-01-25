@@ -6,9 +6,6 @@ use Base\Enum\UserGender as Gender;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- *
- */
 class GenderType extends AbstractType
 {
     public function getParent(): ?string

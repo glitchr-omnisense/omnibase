@@ -4,9 +4,6 @@ namespace Base\Service\Model;
 
 use App\Entity\Thread;
 
-/**
- *
- */
 interface PaginationInterface
 {
     public function getPage();

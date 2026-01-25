@@ -10,9 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-/**
- *
- */
 abstract class UserActionCrudController extends AbstractCrudController
 {
     /**

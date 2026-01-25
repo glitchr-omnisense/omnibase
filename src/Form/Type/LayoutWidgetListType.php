@@ -18,9 +18,6 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Util\StringUtil;
 use Traversable;
 
-/**
- *
- */
 class LayoutWidgetListType extends AbstractType implements DataMapperInterface
 {
     /**

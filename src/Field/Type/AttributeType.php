@@ -42,9 +42,6 @@ use Doctrine\ORM\Mapping\InverseSideMapping;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;
 
-/**
- *
- */
 class AttributeType extends AbstractType implements DataMapperInterface
 {
     /**

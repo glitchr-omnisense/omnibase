@@ -5,9 +5,6 @@ namespace Base\Service;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-/**
- *
- */
 class Themizer extends AbstractLocalCache implements ThemizerInterface
 {
     protected $parameterBag;

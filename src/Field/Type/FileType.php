@@ -33,9 +33,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Traversable;
 
-/**
- *
- */
 class FileType extends AbstractType implements DataMapperInterface
 {
     /**
