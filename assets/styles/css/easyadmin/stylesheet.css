@@ -590,9 +590,10 @@ height: 29px;
 
 .action-separator
 {
-margin: 0.75em;
-border-left: 1px solid  var(--sidebar-border-color);
-height: 35px;
+    margin: 0.75em;
+    border-left: 1px solid  var(--sidebar-border-color);
+    height: 35px;
+    background-image:none;
 }
 
 .login-wrapper .input-group button, .login-wrapper .input-group button:active, .login-wrapper .input-group button:focus, .login-wrapper .input-group button:hover

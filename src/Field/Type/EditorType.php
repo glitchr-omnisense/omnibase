@@ -88,7 +88,6 @@ class EditorType extends AbstractType
             if($json && count($json->blocks) < 1) {
                 $event->setData(null);
             }
-
         });
     }
 
@@ -112,8 +111,13 @@ class EditorType extends AbstractType
             
             foreach($value->blocks as $k => $block) {
                 if ($block->type === "image" && property_exists($block->data, "file") && property_exists($block->data->file, "url")) {
+
+                    dump("in: ". $block->data->file->url);
                     $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->url, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
                     $value->blocks[$k] = $block;
+
+                    dump("out: ".$block->data->file->url);
+                    exit(1);
                 }
             }
         }

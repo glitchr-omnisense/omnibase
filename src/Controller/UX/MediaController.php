@@ -254,10 +254,11 @@ class MediaController extends AbstractController
     public function ImageWebp($data): Response
     {
         $config = $this->mediaService->resolve($data);
+
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();
         }
-       
+
         $webp = $config["webp"] ?? $this->mediaService->isWebpEnabled();
         if (!$webp) {
             return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);

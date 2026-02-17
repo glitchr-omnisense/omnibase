@@ -16,7 +16,7 @@ class FileService implements FileServiceInterface
     public const USE_SHORT = Obfuscator::USE_SHORT;
     protected const CACHE_SUBDIVISION = 3;
     protected const CACHE_SUBDIVISION_LENGTH = 1;
-
+    
     /**
      * @var MimeTypes
      */
@@ -229,13 +229,13 @@ class FileService implements FileServiceInterface
         $config["options"] = $config["options"] ?? [];
         $config["local_cache"] = $config["local_cache"] ?? null;
 
-        while (($pathConfig = $this->obfuscator->decode(basename($path)/*, FileService::USE_SHORT*/))) {
+        while (($pathConfig = $this->obfuscator->decode(basename($path), FileService::USE_SHORT))) {
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        return $this->obfuscator->encode($config/*, FileService::USE_SHORT*/);
+        return $this->obfuscator->encode($config, FileService::USE_SHORT);
     }
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string

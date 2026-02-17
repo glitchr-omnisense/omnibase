@@ -204,11 +204,13 @@ class MediaService extends FileService implements MediaServiceInterface
 
         $output = [];
 
+        $storage = $config["storage"] ?? null;
         $pathList = is_array($path) ? $path : [$path];
         foreach ($pathList as $p) {
+
             $output[] = $supports_webp ?
-                $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters])) :
-                $this->generate("ux_imageExtension", [], $path, array_merge($config, ["extension" => $extension, "filters" => $filters]));
+                    $this->generate("ux_imageWebp", [], $p, array_merge($config, ["filters" => $filters])) :
+                    $this->generate("ux_imageExtension", [], $p, array_merge($config, ["filters" => $filters, "extension" => $extension]));
         }
 
         return is_array($path) ? $output : first($output);
@@ -535,6 +537,7 @@ class MediaService extends FileService implements MediaServiceInterface
         //
         // Resolve nested paths
         $options = $this->resolve($path, $filters);
+
         $path = $config["path"] ?? $options["path"] ?? $path; // Cache directory location
         $filters = $config["filters"] ?? $options["filters"] ?? [];
         $storage = $config["storage"] ?? $options["storage"] ?? null;
@@ -549,6 +552,7 @@ class MediaService extends FileService implements MediaServiceInterface
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
+
         if ($formatter === false) {
             throw new NotFoundHttpException("No filter provided at least one must be provided (and must implement \"" . FormatFilterInterface::class . "\").");
         }
@@ -580,10 +584,10 @@ class MediaService extends FileService implements MediaServiceInterface
             }
         }
 
-        $pathRelative = $this->flysystem->stripPrefix($output, $storage);
         
         // Encode path using hashid only: make sure the path is matching route generator
         // ... Otherwise, the controller will take over. Lines below make sure suffix is applied including filter operations
+        $pathRelative = $this->flysystem->stripPrefix($output, $storage);
         $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
         $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
@@ -615,7 +619,7 @@ class MediaService extends FileService implements MediaServiceInterface
 
                 $filteredPath = $this->filter($path, array_merge($config, ["local_cache" => false]), $filters) ?? $path;
                 if (!file_exists($filteredPath)) {
-                    
+
                     if (!$this->fallback) {
                         throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provide in ".$storage.".");
                     }
