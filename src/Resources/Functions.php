@@ -46,6 +46,14 @@ namespace {
         return implode('', $uniqueTokens);
     }
     
+    /**
+     * Get the topmost parent class in an inheritance hierarchy
+     *
+     * Traverses the inheritance chain to find the root ancestor class.
+     *
+     * @param object|string $object_or_class Object instance or class name
+     * @return string|false The root class name, or false if invalid input
+     */
     function get_root_class(object|string $object_or_class): string|false
     {
         $class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
@@ -548,8 +556,7 @@ namespace {
 
         // Compose full URL
         $url = $schemePart
-            . $userPart
-            . $password // already included in userPart if present
+            . $userPart  // already contains "user:password@" if password present
             . $machinePart
             . $subdomainPart
             . $domain
@@ -2179,7 +2186,7 @@ namespace {
         return (php_sapi_name() == "cli");
     }
 
-    if(!function_exists('mb_ucfirst')) { 
+    if(!function_exists('mb_lcfirst')) {
         function mb_lcfirst(array|string $str, ?string $encoding = null): array|string
         {
             if (is_array($str)) {
@@ -2760,15 +2767,45 @@ namespace {
         return array_combine($keys, array_values($array));
     }
 
+    /**
+     * Recursively apply a callback to all leaf values in a nested array
+     *
+     * Traverses a multi-dimensional array and applies a callback function to each
+     * leaf (non-array) value, preserving the array structure and keys.
+     *
+     * Performance: Creates a complete copy of the array structure. For side-effect-only
+     * operations (where the return value is discarded), use array_walk_recursive() instead.
+     *
+     * @param callable $callback Function to apply to each leaf value. Signature: function($value): mixed
+     * @param array $array The nested array to process
+     * @return array New array with callback applied to all leaf values, structure preserved
+     *
+     * @see array_walk_recursive() For side-effect-only operations without creating a copy
+     * @see array_leaves() To extract all leaf values into a flat array
+     * @see count_leaves() To count leaf nodes
+     */
     function array_map_recursive(callable $callback, array $array): array
     {
         $func = function ($item) use (&$func, &$callback) {
-            return is_array($item) ? array_map($func, $item) : call_user_func($callback, $item);
+            return is_array($item) ? array_map($func, $item) : $callback($item);
         };
 
         return array_map($func, $array);
     }
 
+    /**
+     * Extract all leaf values from a nested array into a flat array
+     *
+     * Recursively traverses a multi-dimensional array and returns all non-array
+     * values (leaves) as a flat, numerically-indexed array. Keys are not preserved.
+     *
+     * @param array $array The nested array to extract leaves from
+     * @return array Flat array containing all leaf values
+     *
+     * @see array_map_recursive() To transform leaf values while preserving structure
+     * @see count_leaves() To count leaf nodes
+     * @see json_leaves() For JSON-specific leaf extraction with reference support
+     */
     function array_leaves(array $array): array
     {
         $leaves = [];
@@ -2780,8 +2817,12 @@ namespace {
     }
 
     /**
-     * @param array $array
-     * @return int
+     * Count the number of leaf nodes in a nested array
+     *
+     * @param array $array The nested array to count leaves in
+     * @return int Total number of non-array values (leaf nodes)
+     *
+     * @see array_leaves() To extract the actual leaf values
      */
     function count_leaves(array $array)
     {
@@ -3066,11 +3107,41 @@ namespace {
     const ARRAY_TRANSFORMS_OVERRIDE = 1;
     const ARRAY_TRANSFORMS_MERGE = 2;
 
+    /**
+     * Transform an array by applying a callback that returns new key-value pairs
+     *
+     * Advanced array transformation function that supports:
+     * - Generator yields for multiple outputs per input
+     * - Recursive callbacks via third parameter
+     * - Conflict resolution strategies (override vs merge)
+     * - Depth tracking for nested transformations
+     *
+     * The callback receives: ($key, $value, $callback, $counter, $depth)
+     * and must return: array|Generator with signature [newKey, newValue] or yield [newKey => newValue]
+     *
+     * Used extensively in SelectType.php for building form choice hierarchies.
+     *
+     * @param callable $callback Transformation function. Must declare 'array' or 'Generator' return type.
+     * @param array $array The array to transform
+     * @param int $depth Current recursion depth (internal use)
+     * @param int $prevent_conflicts Strategy: ARRAY_TRANSFORMS_OVERRIDE (default) or ARRAY_TRANSFORMS_MERGE
+     * @return array Transformed array
+     *
+     * @throws Exception If callback lacks proper return type declaration
+     */
     function array_transforms(callable $callback, array $array, int $depth = 0, int $prevent_conflicts = ARRAY_TRANSFORMS_OVERRIDE): array
     {
-        $reflection = new ReflectionFunction($callback);
-        if (!$reflection->getReturnType() || !in_array($reflection->getReturnType()->getName(), ['array', 'Generator'])) {
-            throw new Exception('Callable function must use "array" or "Generator" return type');
+        // Cache ReflectionFunction to avoid recreating for recursive calls with same callback
+        static $reflectionCache = [];
+
+        $callbackId = is_object($callback) ? spl_object_id($callback) : md5(serialize($callback));
+
+        if (!isset($reflectionCache[$callbackId])) {
+            $reflection = new ReflectionFunction($callback);
+            if (!$reflection->getReturnType() || !in_array($reflection->getReturnType()->getName(), ['array', 'Generator'])) {
+                throw new Exception('Callable function must use "array" or "Generator" return type');
+            }
+            $reflectionCache[$callbackId] = true; // Store validation result only
         }
 
         $tArray = [];
