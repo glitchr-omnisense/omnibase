@@ -222,6 +222,19 @@ class FileService implements FileServiceInterface
             return null;
         }
 
+        // EARLY CHECK: If path matches a media route, extract the UUID data
+        $routeMatch = $this->router->getRouteMatch($path);
+        if ($routeMatch && isset($routeMatch["_route"]) && str_starts_with($routeMatch["_route"], "ux_image")) {
+            // Already an obfuscated URL - extract the data parameter
+            $data = $routeMatch["data"] ?? null;
+            if ($data) {
+                // Clean up the data (remove slashes from subdivided path)
+                $data = str_replace("/", "", $data);
+                // Return the UUID as-is (already encoded)
+                return $data;
+            }
+        }
+
         $path = realpath($path);
         $path = "/" . str_strip($path, $this->router->getAssetUrl(""));
 

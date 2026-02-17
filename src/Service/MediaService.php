@@ -321,6 +321,17 @@ class MediaService extends FileService implements MediaServiceInterface
             return null;
         }
 
+        // EARLY CHECK: If path matches a media route, extract the subdivided data
+        $routeMatch = $this->router->getRouteMatch($path);
+        if ($routeMatch && isset($routeMatch["_route"]) && str_starts_with($routeMatch["_route"], "ux_image")) {
+            // Already an obfuscated URL - extract the data parameter
+            $data = $routeMatch["data"] ?? null;
+            if ($data) {
+                // Data is already subdivided (e.g., "AB/CD/EF/GH/IJ/...") - return as-is
+                return $data;
+            }
+        }
+
         $path = "/" . str_strip($path, $this->router->getAssetUrl(""));
 
         $config["path"] = $path;

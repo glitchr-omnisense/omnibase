@@ -111,18 +111,13 @@ class EditorType extends AbstractType
             
             foreach($value->blocks as $k => $block) {
                 if ($block->type === "image" && property_exists($block->data, "file") && property_exists($block->data->file, "url")) {
-
-                    dump("in: ". $block->data->file->url);
                     $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->url, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
                     $value->blocks[$k] = $block;
-
-                    dump("out: ".$block->data->file->url);
-                    exit(1);
                 }
             }
         }
 
-        $view->vars["value"] = is_json($value) ? json_encode($value) : $view->vars["value"];
+        $view->vars["value"] = (is_object($value) || is_array($value)) ? json_encode($value) : $view->vars["value"];
         $view->vars["uploadByFile"] = $this->router->generate("ux_editorjs_uploadByFile", ["data" => $data]);
         $view->vars["uploadByUrl"]  = $this->router->generate("ux_editorjs_uploadByUrl", ["data" => $data]);
 
