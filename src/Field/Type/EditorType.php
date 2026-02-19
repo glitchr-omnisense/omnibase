@@ -111,7 +111,8 @@ class EditorType extends AbstractType
             
             foreach($value->blocks as $k => $block) {
                 if ($block->type === "image" && property_exists($block->data, "file") && property_exists($block->data->file, "url")) {
-                    $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->url, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
+                    $block->data->file->origin ??= $block->data->file->url; // @deprecated - to be removed in favor of "storageId" property later on
+                    $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->origin, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
                     $value->blocks[$k] = $block;
                 }
             }

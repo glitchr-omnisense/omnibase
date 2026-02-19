@@ -593,7 +593,7 @@ height: 29px;
     margin: 0.75em;
     border-left: 1px solid  var(--sidebar-border-color);
     height: 35px;
-    background-image:none;
+    background-image: none !important;
 }
 
 .login-wrapper .input-group button, .login-wrapper .input-group button:active, .login-wrapper .input-group button:focus, .login-wrapper .input-group button:hover
@@ -1401,6 +1401,11 @@ ul.sidebar-menu a { white-space: nowrap; }
     bottom: 0;
 }
 
+.ea.ea-generic
+{
+    overflow:hidden;
+    height:100%;
+}
 
 .ea-index .flash-messages, .ea-edit .flash-messages, .ea-details .flash-messages, .ea.ea-generic .flash-messages
 { 

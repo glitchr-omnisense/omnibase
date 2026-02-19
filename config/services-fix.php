@@ -10,10 +10,6 @@ return static function (ContainerConfigurator $container): void {
 
     $services->defaults();
 
-    // Backup Manager
-    $services->set('Backup\Manager\Manager')
-        ->public(true);
-
     // Notifier fix
     $services->alias('Symfony\Component\Notifier\Channel\ChannelPolicyInterface', 'notifier.channel_policy');
 

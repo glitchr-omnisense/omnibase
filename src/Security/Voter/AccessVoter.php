@@ -61,6 +61,12 @@ class AccessVoter extends Voter
 
     protected ?array $urlExceptions;
 
+    // Request-scoped cache for parameter bag reads
+    private ?bool $adminAccessCache = null;
+    private ?bool $userAccessCache = null;
+    private ?bool $publicAccessCache = null;
+    private ?string $currentFirewallCache = null;
+
     public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocalizerInterface $localizer, MaintenanceProviderInterface $maintenanceProvider, LauncherInterface $launcher)
     {
         $this->requestStack = $requestStack;
@@ -72,11 +78,13 @@ class AccessVoter extends Voter
         $this->maintenanceProvider = $maintenanceProvider;
         $this->launcher = $launcher;
 
-        $this->urlExceptions   = array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocale());
-        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getLocaleLang());
-        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocale());
-        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", $this->localizer->getDefaultLocaleLang());
-        $this->urlExceptions ??= array_search_by($this->parameterBag->get("base.access_restriction.exceptions"), "locale", null) ?? [];
+        // Fetch exceptions once to avoid duplicate parameter bag calls
+        $exceptions = $this->parameterBag->get("base.access_restriction.exceptions");
+        $this->urlExceptions   = array_search_by($exceptions, "locale", $this->localizer->getLocale());
+        $this->urlExceptions ??= array_search_by($exceptions, "locale", $this->localizer->getLocaleLang());
+        $this->urlExceptions ??= array_search_by($exceptions, "locale", $this->localizer->getDefaultLocale());
+        $this->urlExceptions ??= array_search_by($exceptions, "locale", $this->localizer->getDefaultLocaleLang());
+        $this->urlExceptions ??= array_search_by($exceptions, "locale", null) ?? [];
     }
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -86,29 +94,35 @@ class AccessVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
+        // Initialize request-scoped cache for parameter bag reads
+        if ($this->adminAccessCache === null) {
+            $this->adminAccessCache = filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
+        }
+        if ($this->userAccessCache === null) {
+            $this->userAccessCache = filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
+        }
+        if ($this->publicAccessCache === null) {
+            $this->publicAccessCache = filter_var($this->parameterBag->get("base.access_restriction.public_access"), FILTER_VALIDATE_BOOLEAN);
+        }
+
         $user = $subject instanceof User ? $subject : null;
         $url = is_string($subject) || $subject instanceof Referrer ? $subject : get_url();
 
         switch ($attribute) {
 
             case self::ADMIN_ACCESS:
-                $access = filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
+                $access = $this->adminAccessCache;
                 $access |= $user && $user->isGranted("ROLE_SUPERADMIN");
                 return $access;
 
             case self::USER_ACCESS:
-                $access = filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
-                $access |=
-                    filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN)
-                    && $user && $user->isGranted("ROLE_ADMIN");
+                $access = $this->userAccessCache;
+                $access |= $this->adminAccessCache && $user && $user->isGranted("ROLE_ADMIN");
                 return $access;
 
             case self::ANONYMOUS_ACCESS:
-                $access = filter_var($this->parameterBag->get("base.access_restriction.public_access"), FILTER_VALIDATE_BOOLEAN);
-                $access |= (
-                        filter_var($this->parameterBag->get("base.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN) ||
-                        filter_var($this->parameterBag->get("base.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN)
-                    ) && $user && $user->isGranted("ROLE_USER");
+                $access = $this->publicAccessCache;
+                $access |= ($this->adminAccessCache || $this->userAccessCache) && $user && $user->isGranted("ROLE_USER");
 
                 return $access;
 
@@ -124,7 +138,11 @@ class AccessVoter extends Voter
                 $firewallNames = $this->parameterBag->get("base.access_restriction.firewalls");
                 $isRestrictedFirewall = false;
 
-                $firewall = $this->router->getRouteFirewall($url);
+                // Cache firewall resolution (expensive URL pattern matching)
+                if ($this->currentFirewallCache === null) {
+                    $this->currentFirewallCache = $this->router->getRouteFirewall($url);
+                }
+                $firewall = $this->currentFirewallCache;
                 if ($firewall == null) {
                     return true;
                 }

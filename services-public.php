@@ -98,7 +98,7 @@ return static function (ContainerConfigurator $container): void {
     $services->alias('base.translator', 'Base\Service\Translator');
     $services->alias('Base\Service\TranslatorInterface', 'base.translator');
 
-    $services->alias('parameter_bag.hot', 'Base\Service\ParameterBag');
+    $services->alias('parameter_bag.hot', 'Base\Service\HotParameterBag');
     $services->alias('Base\Service\HotParameterBagInterface', 'parameter_bag.hot');
 
     // Widget / Paginator / Breadgrinder / Sitemap
@@ -134,7 +134,6 @@ return static function (ContainerConfigurator $container): void {
     $services->alias('base.annotation_reader', 'Base\Annotations\AnnotationReader');
 
     $services->alias('base.entity_extension', 'Base\Database\Entity\EntityExtension');
-    $services->alias('Base\Database\Entity\EntityExtensionInterface', 'base.entity_extension');
 
     // Twig Variables / Loader
     $services->alias('twig.loader.filesystem', 'Base\Twig\Loader\FilesystemLoader');

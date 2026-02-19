@@ -715,9 +715,8 @@ class BaseService implements RuntimeExtensionInterface
      */
     public function inDoctrineStack()
     {
-        $debug_backtrace = debug_backtrace();
-        foreach ($debug_backtrace as $trace) {
-            if (str_starts_with($trace["class"], "Doctrine")) {
+        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $trace) {
+            if (isset($trace["class"]) && str_starts_with($trace["class"], "Doctrine")) {
                 return true;
             }
         }

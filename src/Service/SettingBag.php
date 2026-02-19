@@ -29,9 +29,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     protected EntityManagerInterface $entityManager;
 
     /**
-     * @var CacheItemInterface
+     * @var CacheItemInterface|null
      */
-    protected CacheItemInterface $cacheSettingBag;
+    protected ?CacheItemInterface $cacheSettingBag = null;
 
     /**
      * @var LocalizerInterface
@@ -60,6 +60,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      */
     protected ParameterBagInterface $parameterBag;
 
+    /**
+     * Track if cache needs to be saved (defer writes to destruct)
+     */
+    private bool $cacheIsDirty = false;
+
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $this->all();
@@ -76,11 +81,32 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
         $this->cache = $cache;
         $this->cacheName = "setting_bag." . hash('md5', self::class);
-        $this->cacheSettingBag = $cache->getItem($this->cacheName);
+        // Defer cache item fetch to first use (lazy loading)
 
         $this->packages = $packages;
         $this->localizer = $localizer;
         $this->environment = $environment;
+    }
+
+    /**
+     * Lazy-load cache item on first access
+     */
+    private function getCacheItem(): CacheItemInterface
+    {
+        if ($this->cacheSettingBag === null) {
+            $this->cacheSettingBag = $this->cache->getItem($this->cacheName);
+        }
+        return $this->cacheSettingBag;
+    }
+
+    /**
+     * Save cache if dirty (deferred from get/clear calls)
+     */
+    public function __destruct()
+    {
+        if ($this->cacheIsDirty && $this->cacheSettingBag !== null) {
+            $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        }
     }
 
     public function all(?string $locale = null): array
@@ -341,7 +367,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return $settings;
         }
 
-        $this->settingBag ??= $useCache ? $this->cacheSettingBag->get() ?? [] : [];
+        $this->settingBag ??= $useCache ? $this->getCacheItem()->get() ?? [] : [];
         if (array_key_exists($path . ":" . ($locale ?? Localizer::LOCALE_FORMAT), $this->settingBag)) {
             return $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)];
         }
@@ -361,7 +387,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }, $values);
 
         if ($useCache) {
-            $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+            $this->cacheIsDirty = true;
         }
 
         return $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)];
@@ -404,8 +430,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         if ($useCache) {
             if ($path == null) {
                 $this->cache->delete($this->cacheName);
+                $this->cacheIsDirty = false;
             } else {
-                $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+                $this->cacheIsDirty = true;
             }
         }
     }

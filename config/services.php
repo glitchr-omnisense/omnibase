@@ -306,8 +306,8 @@ return static function (ContainerConfigurator $container): void {
 
     // TimeMachine service
     $services->set('Base\Service\TimeMachine')
-        ->parent('Backup\Manager\Manager')
         ->public(true)
+        ->lazy()  // Lazy-load: heavy backup service, not needed on every request
         ->args([service('flysystem'), service('doctrine'), service('parameter_bag')]);
 
     // Console commands
@@ -479,6 +479,7 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set('Base\Service\SpamChecker')
         ->public()
+        ->lazy()  // Lazy-load: spam checking service, only needed for form submissions
         ->args([
             new Reference('request_stack'),
             new Reference('setting_bag'),
@@ -585,6 +586,7 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set('Base\Service\FileService')
         ->public()
+        ->lazy()  // Lazy-load: file operations service, not needed on every request
         ->tag('twig.runtime')
         ->args([
             new Reference('twig'),
@@ -597,6 +599,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\MediaService')
             ->parent('Base\Service\FileService')
             ->public()
+            ->lazy()  // Lazy-load: media processing service with heavy image manipulation
             ->tag('twig.runtime')
             ->args([
                 new Reference('imagine.bitmap'),
@@ -683,6 +686,7 @@ return static function (ContainerConfigurator $container): void {
     * ------------------------------*/
 
     $services->set('Base\Service\Trading')
+        ->lazy()  // Lazy-load: currency/trading service, only needed for financial operations
         ->args([new Reference('http_client')])
         ->bind('$cacheDir', '%kernel.cache_dir%');
 
@@ -1183,19 +1187,42 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
     // ------------------------------
     // Controllers, Subscribers, Security
     // ------------------------------
-    $controllerServices = [
-        'Base\Controller\Client\ThreadSearchController',
-        'Base\Controller\Client\UserSearchController',
-        'Base\Controller\Client\UserProfileController',
-        'Base\Controller\Client\UserSettingsController',
-    ];
+    // Client controllers require explicit constructor arguments
+    $services->set('Base\Controller\Client\ThreadSearchController')
+        ->tag('controller.service_arguments')
+        ->tag('container.service_subscriber')
+        ->call('setContainer', [new Reference('Psr\Container\ContainerInterface')])
+        ->args([
+            new Reference('form.proxy'),
+            new Reference('doctrine.orm.entity_manager'),
+        ]);
 
-    foreach ($controllerServices as $controller) {
-        $services->set($controller)
-            ->tag('controller.service_arguments')
-            ->tag('container.service_subscriber')
-            ->call('setContainer', [new Reference('Psr\Container\ContainerInterface')]);
-    }
+    $services->set('Base\Controller\Client\UserSearchController')
+        ->tag('controller.service_arguments')
+        ->tag('container.service_subscriber')
+        ->call('setContainer', [new Reference('Psr\Container\ContainerInterface')])
+        ->args([
+            new Reference('form.proxy'),
+            new Reference('doctrine.orm.entity_manager'),
+        ]);
+
+    $services->set('Base\Controller\Client\UserProfileController')
+        ->tag('controller.service_arguments')
+        ->tag('container.service_subscriber')
+        ->call('setContainer', [new Reference('Psr\Container\ContainerInterface')])
+        ->args([
+            new Reference('doctrine.orm.entity_manager'),
+            new Reference('form.proxy'),
+        ]);
+
+    $services->set('Base\Controller\Client\UserSettingsController')
+        ->tag('controller.service_arguments')
+        ->tag('container.service_subscriber')
+        ->call('setContainer', [new Reference('Psr\Container\ContainerInterface')])
+        ->args([
+            new Reference('base.service'),
+            new Reference('App\Repository\UserRepository'),
+        ]);
 
     $services->set('Base\Security\UserTracker')
         ->args([

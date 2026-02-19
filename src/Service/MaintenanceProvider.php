@@ -42,6 +42,9 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     protected ?string $lockPath = null;
     protected bool $ready = false;
 
+    // Request-scoped cache for maintenance status
+    private ?bool $maintenanceStatusCache = null;
+
     protected function parseLockPath(): self
     {
         if ($this->lockPath) {
@@ -106,16 +109,23 @@ class MaintenanceProvider implements MaintenanceProviderInterface
 
     public function isUnderMaintenance(): bool
     {
+        // Return cached result if available (avoids repeated file I/O)
+        if ($this->maintenanceStatusCache !== null) {
+            return $this->maintenanceStatusCache;
+        }
+
         $this->parseLockPath();
 
+        $result = false;
         if (filter_var($this->settingBag->getScalar("base.settings.maintenance", $this->localizer->getLocale()))) {
-            return true;
-        }
-        if ($this->lockPath && file_exists($this->lockPath)) {
-            return true;
+            $result = true;
+        } elseif ($this->lockPath && file_exists($this->lockPath)) {
+            $result = true;
         }
 
-        return false;
+        // Cache the result for the duration of the request
+        $this->maintenanceStatusCache = $result;
+        return $result;
     }
 
     public function redirectOnDeny(?RequestEvent $event = null): bool

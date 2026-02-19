@@ -89,7 +89,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return Uuid::v5(Uuid::fromString($this->uuid), $name);
     }
 
-    public function encode(array $value, ?bool $short = Obfuscator::NO_SHORT): string
+    public function encode(array $value, bool $short = Obfuscator::NO_SHORT): string
     {
         ksort($value); // Make sure keys are sorted before serializing..
 

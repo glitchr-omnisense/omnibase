@@ -6,21 +6,85 @@ use Base\Controller\Admin\AbstractCrudController;
 use Doctrine\ORM\EntityManager;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\CrudControllerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\DashboardControllerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry;
+use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
 class AdminRouterSubscriber extends \EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber
 {
     protected EntityManager $entityManager;
+    protected DashboardControllerRegistry $dashboardRegistry;
+
     public function __construct(...$args)
     {
         $this->entityManager = array_pop($args);
+        $this->dashboardRegistry = array_pop($args);
         parent::__construct(...$args);
+    }
+
+    /**
+     * Resolve abstract dashboard controllers to their concrete subclass.
+     * Base bundle routes serve as fallbacks; app routes take priority.
+     */
+    private function resolveAbstractDashboard(string $fqcn): string
+    {
+        if ((new ReflectionClass($fqcn))->isAbstract()) {
+            foreach ($this->dashboardRegistry->getAll() as $item) {
+                $registeredFqcn = $item['controller'];
+                if (is_subclass_of($registeredFqcn, $fqcn)) {
+                    return $registeredFqcn;
+                }
+            }
+        }
+
+        return $fqcn;
+    }
+
+    /**
+     * Resolves the dashboard FQCN and updates the _controller request attribute
+     * so Symfony can instantiate the concrete class (not the abstract one).
+     */
+    protected function getDashboardControllerFqcn(Request $request): ?string
+    {
+        $fqcn = parent::getDashboardControllerFqcn($request);
+        if ($fqcn === null) {
+            return null;
+        }
+
+        $resolved = $this->resolveAbstractDashboard($fqcn);
+        if ($resolved !== $fqcn) {
+            $controller = $request->attributes->get('_controller');
+            if (is_string($controller)) {
+                $request->attributes->set('_controller', str_replace($fqcn, $resolved, $controller));
+            }
+        }
+
+        return $resolved;
+    }
+
+    /**
+     * Covers the pretty-URL path (onKernelRequestPrettyUrls) which reads the FQCN
+     * directly from the dashboard routes cache and skips getDashboardControllerFqcn().
+     */
+    protected function getDashboardControllerInstance(string $dashboardControllerFqcn, Request $request): ?DashboardControllerInterface
+    {
+        $resolvedControllerFqcn = $this->resolveAbstractDashboard($dashboardControllerFqcn);
+        if ($resolvedControllerFqcn !== $dashboardControllerFqcn) {
+            $controllerFqcn = $request->attributes->get('_controller');
+            $request->attributes->set('_controller', str_replace($dashboardControllerFqcn, $resolvedControllerFqcn, $controllerFqcn));
+            if (is_string($controllerFqcn)) {
+                // must be resolved as an array for EA to instantiate the concrete class instead of fallinback to ::index
+                $request->attributes->set('_controller', explode("::", $request->attributes->get('_controller')));
+            }
+        }
+
+        return parent::getDashboardControllerInstance($resolvedControllerFqcn, $request);
     }
 
     protected function getCrudControllerInstance(Request $request): ?CrudControllerInterface
     {
-        // dump($request);
         $crudControllerFqcn = $request->attributes->get(EA::CRUD_CONTROLLER_FQCN);
         if($crudControllerFqcn) {
             $request->query->set(EA::CRUD_CONTROLLER_FQCN, $crudControllerFqcn);

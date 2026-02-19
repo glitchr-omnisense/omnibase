@@ -30,14 +30,6 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
     {
         //
         // Load service declaration (includes services, controllers,..)
-
-        // Format XML
-        // $loader = new XmlFileLoader($container, new FileLocator(\dirname(__DIR__, 2) . '/config'));
-        // $loader->load('services.xml');
-        // $loader->load('services-public.xml');
-        // $loader->load('services-fix.xml');
-        // $loader->load('services-decoration.xml');
-
         $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__, 2) . '/config'));
         $loader->load('services.php');
         $loader->load('services-public.php');

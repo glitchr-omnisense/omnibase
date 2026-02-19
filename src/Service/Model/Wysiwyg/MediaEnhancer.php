@@ -82,6 +82,7 @@ class MediaEnhancer implements MediaEnhancerInterface
 
         // Build absolute path using flysystem
         if ($storage) {
+
             // Try both public and private storage (web paths are usually in .public)
             $storagesToTry = [$storage . '.public', $storage];
 
@@ -95,6 +96,7 @@ class MediaEnhancer implements MediaEnhancerInterface
                 // e.g., /wysiwyg/a4/fe/... -> a4/fe/... for local.wysiwyg storage
                 $relativePath = $path;
                 if (str_starts_with($path, '/')) {
+
                     // Extract base path from storage name (e.g., "local.wysiwyg" -> "wysiwyg")
                     $storageParts = explode('.', $storageAttempt);
                     $basePrefix = $storageParts[count($storageParts) - 1]; // Get last part (skip .public)

@@ -639,7 +639,7 @@ class MediaService extends FileService implements MediaServiceInterface
                 }
 
                 try {
-                    
+
                     $this->flysystem->mkdir(dirname($pathCache), $localCache);
                     $this->flysystem->write($pathCache, file_get_contents($filteredPath), $localCache);
 
