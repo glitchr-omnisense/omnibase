@@ -133,16 +133,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         //
         // Prepare database configuration
         foreach ($doctrine->getConnectionNames() as $connectionName => $_) {
-            $params = $doctrine->getConnection($connectionName)->getParams();
-            $this->databaseConfigs[$connectionName] = [
-                "type" => $params["driver"],
-                "host" => $params["host"],
-                "port" => $params["port"],
-                "user" => $params["user"],
-                "pass" => $params["password"],
-                "database" => $params["dbname"] ?? null,
-                "extraParams" => $params["driverOptions"],
-            ];
+            $this->databaseConfigs[$connectionName] = $doctrine->getConnection($connectionName)->getParams();
         }
 
         //

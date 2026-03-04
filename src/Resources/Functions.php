@@ -572,8 +572,8 @@ namespace {
     function strtobool(string|bool $val): bool {
         if (is_bool($val)) return $val;
         return match(strtolower($val)) {
-            'on', 'true', '1', 'yes' => true,
-            'off', 'false', '0', 'no' => false,
+            'enable', 'enabled', 'on', 'true', '1', 'yes' => true,
+            'disable', 'disabled', 'off', 'false', '0', 'no' => false,
             default => false,
         };
     }
@@ -3573,10 +3573,27 @@ namespace {
             return null;
         }
 
+        if(is_array($key)) {
+            $result = [];
+            foreach ($key as $k) {
+                $result[$k] = array_pop_key($k, $array);
+            }
+            return $result;
+        }
+
         $entry = $array[$key] ?? null;
         $array = array_key_removes($array, $key);
 
         return $entry;
+    }
+
+    function array_pop_keys(array $keys, array &$array): array
+    {
+        $result = [];
+        foreach ($keys as $key) {
+            $result[$key] = array_pop_key($key, $array);
+        }
+        return $result;
     }
 
     function array_pop_class(string $class, array &$array): mixed

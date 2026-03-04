@@ -532,7 +532,7 @@ class BaseService implements RuntimeExtensionInterface
     public function refresh(?Request $request = null): RedirectResponse
     {
         $request = $request ?? $this->getRequest();
-        return $this->redirect($request->get('_route'));
+        return $this->redirect($request->attributes->get('_route'));
     }
 
     /**

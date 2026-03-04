@@ -105,11 +105,19 @@ class AutocompleteController extends AbstractController
             return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
         }
 
-        $expectedMethod = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
-        if (in_array($request->getMethod(), $expectedMethod)) {
+        $expectedMethods = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        if (in_array($request->getMethod(), $expectedMethods)) {
 
-            $term = strtolower(str_strip_accents($request->get("term")) ?? "");
-            $meta = explode(".", $request->get("page") ?? "");
+            if ($this->getService()->isDebug()) {
+                $term = $request->query->get('term', $request->request->get('term', ''));
+                $pageParam = $request->query->get('page', $request->request->get('page', ''));
+            } else {
+                $term = $request->request->get('term', '');
+                $pageParam = $request->request->get('page', '');
+            }
+
+            $term = strtolower(str_strip_accents($term));
+            $meta = explode('.', $pageParam);
             $page = max(1, intval($meta[0] ?? 1));
             $bookmark = max(0, intval($meta[1] ?? 0));
 
