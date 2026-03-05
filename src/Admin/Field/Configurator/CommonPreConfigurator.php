@@ -33,7 +33,7 @@ readonly class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Fi
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $translationDomain = $context->getI18n()->getTranslationDomain();
-        $label = $this->buildLabelOption($field, $translationDomain, $context->getCrud()->getCurrentPage(), $entityDto);
+        $label = $this->buildLabelOption($entityDto, $field, $translationDomain, $context->getCrud()->getCurrentPage(), $this->extension->isEntityTranslationEnabled());
         $field->setLabel($label);
 
         if ($entityDto->getInstance() && $this->propertyAccessor->isReadable($entityDto->getInstance(), $field->getProperty())) {
@@ -49,7 +49,7 @@ readonly class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Fi
      * @return TranslatableInterface|string|false|null
      * @throws \Exception
      */
-    protected function buildLabelOption(FieldDto $field, string $translationDomain, ?string $currentPage, ?EntityDto $entityDto = null)
+    protected function buildLabelOption(EntityDto $entityDto, FieldDto $field, string $translationDomain, ?string $currentPage, bool $useEntityTranslations): TranslatableInterface|string|false|null
     {
         // don't autogenerate a label for these special fields (there's a dedicated configurator for them)
         if (FormField::class === $field->getFieldFqcn()) {
