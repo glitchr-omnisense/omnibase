@@ -91,7 +91,7 @@ return static function (ContainerConfigurator $container): void {
             $definition->arg($i, service($arg));
         }
         if ($id === 'Base\Controller\UX\MediaController') {
-            $definition->arg(4, service('profiler')->nullOnInvalid());
+            $definition->arg(4, new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE));
         }
     }
 
@@ -226,7 +226,7 @@ return static function (ContainerConfigurator $container): void {
             service('base.database.entity_hydrator'),
             service('base.database.metadata_manipulator'),
             service('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'),
-            service('profiler')->nullOnInvalid(),
+            new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE),
         ]);
 
     // Services inheriting from AbstractLocalCache
