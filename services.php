@@ -90,11 +90,10 @@ return static function (ContainerConfigurator $container): void {
         foreach ($args as $i => $arg) {
             $definition->arg($i, service($arg));
         }
+        if ($id === 'Base\Controller\UX\MediaController') {
+            $definition->arg(4, service('profiler')->nullOnInvalid());
+        }
     }
-
-    // MediaController has an optional profiler dependency
-    $services->get('Base\Controller\UX\MediaController')
-        ->arg(4, service('profiler')->nullOnInvalid());
 
     // Subscribers
     $subscribers = [
