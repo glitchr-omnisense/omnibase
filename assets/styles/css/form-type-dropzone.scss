@@ -1,4 +1,4 @@
-@import '~dropzone/src/dropzone.scss';
+@use '~dropzone/src/dropzone.scss';
 
 .dropzone .dz-preview .dz-details .dz-filename { display:none; }
 .dropzone .dz-preview .dz-details i:hover { color:#EEEA; }

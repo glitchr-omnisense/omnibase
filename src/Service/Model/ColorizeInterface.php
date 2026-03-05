@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model;
 
-/**
- *
- */
 interface ColorizeInterface
 {
     public function __colorize(): ?array;

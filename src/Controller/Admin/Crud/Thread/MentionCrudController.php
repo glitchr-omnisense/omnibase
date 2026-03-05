@@ -6,9 +6,6 @@ use Base\Controller\Admin\AbstractCrudController;
 use Base\Field\SelectField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
-/**
- *
- */
 class MentionCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

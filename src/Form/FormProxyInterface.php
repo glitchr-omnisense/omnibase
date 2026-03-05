@@ -5,9 +5,6 @@ namespace Base\Form;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
 
-/**
- *
- */
 interface FormProxyInterface
 {
     public function all();

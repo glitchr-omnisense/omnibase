@@ -1,7 +1,8 @@
+@use "sass:meta";
 @media (prefers-color-scheme: light) {
-  @import 'flatpickr/light.scss';
+  @include meta.load-css('flatpickr/light.scss');
 }
 
 @media (prefers-color-scheme: dark) {
-  @import 'flatpickr/dark.scss';
+  @include meta.load-css('flatpickr/dark.scss');
 }

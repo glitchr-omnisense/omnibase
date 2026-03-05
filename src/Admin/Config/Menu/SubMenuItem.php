@@ -7,9 +7,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
-/**
- *
- */
 class SubMenuItem implements MenuItemInterface
 {
     use MenuItemTrait {

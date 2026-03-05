@@ -34,9 +34,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Process\Process;
 use TypeError;
 
-/**
- *
- */
 class IntegritySubscriber implements EventSubscriberInterface
 {
     public const int DEFAULT_PRIORITY = 7;
@@ -86,7 +83,7 @@ class IntegritySubscriber implements EventSubscriberInterface
      */
     protected Process $clearProcess;
 
-    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, AdvancedRouterInterface $router, ReferrerInterface $referrer, string $projectDir, string $secret = null)
+    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, AdvancedRouterInterface $router, ReferrerInterface $referrer, string $projectDir, ?string $secret = null)
     {
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;

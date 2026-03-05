@@ -7,9 +7,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
 
-/**
- *
- */
 final class SeparatorWidgetItem implements MenuItemInterface
 {
     use MenuItemTrait {

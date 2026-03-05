@@ -91,7 +91,7 @@ use Base\Wikidoc\Entity\DevDocument;
 use Base\Wikidoc\Entity\UserDocument;
 
 #[Route(path: '/admin', name: 'admin')]
-class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
+abstract class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
     use WidgetTrait;
 
@@ -133,12 +133,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * @var SettingBagInterface
      */
-    protected $settingBag;
+    protected SettingBagInterface $settingBag;
 
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     /**
      * @var AdvancedRouterInterface

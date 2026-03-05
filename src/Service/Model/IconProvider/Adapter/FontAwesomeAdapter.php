@@ -5,9 +5,6 @@ namespace Base\Service\Model\IconProvider\Adapter;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 
-/**
- *
- */
 class FontAwesomeAdapter extends AbstractIconAdapter
 {
     public const STYLE_SOLID = "solid";

@@ -8,9 +8,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 //@TODO not ready..
 
-/**
- *
- */
 class ForexType extends SelectType implements SelectInterface
 {
     public function configureOptions(OptionsResolver $resolver): void

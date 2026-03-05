@@ -6,9 +6,6 @@ use Base\Field\Type\SlugType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 final class SlugField implements FieldInterface
 {
     use FieldTrait;

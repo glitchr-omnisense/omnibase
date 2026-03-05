@@ -4,9 +4,6 @@ namespace Base\Annotations\Traits;
 
 use Exception;
 
-/**
- *
- */
 trait HierarchifyTrait
 {
     /**
@@ -44,6 +41,8 @@ trait HierarchifyTrait
     public function getHierarchyTree(?string $separator = null)
     {
         $entityHierarchy = $this->getClassMetadataCompletor()->entityHierarchy;
+        dump($this->getClassMetadataCompletor());
+        dump(debug_backtrace_short());
         if (empty($entityHierarchy)) {
             throw new Exception("Missing @Hierarchify for class \"" . get_class($this) . "\"");
         }

@@ -4,9 +4,6 @@ namespace Base\Service;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
-/**
- *
- */
 interface MaintenanceProviderInterface
 {
     public function getRemainingTime(): int;

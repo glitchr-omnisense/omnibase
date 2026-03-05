@@ -13,9 +13,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-/**
- *
- */
 final class BooleanConfigurator implements FieldConfiguratorInterface
 {
     /**

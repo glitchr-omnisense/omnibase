@@ -39,9 +39,6 @@ use League\Flysystem\Filesystem;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-/**
- *
- */
 class TimeMachine extends BackupManager implements TimeMachineInterface
 {
     /** @var CompressorProvider */
@@ -136,16 +133,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         //
         // Prepare database configuration
         foreach ($doctrine->getConnectionNames() as $connectionName => $_) {
-            $params = $doctrine->getConnection($connectionName)->getParams();
-            $this->databaseConfigs[$connectionName] = [
-                "type" => $params["driver"],
-                "host" => $params["host"],
-                "port" => $params["port"],
-                "user" => $params["user"],
-                "pass" => $params["password"],
-                "database" => $params["dbname"] ?? null,
-                "extraParams" => $params["driverOptions"],
-            ];
+            $this->databaseConfigs[$connectionName] = $doctrine->getConnection($connectionName)->getParams();
         }
 
         //
@@ -407,7 +395,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @param int|array $storageNames
      * @param string|null $prefix
      * @param int $cycle
-     * @return true
+     * @return bool
      * @throws CompressorTypeNotSupported
      * @throws ConfigFieldNotFound
      * @throws ConfigNotFoundForConnection
@@ -415,7 +403,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @throws FilesystemException
      * @throws FilesystemTypeNotSupported
      */
-    public function backup(null|string|array $databases, int|array $storageNames = [], bool $userInfo = false, ?string $prefix = null, int $cycle = -1)
+    public function backup(null|string|array $databases, int|array $storageNames = [], bool $userInfo = false, ?string $prefix = null, int $cycle = -1): bool
     {
         $prefix = $prefix ?? $this->environment;
         $this->output?->section()->writeln("<info>Backup procedure started for </info> \"" . $prefix. "\"");
@@ -547,9 +535,9 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
             rrmdir($outputDir);
         }
 
-	if( empty($output) ) {
-	    return false;
-	}
+        if( empty($output) ) {
+            return false;
+        }
 
         foreach ($destinations as $id => $destination) {
 

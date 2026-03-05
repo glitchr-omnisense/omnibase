@@ -15,9 +15,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
-/**
- *
- */
 class AnnotationSubscriber
 {
     /**

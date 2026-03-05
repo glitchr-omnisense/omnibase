@@ -4,9 +4,6 @@ namespace Base\Service\Model\Obfuscator\Compression;
 
 use Base\Service\Model\Obfuscator\AbstractCompression;
 
-/**
- *
- */
 class NullCompression extends AbstractCompression
 {
     public function getName(): string

@@ -6,9 +6,6 @@ use Base\Database\Type\EnumType;
 use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeInterface
 {
     public const SECOND = "s";

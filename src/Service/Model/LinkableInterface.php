@@ -4,9 +4,6 @@ namespace Base\Service\Model;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-/**
- *
- */
 interface LinkableInterface
 {
     public function __toString();

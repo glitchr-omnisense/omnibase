@@ -28,9 +28,6 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
-/**
- *
- */
 class AdvancedRouter implements AdvancedRouterInterface
 {
     /**

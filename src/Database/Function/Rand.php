@@ -7,9 +7,6 @@ use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\TokenType;
 
-/**
- *
- */
 class Rand extends FunctionNode
 {
     public function parse(Parser $parser): void

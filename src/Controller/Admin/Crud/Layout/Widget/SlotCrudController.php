@@ -13,9 +13,6 @@ use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-/**
- *
- */
 class SlotCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string

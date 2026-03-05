@@ -8,9 +8,6 @@ use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
-/**
- *
- */
 class WebpackCacheWarmer extends AbstractLocalCacheWarmer
 {
     public function __construct(ParameterBagInterface $parameterBag, WebpackTagRenderer $webpackTagRenderer, ?EntrypointLookupInterface $entrypointLookup, string $cacheDir, string $publicDir)

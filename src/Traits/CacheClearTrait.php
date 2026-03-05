@@ -10,9 +10,6 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Process\Process;
 
-/**
- *
- */
 trait CacheClearTrait
 {
     protected function checkCache(SymfonyStyle $io): void
@@ -158,9 +155,8 @@ trait CacheClearTrait
 
     protected function clearOPCache(SymfonyStyle $io): void
     {
-        dump("!ah?", extension_loaded('Zend OPcache'), $_SERVER);
         if (extension_loaded('Zend OPcache')) {
-            $io->note("Zend OPcache Cleared");
+            $io->note("Zend OPcache Cleared (CLI)");
             \opcache_reset();
         }
     }

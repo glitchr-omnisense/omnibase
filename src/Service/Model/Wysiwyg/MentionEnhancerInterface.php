@@ -3,9 +3,6 @@
 namespace Base\Service\Model\Wysiwyg;
 use Base\Repository\Thread\MentionRepository;
 
-/**
- *
- */
 interface MentionEnhancerInterface
 {
     public function getRepository(): MentionRepository;

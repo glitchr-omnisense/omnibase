@@ -6,9 +6,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- *
- */
 interface FormProcessorInterface
 {
     public function handleRequest(Request $request): static;

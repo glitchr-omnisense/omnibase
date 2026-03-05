@@ -6,9 +6,6 @@ use Base\Service\Model\LinkableInterface;
 use Base\Service\Model\Sharer\SharerAdapterInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-/**
- *
- */
 class Sharer
 {
     protected $adapters = [];

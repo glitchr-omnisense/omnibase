@@ -8,9 +8,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-/**
- *
- */
 class FlashBagSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents(): array

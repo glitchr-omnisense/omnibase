@@ -18,9 +18,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-/**
- *
- */
 #[AsCommand(name: 'uploader:images:crop', aliases: [], description: '')]
 class UploaderImagesCropCommand extends UploaderImagesCommand
 {

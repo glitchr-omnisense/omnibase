@@ -10,9 +10,6 @@ use Doctrine\Common\Collections\ReadableCollection;
 use Doctrine\Common\Collections\Selectable;
 use Traversable;
 
-/**
- *
- */
 class OrderedArrayCollection extends ArrayCollection
 {
     /**  * @var array */

@@ -9,9 +9,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\VarDumper\Cloner\Data;
 
-/**
- *
- */
 class LocalizerDataCollector extends AbstractDataCollector
 {
     /** @var LocalizerInterface */

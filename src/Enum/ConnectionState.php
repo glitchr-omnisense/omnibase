@@ -5,9 +5,6 @@ namespace Base\Enum;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class ConnectionState extends EnumType implements IconizeInterface
 {
     public const FAILED = "CONNECTION_FAILED";

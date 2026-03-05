@@ -7,9 +7,6 @@ use Base\Database\Annotation\Trasheable;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 
-/**
- *
- */
 class TrashFilter extends SQLFilter
 {
     /**

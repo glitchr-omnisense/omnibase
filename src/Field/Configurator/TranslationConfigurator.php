@@ -18,9 +18,6 @@ use function Symfony\Component\String\u;
 use const ENT_NOQUOTES;
 use const PHP_INT_MAX;
 
-/**
- *
- */
 class TranslationConfigurator implements FieldConfiguratorInterface
 {
     /**

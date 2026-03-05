@@ -9,9 +9,6 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Base\Service\ObfuscatorInterface;
 
-/**
- *
- */
 class ImageType extends FileType
 {
     public function getBlockPrefix(): string

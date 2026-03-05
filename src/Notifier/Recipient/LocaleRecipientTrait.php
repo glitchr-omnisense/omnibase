@@ -2,9 +2,6 @@
 
 namespace Base\Notifier\Recipient;
 
-/**
- *
- */
 trait LocaleRecipientTrait
 {
     private string $locale;

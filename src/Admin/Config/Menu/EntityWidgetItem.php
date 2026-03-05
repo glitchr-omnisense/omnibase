@@ -19,9 +19,6 @@ use function gettype;
 use function in_array;
 use function is_string;
 
-/**
- *
- */
 final class EntityWidgetItem implements MenuItemInterface
 {
     use MenuItemTrait;

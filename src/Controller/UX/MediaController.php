@@ -81,7 +81,7 @@ class MediaController extends AbstractController
     public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
     {
         $request = $this->requestStack->getCurrentRequest();
-        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+        $isUX = $request ? str_starts_with($request->attributes->get("_route"), "ux_") : true;
         if ($this->profiler !== null && $isUX) {
             $this->profiler->disable();
         }
@@ -222,7 +222,7 @@ class MediaController extends AbstractController
         $path = $this->mediaService->filter($path, ["local_cache" => $localCache, "output" => $output], new BitmapFilter(null, $options, $filters));
 
         $request = $this->requestStack->getCurrentRequest();
-        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+        $isUX = $request ? str_starts_with($request->attributes->get("_route"), "ux_") : true;
 
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
@@ -254,10 +254,11 @@ class MediaController extends AbstractController
     public function ImageWebp($data): Response
     {
         $config = $this->mediaService->resolve($data);
+
         if (!array_key_exists("path", $config)) {
             throw $this->createNotFoundException();
         }
-       
+
         $webp = $config["webp"] ?? $this->mediaService->isWebpEnabled();
         if (!$webp) {
             return $this->redirectToRoute("ux_image", ["data" => $data], Response::HTTP_MOVED_PERMANENTLY);
@@ -283,7 +284,7 @@ class MediaController extends AbstractController
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new WebpFilter(null, $options, $filters));
 
         $request = $this->requestStack->getCurrentRequest();
-        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+        $isUX = $request ? str_starts_with($request->attributes->get("_route"), "ux_") : true;
 
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
@@ -311,7 +312,7 @@ class MediaController extends AbstractController
         $path = $this->mediaService->filter($config["path"], ["local_cache" => $localCache, "output" => $output], new SvgFilter(null, $options, $filters));
 
         $request = $this->requestStack->getCurrentRequest();
-        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+        $isUX = $request ? str_starts_with($request->attributes->get("_route"), "ux_") : true;
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 
@@ -357,7 +358,7 @@ class MediaController extends AbstractController
         }
 
         $request = $this->requestStack->getCurrentRequest();
-        $isUX = $request ? str_starts_with($request->get("_route"), "ux_") : true;
+        $isUX = $request ? str_starts_with($request->attributes->get("_route"), "ux_") : true;
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => !$isUX]);
     }
 }

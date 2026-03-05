@@ -4,9 +4,6 @@ namespace Base\Service\Model;
 
 use Doctrine\Common\Collections\Collection;
 
-/**
- *
- */
 interface GraphInterface
 {
     public function getParent();

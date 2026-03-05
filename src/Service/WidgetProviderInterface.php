@@ -5,9 +5,6 @@ namespace Base\Service;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
 
-/**
- *
- */
 interface WidgetProviderInterface
 {
     public function all(): array;

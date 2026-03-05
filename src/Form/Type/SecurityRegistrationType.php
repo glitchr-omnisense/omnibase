@@ -14,9 +14,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Util\StringUtil;
 
-/**
- *
- */
 class SecurityRegistrationType extends AbstractType
 {
     public function getBlockPrefix(): string

@@ -14,9 +14,6 @@ use RuntimeException;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Query\SqlOutputWalker;
 
-/**
- *
- */
 class TranslatableWalker extends SqlOutputWalker implements OutputWalker
 {
     /**

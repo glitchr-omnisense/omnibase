@@ -7,9 +7,6 @@ use Imagine\Image\Box;
 use Imagine\Image\BoxInterface;
 use Imagine\Image\ImageInterface;
 
-/**
- *
- */
 class ThumbnailFilter implements FilterInterface
 {
     /** * @var int|null */

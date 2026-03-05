@@ -45,9 +45,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Traversable;
 
-/**
- *
- */
 class SelectType extends AbstractType implements DataMapperInterface
 {
     /** @var ClassMetadataManipulator */

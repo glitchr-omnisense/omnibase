@@ -14,9 +14,6 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Util\StringUtil;
 
-/**
- *
- */
 class ContactType extends AbstractType
 {
     public function getBlockPrefix(): string

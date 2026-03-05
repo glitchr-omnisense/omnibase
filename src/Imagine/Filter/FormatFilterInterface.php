@@ -5,9 +5,6 @@ namespace Base\Imagine\Filter;
 use Base\Imagine\FilterInterface;
 use Imagine\Image\ImageInterface;
 
-/**
- *
- */
 interface FormatFilterInterface extends FilterInterface
 {
     public static function getStandardExtension(): string;

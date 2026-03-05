@@ -8,9 +8,6 @@ use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class BreadgrinderTwigExtension extends AbstractExtension
 {
     protected BreadgrinderInterface $breadgrinder;

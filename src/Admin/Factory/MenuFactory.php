@@ -5,9 +5,6 @@ namespace Base\Admin\Factory;
 use Base\Routing\AdvancedRouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 
-/**
- *
- */
 class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
 {
     /**

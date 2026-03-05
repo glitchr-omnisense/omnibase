@@ -135,45 +135,9 @@ class DropzoneController extends AbstractController
             return new Response($this->translator->trans("fileupload.error.cant_write", [], "fields"), 500);
         }
 
-        // $fnExpiry = function($expiry, $uuid) use ($cacheDir) {
-
-        //     if($expiry > time()) return true;
-
-        //     if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
-        //         return new Response("Invalid uuid.", 500);
-
-        //     $fname = $cacheDir."/".$uuid;
-        //     if(file_exists($fname)) unlink($fname);
-
-        //     return false;
-        // };
-
-        // @TODO Implement a cleaning command..
-        // $cacheDropzone = $this->cache->getItem("cache:dropzone");
-        // if($cacheDropzone->isHit()) { // If cache found and didn't expired
-
-        //     $dropzone = $cacheDropzone->get();
-        //     $dropzone = array_filter($dropzone, $fnExpiry, ARRAY_FILTER_USE_BOTH);
-
-        // } else { // If cache not found or expired
-
-        //     $dropzone = $cacheDropzone->get() ?? [];
-        //     foreach($dropzone as $uuid => $_)
-        //         if(file_exists($cacheDir."/".$uuid)) unlink($cacheDir."/".$uuid);
-        // }
-
-        // $dropzone[(string) $fileUuid] = time() + self::CACHE_DURATION;
-        // $cacheDropzone->set($dropzone);
-        // $cacheDropzone->expiresAfter(self::CACHE_DURATION);
-        // $this->cache->save($cacheDropzone);
-
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
     }
 
-    /**
-     * Controller example
-     */
-    
     #[Route("/ux/dropzone/{data}/{uuid}", name:"ux_dropzone_preview")]
     public function Preview(string $data, string $uuid): Response
     {
@@ -212,10 +176,6 @@ class DropzoneController extends AbstractController
         throw new NotFoundHttpException();
     }
 
-    /**
-     * Controller example
-     */
-    
     #[Route("/ux/dropzone/{data}/{uuid}/delete", name:"ux_dropzone_delete")]
     public function Delete(string $data, string $uuid): Response
     {

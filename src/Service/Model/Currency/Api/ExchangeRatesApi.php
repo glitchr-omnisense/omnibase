@@ -6,9 +6,6 @@ use Base\Service\Model\Currency\AbstractCurrencyApi;
 
 // Endpoint http://api.exchangeratesapi.io/v1/
 
-/**
- *
- */
 class ExchangeRatesApi extends AbstractCurrencyApi
 {
     public function getOptions(): array

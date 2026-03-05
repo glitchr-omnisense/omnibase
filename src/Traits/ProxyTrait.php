@@ -5,9 +5,6 @@ namespace Base\Traits;
 use Exception;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-/**
- *
- */
 trait ProxyTrait
 {
     private ?object $_proxy = null;

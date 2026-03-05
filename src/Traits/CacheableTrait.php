@@ -2,9 +2,6 @@
 
 namespace Base\Traits;
 
-/**
- *
- */
 trait CacheableTrait
 {
     public function __toKey(mixed ...$variadic): string

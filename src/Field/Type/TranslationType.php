@@ -29,9 +29,6 @@ use Traversable;
 use UnexpectedValueException;
 use function count;
 
-/**
- *
- */
 class TranslationType extends AbstractType implements DataMapperInterface
 {
     /**

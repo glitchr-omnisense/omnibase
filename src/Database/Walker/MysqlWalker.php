@@ -4,9 +4,6 @@ namespace Base\Database\Walker;
 
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST;
-/**
- *
- */
 class MysqlWalker extends SqlWalker
 {
     public const HINT_NO_CACHE = "mysql.no_cache";

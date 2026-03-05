@@ -7,9 +7,6 @@ use Doctrine\ORM\Mapping\Table;
 use Exception;
 use ReflectionClass;
 
-/**
- *
- */
 class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 {
     public const TABLE_NAME_SIZE = 64;

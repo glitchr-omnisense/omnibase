@@ -5,9 +5,6 @@ namespace Base\Enum;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class SpamScore extends EnumType implements IconizeInterface
 {
     public const NO_TEXT = "NO_TEXT";

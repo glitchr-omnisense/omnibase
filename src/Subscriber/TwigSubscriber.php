@@ -15,9 +15,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-/**
- *
- */
 class TwigSubscriber implements EventSubscriberInterface
 {
     /**

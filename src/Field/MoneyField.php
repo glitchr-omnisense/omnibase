@@ -8,9 +8,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use Symfony\Component\Intl\Currencies;
 
-/**
- *
- */
 final class MoneyField implements FieldInterface
 {
     use FieldTrait;

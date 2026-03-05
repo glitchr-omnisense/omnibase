@@ -4,9 +4,6 @@ namespace Base\Notifier\Recipient;
 
 use Base\Service\Localizer;
 
-/**
- *
- */
 class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implements LocaleRecipientInterface, TimezoneRecipientInterface
 {
     use LocaleRecipientTrait;

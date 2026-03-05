@@ -21,9 +21,6 @@ use Base\Routing\AdvancedRouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use TypeError;
 
-/**
- *
- */
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
     /**

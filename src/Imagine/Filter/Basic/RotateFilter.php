@@ -5,9 +5,6 @@ namespace Base\Imagine\Filter\Basic;
 use Base\Imagine\FilterInterface;
 use Imagine\Image\ImageInterface;
 
-/**
- *
- */
 class RotateFilter implements FilterInterface
 {
     /** * @var int */

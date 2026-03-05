@@ -8,9 +8,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Base\Field\Type\ColorType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
-/**
- *
- */
 final class ColorField implements FieldInterface
 {
     use FieldTrait;

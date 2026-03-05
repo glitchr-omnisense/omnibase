@@ -12,9 +12,6 @@ use InvalidArgumentException;
 use Symfony\Component\Intl\Currencies;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
-/**
- *
- */
 final class MoneyConfigurator implements FieldConfiguratorInterface
 {
     private IntlFormatter $intlFormatter;

@@ -9,9 +9,6 @@ use Base\Service\Model\Wysiwyg\SemanticEnhancerInterface;
 use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
 use Base\Twig\Environment;
 
-/**
- *
- */
 class WysiwygEnhancer implements WysiwygEnhancerInterface
 {
     /**

@@ -16,9 +16,6 @@ use InvalidArgumentException;
 use ReflectionClass;
 use UnexpectedValueException;
 
-/**
- *
- */
 abstract class EnumType extends Type implements SelectInterface
 {
     protected static array $icons = [];

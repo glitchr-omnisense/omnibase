@@ -8,9 +8,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
 use Base\Field\AttributeField;
 
-/**
- *
- */
 class AttributeConfigurator extends SelectConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool

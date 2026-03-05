@@ -20,9 +20,6 @@ use Symfony\Component\Form\FormRegistryInterface;
 use Symfony\Component\Form\FormFactory as SymfonyFormFactory;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-/**
- *
- */
 class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
 {
     use FormGuessTrait;

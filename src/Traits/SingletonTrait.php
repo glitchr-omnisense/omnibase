@@ -5,9 +5,6 @@ namespace Base\Traits;
 use ArgumentCountError;
 use Exception;
 
-/**
- *
- */
 trait SingletonTrait
 {
     protected static $_instance = null;

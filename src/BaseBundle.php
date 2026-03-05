@@ -22,9 +22,6 @@ use Base\Console\Command\CacheClearCommand;
 use Base\DependencyInjection\Dumper\CliDumper;
 use Base\DependencyInjection\Dumper\HtmlDumper;
 
-/**
- *
- */
 class BaseBundle extends AbstractBaseBundle
 {
     public const VERSION = '1.0.0';

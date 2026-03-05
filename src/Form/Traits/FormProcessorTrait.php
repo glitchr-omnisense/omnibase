@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
- *
+ * @deprecated in favor of using Symfony Form Flows
  */
 trait FormProcessorTrait
 {
@@ -128,7 +128,7 @@ trait FormProcessorTrait
      * @param SessionInterface|null $session
      * @return true
      */
-    public function killSession(SessionInterface $session = null)
+    public function killSession(?SessionInterface $session = null)
     {
         return true;
         // $session = $this->bindSession($session);

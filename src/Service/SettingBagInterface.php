@@ -2,9 +2,6 @@
 
 namespace Base\Service;
 
-/**
- *
- */
 interface SettingBagInterface
 {
     public function clearAll();

@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model;
 
-/**
- *
- */
 interface IconizeInterface
 {
     public function __iconize(): ?array;

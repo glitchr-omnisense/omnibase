@@ -11,9 +11,6 @@ use Base\Field\SelectField;
 use Base\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 
-/**
- *
- */
 class ConnectionCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

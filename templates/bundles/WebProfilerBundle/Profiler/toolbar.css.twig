@@ -295,13 +295,19 @@ div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a { padding:0 0.25em; }
 {
     border-radius: 1em;
 }
-.sf-toolbar-info-piece:first-child
-{
-    border-radius: 1em 1em 0 0;
+
+.sf-toolbar-info-piece:first-child:not(:last-child) {
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
 }
-.sf-toolbar-info-piece:last-child
-{
-    border-radius: 0 0 1em 1em;
+
+.sf-toolbar-info-piece:last-child:not(:first-child) {
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+.sf-toolbar-info-piece:only-child {
+    border-radius: 1em;
 }
 
 .sf-toolbar-block:hover .sf-toolbar-icon, .sf-toolbar-block.sf-toolbar-block-right:hover .sf-toolbar-icon

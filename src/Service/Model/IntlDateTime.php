@@ -8,9 +8,6 @@ use IntlCalendar;
 use IntlDateFormatter;
 use IntlTimeZone;
 
-/**
- *
- */
 class IntlDateTime extends DateTime
 {
     /**

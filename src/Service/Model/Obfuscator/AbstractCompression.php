@@ -20,6 +20,7 @@ abstract class AbstractCompression implements CompressionInterface
         if (class_exists($name) && static::class == $name) {
             return true;
         }
+
         return $this->getName() == $name;
     }
 

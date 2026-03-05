@@ -6,9 +6,6 @@ use Base\Field\Type\StockType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 final class StockField implements FieldInterface
 {
     use FieldTrait;

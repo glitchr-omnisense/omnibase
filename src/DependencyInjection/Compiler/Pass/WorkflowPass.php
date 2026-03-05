@@ -10,9 +10,6 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Workflow\Registry;
 use Symfony\Component\Workflow\SupportStrategy\InstanceOfSupportStrategy;
 
-/**
- *
- */
 class WorkflowPass extends AbstractPass
 {
     public function serviceInterface(): ?string 

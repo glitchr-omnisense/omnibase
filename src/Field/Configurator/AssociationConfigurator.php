@@ -19,9 +19,6 @@ use RuntimeException;
 use Traversable;
 use function count;
 
-/**
- *
- */
 class AssociationConfigurator implements FieldConfiguratorInterface
 {
     /**

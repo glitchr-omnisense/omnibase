@@ -7,9 +7,6 @@ use Base\Field\SelectField;
 use Base\Enum\SystemOfUnits\StandardUnits;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 
-/**
- *
- */
 class ScalarAdapterCrudController extends AbstractAdapterCrudController
 {
     public static function getPreferredIcon(): ?string

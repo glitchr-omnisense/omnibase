@@ -9,9 +9,6 @@ use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class TradingTwigExtension extends AbstractExtension
 {
     /**
@@ -55,7 +52,7 @@ final class TradingTwigExtension extends AbstractExtension
      * @return string
      * @throws RuntimeError
      */
-    public function formatCurrency($amount, string $currency, array $attrs = [], string $locale = null): string
+    public function formatCurrency($amount, string $currency, array $attrs = [], ?string $locale = null): string
     {
         $rate = 1.00;
         $applyRate = array_pop_key('use_rate', $attrs) ?? true;
@@ -82,7 +79,7 @@ final class TradingTwigExtension extends AbstractExtension
      * @param string|null $locale
      * @return float|null
      */
-    public function applyCurrencyRate($amount, string $currency, array $attrs = [], string $locale = null): ?float
+    public function applyCurrencyRate($amount, string $currency, array $attrs = [], ?string $locale = null): ?float
     {
         $targetCurrency = $this->tradingMarket->getRenderedCurrency() ?? $currency;
         $rate = $this->tradingMarket->getFallback($currency, $targetCurrency)?->getValue();

@@ -5,9 +5,6 @@ namespace Base\Imagine\Filter\Basic\Definition;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Imagine\Image\ImageInterface;
 
-/**
- *
- */
 class UltraHighDefinitionFilter extends ThumbnailFilter
 {
     /**

@@ -6,9 +6,6 @@ use Base\Field\Type\NumberType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 final class NumberField implements FieldInterface
 {
     use FieldTrait;

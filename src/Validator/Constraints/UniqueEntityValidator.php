@@ -14,9 +14,6 @@ use function count;
 use function get_class;
 use function is_array;
 
-/**
- *
- */
 class UniqueEntityValidator extends ConstraintEntityValidator
 {
     /**

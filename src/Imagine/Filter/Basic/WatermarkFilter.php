@@ -9,9 +9,6 @@ use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 use InvalidArgumentException;
 
-/**
- *
- */
 class WatermarkFilter implements FilterInterface
 {
     /**

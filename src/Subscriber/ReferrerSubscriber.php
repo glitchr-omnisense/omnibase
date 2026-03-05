@@ -11,9 +11,6 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 use Base\Service\ParameterBagInterface;
 
-/**
- *
- */
 class ReferrerSubscriber implements EventSubscriberInterface
 {
     /**

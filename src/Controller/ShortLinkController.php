@@ -9,9 +9,6 @@ use Base\Annotations\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Http\Discovery\Exception\NotFoundException;
 
-/**
- *
- */
 class ShortLinkController extends AbstractController
 {
     /**

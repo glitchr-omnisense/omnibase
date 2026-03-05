@@ -5,9 +5,6 @@ namespace Base\Twig\Variable;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV4;
 
-/**
- *
- */
 class RandomVariable
 {
     /**

@@ -11,9 +11,6 @@ use Base\Service\ObfuscatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMDocument;
 
-/**
- *
- */
 class MentionEnhancer implements MentionEnhancerInterface
 {
     /**

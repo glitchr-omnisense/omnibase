@@ -10,9 +10,6 @@ use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-/**
- *
- */
 class TooltipCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

@@ -5,9 +5,6 @@ namespace Base\Cache\Abstract;
 use Psr\Cache\CacheItemPoolInterface;
 use Base\Traits\SimpleCacheTrait;
 
-/**
- *
- */
 abstract class AbstractLocalCache implements AbstractLocalCacheInterface
 {
     use SimpleCacheTrait;

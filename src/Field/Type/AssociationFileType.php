@@ -33,9 +33,6 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Traversable;
 
-/**
- *
- */
 class AssociationFileType extends AbstractType implements DataMapperInterface
 {
     use BaseTrait;

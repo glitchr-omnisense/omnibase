@@ -19,9 +19,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-/**
- *
- */
 class EditorType extends AbstractType
 {
     /** @var Environment */
@@ -91,7 +88,6 @@ class EditorType extends AbstractType
             if($json && count($json->blocks) < 1) {
                 $event->setData(null);
             }
-
         });
     }
 
@@ -115,13 +111,14 @@ class EditorType extends AbstractType
             
             foreach($value->blocks as $k => $block) {
                 if ($block->type === "image" && property_exists($block->data, "file") && property_exists($block->data->file, "url")) {
-                    $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->url, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
+                    $block->data->file->origin ??= $block->data->file->url; // @deprecated - to be removed in favor of "storageId" property later on
+                    $block->data->file->url = $this->mediaEnhancer->enhance($block->data->file->origin, ["storage" => $this->parameterBag->get("base.twig.editor.storage")], [], []);
                     $value->blocks[$k] = $block;
                 }
             }
         }
 
-        $view->vars["value"] = is_json($value) ? json_encode($value) : $view->vars["value"];
+        $view->vars["value"] = (is_object($value) || is_array($value)) ? json_encode($value) : $view->vars["value"];
         $view->vars["uploadByFile"] = $this->router->generate("ux_editorjs_uploadByFile", ["data" => $data]);
         $view->vars["uploadByUrl"]  = $this->router->generate("ux_editorjs_uploadByUrl", ["data" => $data]);
 

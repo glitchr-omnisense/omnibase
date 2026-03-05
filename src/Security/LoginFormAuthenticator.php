@@ -27,9 +27,6 @@ use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
-/**
- *
- */
 class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;

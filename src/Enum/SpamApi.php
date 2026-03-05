@@ -5,9 +5,6 @@ namespace Base\Enum;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class SpamApi extends EnumType implements IconizeInterface
 {
     public const AKISMET = "AKISMET";

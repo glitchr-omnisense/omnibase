@@ -5,9 +5,6 @@ namespace Base\Service;
 use DateTime;
 use Exchanger\Contract\ExchangeRate;
 
-/**
- *
- */
 interface TradingInterface
 {
     public function normalize(string $source, string $target, mixed $value, null|string|int|DateTime $datetime): ?ExchangeRate;

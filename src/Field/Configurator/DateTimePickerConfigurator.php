@@ -14,9 +14,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
 use Base\Field\DateTimePickerField;
 use function in_array;
 
-/**
- *
- */
 class DateTimePickerConfigurator implements FieldConfiguratorInterface
 {
     /**

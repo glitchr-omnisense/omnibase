@@ -21,9 +21,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SubMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
 use Exception;
 
-/**
- *
- */
 class WidgetItem
 {
     public static $adminUrlGenerator;
@@ -130,7 +127,7 @@ class WidgetItem
         return new UrlMenuItem($label, $icon, $url);
     }
 
-    public static function section(?string $label = null, ?string $icon = null, int $width = 1, int $column = null): SectionWidgetItem
+    public static function section(?string $label = null, ?string $icon = null, int $width = 1, ?int $column = null): SectionWidgetItem
     {
         return new SectionWidgetItem($label, $icon, $width, $column);
     }

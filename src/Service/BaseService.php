@@ -60,9 +60,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use function is_object;
 
-/**
- *
- */
 class BaseService implements RuntimeExtensionInterface
 {
     use BaseTrait;
@@ -535,7 +532,7 @@ class BaseService implements RuntimeExtensionInterface
     public function refresh(?Request $request = null): RedirectResponse
     {
         $request = $request ?? $this->getRequest();
-        return $this->redirect($request->get('_route'));
+        return $this->redirect($request->attributes->get('_route'));
     }
 
     /**
@@ -718,9 +715,8 @@ class BaseService implements RuntimeExtensionInterface
      */
     public function inDoctrineStack()
     {
-        $debug_backtrace = debug_backtrace();
-        foreach ($debug_backtrace as $trace) {
-            if (str_starts_with($trace["class"], "Doctrine")) {
+        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $trace) {
+            if (isset($trace["class"]) && str_starts_with($trace["class"], "Doctrine")) {
                 return true;
             }
         }

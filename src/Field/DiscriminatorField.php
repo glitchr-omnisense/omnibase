@@ -6,9 +6,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
-/**
- *
- */
 class DiscriminatorField extends SelectField implements FieldInterface
 {
     public const OPTION_DISCRIMINATOR_AUTOLOAD = 'discriminatorAutoload';

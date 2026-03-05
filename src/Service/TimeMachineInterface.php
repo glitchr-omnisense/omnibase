@@ -2,9 +2,6 @@
 
 namespace Base\Service;
 
-/**
- *
- */
 interface TimeMachineInterface
 {
     public function findOneBy(int $id, int|array $storageNames, ?string $prefix = null, int $cycle = -1);

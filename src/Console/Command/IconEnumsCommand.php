@@ -12,9 +12,6 @@ use Base\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- *
- */
 #[AsCommand(name: 'icon:enums', aliases: [], description: '')]
 class IconEnumsCommand extends Command
 {

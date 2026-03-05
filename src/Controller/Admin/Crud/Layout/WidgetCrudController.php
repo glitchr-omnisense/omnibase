@@ -11,9 +11,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-/**
- *
- */
 class WidgetCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

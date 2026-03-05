@@ -9,9 +9,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-/**
- *
- */
 class Console implements ConsoleInterface
 {
     protected Application $application;

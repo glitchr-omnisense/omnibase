@@ -1,19 +1,20 @@
-@import 'css/easyadmin/stylesheet';
+@use "sass:meta";
+@use 'css/easyadmin/stylesheet';
 
 @media all and (min-width: 1025px)
-{ @import 'css/easyadmin/stylesheet.laptop'; }
+{ @include meta.load-css('css/easyadmin/stylesheet.laptop'); }
 
 @media all and (min-width: 1281px)
-{ @import 'css/easyadmin/stylesheet.desktop'; }
+{ @include meta.load-css('css/easyadmin/stylesheet.desktop'); }
 
 @media all and (max-width: 1024px)
-{ @import 'css/easyadmin/stylesheet.tablet'; }
+{ @include meta.load-css('css/easyadmin/stylesheet.tablet'); }
 
 @media all and (max-width: 1024px) and (orientation: landscape)
-{ @import 'css/easyadmin/stylesheet.tablet.landscape'; }
+{ @include meta.load-css('css/easyadmin/stylesheet.tablet.landscape'); }
 
 @media all and (max-width: 470px)
-{ @import 'css/easyadmin/stylesheet.mobile'; }
+{ @include meta.load-css('css/easyadmin/stylesheet.mobile'); }
 
 @media all and (max-width: 470px) and (orientation: landscape)
-{ @import 'css/easyadmin/stylesheet.mobile.landscape'; }
+{ @include meta.load-css('css/easyadmin/stylesheet.mobile.landscape'); }

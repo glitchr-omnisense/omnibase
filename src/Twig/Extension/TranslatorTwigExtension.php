@@ -8,9 +8,6 @@ use Base\Service\Translator;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- *
- */
 final class TranslatorTwigExtension extends AbstractExtension
 {
     /**

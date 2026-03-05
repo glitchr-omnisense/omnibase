@@ -10,9 +10,6 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\Point;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- *
- */
 class FixedFilter implements FilterInterface
 {
     private array $options;

@@ -7,9 +7,6 @@ namespace Base\EntityDispatcher;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
-/**
- *
- */
 interface EventDispatcherInterface
 {
     public function supports(mixed $subject): bool;

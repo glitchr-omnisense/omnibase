@@ -15,9 +15,6 @@ use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-/**
- *
- */
 class ThreadSubscriber implements EventSubscriberInterface
 {
     /**

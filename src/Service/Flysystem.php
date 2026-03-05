@@ -25,9 +25,6 @@ use InvalidArgumentException;
 use League\Flysystem\UnableToCreateDirectory;
 use ReflectionException;
 
-/**
- *
- */
 class Flysystem extends LazyFactory implements FlysystemInterface
 {
     /**

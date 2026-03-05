@@ -10,9 +10,6 @@ use Symfony\Component\CssSelector\Exception\ParseException;
 
 use function is_file;
 
-/**
- *
- */
 class Aco
 {
     public const BYTE_SIZE = 8;

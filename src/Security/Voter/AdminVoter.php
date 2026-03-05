@@ -7,9 +7,6 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 
-/**
- *
- */
 class AdminVoter extends Voter
 {
     public const BACKEND = "BACKEND";
@@ -27,7 +24,8 @@ class AdminVoter extends Voter
     protected function supports(string $attribute, mixed $subject): bool
     {
         // Voter only support "User" objects and one specific ballot type..
-        return $this->router->isAdmin() && $attribute == self::BACKEND;
+        // Check attribute first to short-circuit expensive route resolution
+        return $attribute == self::BACKEND && $this->router->isAdmin();
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool

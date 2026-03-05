@@ -6,9 +6,6 @@ use Base\Serializer\Excel;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
-/**
- *
- */
 class ExcelEncoder implements EncoderInterface, DecoderInterface
 {
     /**

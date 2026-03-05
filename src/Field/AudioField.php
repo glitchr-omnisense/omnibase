@@ -6,9 +6,6 @@ use Base\Field\Type\AudioType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-/**
- *
- */
 class AudioField extends FileField implements FieldInterface
 {
     public const OPTION_RENDER_FORMAT = 'renderFormat';

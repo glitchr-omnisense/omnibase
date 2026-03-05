@@ -26,9 +26,6 @@ use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 
-/**
- *
- */
 class ServiceEntityParser
 {
     protected $method;

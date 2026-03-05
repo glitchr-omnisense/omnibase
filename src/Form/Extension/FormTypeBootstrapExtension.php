@@ -11,9 +11,6 @@ use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-/**
- *
- */
 class FormTypeBootstrapExtension extends AbstractTypeExtension
 {
     /**

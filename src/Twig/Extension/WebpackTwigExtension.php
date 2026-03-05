@@ -6,9 +6,6 @@ use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class WebpackTwigExtension extends AbstractExtension
 {
     public function getFunctions(): array

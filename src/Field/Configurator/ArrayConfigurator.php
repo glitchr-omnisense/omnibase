@@ -20,9 +20,6 @@ use function count;
 use function in_array;
 use function Symfony\Component\String\u;
 
-/**
- *
- */
 class ArrayConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool

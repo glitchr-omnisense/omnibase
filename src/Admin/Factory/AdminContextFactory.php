@@ -27,21 +27,12 @@ class AdminContextFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\Admin
     {
         $adminContext = parent::create($request, $dashboardController, $crudController, $actionName);
         $adminContext = object_dehydrate($adminContext);    
-        
+
         return new AdminContext(
-            $request, 
-            $adminContext["user"], 
-            $adminContext["i18nDto"],
-            $adminContext["crudControllers"], 
-            $adminContext["dashboardDto"], 
-            $adminContext["dashboardControllerInstance"], 
-            $adminContext["assetDto"], 
-            $adminContext["crudDto"], 
-            $adminContext["entityDto"], 
-            $adminContext["searchDto"], 
-            $adminContext["menuFactory"], 
-            $adminContext["templateRegistry"], 
-            $adminContext["usePrettyUrls"], 
+            $adminContext["requestContext"],
+            $adminContext["crudContext"],
+            $adminContext["dashboardContext"],
+            $adminContext["i18nContext"],
             $this->extension
         );
     }

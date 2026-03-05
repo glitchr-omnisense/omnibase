@@ -7,9 +7,6 @@ use Base\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- *
- */
 class RoleType extends AbstractType
 {
     public function getParent(): ?string

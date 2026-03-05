@@ -24,9 +24,6 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- *
- */
 class BundleDataCollector extends AbstractDataCollector
 {
     /** @var AdminContextProvider */

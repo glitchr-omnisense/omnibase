@@ -16,9 +16,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- *
- */
 #[AsCommand(name: 'timemachine:snapshot', aliases: [], description: '')]
 class TimeMachineSnapshotCommand extends Command
 {
@@ -59,8 +56,7 @@ class TimeMachineSnapshotCommand extends Command
 
         $this->addOption('cycle', null, InputOption::VALUE_OPTIONAL, 'Which version do you want to get?', null);
         $this->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Which prefix do you want to use?', $this->environment);
-        $this->addOption('database', null, InputOption::VALUE_OPTIONAL, 'Which database do you want to backup?', null);
-        $this->addOption('userlog', null, InputOption::VALUE_NONE, 'Save user info too?', null);
+        $this->addOption('database', null, InputOption::VALUE_OPTIONAL, 'Which database do you want to backup?', null);    
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -70,15 +66,8 @@ class TimeMachineSnapshotCommand extends Command
         $storages = $input->getArgument('storages') ?? [];
         $database = $input->getOption('database') ?? null;
         $prefix   = $input->getOption('prefix') ?? null;
-        $userlog  = $input->getOption('userlog') ?? null;
         $cycle    = $input->getOption('cycle') ?? -1;
 
-        if($userlog) {
-            $output->section()->writeln("<info>User configuration will be included in the backup</info>\n");
-        } else {
-            $output->section()->writeln("<warning>User configuration will not be included in the backup</warning> (use `--userlog` option to include it)\n");
-        }
-        
         $output->section()->writeln("<info>Available database connection(s)</info>:");
         foreach ($this->timeMachine->getDatabaseList() as $connectionName => $connection) {
 

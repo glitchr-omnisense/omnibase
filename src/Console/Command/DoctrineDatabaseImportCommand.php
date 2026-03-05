@@ -35,9 +35,6 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 
-/**
- *
- */
 #[AsCommand(name: 'doctrine:database:import', aliases: [], description: 'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
 {

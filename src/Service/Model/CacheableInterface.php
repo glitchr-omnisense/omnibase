@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model;
 
-/**
- *
- */
 interface CacheableInterface
 {
     public function __toKey(?string ...$context): string;

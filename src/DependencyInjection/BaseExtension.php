@@ -14,16 +14,13 @@ use Base\Twig\Renderer\TagRendererInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 use Base\Bundle\AbstractBaseExtension;
 use Base\Service\Model\Sharer\SharerAdapterInterface;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
-/**
- *
- */
 class BaseExtension extends AbstractBaseExtension implements PrependExtensionInterface
 {
     /**
@@ -33,13 +30,11 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
     {
         //
         // Load service declaration (includes services, controllers,..)
-
-        // Format XML
-        $loader = new XmlFileLoader($container, new FileLocator(\dirname(__DIR__, 2) . '/config'));
-        $loader->load('services.xml');
-        $loader->load('services-public.xml');
-        $loader->load('services-fix.xml');
-        $loader->load('services-decoration.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__, 2) . '/config'));
+        $loader->load('services.php');
+        $loader->load('services-public.php');
+        $loader->load('services-fix.php');
+        $loader->load('services-decoration.php');
 
         // Configuration file: ./config/package/base.yaml
         $processor = new Processor();

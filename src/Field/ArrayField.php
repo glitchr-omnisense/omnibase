@@ -6,9 +6,6 @@ use Base\Field\Type\ArrayType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 class ArrayField extends CollectionField implements FieldInterface
 {
     use FieldTrait;

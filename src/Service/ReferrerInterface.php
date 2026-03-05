@@ -2,9 +2,6 @@
 
 namespace Base\Service;
 
-/**
- *
- */
 interface ReferrerInterface
 {
     public function getUrl(): ?string;

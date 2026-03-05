@@ -6,9 +6,6 @@ use Base\Enum\ThreadState;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- *
- */
 class StateType extends AbstractType
 {
     public function getParent(): ?string

@@ -8,9 +8,6 @@ use Doctrine\ORM\Query\AST\SelectExpression;
 use Doctrine\ORM\Query\AST\SelectStatement;
 use Doctrine\ORM\Query\TreeWalkerAdapter;
 
-/**
- *
- */
 class CountWalker extends TreeWalkerAdapter
 {
     /**

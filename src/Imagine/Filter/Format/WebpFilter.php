@@ -8,9 +8,6 @@ use Imagine\Filter\Basic\Autorotate;
 use Imagine\Filter\Basic\WebOptimization;
 use Imagine\Image\ImageInterface;
 
-/**
- *
- */
 class WebpFilter extends WebOptimization implements BitmapFilterInterface
 {
     protected array $filters;

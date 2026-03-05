@@ -23,6 +23,7 @@ trait VaultTrait
         return $this;
     }
 
+    // not mapped
     protected array $vaultBag = [];
 
     public function getPlainVaultBag(mixed $key): mixed

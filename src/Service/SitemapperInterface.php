@@ -5,9 +5,6 @@ namespace Base\Service;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Route;
 
-/**
- *
- */
 interface SitemapperInterface
 {
     public function getHostname(): string;

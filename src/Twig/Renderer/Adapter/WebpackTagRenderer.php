@@ -22,9 +22,6 @@ use Symfony\WebpackEncoreBundle\Exception\EntrypointNotFoundException;
 use Symfony\WebpackEncoreBundle\Exception\UndefinedBuildException;
 use Twig\Environment;
 
-/**
- *
- */
 class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCacheInterface
 {
     use SimpleCacheTrait;
@@ -56,7 +53,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         Packages                             $packages,
         string                               $publicDir,
         string                               $cacheDir,
-        string                               $buildDir = null
+        ?string                              $buildDir = null
     )
     {
         $this->entrypointLookupCollection = $entrypointLookupCollection;
@@ -214,7 +211,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
      * @param bool $strictMode
      * @return $this
      */
-    public function addEntrypoint(string $value, string $entrypointJsonPath, CacheItemPoolInterface $cache = null, string $cacheKey = null, bool $strictMode = true)
+    public function addEntrypoint(string $value, string $entrypointJsonPath, ?CacheItemPoolInterface $cache = null, ?string $cacheKey = null, bool $strictMode = true)
     {
         if (null == $this->entrypointLookupCollection) {
             throw new \LogicException('You cannot use "' . __CLASS__ . '::' . __METHOD__ . '" as the "symfony/webpack-encore-bundle" package is not installed. Try running "composer require symfony/webpack-encore-bundle".');

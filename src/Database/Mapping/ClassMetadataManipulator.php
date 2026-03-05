@@ -42,9 +42,6 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use function count;
 use function in_array;
 
-/**
- *
- */
 class ClassMetadataManipulator extends AbstractLocalCache
 {
     /**
@@ -1206,7 +1203,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     protected function getCompletorFor(object|string $className)
     {
         $className = is_object($className) ? get_class($className) : $className;
-        if (array_key_exists($className, self::$completors)) {
+        if (array_key_exists($className, self::$completors) && !isset(self::$completors->payload)) {
             return self::$completors[$className];
         }
 
@@ -1236,6 +1233,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         self::$completors = $this->getCache("/Completors", function () {
+            
             foreach ($this->getAllClassNames() as $className) {
                 $this->getCompletorFor($className);
             }

@@ -14,9 +14,6 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
 use Twig\Environment;
 
-/**
- *
- */
 class Sitemapper implements SitemapperInterface
 {
     /**
@@ -264,7 +261,7 @@ class Sitemapper implements SitemapperInterface
 
             array_map_recursive(function ($sitemap) use ($group) {
                 if (!array_key_exists($group, $this->urlset)) {
-                    $urlset[$group] = $sitemap;
+                    $this->urlset[$group] = $sitemap;
                 }
 
                 $this->urlset[$group]->addAlternate($sitemap);

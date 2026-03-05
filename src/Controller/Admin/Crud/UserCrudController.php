@@ -20,9 +20,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-/**
- *
- */
 class UserCrudController extends UserActionCrudController
 {
     public static function getPreferredIcon(): ?string

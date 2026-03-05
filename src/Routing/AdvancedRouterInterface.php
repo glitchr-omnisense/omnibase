@@ -15,9 +15,6 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-/**
- *
- */
 interface AdvancedRouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
 {
     public function getRouteIndex(): string;

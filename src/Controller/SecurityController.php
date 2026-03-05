@@ -44,9 +44,6 @@ use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 
-/**
- *
- */
 class SecurityController extends AbstractController
 {
     /**
@@ -442,7 +439,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route("/welcome-back/{token}", name: "security_accountWelcomeBackWithToken")]
-    public function EnableAccountRequest(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
+    public function EnableAccountRequest(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ?string $token = null): Response
     {
         $welcomeBackToken = $this->tokenRepository->findOneByValueAndName($token, "welcome-back");
         $user = $welcomeBackToken ? $welcomeBackToken->getUser() : $this->getUser();
@@ -519,7 +516,7 @@ class SecurityController extends AbstractController
      */
     
     #[Route("/reset-password/{token}", name: "security_resetPasswordWithToken")]
-    public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
+    public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ?string $token = null): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent()) {
             $notification = new Notification("login.already");

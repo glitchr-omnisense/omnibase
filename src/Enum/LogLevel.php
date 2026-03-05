@@ -5,9 +5,6 @@ namespace Base\Enum;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class LogLevel extends EnumType implements IconizeInterface
 {
     public const INFO = "INFO";

@@ -16,9 +16,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Throwable;
 
-/**
- *
- */
 class ErrorController extends AbstractController
 {
     private BaseService $baseService;

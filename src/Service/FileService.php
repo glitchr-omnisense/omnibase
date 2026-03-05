@@ -11,15 +11,12 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
 
-/**
- *
- */
 class FileService implements FileServiceInterface
 {
     public const USE_SHORT = Obfuscator::USE_SHORT;
     protected const CACHE_SUBDIVISION = 3;
     protected const CACHE_SUBDIVISION_LENGTH = 1;
-
+    
     /**
      * @var MimeTypes
      */
@@ -225,6 +222,19 @@ class FileService implements FileServiceInterface
             return null;
         }
 
+        // EARLY CHECK: If path matches a media route, extract the UUID data
+        $routeMatch = $this->router->getRouteMatch($path);
+        if ($routeMatch && isset($routeMatch["_route"]) && str_starts_with($routeMatch["_route"], "ux_image")) {
+            // Already an obfuscated URL - extract the data parameter
+            $data = $routeMatch["data"] ?? null;
+            if ($data) {
+                // Clean up the data (remove slashes from subdivided path)
+                $data = str_replace("/", "", $data);
+                // Return the UUID as-is (already encoded)
+                return $data;
+            }
+        }
+
         $path = realpath($path);
         $path = "/" . str_strip($path, $this->router->getAssetUrl(""));
 
@@ -232,13 +242,13 @@ class FileService implements FileServiceInterface
         $config["options"] = $config["options"] ?? [];
         $config["local_cache"] = $config["local_cache"] ?? null;
 
-        while (($pathConfig = $this->obfuscator->decode(basename($path)/*, FileService::USE_SHORT*/))) {
+        while (($pathConfig = $this->obfuscator->decode(basename($path), FileService::USE_SHORT))) {
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        return $this->obfuscator->encode($config/*, FileService::USE_SHORT*/);
+        return $this->obfuscator->encode($config, FileService::USE_SHORT);
     }
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string

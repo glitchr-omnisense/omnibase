@@ -10,9 +10,6 @@ use Base\Field\BooleanField;
 use Base\Field\SlugField;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
-/**
- *
- */
 class SettingCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

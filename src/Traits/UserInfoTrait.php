@@ -5,9 +5,6 @@ namespace Base\Traits;
 use Symfony\Component\Intl\Timezones;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- *
- */
 trait UserInfoTrait
 {
     public const __COOKIE_IDENTIFIER__ = "USER/INFO";

@@ -15,9 +15,6 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Traversable;
 
-/**
- *
- */
 class QuadrantType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string

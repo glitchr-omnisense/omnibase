@@ -17,9 +17,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 
-/**
- *
- */
 class ImageCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }

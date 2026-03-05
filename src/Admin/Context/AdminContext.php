@@ -10,11 +10,20 @@ use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
 {
     protected ?Extension $extension = null;
+    protected ?AbstractDashboardController $dashboardControllerInstance = null;
 
     public function __construct(...$args)
     {
         $this->extension = \array_pop_class(Extension::class, $args);
         parent::__construct(...$args);
+
+
+        $this->dashboardControllerInstance = $this->extension->getController(
+            AbstractDashboardController::class, 
+            $this->dashboardContext->getDashboardControllerFqcn(),
+            "index",
+            $this->requestContext->getRequest()
+        );
     }
 
     /**
@@ -30,7 +39,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
      */
     public function getTranslationDomain()
     {
-        return $this->dashboardDto->getTranslationDomain();
+        return $this->dashboardContext->getDashboardDto()->getTranslationDomain() ?? EA::DEFAULT_TRANSLATION_DOMAIN;
     }
 
     public function impersonator_permission(): string
@@ -52,17 +61,14 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
         if (null !== $this->mainMenuBeforeDto) {
             return $this->mainMenuBeforeDto;
         }
-
-        $mainMenuItems = [];
-        if($this->dashboardControllerInstance instanceof AbstractDashboardController) {
-        
-            $configuredMenuItems = $this->dashboardControllerInstance->configureMenuBeforeItems();
-            $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
-        }
-
-        return $this->mainMenuBeforeDto = $this->menuFactory->createMainMenu($mainMenuItems);
+ 
+        $configuredMenuItems = $this->dashboardControllerInstance->configureMenuBeforeItems();
+        $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
+    
+        return $this->mainMenuBeforeDto = $this->extension->createMainMenu($mainMenuItems);
     }
 
+    protected ?MainMenuDto $mainMenuDto = null;
     public function getMainMenu(): MainMenuDto
     {
         if (null !== $this->mainMenuDto) {
@@ -72,7 +78,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
         $configuredMenuItems = $this->dashboardControllerInstance->configureMenuItems();
         $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
 
-        return $this->mainMenuDto = $this->menuFactory->createMainMenu($mainMenuItems);
+        return $this->mainMenuDto = $this->extension->createMainMenu($mainMenuItems);
     }
 
     /**
@@ -85,14 +91,10 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
             return $this->mainMenuAfterDto;
         }
 
-        $mainMenuItems = [];
-        if($this->dashboardControllerInstance instanceof AbstractDashboardController) {
-        
-            $configuredMenuItems = $this->dashboardControllerInstance->configureMenuAfterItems();
-            $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
-        }
+        $configuredMenuItems = $this->dashboardControllerInstance->configureMenuAfterItems();
+        $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
 
-        return $this->mainMenuAfterDto = $this->menuFactory->createMainMenu($mainMenuItems);
+        return $this->mainMenuAfterDto = $this->extension->createMainMenu($mainMenuItems);
     }
 
     /**
@@ -124,7 +126,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
             $referenceUrl["fragment"] ?? null
         );
 
-        $url = parse_url($this->request->getRequestUri());
+        $url = parse_url($this->requestContext->getRequest()->getRequestUri());
 
         $url["query"] ??= "";
         $url["query"] = explode_attributes("&", $url["query"]);

@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model\Sharer;
 
-/**
- *
- */
 interface SharerAdapterInterface
 {
     public function getIdentifier(): string;

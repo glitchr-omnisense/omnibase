@@ -13,9 +13,6 @@ use Imagine\Utils\Matrix;
 use function in_array;
 use function is_string;
 
-/**
- *
- */
 class Effects implements EffectsInterface
 {
     private const SVG_FILTER_ID_PREFIX = 'svgImagineFilterV1_';

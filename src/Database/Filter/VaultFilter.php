@@ -8,9 +8,6 @@ use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 use InvalidArgumentException;
 
-/**
- *
- */
 class VaultFilter extends SQLFilter
 {
     protected $environment;

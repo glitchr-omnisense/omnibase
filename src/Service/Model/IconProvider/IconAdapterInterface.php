@@ -4,9 +4,6 @@ namespace Base\Service\Model\IconProvider;
 
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 interface IconAdapterInterface
 {
     public function supports(IconizeInterface|string|null $icon): bool;

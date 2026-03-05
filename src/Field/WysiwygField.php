@@ -6,9 +6,6 @@ use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- *
- */
 final class WysiwygField implements FieldInterface
 {
     use FieldTrait;

@@ -14,9 +14,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 
-/**
- *
- */
 trait FormGuessTrait
 {
     public function guessClass(FormInterface|FormEvent $form, ?array $options = null): ?string

@@ -2,9 +2,6 @@
 
 namespace Base\Service\Model\Obfuscator;
 
-/**
- *
- */
 interface CompressionInterface
 {
     public function getName(): string;

@@ -7,9 +7,6 @@ use Base\Field\CountryField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-/**
- *
- */
 class AddressCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string

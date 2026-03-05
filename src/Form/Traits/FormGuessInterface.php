@@ -6,9 +6,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 
-/**
- *
- */
 interface FormGuessInterface
 {
     public const GUESS_FROM_FORM = "GUESS_FROM_FORM";

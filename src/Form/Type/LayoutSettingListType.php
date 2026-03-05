@@ -26,9 +26,6 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- *
- */
 class LayoutSettingListType extends AbstractType implements DataMapperInterface
 {
     protected SettingBagInterface $settingBag;

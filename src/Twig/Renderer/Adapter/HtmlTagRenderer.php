@@ -12,9 +12,6 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 
-/**
- *
- */
 class HtmlTagRenderer extends AbstractTagRenderer
 {
     protected RequestStack $requestStack;

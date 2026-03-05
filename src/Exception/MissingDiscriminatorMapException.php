@@ -4,9 +4,6 @@ namespace Base\Exception;
 
 use Exception;
 
-/**
- *
- */
 class MissingDiscriminatorMapException extends Exception
 {
     /**

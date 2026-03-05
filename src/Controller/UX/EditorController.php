@@ -346,7 +346,8 @@ class EditorController extends AbstractController
         $mimeType = mime_content_type2($file->getPathname());
 
         $fileExtension = $mimeType ? $this->mimeTypes->getExtensions($mimeType)[0] ?? null : null;
-        $filePath = "/" . $fileUuid . ($fileExtension ? "." . $fileExtension : "");
+
+        $filePath = "/" . path_subdivide(str_replace("-", "", $fileUuid), 5, 2) . ($fileExtension ? "." . $fileExtension : "");
 
         if (!file_exists($file->getPathname())) {
             return new Response("Uploaded file lost in the limbo.", 500);

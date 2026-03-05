@@ -8,9 +8,6 @@ use Symfony\Component\Form\FormView;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class FormTwigExtension extends AbstractExtension
 {
     private FormProxyInterface $formProxy;

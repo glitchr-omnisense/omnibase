@@ -6,9 +6,6 @@ use Base\Database\Type\EnumType;
 use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\IconizeInterface;
 
-/**
- *
- */
 class ThreadState extends EnumType implements IconizeInterface, ColorizeInterface
 {
     public const DRAFT = "STATE_DRAFT";

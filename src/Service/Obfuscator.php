@@ -10,9 +10,6 @@ use LogicException;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV5;
 
-/**
- *
- */
 class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
 {
     protected string $uuid;
@@ -92,7 +89,7 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return Uuid::v5(Uuid::fromString($this->uuid), $name);
     }
 
-    public function encode(array $value, ?bool $short = Obfuscator::NO_SHORT): string
+    public function encode(array $value, bool $short = Obfuscator::NO_SHORT): string
     {
         ksort($value); // Make sure keys are sorted before serializing..
 

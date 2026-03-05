@@ -4,9 +4,6 @@ namespace Base\Service\Model\Sharer\Adapter;
 
 use Base\Service\Model\Sharer\AbstractSharerAdapter;
 
-/**
- *
- */
 class TumblrAdapter extends AbstractSharerAdapter
 {
     public function getIdentifier(): string

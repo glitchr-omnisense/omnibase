@@ -2,9 +2,6 @@
 
 namespace Base\Database\Entity\Extension;
 
-/**
- *
- */
 interface TranslationInterface
 {
     public function getTranslatable(): ?TranslatableInterface;

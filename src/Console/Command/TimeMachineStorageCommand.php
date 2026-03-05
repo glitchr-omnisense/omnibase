@@ -15,9 +15,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- *
- */
 #[AsCommand(name: 'timemachine:storage', aliases: [], description: '')]
 class TimeMachineStorageCommand extends Command
 {

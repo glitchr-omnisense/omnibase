@@ -13,9 +13,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-/**
- *
- */
 class ThreadSearchController extends AbstractController
 {
     protected FormProxyInterface $formProxy;

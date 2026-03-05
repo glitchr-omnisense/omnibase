@@ -266,21 +266,6 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
 
     /**
-     * @return bool
-     */
-    public static function inDoctrineStack(): bool
-    {
-        $debug_backtrace = debug_backtrace();
-        foreach ($debug_backtrace as $trace) {
-            if (str_starts_with($trace["class"], "Doctrine")) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * @param $entity
      * @param string $property
      * @return ServiceEntityRepositoryInterface

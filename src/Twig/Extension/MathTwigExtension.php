@@ -5,9 +5,6 @@ namespace Base\Twig\Extension;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-/**
- *
- */
 final class MathTwigExtension extends AbstractExtension
 {
     public function getFunctions(): array

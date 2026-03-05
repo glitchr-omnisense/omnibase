@@ -5,9 +5,6 @@ namespace Base\Service\Model;
 use Base\Service\TranslatorInterface;
 use Base\Validator\Constraint;
 
-/**
- *
- */
 class Autovalidate
 {
     private ?TranslatorInterface $translator;

@@ -17,9 +17,6 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-/**
- *
- */
 class Trading implements TradingInterface
 {
     /**
