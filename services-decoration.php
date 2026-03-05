@@ -103,7 +103,7 @@ return static function (ContainerConfigurator $container): void {
         ->parent('EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber')
         ->decorate('EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber')
         ->tag('kernel.event_subscriber')
-        ->args([new Reference('EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry', ContainerInterface::NULL_ON_INVALID_REFERENCE), new Reference('doctrine.orm.entity_manager')]);
+        ->args([new Reference('EasyCorp\Bundle\EasyAdminBundle\Registry\AdminControllerRegistry'), new Reference('doctrine.orm.entity_manager')]);
 
     $services->set('Base\Admin\Router\AdminRouteGenerator')
         ->parent('EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator')

@@ -76,7 +76,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             new Reference('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider'),
             new Reference('router'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            new Reference('EasyCorp\\Bundle\\EasyAdminBundle\\Registry\\AdminControllerRegistry'),
             new Reference('EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator'),
             new Reference('cache.easyadmin'),
         ]);

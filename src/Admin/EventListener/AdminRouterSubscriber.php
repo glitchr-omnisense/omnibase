@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManager;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\CrudControllerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\DashboardControllerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry;
+use EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistryInterface;
 use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Event\ControllerEvent;
 readonly class AdminRouterSubscriber extends \EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber
 {
     protected EntityManager $entityManager;
-    protected DashboardControllerRegistry $dashboardRegistry;
+    protected DashboardControllerRegistryInterface $dashboardRegistry;
 
     public function __construct(...$args)
     {
