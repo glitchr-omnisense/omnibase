@@ -17,7 +17,7 @@ use Symfony\Contracts\Translation\TranslatableInterface;
 use function in_array;
 use function Symfony\Component\Translation\t;
 
-class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator
+readonly class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator
 {
     /**
      * @var TranslatorInterface
