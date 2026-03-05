@@ -1,6 +1,7 @@
 <?php
 
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
@@ -74,11 +75,10 @@ return static function (ContainerConfigurator $container): void {
         ->public(true)
         ->args([
             new Reference('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider'),
-            new Reference('Symfony\Component\Routing\Generator\UrlGeneratorInterface'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry'),
+            new Reference('router'),
+            new Reference('EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry', ContainerInterface::NULL_ON_INVALID_REFERENCE),
             new Reference('EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator'),
             new Reference('cache.easyadmin'),
-            new Reference('doctrine.orm.entity_manager'),
         ]);
 
     $services->set('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider')
