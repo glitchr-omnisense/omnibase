@@ -6,7 +6,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Routing\Route;
 
-readonly class AdminRouteGenerator extends \EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator
+class AdminRouteGenerator extends \EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator
 {
     protected function transformCrudControllerNameToKebabCase(string $crudControllerFqcn): string
     {
