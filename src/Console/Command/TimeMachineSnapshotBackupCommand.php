@@ -48,6 +48,12 @@ class TimeMachineSnapshotBackupCommand extends TimeMachineSnapshotCommand
         if(!$batchMode && !$helper->ask($input, $output, $question))
             return Command::SUCCESS;
 
-        return $this->timeMachine->backup($database, $storages, $userlog, $prefix, $cycle);
+        if($this->timeMachine->backup($database, $storages, $userlog, $prefix, $cycle)) {
+            $output->section()->writeln("<info>Backup completed successfully.</info>\n");
+            return Command::SUCCESS;
+        }
+            
+        $output->section()->writeln("<error>Backup failed.</error>\n");
+        return Command::FAILURE;
     }
 }
