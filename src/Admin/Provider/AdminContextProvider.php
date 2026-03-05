@@ -2,7 +2,7 @@
 
 namespace Base\Admin\Provider;
 
-class AdminContextProvider extends \EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider
+readonly class AdminContextProvider extends \EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider
 {
     public function getTranslationDomain()
     {
