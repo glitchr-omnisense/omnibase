@@ -14,6 +14,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
+use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 
 class AccessVoter extends Voter
@@ -65,7 +66,7 @@ class AccessVoter extends Voter
     private ?bool $adminAccessCache = null;
     private ?bool $userAccessCache = null;
     private ?bool $publicAccessCache = null;
-    private ?string $currentFirewallCache = null;
+    private ?FirewallConfig $currentFirewallCache = null;
 
     public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocalizerInterface $localizer, MaintenanceProviderInterface $maintenanceProvider, LauncherInterface $launcher)
     {
