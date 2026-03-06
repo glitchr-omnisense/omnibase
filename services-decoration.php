@@ -1,5 +1,6 @@
 <?php
 
+use EasyCorp\Bundle\EasyAdminBundle\Registry\AdminControllerRegistry;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
@@ -98,12 +99,11 @@ return static function (ContainerConfigurator $container): void {
             new Reference('parameter_bag'),
         ]);
 
-    // Admin services
     $services->set('Base\Admin\EventListener\AdminRouterSubscriber')
         ->parent('EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber')
         ->decorate('EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber')
         ->tag('kernel.event_subscriber')
-        ->args([new Reference('EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry'), new Reference('doctrine.orm.entity_manager')]);
+        ->args([new Reference(AdminControllerRegistry::class), new Reference('doctrine.orm.entity_manager')]);
 
     $services->set('Base\Admin\Router\AdminRouteGenerator')
         ->parent('EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator')
