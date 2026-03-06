@@ -28,21 +28,18 @@ readonly class AdminContextFactory extends \EasyCorp\Bundle\EasyAdminBundle\Fact
         $adminContext = parent::create($request, $dashboardController, $crudController, $actionName);
         $props = object_dehydrate($adminContext);
 
-        return new AdminContext(
-            $props["request"],
-            $props["user"],
-            $props["i18nDto"],
-            $props["crudControllers"],
-            $props["dashboardDto"],
-            $props["dashboardControllerInstance"],
-            $props["assetDto"],
-            $props["crudDto"],
-            $props["entityDto"],
-            $props["searchDto"],
-            $props["menuFactory"],
-            $props["templateRegistry"],
-            $props["usePrettyUrls"],
-            $this->extension
-        );
+        // Resolve constructor args by name so this works with any EasyCorp version
+        // (old sub-object API uses keys like "requestContext"; new flat API uses "request", etc.)
+        $ref = new \ReflectionClass(\EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext::class);
+        $args = [];
+        foreach ($ref->getConstructor()->getParameters() as $param) {
+            $name = $param->getName();
+            $args[] = array_key_exists($name, $props)
+                ? $props[$name]
+                : ($param->isDefaultValueAvailable() ? $param->getDefaultValue() : null);
+        }
+        $args[] = $this->extension;
+
+        return new AdminContext(...$args);
     }
 }
