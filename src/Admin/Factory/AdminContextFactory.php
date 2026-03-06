@@ -26,13 +26,22 @@ readonly class AdminContextFactory extends \EasyCorp\Bundle\EasyAdminBundle\Fact
     public function create(Request $request, DashboardControllerInterface $dashboardController, ?CrudControllerInterface $crudController, ?string $actionName = null): AdminContext
     {
         $adminContext = parent::create($request, $dashboardController, $crudController, $actionName);
-        $adminContext = object_dehydrate($adminContext);    
+        $props = object_dehydrate($adminContext);
 
         return new AdminContext(
-            $adminContext["requestContext"],
-            $adminContext["crudContext"],
-            $adminContext["dashboardContext"],
-            $adminContext["i18nContext"],
+            $props["request"],
+            $props["user"],
+            $props["i18nDto"],
+            $props["crudControllers"],
+            $props["dashboardDto"],
+            $props["dashboardControllerInstance"],
+            $props["assetDto"],
+            $props["crudDto"],
+            $props["entityDto"],
+            $props["searchDto"],
+            $props["menuFactory"],
+            $props["templateRegistry"],
+            $props["usePrettyUrls"],
             $this->extension
         );
     }
