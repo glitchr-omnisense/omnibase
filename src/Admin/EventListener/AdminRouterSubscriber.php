@@ -12,15 +12,15 @@ use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
-readonly class AdminRouterSubscriber extends \EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber
+class AdminRouterSubscriber extends \EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber
 {
     protected EntityManager $entityManager;
     protected DashboardControllerRegistryInterface $dashboardRegistry;
 
-    public function __construct(...$args)
+    public function __construct(DashboardControllerRegistryInterface $dashboardRegistry, EntityManager $entityManager, ...$args)
     {
-        $this->entityManager = array_pop($args);
-        $this->dashboardRegistry = array_pop($args);
+        $this->dashboardRegistry = $dashboardRegistry;
+        $this->entityManager = $entityManager;
         parent::__construct(...$args);
     }
 
