@@ -17,10 +17,10 @@ readonly class AdminRouterSubscriber extends \EasyCorp\Bundle\EasyAdminBundle\Ev
     protected EntityManager $entityManager;
     protected AdminControllerRegistry $dashboardRegistry;
 
-    public function __construct(AdminControllerRegistry $dashboardRegistry, EntityManager $entityManager, ...$args)
+    public function __construct(...$args)
     {
-        $this->dashboardRegistry = $dashboardRegistry;
-        $this->entityManager = $entityManager;
+        $this->entityManager = array_pop($args);
+        $this->dashboardRegistry = array_pop($args);
         parent::__construct(...$args);
     }
 
