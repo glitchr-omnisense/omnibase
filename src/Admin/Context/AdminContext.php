@@ -4,25 +4,25 @@ namespace Base\Admin\Context;
 
 use Base\Admin\Config\Extension;
 use Base\Controller\Admin\AbstractDashboardController;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MainMenuDto;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 
 class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
 {
     protected ?Extension $extension = null;
-    protected ?AbstractDashboardController $dashboardControllerInstance = null;
+    protected ?AbstractDashboardController $dashboardController = null;
 
     public function __construct(...$args)
     {
         $this->extension = \array_pop_class(Extension::class, $args);
         parent::__construct(...$args);
 
-
-        $this->dashboardControllerInstance = $this->extension->getController(
-            AbstractDashboardController::class, 
-            $this->dashboardContext->getDashboardControllerFqcn(),
+        $this->dashboardController = $this->extension->getController(
+            AbstractDashboardController::class,
+            $this->getDashboardControllerFqcn(),
             "index",
-            $this->requestContext->getRequest()
+            $this->getRequest()
         );
     }
 
@@ -39,7 +39,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
      */
     public function getTranslationDomain()
     {
-        return $this->dashboardContext->getDashboardDto()->getTranslationDomain() ?? EA::DEFAULT_TRANSLATION_DOMAIN;
+        return $this->dashboardDto->getTranslationDomain() ?? EA::DEFAULT_TRANSLATION_DOMAIN;
     }
 
     public function impersonator_permission(): string
@@ -62,7 +62,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
             return $this->mainMenuBeforeDto;
         }
  
-        $configuredMenuItems = $this->dashboardControllerInstance->configureMenuBeforeItems();
+        $configuredMenuItems = $this->dashboardController->configureMenuBeforeItems();
         $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
     
         return $this->mainMenuBeforeDto = $this->extension->createMainMenu($mainMenuItems);
@@ -75,7 +75,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
             return $this->mainMenuDto;
         }
 
-        $configuredMenuItems = $this->dashboardControllerInstance->configureMenuItems();
+        $configuredMenuItems = $this->dashboardController->configureMenuItems();
         $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
 
         return $this->mainMenuDto = $this->extension->createMainMenu($mainMenuItems);
@@ -91,7 +91,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
             return $this->mainMenuAfterDto;
         }
 
-        $configuredMenuItems = $this->dashboardControllerInstance->configureMenuAfterItems();
+        $configuredMenuItems = $this->dashboardController->configureMenuAfterItems();
         $mainMenuItems = \is_array($configuredMenuItems) ? $configuredMenuItems : iterator_to_array($configuredMenuItems, false);
 
         return $this->mainMenuAfterDto = $this->extension->createMainMenu($mainMenuItems);
@@ -126,7 +126,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
             $referenceUrl["fragment"] ?? null
         );
 
-        $url = parse_url($this->requestContext->getRequest()->getRequestUri());
+        $url = parse_url($this->getRequest()->getRequestUri());
 
         $url["query"] ??= "";
         $url["query"] = explode_attributes("&", $url["query"]);
