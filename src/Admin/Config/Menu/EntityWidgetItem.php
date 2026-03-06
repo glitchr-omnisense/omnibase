@@ -124,7 +124,7 @@ final class EntityWidgetItem implements MenuItemInterface
                 WidgetItem::$adminUrlGenerator->setController($crudControllerFqcn);
                 // 2. ...otherwise, find the CRUD controller from the entityFqcn
             } else if(WidgetItem::$adminContextProvider->getContext()) {
-                $crudControllers = WidgetItem::$adminContextProvider->getContext()->getCrudControllers();
+                $crudControllers = WidgetItem::$adminContextProvider->getContext()->getCrud();
                 if (null === $controllerFqcn = AbstractCrudController::getCrudControllerFqcn($entityFqcn)) {
                     throw new RuntimeException(sprintf('Unable to find the controller related to the "%s" Entity; did you forget to extend "%s"?', $entityFqcn, AbstractCrudController::class));
                 }
