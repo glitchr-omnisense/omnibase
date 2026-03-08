@@ -39,7 +39,7 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
      */
     public function getTranslationDomain()
     {
-        return $this->dashboardDto->getTranslationDomain() ?? EA::DEFAULT_TRANSLATION_DOMAIN;
+        return $this->dashboardContext->getDashboardDto()->getTranslationDomain() ?? EA::DEFAULT_TRANSLATION_DOMAIN;
     }
 
     public function impersonator_permission(): string
