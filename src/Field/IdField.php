@@ -5,6 +5,7 @@ namespace Base\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class IdField implements FieldInterface
 {
@@ -14,7 +15,7 @@ final class IdField implements FieldInterface
     public const OPTION_ADD_LINK = 'addLink';
     public const OPTION_IMPERSONATE = 'impersonate';
 
-    public static function new(string $propertyName = 'id', ?string $label = null): self
+    public static function new(string $propertyName = 'id', TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

@@ -5,6 +5,7 @@ namespace Base\Field;
 use Base\Field\Type\SlugType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class SlugField implements FieldInterface
 {
@@ -14,7 +15,7 @@ final class SlugField implements FieldInterface
     public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';
     public const OPTION_UNLOCK_CONFIRMATION_MESSAGE = 'unlockConfirmationMessage';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

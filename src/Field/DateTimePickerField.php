@@ -6,6 +6,7 @@ use Base\Field\Type\DateTimePickerType;
 use DateTime;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class DateTimePickerField implements FieldInterface
 {
@@ -45,7 +46,7 @@ final class DateTimePickerField implements FieldInterface
     public const OPTION_WIDGET = 'widget';
     public const OPTION_DEFAULT = 'default_value';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

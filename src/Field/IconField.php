@@ -6,12 +6,13 @@ use Base\Field\Type\IconType;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 class IconField extends SelectField implements FieldInterface
 {
     public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

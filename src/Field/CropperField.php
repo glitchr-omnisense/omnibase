@@ -6,6 +6,7 @@ use Base\Field\Type\ImageType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 class CropperField implements FieldInterface
 {
@@ -14,7 +15,7 @@ class CropperField implements FieldInterface
     public const OPTION_SHOWFIRST = 'showFirst';
     public const OPTION_RENDER_FORMAT = 'renderFormat';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

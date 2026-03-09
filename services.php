@@ -102,6 +102,7 @@ return static function (ContainerConfigurator $container): void {
         'Base\Subscriber\TwigSubscriber' => ['twig.html_renderer', 'twig.webpack_renderer', 'security.authorization_checker', 'parameter_bag', 'advanced_router', '$publicDir' => '%kernel.project_dir%/public'],
         'Base\Subscriber\HotParameterBagSubscriber' => ['parameter_bag', 'setting_bag'],
         'Base\Subscriber\EasyAdminSubscriber' => ['advanced_router', 'EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider', 'EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'],
+        'Base\Subscriber\AdminContextSubscriber' => [],
         'Base\Subscriber\AnalyticsSubscriber' => ['security.token_storage', 'advanced_router', 'translator', 'twig', 'App\Repository\UserRepository', 'ga.service'],
     ];
 
@@ -1195,6 +1196,8 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
 
     foreach ($controllerServices as $controller) {
         $services->set($controller)
+            ->autowire(true)
+            ->autoconfigure(true)
             ->tag('controller.service_arguments')
             ->tag('container.service_subscriber')
             ->call('setContainer', [new Reference('Psr\Container\ContainerInterface')]);

@@ -6,6 +6,7 @@ use Base\Field\Type\AssociationType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class AssociationField implements FieldInterface
 {
@@ -34,7 +35,7 @@ final class AssociationField implements FieldInterface
     public const OPTION_RELATED_URL = 'relatedUrl';
     public const OPTION_DOCTRINE_ASSOCIATION_TYPE = 'associationType';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

@@ -5,6 +5,7 @@ namespace Base\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 class DiscriminatorField extends SelectField implements FieldInterface
 {
@@ -13,7 +14,7 @@ class DiscriminatorField extends SelectField implements FieldInterface
     public const OPTION_SHOW_INLINE = 'discriminatorInline';
     public const OPTION_SHOW_LEAF = 'discriminatorLeaf';
 
-    public static function new(string $propertyName = "id", ?string $label = null): self
+    public static function new(string $propertyName = "id", TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

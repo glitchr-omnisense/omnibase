@@ -92,10 +92,12 @@ class DateTimePickerConfigurator implements FieldConfiguratorInterface
         $field->setFormattedValue($formattedValue);
 
         // check if the property is immutable, but only if it's a real Doctrine entity property
-        if (!$entityDto->hasProperty($field->getProperty())) {
+        if (!isset($entityDto->getClassMetadata()->fieldMappings[$field->getProperty()])) {
             return;
         }
-        $doctrineDataType = $entityDto->getPropertyMetadata($field->getProperty())->get('type');
+        $fieldMapping = $entityDto->getClassMetadata()->getFieldMapping($field->getProperty());
+        // Doctrine ORM 2.x returns an array and Doctrine ORM 3.x returns a FieldMapping object
+        $doctrineDataType = \is_array($fieldMapping) ? ($fieldMapping['type'] ?? null) : $fieldMapping->type;
         $isImmutableDateTime = in_array($doctrineDataType, [Types::DATETIMETZ_IMMUTABLE, Types::DATETIME_IMMUTABLE, Types::DATE_IMMUTABLE, Types::TIME_IMMUTABLE], true);
         if ($isImmutableDateTime) {
             $field->setFormTypeOptionIfNotSet('input', 'datetime_immutable');

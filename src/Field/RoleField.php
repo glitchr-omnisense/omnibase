@@ -5,10 +5,11 @@ namespace Base\Field;
 use App\Enum\UserRole;
 use Base\Field\Type\RoleType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 class RoleField extends SelectField
 {
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

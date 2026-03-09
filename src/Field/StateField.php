@@ -5,12 +5,13 @@ namespace Base\Field;
 use Base\Enum\ThreadState;
 use Base\Field\Type\StateType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 class StateField extends SelectField
 {
     public const OPTION_CLASS = 'class';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

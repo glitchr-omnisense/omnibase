@@ -8,6 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 class FileField implements FieldInterface
 {
@@ -27,7 +28,7 @@ class FileField implements FieldInterface
     public const OPTION_ALLOW_REUPLOAD = 'allow_reupload';
     public const OPTION_PREFERRED_DOWNLOAD_NAME = 'preferredDownloadName';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

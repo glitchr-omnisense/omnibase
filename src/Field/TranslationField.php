@@ -7,6 +7,7 @@ use Base\Service\Localizer;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 class TranslationField implements FieldInterface
 {
@@ -16,7 +17,7 @@ class TranslationField implements FieldInterface
     public const OPTION_RENDER_AS_HTML = 'renderAsHtml';
     public const OPTION_STRIP_TAGS = 'stripTags';
 
-    public static function new(string $propertyName = null, ?string $label = null): self
+    public static function new(string $propertyName = null, TranslatableInterface|string|bool|null $label = null): self
     {
         $field = (new self())
             ->setProperty('translations')

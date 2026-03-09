@@ -1526,6 +1526,11 @@ fieldset .sidebar-menu { margin:0.25em 0em 0.25em 0; }
 }
 
 
+.content-panel-body.with-background
+{
+    padding-bottom:1em !important;
+}
+
 .content-panel-body.with-background,
 .content-panel-body.without-footer, .content-panel-footer
 {

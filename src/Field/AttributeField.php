@@ -5,6 +5,7 @@ namespace Base\Field;
 use Base\Field\Type\AttributeType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class AttributeField implements FieldInterface
 {
@@ -27,7 +28,7 @@ final class AttributeField implements FieldInterface
     public const SHOW_ICON_ONLY = 2;
     public const SHOW_ALL = 3;
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

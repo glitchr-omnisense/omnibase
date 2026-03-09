@@ -32,7 +32,7 @@
     {% block main_menu_before %}
         <ul class="menu menu-before">
         {% for menuItem in ea().mainMenuBefore.items %}
-            <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.hasSubItems ? 'has-submenu' }} {{ ea().mainMenu.isSelected(menuItem) or ea().isActive(menuItem.linkUrl) ? 'active' }} {{ ea().mainMenu.isExpanded(menuItem) ? 'expanded' }}">
+            <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.hasSubItems ? 'has-submenu' }} {{ menuItem.isSelected() ? 'active' }} {{ menuItem.isExpanded() ? 'expanded' }}">
                 {{ _self.render_menu_item(menuItem, ea().getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea().getTranslationDomain())|raw }}
             </li>
         {% endfor %}
@@ -45,14 +45,14 @@
                 {% block menu_item %}
                     {% if menuItem.label is not null %}
 
-                    <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.hasSubItems ? 'has-submenu' }} {{ ea().mainMenu.isSelected(menuItem) or ea().isActive(menuItem.linkUrl) ? 'active' }} {{ ea().mainMenu.isExpanded(menuItem) ? 'expanded' }}">
+                    <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.hasSubItems ? 'has-submenu' }} {{ menuItem.isSelected() ? 'active' }} {{ menuItem.isExpanded() ? 'expanded' }}">
                         {{ _self.render_menu_item(menuItem, ea().getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea().getTranslationDomain())|raw }}
                         {% if menuItem.hasSubItems %}
                         <ul class="submenu">
                             {% for menuSubItem in menuItem.subItems %}
                                 {% block menu_subitem %}
 
-                                    <li class="{{ menuSubItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuSubItem.isSelected(menuSubItem) or ea().isActive(menuSubItem.linkUrl) ? 'active' }}">
+                                    <li class="{{ menuSubItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuSubItem.isSelected() ? 'active' }}">
                                         {{ _self.render_menu_item(menuSubItem, ea().getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea().getTranslationDomain())|raw }}
                                     </li>
                                 {% endblock menu_subitem %}
@@ -69,7 +69,7 @@
     {% block main_menu_after %}
     <ul class="menu menu-after">
     {% for menuItem in ea().mainMenuAfter.items %}
-        <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ ea().mainMenu.isSelected(menuItem) or ea().isActive(menuItem.linkUrl) ? 'active' }}">
+        <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.isSelected() ? 'active' }}">
             {{ _self.render_menu_item(menuItem, ea().getTranslationDomain()|default('EasyAdminBundle'))|trans_quiet(nullable = false, domain = ea().getTranslationDomain())|raw }}
         </li>
     {% endfor %}

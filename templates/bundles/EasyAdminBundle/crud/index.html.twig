@@ -254,7 +254,7 @@
     {% endif %}
 
     {% block delete_form %}
-        {{ include('@EasyAdmin/crud/includes/_delete_form.html.twig', with_context = false) }}
+        {{ include('@EasyAdmin/crud/includes/_action_confirmation_modal.html.twig', with_context: false) }}
     {% endblock delete_form %}
 
     {% if has_filters %}

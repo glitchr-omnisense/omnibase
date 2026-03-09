@@ -5,6 +5,7 @@ namespace Base\Field;
 use Base\Field\Type\WysiwygType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class WysiwygField implements FieldInterface
 {
@@ -17,7 +18,7 @@ final class WysiwygField implements FieldInterface
     public const OPTION_STRIP_TAGS = 'stripTags';
     public const OPTION_RENDER_AS_BOOLEAN = 'renderAsBoolean';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, TranslatableInterface|string|bool|null $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

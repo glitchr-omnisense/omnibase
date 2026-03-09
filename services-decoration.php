@@ -130,7 +130,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Admin\Field\Configurator\CommonPreConfigurator')
         ->parent('EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator')
         ->decorate('EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator')
-        ->args([new Reference('translator')]);
+        ->arg(3, new Reference('translator'));
 
     // Console commands
     $services->set('Base\Console\Command\CacheClearCommand')

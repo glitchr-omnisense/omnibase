@@ -7,11 +7,13 @@ use Base\Field\AvatarField;
 use Base\Service\TranslatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Translation\EntityTranslationIdGeneratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AvatarField as EaAvatarField;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
+use EasyCorp\Bundle\EasyAdminBundle\Generator\LabelGenerator;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 use function in_array;
@@ -24,16 +26,16 @@ readonly class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Fi
      */
     protected TranslatorInterface $translator;
 
-    public function __construct(PropertyAccessor $propertyAccessor, EntityFactory $entityFactory, TranslatorInterface $translator)
+    public function __construct(PropertyAccessorInterface $propertyAccessor, EntityFactory $entityFactory, EntityTranslationIdGeneratorInterface $entityTranslationIdGenerator, TranslatorInterface $translator)
     {
         $this->translator = $translator;
-        parent::__construct($propertyAccessor, $entityFactory);
+        parent::__construct($propertyAccessor, $entityFactory, $entityTranslationIdGenerator);
     }
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $translationDomain = $context->getI18n()->getTranslationDomain();
-        $label = $this->buildLabelOption($entityDto, $field, $translationDomain, $context->getCrud()->getCurrentPage(), $this->extension->isEntityTranslationEnabled());
+        $label = $this->buildLabelOption($entityDto, $field, $translationDomain, $context->getCrud()->getCurrentPage(), $context->isUseEntityTranslations());
         $field->setLabel($label);
 
         if ($entityDto->getInstance() && $this->propertyAccessor->isReadable($entityDto->getInstance(), $field->getProperty())) {
@@ -71,7 +73,7 @@ readonly class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Fi
         // it field doesn't define its label explicitly, generate an automatic
         // label based on the field's field name
         if (null === $label = $field->getLabel()) {
-            $label = $this->robotizeString($entityDto, $field->getProperty()) ?? $this->humanizeString($field->getProperty());
+            $label = $this->robotizeString($entityDto, $field->getProperty()) ?? LabelGenerator::humanize($field->getProperty());
         }
 
         if (empty($label)) {
