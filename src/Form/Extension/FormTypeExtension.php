@@ -118,6 +118,18 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function applyEA(FormView $view, FormInterface $form)
     {
+        // EA 5 removed ea_crud_form from field views; reconstruct it from ea_vars + form config attributes for backward compat
+        if (empty($view->vars['ea_crud_form']) && !empty($view->vars['ea_vars'])) {
+            $eaVars = $view->vars['ea_vars'];
+            $view->vars['ea_crud_form'] = [
+                'form_panel'    => $form->getConfig()->getAttribute('ea_form_fieldset'),
+                'form_fieldset' => $form->getConfig()->getAttribute('ea_form_fieldset'),
+                'form_tab'      => $form->getConfig()->getAttribute('ea_form_tab'),
+                'ea_field'      => $eaVars->getField(),
+                'ea_entity'     => $eaVars->getEntity(),
+            ];
+        }
+
         if (!empty($view->vars['ea_crud_form'])) {
             if (!$form->getParent()) {
                 if (!array_key_exists('class', $view->vars['attr'])) {

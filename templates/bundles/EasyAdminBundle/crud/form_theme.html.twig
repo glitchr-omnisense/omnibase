@@ -13,7 +13,7 @@
                                 {%- if tab_config.icon|default(false) -%}
                                     <i class="fa-solid fa-fw fa-{{ tab_config.icon }}"></i>
                                 {%- endif -%}
-                                {{ tab_config['label']|trans(domain = ea.i18n.translationDomain) }}
+                                {{ tab_config['label']|trans(domain = ea().i18n.translationDomain) }}
                                 {%- if tab_config.errors > 0 -%}
                                     <span class="badge badge-danger" title="{{ 'form.tab.error_badge_title'|trans({'%count%': tab_config.errors}, 'EasyAdminBundle') }}">
                                         {{- tab_config.errors -}}
@@ -28,7 +28,7 @@
                         <div id="{{ tab_config['id'] }}" class="tab-pane {% if tab_config.active %}active{% endif %} {{ tab_config['css_class']|default('') }}">
                             {% if tab_config['help']|default(false) %}
                                 <div class="content-header-help tab-help">
-                                    {{ tab_config['help']|trans(domain = ea.i18n.translationDomain)|raw }}
+                                    {{ tab_config['help']|trans(domain = ea().i18n.translationDomain)|raw }}
                                 </div>
                             {% endif %}
 
@@ -102,7 +102,7 @@
 {# EasyAdminFilters form type #}
 {% block ea_filters_widget %}
 
-    {% set applied_filters = ea.request.query.all()['filters']|default([])|keys %}
+    {% set applied_filters = ea().request.query.all()['filters']|default([])|keys %}
 
     {% for field in form %}
         <div class="col-12">
@@ -111,7 +111,7 @@
                     <input type="checkbox" class="filter-checkbox" {% if field.vars.name in applied_filters %}checked{% endif %}>
                     <a data-bs-toggle="collapse" href="#filter-content-{{ loop.index }}" aria-expanded="{{ field.vars.name in applied_filters ? 'true' : 'false' }}" aria-controls="filter-content-{{ loop.index }}"
                         {% for name, value in field.vars.label_attr|default([]) %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-                        {{ field.vars.label|default(field.vars.name|humanize)|trans(domain = ea.i18n.translationDomain) }}
+                        {{ field.vars.label|default(field.vars.name|humanize)|trans(domain = ea().i18n.translationDomain) }}
                     </a>
                 </div>
                 <div id="filter-content-{{ loop.index }}" class="filter-content collapse {% if field.vars.name in applied_filters %}show{% endif %}" aria-labelledby="filter-heading-{{ loop.index }}">

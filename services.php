@@ -887,6 +887,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([new Reference('base.service.sharer')]);
 
     // Form extensions
+    $services->set('Base\Form\Extension\EaCrudFormCompatExtension')->tag('form.type_extension');
     $services->set('Base\Form\Extension\FormTypeBootstrapExtension')
         ->tag('form.type_extension')
         ->args([new Reference('base.service')]);
@@ -1110,6 +1111,8 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
     // ------------------------------
     // Form Extensions
     // ------------------------------
+    $services->set('Base\Form\Extension\EaCrudFormCompatExtension')->tag('form.type_extension');
+
     $services->set('Base\Form\Extension\FormTypeBootstrapExtension')
         ->tag('form.type_extension')
         ->args([new Reference('base.service')]);

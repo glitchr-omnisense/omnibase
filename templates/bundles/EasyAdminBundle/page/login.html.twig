@@ -1,7 +1,7 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {% set ea = ea() %}
-{% extends ea is defined ? ea.templatePath('layout') : '!@EasyAdmin/page/login.html.twig' %}
-{% trans_default_domain ea is defined ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? '@messages') %}
+{% extends ea ? ea.templatePath('layout') : '!@EasyAdmin/page/login.html.twig' %}
+{% trans_default_domain ea ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? '@messages') %}
 
 {% block page_title %}{{ (page_title ?? ea.dashboardTitle ?? ('@forms.login.title'|trans))|raw }}{% endblock %}
 {% block page_title_block_output %}{{ block("page_title")}}{% endblock%}
