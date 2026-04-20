@@ -1,3 +1,6 @@
+import $ from 'jquery';
+window.jQuery = $;
+
 //
 // Apply form validation
 window.addEventListener('load', function(event) {

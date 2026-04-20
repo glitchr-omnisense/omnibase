@@ -29,9 +29,6 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Doctrine\Persistence\Mapping\ClassMetadataFactory')
         ->factory([new Reference('doctrine.orm.default_entity_manager'), 'getMetadataFactory']);
 
-    // EasyAdmin fixes
-    $services->set('EasyCorp\Bundle\EasyAdminBundle\Inspector\DataCollector');
-
     $services->set('EasyCorp\Bundle\EasyAdminBundle\Factory\FilterFactory')
         ->public(true)
         ->args([

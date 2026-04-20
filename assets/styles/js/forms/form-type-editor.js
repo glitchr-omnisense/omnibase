@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import EditorJs from '@editorjs/editorjs';
 import Embed from '@editorjs/embed';
 import Warning from '@editorjs/warning';

@@ -12,6 +12,14 @@ $(window).off("onbeforeunload.popover");
 $(window).on("onbeforeunload.popover",function() { $('[data-toggle="popover"]').popover("hide"); });
 
 import Tooltip from 'bootstrap/js/dist/tooltip';
+
+// Bootstrap's defineJQueryPlugin() registers $.fn.* only on window.jQuery, which
+// may be a different jQuery instance than our ProvidePlugin-injected $ (each
+// disableSingleRuntimeChunk entry has its own module registry). Re-register on
+// the local instance so $(el).popover() / $(el).tooltip() work in this bundle.
+$.fn.popover = $.fn.popover || Popover.jQueryInterface;
+$.fn.tooltip = $.fn.tooltip || Tooltip.jQueryInterface;
+
 $(window).off("load.tooltip");
 $(window).on("load.tooltip", function() { 
     $('[data-toggle="tooltip"]').each(function() { 

@@ -1,3 +1,4 @@
+import './jquery-shims.js';
 import './styles/form-defer.scss';
 
 import './styles/js/form.js';

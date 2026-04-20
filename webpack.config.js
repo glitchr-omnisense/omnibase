@@ -1,7 +1,9 @@
 const Encore = require('@symfony/webpack-encore');
 
+const Webpack = require('webpack');
 const WebpackBar = require('webpackbar');
 const MediaQueryPlugin = require('@glitchr/media-query-plugin');
+const path = require('path');
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -39,8 +41,12 @@ Encore.addPlugin(new WebpackBar())
         config.corejs = '3.23';
     })
 
-    // uncomment if you're having problems with a jQuery plugin
-    .autoProvidejQuery()
+    // 'window.jQuery': 'jquery' is intentionally omitted: ProvidePlugin rewrites the
+    // LHS of `window.jQuery = ...` to a local var, so the global would never be set.
+    .addPlugin(new Webpack.ProvidePlugin({
+        $: 'jquery',
+        jQuery: 'jquery'
+    }))
 
     .addEntry('base-async', './assets/base-async.js')
     .addEntry('base-defer', './assets/base-defer.js')
@@ -94,3 +100,12 @@ module.exports.snapshot = { managedPaths: [/^(.+?[\\/]node_modules)[\\/]((?!.*))
 module.exports.ignoreWarnings = [{
     module: /node_modules/
 }];
+
+// Fix jQuery 4.x ESM: alias to the CJS bundler-require-wrapper so that both
+// `require('jquery')` and ProvidePlugin get the function, not the module namespace.
+module.exports.resolve = module.exports.resolve || {};
+module.exports.resolve.alias = module.exports.resolve.alias || {};
+module.exports.resolve.alias['jquery'] = path.resolve(
+    path.dirname(require.resolve('jquery')),
+    'wrappers/jquery.bundler-require-wrapper.js'
+);

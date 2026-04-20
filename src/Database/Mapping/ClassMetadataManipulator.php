@@ -1233,15 +1233,101 @@ class ClassMetadataManipulator extends AbstractLocalCache
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         self::$completors = $this->getCache("/Completors", function () {
-            
+
             foreach ($this->getAllClassNames() as $className) {
                 $this->getCompletorFor($className);
             }
 
             return self::$completors;
-        });
+        }) ?? [];
 
         return [];
+    }
+
+    /**
+     * Runs the annotation-driven loadClassMetadata pipeline for every entity so that
+     * completors get their `aliasNames`, `entityHierarchy`, etc. fields populated,
+     * then persists the enriched completors to the /Completors cache entry.
+     *
+     * Must be called from a context where both this service and the AnnotationReader
+     * are fully constructed (i.e. a Symfony cache warmer), never from __construct
+     * (that would recurse through the AnnotationReader -> ClassMetadataManipulator
+     * dependency).
+     */
+    public function enrichAndSaveCompletors(\Base\Annotations\AnnotationReader $annotationReader): void
+    {
+        self::$completors = [];
+
+        foreach ($this->getAllClassNames() as $className) {
+            $classMetadata = $this->getClassMetadata($className);
+            if ($classMetadata === null) {
+                $this->getCompletorFor($className);
+                continue;
+            }
+
+            $this->getCompletorFor($className);
+            $this->runAnnotationLoadClassMetadata($classMetadata, $annotationReader);
+        }
+
+        $this->saveCompletors();
+        $this->commitCache();
+    }
+
+    /**
+     * Mirrors AnnotationSubscriber::loadClassMetadata(): iterates class/method/property
+     * annotations and invokes $annotation->loadClassMetadata(...) on each, which is the
+     * code path that writes aliasNames / entityHierarchy onto the completor.
+     */
+    protected function runAnnotationLoadClassMetadata(ClassMetadata $classMetadata, \Base\Annotations\AnnotationReader $annotationReader): void
+    {
+        $className = $classMetadata->name;
+        $annotations = $annotationReader->getAnnotations($className);
+
+        $classAnnotations = $annotations[\Base\Annotations\AnnotationReader::TARGET_CLASS][$className] ?? [];
+        foreach ($classAnnotations as $annotation) {
+            if (!is_subclass_of($annotation, \Base\Annotations\AbstractAnnotation::class)) {
+                continue;
+            }
+            if (!in_array(\Base\Annotations\AnnotationReader::TARGET_CLASS, $annotationReader->getAnnotationTargets($annotation))) {
+                continue;
+            }
+            if (!$annotation->supports(\Base\Annotations\AnnotationReader::TARGET_CLASS, $className, $classMetadata)) {
+                continue;
+            }
+            $annotation->loadClassMetadata($classMetadata, \Base\Annotations\AnnotationReader::TARGET_CLASS, $className);
+        }
+
+        $methodAnnotations = $annotations[\Base\Annotations\AnnotationReader::TARGET_METHOD][$className] ?? [];
+        foreach ($methodAnnotations as $method => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, \Base\Annotations\AbstractAnnotation::class)) {
+                    continue;
+                }
+                if (!in_array(\Base\Annotations\AnnotationReader::TARGET_METHOD, $annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+                if (!$annotation->supports(\Base\Annotations\AnnotationReader::TARGET_METHOD, $method, $classMetadata)) {
+                    continue;
+                }
+                $annotation->loadClassMetadata($classMetadata, \Base\Annotations\AnnotationReader::TARGET_METHOD, $method);
+            }
+        }
+
+        $propertyAnnotations = $annotations[\Base\Annotations\AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        foreach ($propertyAnnotations as $property => $_) {
+            foreach ($_ as $annotation) {
+                if (!is_subclass_of($annotation, \Base\Annotations\AbstractAnnotation::class)) {
+                    continue;
+                }
+                if (!in_array(\Base\Annotations\AnnotationReader::TARGET_PROPERTY, $annotationReader->getAnnotationTargets($annotation))) {
+                    continue;
+                }
+                if (!$annotation->supports(\Base\Annotations\AnnotationReader::TARGET_PROPERTY, $property, $classMetadata)) {
+                    continue;
+                }
+                $annotation->loadClassMetadata($classMetadata, \Base\Annotations\AnnotationReader::TARGET_PROPERTY, $property);
+            }
+        }
     }
 
     public function saveCompletors()

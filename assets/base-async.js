@@ -1,3 +1,7 @@
+import $ from 'jquery';
+window.$ = $;
+window.jQuery = $;
+
 import '@glitchr/lightbox2';
 import '@glitchr/cookie';
 import '@glitchr/clipboardjs';

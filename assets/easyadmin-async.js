@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import './styles/easyadmin-async.scss';
 
 var spinnerTimeout = setTimeout(function () { $(".content").addClass("spinner"); }, 1000);

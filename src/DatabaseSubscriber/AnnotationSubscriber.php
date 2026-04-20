@@ -100,6 +100,9 @@ class AnnotationSubscriber
                 $annotation->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
             }
         }
+
+        $this->classMetadataManipulator->saveCompletors();
+        $this->classMetadataManipulator->commitCache();
     }
 
     public function resolveDiscriminator(ResolveDiscriminatorEventArgs $event)

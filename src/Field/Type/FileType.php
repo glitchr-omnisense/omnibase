@@ -205,6 +205,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 if ($options["allow_url"]) {
                     $form->add("url", UrlType::class, [
                         "required" => $options["required"] && ($data === null) && ($options["cropper"] ?? null) === null,
+                        "default_protocol" => null,
                     ]);
                 }
 

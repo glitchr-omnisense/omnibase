@@ -1,3 +1,4 @@
+import './jquery-shims.js';
 import './styles/css/form-type-dropzone.scss';
 
 import './styles/js/forms/form-type-file.js';

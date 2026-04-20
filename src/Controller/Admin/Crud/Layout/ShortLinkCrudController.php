@@ -36,6 +36,7 @@ class ShortLinkCrudController extends AbstractCrudController
                     "label" => [],
                     "url" => [
                         "form_type" => UrlType::class,
+                        "default_protocol" => null,
                         "attr" => ["placeholder" => $this->getTranslator()->trans("@" . AbstractDashboardController::TRANSLATION_DASHBOARD . ".crud.shlink.url.placeholder", [$url["scheme"] . "://" . $url["host"]])]
                     ]
                 ]);

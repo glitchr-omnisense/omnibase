@@ -504,6 +504,7 @@
     {% endblock wrapper_wrapper %}
 
     {% block body_javascript %}{% endblock body_javascript %}
+
     {% block configured_body_contents %}
         {% for htmlContent in  ea.assets.bodyContents ?? [] %}
             {{ htmlContent|raw }}
