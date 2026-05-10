@@ -42,7 +42,9 @@
 
         if (toolbarReset != _toolbarReset) {
             toolbarReset = _toolbarReset;
-            observer.disconnect();
+            toolbar = document.querySelector('.sf-toolbar') || toolbar;
+            initialWidth = toolbarReset.offsetWidth;
+            currentWidth = initialWidth;
         }
 
         restoreToolbarWidth();
