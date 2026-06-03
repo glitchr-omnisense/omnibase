@@ -18,7 +18,7 @@ ifneq ($(strip $(APP_DEBUG_BAK)),)
 endif
 export APP_ENV APP_DEBUG
 
-assets:
+build:
 ifeq ($(APP_DEBUG),1)
 	@cd assets && if [ "$$ALLOW_ASSETS_UPDATE" = "1" ]; then yarn upgrade; fi && yarn install && yarn run watch
 else

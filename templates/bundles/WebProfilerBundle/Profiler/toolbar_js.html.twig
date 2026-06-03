@@ -1,3 +1,23 @@
+{# ── Inline FOUC guard for the Symfony Web Debug Toolbar ────────────
+   The Symfony toolbar_js.html.twig (included below) outputs the toolbar
+   markup directly into the page, with the "Loading the web debug toolbar…"
+   placeholder content from cancel.html.twig inside #sfwdt{token}. The
+   stylesheet that styles all of that lives at /_wdt_stylesheet and is
+   referenced by a <link> at the END of the toolbar markup — so for the
+   ~100-300ms between HTML parse and stylesheet arrival, the placeholder
+   shows unstyled (light-blue background, raw "Loading…" / "Cancel" text).
+   This inline <style> hides the toolbar until the loaded toolbar content
+   appears — the loaded state has a .sf-toolbarreset child; the cancel
+   placeholder doesn't. :has() is Chrome 105+, Safari 15.4+, Firefox 121+. #}
+<style>
+    .sf-toolbar { visibility: hidden; }
+    .sf-toolbar:has(.sf-toolbarreset) {
+        visibility: visible;
+        animation: sf-toolbar-fade-in 0.15s ease-in;
+    }
+    @keyframes sf-toolbar-fade-in { from { opacity: 0 } to { opacity: 1 } }
+</style>
+
 {% include '@!WebProfiler/Profiler/toolbar_js.html.twig' %}
 
 <script{% if csp_script_nonce is defined and csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>
@@ -229,5 +249,44 @@
 
     toolbar._draggableListeners = { mousedown, mousemove, mouseup, click, dblclick, resizeStart };
 
+})();
+</script>
+
+<script{% if csp_script_nonce is defined and csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>
+// ─── Defensive patch for Symfony WebProfilerBundle toolbar ──────────
+// Wraps each .sf-toolbar-block's onmouseover so it no-ops when the
+// expected .sf-toolbar-info child is missing — fixes the
+// "TypeError: undefined is not an object (evaluating 'toolbarInfo.offsetWidth')"
+// that fires from the upstream handler at
+//   vendor/symfony/web-profiler-bundle/Resources/views/Profiler/toolbar_js.html.twig#L598
+// when a toolbar block is rendered without its info child (which can happen
+// in some Symfony toolbar states, including after AJAX navigations).
+(function() {
+    function safeguardToolbarBlocks() {
+        document.querySelectorAll('.sf-toolbar-block').forEach(function(block) {
+            var orig = block.onmouseover;
+            if (typeof orig !== 'function') return;
+            // Skip if our wrapper is already the current handler.
+            if (orig.__sfSafe) return;
+            var safe = function(e) {
+                var info = this.querySelectorAll && this.querySelectorAll('.sf-toolbar-info')[0];
+                if (!info) return;
+                return orig.call(this, e);
+            };
+            safe.__sfSafe = true;
+            block.onmouseover = safe;
+        });
+    }
+
+    // Initial pass for blocks already in DOM.
+    safeguardToolbarBlocks();
+
+    // Watch for new toolbar blocks (Symfony re-renders them on every AJAX
+    // request via loadToolbar). On each DOM mutation, run the safeguard
+    // again — idempotent thanks to the __sfSafe flag check.
+    var observer = new MutationObserver(function() {
+        safeguardToolbarBlocks();
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 </script>

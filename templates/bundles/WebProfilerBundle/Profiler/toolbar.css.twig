@@ -1,9 +1,25 @@
 {% include "@!WebProfiler/Profiler/toolbar.css.twig" %}
 
-.sf-toolbar-block:hover .sf-toolbar-info 
-{ 
+.sf-toolbar-block:hover .sf-toolbar-info
+{
   position:fixed;
   left: auto !important;
+}
+
+/* Hide the toolbar until its inner content is fully loaded.
+   The Symfony WDT renders #sfwdt{token} with a "Loading the web debug toolbar..."
+   placeholder (cancel.html.twig). When the deferred fetch to /_wdt/{token}
+   completes, the placeholder is replaced with content containing
+   .sf-toolbarreset. Until that swap happens, the placeholder shows unstyled
+   (the FOUC seen on cold-cache hard reloads). Using :has() to detect the
+   loaded state and fade in once it's there.
+   :has() — Chrome 105+, Safari 15.4+, Firefox 121+. */
+[id^="sfwdt"]:not(:has(.sf-toolbarreset)) {
+    opacity: 0;
+    pointer-events: none;
+}
+[id^="sfwdt"] {
+    transition: opacity 0.15s ease-in;
 }
 
 .sf-toolbarreset .hide-button {
