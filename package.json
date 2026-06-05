@@ -37,6 +37,7 @@
     "@glitchr/media-query-plugin": "^1.5",
     "@glitchr/quill": "^1.0",
     "@glitchr/select2": "^1.0",
+    "@hotwired/turbo": "^8.0.23",
     "@ikbenbas/editorjs-image": "^1.0",
     "@picmo/popup-picker": "5.7.2",
     "@popperjs/core": "^2.11.6",

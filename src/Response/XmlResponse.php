@@ -32,14 +32,14 @@ class XmlResponse extends Response
      *
      * @return static
      */
-    public static function fromXmlString(string $source, int $options = null, int $status = 200, array $headers = []): Response
+    public static function fromXmlString(string $source, ?int $options = null, int $status = 200, array $headers = []): Response
     {
         $dom = new DOMDocument();
         $dom->loadXML($source, $options);
         return new static($dom->saveXML(), $status, $headers);
     }
 
-    public static function fromXmlFile(string $filename, int $options = null, int $status = 200, array $headers = []): Response
+    public static function fromXmlFile(string $filename, ?int $options = null, int $status = 200, array $headers = []): Response
     {
         $dom = new DOMDocument();
         $dom->load($filename, $options);

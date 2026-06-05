@@ -44,12 +44,58 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
 
         $className = $class->getName();
         $tableName = $class->getTableName();
-        
+
         if (str_contains($className, "\\Entity\\") && array_key_exists($tableName, $this->uniqueTableName) && $className != $this->uniqueTableName[$tableName]) {
             throw new Exception("Ambiguous table name \"" . $tableName . "\" found between \"" . $this->uniqueTableName[$tableName] . "\" and \"" . $className . "\"");
         }
-        
+
         $this->uniqueTableName[$tableName] = $className;
+    }
+
+    /**
+     * Re-inject namingStrategy after deserialization from the metadata cache pool.
+     *
+     * Doctrine ORM 3.6 promoted ClassMetadata::$namingStrategy to a typed property
+     * (protected NamingStrategy $namingStrategy;) but did NOT add it to __sleep()
+     * — see vendor/doctrine/orm/src/Mapping/ClassMetadata.php::__sleep() around
+     * line 723: the serialized field list excludes namingStrategy. ClassMetadata
+     * also has no __wakeup() that re-initializes it, and Doctrine's own
+     * AbstractClassMetadataFactory::wakeupReflection() only restores the
+     * ReflectionService. So a cache-roundtripped ClassMetadata comes back with
+     * an uninitialized typed property — the next code that touches it (e.g.
+     * mapField → validateAndCompleteFieldMapping accessing
+     * $this->namingStrategy->propertyToColumnName at ClassMetadata.php:1219)
+     * throws "Typed property … namingStrategy must not be accessed before
+     * initialization".
+     *
+     * This manifests in this project because Base\Cache\Warmer\MetadataCacheWarmer
+     * → ClassMetadataManipulator::enrichAndSaveCompletors() iterates entities,
+     * resolves their ClassMetadata via $em->getClassMetadata() (a cache-pool-
+     * backed call), then invokes annotation->loadClassMetadata() which (in
+     * Base\Database\Annotation\OrderColumn::loadClassMetadata at line 110) calls
+     * $classMetadata->mapField([...]) — that's the access path that trips the
+     * typed-property guard on a deserialized ClassMetadata.
+     *
+     * Re-injecting namingStrategy at wakeupReflection time fixes every cache-hit
+     * path: subsequent property accesses succeed because the property is
+     * initialized to the same NamingStrategy instance the constructor would
+     * have set. Uses reflection because the property is `protected`.
+     */
+    protected function wakeupReflection(ClassMetadataInterface $class, ReflectionService $reflService): void
+    {
+        parent::wakeupReflection($class, $reflService);
+
+        if (!$class instanceof ClassMetadata) {
+            return;
+        }
+
+        $reflProperty = new \ReflectionProperty(ClassMetadata::class, 'namingStrategy');
+        if (!$reflProperty->isInitialized($class)) {
+            $reflProperty->setValue(
+                $class,
+                $this->em->getConfiguration()->getNamingStrategy()
+            );
+        }
     }
 
     /**

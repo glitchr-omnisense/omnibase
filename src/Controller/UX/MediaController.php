@@ -320,7 +320,6 @@ class MediaController extends AbstractController
     #[Route("/images/{data}", name: "image", requirements: ["data" => ".+"])]
     public function Image($data, ?string $extension = null, bool $debug = false): Response
     {
-        exit(1);
         //
         // Extract parameters
         $config = $this->mediaService->resolve($data);

@@ -47,7 +47,7 @@ class Palette implements Countable, IteratorAggregate
         return $this->colors[$color];
     }
 
-    public function getDominantColors(int $limit = null): array
+    public function getDominantColors(?int $limit = null): array
     {
         return array_slice($this->colors, 0, $limit, true);
     }

@@ -17,7 +17,7 @@ class TranslationField implements FieldInterface
     public const OPTION_RENDER_AS_HTML = 'renderAsHtml';
     public const OPTION_STRIP_TAGS = 'stripTags';
 
-    public static function new(string $propertyName = null, TranslatableInterface|string|bool|null $label = null): self
+    public static function new(?string $propertyName = null, TranslatableInterface|string|bool|null $label = null): self
     {
         $field = (new self())
             ->setProperty('translations')

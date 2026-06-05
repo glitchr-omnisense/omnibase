@@ -30,12 +30,12 @@ final class Colors extends ResourceBundle
         }
     }
 
-    public static function getName(string $color, string $displayLocale = null): string
+    public static function getName(string $color, ?string $displayLocale = null): string
     {
         return self::readEntry(['Names', $color], $displayLocale);
     }
 
-    public static function getNames(string $displayLocale = null): array
+    public static function getNames(?string $displayLocale = null): array
     {
         return self::asort(self::readEntry(['Names'], $displayLocale), $displayLocale);
     }

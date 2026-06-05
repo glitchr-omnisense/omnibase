@@ -19,7 +19,7 @@ class DiscriminatorFilter implements FilterInterface
 
     protected $alias;
 
-    public static function new(string $propertyName, $label = null, string $entityFqcn = null): self
+    public static function new(string $propertyName, $label = null, ?string $entityFqcn = null): self
     {
         $filter = (new self());
 

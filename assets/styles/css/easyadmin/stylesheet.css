@@ -954,9 +954,27 @@ body.ea-edit .content-header, body.ea-new .content-header {
 
 .login-wrapper { position:relative; }
 
+/* Turbo replaces .content nearly instantly without firing window.load —
+   the spinner that easyadmin-async.js adds via `setTimeout(...,1000)`
+   never gets the `.loaded` class on subsequent Turbo navigations, so
+   it would hang indefinitely (visible spinner + invisible content via
+   `.spinner:not(.loaded) > * { opacity: 0 }` in base-async.scss).
+   Skip the spinner UI entirely while data-turbo="true" is in effect
+   (i.e. across the entire EasyAdmin section). The Turbo progress bar
+   at the top of the viewport already signals navigation activity, and
+   page swaps are fast enough that a spinner is more noise than signal.
+   Higher specificity (html[data-turbo] + the existing selector) wins
+   over the base-async rule. */
+html[data-turbo="true"] .spinner:not(.loaded):before {
+    display: none !important;
+}
+html[data-turbo="true"] .spinner:not(.loaded) > * {
+    opacity: 1 !important;
+}
+
 .wrapper .spinner:not(.loaded):before,
 .content-wrapper .spinner:not(.loaded):before
-{ 
+{
     left: calc(50% + var(--sidebar-max-width)/2);
 }
 .spinner:not(.loaded):before {

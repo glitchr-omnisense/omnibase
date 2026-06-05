@@ -1,3 +1,10 @@
 {{ lazyload and lazybox ? "<div class='lazybox'>" : "" }}
-<img {{ lazyload ? "data-src" : "src" }}='{{ path }}' {{ html_attributes(attr) }} />
+{# `onerror` adds the `.error` class on any load failure (404, ACL, missing
+   file). transparent.js's lazyLoad observer sets the same class for images
+   it observes, but editor.js / dynamically-rendered images can be inserted
+   AFTER the observer ran and would escape it. This inline handler catches
+   those too. CSS in assets/styles/css/stylesheet.css renders a styled
+   placeholder (grey card with mountain-sun SVG icon) for img.error so the
+   user sees "image expected here, not available" instead of blank space. #}
+<img {{ lazyload ? "data-src" : "src" }}='{{ path }}' onerror="this.classList.add('error');if(this.closest('.lazybox'))this.closest('.lazybox').classList.add('error');" {{ html_attributes(attr) }} />
 {{ lazyload and lazybox ? "</div>" : "" }}

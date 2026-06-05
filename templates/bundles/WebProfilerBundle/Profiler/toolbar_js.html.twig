@@ -10,12 +10,36 @@
    appears — the loaded state has a .sf-toolbarreset child; the cancel
    placeholder doesn't. :has() is Chrome 105+, Safari 15.4+, Firefox 121+. #}
 <style>
-    .sf-toolbar { visibility: hidden; }
-    .sf-toolbar:has(.sf-toolbarreset) {
-        visibility: visible;
+    /* `display: none` (not visibility: hidden) so the toolbar markup occupies
+       zero layout space until the loaded state is reached — visibility:hidden
+       still allocates the bounding box, which was leaking the unstyled
+       "Loading the web debug toolbar..." placeholder above the page content
+       during the brief window between HTML parse and /_wdt_stylesheet load,
+       AND during transparent.js SPA navigations when loadToolbar replaces
+       the toolbar innerHTML with the cancel placeholder for retries.
+       Belt-and-suspenders: also gate on the outer .sf-minitoolbar element. */
+    .sf-toolbar,
+    .sf-toolbar .sf-minitoolbar { display: none !important; }
+    .sf-toolbar:has(.sf-toolbarreset),
+    .sf-toolbar:has(.sf-toolbarreset) .sf-minitoolbar {
+        display: block !important;
         animation: sf-toolbar-fade-in 0.15s ease-in;
     }
     @keyframes sf-toolbar-fade-in { from { opacity: 0 } to { opacity: 1 } }
+
+    /* ── Hide toolbar in lockstep with #page fade during SPA nav ─────────
+       The toolbar div is rendered OUTSIDE #page (at the end of <body>), so
+       while `.transparent.loading #page { opacity:0 }` fades the page, the
+       toolbar stays at opacity:1 — leaving the toolbar as the ONLY visible
+       element on screen during transitions. If Symfony's loadToolbar is
+       mid-XHR for the new request's profile, the inner state shows the
+       cancel placeholder (light-blue background, "Loading the web debug
+       toolbar..."), and that's what users actually see between clicks.
+       Hiding the toolbar entirely while LOADING is set on <html> matches
+       the page's behavior and removes the placeholder leak. Specificity:
+       `.transparent.loading .sf-toolbar` = 3 classes > 2 for `:has`, so
+       this wins regardless of the loaded-vs-cancel state inside. */
+    html.transparent.loading .sf-toolbar { display: none !important; }
 </style>
 
 {% include '@!WebProfiler/Profiler/toolbar_js.html.twig' %}
