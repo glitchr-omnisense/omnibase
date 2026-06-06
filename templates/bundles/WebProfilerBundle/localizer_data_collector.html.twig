@@ -27,7 +27,10 @@
         {%- endset -%}
 
         {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { 'link': true }) }}
-        <span class="sf-toolbar-block sf-toolbar-block-base sf-toolbar-status-normal sf-toolbar-block-spacer"></span>
+        {# Spacer only — must NOT carry `sf-toolbar-block`, otherwise the WebProfiler
+           toolbar.js mouseover handler targets it and dereferences a missing
+           `.sf-toolbar-info` (TypeError: toolbarInfo.offsetWidth). #}
+        <span class="sf-toolbar-spacer sf-toolbar-block-spacer"></span>
 {% endblock %}
 
 {% block menu %}

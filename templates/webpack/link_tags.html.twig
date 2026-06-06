@@ -17,7 +17,12 @@
         {%- set htmlAttributes = htmlAttributes|merge({'media': media}) -%}
     {% endif %}
 
-    {% if preload or async or defer %}
+    {# Don't preload media-scoped (breakpoint) stylesheets: a preload hint has no
+       media attribute, so it would force-fetch non-matching breakpoint CSS (e.g.
+       desktop CSS on mobile) at high priority, defeating the media-based
+       deprioritization. The plain <link rel="stylesheet" media="…"> below still
+       loads the matching breakpoint; non-matching ones stay low priority. #}
+    {% if (preload or async or defer) and not media %}
         {{ ('<link rel="preload" href="'~ asset(value, packageName) ~ '" as="' ~ preloadAs ~ '">')|raw }}
     {% endif %}
 
