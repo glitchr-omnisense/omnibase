@@ -104,8 +104,16 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
        
             if ($block->type != "image") continue;
 
-            $url = $block?->data?->file?->url;
-            if($url) $block->data->file->url = $this->mediaEnhancer->enhance($url, $config, $filters, $attrs);
+            // `origin` is the immutable raw upload (/wysiwyg/…) EditorJS stores
+            // alongside `url`. Re-derive the displayed URL from `origin` when present:
+            // `url` is only a derived value and can hold a stale or nested obfuscated
+            // encoding (e.g. a viewer /images/… URL that leaked back into the saved
+            // content, whose short-lived obfuscator mapping was later wiped by a
+            // cache:clear — making the image 404). Deriving from the raw origin every
+            // render makes the URL self-healing. Older blocks without `origin` fall
+            // back to `url`.
+            $source = $block?->data?->file?->origin ?? $block?->data?->file?->url;
+            if($source) $block->data->file->url = $this->mediaEnhancer->enhance($source, $config, $filters, $attrs);
         }
         
         return $json;

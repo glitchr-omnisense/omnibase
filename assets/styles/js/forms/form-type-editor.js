@@ -192,3 +192,31 @@ window.addEventListener("load.form_type", function (el) {
         edjs(input, editorId, value);
     }));
 });
+
+// ── EditorJS image caption: empty-state flag (WYSIWYG) ───────────────────────
+// CSS `:empty` can't tell that a caption the user cleared still holds a stray
+// <br>, so it would treat a blank caption as filled and reserve a box below the
+// image. We flag truly-empty captions (by trimmed text) with `caption-empty` so
+// the stylesheet can overlay an empty caption ON the image (no layout gap) in the
+// editor, hide it in the read-only viewer, and flow a filled one BELOW the image.
+// Runs in both contexts because this file loads with both.
+(function () {
+    function markCaption(el) {
+        if (el && el.classList && el.classList.contains('image-tool__caption')) {
+            el.classList.toggle('caption-empty', (el.textContent || '').trim() === '');
+        }
+    }
+    function markAll() {
+        document.querySelectorAll('.image-tool__caption').forEach(markCaption);
+    }
+    document.addEventListener('input', function (e) { markCaption(e.target); }, true);
+    document.addEventListener('DOMContentLoaded', markAll);
+    window.addEventListener('load', markAll);
+    if ('MutationObserver' in window) {
+        var t;
+        new MutationObserver(function () {
+            clearTimeout(t);
+            t = setTimeout(markAll, 100); // debounced: catch render + programmatic edits
+        }).observe(document.documentElement, { subtree: true, childList: true });
+    }
+})();

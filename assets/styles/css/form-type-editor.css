@@ -54,7 +54,33 @@
 .read-only .ce-block__content, .read-only .ce-toolbar__content { max-width:calc(100% - 80px); } */
 .read-only .cdx-block { max-width: 100%; }
 
-.ce-block { margin: 1.6em 0 !important; }
+/* ── EditorJS image caption positioning (WYSIWYG) ─────────────────────────────
+   The official @editorjs/image styles the caption as an ABSOLUTE overlay
+   (position:absolute; bottom:0; left:0) on top of the image. We keep that for an
+   EMPTY caption — its placeholder hint sits over the image and takes NO layout
+   space, so an uncaptioned image leaves no gap. The `caption-empty` class is set
+   by form-type-editor.js from the trimmed text (CSS `:empty` can't see the stray
+   <br> a cleared caption keeps). A FILLED caption flips to normal flow and drops
+   cleanly BELOW the image (it's before the caption in the DOM). Read-only empty
+   captions are hidden. Kept in the bundle's own source (not
+   node_modules/editorjs-image) so it survives `yarn install`. */
+.image-tool .image-tool__caption:not(.caption-empty) {
+    position: static !important;
+    bottom: auto !important;
+    left: auto !important;
+    margin: 10px 0 0 0 !important;
+    width: 100%;
+    clear: both;
+    background: transparent !important;
+    text-align: center;
+    font-style: italic;
+    color: #555;
+}
+/* Read-only viewer: an empty caption is hidden entirely (no overlay needed since
+   it isn't editable and shows no placeholder). */
+.read-only .image-tool__caption.caption-empty { display: none !important; }
+
+.ce-block { margin: 1.15em 0 !important; } /* slightly tighter paragraph spacing */
 .cdx-nested-list { padding-left: 2rem !important ; }
 
 .codex-editor__redactor { padding: 0em !important; }
