@@ -47,7 +47,7 @@
         "nelmio/security-bundle": "^3.0",
         "phpoffice/phpspreadsheet": "^1.23|^2.0",
         "picqer/php-barcode-generator": "^2.0",
-        "scheb/2fa": "^7.0",
+        "scheb/2fa": "^7.0|^8.0",
         "scienta/doctrine-json-functions": "~4.3",
         "symfony/config": "^6.0|^7.0|^8.0",
         "symfony/dependency-injection": "^6.0|^7.0|^8.0",
