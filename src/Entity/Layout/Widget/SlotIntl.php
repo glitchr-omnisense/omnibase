@@ -4,7 +4,7 @@ namespace Base\Entity\Layout\Widget;
 
 use Doctrine\ORM\Mapping as ORM;
 
-use Base\Database\Annotation\Alias;
+use Base\Database\Attribute\Alias;
 use Base\Entity\Layout\WidgetIntl;
 
 #[ORM\Entity]

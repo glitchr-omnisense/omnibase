@@ -2,11 +2,11 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\Common\AbstractRuleAdapterRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 use InvalidArgumentException;
 
 #[ORM\Entity(repositoryClass: AbstractRuleAdapterRepository::class)]

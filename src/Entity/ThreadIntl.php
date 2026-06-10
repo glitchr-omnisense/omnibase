@@ -2,7 +2,7 @@
 
 namespace Base\Entity;
 
-use Base\Database\Annotation\OrderColumn;
+use Base\Database\Attribute\OrderColumn;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Traits\BaseTrait;

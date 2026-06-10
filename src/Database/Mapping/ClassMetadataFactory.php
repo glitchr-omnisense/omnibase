@@ -72,7 +72,7 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
      * → ClassMetadataManipulator::enrichAndSaveCompletors() iterates entities,
      * resolves their ClassMetadata via $em->getClassMetadata() (a cache-pool-
      * backed call), then invokes annotation->loadClassMetadata() which (in
-     * Base\Database\Annotation\OrderColumn::loadClassMetadata at line 110) calls
+     * Base\Database\Attribute\OrderColumn::loadClassMetadata at line 110) calls
      * $classMetadata->mapField([...]) — that's the access path that trips the
      * typed-property guard on a deserialized ClassMetadata.
      *

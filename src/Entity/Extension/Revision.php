@@ -2,14 +2,14 @@
 
 namespace Base\Entity\Extension;
 
-use Base\Database\Annotation\Hashify;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\Hashify;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\RevisionRepository;
 
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:RevisionRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]

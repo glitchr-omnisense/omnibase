@@ -3,8 +3,8 @@
 namespace Base\DatabaseSubscriber;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
+use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AnnotationReader;
 use Base\BaseBundle;
 use Base\Database\Event\DoctrineQueryEventArgs;
 use Base\Database\Event\ResolveDiscriminatorEventArgs;

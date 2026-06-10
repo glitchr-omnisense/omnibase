@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
@@ -10,7 +10,7 @@ use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\AttributeRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: AttributeRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]

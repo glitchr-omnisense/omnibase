@@ -5,7 +5,7 @@ namespace Base\Controller\Client;
 use App\Entity\User;
 use App\Form\Type\UserProfileType;
 use App\Repository\UserRepository;
-use Base\Annotations\Annotation\Iconize;
+use Base\Attributes\Attribute\Iconize;
 use Base\Enum\UserRole;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;

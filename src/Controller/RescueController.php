@@ -2,7 +2,7 @@
 
 namespace Base\Controller;
 
-use Base\Annotations\Annotation\Iconize;
+use Base\Attributes\Attribute\Iconize;
 use Base\Controller\Admin\AbstractDashboardController;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;

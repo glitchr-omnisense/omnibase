@@ -2,8 +2,8 @@
 
 namespace Base\Service;
 
-use Base\Annotations\Annotation\Iconize;
-use Base\Annotations\AnnotationReader;
+use Base\Attributes\Attribute\Iconize;
+use Base\Attributes\AnnotationReader;
 use Base\Cache\Abstract\AbstractLocalCache;
 
 use Base\Database\Type\EnumType;

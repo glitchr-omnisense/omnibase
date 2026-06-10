@@ -3,8 +3,8 @@
 namespace Base\Service\Model;
 
 use ArrayAccess;
-use Base\Annotations\Annotation\Iconize;
-use Base\Annotations\AnnotationReader;
+use Base\Attributes\Attribute\Iconize;
+use Base\Attributes\AnnotationReader;
 use Base\Service\TranslatorInterface;
 use Countable;
 use Exception;

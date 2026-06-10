@@ -2,7 +2,7 @@
 
 namespace Base\Controller\UX;
 
-use Base\Annotations\Annotation\IsGranted;
+use Base\Attributes\Attribute\IsGranted;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;

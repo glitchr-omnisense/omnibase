@@ -2,8 +2,8 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\Annotation\Iconize;
-use Base\Annotations\AnnotationReader;
+use Base\Attributes\Attribute\Iconize;
+use Base\Attributes\AnnotationReader;
 use Base\Console\Command;
 use Base\Service\Model\IconizeInterface;
 

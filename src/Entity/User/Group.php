@@ -9,7 +9,7 @@ use Base\Service\Model\IconizeInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\GroupRepository;

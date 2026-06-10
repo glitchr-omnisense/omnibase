@@ -3,7 +3,7 @@
 namespace Base\Repository;
 
 use Base\Entity\Thread;
-use Base\Annotations\Traits\HierarchifyTrait;
+use Base\Attributes\Traits\HierarchifyTrait;
 
 use Base\Database\Repository\ServiceEntityRepository;
 use Base\Enum\WorkflowState;

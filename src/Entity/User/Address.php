@@ -3,13 +3,13 @@
 namespace Base\Entity\User;
 
 use Base\Entity\User;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Service\Model\HtmlizeInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\AddressRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]

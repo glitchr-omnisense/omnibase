@@ -2,7 +2,7 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\Annotation\Iconize;
+use Base\Attributes\Attribute\Iconize;
 use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Controller\Admin\AbstractCrudController;

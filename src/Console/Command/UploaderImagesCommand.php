@@ -2,7 +2,7 @@
 
 namespace Base\Console\Command;
 
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Uploader;
 use Base\Controller\UX\MediaController;
 use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Service\MediaServiceInterface;

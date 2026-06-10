@@ -154,8 +154,8 @@ class BaseBundle extends AbstractBaseBundle
             $this->setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
             $this->setMapping($this->getBundleDir() . "/src/Repository", "Base\Repository", "App\Repository");
             
-            self::getAllClasses($this->getBundleDir() . "/src/Database/Annotation");
-            self::getAllClasses($this->getBundleDir() . "/src/Annotations/Annotation");
+            self::getAllClasses($this->getBundleDir() . "/src/Database/Attribute");
+            self::getAllClasses($this->getBundleDir() . "/src/Attributes/Attribute");
             
             self::getAllClasses($this->getBundleDir() . "/src/Enum");
             self::getAllClasses($this->getProjectDir() . "/src/Enum");

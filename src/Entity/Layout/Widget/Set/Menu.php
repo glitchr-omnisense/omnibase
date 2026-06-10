@@ -2,8 +2,8 @@
 
 namespace Base\Entity\Layout\Widget\Set;
 
-use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Annotation\OrderColumn;
+use Base\Database\Attribute\DiscriminatorEntry;
+use Base\Database\Attribute\OrderColumn;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
@@ -13,7 +13,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\Set\MenuRepository;
 
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:MenuRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]

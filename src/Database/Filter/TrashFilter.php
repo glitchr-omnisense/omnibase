@@ -2,8 +2,8 @@
 
 namespace Base\Database\Filter;
 
-use Base\Annotations\AnnotationReader;
-use Base\Database\Annotation\Trasheable;
+use Base\Attributes\AnnotationReader;
+use Base\Database\Attribute\Trasheable;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 

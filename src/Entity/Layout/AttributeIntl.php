@@ -2,8 +2,8 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\Annotation\Uploader;
-use Base\Database\Annotation\Associate;
+use Base\Database\Attribute\Uploader;
+use Base\Database\Attribute\Associate;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Database\Entity\Extension\TranslationInterface;

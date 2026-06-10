@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout\Widget;
 
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\LinkRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:LinkRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]

@@ -2,11 +2,11 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\Annotation\Associate;
+use Base\Database\Attribute\Associate;
 use Doctrine\ORM\Mapping as ORM;
 
-use Base\Database\Annotation\Vault;
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Vault;
+use Base\Database\Attribute\Uploader;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Database\Entity\Extension\VaultTrait;

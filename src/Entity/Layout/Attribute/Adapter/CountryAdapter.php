@@ -2,12 +2,12 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter;
 
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\CountryAdapterRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 use Base\Field\Type\CountryType;
 
 #[ORM\Entity(repositoryClass: CountryAdapterRepository::class)]

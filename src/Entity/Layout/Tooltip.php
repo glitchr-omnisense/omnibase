@@ -2,17 +2,17 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\Annotation\Timestamp;
+use Base\Database\Attribute\Timestamp;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
 
 use Base\Validator\Constraints as AssertBase;
 
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Uploader;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\TooltipRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 use DateTimeInterface;
 
 #[ORM\Entity(repositoryClass: TooltipRepository::class)]

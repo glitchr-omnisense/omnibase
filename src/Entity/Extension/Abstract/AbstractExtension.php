@@ -2,16 +2,16 @@
 
 namespace Base\Entity\Extension\Abstract;
 
-use Base\Database\Annotation\Blameable;
-use Base\Database\Annotation\Timestamp;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\Blameable;
+use Base\Database\Attribute\Timestamp;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\User;
 use Base\Repository\Extension\Abstract\AbstractExtensionRepository;
 use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: AbstractExtensionRepository::class)]
 #[ORM\InheritanceType("JOINED")]

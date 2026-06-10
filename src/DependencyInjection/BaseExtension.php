@@ -2,7 +2,7 @@
 
 namespace Base\DependencyInjection;
 
-use Base\Annotations\AnnotationInterface;
+use Base\Attributes\AnnotationInterface;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\EntityDispatcher\EventDispatcherInterface;

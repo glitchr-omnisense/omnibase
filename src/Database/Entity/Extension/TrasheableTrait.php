@@ -2,7 +2,7 @@
 
 namespace Base\Database\Entity\Extension;
 
-use Base\Database\Annotation\Timestamp;
+use Base\Database\Attribute\Timestamp;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 

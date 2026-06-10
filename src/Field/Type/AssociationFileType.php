@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Uploader;
 use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;

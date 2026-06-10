@@ -2,7 +2,7 @@
 
 namespace Base\Subscriber;
 
-use Base\Database\Annotation\Vault;
+use Base\Database\Attribute\Vault;
 use App\Entity\User;
 use Base\Entity\User as BaseUser;
 

@@ -721,7 +721,7 @@ return static function (ContainerConfigurator $container): void {
         ->bind('$cacheDir', '%kernel.cache_dir%');
 
     // Annotation reader
-    $services->set('Base\Annotations\AnnotationReader')->public()
+    $services->set('Base\Attributes\AnnotationReader')->public()
         ->args([
             new Reference('event_dispatcher'),
             new Reference('advanced_router'),
@@ -967,7 +967,7 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
         ])
         ->bind('$cacheDir', '%kernel.cache_dir%');
 
-    $services->set('Base\Annotations\AnnotationReader')
+    $services->set('Base\Attributes\AnnotationReader')
         ->public()
         ->args([
             new Reference('event_dispatcher'),

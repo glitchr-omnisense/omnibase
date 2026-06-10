@@ -15,7 +15,7 @@ use App\Entity\User\Group;
 use App\Entity\User\Penalty;
 use App\Entity\User\Permission;
 use App\Entity\User\Notification;
-use Base\Database\Annotation\OrderColumn;
+use Base\Database\Attribute\OrderColumn;
 
 use DateTime;
 use DateTimeInterface;
@@ -32,10 +32,10 @@ use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 
-use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Annotation\Timestamp;
-use Base\Database\Annotation\Uploader;
-use Base\Database\Annotation\Hashify;
+use Base\Database\Attribute\DiscriminatorEntry;
+use Base\Database\Attribute\Timestamp;
+use Base\Database\Attribute\Uploader;
+use Base\Database\Attribute\Hashify;
 
 use Base\Service\Localizer;
 use Base\Notifier\Recipient\Recipient;
@@ -45,7 +45,7 @@ use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Exception;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;

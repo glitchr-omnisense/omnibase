@@ -31,7 +31,7 @@ use Exception;
 use Twig\Error\LoaderError;
 use UnexpectedValueException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 

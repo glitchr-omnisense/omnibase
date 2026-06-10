@@ -4,11 +4,11 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\TextareaAdapterRepository;
 
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: TextareaAdapterRepository::class)]
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]

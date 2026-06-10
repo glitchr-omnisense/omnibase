@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Uploader;
 use Base\Field\CropperField;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;

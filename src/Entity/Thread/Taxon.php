@@ -3,10 +3,10 @@
 namespace Base\Entity\Thread;
 
 use App\Entity\Thread;
-use Base\Database\Annotation\Slugify;
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Slugify;
+use Base\Database\Attribute\Uploader;
 use Doctrine\Common\Collections\ArrayCollection;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 
 use Base\Database\Entity\Extension\TranslatableTrait;
 
@@ -14,7 +14,7 @@ use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\GraphInterface;
 use Doctrine\Common\Collections\Collection;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Thread\TaxonRepository;

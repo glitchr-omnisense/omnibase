@@ -6,22 +6,22 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
-use Base\Database\Annotation\Alias;
+use Base\Database\Attribute\Alias;
 
-use Base\Database\Annotation\OrderColumn;
+use Base\Database\Attribute\OrderColumn;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Validator\Constraints as AssertBase;
 
-use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Annotation\GenerateUuid;
-use Base\Database\Annotation\Timestamp;
-use Base\Database\Annotation\Slugify;
-use Base\Database\Annotation\Hierarchify;
-use Base\Database\Annotation\Cache;
-use Base\Database\Annotation\Trasheable;
+use Base\Database\Attribute\DiscriminatorEntry;
+use Base\Database\Attribute\GenerateUuid;
+use Base\Database\Attribute\Timestamp;
+use Base\Database\Attribute\Slugify;
+use Base\Database\Attribute\Hierarchify;
+use Base\Database\Attribute\Cache;
+use Base\Database\Attribute\Trasheable;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;

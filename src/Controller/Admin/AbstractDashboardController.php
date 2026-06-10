@@ -31,8 +31,8 @@ use Base\Admin\Config\WidgetItem;
 use Base\Admin\Config\MenuItem;
 
 use App\Enum\UserRole;
-use Base\Annotations\Annotation\Iconize;
-use Base\Annotations\Annotation\IsGranted;
+use Base\Attributes\Attribute\Iconize;
+use Base\Attributes\Attribute\IsGranted;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\LayoutSettingListType;

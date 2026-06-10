@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\Annotation\OrderColumn;
+use Base\Database\Attribute\OrderColumn;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Database\Entity\Extension\TranslationInterface;

@@ -8,13 +8,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Validator\Constraints as AssertBase;
-use Base\Database\Annotation\Slugify;
-use Base\Database\Annotation\Uploader;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\Slugify;
+use Base\Database\Attribute\Uploader;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Service\Model\IconizeInterface;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 use Base\Database\Entity\Extension\AliasInterface;
 use Base\Database\Entity\Extension\AliasTrait;
 use Base\Database\Entity\Extension\TranslatableAliasTrait;

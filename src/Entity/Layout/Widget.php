@@ -6,10 +6,10 @@ use Base\Service\Model\CacheableInterface;
 use Base\Traits\CacheableTrait;
 use Base\Validator\Constraints as AssertBase;
 
-use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Annotation\GenerateUuid;
-use Base\Database\Annotation\Uploader;
-use Base\Database\Annotation\OrderColumn;
+use Base\Database\Attribute\DiscriminatorEntry;
+use Base\Database\Attribute\GenerateUuid;
+use Base\Database\Attribute\Uploader;
+use Base\Database\Attribute\OrderColumn;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
@@ -20,8 +20,8 @@ use Base\Repository\Layout\WidgetRepository;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Base\Database\Annotation\Cache;
-use Base\Database\Annotation\Timestamp;
+use Base\Database\Attribute\Cache;
+use Base\Database\Attribute\Timestamp;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 

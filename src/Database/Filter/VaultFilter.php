@@ -2,8 +2,8 @@
 
 namespace Base\Database\Filter;
 
-use Base\Annotations\AnnotationReader;
-use Base\Database\Annotation\Vault;
+use Base\Attributes\AnnotationReader;
+use Base\Database\Attribute\Vault;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 use InvalidArgumentException;

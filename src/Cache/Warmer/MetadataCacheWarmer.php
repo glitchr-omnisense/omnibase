@@ -2,7 +2,7 @@
 
 namespace Base\Cache\Warmer;
 
-use Base\Annotations\AnnotationReader;
+use Base\Attributes\AnnotationReader;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Cache\Abstract\AbstractLocalCacheWarmer;

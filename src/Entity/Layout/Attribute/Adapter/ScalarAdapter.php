@@ -2,13 +2,13 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter;
 
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Field\Type\NumberType;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\ScalarAdapterRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: ScalarAdapterRepository::class)]
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]

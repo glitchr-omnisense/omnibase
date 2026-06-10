@@ -2,12 +2,12 @@
 
 namespace Base\Entity\User;
 
-use Base\Database\Annotation\Blameable;
-use Base\Database\Annotation\Timestamp;
+use Base\Database\Attribute\Blameable;
+use Base\Database\Attribute\Timestamp;
 use Base\Entity\User;
 use Base\Enum\ConnectionState;
 use Base\Repository\User\ConnectionRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 use Base\Service\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 

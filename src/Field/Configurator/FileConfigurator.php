@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Uploader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\FileField;
 

@@ -12,7 +12,7 @@ use Base\Security\LoginFormAuthenticator;
 
 use App\Form\Type\SecurityRegistrationType;
 use App\Form\Type\SecurityLoginType;
-use Base\Annotations\Annotation\IsGranted;
+use Base\Attributes\Attribute\IsGranted;
 
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
@@ -27,7 +27,7 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Base\Entity\User\Token;
 use Base\Form\Type\SecurityResetPasswordType;
 use App\Repository\UserRepository;
-use Base\Annotations\Annotation\Iconize;
+use Base\Attributes\Attribute\Iconize;
 use Base\Form\FormProxy;
 use Base\Form\FormProcessorInterface;
 use Base\Form\Type\SecurityLoginTokenType;

@@ -6,15 +6,15 @@ use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
 
-use Base\Database\Annotation\Slugify;
+use Base\Database\Attribute\Slugify;
 use Base\Service\Model\LinkableInterface;
 
-use Base\Database\Annotation\Randomize;
+use Base\Database\Attribute\Randomize;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ShortLinkRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: ShortLinkRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]

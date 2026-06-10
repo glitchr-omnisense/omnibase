@@ -2,8 +2,8 @@
 
 namespace Base\Subscriber;
 
-use Base\Annotations\Annotation\IsGranted;
-use Base\Annotations\AnnotationReader;
+use Base\Attributes\Attribute\IsGranted;
+use Base\Attributes\AnnotationReader;
 use LogicException;
 use RuntimeException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

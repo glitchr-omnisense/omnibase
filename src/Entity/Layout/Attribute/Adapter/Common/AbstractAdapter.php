@@ -2,8 +2,8 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
-use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Annotation\Slugify;
+use Base\Database\Attribute\DiscriminatorEntry;
+use Base\Database\Attribute\Slugify;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
@@ -17,7 +17,7 @@ use Base\Entity\Layout\Attribute\Common\AttributeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:AbstractAdapterRepository::class)]
 #[ORM\InheritanceType("JOINED")]

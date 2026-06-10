@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\Annotation\Slugify;
+use Base\Database\Attribute\Slugify;
 use Base\Service\Model\LinkableInterface;
 use Base\Traits\BaseTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ImageCropRepository;
 use Base\Service\Model\SaltInterface;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:ImageCropRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]

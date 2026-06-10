@@ -2,11 +2,11 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Uploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Enum\Quadrant\Quadrant;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Service\Model\IconizeInterface;
@@ -16,7 +16,7 @@ use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ImageRepository;

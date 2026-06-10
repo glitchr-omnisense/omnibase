@@ -2,8 +2,8 @@
 
 namespace Base\Console\Command;
 
-use Base\Database\Annotation\Uploader;
-use Base\Annotations\AnnotationReader;
+use Base\Database\Attribute\Uploader;
+use Base\Attributes\AnnotationReader;
 use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Entity\Layout\Image;

@@ -13,7 +13,7 @@ use DomDocument;
 use DOMXPath;
 use Exception;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: SemanticRepository::class)]
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]

@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Uploader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Form\FormFactoryInterface;

@@ -2,13 +2,13 @@
 
 namespace Base\Entity\Layout\Attribute\Common;
 
-use Base\Database\Annotation\Associate;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\Associate;
+use Base\Database\Attribute\DiscriminatorEntry;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractActionRepository;
 
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: AbstractActionRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]

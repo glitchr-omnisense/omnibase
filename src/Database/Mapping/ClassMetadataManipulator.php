@@ -1254,7 +1254,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
      * (that would recurse through the AnnotationReader -> ClassMetadataManipulator
      * dependency).
      */
-    public function enrichAndSaveCompletors(\Base\Annotations\AnnotationReader $annotationReader): void
+    public function enrichAndSaveCompletors(\Base\Attributes\AnnotationReader $annotationReader): void
     {
         self::$completors = [];
 
@@ -1278,54 +1278,54 @@ class ClassMetadataManipulator extends AbstractLocalCache
      * annotations and invokes $annotation->loadClassMetadata(...) on each, which is the
      * code path that writes aliasNames / entityHierarchy onto the completor.
      */
-    protected function runAnnotationLoadClassMetadata(ClassMetadata $classMetadata, \Base\Annotations\AnnotationReader $annotationReader): void
+    protected function runAnnotationLoadClassMetadata(ClassMetadata $classMetadata, \Base\Attributes\AnnotationReader $annotationReader): void
     {
         $className = $classMetadata->name;
         $annotations = $annotationReader->getAnnotations($className);
 
-        $classAnnotations = $annotations[\Base\Annotations\AnnotationReader::TARGET_CLASS][$className] ?? [];
+        $classAnnotations = $annotations[\Base\Attributes\AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $annotation) {
-            if (!is_subclass_of($annotation, \Base\Annotations\AbstractAnnotation::class)) {
+            if (!is_subclass_of($annotation, \Base\Attributes\AbstractAnnotation::class)) {
                 continue;
             }
-            if (!in_array(\Base\Annotations\AnnotationReader::TARGET_CLASS, $annotationReader->getAnnotationTargets($annotation))) {
+            if (!in_array(\Base\Attributes\AnnotationReader::TARGET_CLASS, $annotationReader->getAnnotationTargets($annotation))) {
                 continue;
             }
-            if (!$annotation->supports(\Base\Annotations\AnnotationReader::TARGET_CLASS, $className, $classMetadata)) {
+            if (!$annotation->supports(\Base\Attributes\AnnotationReader::TARGET_CLASS, $className, $classMetadata)) {
                 continue;
             }
-            $annotation->loadClassMetadata($classMetadata, \Base\Annotations\AnnotationReader::TARGET_CLASS, $className);
+            $annotation->loadClassMetadata($classMetadata, \Base\Attributes\AnnotationReader::TARGET_CLASS, $className);
         }
 
-        $methodAnnotations = $annotations[\Base\Annotations\AnnotationReader::TARGET_METHOD][$className] ?? [];
+        $methodAnnotations = $annotations[\Base\Attributes\AnnotationReader::TARGET_METHOD][$className] ?? [];
         foreach ($methodAnnotations as $method => $_) {
             foreach ($_ as $annotation) {
-                if (!is_subclass_of($annotation, \Base\Annotations\AbstractAnnotation::class)) {
+                if (!is_subclass_of($annotation, \Base\Attributes\AbstractAnnotation::class)) {
                     continue;
                 }
-                if (!in_array(\Base\Annotations\AnnotationReader::TARGET_METHOD, $annotationReader->getAnnotationTargets($annotation))) {
+                if (!in_array(\Base\Attributes\AnnotationReader::TARGET_METHOD, $annotationReader->getAnnotationTargets($annotation))) {
                     continue;
                 }
-                if (!$annotation->supports(\Base\Annotations\AnnotationReader::TARGET_METHOD, $method, $classMetadata)) {
+                if (!$annotation->supports(\Base\Attributes\AnnotationReader::TARGET_METHOD, $method, $classMetadata)) {
                     continue;
                 }
-                $annotation->loadClassMetadata($classMetadata, \Base\Annotations\AnnotationReader::TARGET_METHOD, $method);
+                $annotation->loadClassMetadata($classMetadata, \Base\Attributes\AnnotationReader::TARGET_METHOD, $method);
             }
         }
 
-        $propertyAnnotations = $annotations[\Base\Annotations\AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        $propertyAnnotations = $annotations[\Base\Attributes\AnnotationReader::TARGET_PROPERTY][$className] ?? [];
         foreach ($propertyAnnotations as $property => $_) {
             foreach ($_ as $annotation) {
-                if (!is_subclass_of($annotation, \Base\Annotations\AbstractAnnotation::class)) {
+                if (!is_subclass_of($annotation, \Base\Attributes\AbstractAnnotation::class)) {
                     continue;
                 }
-                if (!in_array(\Base\Annotations\AnnotationReader::TARGET_PROPERTY, $annotationReader->getAnnotationTargets($annotation))) {
+                if (!in_array(\Base\Attributes\AnnotationReader::TARGET_PROPERTY, $annotationReader->getAnnotationTargets($annotation))) {
                     continue;
                 }
-                if (!$annotation->supports(\Base\Annotations\AnnotationReader::TARGET_PROPERTY, $property, $classMetadata)) {
+                if (!$annotation->supports(\Base\Attributes\AnnotationReader::TARGET_PROPERTY, $property, $classMetadata)) {
                     continue;
                 }
-                $annotation->loadClassMetadata($classMetadata, \Base\Annotations\AnnotationReader::TARGET_PROPERTY, $property);
+                $annotation->loadClassMetadata($classMetadata, \Base\Attributes\AnnotationReader::TARGET_PROPERTY, $property);
             }
         }
     }

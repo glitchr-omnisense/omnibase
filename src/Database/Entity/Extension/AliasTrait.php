@@ -2,7 +2,7 @@
 
 namespace Base\Database\Entity\Extension;
 
-use Base\Database\Annotation\Alias;
+use Base\Database\Attribute\Alias;
 use Doctrine\Common\Collections\Collection;
 use ReflectionClass;
 use ReflectionProperty;

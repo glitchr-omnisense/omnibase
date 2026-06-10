@@ -8,7 +8,7 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 
 use App\Form\Extension\Login2FAType;
-use Base\Annotations\Annotation\Iconize;
+use Base\Attributes\Attribute\Iconize;
 use Base\Entity\User\Notification;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

@@ -2,11 +2,11 @@
 
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Repository\Layout\Attribute\Adapter\Common\AbstractScopeAdapterRepository;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 use InvalidArgumentException;
 
 #[ORM\Entity(repositoryClass: AbstractScopeAdapterRepository::class)]

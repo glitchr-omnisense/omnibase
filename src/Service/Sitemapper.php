@@ -2,8 +2,8 @@
 
 namespace Base\Service;
 
-use Base\Annotations\Annotation\Sitemap;
-use Base\Annotations\AnnotationReader;
+use Base\Attributes\Attribute\Sitemap;
+use Base\Attributes\AnnotationReader;
 use Base\Exception\SitemapNotFoundException;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Model\SitemapEntry;

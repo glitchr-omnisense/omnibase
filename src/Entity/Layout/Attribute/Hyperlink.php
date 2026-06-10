@@ -2,8 +2,8 @@
 
 namespace Base\Entity\Layout\Attribute;
 
-use Base\Database\Annotation\Alias;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\Alias;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
@@ -14,7 +14,7 @@ use Base\Service\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\HyperlinkRepository;
 
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: HyperlinkRepository::class)]
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]

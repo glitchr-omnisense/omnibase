@@ -4,8 +4,8 @@ namespace Base\Entity\Layout\Widget;
 
 use Base\Validator\Constraints as AssertBase;
 
-use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Annotation\Slugify;
+use Base\Database\Attribute\DiscriminatorEntry;
+use Base\Database\Attribute\Slugify;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\PageRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 use Base\Entity\Layout\Widget\Set\Book;
 
 #[ORM\Entity(repositoryClass:PageRepository::class)]

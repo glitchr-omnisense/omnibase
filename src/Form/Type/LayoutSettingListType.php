@@ -2,7 +2,7 @@
 
 namespace Base\Form\Type;
 
-use Base\Database\Annotation\Uploader;
+use Base\Database\Attribute\Uploader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;

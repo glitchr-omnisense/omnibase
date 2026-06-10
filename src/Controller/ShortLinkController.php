@@ -5,7 +5,7 @@ namespace Base\Controller;
 use Base\Repository\Layout\ShortLinkRepository;
 use Base\Routing\AdvancedRouterInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Base\Annotations\Annotation\Route;
+use Base\Attributes\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Http\Discovery\Exception\NotFoundException;
 

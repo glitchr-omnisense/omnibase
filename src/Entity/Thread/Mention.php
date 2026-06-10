@@ -7,9 +7,9 @@ use App\Entity\Thread;
 
 use Base\Repository\Thread\MentionRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Service\Model\IconizeInterface;
-use Base\Database\Annotation\Cache;
+use Base\Database\Attribute\Cache;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 

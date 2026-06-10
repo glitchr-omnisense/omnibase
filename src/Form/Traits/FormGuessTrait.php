@@ -2,9 +2,9 @@
 
 namespace Base\Form\Traits;
 
-use Base\Annotations\AnnotationReader;
-use Base\Database\Annotation\Alias;
-use Base\Database\Annotation\OrderColumn;
+use Base\Attributes\AnnotationReader;
+use Base\Database\Attribute\Alias;
+use Base\Database\Attribute\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
