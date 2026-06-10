@@ -120,7 +120,7 @@ class BundleDataCollector extends AbstractDataCollector
      * @param $exception
      * @return void
      */
-    public function collect(Request $request, Response $response, $exception = null)
+    public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
         $context = $this->adminContextProvider->getContext();
         $dbname = $this->doctrine->getConnection($this->doctrine->getDefaultConnectionName())->getParams()["dbname"] ?? null;
