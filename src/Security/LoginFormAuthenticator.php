@@ -94,23 +94,24 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $identifier = $request->get('security_login')["identifier"] ?? $request->get('_base_security_login')["identifier"] ?? $request->get("identifier") ?? "";
-        $password = $request->get('security_login')["password"] ?? $request->get('_base_security_login')["password"] ?? $request->get("password") ?? "";
+        $loginData = $request->request->all('security_login') ?: $request->request->all('_base_security_login') ?: [];
+        $identifier = $loginData["identifier"] ?? $request->request->get("identifier") ?? "";
+        $password = $loginData["password"] ?? $request->request->get("password") ?? "";
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
 
         $badges = [];
-        if (array_key_exists("_remember_me", $request->get('security_login') ?? $request->get('_base_security_login') ?? [])) {
+        if (array_key_exists("_remember_me", $loginData)) {
             $badges[] = new RememberMeBadge();
-            if ($request->get('security_login')["_remember_me"] ?? $request->get('_base_security_login')["_remember_me"]) {
+            if ($loginData["_remember_me"]) {
                 end($badges)->enable();
             }
         }
 
-        if (array_key_exists("password", $request->get('security_login') ?? $request->get('_base_security_login') ?? [])) {
+        if (array_key_exists("password", $loginData)) {
             $badges[] = new PasswordUpgradeBadge($password, $this->userRepository);
         }
-        if (array_key_exists("_captcha", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) && class_exists(CaptchaBadge::class)) {
-            $badges[] = new CaptchaBadge("_captcha", $request->get('security_login')["_captcha"] ?? $request->get('_base_security_login')["_captcha"]);
+        if (array_key_exists("_captcha", $loginData) && class_exists(CaptchaBadge::class)) {
+            $badges[] = new CaptchaBadge("_captcha", $loginData["_captcha"]);
         }
 
         return new Passport(
