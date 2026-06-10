@@ -16,15 +16,11 @@
         <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noodp, noimageindex, notranslate, nocache" />
         <meta content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" name="viewport">
         <meta name="description" content="{{ (_content_title ?? null) }}" />
-        {# Turbo reads this nonce and re-applies it to <script> elements it injects
-           from form/page responses. Without it, the EasyAdmin CSP (which carries a
-           csp_nonce('script') from the asset includes, making 'unsafe-inline'
-           ineffective) blocks every inline script Turbo swaps in after a form
-           submit — so editorJS/Dropzone/Select2 never re-initialise. Upstream
-           EasyAdmin ships this meta; this override had dropped it. #}
-        {% guard function csp_nonce %}
-        <meta name="csp-nonce" content="{{ csp_nonce('script') }}">
-        {% endguard %}
+        {# Do NOT call csp_nonce('script') here. Per CSP spec, once ANY nonce appears
+           in script-src, browsers ignore 'unsafe-inline' and block every inline
+           script that lacks the nonce — including editorJS, Dropzone, Select2, and
+           all Turbo-morphed fragments. Our CSP uses 'unsafe-inline' for dev/beta;
+           adding a nonce would silently break all inline scripts on admin pages. #}
     {% endblock head_metas %}
 
     {% set page_title_block_output %}{% block page_title %}{{ _content_title }}{% endblock %}{% endset %}

@@ -5,3 +5,12 @@
 {% extends "@!EasyAdmin/crud/new.html.twig" %}
 
 {% block content_title %}{% endblock %}
+
+{% block head_javascript %}
+    {# Skip parent() — upstream new.html.twig calls csp_nonce('script') via a guard
+       block, which adds a nonce to script-src and causes browsers to ignore
+       'unsafe-inline', blocking all non-nonce inline scripts. Instead reproduce the
+       layout's block content here and add form.js without any nonce. #}
+    {{ block('head_javascript', '@EasyAdmin/layout.html.twig') }}
+    <script src="{{ asset('form.js', ea.assets.defaultAssetPackageName) }}"></script>
+{% endblock head_javascript %}
