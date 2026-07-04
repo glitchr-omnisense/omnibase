@@ -25,6 +25,13 @@
             "Tests\\Base\\": "./tests"
         }
     },
+    "repositories": [
+        { "type": "vcs", "url": "https://gitlab.glitchr.dev/public-repository/agnostic/backup-manager" },
+        { "type": "vcs", "url": "https://gitlab.glitchr.dev/public-repository/symfony/bundle/base/plugin" },
+        { "type": "vcs", "url": "https://gitlab.glitchr.dev/public-repository/symfony/bundle/doctrine-dc2type" },
+        { "type": "vcs", "url": "https://gitlab.glitchr.dev/public-repository/symfony/bundle/hypertext-bundle" },
+        { "type": "vcs", "url": "https://gitlab.glitchr.dev/public-repository/symfony/bundle/well-known" }
+    ],
     "require": {
         "php": "^8.1",
         "beberlei/doctrineextensions": "^1.0",
@@ -75,6 +82,7 @@
         "twig/twig": "^3.0"
     },
     "require-dev": {
+        "phpstan/phpstan": "^1.12",
         "phpunit/phpunit": "^10.5",
         "wapmorgan/php-deprecation-detector": "^2.0",
         "doctrine/doctrine-fixtures-bundle": "^3.4",

@@ -1,0 +1,43 @@
+# First iteration: phpunit is the hard gate; phpcs/phpstan report but don't
+# block (level max on a codebase this size needs a baseline first).
+# The per-job apt/ext setup is slow — move to a prebuilt image once stable.
+
+image: php:8.4-cli
+
+variables:
+  COMPOSER_ALLOW_SUPERUSER: "1"
+  COMPOSER_CACHE_DIR: .composer-cache
+
+cache:
+  key: composer
+  paths:
+    - .composer-cache/
+
+default:
+  before_script:
+    - apt-get update -qq && apt-get install -yqq git unzip > /dev/null
+    - docker-php-ext-install -j$(nproc) bcmath > /dev/null
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - if [ -n "$CI_JOB_TOKEN" ]; then composer config -g gitlab-domains gitlab.glitchr.dev && composer config -g gitlab-token.gitlab.glitchr.dev "$CI_JOB_TOKEN"; fi
+    - composer validate --no-check-publish
+    - composer install --no-interaction --no-progress --ignore-platform-reqs
+
+stages:
+  - qa
+
+phpunit:
+  stage: qa
+  script:
+    - vendor/bin/phpunit
+
+phpcs:
+  stage: qa
+  allow_failure: true
+  script:
+    - vendor/bin/phpcs
+
+phpstan:
+  stage: qa
+  allow_failure: true
+  script:
+    - vendor/bin/phpstan analyse --no-progress --memory-limit=1G
