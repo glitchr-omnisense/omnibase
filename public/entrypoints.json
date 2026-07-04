@@ -1,0 +1,102 @@
+{
+  "entrypoints": {
+    "base-async": {
+      "css": [
+        "/bundles/base/base-async.25c495ee.css"
+      ],
+      "js": [
+        "/bundles/base/base-async.ab81de0f.js"
+      ]
+    },
+    "base-defer": {
+      "css": [
+        "/bundles/base/base-defer.5f32239b.css"
+      ],
+      "js": [
+        "/bundles/base/base-defer.f7dc3e49.js"
+      ]
+    },
+    "easyadmin-async": {
+      "css": [
+        "/bundles/base/easyadmin-async.a4508e13.css"
+      ],
+      "js": [
+        "/bundles/base/easyadmin-async.9cbe9b2f.js"
+      ]
+    },
+    "form-defer": {
+      "css": [
+        "/bundles/base/form-defer.c7f58a8b.css"
+      ],
+      "js": [
+        "/bundles/base/form-defer.74fcdbd4.js"
+      ]
+    },
+    "form-defer.editor": {
+      "css": [
+        "/bundles/base/form-defer.editor.1c80c5a6.css"
+      ],
+      "js": [
+        "/bundles/base/form-defer.editor.2e2b3f33.js"
+      ]
+    },
+    "form-defer.array": {
+      "js": [
+        "/bundles/base/form-defer.array.41d9bc2e.js"
+      ]
+    },
+    "form-defer.datetime": {
+      "css": [
+        "/bundles/base/form-defer.datetime.604c58d2.css"
+      ],
+      "js": [
+        "/bundles/base/form-defer.datetime.d0ebd50e.js"
+      ]
+    },
+    "form-defer.select2": {
+      "css": [
+        "/bundles/base/form-defer.select2.ed9e897e.css"
+      ],
+      "js": [
+        "/bundles/base/form-defer.select2.830eac74.js"
+      ]
+    },
+    "form-defer.color": {
+      "css": [
+        "/bundles/base/form-defer.color.c9742277.css"
+      ],
+      "js": [
+        "/bundles/base/form-defer.color.b9f79785.js"
+      ]
+    },
+    "form-defer.wysiwyg": {
+      "css": [
+        "/bundles/base/form-defer.wysiwyg.c8872d96.css"
+      ],
+      "js": [
+        "/bundles/base/form-defer.wysiwyg.925f62d8.js"
+      ]
+    },
+    "form-defer.cropper": {
+      "css": [
+        "/bundles/base/form-defer.cropper.31d6cfe0.css"
+      ],
+      "js": [
+        "/bundles/base/form-defer.cropper.91b50d1c.js"
+      ]
+    },
+    "form-defer.emoji": {
+      "js": [
+        "/bundles/base/form-defer.emoji.3f86d91d.js"
+      ]
+    },
+    "form-defer.dropzone": {
+      "css": [
+        "/bundles/base/form-defer.dropzone.063304f6.css"
+      ],
+      "js": [
+        "/bundles/base/form-defer.dropzone.c5579be7.js"
+      ]
+    }
+  }
+}
