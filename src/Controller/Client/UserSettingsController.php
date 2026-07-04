@@ -19,8 +19,8 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
-use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface as TotpTwoFactorInterface;
@@ -50,16 +50,17 @@ class UserSettingsController extends AbstractController
 
     private function displayQrCode(string $qrCodeContent): Response
     {
-        $result = Builder::create()
-            ->writer(new PngWriter())
-            ->writerOptions([])
-            ->data($qrCodeContent)
-            ->encoding(new Encoding('UTF-8'))
-            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-            ->size(200)
-            ->margin(0)
-            ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
-            ->build();
+        $builder = new Builder(
+            writer: new PngWriter(),
+            writerOptions: [],
+            data: $qrCodeContent,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 200,
+            margin: 0,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin,
+        );
+        $result = $builder->build();
 
         return new Response($result->getString(), 200, ['Content-Type' => 'image/png']);
     }
@@ -120,24 +121,21 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa/qr-code", name: "user_settings_2fa_qrcode")]
-    public function TwoFactorAuthentification_QrCode()
+    public function TwoFactorAuthentification_QrCode(TotpAuthenticatorInterface $totpAuthenticator)
     {
+        // Was written against the endroid v3 generator API and a
+        // $this->qrCodeGenerator property that never existed: the route
+        // fataled whenever hit. Route through the same builder as
+        // /members/qr/totp instead.
         $user = $this->getUser();
+        if (!($user instanceof TotpTwoFactorInterface)) {
+            throw new NotFoundHttpException('Cannot display QR code');
+        }
 
         if (empty($user->getTotpSecret())) {
-            $totpAuthenticator = $this->baseService->getContainer("scheb_two_factor.security.totp_authenticator");
             $user->setTotpSecret($totpAuthenticator->generateSecret());
         }
 
-        $qrCode = $this->qrCodeGenerator->getTotpQrCode($user);
-        $qrCode->setSize(250);
-        $qrCode->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0));
-        $qrCode->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0));
-        $qrCode->setLogoPath("/assets/ico/favicon_qr.png");
-        $qrCode->setLogoSize(128);
-        $qrCode->setErrorCorrectionLevel(ErrorCorrectionLevel::QUARTILE());
-
-
-        return new Response($qrCode->writeString(), 250, ['Content-Type' => 'image/png']);
+        return $this->displayQrCode($totpAuthenticator->getQRContent($user));
     }
 }
