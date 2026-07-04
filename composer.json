@@ -50,7 +50,7 @@
         "glitchr/well-known": "1.0.*-dev",
         "glitchr/base-plugin": "2.0.*-dev",
         "glitchr/doctrine-dc2type": "1.0.*-dev",
-        "hashids/hashids": "^4.1",
+        "hashids/hashids": "^5.0",
         "imagine/imagine": "^1.2",
         "league/flysystem-bundle": "^3.1",
         "league/flysystem-ftp": "^3.0",
