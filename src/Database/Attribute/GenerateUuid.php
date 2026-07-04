@@ -7,20 +7,13 @@ use Base\Attributes\AnnotationReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 use Exception;
 
 use Symfony\Component\Uid\Uuid;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class GenerateUuid
  * package Base\Database\Attribute\GenerateUuid
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"PROPERTY"})
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]

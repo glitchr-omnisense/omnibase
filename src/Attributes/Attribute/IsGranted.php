@@ -6,17 +6,8 @@ use Base\Attributes\AbstractAnnotation;
 
 use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 use function is_string;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
 use Symfony\Component\ExpressionLanguage\Expression;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "METHOD"})
- */
 
 #[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_FUNCTION)]
 class IsGranted extends AbstractAnnotation

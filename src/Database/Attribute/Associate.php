@@ -8,18 +8,10 @@ use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Attribute;
-use Doctrine\Common\Annotations\Annotation\Attributes;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"PROPERTY"})
  * @Attributes({
  *   @Attribute("class", type = "string")
  * })

@@ -5,18 +5,9 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAnnotation;
 use Base\Attributes\AnnotationReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 use Exception;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"PROPERTY"})
- */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Countify extends AbstractAnnotation implements ExtensionOptionInterface

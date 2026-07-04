@@ -5,17 +5,8 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAnnotation;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS"})
- */
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class DiscriminatorEntry extends AbstractAnnotation implements ExtensionOptionInterface

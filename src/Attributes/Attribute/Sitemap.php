@@ -4,20 +4,12 @@ namespace Base\Attributes\Attribute;
 
 use Base\Attributes\AbstractAnnotation;
 
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Attribute;
-use Doctrine\Common\Annotations\Annotation\Attributes;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Sitemap
  * package Base\Attributes\Attribute\Sitemap
  *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"METHOD"})
  * @Attributes({
  *   @Attribute("group", type = "string"),
  *   @Attribute("priority", type = "float"),

@@ -5,18 +5,11 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAnnotation;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * Class Blameable
  * package Base\AnnotationReader\Abstract\Blameable
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "PROPERTY"})
  */
 
  #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]

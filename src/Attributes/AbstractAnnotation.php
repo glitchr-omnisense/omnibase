@@ -67,14 +67,6 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
 
     /**
-     * @return mixed
-     */
-    public static function getDoctrineReader()
-    {
-        return AnnotationReader::getInstance()->getDoctrineReader();
-    }
-
-    /**
      * @return EntityManager|null
      */
     public static function getEntityManager(): ?EntityManager

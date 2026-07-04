@@ -13,8 +13,6 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use League\Flysystem\FilesystemException;
@@ -24,7 +22,6 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 
 use function is_file;
@@ -32,10 +29,6 @@ use function is_file;
 /**
  * Class Uploader
  * package Base\Database\Attribute\Uploader
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "PROPERTY"})
  */
 
  #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]

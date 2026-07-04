@@ -12,22 +12,13 @@ use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
 use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 use Symfony\Component\Cache\Marshaller\SodiumMarshaller;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 use function is_file;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS"})
- */
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class Vault extends AbstractAnnotation

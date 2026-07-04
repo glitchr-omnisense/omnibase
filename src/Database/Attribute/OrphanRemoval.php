@@ -7,17 +7,9 @@ use Base\Database\Entity\EntityExtension;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Attribute;
-use Doctrine\Common\Annotations\Annotation\Attributes;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "PROPERTY"})
  * @Attributes({
  *   @Attribute("column" , type = "string"),
  *   @Attribute("value" , type = "bool")

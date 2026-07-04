@@ -8,18 +8,11 @@ use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\String\Slugger\AsciiSlugger;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Slugify
  * package Base\Database\Attribute\Slugify
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"PROPERTY"})
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]

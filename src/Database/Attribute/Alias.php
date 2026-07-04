@@ -9,17 +9,8 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "PROPERTY"})
- */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
 class Alias extends AbstractAnnotation implements ExtensionOptionInterface

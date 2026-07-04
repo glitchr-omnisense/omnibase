@@ -8,18 +8,11 @@ use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Timestamp
  * package Base\Database\Attribute\Timestamp
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "PROPERTY"})
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]

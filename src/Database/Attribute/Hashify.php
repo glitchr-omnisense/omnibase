@@ -9,23 +9,16 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 
 use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Hashify
  * package Base\Database\Attribute\Hashify
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"PROPERTY"})
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]

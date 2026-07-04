@@ -3,18 +3,11 @@
 namespace Base\Attributes\Attribute;
 
 use Base\Attributes\AbstractAnnotation;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Iconize
  * package Base\Attributes\Attribute\Iconize
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"METHOD"})
  */
 
  #[\Attribute(\Attribute::TARGET_METHOD)]

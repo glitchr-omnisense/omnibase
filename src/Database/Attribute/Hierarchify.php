@@ -5,19 +5,12 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAnnotation;
 use Base\Attributes\AnnotationReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Hierarchify
  * package Base\Database\Attribute\Hierarchify.
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS"})
  */
 
  #[\Attribute(\Attribute::TARGET_CLASS)]

@@ -11,16 +11,7 @@ use Base\Enum\EntityAction;
 use DateTime;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS"})
- */
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class Trasheable extends AbstractAnnotation implements EntityExtensionInterface

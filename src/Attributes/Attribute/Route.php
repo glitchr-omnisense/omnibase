@@ -2,17 +2,9 @@
 
 namespace Base\Attributes\Attribute;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Attribute class for @Route().
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "METHOD"})
- *
  */
 
 #[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]

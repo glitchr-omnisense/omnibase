@@ -7,18 +7,11 @@ use Base\Attributes\AnnotationReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Randomize
  * package Base\Database\Attribute\Randomize
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"PROPERTY"})
  */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]

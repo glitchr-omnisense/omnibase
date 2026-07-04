@@ -4,21 +4,14 @@ namespace Base\Database\Attribute;
 
 use Base\Attributes\AbstractAnnotation;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Class Timezone
  * package Base\Database\Attribute\Timezone
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"PROPERTY"})
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]

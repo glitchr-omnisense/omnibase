@@ -2,7 +2,6 @@
 
 namespace Base\Database\Mapping;
 
-use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\ORM\Mapping\Table;
 use Exception;
 use ReflectionClass;

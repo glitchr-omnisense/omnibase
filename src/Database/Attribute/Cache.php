@@ -8,15 +8,9 @@ use Base\Database\Entity\EntityExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\Event\LifecycleEventArgs as BaseLifecycleEventArgs;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Caching to an entity or a collection.
- *
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "PROPERTY"})
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]

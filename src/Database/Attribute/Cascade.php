@@ -7,15 +7,6 @@ use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS", "PROPERTY"})
- */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
 class Cascade extends AbstractAnnotation implements ExtensionOptionInterface

@@ -7,10 +7,7 @@ use Base\Attributes\AnnotationReader;
 use Base\Database\Attribute\Extension\ExtensionInlineInterface;
 use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Type\SetType;
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
@@ -20,12 +17,6 @@ use Doctrine\DBAL\Types\StringType;
 use Doctrine\ORM\PersistentCollection;
 use ReflectionProperty;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"PROPERTY"})
- */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class OrderColumn extends AbstractAnnotation implements ExtensionInlineInterface
