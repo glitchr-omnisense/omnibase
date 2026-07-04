@@ -11,9 +11,10 @@ return static function (ContainerConfigurator $container): void {
 
     $services->defaults();
 
-    // Backup Manager
+    // Backup Manager — only a DI-parent template for Base\Service\TimeMachine;
+    // its 3-arg constructor is never wired directly, so keep it abstract.
     $services->set('Backup\Manager\Manager')
-        ->public(true);
+        ->abstract();
 
     // Notifier fix
     $services->alias('Symfony\Component\Notifier\Channel\ChannelPolicyInterface', 'notifier.channel_policy');
