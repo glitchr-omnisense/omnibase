@@ -13,12 +13,6 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
     protected array $uniqueTableName = [];
 
-    protected ?DoctrineAnnotationReader $annotationReader;
-    public function __construct()
-    {
-        $this->annotationReader = new DoctrineAnnotationReader();
-    }
-
     /**
      * @param $className
      * @return string
@@ -50,15 +44,6 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
                 $annotations[] = $annotation;
             }
 
-            while ($annotation = array_pop($annotations)) {
-                if ($annotation instanceof Table && !empty($annotation->name)) {
-                    $tableName = $annotation->name;
-                    break;
-                }
-            }
-
-            // Doctrine annotations
-            $annotations = $this->annotationReader->getClassAnnotations($reflClass);
             while ($annotation = array_pop($annotations)) {
                 if ($annotation instanceof Table && !empty($annotation->name)) {
                     $tableName = $annotation->name;
