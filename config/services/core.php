@@ -1,0 +1,360 @@
+<?php
+
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use \Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Reference;
+
+use Base\Field\Configurator\LocaleConfigurator;
+use Base\Field\Configurator\TextConfigurator;
+use Base\Field\Configurator\WysiwygConfigurator;
+use Base\Field\Configurator\StockConfigurator;
+use Base\Field\Configurator\MoneyConfigurator;
+use Base\Field\Configurator\CurrencyConfigurator;
+use Base\Field\Configurator\EmailConfigurator;
+use Base\Field\Configurator\DateTimePickerConfigurator;
+use Base\Field\Configurator\CollectionConfigurator;
+use Base\Field\Configurator\ArrayConfigurator;
+use Base\Field\Configurator\SlugConfigurator;
+use Base\Field\Configurator\CropperConfigurator;
+use Base\Field\Configurator\FileConfigurator;
+use Base\Field\Configurator\TranslationConfigurator;
+use Base\Field\Configurator\BooleanConfigurator;
+use Base\Field\Configurator\AssociationConfigurator;
+use Base\Field\Configurator\AssociationFileConfigurator;
+use Base\Field\Configurator\SelectConfigurator;
+use Base\Field\Configurator\RoleConfigurator;
+use Base\Field\Configurator\StateConfigurator;
+use Base\Field\Configurator\CountryConfigurator;
+use Base\Field\Configurator\QuadrantConfigurator;
+use Base\Field\Configurator\DiscriminatorConfigurator;
+use Base\Field\Configurator\AttributeConfigurator;
+use Base\Field\Configurator\IconConfigurator;
+use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
+use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+
+return static function (ContainerConfigurator $container): void {
+    $services = $container->services();
+
+    $services->defaults()
+        ->public(false);
+
+    // Form proxy
+    $services->set('Base\Form\FormProxy')
+        ->public(true)
+        ->args([service('form.factory')]);
+
+    // Session storage
+    $services->set('Base\Security\Session\DynamicSessionStorageFactory')
+        ->public(true)
+        ->parent('session.storage.factory.native');
+
+    // Access token handler
+    $services->set('Base\Security\AccessTokenHandler')
+        ->args([service('Base\Repository\User\TokenRepository')]);
+
+    // Referrer
+    $services->set('Base\Service\Referrer')
+        ->public(true)
+        ->args([
+            service('request_stack'),
+            service('advanced_router'),
+            service('localizer'),
+        ]);
+
+    // CacheClearSessionsCommand
+    $services->set('Base\Console\Command\CacheClearSessionsCommand')
+        ->parent('Base\Console\Command')
+        ->public(true)
+        ->tag('console.command')
+        ->bind('$projectDir', '%kernel.project_dir%');
+
+    // Controllers
+    $controllers = [
+        'Base\Controller\MainController' => ['base.service', 'setting_bag'],
+        'Base\Controller\ProfilerController' => ['base.notifier', 'App\Repository\UserRepository'],
+        'Base\Controller\Client\ContactController' => ['form.proxy', 'base.notifier'],
+        'Base\Controller\LocalizerController' => ['localizer', 'doctrine.orm.entity_manager', 'advanced_router', 'referrer', 'translator'],
+        'Base\Controller\UX\MediaController' => ['request_stack', 'flysystem', 'base.service.image', 'Base\Repository\Layout\ImageCropRepository'],
+        'Base\Controller\WidgetController' => ['Base\Repository\Layout\Widget\PageRepository', 'Base\Repository\Layout\Widget\AttachmentRepository'],
+        'Base\Controller\ShortLinkController' => ['advanced_router', 'Base\Repository\Layout\ShortLinkRepository'],
+    ];
+
+    foreach ($controllers as $id => $args) {
+        $definition = $services->set($id)
+            ->tag('controller.service_arguments')
+            ->tag('container.service_subscriber')
+            ->call('setContainer', [service('Psr\Container\ContainerInterface')]);
+        foreach ($args as $i => $arg) {
+            $definition->arg($i, service($arg));
+        }
+        if ($id === 'Base\Controller\UX\MediaController') {
+            $definition->arg(4, new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE));
+        }
+    }
+
+    // Subscribers
+    $subscribers = [
+        'Base\Subscriber\RouterSubscriber' => ['security.authorization_checker', 'advanced_router', 'parameter_bag', 'setting_bag'],
+        'Base\Subscriber\ProfilerSubscriber' => ['advanced_router'],
+        'Base\Subscriber\TwigSubscriber' => ['twig.html_renderer', 'twig.webpack_renderer', 'security.authorization_checker', 'parameter_bag', 'advanced_router', '$publicDir' => '%kernel.project_dir%/public'],
+        'Base\Subscriber\HotParameterBagSubscriber' => ['parameter_bag', 'setting_bag'],
+        'Base\Subscriber\EasyAdminSubscriber' => ['advanced_router', 'EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider', 'EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'],
+        'Base\Subscriber\AdminContextSubscriber' => [],
+        'Base\Subscriber\AnalyticsSubscriber' => ['security.token_storage', 'advanced_router', 'translator', 'twig', 'App\Repository\UserRepository', 'ga.service'],
+    ];
+
+    foreach ($subscribers as $id => $args) {
+        $definition = $services->set($id)
+            ->tag('kernel.event_subscriber');
+        foreach ($args as $k => $v) {
+            if (is_int($k)) {
+                $definition->arg($k, service($v));
+            } else {
+                $definition->bind($k, $v);
+            }
+        }
+    }
+
+    // AdvancedRouter
+    $services->set('Base\Routing\AdvancedRouter')
+        ->tag('twig.runtime')
+        ->args([
+            service('router'),
+            service('request_stack'),
+            service('security.firewall.map'),
+            service('parameter_bag'),
+            service('localizer'),
+            service('twig.extension.assets'),
+            service('cache.adapter'),
+        ])
+        ->bind('$debug', '%kernel.debug%')
+        ->bind('$environment', '%kernel.environment%');
+
+    // SettingBag
+    $services->alias('Base\Service\SettingBagInterface', 'Base\Service\SettingBag');
+    $services->set('Base\Service\SettingBag')
+        ->public(true)
+        ->tag('twig.runtime')
+        ->args([
+            service('parameter_bag'),
+            service('doctrine.orm.entity_manager'),
+            service('Base\Repository\Layout\SettingRepository'),
+            service('localizer'),
+            service('assets.packages'),
+            service('cache.adapter'),
+        ])
+        ->bind('$environment', '%kernel.environment%');
+
+    // Notifier
+    $services->alias('App\Notifier\Notifier', 'Base\Notifier\Notifier');
+    $services->alias('Base\Notifier\NotifierInterface', 'Base\Notifier\Notifier');
+    $services->set('Base\Notifier\Notifier')
+        ->parent('Base\Notifier\Abstract\BaseNotifier')
+        ->public(true);
+
+    $services->alias('Base\Notifier\Abstract\BaseNotifierInterface', 'Base\Notifier\Abstract\BaseNotifier');
+    $services->set('Base\Notifier\Abstract\BaseNotifier')
+        ->abstract(true)
+        ->args([
+            service('notifier'),
+            service('notifier.channel_policy'),
+            service('doctrine.orm.entity_manager'),
+            service('parameter_bag'),
+            service('translator'),
+            service('localizer'),
+            service('advanced_router'),
+            service('twig'),
+            service('setting_bag'),
+        ])
+        ->bind('$debug', '%kernel.debug%');
+
+    // LocalCache / CacheWarmers
+    $cacheServices = [
+        'Base\Cache\Abstract\AbstractLocalCache' => ['$cacheDir' => '%kernel.cache_dir%'],
+        'Base\Cache\Warmer\SpreadsheetCacheWarmer' => ['$cacheDir' => '%kernel.cache_dir%'],
+        'Base\Cache\Warmer\IconCacheWarmer' => ['base.service.icon', '$cacheDir' => '%kernel.cache_dir%'],
+        'Base\Cache\Warmer\LocalizerCacheWarmer' => ['localizer', '$cacheDir' => '%kernel.cache_dir%'],
+        'Base\Cache\Warmer\ThemizerCacheWarmer' => ['themizer', '$cacheDir' => '%kernel.cache_dir%'],
+        'Base\Cache\Warmer\WebpackCacheWarmer' => ['parameter_bag', 'twig.webpack_renderer', 'webpack_encore.entrypoint_lookup[_default]', '$cacheDir' => '%kernel.cache_dir%', '$publicDir' => '%kernel.project_dir%/public'],
+        'Base\Cache\Warmer\AnnotationCacheWarmer' => ['base.annotation_reader', '$cacheDir' => '%kernel.cache_dir%'],
+        'Base\Cache\Warmer\MetadataCacheWarmer' => ['base.database.metadata_manipulator', 'base.annotation_reader', '$cacheDir' => '%kernel.cache_dir%'],
+    ];
+
+    foreach ($cacheServices as $id => $args) {
+        $definition = $services->set($id);
+        if (str_contains($id, 'Warmer')) {
+            $definition->tag('kernel.cache_warmer');
+        }
+        foreach ($args as $k => $v) {
+            if (is_int($k)) {
+                $definition->arg($k, service($v));
+            } else {
+                $definition->bind($k, $v);
+            }
+        }
+        if (str_contains($id, 'Warmer')) {
+            $definition->public(true);
+        }
+    }
+
+    // BaseService
+    $services->set('Base\Service\BaseService')
+        ->public(true)
+        ->args([
+            service('kernel'),
+            service('request_stack'),
+            service('security.firewall.map'),
+            service('twig'),
+            service('slugger'),
+            service('doctrine'),
+            service('security.authorization_checker'),
+            service('security.token_storage'),
+            service('security.csrf.token_manager'),
+            service('parameter_bag'),
+            service('base.notifier'),
+            service('form.factory'),
+            service('localizer'),
+            service('trading_market'),
+            service('obfuscator'),
+            service('setting_bag'),
+            service('base.service.image'),
+            service('base.service.icon'),
+            service('translator'),
+            service('advanced_router'),
+            service('base.database.entity_hydrator'),
+            service('base.database.metadata_manipulator'),
+            service('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'),
+            new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+        ]);
+
+    // Services inheriting from AbstractLocalCache
+    $services->set('Base\Service\Localizer')
+        ->parent('Base\Cache\Abstract\AbstractLocalCache')
+        ->public(true)
+        ->tag('twig.runtime')
+        ->args([service('parameter_bag'), service('translator')]);
+
+    $services->set('Base\Service\Themizer')
+        ->parent('Base\Cache\Abstract\AbstractLocalCache')
+        ->public(true)
+        ->args([service('parameter_bag'), service('security.token_storage')]);
+
+    $services->set('Base\Cache\SimpleCache')
+        ->parent('Base\Cache\Abstract\AbstractLocalCache')
+        ->public(true);
+
+    // Maintenance / Launcher / Paginator / Breadgrinder / WidgetProvider
+    $services->set('Base\Service\MaintenanceProvider')
+        ->public(true)
+        ->args([service('advanced_router'), service('setting_bag'), service('security.authorization_checker'), service('parameter_bag'), service('localizer'), service('security.token_storage')]);
+
+    $services->set('Base\Service\Launcher')
+        ->public(true)
+        ->args([service('advanced_router'), service('parameter_bag'), service('setting_bag'), service('security.authorization_checker'), service('security.token_storage')]);
+
+    $services->set('Base\Service\Paginator')
+        ->public(true)
+        ->args([service('advanced_router'), service('parameter_bag')]);
+
+    $services->set('Base\Service\Breadgrinder')
+        ->public(true)
+        ->args([service('advanced_router'), service('translator'), service('parameter_bag')]);
+
+    $services->set('Base\Service\WidgetProvider')
+        ->public(true)
+        ->tag('twig.runtime')
+        ->args([service('doctrine.orm.entity_manager')]);
+
+    // Form extensions
+    $services->set('Base\Form\Extension\FormTypeTranslateExtension')->tag('form.type_extension');
+
+    $services->set('Base\Form\Extension\FormTypeSpamExtension')
+        ->tag('form.type_extension')
+        ->args([service('spam_checker'), service('advanced_router')]);
+
+    // Console
+    $services->set('Base\Console\Console')->public(true)->args([service('kernel')]);
+    $services->set('Base\Console\Command')->public(true)->args([service('localizer'), service('translator'), service('doctrine.orm.entity_manager'), service('parameter_bag')]);
+
+    $commandServices = [
+        'Base\Console\Command\NotifierCommand',
+        'Base\Console\Command\DoctrineSchemaCharsetCommand',
+        'Base\Console\Command\DoctrineArrayUpgradeCommand',
+        'Base\Console\Command\BaseMappingCommand',
+        'Base\Console\Command\ThreadPublishableCommand',
+        'Base\Console\Command\EntityDiscriminatorCommand',
+        'Base\Console\Command\NotifierMailTestCommand',
+        'Base\Console\Command\TimeMachineSnapshotCommand',
+        'Base\Console\Command\TimeMachineSnapshotBackupCommand',
+        'Base\Console\Command\TimeMachineSnapshotRestoreCommand',
+    ];
+
+    foreach ($commandServices as $command) {
+        $definition = $services->set($command)
+            ->parent('Base\Console\Command')
+            ->tag('console.command');
+        // Add specific arguments for certain commands
+        if ($command === 'Base\Console\Command\EntityDiscriminatorCommand') {
+            $definition->arg(0, service('base.database.metadata_manipulator'));
+        }
+        if ($command === 'Base\Console\Command\NotifierMailTestCommand') {
+            $definition->args([service('base.notifier'), service('App\Repository\UserRepository')]);
+        }
+        if (str_contains($command, 'TimeMachineSnapshot')) {
+            $definition->args([service('time_machine'), service('flysystem')]);
+        }
+    }
+
+    // TimeMachine service
+    $services->set('Base\Service\TimeMachine')
+        ->parent('Backup\Manager\Manager')
+        ->public(true)
+        ->args([service('flysystem'), service('doctrine'), service('parameter_bag')]);
+
+    // Console commands
+    $services->set('Base\Console\Command\UserNotificationCommand')
+        ->parent('Base\Console\Command')
+        ->tag('console.command');
+
+    $services->set('Base\Console\Command\UploaderEntitiesCommand')
+        ->parent('Base\Console\Command')
+        ->tag('console.command');
+
+    $services->set('Base\Console\Command\UploaderImagesCommand')
+        ->parent('Base\Console\Command\UploaderEntitiesCommand')
+        ->tag('console.command')
+        ->args([
+            new Reference('base.service.image'),
+            new Reference('Base\Controller\UX\MediaController'),
+        ]);
+
+    $services->set('Base\Console\Command\UploaderImagesCropCommand')
+        ->parent('Base\Console\Command\UploaderImagesCommand')
+        ->tag('console.command');
+
+    $services->set('Base\Console\Command\TranslationControllersCommand')
+        ->parent('Base\Console\Command')
+        ->tag('console.command');
+
+    $services->set('Base\Console\Command\TranslationSettingsCommand')
+        ->parent('Base\Console\Command')
+        ->tag('console.command')
+        ->args([new Reference('setting_bag')]);
+
+    $services->set('Base\Console\Command\IconEntitiesCommand')
+        ->parent('Base\Console\Command')
+        ->tag('console.command')
+        ->args([new Reference('base.database.metadata_manipulator')]);
+
+    $services->set('Base\Console\Command\DoctrineDatabaseImportCommand')
+        ->parent('Base\Console\Command')
+        ->tag('console.command')
+        ->args([
+            new Reference('base.database.entity_hydrator'),
+            new Reference('base.database.metadata_manipulator'),
+            new Reference('base.notifier'),
+        ]);
+};
