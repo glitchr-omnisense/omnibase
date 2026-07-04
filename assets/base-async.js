@@ -11,3 +11,4 @@ import './styles/base-async.scss';
 import './styles/js/user.js';
 import './styles/js/flashbag.js';
 import './styles/js/countdown.js';
+import './styles/js/offline.js';

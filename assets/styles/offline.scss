@@ -1,0 +1,68 @@
+/* ── Offline mode (styles/js/offline.js): full-page takeover ─────────────── */
+#offline-page {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2em;
+    background: #fff;
+    color: #333;
+    animation: offline-fade-in 0.25s ease;
+}
+
+#offline-page .offline-inner {
+    max-width: 28em;
+}
+
+#offline-page .offline-icon {
+    display: block;
+    font-size: 4.5em;
+    line-height: 1;
+    margin-bottom: 0.35em;
+    opacity: 0.45;
+}
+
+#offline-page .offline-title {
+    font-size: 1.6em;
+    font-weight: 700;
+    margin: 0 0 0.4em;
+}
+
+#offline-page .offline-message {
+    margin: 0 0 1.6em;
+    opacity: 0.75;
+}
+
+#offline-page .offline-retry {
+    display: inline-block;
+    padding: 0.6em 2.2em;
+    font-size: 1em;
+    font-weight: 700;
+    border: none;
+    border-radius: 2em;
+    cursor: pointer;
+    background: #065fd4;
+    color: #fff;
+}
+#offline-page .offline-retry:hover { filter: brightness(1.1); }
+#offline-page .offline-retry:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+#offline-page .offline-retry.offline-shake { animation: offline-shake 0.4s ease; }
+
+html.theme-mode-dark #offline-page {
+    background: #14212b;
+    color: #e8e8e8;
+}
+
+@keyframes offline-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes offline-shake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-0.4em); }
+    75%      { transform: translateX(0.4em); }
+}
