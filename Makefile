@@ -37,7 +37,7 @@ phpstan:
 	../../vendor/bin/phpstan analyse
 
 tests:
-	@echo "Not implemented yet."
+	@if [ -x vendor/bin/phpunit ]; then vendor/bin/phpunit; else $(ROOT_DIR)/bin/phpunit -c phpunit.xml.dist; fi
 
 clean:
 	@$(RM) -rf composer.lock vendor assets/build assets/package-lock.json assets/yarn.lock

@@ -1,5 +1,7 @@
 .cache
 .php-cs-fixer.cache
+.phpunit.cache
+.phpunit.result.cache
 .swp
 node_modules
 package-lock.json
