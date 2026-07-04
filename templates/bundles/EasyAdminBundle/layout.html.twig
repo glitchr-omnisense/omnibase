@@ -47,6 +47,28 @@
         {{ include('@EasyAdmin/includes/_encore_script_tags.html.twig', { assets:  ea.assets.webpackEncoreAssets ?? [] }, with_context = false) }}
     {% endblock %}
 
+    {# EasyAdmin's "form" entry (assets/js/form.js) wires up `dirty-form` on every
+       .ea-edit-form/.ea-new-form, once, on the initial DOMContentLoaded, and sets
+       window.onbeforeunload = () => isDirty ? message : undefined. dirty-form's
+       checkValue() listens for change/input with no isTrusted guard, so any field
+       widget that initializes AFTER it (select2, datetime/color pickers, EditorJS,
+       ...) and reformats+re-dispatches its value flips isDirty=true before the user
+       has touched anything.
+       Because <html data-turbo> means subsequent admin pages are Turbo visits (no
+       new DOMContentLoaded, so form.js never reruns and never resets
+       onbeforeunload), this stale handler lingers across pages and fires the native
+       "Leave site? / Changes may not be saved" dialog on the next real navigation
+       (refresh, address bar, a non-Turbo link) — on whatever page happens to be
+       open, looking unrelated to anything the user just did.
+       Clear it right after form.js sets it, same approach as the public site's
+       formMemory-based draft persistence: drafts aren't lost (re-typing is cheap
+       here), and the spurious blocking prompt is worse than the safety net. #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.onbeforeunload = null;
+        });
+    </script>
+
     {% if ea and 'rtl' == ea.i18n.textDirection %}
         <link rel="stylesheet" href="{{ asset('app.rtl.css', ea.assets.defaultAssetPackageName) }}">
     {% endif %}
