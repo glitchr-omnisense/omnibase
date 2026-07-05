@@ -263,7 +263,7 @@ return static function (ContainerConfigurator $container): void {
         ->public()
         ->tag('twig.runtime')
         ->args([new Reference('parameter_bag')])
-        ->bind('$cacheDir', '%kernel.cache_dir%');
+        ->bind('$cacheDir', '%base.obfuscator.cache_dir%');
 
 
     /* ------------------------------

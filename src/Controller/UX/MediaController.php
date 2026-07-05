@@ -127,14 +127,14 @@ class MediaController extends AbstractController
         // Extract parameters
         $config = $this->mediaService->resolve($data);
         if (!array_key_exists("path", $config)) {
-            throw $this->createNotFoundException();
+            return $this->mediaService->serve(null);
         }
 
         $filters = $config["filters"] ?? [];
         $options = $config["options"] ?? [];
         $path = $config["path"] ?? null;
         if (!$path) {
-            throw $this->createNotFoundException();
+            return $this->mediaService->serve(null);
         }
 
         // Redirect to proper path
@@ -256,7 +256,7 @@ class MediaController extends AbstractController
         $config = $this->mediaService->resolve($data);
 
         if (!array_key_exists("path", $config)) {
-            throw $this->createNotFoundException();
+            return $this->mediaService->serve(null);
         }
 
         $webp = $config["webp"] ?? $this->mediaService->isWebpEnabled();
@@ -294,7 +294,7 @@ class MediaController extends AbstractController
     {
         $config = $this->mediaService->resolve($data);
         if (!array_key_exists("path", $config)) {
-            throw $this->createNotFoundException();
+            return $this->mediaService->serve(null);
         }
 
         $filters = $config["filters"];
@@ -333,7 +333,7 @@ class MediaController extends AbstractController
         $extensions = $this->mediaService->getExtensions($path);
         if (!$extensions && $extension !== null) $extensions[] = $extension;
         if (!$extensions) {
-            throw $this->createNotFoundException();
+            return $path === null ? $this->mediaService->serve(null) : throw $this->createNotFoundException();
         }
 
         if ($extension === null || !in_array($extension, $extensions)) {
