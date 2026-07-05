@@ -16,6 +16,7 @@ use League\Flysystem\UnableToCreateDirectory;
 use LogicException;
 use Twig\Environment;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
@@ -71,6 +72,9 @@ class MediaService extends FileService implements MediaServiceInterface
     /** @var ?bool */
     protected ?bool $enableWebp;
 
+    /** @var ?LoggerInterface */
+    protected ?LoggerInterface $logger;
+
     public function __construct(
         Environment             $twig,
         AdvancedRouterInterface $router,
@@ -79,12 +83,14 @@ class MediaService extends FileService implements MediaServiceInterface
         ParameterBagInterface   $parameterBag,
         ImagineInterface        $imagineBitmap,
         ImagineInterface        $imagineSvg,
-        ?Profiler               $profiler
+        ?Profiler               $profiler,
+        ?LoggerInterface        $logger = null
     )
     {
         parent::__construct($twig, $router, $obfuscator, $flysystem, $parameterBag);
 
         $this->profiler = $profiler;
+        $this->logger = $logger;
 
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg = $imagineSvg;
@@ -454,14 +460,22 @@ class MediaService extends FileService implements MediaServiceInterface
                     new LogicException("Image \"" . str_shorten($file, 50, SHORTEN_MIDDLE) . "\" overflowed the PHP_MAXPATHLEN (= " . constant("PHP_MAXPATHLEN") . ") limit. Maybe use a compress option (\"gzcompress\",\"gzdeflate\",\"gzencode\") ?");
             }
 
+            $this->logger?->warning("MediaService: serving no-image placeholder, could not resolve \"{path}\".", [
+                "path" => $_SERVER["REQUEST_URI"] ?? "(unknown)",
+            ]);
+
             $file = $this->getNoImage($this->getExtension($file) ?? BitmapFilter::getStandardExtension());
 
             // The requested identifier failed to resolve (e.g. an orphaned obfuscator
             // hash) — this fallback response must never be cached under the requested
             // URL, since a future successful resolve (e.g. after content is fixed)
-            // must not be masked by a stale cached placeholder at the same URL.
+            // must not be masked by a stale cached placeholder at the same URL. Callers
+            // can also detect this via the X-Media-Fallback header (status stays 200:
+            // browsers only render an <img> body from a 2xx response, so a 404 here
+            // would just replace our placeholder with the browser's own broken-image icon).
             array_pop_key("http_cache", $headers);
             $headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+            $headers["X-Media-Fallback"] = "true";
         }
 
         $useProfiler = $headers["profiler"] ?? true;

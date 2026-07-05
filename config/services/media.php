@@ -289,6 +289,7 @@ return static function (ContainerConfigurator $container): void {
                 new Reference('imagine.bitmap'),
                 new Reference('imagine.svg'),
                 new Reference('profiler', ContainerInterface::IGNORE_ON_INVALID_REFERENCE),
+                new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE),
             ]);
 
     $services->set('Base\Service\Flysystem')
