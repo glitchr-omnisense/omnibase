@@ -1,7 +1,8 @@
 # Changelog
 
 All notable changes to this bundle are documented here, per release tag.
-Versions follow the branch-per-major scheme: branch `3.0` → tags `3.0.x`.
+Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
+`3.1.0`, … (the next major continues on `4.x`).
 
 ## [3.0.0] — 2026-07-04
 

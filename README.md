@@ -68,11 +68,15 @@ CI (`.gitlab-ci.yml`) runs cs-fixer, PHPStan and PHPUnit on every push.
 
 ## Releases
 
-Branch per major (`1.0`, `2.0`, `3.0`), tags per release (`3.0.x`) — tag after
-each meaningful batch so consumers can pin stable versions:
+One development branch per major (`1.x`, `2.x`, `3.x` — the current one is the
+main branch; the next major starts `4.x`), tags per release (`3.0.0`, `3.1.0`,
+…) — tag after each meaningful batch so consumers can pin stable versions:
 
 ```bash
-git tag -a 3.0.x -m "..." && git push origin 3.0.x
+git tag -a 3.1.0 -m "..." && git push origin 3.1.0
 ```
+
+The legacy `1.0`/`2.0`/`3.0` branches carry the pre-2026 unslimmed history and
+are frozen — do not push to them.
 
 See `CHANGELOG.md`.
