@@ -51,6 +51,14 @@ class IconProvider extends AbstractLocalCache
                     return [];
                 }
 
+                // routes may declare [Class::class, 'method'] instead of "Class::method"
+                if (is_array($controller)) {
+                    $controller = implode("::", $controller);
+                }
+                if (!is_string($controller)) {
+                    return [];
+                }
+
                 $parts = explode("::", $controller);
                 if (count($parts) !== 2) {
                     return [];

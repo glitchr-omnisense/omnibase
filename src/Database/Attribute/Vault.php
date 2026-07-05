@@ -104,10 +104,15 @@ class Vault extends AbstractAnnotation
      * @param string|null $value
      * @return array|mixed|null
      */
-    public function seal(MarshallerInterface $marshaller, mixed $value): string
+    public function seal(?MarshallerInterface $marshaller, mixed $value): string
     {
         if (is_array($value) || is_object($value)) {
             $value = serialize($value);
+        }
+
+        // no vault keys available: store the value unsealed
+        if ($marshaller === null) {
+            return (string) $value;
         }
 
         $failed = [];
@@ -124,13 +129,13 @@ class Vault extends AbstractAnnotation
      * @param string|null $value
      * @return mixed|null
      */
-    public function reveal(MarshallerInterface $marshaller, ?string $value): ?string
+    public function reveal(?MarshallerInterface $marshaller, ?string $value): ?string
     {
         if ($value === null) {
             return null;
         }
 
-        try { $value = $marshaller->unmarshall(base64_decode($value)); }
+        try { $value = $marshaller?->unmarshall(base64_decode($value)) ?? $value; }
         catch (Exception $e) { }
 
         return is_serialized($value) ? unserialize($value) : $value;

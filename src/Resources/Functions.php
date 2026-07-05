@@ -504,7 +504,7 @@ namespace {
 
         // Default scheme according to Symfony semantics
         if ($domain && !$scheme) {
-            $scheme = boolval($_SERVER["HTTPS"]) ? 'https' : 'http';
+            $scheme = boolval($_SERVER["HTTPS"] ?? false) ? 'https' : 'http';
         }
 
         // Only build scheme if domain is provided

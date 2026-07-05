@@ -743,8 +743,13 @@ class AnnotationReader extends AbstractLocalCache
 
             // Warmup controllers
             foreach ($this->router->getRouteCollection()->all() as $route) {
-                $className = explode("::", $route->getDefaults()["_controller"] ?? "")[0] ?? "";
-                if (!class_exists($className)) {
+                $controller = $route->getDefaults()["_controller"] ?? "";
+                // routes may declare [Class::class, 'method'] instead of "Class::method"
+                if (is_array($controller)) {
+                    $controller = implode("::", $controller);
+                }
+                $className = is_string($controller) ? (explode("::", $controller)[0] ?? "") : "";
+                if (!$className || !class_exists($className)) {
                     continue;
                 }
 
