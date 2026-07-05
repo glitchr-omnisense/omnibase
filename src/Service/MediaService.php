@@ -446,7 +446,7 @@ class MediaService extends FileService implements MediaServiceInterface
 
     public function serve(?string $file, int $status = 200, array $headers = []): ?Response
     {
-        if (!file_exists($file)) {
+        if (!file_exists($file ?? "")) {
 
             if (!$this->fallback) {
                 throw is_length_safe($file) ?
@@ -455,7 +455,13 @@ class MediaService extends FileService implements MediaServiceInterface
             }
 
             $file = $this->getNoImage($this->getExtension($file) ?? BitmapFilter::getStandardExtension());
+
+            // The requested identifier failed to resolve (e.g. an orphaned obfuscator
+            // hash) — this fallback response must never be cached under the requested
+            // URL, since a future successful resolve (e.g. after content is fixed)
+            // must not be masked by a stale cached placeholder at the same URL.
             array_pop_key("http_cache", $headers);
+            $headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
         }
 
         $useProfiler = $headers["profiler"] ?? true;
