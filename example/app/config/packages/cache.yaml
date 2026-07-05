@@ -1,0 +1,8 @@
+framework:
+    cache:
+        # Pools the bundle wires into its services — part of the host contract.
+        pools:
+            cache.adapter:
+                adapter: cache.adapter.filesystem
+            cache.easyadmin:
+                adapter: cache.adapter.filesystem

@@ -26,6 +26,23 @@ Base\BaseBundle::class => ['all' => true],
 Bundle configuration lives under the `base:` key; the tree is defined in
 `src/DependencyInjection/BaseConfiguration.php`.
 
+## Try it in one command
+
+A self-contained demo (bare Symfony skeleton + this bundle + SQLite, one flat
+page touring the `App\ ↔ Base\` mirroring, the shipped entity layer, the
+setting bag, the obfuscator and the translator) ships in the root
+[Dockerfile](Dockerfile):
+
+```bash
+docker build -t base-bundle-demo .
+docker run --rm -p 8000:8000 base-bundle-demo
+# → http://localhost:8000/
+```
+
+The demo app under [example/app/](example/app/) doubles as a minimal
+reference: the smallest `bundles.php`, `base.yaml`, `doctrine.yaml`,
+`security.yaml` and `flysystem.yaml` a host application needs.
+
 ## What's inside (map of `src/`)
 
 | Area | Directories | Purpose |

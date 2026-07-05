@@ -1,0 +1,17 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+    orm:
+        # Base ships its own naming strategy and metadata factory: they resolve
+        # the App\ <-> Base\ mirrored entities and the Set/Enum column types.
+        naming_strategy: Base\Database\Mapping\NamingStrategy
+        class_metadata_factory_name: Base\Database\Mapping\ClassMetadataFactory
+        # auto_mapping picks up the bundle's own entities (Base\Entity\*).
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App

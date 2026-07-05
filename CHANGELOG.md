@@ -4,6 +4,20 @@ All notable changes to this bundle are documented here, per release tag.
 Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 `3.1.0`, … (the next major continues on `4.x`).
 
+## [Unreleased]
+
+### Added
+- Standalone Docker demo (root `Dockerfile` + `example/app/`): bare Symfony
+  skeleton + this bundle + SQLite, one flat page touring the App\ ↔ Base\
+  mirroring, entity layer, setting bag, obfuscator and translator. The
+  `example/app/` overlay doubles as a minimal host-app reference config.
+
+### Fixed
+- `composer.json` now declares dependencies the bundle's DI actually
+  hard-references: `hwi/oauth-bundle`, `symfony/webpack-encore-bundle`,
+  `symfony/monolog-bundle`, `glitchr/ux-google`, plus `ext-imagick` /
+  `ext-igbinary` (required unconditionally in `BaseBundle::boot()`).
+
 ## [3.0.0] — 2026-07-04
 
 First tagged release of the 3.0 line (branched from 2.0 in 2025).

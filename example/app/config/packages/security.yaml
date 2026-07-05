@@ -1,0 +1,17 @@
+security:
+    password_hashers:
+        Base\Entity\User:
+            algorithm: auto
+
+    providers:
+        # App\Entity\User does not exist in this demo: BaseBundle aliases it
+        # to Base\Entity\User at boot (the App\ <-> Base\ mirroring).
+        users: { entity: { class: App\Entity\User } }
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            lazy: true
+            provider: users

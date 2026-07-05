@@ -1,0 +1,23 @@
+# Nearly everything in base has defaults; the parameter_bag flags are the
+# exception — with use_hot_bag unset, the decorated parameter bag resolves
+# every lookup (even plain container parameters) to null.
+base:
+    parameter_bag:
+        use_hot_bag: true
+        use_setting_bag: true
+    database:
+        use_custom: true
+    router:
+        use_custom: true
+    annotations:
+        use_custom: true
+    twig:
+        use_custom: true
+        use_form2: true
+        use_bootstrap: true
+        editor:
+            storage: "local.wysiwyg"
+    uploader:
+        storage: "local.uploads"
+    site:
+        index: demo_index
