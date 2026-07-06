@@ -130,8 +130,8 @@ return static function (ContainerConfigurator $container): void {
 
     $services->alias('base.database.metadata_manipulator', 'Base\Database\Mapping\ClassMetadataManipulator');
 
-    // Annotations
-    $services->alias('base.annotation_reader', 'Base\Attributes\AnnotationReader');
+    // Attributes
+    $services->alias('base.attribute_reader', 'Base\Attributes\AttributeReader');
 
     $services->alias('base.entity_extension', 'Base\Database\Entity\EntityExtension');
 

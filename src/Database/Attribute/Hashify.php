@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
@@ -22,7 +22,7 @@ use Symfony\Component\PasswordHasher\PasswordHasherInterface;
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Hashify extends AbstractAnnotation implements ExtensionOptionInterface
+class Hashify extends AbstractAttribute implements ExtensionOptionInterface
 {
     public ?string $referenceColumn;
     public bool $random;
@@ -78,8 +78,8 @@ class Hashify extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public static function getHashify($className, $property)
     {
-        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($className, Hashify::class);
-        $that = $annotations[$property] ?? [];
+        $attributes = AttributeReader::getInstance()->getPropertyAttributes($className, Hashify::class);
+        $that = $attributes[$property] ?? [];
         $that = array_pop($that);
 
         return ($that ?: null);
@@ -143,15 +143,15 @@ class Hashify extends AbstractAnnotation implements ExtensionOptionInterface
     public static function isValid($entity, $property, $hashedMessage): bool
     {
         $className = ClassUtils::getClass($entity);
-        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($className, Hashify::class);
-        $that = $annotations[$property] ?? [];
+        $attributes = AttributeReader::getInstance()->getPropertyAttributes($className, Hashify::class);
+        $that = $attributes[$property] ?? [];
 
         if (!($that = array_pop($that))) {
-            throw new Exception("@Hashify annotation not found in \"$property\" for $className");
+            throw new Exception("@Hashify attribute not found in \"$property\" for $className");
         }
 
         if ($that->needsRehash($entity, $hashedMessage)) {
-            throw new Exception("Password in @Hashify annotation in \"$property\" for $className needs to be rehashed");
+            throw new Exception("Password in @Hashify attribute in \"$property\" for $className needs to be rehashed");
         }
 
         return $that->getMessageHasher($entity)->verify(
@@ -200,7 +200,7 @@ class Hashify extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AttributeReader::TARGET_PROPERTY);
     }
 
     /**

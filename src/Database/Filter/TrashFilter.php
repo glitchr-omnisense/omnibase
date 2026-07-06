@@ -2,7 +2,7 @@
 
 namespace Base\Database\Filter;
 
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Trasheable;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
@@ -17,13 +17,13 @@ class TrashFilter extends SQLFilter
      */
     public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string
     {
-        $trasheableAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Trasheable::class);
+        $trasheableAttribute = AttributeReader::getInstance()->getClassAttributes($targetEntity->getName(), Trasheable::class);
 
-        if (count($trasheableAnnotation) < 1) {
+        if (count($trasheableAttribute) < 1) {
             return "";
         }
 
-        $fieldName = end($trasheableAnnotation)->deletedAt;
+        $fieldName = end($trasheableAttribute)->deletedAt;
         if ($targetEntity->hasField($fieldName)) {
             $date = date("Y-m-d H:00:00", time() + 3600);
             return $targetTableAlias . "." . $fieldName . " < '" . $date . "' OR " . $targetTableAlias . "." . $fieldName . " IS NULL";

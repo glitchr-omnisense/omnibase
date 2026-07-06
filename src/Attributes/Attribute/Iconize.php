@@ -2,7 +2,7 @@
 
 namespace Base\Attributes\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 
 
 /**
@@ -11,7 +11,7 @@ use Base\Attributes\AbstractAnnotation;
  */
 
  #[\Attribute(\Attribute::TARGET_METHOD)]
-class Iconize extends AbstractAnnotation
+class Iconize extends AbstractAttribute
 {
     protected array $icons;
 

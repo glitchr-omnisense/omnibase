@@ -3,7 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Database\Attribute\Uploader;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Entity\Layout\Image;
@@ -155,14 +155,14 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
     /**
      * @param mixed $class
      * @param string $field
-     * @param Uploader $annotation
+     * @param Uploader $attribute
      * @param array $fileList
      * @return int|void
      */
-    public function postProcess(mixed $class, string $field, Uploader $annotation, array $fileList)
+    public function postProcess(mixed $class, string $field, Uploader $attribute, array $fileList)
     {
         if ($field != "source") {
-            return parent::postProcess($class, $field, $annotation, $fileList);
+            return parent::postProcess($class, $field, $attribute, $fileList);
         }
 
         if ($this->warmup) {
@@ -186,7 +186,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                     return Command::FAILURE;
                 }
 
-                $publicDir = $annotation->getFlysystem()->getPublic("", $annotation->storage());
+                $publicDir = $attribute->getFlysystem()->getPublic("", $attribute->storage());
 
                 $file = $image->getSource();
                 if ($file === null) {
@@ -206,7 +206,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 } else {
 
                     $this->output->section()->writeln("             <ln>* Warming up main image \"." . str_lstrip(realpath($file), realpath($publicDir)) . "\" .. (" . ($i + 1) . "/" . $N . ")</ln>", OutputInterface::VERBOSITY_VERBOSE);
-                    $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
+                    $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $attribute->mimeTypes()) . " (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
 
                     $this->mediaController->ImageWebp($dataWebp);
                     $this->mediaController->Image($data, $extension);
@@ -226,7 +226,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                         $this->mediaController->ImageCrop($data, $identifier, $extension);
                     }
 
-                    $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); " . $identifier, OutputInterface::VERBOSITY_DEBUG);
+                    $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $attribute->mimeTypes()) . " (incl. WEBP); " . $identifier, OutputInterface::VERBOSITY_DEBUG);
                 }
             }
         }

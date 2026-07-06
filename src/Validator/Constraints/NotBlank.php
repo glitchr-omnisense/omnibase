@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
 /**
  * Constraint for the NotBlank validator.
  *
- * @Annotation
+ * @Attribute
  * @Target({"CLASS", "PROPERTY", "METHOD"})
  * @NamedArgumentConstructor
  */

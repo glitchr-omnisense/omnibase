@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Randomize extends AbstractAnnotation implements ExtensionOptionInterface
+class Randomize extends AbstractAttribute implements ExtensionOptionInterface
 {
     protected ?int $length;
     protected ?string $chars;
@@ -34,7 +34,7 @@ class Randomize extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AttributeReader::TARGET_PROPERTY);
     }
 
     /**

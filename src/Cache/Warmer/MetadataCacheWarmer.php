@@ -2,7 +2,7 @@
 
 namespace Base\Cache\Warmer;
 
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Cache\Abstract\AbstractLocalCacheWarmer;
@@ -11,12 +11,12 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 class MetadataCacheWarmer extends AbstractLocalCacheWarmer
 {
-    protected AnnotationReader $annotationReader;
+    protected AttributeReader $attributeReader;
 
-    public function __construct(AbstractLocalCacheInterface $simpleCache, AnnotationReader $annotationReader, string $cacheDir)
+    public function __construct(AbstractLocalCacheInterface $simpleCache, AttributeReader $attributeReader, string $cacheDir)
     {
         parent::__construct($simpleCache, $cacheDir);
-        $this->annotationReader = $annotationReader;
+        $this->attributeReader = $attributeReader;
     }
 
     protected function doWarmUp(string $cacheDir, ArrayAdapter $arrayAdapter, ?string $buildDir = null): bool
@@ -26,7 +26,7 @@ class MetadataCacheWarmer extends AbstractLocalCacheWarmer
         }
 
         if ($this->simpleCache instanceof ClassMetadataManipulator) {
-            $this->simpleCache->enrichAndSaveCompletors($this->annotationReader);
+            $this->simpleCache->enrichAndSaveCompletors($this->attributeReader);
         }
 
         return true;

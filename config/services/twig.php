@@ -251,7 +251,7 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
         ])
         ->bind('$cacheDir', '%kernel.cache_dir%');
 
-    $services->set('Base\Attributes\AnnotationReader')
+    $services->set('Base\Attributes\AttributeReader')
         ->public()
         ->args([
             new Reference('event_dispatcher'),

@@ -32,14 +32,14 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Exception;
 
-abstract class AbstractAnnotation implements AnnotationInterface
+abstract class AbstractAttribute implements AttributeInterface
 {
     /**
-     * @return AnnotationReader|null
+     * @return AttributeReader|null
      */
-    public static function getAnnotationReader(): ?AnnotationReader
+    public static function getAttributeReader(): ?AttributeReader
     {
-        return AnnotationReader::getInstance();
+        return AttributeReader::getInstance();
     }
 
     /**
@@ -47,7 +47,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getEnvironment(): string
     {
-        return AnnotationReader::getInstance()->getEnvironment();
+        return AttributeReader::getInstance()->getEnvironment();
     }
 
     /**
@@ -55,7 +55,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getProjectDir(): string
     {
-        return AnnotationReader::getInstance()->getProjectDir();
+        return AttributeReader::getInstance()->getProjectDir();
     }
 
     /**
@@ -63,7 +63,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getParameterBag(): ParameterBagInterface
     {
-        return AnnotationReader::getInstance()->getParameterBag();
+        return AttributeReader::getInstance()->getParameterBag();
     }
 
     /**
@@ -71,7 +71,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getEntityManager(): ?EntityManager
     {
-        return AnnotationReader::getInstance()->getEntityManager();
+        return AttributeReader::getInstance()->getEntityManager();
     }
 
     /**
@@ -79,7 +79,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getEntityHydrator(): EntityHydratorInterface
     {
-        return AnnotationReader::getInstance()->getEntityHydrator();
+        return AttributeReader::getInstance()->getEntityHydrator();
     }
 
     /**
@@ -90,7 +90,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getTypeOfField($className, string $property)
     {
-        return AnnotationReader::getInstance()->getClassMetadataManipulator()->getTypeOfField($className, $property);
+        return AttributeReader::getInstance()->getClassMetadataManipulator()->getTypeOfField($className, $property);
     }
 
     /**
@@ -104,27 +104,27 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator
     {
-        return AnnotationReader::getInstance()->getClassMetadataManipulator();
+        return AttributeReader::getInstance()->getClassMetadataManipulator();
     }
 
     public static function getClassMetadataCompletor(mixed $entityOrClassOrMetadata): ?ClassMetadataCompletor
     {
-        return AnnotationReader::getInstance()->getClassMetadataManipulator()->getClassMetadataCompletor($entityOrClassOrMetadata);
+        return AttributeReader::getInstance()->getClassMetadataManipulator()->getClassMetadataCompletor($entityOrClassOrMetadata);
     }
 
     public static function getFlysystem(): FlysystemInterface
     {
-        return AnnotationReader::getInstance()->getFlysystem();
+        return AttributeReader::getInstance()->getFlysystem();
     }
 
     public static function getImpersonator(): ?User
     {
-        return AnnotationReader::getInstance()->getImpersonator();
+        return AttributeReader::getInstance()->getImpersonator();
     }
 
     public static function getUser(): ?User
     {
-        return AnnotationReader::getInstance()->getUser();
+        return AttributeReader::getInstance()->getUser();
     }
 
     /**
@@ -133,7 +133,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getRepository($className): EntityRepository|ObjectRepository
     {
-        return AnnotationReader::getInstance()->getRepository($className);
+        return AttributeReader::getInstance()->getRepository($className);
     }
 
     /**
@@ -142,22 +142,29 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getAsset($url): string
     {
-        return AnnotationReader::getInstance()->getAsset($url);
+        return AttributeReader::getInstance()->getAsset($url);
     }
 
     /**
+     * Resolve the attribute instances mapped at $mappingPath for an
+     * entity/class (optionally filtered to $attributeClass). Named
+     * resolveAttributes rather than getAttributes: several #[Attribute]
+     * subclasses (e.g. IsGranted) have their own unrelated instance-level
+     * getAttributes()/setAttributes() pair, which a same-named static method
+     * here would collide with (incompatible static/instance override).
+     *
      * @param $entityOrClassNameOrMetadataOrRefl
      * @param string $mappingPath
-     * @param string|null $annotationClass
+     * @param string|null $attributeClass
      * @return array
      * @throws Exception
      */
-    public static function getAnnotations($entityOrClassNameOrMetadataOrRefl, string $mappingPath, ?string $annotationClass = null): array
+    public static function resolveAttributes($entityOrClassNameOrMetadataOrRefl, string $mappingPath, ?string $attributeClass = null): array
     {
         if (!$entityOrClassNameOrMetadataOrRefl) {
             return [];
         }
-        if (AnnotationReader::getInstance()->isEntity($entityOrClassNameOrMetadataOrRefl)) {
+        if (AttributeReader::getInstance()->isEntity($entityOrClassNameOrMetadataOrRefl)) {
             $entityOrClassNameOrMetadataOrRefl = is_object($entityOrClassNameOrMetadataOrRefl) ? get_class($entityOrClassNameOrMetadataOrRefl) : $entityOrClassNameOrMetadataOrRefl;
         }
 
@@ -172,38 +179,38 @@ abstract class AbstractAnnotation implements AnnotationInterface
             }
         }
 
-        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($entityOrClassNameOrMetadataOrRefl);
-        foreach ($annotations as $column => $annotation) {
-            if ($annotationClass !== null) {
-                $annotations[$column] = array_filter($annotation, fn($a) => is_instanceof($a, $annotationClass));
+        $attributes = AttributeReader::getInstance()->getPropertyAttributes($entityOrClassNameOrMetadataOrRefl);
+        foreach ($attributes as $column => $attribute) {
+            if ($attributeClass !== null) {
+                $attributes[$column] = array_filter($attribute, fn($a) => is_instanceof($a, $attributeClass));
             }
         }
 
-        return $annotations[$mapping] ?? [];
+        return $attributes[$mapping] ?? [];
     }
 
     /**
      * @param $entityOrClassNameOrMetadataOrRefl
      * @param string $mapping
-     * @param string $annotationClass
+     * @param string $attributeClass
      * @return mixed
      */
-    public static function getAnnotation($entityOrClassNameOrMetadataOrRefl, string $mapping, string $annotationClass): mixed
+    public static function getAttribute($entityOrClassNameOrMetadataOrRefl, string $mapping, string $attributeClass): mixed
     {
-        $annotations = self::getAnnotations($entityOrClassNameOrMetadataOrRefl, $mapping, $annotationClass);
-        return !empty($annotations) ? end($annotations) : null;
+        $attributes = self::resolveAttributes($entityOrClassNameOrMetadataOrRefl, $mapping, $attributeClass);
+        return !empty($attributes) ? end($attributes) : null;
     }
 
     /**
      * @param $entityOrClassNameOrMetadataOrRefl
      * @param string $mapping
-     * @param string $annotationClass
+     * @param string $attributeClass
      * @return bool
      */
-    public static function hasAnnotation($entityOrClassNameOrMetadataOrRefl, string $mapping, string $annotationClass): bool
+    public static function hasAttribute($entityOrClassNameOrMetadataOrRefl, string $mapping, string $attributeClass): bool
     {
-        $annotations = self::getAnnotations($entityOrClassNameOrMetadataOrRefl, $mapping, $annotationClass);
-        return !empty($annotations);
+        $attributes = self::resolveAttributes($entityOrClassNameOrMetadataOrRefl, $mapping, $attributeClass);
+        return !empty($attributes);
     }
 
     /**
@@ -212,7 +219,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
      */
     public static function getUnitOfWork(): UnitOfWork
     {
-        return AnnotationReader::getInstance()->getEntityManager()->getUnitOfWork();
+        return AttributeReader::getInstance()->getEntityManager()->getUnitOfWork();
     }
 
     /**
@@ -245,13 +252,13 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
 
     /**
-     * @param AbstractAnnotation $annotation
+     * @param AbstractAttribute $attribute
      * @return bool
      */
-    public static function isSerializable(AbstractAnnotation $annotation): bool
+    public static function isSerializable(AbstractAttribute $attribute): bool
     {
         try {
-            return is_serializable($annotation);
+            return is_serializable($attribute);
         } catch (Exception $e) {
             return false;
         }

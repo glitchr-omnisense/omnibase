@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -16,7 +16,7 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Slugify extends AbstractAnnotation implements ExtensionOptionInterface
+class Slugify extends AbstractAttribute implements ExtensionOptionInterface
 {
     protected $slugger;
     protected bool $unique;
@@ -188,7 +188,7 @@ class Slugify extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return AnnotationReader::TARGET_PROPERTY == $target;
+        return AttributeReader::TARGET_PROPERTY == $target;
     }
 
     /**

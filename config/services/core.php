@@ -201,8 +201,8 @@ return static function (ContainerConfigurator $container): void {
         'Base\Cache\Warmer\LocalizerCacheWarmer' => ['localizer', '$cacheDir' => '%kernel.cache_dir%'],
         'Base\Cache\Warmer\ThemizerCacheWarmer' => ['themizer', '$cacheDir' => '%kernel.cache_dir%'],
         'Base\Cache\Warmer\WebpackCacheWarmer' => ['parameter_bag', 'twig.webpack_renderer', 'webpack_encore.entrypoint_lookup[_default]', '$cacheDir' => '%kernel.cache_dir%', '$publicDir' => '%kernel.project_dir%/public'],
-        'Base\Cache\Warmer\AnnotationCacheWarmer' => ['base.annotation_reader', '$cacheDir' => '%kernel.cache_dir%'],
-        'Base\Cache\Warmer\MetadataCacheWarmer' => ['base.database.metadata_manipulator', 'base.annotation_reader', '$cacheDir' => '%kernel.cache_dir%'],
+        'Base\Cache\Warmer\AttributeCacheWarmer' => ['base.attribute_reader', '$cacheDir' => '%kernel.cache_dir%'],
+        'Base\Cache\Warmer\MetadataCacheWarmer' => ['base.database.metadata_manipulator', 'base.attribute_reader', '$cacheDir' => '%kernel.cache_dir%'],
     ];
 
     foreach ($cacheServices as $id => $args) {

@@ -2,7 +2,7 @@
 
 namespace Base\DependencyInjection;
 
-use Base\Attributes\AnnotationInterface;
+use Base\Attributes\AttributeInterface;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\EntityDispatcher\EventDispatcherInterface;
@@ -51,7 +51,7 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
 
         $container->registerForAutoconfiguration(AbstractIconAdapter::class)->addTag('base.service.icon');
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
-        $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
+        $container->registerForAutoconfiguration(AttributeInterface::class)->addTag('base.attribute');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
         $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
         $container->registerForAutoconfiguration(AbstractLocalCacheInterface::class)->addTag('base.simple_cache');

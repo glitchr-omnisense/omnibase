@@ -113,7 +113,7 @@ class DoctrineArrayUpgradeCommand extends Command
         try {
             $connection->executeStatement("ALTER TABLE $tableName MODIFY $columnName JSON");
             $output->writeln("Altered $columnName in $tableName to JSON format.");
-            $output->writeln("--> You can now change annotations/attributes column information in entities to `json`.");
+            $output->writeln("--> You can now change attributes/attributes column information in entities to `json`.");
         } catch (\Exception $e) {
             // Handle the exception gracefully
             $output->writeln("Error altering $columnName in $tableName: " . $e->getMessage());

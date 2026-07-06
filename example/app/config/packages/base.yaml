@@ -9,7 +9,7 @@ base:
         use_custom: true
     router:
         use_custom: true
-    annotations:
+    attributes:
         use_custom: true
     twig:
         use_custom: true

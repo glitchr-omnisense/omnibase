@@ -2,15 +2,15 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Countify extends AbstractAnnotation implements ExtensionOptionInterface
+class Countify extends AbstractAttribute implements ExtensionOptionInterface
 {
     protected ?string $referenceColumn;
     protected string $type;
@@ -65,7 +65,7 @@ class Countify extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AttributeReader::TARGET_PROPERTY);
     }
 
     /**

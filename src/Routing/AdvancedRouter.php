@@ -421,7 +421,7 @@ class AdvancedRouter implements AdvancedRouterInterface
     }
 
     //
-    // NB: This route variable is not same as annotations and...
+    // NB: This route variable is not same as attributes and...
     // ... it is computed based on compiled routes from generator (not matcher)
     protected array $routes = [];
 

@@ -15,7 +15,7 @@ interface SitemapperInterface
 
     public function registerUrl(string $url): self;
 
-    public function registerAnnotations(): self;
+    public function registerAttributes(): self;
 
     public function serve(string $name, array $context = []): Response;
 }

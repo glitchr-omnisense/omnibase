@@ -58,8 +58,8 @@ return static function (ContainerConfigurator $container): void {
         ])
         ->bind('$cacheDir', '%kernel.cache_dir%');
 
-    // Annotation reader
-    $services->set('Base\Attributes\AnnotationReader')->public()
+    // Attribute reader
+    $services->set('Base\Attributes\AttributeReader')->public()
         ->args([
             new Reference('event_dispatcher'),
             new Reference('advanced_router'),

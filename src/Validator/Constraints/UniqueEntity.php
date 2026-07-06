@@ -7,7 +7,7 @@ use Base\Validator\ConstraintEntity;
 /**
  * Constraint for UniqueEntity validation.
  *
- * @Annotation
+ * @Attribute
  * @NamedArgumentConstructor
  * @Target({"CLASS"})
  */

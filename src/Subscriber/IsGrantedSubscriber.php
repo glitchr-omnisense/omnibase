@@ -3,7 +3,7 @@
 namespace Base\Subscriber;
 
 use Base\Attributes\Attribute\IsGranted;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use LogicException;
 use RuntimeException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -27,17 +27,17 @@ class IsGrantedSubscriber implements EventSubscriberInterface
     private ?AuthorizationCheckerInterface $authorizationChecker;
 
     /**
-     * @var AnnotationReader
+     * @var AttributeReader
      */
-    private AnnotationReader $annotationReader;
+    private AttributeReader $attributeReader;
 
     private TokenStorageInterface $tokenStorage;
 
-    public function __construct(AnnotationReader $annotationReader, TokenStorageInterface $tokenStorage, ?AuthorizationCheckerInterface $authorizationChecker = null)
+    public function __construct(AttributeReader $attributeReader, TokenStorageInterface $tokenStorage, ?AuthorizationCheckerInterface $authorizationChecker = null)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
-        $this->annotationReader = $annotationReader;
+        $this->attributeReader = $attributeReader;
     }
 
     public function onKernelControllerArguments(KernelEvent $event)
@@ -54,8 +54,8 @@ class IsGrantedSubscriber implements EventSubscriberInterface
         }
 
         $configurations = array_merge(
-            $this->annotationReader->getClassAnnotations($class, IsGranted::class),
-            $this->annotationReader->getMethodAnnotations($class, IsGranted::class)[$method] ?? []
+            $this->attributeReader->getClassAttributes($class, IsGranted::class),
+            $this->attributeReader->getMethodAttributes($class, IsGranted::class)[$method] ?? []
         );
 
         if (null === $this->authorizationChecker) {
@@ -90,7 +90,7 @@ class IsGrantedSubscriber implements EventSubscriberInterface
             $attributes = (array) $configuration->getAttributes();
             if(!$attributes) {
                 $argsString = $this->getIsGrantedString($configuration);
-                throw new RuntimeException(sprintf('The @IsGranted annotation on "%s::%s" must have at least one attribute. Try adding @IsGranted(%s).', $class, $method, $argsString));
+                throw new RuntimeException(sprintf('The @IsGranted attribute on "%s::%s" must have at least one attribute. Try adding @IsGranted(%s).', $class, $method, $argsString));
             }
 
             foreach ($attributes as $attribute) {
@@ -98,7 +98,7 @@ class IsGrantedSubscriber implements EventSubscriberInterface
                 if (!$this->authorizationChecker->isGranted($attribute, $subject)) {
                     $argsString = $this->getIsGrantedString($configuration);
 
-                    $message = $configuration->getMessage() ?: sprintf('Access Denied by controller annotation @IsGranted(%s)', $argsString);
+                    $message = $configuration->getMessage() ?: sprintf('Access Denied by controller attribute @IsGranted(%s)', $argsString);
 
                     if ($statusCode = $configuration->getStatusCode()) {
                         throw new HttpException($statusCode, $message);
@@ -120,7 +120,7 @@ class IsGrantedSubscriber implements EventSubscriberInterface
      */
     private function createMissingSubjectException(string $subject)
     {
-        return new RuntimeException(sprintf('Could not find the subject "%s" for the @IsGranted annotation. Try adding a "$%s" argument to your controller method.', $subject, $subject));
+        return new RuntimeException(sprintf('Could not find the subject "%s" for the @IsGranted attribute. Try adding a "$%s" argument to your controller method.', $subject, $subject));
     }
 
     /**

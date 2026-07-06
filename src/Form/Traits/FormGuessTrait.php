@@ -2,7 +2,7 @@
 
 namespace Base\Form\Traits;
 
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Alias;
 use Base\Database\Attribute\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -254,14 +254,14 @@ trait FormGuessTrait
                 $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
-            $annotations = AnnotationReader::getInstance()->getAnnotations($target, [OrderColumn::class, Alias::class], [AnnotationReader::TARGET_PROPERTY]);
-            $options['sortable'] = !empty(array_filter_recursive($annotations['property'][$target][$form->getName()] ?? []));
+            $attributes = AttributeReader::getInstance()->getAttributes($target, [OrderColumn::class, Alias::class], [AttributeReader::TARGET_PROPERTY]);
+            $options['sortable'] = !empty(array_filter_recursive($attributes['property'][$target][$form->getName()] ?? []));
             if (!$options['sortable']) {
 
-                $columnAlias = $annotations['property'][$target][$form->getName()][Alias::class] ?? null;
+                $columnAlias = $attributes['property'][$target][$form->getName()][Alias::class] ?? null;
                 if ($columnAlias) {
                     $aliasedColumn = $columnAlias->getAlias();
-                    $options['sortable'] = !empty(array_filter_recursive($annotations['property'][$target][$aliasedColumn][OrderColumn::class] ?? []));
+                    $options['sortable'] = !empty(array_filter_recursive($attributes['property'][$target][$aliasedColumn][OrderColumn::class] ?? []));
                 }
             }
         }
@@ -310,27 +310,27 @@ trait FormGuessTrait
                 $target = $options['class'] ?? $options['data_class'] ?? $options['abstract_class'] ?? null;
             }
 
-            $annotations = AnnotationReader::getInstance()->getAnnotations(
+            $attributes = AttributeReader::getInstance()->getAttributes(
                 $target,
                 [OrderColumn::class, Alias::class],
-                [AnnotationReader::TARGET_PROPERTY]
+                [AttributeReader::TARGET_PROPERTY]
             );
 
-            $orderColumn = $annotations['property'][$target][$form->getName()][OrderColumn::class] ?? null;
+            $orderColumn = $attributes['property'][$target][$form->getName()][OrderColumn::class] ?? null;
             if ($orderColumn) {
                 $order = strtoupper($orderColumn->getOrder() ?? 'ASC');
             } else {
-                $columnAlias = $annotations['property'][$target][$form->getName()][Alias::class] ?? null;
+                $columnAlias = $attributes['property'][$target][$form->getName()][Alias::class] ?? null;
                 if ($columnAlias) {
                     $aliasedColumn = $columnAlias->getAlias();
-                    $orderColumn = $annotations['property'][$target][$aliasedColumn][OrderColumn::class] ?? null;
+                    $orderColumn = $attributes['property'][$target][$aliasedColumn][OrderColumn::class] ?? null;
                     if ($orderColumn) {
                         $order = strtoupper($orderColumn->getOrder() ?? 'ASC');
                     }
                 }
             }
 
-            // Try to guess from Doctrine OrderBy mapping if annotation not found
+            // Try to guess from Doctrine OrderBy mapping if attribute not found
             if (!$order && $this->classMetadataManipulator && $this->classMetadataManipulator->isEntity($target)) {
                 $mapping = $this->classMetadataManipulator->getMapping($target, $form->getName());
                 if (isset($mapping->orderBy) && is_array($mapping->orderBy)) {

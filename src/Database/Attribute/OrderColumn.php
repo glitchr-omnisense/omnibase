@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionInlineInterface;
 use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Type\SetType;
@@ -19,7 +19,7 @@ use ReflectionProperty;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class OrderColumn extends AbstractAnnotation implements ExtensionInlineInterface
+class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
 {
     public const ASC = "ASC";
     public const DESC = "DESC";
@@ -55,8 +55,8 @@ class OrderColumn extends AbstractAnnotation implements ExtensionInlineInterface
             }
 
             // Disallow using both @OrderColumn and @OrderBy?
-            $siblingAnnotations = $this->getAnnotationReader()->getPropertyAnnotations($object->getName(), OrderBy::class);
-            if (array_key_exists($targetValue, $siblingAnnotations)) {
+            $siblingAttributes = $this->getAttributeReader()->getPropertyAttributes($object->getName(), OrderBy::class);
+            if (array_key_exists($targetValue, $siblingAttributes)) {
                 throw new Exception(
                     "@OrderBy metadata conflicts with @OrderColumn for \"" 
                     . $object->getName() . "::$targetValue\""
@@ -64,7 +64,7 @@ class OrderColumn extends AbstractAnnotation implements ExtensionInlineInterface
             }
         }
 
-        return ($target === AnnotationReader::TARGET_PROPERTY);
+        return ($target === AttributeReader::TARGET_PROPERTY);
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void

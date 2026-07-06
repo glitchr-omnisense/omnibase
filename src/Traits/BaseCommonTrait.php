@@ -7,7 +7,6 @@ use Base\Database\Entity\EntityHydratorInterface;
 use Base\Service\BaseService;
 use Base\Service\Obfuscator;
 use Base\Service\TradingInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
@@ -16,7 +15,6 @@ use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
 use Twig\Environment;
-use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -153,16 +151,6 @@ trait BaseCommonTrait
     }
 
     /**
-     * @var EntityManagerInterface|null
-     */
-    protected static ?EntityManagerInterface $entityManager = null;
-
-    public static function setEntityManager(EntityManagerInterface $entityManager)
-    {
-        self::$entityManager = $entityManager;
-    }
-
-    /**
      * @var ManagerRegistry|null
      */
     protected static ?ManagerRegistry $doctrine = null;
@@ -280,16 +268,6 @@ trait BaseCommonTrait
     public static function setTwig(Environment $twig)
     {
         self::$twig = $twig;
-    }
-
-    /**
-     * @var BaseTwigExtension|null
-     */
-    protected static ?BaseTwigExtension $twigExtension = null;
-
-    public static function setTwigExtension(BaseTwigExtension $twigExtension)
-    {
-        self::$twigExtension = $twigExtension;
     }
 
     /**

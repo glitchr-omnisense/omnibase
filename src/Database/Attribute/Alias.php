@@ -2,7 +2,7 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
 use Closure;
@@ -13,7 +13,7 @@ use Exception;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
-class Alias extends AbstractAnnotation implements ExtensionOptionInterface
+class Alias extends AbstractAttribute implements ExtensionOptionInterface
 {
     public string $alias;
     public string $column;

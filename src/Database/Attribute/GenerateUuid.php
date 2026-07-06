@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -17,7 +17,7 @@ use Symfony\Component\Uid\Uuid;
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class GenerateUuid extends AbstractAnnotation implements ExtensionOptionInterface
+class GenerateUuid extends AbstractAttribute implements ExtensionOptionInterface
 {
     private mixed $version;
     public const V1_MAC = 1;
@@ -82,7 +82,7 @@ class GenerateUuid extends AbstractAnnotation implements ExtensionOptionInterfac
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AttributeReader::TARGET_PROPERTY);
     }
 
     /**

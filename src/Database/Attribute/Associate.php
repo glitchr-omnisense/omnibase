@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -18,7 +18,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Associate extends AbstractAnnotation implements ExtensionOptionInterface
+class Associate extends AbstractAttribute implements ExtensionOptionInterface
 {
     public string $metadata;
 
@@ -35,7 +35,7 @@ class Associate extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AttributeReader::TARGET_PROPERTY);
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)

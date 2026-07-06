@@ -2,7 +2,7 @@
 
 namespace Base\Attributes\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 
 use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 use function is_string;
@@ -10,7 +10,7 @@ use function is_string;
 use Symfony\Component\ExpressionLanguage\Expression;
 
 #[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_FUNCTION)]
-class IsGranted extends AbstractAnnotation
+class IsGranted extends AbstractAttribute
 {
     /**
      * @param array|string $data

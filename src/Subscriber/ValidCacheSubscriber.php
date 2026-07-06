@@ -10,8 +10,8 @@ use Symfony\Component\HttpKernel\Event\KernelEvent;
 /**
  * Marks the bundle cache as valid early in the request cycle. Sole survivor
  * of the former EagerSubscriber: its eager-construction duty is obsolete now
- * that AnnotationReader's constructor is metadata-free (the heavy precompute
- * moved to AnnotationCacheWarmer) and BaseTrait statics resolve lazily
+ * that AttributeReader's constructor is metadata-free (the heavy precompute
+ * moved to AttributeCacheWarmer) and BaseTrait statics resolve lazily
  * through the base.runtime locator.
  */
 class ValidCacheSubscriber implements EventSubscriberInterface

@@ -2,14 +2,14 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class Cascade extends AbstractAnnotation implements ExtensionOptionInterface
+class Cascade extends AbstractAttribute implements ExtensionOptionInterface
 {
     /** @Required */
     private string $column;
@@ -40,7 +40,7 @@ class Cascade extends AbstractAnnotation implements ExtensionOptionInterface
             $column = $this->column;
         }
 
-        $columnAlias = $this->getAnnotation($classMetadata, $column, Alias::class);
+        $columnAlias = $this->getAttribute($classMetadata, $column, Alias::class);
         if ($columnAlias) {
             $column = $columnAlias->column;
         }

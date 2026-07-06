@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Attributes\Attribute\Sitemap;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Exception\SitemapNotFoundException;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Model\SitemapEntry;
@@ -22,9 +22,9 @@ class Sitemapper implements SitemapperInterface
     protected $twig;
 
     /**
-     * @var AnnotationReader
+     * @var AttributeReader
      */
-    protected $annotationReader;
+    protected $attributeReader;
 
     /**
      * @var AdvancedRouterInterface
@@ -45,12 +45,12 @@ class Sitemapper implements SitemapperInterface
     protected string $hostname = "";
     protected array $urlset = [];
 
-    public function __construct(Environment $twig, AnnotationReader $annotationReader, AdvancedRouterInterface $router, LocalizerInterface $localizer)
+    public function __construct(Environment $twig, AttributeReader $attributeReader, AdvancedRouterInterface $router, LocalizerInterface $localizer)
     {
         $this->twig = $twig;
         $this->router = $router;
         $this->localizer = $localizer;
-        $this->annotationReader = $annotationReader;
+        $this->attributeReader = $attributeReader;
 
         $this->mimeTypes = new MimeTypes();
     }
@@ -67,10 +67,10 @@ class Sitemapper implements SitemapperInterface
             return null;
         }
 
-        $annotations = $this->annotationReader->getAnnotations($class, Sitemap::class, [AnnotationReader::TARGET_METHOD]);
-        $annotations = $annotations[AnnotationReader::TARGET_METHOD][$class][$method] ?? [];
+        $attributes = $this->attributeReader->getAttributes($class, Sitemap::class, [AttributeReader::TARGET_METHOD]);
+        $attributes = $attributes[AttributeReader::TARGET_METHOD][$class][$method] ?? [];
 
-        $sitemap = end($annotations);
+        $sitemap = end($attributes);
         return $sitemap === false ? null : $sitemap;
     }
 
@@ -100,7 +100,7 @@ class Sitemapper implements SitemapperInterface
 
         $sitemap = $this->getSitemap($route);
         if (!$sitemap) {
-            throw new SitemapNotFoundException("Sitemap annotation not found for \"" . ($routeMatch["_controller"] ?? $route->getPath()) . "\".");
+            throw new SitemapNotFoundException("Sitemap attribute not found for \"" . ($routeMatch["_controller"] ?? $route->getPath()) . "\".");
         }
 
         $routeName = $sitemap->getGroup() ?? $route->getDefaults()["_canonical_route"] ?? $routeMatch["_route"] ?? null;
@@ -148,7 +148,7 @@ class Sitemapper implements SitemapperInterface
         return $this->register($routeParameters["_route"], $routeParameters);
     }
 
-    public function registerAnnotations(): self
+    public function registerAttributes(): self
     {
         $this->computeFlag = false;
         foreach ($this->router->getRouteCollection() as $routeName => $route) {

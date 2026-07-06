@@ -2,14 +2,14 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class DiscriminatorEntry extends AbstractAnnotation implements ExtensionOptionInterface
+class DiscriminatorEntry extends AbstractAttribute implements ExtensionOptionInterface
 {
     /** @Required */
     protected ?string $value;
@@ -64,7 +64,7 @@ class DiscriminatorEntry extends AbstractAnnotation implements ExtensionOptionIn
         if ($parentClassName = get_parent_class($className)) {
 
             $parentNamespace = explodeByArray("\\Entity\\", $parentClassName)[1] ?? null;
-            $parentMetadata = $this->getAnnotationReader()->getAnnotations($parentClassName, $this);
+            $parentMetadata = $this->getAttributeReader()->getAttributes($parentClassName, $this);
             $parentMetadata = $parentMetadata[EntityExtension::TARGET_CLASS][$parentClassName];
             if (($parentAttribute = $parentMetadata ? end($parentMetadata) : null)) {
 
@@ -123,7 +123,7 @@ class DiscriminatorEntry extends AbstractAnnotation implements ExtensionOptionIn
         $discriminatorValues = [];
         foreach ($classMetadata->discriminatorMap as $className) {
 
-            $metadata = $this->getAnnotationReader()->getAnnotations($className, $this);
+            $metadata = $this->getAttributeReader()->getAttributes($className, $this);
             $metadata = $metadata[EntityExtension::TARGET_CLASS][$className];
             $metadata = $metadata ? end($metadata) : null;
             if ($metadata === null) {

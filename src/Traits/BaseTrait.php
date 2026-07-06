@@ -2,7 +2,7 @@
 
 namespace Base\Traits;
 
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Service\Obfuscator;
@@ -38,9 +38,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  */
 trait BaseTrait
 {
-    public static function getAnnotationReader(): ?AnnotationReader
+    public static function getAttributeReader(): ?AttributeReader
     {
-        return AnnotationReader::getInstance();
+        return AttributeReader::getInstance();
     }
 
     public static function getService(): ?BaseService

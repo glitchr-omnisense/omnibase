@@ -3,7 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Database\Attribute\Uploader;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\BaseBundle;
 use League\Flysystem\FileAttributes;
 use Base\Console\Command;
@@ -24,7 +24,7 @@ class UploaderEntitiesCommand extends Command
     protected ?bool $orphans;
     protected ?bool $deleteOrphans;
 
-    protected $propertyAnnotations;
+    protected $propertyAttributes;
     protected $baseEntities;
     protected $baseEntityLocation;
     protected $appEntities;
@@ -49,55 +49,55 @@ class UploaderEntitiesCommand extends Command
         $this->orphans ??= $input->getOption('orphans');
         $this->deleteOrphans ??= $input->getOption('delete-orphans');
 
-        $output->section()->writeln("\n <info>Looking for \"" . Uploader::class . "\"</info> annotations..");
+        $output->section()->writeln("\n <info>Looking for \"" . Uploader::class . "\"</info> attributes..");
 
         $nTotalFiles = 0;
         $nTotalOrphans = 0;
         $nTotalFields = 0;
 
         $this->appEntities ??= "App\\Entity\\" . $this->entityName;
-        $appAnnotations = $this->getUploaderAnnotations($output, $this->appEntities);
-        if (!$appAnnotations) {
-            $output->section()->writeln("\t<warning>Uploader annotation not found for \"$this->appEntities\"</warning>");
+        $appAttributes = $this->getUploaderAttributes($output, $this->appEntities);
+        if (!$appAttributes) {
+            $output->section()->writeln("\t<warning>Uploader attribute not found for \"$this->appEntities\"</warning>");
         }
 
         $this->baseEntities ??= "Base\\Entity\\" . $this->entityName;
-        $baseAnnotations = $this->getUploaderAnnotations($output, $this->baseEntities);
-        if (!$baseAnnotations) {
-            $output->section()->writeln("\t<warning>Uploader annotation not found for \"$this->baseEntities\"</warning>");
+        $baseAttributes = $this->getUploaderAttributes($output, $this->baseEntities);
+        if (!$baseAttributes) {
+            $output->section()->writeln("\t<warning>Uploader attribute not found for \"$this->baseEntities\"</warning>");
         }
 
         $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
 
-        $annotations = array_merge($appAnnotations, $baseAnnotations);
-        foreach ($annotations as $class => $_) {
+        $attributes = array_merge($appAttributes, $baseAttributes);
+        foreach ($attributes as $class => $_) {
             if (!str_starts_with($class, "Base\\Entity\\" . $this->entityName) && !str_starts_with($class, "App\\Entity\\" . $this->entityName)) {
                 continue;
             }
 
             $noPropertyFound = true;
-            foreach ($_ as $field => $annotation) {
+            foreach ($_ as $field => $attribute) {
                 if ($this->property && $field != $this->property) {
                     continue;
                 }
                 $nTotalFields++;
 
-                $annotation = last($annotation);
-                if ($annotation->getDeclaringEntity($class, $field) != $class) {
+                $attribute = last($attribute);
+                if ($attribute->getDeclaringEntity($class, $field) != $class) {
                     continue;
                 }
 
-                if ($annotation->getMissable()) {
+                if ($attribute->getMissable()) {
                     $output->section()->writeln("             $class::$field <warning> is missable.. cannot have orphan files..</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                     continue;
                 } else {
                     $output->section()->writeln("             Processing <info>$class::$field</info>..");
                 }
 
-                $this->preProcess($class, $field, $annotation);
+                $this->preProcess($class, $field, $attribute);
 
-                $publicPath = $annotation->getFlysystem()->getPublic("", $annotation->getStorage());
-                $fileList = $this->getFileList($class, $field, $annotation);
+                $publicPath = $attribute->getFlysystem()->getPublic("", $attribute->getStorage());
+                $fileList = $this->getFileList($class, $field, $attribute);
                 $nTotalFiles += count($fileList);
                 $noPropertyFound = false;
 
@@ -112,7 +112,7 @@ class UploaderEntitiesCommand extends Command
                 }
 
                 if ($this->orphans || $this->deleteOrphans) {
-                    $orphanFiles = $this->getOrphanFiles($class, $field, $annotation);
+                    $orphanFiles = $this->getOrphanFiles($class, $field, $attribute);
                     $nOrphans = count($orphanFiles);
                     $nTotalOrphans += $nOrphans;
 
@@ -122,7 +122,7 @@ class UploaderEntitiesCommand extends Command
                     }
 
                     if ($this->deleteOrphans) {
-                        $this->deleteOrphanFiles($annotation, $orphanFiles);
+                        $this->deleteOrphanFiles($attribute, $orphanFiles);
 
                         if ($orphanFiles) {
                             $output->section()->writeln("\t           <red>* Orphan files deleted..</red>", OutputInterface::VERBOSITY_VERY_VERBOSE);
@@ -132,7 +132,7 @@ class UploaderEntitiesCommand extends Command
                     }
                 }
 
-                $this->postProcess($class, $field, $annotation, $fileList);
+                $this->postProcess($class, $field, $attribute, $fileList);
             }
 
             if ($noPropertyFound && !$this->property) {
@@ -161,7 +161,7 @@ class UploaderEntitiesCommand extends Command
      * @return array
      * @throws \Exception
      */
-    protected function getUploaderAnnotations(OutputInterface $output, ?string $namespace)
+    protected function getUploaderAttributes(OutputInterface $output, ?string $namespace)
     {
         $path = "";
         if(str_starts_with($namespace, "App\Entity")) {
@@ -192,16 +192,16 @@ class UploaderEntitiesCommand extends Command
             $metadataClasses[$class] = $this->entityManager->getClassMetadata($class);
         }
 
-        $annotations = [];
-        $annotationReader = AnnotationReader::getInstance();
+        $attributes = [];
+        $attributeReader = AttributeReader::getInstance();
         foreach ($metadataClasses as $class => $classMetadata) {
-            $this->propertyAnnotations = $annotationReader->getPropertyAnnotations($classMetadata, Uploader::class);
-            if ($this->propertyAnnotations) {
-                $annotations[$class] = $this->propertyAnnotations;
+            $this->propertyAttributes = $attributeReader->getPropertyAttributes($classMetadata, Uploader::class);
+            if ($this->propertyAttributes) {
+                $attributes[$class] = $this->propertyAttributes;
             }
         }
 
-        return $annotations;
+        return $attributes;
     }
 
     private $allEntries = [];
@@ -223,22 +223,22 @@ class UploaderEntitiesCommand extends Command
     /**
      * @param string $class
      * @param string $field
-     * @param Uploader $annotation
+     * @param Uploader $attribute
      * @return array|mixed
      * @throws FilesystemException
      */
-    protected function getFileList(string $class, string $field, Uploader $annotation)
+    protected function getFileList(string $class, string $field, Uploader $attribute)
     {
-        $classPath = dirname($annotation->getPath($class, $field));
+        $classPath = dirname($attribute->getPath($class, $field));
         $filesystem = Uploader::getFlysystem();
 
         $propertyFqcn = $class . "::" . $field;
         if (!array_key_exists($propertyFqcn, $this->fileList)) {
-            $this->fileList[$propertyFqcn] = array_values(array_filter(array_map(function ($f) use ($annotation) {
+            $this->fileList[$propertyFqcn] = array_values(array_filter(array_map(function ($f) use ($attribute) {
                 if (!$f instanceof FileAttributes) {
                     return null;
                 }
-                return $annotation->getFlysystem()->getPublic($f->path(), $annotation->getStorage());
+                return $attribute->getFlysystem()->getPublic($f->path(), $attribute->getStorage());
             }, $filesystem->getOperator()->listContents($classPath)->toArray())));
         }
 
@@ -252,17 +252,17 @@ class UploaderEntitiesCommand extends Command
     /**
      * @param string $class
      * @param string $field
-     * @param Uploader $annotation
+     * @param Uploader $attribute
      * @return array
      * @throws \Exception
      */
-    public function getOrphanFiles(string $class, string $field, Uploader $annotation)
+    public function getOrphanFiles(string $class, string $field, Uploader $attribute)
     {
-        if ($annotation->getMissable()) {
+        if ($attribute->getMissable()) {
             return [];
         }
 
-        $fileList = $this->getFileList($class, $field, $annotation);
+        $fileList = $this->getFileList($class, $field, $attribute);
         $fileListInDatabase = array_map(
             fn($e) => $this->propertyAccessor->getValue($e, $field),
             $this->getEntries($class)
@@ -275,13 +275,13 @@ class UploaderEntitiesCommand extends Command
     }
 
     /**
-     * @param Uploader $annotation
+     * @param Uploader $attribute
      * @param array $fileList
      * @return true
      */
-    public function deleteOrphanFiles(Uploader $annotation, array $fileList)
+    public function deleteOrphanFiles(Uploader $attribute, array $fileList)
     {
-        $publicPath = $annotation->getFlysystem()->getPublic("", $annotation->getStorage());
+        $publicPath = $attribute->getFlysystem()->getPublic("", $attribute->getStorage());
         $filesystem = Uploader::getFlysystem();
 
         foreach ($fileList as $file) {
@@ -291,11 +291,11 @@ class UploaderEntitiesCommand extends Command
     }
 
 
-    public function preProcess(mixed $class, string $field, Uploader $annotation)
+    public function preProcess(mixed $class, string $field, Uploader $attribute)
     {
     }
 
-    public function postProcess(mixed $class, string $field, Uploader $annotation, array $fileList)
+    public function postProcess(mixed $class, string $field, Uploader $attribute, array $fileList)
     {
     }
 }

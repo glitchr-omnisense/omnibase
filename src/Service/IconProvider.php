@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Attributes\Attribute\Iconize;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Cache\Abstract\AbstractLocalCache;
 
 use Base\Database\Type\EnumType;
@@ -15,9 +15,9 @@ use ErrorException;
 class IconProvider extends AbstractLocalCache
 {
     /**
-     * @var AnnotationReader
+     * @var AttributeReader
      */
-    protected AnnotationReader $annotationReader;
+    protected AttributeReader $attributeReader;
     /**
      * @var MediaServiceInterface
      */
@@ -31,9 +31,9 @@ class IconProvider extends AbstractLocalCache
      */
     protected AdvancedRouterInterface $router;
 
-    public function __construct(AnnotationReader $annotationReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, AdvancedRouterInterface $router, string $cacheDir, ?string $buildDir = null)
+    public function __construct(AttributeReader $attributeReader, MediaServiceInterface $mediaService, LocalizerInterface $localizer, AdvancedRouterInterface $router, string $cacheDir, ?string $buildDir = null)
     {
-        $this->annotationReader = $annotationReader;
+        $this->attributeReader = $attributeReader;
         $this->mediaService = $mediaService;
         $this->localizer = $localizer;
         $this->router = $router;
@@ -69,12 +69,12 @@ class IconProvider extends AbstractLocalCache
                     return [];
                 }
 
-                $iconAnnotations = $this->annotationReader->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
-                if (!$iconAnnotations) {
+                $iconAttributes = $this->attributeReader->getMethodAttributes($class, [Iconize::class])[$method] ?? [];
+                if (!$iconAttributes) {
                     return [];
                 }
 
-                return [$route, end($iconAnnotations)->getIcons()];
+                return [$route, end($iconAttributes)->getIcons()];
 
             }, $this->router->getRouteCollection()->all());
         });

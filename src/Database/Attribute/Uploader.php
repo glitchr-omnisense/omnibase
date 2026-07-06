@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
@@ -32,7 +32,7 @@ use function is_file;
  */
 
  #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
+class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 {
     protected string $storage;
     protected string $pool;
@@ -201,14 +201,14 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public static function getPublic($entity, $fieldName)
     {
-        if (!self::hasAnnotation($entity, $fieldName, self::class)) {
+        if (!self::hasAttribute($entity, $fieldName, self::class)) {
             return null;
         }
 
         /**
          * @var Uploader $that
          */
-        $that = self::getAnnotation($entity, $fieldName, self::class);
+        $that = self::getAttribute($entity, $fieldName, self::class);
         if (!$that) {
             return null;
         }
@@ -296,11 +296,11 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public static function getMimeTypes($entity, $fieldName): array
     {
-        if (!self::hasAnnotation($entity, $fieldName, self::class)) {
+        if (!self::hasAttribute($entity, $fieldName, self::class)) {
             return [];
         }
 
-        $that = self::getAnnotation($entity, $fieldName, self::class);
+        $that = self::getAttribute($entity, $fieldName, self::class);
         if (!$that) {
             return [];
         }
@@ -316,13 +316,13 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
     public static function getMaxFilesize($entity, $fieldName): int
     {
         $maxSize = UploadedFile::getMaxFilesize();
-        if (self::hasAnnotation($entity, $fieldName, self::class)) {
-            $that = self::getAnnotation($entity, $fieldName, self::class);
+        if (self::hasAttribute($entity, $fieldName, self::class)) {
+            $that = self::getAttribute($entity, $fieldName, self::class);
             $maxSize = min($that->maxSize ?: $maxSize, $maxSize);
         }
 
-        if (self::hasAnnotation($entity, $fieldName, ConstraintsFile::class)) {
-            $that = self::getAnnotation($entity, $fieldName, ConstraintsFile::class);
+        if (self::hasAttribute($entity, $fieldName, ConstraintsFile::class)) {
+            $that = self::getAttribute($entity, $fieldName, ConstraintsFile::class);
             $maxSize = min($that->getMaxSize() ?: $maxSize, $maxSize);
         }
 
@@ -343,14 +343,14 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
             return null;
         }
 
-        if (!self::hasAnnotation($entity, $fieldName, self::class)) {
+        if (!self::hasAttribute($entity, $fieldName, self::class)) {
             return null;
         }
 
         /**
          * @var Uploader $that
          */
-        $that = self::getAnnotation($entity, $fieldName, self::class);
+        $that = self::getAttribute($entity, $fieldName, self::class);
         if (!$that) {
             return null;
         }
@@ -576,7 +576,7 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AttributeReader::TARGET_PROPERTY);
     }
 
     /**

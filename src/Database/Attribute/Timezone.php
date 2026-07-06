@@ -2,7 +2,7 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  */
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Timezone extends AbstractAnnotation implements ExtensionOptionInterface
+class Timezone extends AbstractAttribute implements ExtensionOptionInterface
 {
     public const DEFAULT_TIMEZONE = "UTC";
     private array $context;

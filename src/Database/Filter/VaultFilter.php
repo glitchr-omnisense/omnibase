@@ -2,7 +2,7 @@
 
 namespace Base\Database\Filter;
 
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Vault;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
@@ -38,8 +38,8 @@ class VaultFilter extends SQLFilter
      */
     public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string
     {
-        $vaultAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Vault::class);
-        if (count($vaultAnnotation) < 1) {
+        $vaultAttribute = AttributeReader::getInstance()->getClassAttributes($targetEntity->getName(), Vault::class);
+        if (count($vaultAttribute) < 1) {
             return "";
         }
 
@@ -47,7 +47,7 @@ class VaultFilter extends SQLFilter
             throw new InvalidArgumentException("No environment defined in \"" . self::class . "\" while setting up " . $targetEntity->getName());
         }
 
-        $vaultFieldName = end($vaultAnnotation)->vault;
+        $vaultFieldName = end($vaultAttribute)->vault;
         $operator = str_contains($this->environment, "%") ? "LIKE" : "=";
         if ($targetEntity->hasField($vaultFieldName)) {
             return $targetTableAlias . "." . $vaultFieldName . " IS NULL OR " . $targetTableAlias . "." . $vaultFieldName . " $operator '" . $this->environment . "'";

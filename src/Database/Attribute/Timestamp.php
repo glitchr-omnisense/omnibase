@@ -2,7 +2,7 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use DateTime;
 use DateTimeImmutable;
@@ -16,7 +16,7 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class Timestamp extends AbstractAnnotation implements ExtensionOptionInterface
+class Timestamp extends AbstractAttribute implements ExtensionOptionInterface
 {
     private array $fields;
     private array $context;

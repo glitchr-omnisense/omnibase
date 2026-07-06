@@ -2,7 +2,7 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Entity\EntityExtension;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -17,7 +17,7 @@ use Exception;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class OrphanRemoval extends AbstractAnnotation implements ExtensionOptionInterface
+class OrphanRemoval extends AbstractAttribute implements ExtensionOptionInterface
 {
     /** @Required */
     protected string $column;
@@ -48,13 +48,13 @@ class OrphanRemoval extends AbstractAnnotation implements ExtensionOptionInterfa
             $column = $this->column;
         }
 
-        $columnAlias = $this->getAnnotation($classMetadata, $column, Alias::class);
+        $columnAlias = $this->getAttribute($classMetadata, $column, Alias::class);
         if ($columnAlias) {
             $column = $columnAlias->column;
         }
 
         if (!property_exists($classMetadata->getName(), $column)) {
-            throw new Exception("Invalid column property \"$column\" provided in annotation of class " . $classMetadata->getName());
+            throw new Exception("Invalid column property \"$column\" provided in attribute of class " . $classMetadata->getName());
         }
 
         $associationMapping = $classMetadata->getAssociationMapping($classMetadata->getFieldName($column));

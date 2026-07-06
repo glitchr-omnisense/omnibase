@@ -33,20 +33,20 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
             $reflClass = new ReflectionClass($className);
             
             // Attributes
-            $annotations = [];
+            $attributes = [];
             foreach($reflClass->getAttributes() as $attribute) {
 
-                $annotation = $attribute->newInstance();
-                if (!is_serializable($annotation)) {
-                    throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                $attribute = $attribute->newInstance();
+                if (!is_serializable($attribute)) {
+                    throw new Exception("Attribute \"" . get_class($attribute) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                 }
 
-                $annotations[] = $annotation;
+                $attributes[] = $attribute;
             }
 
-            while ($annotation = array_pop($annotations)) {
-                if ($annotation instanceof Table && !empty($annotation->name)) {
-                    $tableName = $annotation->name;
+            while ($attribute = array_pop($attributes)) {
+                if ($attribute instanceof Table && !empty($attribute->name)) {
+                    $tableName = $attribute->name;
                     break;
                 }
             }

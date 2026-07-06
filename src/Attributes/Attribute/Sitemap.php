@@ -2,7 +2,7 @@
 
 namespace Base\Attributes\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 
 
 
@@ -19,7 +19,7 @@ use Base\Attributes\AbstractAnnotation;
  */
 
  #[\Attribute(\Attribute::TARGET_METHOD)]
-class Sitemap extends AbstractAnnotation
+class Sitemap extends AbstractAttribute
 {
     protected static array $urls = [];
     protected string $lastMod;

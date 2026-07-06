@@ -4,7 +4,7 @@ namespace Base\Service\Model;
 
 use ArrayAccess;
 use Base\Attributes\Attribute\Iconize;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Service\TranslatorInterface;
 use Countable;
 use Exception;
@@ -86,9 +86,9 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     protected TranslatorInterface $translator;
 
     /**
-     * @var AnnotationReader|null
+     * @var AttributeReader|null
      */
-    protected ?AnnotationReader $annotationReader;
+    protected ?AttributeReader $attributeReader;
 
     public function __construct(AdvancedRouterInterface $router, TranslatorInterface $translator, array $options = [], ?string $template = null)
     {
@@ -96,7 +96,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         $this->translator = $translator;
         $this->options = $options;
 
-        $this->annotationReader = AnnotationReader::getInstance();
+        $this->attributeReader = AttributeReader::getInstance();
         if ($template) {
             $this->template = $template;
         }
@@ -150,19 +150,19 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             }
 
             // Get icon from controller attributes (Iconize, Route, ... on the action method)
-            $reflClass = $this->annotationReader->getReflClass($class);
-            $annotations = $reflClass->hasMethod($method)
+            $reflClass = $this->attributeReader->getReflClass($class);
+            $attributes = $reflClass->hasMethod($method)
                 ? array_map(fn($attribute) => $attribute->newInstance(), $reflClass->getMethod($method)->getAttributes())
                 : [];
 
-            $position = array_class_last(Iconize::class, $annotations);
-            $iconize = $position !== false ? $annotations[$position] : null;
+            $position = array_class_last(Iconize::class, $attributes);
+            $iconize = $position !== false ? $attributes[$position] : null;
             $icon = $iconize ? $iconize->getIcons()[0] ?? null : null;
 
-            // Get route name from controller annotation
-            $position = array_class_last(Route::class, $annotations);
+            // Get route name from controller attribute
+            $position = array_class_last(Route::class, $attributes);
 
-            $route = $position !== false ? $annotations[$position] : null;
+            $route = $position !== false ? $attributes[$position] : null;
             $routeName = $route ? $this->getRouteName($path) : null;
             $routeParameters = $route ? array_filter($this->getRouteParameters($path, $route->getPath() !== null ? rtrim($route->getPath(), "/") : null) ?? []) : [];
             $routeParameterKeys = array_keys($routeParameters);

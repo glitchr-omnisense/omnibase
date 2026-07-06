@@ -11,6 +11,6 @@ class SitemapNotFoundException extends Exception
      */
     public function getMessageKey()
     {
-        return 'No sitemap annotation found for this route.';
+        return 'No sitemap attribute found for this route.';
     }
 }

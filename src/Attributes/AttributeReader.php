@@ -27,7 +27,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class AnnotationReader extends AbstractLocalCache
+class AttributeReader extends AbstractLocalCache
 {
     use SingletonTrait;
 
@@ -41,16 +41,16 @@ class AnnotationReader extends AbstractLocalCache
         self::TARGET_PROPERTY
     ];
 
-    // Annotation pass..
-    protected array $annotations = [];
+    // Attribute pass..
+    protected array $attributes = [];
 
     /**
-     * @param $annotations
+     * @param $attributes
      * @return $this
      */
-    public function addAnnotation($annotations): self
+    public function addAttribute($attributes): self
     {
-        $this->annotations[get_class($annotations)] = $annotations;
+        $this->attributes[get_class($attributes)] = $attributes;
         return $this;
     }
 
@@ -183,18 +183,18 @@ class AnnotationReader extends AbstractLocalCache
 
         // Check if custom reader is enabled
         $this->parameterBag = $parameterBag;
-        $this->enabled = $parameterBag->get("base.annotations.use_custom") ?? false;
+        $this->enabled = $parameterBag->get("base.attributes.use_custom") ?? false;
 
         $paths = [];
-        $paths[] = __DIR__ . "/Annotation";
-        $paths[] = __DIR__ . "/../Database/Annotation";
-        if (($matches = preg_grep('/^base.annotations.paths\.[0-9]*\.[.*]*$/', array_keys($parameterBag->all())))) {
+        $paths[] = __DIR__ . "/Attribute";
+        $paths[] = __DIR__ . "/../Database/Attribute";
+        if (($matches = preg_grep('/^base.attributes.paths\.[0-9]*\.[.*]*$/', array_keys($parameterBag->all())))) {
             foreach ($matches as $match) {
                 $paths[] = $parameterBag->get($match);
             }
         }
 
-        // Paths to look for annotations
+        // Paths to look for attributes
         foreach ($paths as $path) {
             $this->addPath($path);
         }
@@ -233,14 +233,14 @@ class AnnotationReader extends AbstractLocalCache
     protected $cache = null;
     protected array $cachePool = [];
 
-    protected array $annotationTargets = [];
+    protected array $attributeTargets = [];
 
     protected array $classAncestors = [];
     protected array $classHierarchies = [];
 
-    protected array $classAnnotations = [];
-    protected array $methodAnnotations = [];
-    protected array $propertyAnnotations = [];
+    protected array $classAttributes = [];
+    protected array $methodAttributes = [];
+    protected array $propertyAttributes = [];
 
     /**
      * @var array
@@ -261,8 +261,8 @@ class AnnotationReader extends AbstractLocalCache
         if (!file_exists($path)) {
             return $this;
         }
-        foreach (BaseBundle::getInstance()->getAllClasses($path) as $annotation) {
-            $this->addAnnotationName($annotation);
+        foreach (BaseBundle::getInstance()->getAllClasses($path) as $attribute) {
+            $this->addAttributeName($attribute);
         }
 
         return $this;
@@ -300,54 +300,54 @@ class AnnotationReader extends AbstractLocalCache
         return ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
     }
 
-    protected array $annotationNames = [];
+    protected array $attributeNames = [];
 
-    public function getAnnotationNames(): array
+    public function getAttributeNames(): array
     {
-        return $this->annotationNames;
+        return $this->attributeNames;
     }
 
     /**
-     * @param string $annotationName
+     * @param string $attributeName
      * @return $this
      */
-    public function addAnnotationName(string $annotationName)
+    public function addAttributeName(string $attributeName)
     {
-        if (!is_subclass_of($annotationName, AbstractAnnotation::class)) {
+        if (!is_subclass_of($attributeName, AbstractAttribute::class)) {
             return $this;
         }
 
-        if (!in_array($annotationName, $this->annotationNames)) {
-            $this->annotationNames[] = $annotationName;
+        if (!in_array($attributeName, $this->attributeNames)) {
+            $this->attributeNames[] = $attributeName;
         }
 
         return $this;
     }
 
     /**
-     * @param string $annotationName
+     * @param string $attributeName
      * @return $this
      */
-    public function removeAnnotationName(string $annotationName)
+    public function removeAttributeName(string $attributeName)
     {
-        if (($pos = array_search($annotationName, $this->annotationNames))) {
-            unset($this->annotationNames[$pos]);
+        if (($pos = array_search($attributeName, $this->attributeNames))) {
+            unset($this->attributeNames[$pos]);
         }
 
         return $this;
     }
 
-    public function getAnnotationTargets(object|string $className): array // Annotation class
+    public function getAttributeTargets(object|string $className): array // Attribute class
     {
         $className = (is_object($className) ? get_class($className) : $className);
 
-        if (array_key_exists($className, $this->annotationTargets)) {
-            return $this->annotationTargets[$className];
+        if (array_key_exists($className, $this->attributeTargets)) {
+            return $this->attributeTargets[$className];
         }
 
         $reflClass = new ReflectionClass($className);
 
-        $annotationTargets = [];
+        $attributeTargets = [];
         $reflClass = new ReflectionClass($className);
         if(!empty($reflClass->getAttributes())) {
 
@@ -356,37 +356,37 @@ class AnnotationReader extends AbstractLocalCache
                 if($attribute->getName() != "Attribute") continue;
                 
                 $targets = $attribute->getArguments()[0] ?? 0;
-                if($targets & \Attribute::TARGET_CLASS) $annotationTargets[] = "class";
-                if($targets & \Attribute::TARGET_METHOD) $annotationTargets[] = "method";
-                if($targets & \Attribute::TARGET_PROPERTY) $annotationTargets[] = "property";
+                if($targets & \Attribute::TARGET_CLASS) $attributeTargets[] = "class";
+                if($targets & \Attribute::TARGET_METHOD) $attributeTargets[] = "method";
+                if($targets & \Attribute::TARGET_PROPERTY) $attributeTargets[] = "property";
             }
             
         } else {
 
             if (preg_match_all('/@Target\(\{(.*)\}\)/', $reflClass->getDocComment(), $matches, PREG_SET_ORDER)) {
-                $annotationTargets = json_decode(mb_strtolower("[" . end($matches)[1] . "]"));
+                $attributeTargets = json_decode(mb_strtolower("[" . end($matches)[1] . "]"));
             }
         }
 
-        foreach ($annotationTargets as $target) {
+        foreach ($attributeTargets as $target) {
             switch ($target) {
                 case 'all':
-                    $this->annotationTargets[$className][] = "class";
-                    $this->annotationTargets[$className][] = "method";
-                    $this->annotationTargets[$className][] = "property";
+                    $this->attributeTargets[$className][] = "class";
+                    $this->attributeTargets[$className][] = "method";
+                    $this->attributeTargets[$className][] = "property";
 
-                    // Not used at this time by the custom AnnotationReader
-                    $this->annotationTargets[$className][] = "annotation";
-                    $this->annotationTargets[$className][] = "attribute";
-                    $this->annotationTargets[$className][] = "function";
+                    // Not used at this time by the custom AttributeReader
+                    $this->attributeTargets[$className][] = "attribute";
+                    $this->attributeTargets[$className][] = "attribute";
+                    $this->attributeTargets[$className][] = "function";
                     break;
 
                 case 'class':
                 case 'method':
                 case 'property':
-                case 'annotation':
+                case 'attribute':
                 case 'function':
-                    $this->annotationTargets[$className][] = $target;
+                    $this->attributeTargets[$className][] = $target;
                     break;
 
                 default:
@@ -394,8 +394,8 @@ class AnnotationReader extends AbstractLocalCache
             }
         }
 
-        $this->setCache("/Targets", $this->annotationTargets, null, true);
-        return $this->annotationTargets[$className] ?? [];
+        $this->setCache("/Targets", $this->attributeTargets, null, true);
+        return $this->attributeTargets[$className] ?? [];
     }
 
     /**
@@ -430,28 +430,28 @@ class AnnotationReader extends AbstractLocalCache
 
     /**
      * @param $className
-     * @param $annotationNames
-     * @param $annotationTargets
+     * @param $attributeNames
+     * @param $attributeTargets
      * @return array[]
      * @throws Exception
      */
-    public function getAncestorAnnotations($className, $annotationNames = null, $annotationTargets = [])
+    public function getAncestorAttributes($className, $attributeNames = null, $attributeTargets = [])
     {
         $classAncestor = $this->getAncestor($className);
-        return $this->getAnnotations($classAncestor, $annotationNames, $annotationTargets);
+        return $this->getAttributes($classAncestor, $attributeNames, $attributeTargets);
     }
 
     /**
      * @param $className
-     * @param $annotationNames
-     * @param $annotationTargets
+     * @param $attributeNames
+     * @param $attributeTargets
      * @return array[]
      * @throws Exception
      */
-    public function getParentAnnotations($className, $annotationNames = null, $annotationTargets = [])
+    public function getParentAttributes($className, $attributeNames = null, $attributeTargets = [])
     {
         $parent = $this->getParent($className);
-        return $this->getAnnotations($parent, $annotationNames, $annotationTargets);
+        return $this->getAttributes($parent, $attributeNames, $attributeTargets);
     }
 
     /**
@@ -473,203 +473,203 @@ class AnnotationReader extends AbstractLocalCache
 
     /**
      * @param $className
-     * @param $annotationNames
-     * @param $annotationTargets
+     * @param $attributeNames
+     * @param $attributeTargets
      * @return array|mixed
      * @throws Exception
      */
-    public function getChildrenAnnotations($className, $annotationNames = null, $annotationTargets = [])
+    public function getChildrenAttributes($className, $attributeNames = null, $attributeTargets = [])
     {
-        $annotations = [];
+        $attributes = [];
         foreach ($this->getChildren($className) as $child) {
-            $childrenAnnotations = $this->getChildrenAnnotations($child, $annotationNames, $annotationTargets);
-            $annotations = array_append_recursive(
-                $annotations,
+            $childrenAttributes = $this->getChildrenAttributes($child, $attributeNames, $attributeTargets);
+            $attributes = array_append_recursive(
+                $attributes,
                 array_append_recursive(
-                    $this->getAnnotations($child, $annotationNames, $annotationTargets),
-                    $childrenAnnotations
+                    $this->getAttributes($child, $attributeNames, $attributeTargets),
+                    $childrenAttributes
                 )
             );
         }
 
-        return $annotations;
+        return $attributes;
     }
 
-    public function getClassAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null, array $annotationTargets = []): array
+    public function getClassAttributes(mixed $classNameOrMetadataOrRefl, mixed $attributeNames = null, array $attributeTargets = []): array
     {
-        $annotationNames = $this->normalizeNames($annotationNames);
-        $annotationTargets = $this->normalizeTargets($annotationTargets, $annotationNames);
-        if (!in_array(self::TARGET_CLASS, $annotationTargets)) {
+        $attributeNames = $this->normalizeNames($attributeNames);
+        $attributeTargets = $this->normalizeTargets($attributeTargets, $attributeNames);
+        if (!in_array(self::TARGET_CLASS, $attributeTargets)) {
             return [];
         }
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-        if (!array_key_exists($reflClass->name, $this->classAnnotations)) {
+        if (!array_key_exists($reflClass->name, $this->classAttributes)) {
 
-            $this->classAnnotations[$reflClass->name] = [];
+            $this->classAttributes[$reflClass->name] = [];
             
             foreach($reflClass->getAttributes() as $attribute) {
 
-                $annotation = $attribute->newInstance();
-                if (!is_serializable($annotation)) {
-                    throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                $attribute = $attribute->newInstance();
+                if (!is_serializable($attribute)) {
+                    throw new Exception("Attribute \"" . get_class($attribute) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                 }
 
-                $this->classAnnotations[$reflClass->name][] = $annotation;
+                $this->classAttributes[$reflClass->name][] = $attribute;
             }
 
-            $this->setCache("/ClassAnnotations", $this->classAnnotations, null, true);
+            $this->setCache("/ClassAttributes", $this->classAttributes, null, true);
         }
 
-        return $this->filterClassAnnotations($reflClass->name, $annotationNames);
+        return $this->filterClassAttributes($reflClass->name, $attributeNames);
     }
 
     /**
      * @param string $className
-     * @param mixed $annotationNames
-     * @param array|null $classAnnotations
+     * @param mixed $attributeNames
+     * @param array|null $classAttributes
      * @return array|mixed
      */
-    protected function filterClassAnnotations(string $className, mixed $annotationNames, ?array $classAnnotations = null)
+    protected function filterClassAttributes(string $className, mixed $attributeNames, ?array $classAttributes = null)
     {
-        $classAnnotations ??= $this->classAnnotations;
+        $classAttributes ??= $this->classAttributes;
 
-        // Return the full set of annotations for a given class
-        if ($annotationNames == $this->getAnnotationNames()) {
-            return $classAnnotations[$className] ?? [];
+        // Return the full set of attributes for a given class
+        if ($attributeNames == $this->getAttributeNames()) {
+            return $classAttributes[$className] ?? [];
         }
 
         // Filter them ask request by the $annontationNames
-        $filteredAnnotations = [];
-        foreach ($classAnnotations[$className] ?? [] as $annotation) {
-            if (in_array(get_class($annotation), $annotationNames)) {
-                $filteredAnnotations[] = $annotation;
+        $filteredAttributes = [];
+        foreach ($classAttributes[$className] ?? [] as $attribute) {
+            if (in_array(get_class($attribute), $attributeNames)) {
+                $filteredAttributes[] = $attribute;
             }
         }
 
-        return $filteredAnnotations;
+        return $filteredAttributes;
     }
 
-    public function getMethodAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null, array $annotationTargets = []): array
+    public function getMethodAttributes(mixed $classNameOrMetadataOrRefl, mixed $attributeNames = null, array $attributeTargets = []): array
     {
-        $annotationNames = $this->normalizeNames($annotationNames);
-        $annotationTargets = $this->normalizeTargets($annotationTargets, $annotationNames);
-        if (!in_array(self::TARGET_METHOD, $annotationTargets)) {
+        $attributeNames = $this->normalizeNames($attributeNames);
+        $attributeTargets = $this->normalizeTargets($attributeTargets, $attributeNames);
+        if (!in_array(self::TARGET_METHOD, $attributeTargets)) {
             return [];
         }
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-        if (!array_key_exists($reflClass->name, $this->methodAnnotations)) {
+        if (!array_key_exists($reflClass->name, $this->methodAttributes)) {
 
-            // Compute the class annotations
-            $this->methodAnnotations[$reflClass->name] = [];
+            // Compute the class attributes
+            $this->methodAttributes[$reflClass->name] = [];
             foreach ($reflClass->getMethods() as $reflMethod) {
 
-                $this->methodAnnotations[$reflClass->name][$reflMethod->name] = [];
+                $this->methodAttributes[$reflClass->name][$reflMethod->name] = [];
                 foreach($reflMethod->getAttributes() as $attribute) {
 
-                    $annotation = $attribute->newInstance();
-                    if (!is_serializable($annotation)) {
-                        throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                    $attribute = $attribute->newInstance();
+                    if (!is_serializable($attribute)) {
+                        throw new Exception("Attribute \"" . get_class($attribute) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                     }
 
-                    $this->methodAnnotations[$reflClass->name][$reflMethod->name][] = $annotation;
+                    $this->methodAttributes[$reflClass->name][$reflMethod->name][] = $attribute;
                 }
             }
 
-            $this->setCache("/MethodAnnotations", $this->methodAnnotations, null, true);
+            $this->setCache("/MethodAttributes", $this->methodAttributes, null, true);
         }
 
-        return $this->filterMethodAnnotations($reflClass->name, $annotationNames);
+        return $this->filterMethodAttributes($reflClass->name, $attributeNames);
     }
 
     /**
      * @param string $className
-     * @param mixed $annotationNames
-     * @param array|null $methodAnnotations
+     * @param mixed $attributeNames
+     * @param array|null $methodAttributes
      * @return array|mixed
      */
-    protected function filterMethodAnnotations(string $className, mixed $annotationNames, ?array $methodAnnotations = null)
+    protected function filterMethodAttributes(string $className, mixed $attributeNames, ?array $methodAttributes = null)
     {
-        $methodAnnotations ??= $this->methodAnnotations;
+        $methodAttributes ??= $this->methodAttributes;
 
-        // Return the full set of annotations for a given class
-        if ($annotationNames == $this->getAnnotationNames()) {
-            return $methodAnnotations[$className] ?? [];
+        // Return the full set of attributes for a given class
+        if ($attributeNames == $this->getAttributeNames()) {
+            return $methodAttributes[$className] ?? [];
         }
 
         // Filter them ask request by the $annontationNames
-        $filteredAnnotations = [];
-        foreach ($methodAnnotations[$className] ?? [] as $method => $_) {
-            foreach ($_ as $annotation) {
-                if (in_array(get_class($annotation), $annotationNames)) {
-                    $filteredAnnotations[$method][] = $annotation;
+        $filteredAttributes = [];
+        foreach ($methodAttributes[$className] ?? [] as $method => $_) {
+            foreach ($_ as $attribute) {
+                if (in_array(get_class($attribute), $attributeNames)) {
+                    $filteredAttributes[$method][] = $attribute;
                 }
             }
         }
 
-        return $filteredAnnotations;
+        return $filteredAttributes;
     }
 
-    public function getPropertyAnnotations(mixed $classNameOrMetadataOrRefl, mixed $annotationNames = null, array $annotationTargets = []): array
+    public function getPropertyAttributes(mixed $classNameOrMetadataOrRefl, mixed $attributeNames = null, array $attributeTargets = []): array
     {
-        $annotationNames = $this->normalizeNames($annotationNames);
-        $annotationTargets = $this->normalizeTargets($annotationTargets, $annotationNames);
-        if (!in_array(self::TARGET_PROPERTY, $annotationTargets)) {
+        $attributeNames = $this->normalizeNames($attributeNames);
+        $attributeTargets = $this->normalizeTargets($attributeTargets, $attributeNames);
+        if (!in_array(self::TARGET_PROPERTY, $attributeTargets)) {
             return [];
         }
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-        if (!array_key_exists($reflClass->name, $this->propertyAnnotations)) {
+        if (!array_key_exists($reflClass->name, $this->propertyAttributes)) {
 
-            // Force to get all known annotations when buffering
-            $this->propertyAnnotations[$reflClass->name] = [];
+            // Force to get all known attributes when buffering
+            $this->propertyAttributes[$reflClass->name] = [];
             foreach ($reflClass->getProperties() as $reflProperty) {
 
-                $this->propertyAnnotations[$reflClass->name][$reflProperty->name] = [];
+                $this->propertyAttributes[$reflClass->name][$reflProperty->name] = [];
                 foreach($reflProperty->getAttributes() as $attribute) {
 
-                    $annotation = $attribute->newInstance();
-                    if (!is_serializable($annotation)) {
-                        throw new Exception("Attribute \"" . get_class($annotation) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+                    $attribute = $attribute->newInstance();
+                    if (!is_serializable($attribute)) {
+                        throw new Exception("Attribute \"" . get_class($attribute) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                     }
 
-                    $this->propertyAnnotations[$reflClass->name][$reflProperty->name][] = $annotation;
+                    $this->propertyAttributes[$reflClass->name][$reflProperty->name][] = $attribute;
                 }
             }
 
-            $this->setCache("/PropertyAnnotations", $this->propertyAnnotations, null, true);
+            $this->setCache("/PropertyAttributes", $this->propertyAttributes, null, true);
         }
 
-        return $this->filterPropertyAnnotations($reflClass->name, $annotationNames);
+        return $this->filterPropertyAttributes($reflClass->name, $attributeNames);
     }
 
     /**
      * @param string $className
-     * @param mixed $annotationNames
-     * @param array|null $propertyAnnotations
+     * @param mixed $attributeNames
+     * @param array|null $propertyAttributes
      * @return array|mixed
      */
-    protected function filterPropertyAnnotations(string $className, mixed $annotationNames, ?array $propertyAnnotations = null)
+    protected function filterPropertyAttributes(string $className, mixed $attributeNames, ?array $propertyAttributes = null)
     {
-        $propertyAnnotations ??= $this->propertyAnnotations;
+        $propertyAttributes ??= $this->propertyAttributes;
 
-        // Return the full set of annotations for a given class
-        if ($annotationNames == $this->getAnnotationNames()) {
-            return $propertyAnnotations[$className] ?? [];
+        // Return the full set of attributes for a given class
+        if ($attributeNames == $this->getAttributeNames()) {
+            return $propertyAttributes[$className] ?? [];
         }
 
         // Filter them by the $annontationNames
-        $filteredAnnotations = [];
-        foreach ($propertyAnnotations[$className] ?? [] as $property => $_) {
-            foreach ($_ as $annotation) {
-                if (in_array(get_class($annotation), $annotationNames)) {
-                    $filteredAnnotations[$property][] = $annotation;
+        $filteredAttributes = [];
+        foreach ($propertyAttributes[$className] ?? [] as $property => $_) {
+            foreach ($_ as $attribute) {
+                if (in_array(get_class($attribute), $attributeNames)) {
+                    $filteredAttributes[$property][] = $attribute;
                 }
             }
         }
 
-        return $filteredAnnotations;
+        return $filteredAttributes;
     }
 
     /**
@@ -687,42 +687,42 @@ class AnnotationReader extends AbstractLocalCache
         }
     }
 
-    public function normalizeNames(mixed $annotationNames, bool $fallbackAnnotationNames = true): ?array
+    public function normalizeNames(mixed $attributeNames, bool $fallbackAttributeNames = true): ?array
     {
-        $annotationNames = $annotationNames === null ? null : array_unique(
-            (is_array($annotationNames) ? $annotationNames :
-                (is_object($annotationNames) ? [get_class($annotationNames)] :
-                    (is_string($annotationNames) ? [$annotationNames] : [])))
+        $attributeNames = $attributeNames === null ? null : array_unique(
+            (is_array($attributeNames) ? $attributeNames :
+                (is_object($attributeNames) ? [get_class($attributeNames)] :
+                    (is_string($attributeNames) ? [$attributeNames] : [])))
         );
 
-        if ($fallbackAnnotationNames && empty($annotationNames)) {
-            $annotationNames = $this->getAnnotationNames();
+        if ($fallbackAttributeNames && empty($attributeNames)) {
+            $attributeNames = $this->getAttributeNames();
         }
 
-        return $annotationNames;
+        return $attributeNames;
     }
 
     /**
-     * @param $annotationTargets
-     * @param $annotationNames
+     * @param $attributeTargets
+     * @param $attributeNames
      * @return mixed|string[]
      * @throws Exception
      */
-    public function normalizeTargets($annotationTargets, $annotationNames)
+    public function normalizeTargets($attributeTargets, $attributeNames)
     {
-        if (empty($annotationTargets)) {
-            foreach ($annotationNames as $annotationName) {
-                $annotationTargets = array_merge($annotationTargets, $this->getAnnotationTargets($annotationName));
+        if (empty($attributeTargets)) {
+            foreach ($attributeNames as $attributeName) {
+                $attributeTargets = array_merge($attributeTargets, $this->getAttributeTargets($attributeName));
             }
 
-            $annotationTargets = array_unique($annotationTargets);
-            if (empty($annotationTargets)) {
-                $annotationTargets = self::ALL_TARGETS;
+            $attributeTargets = array_unique($attributeTargets);
+            if (empty($attributeTargets)) {
+                $attributeTargets = self::ALL_TARGETS;
             }
         }
 
-        asort($annotationTargets);
-        return $annotationTargets;
+        asort($attributeTargets);
+        return $attributeTargets;
     }
 
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
@@ -733,20 +733,20 @@ class AnnotationReader extends AbstractLocalCache
         // here (in particular anything loading entity metadata) re-enters the
         // half-initialized event manager: the historical ClassMetadata race.
         // The heavy precompute lives in precompute(), driven by
-        // AnnotationCacheWarmer at cache:warmup time; classes not covered by
-        // a warm cache still resolve lazily in getAnnotations().
-        $this->annotationTargets = $this->getCache("/Targets") ?? [];
+        // AttributeCacheWarmer at cache:warmup time; classes not covered by
+        // a warm cache still resolve lazily in getAttributes().
+        $this->attributeTargets = $this->getCache("/Targets") ?? [];
         $this->classHierarchies = $this->getCache("/Hierarchies") ?? [];
         $this->classAncestors = $this->getCache("/Ancestors") ?? [];
-        $this->classAnnotations = $this->getCache("/ClassAnnotations") ?? [];
-        $this->methodAnnotations = $this->getCache("/MethodAnnotations") ?? [];
-        $this->propertyAnnotations = $this->getCache("/PropertyAnnotations") ?? [];
+        $this->classAttributes = $this->getCache("/ClassAttributes") ?? [];
+        $this->methodAttributes = $this->getCache("/MethodAttributes") ?? [];
+        $this->propertyAttributes = $this->getCache("/PropertyAttributes") ?? [];
 
         return [];
     }
 
     /**
-     * Precompute annotations for every entity class and every routed
+     * Precompute attributes for every entity class and every routed
      * controller. Iterating the ROUTE COLLECTION makes ApiPlatform load
      * entity metadata, so this must NEVER run from a runtime constructor —
      * only from the cache warmer (cache:clear / cache:warmup), where no
@@ -759,7 +759,7 @@ class AnnotationReader extends AbstractLocalCache
 
             foreach ($this->classMetadataManipulator->getAllClassNames() as $className) {
                 $this->getAncestor($className);
-                $this->getAnnotations($className);
+                $this->getAttributes($className);
             }
 
             // Warmup controllers
@@ -775,7 +775,7 @@ class AnnotationReader extends AbstractLocalCache
                 }
 
                 $this->getAncestor($className);
-                $this->getAnnotations($className);
+                $this->getAttributes($className);
             }
 
             $this->commitCache();
@@ -784,12 +784,12 @@ class AnnotationReader extends AbstractLocalCache
 
     /**
      * @param $classNameOrMetadataOrRefl
-     * @param $annotationNames
-     * @param array $annotationTargets
+     * @param $attributeNames
+     * @param array $attributeTargets
      * @return array|array[]
      * @throws Exception
      */
-    public function getAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $annotationTargets = []): array
+    public function getAttributes($classNameOrMetadataOrRefl, $attributeNames = null, array $attributeTargets = []): array
     {
         // Termination
         if ($classNameOrMetadataOrRefl == null) {
@@ -797,9 +797,9 @@ class AnnotationReader extends AbstractLocalCache
         }
 
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-        $annotations = [self::TARGET_CLASS => [], self::TARGET_METHOD => [], self::TARGET_PROPERTY => []];
-        $annotationNames = $this->normalizeNames($annotationNames);
-        $annotationTargets = $this->normalizeTargets($annotationTargets, $annotationNames);
+        $attributes = [self::TARGET_CLASS => [], self::TARGET_METHOD => [], self::TARGET_PROPERTY => []];
+        $attributeNames = $this->normalizeNames($attributeNames);
+        $attributeTargets = $this->normalizeTargets($attributeTargets, $attributeNames);
 
         //
         // Class not yet visited.. determine parent class
@@ -813,24 +813,24 @@ class AnnotationReader extends AbstractLocalCache
         }
 
 
-        // Get class annotations
-        if (in_array(self::TARGET_CLASS, $annotationTargets)) {
-            $annotations[self::TARGET_CLASS][$reflClass->getName()] =
-                $this->getClassAnnotations($reflClass, $annotationNames, $annotationTargets);
+        // Get class attributes
+        if (in_array(self::TARGET_CLASS, $attributeTargets)) {
+            $attributes[self::TARGET_CLASS][$reflClass->getName()] =
+                $this->getClassAttributes($reflClass, $attributeNames, $attributeTargets);
         }
 
-        // Get method annotations
-        if (in_array(self::TARGET_METHOD, $annotationTargets)) {
-            $annotations[self::TARGET_METHOD][$reflClass->getName()] =
-                $this->getMethodAnnotations($reflClass, $annotationNames, $annotationTargets);
+        // Get method attributes
+        if (in_array(self::TARGET_METHOD, $attributeTargets)) {
+            $attributes[self::TARGET_METHOD][$reflClass->getName()] =
+                $this->getMethodAttributes($reflClass, $attributeNames, $attributeTargets);
         }
 
-        // Get properties annotations
-        if (in_array(self::TARGET_PROPERTY, $annotationTargets)) {
-            $annotations[self::TARGET_PROPERTY][$reflClass->getName()] =
-                $this->getPropertyAnnotations($reflClass, $annotationNames, $annotationTargets);
+        // Get properties attributes
+        if (in_array(self::TARGET_PROPERTY, $attributeTargets)) {
+            $attributes[self::TARGET_PROPERTY][$reflClass->getName()] =
+                $this->getPropertyAttributes($reflClass, $attributeNames, $attributeTargets);
         }
 
-        return $annotations;
+        return $attributes;
     }
 }

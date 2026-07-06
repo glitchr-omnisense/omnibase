@@ -116,19 +116,19 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
 
     protected $ibatch = 0;
 
-    public function postProcess(mixed $class, string $field, Uploader $annotation, array $fileList)
+    public function postProcess(mixed $class, string $field, Uploader $attribute, array $fileList)
     {
         if ($this->warmup) {
 
-            if (!$annotation->isImage()) {
-                $this->output->section()->writeln("             <warning>* Only images (mimetype = \"" . implode(",", $annotation->mimeTypes()) . "\") can be warmed up.. </warning>");
+            if (!$attribute->isImage()) {
+                $this->output->section()->writeln("             <warning>* Only images (mimetype = \"" . implode(",", $attribute->mimeTypes()) . "\") can be warmed up.. </warning>");
                 return;
             }
 
             $formats = [];
 
-            $annotationFormats = $annotation->getFormats();
-            foreach ($annotationFormats as $format) {
+            $attributeFormats = $attribute->getFormats();
+            foreach ($attributeFormats as $format) {
                 if (!is_array($format)) {
                     $format = explode("x", $format);
                 }
@@ -186,7 +186,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 }
 
                 $file = $fileList[$i];
-                $publicDir = $annotation->getFlysystem()->getPublic("", $annotation->storage());
+                $publicDir = $attribute->getFlysystem()->getPublic("", $attribute->storage());
 
                 $formatStr = implode(", ", array_map(fn($f) => implode("x", $f), $formats));
                 $formatStr = $formatStr ? "Formats: " . $formatStr : "";
@@ -211,7 +211,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                     }
                 }
 
-                $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $annotation->mimeTypes()) . " (incl. WEBP); " . $formatStr, OutputInterface::VERBOSITY_VERY_VERBOSE);
+                $this->output->section()->writeln("                - Memory usage: " . round(memory_get_usage() / 1024 / 1024) . "MB; File: " . implode(", ", $attribute->mimeTypes()) . " (incl. WEBP); " . $formatStr, OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
         }
     }

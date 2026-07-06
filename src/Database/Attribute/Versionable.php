@@ -2,14 +2,14 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Entity\EntityExtension;
 use Base\Database\Attribute\Extension\ExtensionMetadataInterface;
 use Base\Entity\Extension\Revision;
 
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Versionable extends AbstractAnnotation implements ExtensionMetadataInterface
+class Versionable extends AbstractAttribute implements ExtensionMetadataInterface
 {
     /**
      * @param string $target

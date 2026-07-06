@@ -2,7 +2,7 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -14,7 +14,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
-class Cache extends AbstractAnnotation implements ExtensionOptionInterface
+class Cache extends AbstractAttribute implements ExtensionOptionInterface
 {
     /**
      * @var string The concurrency strategy.
@@ -135,7 +135,7 @@ class Cache extends AbstractAnnotation implements ExtensionOptionInterface
                 ];
 
                 foreach ($classMetadata->associationMappings as $property => $associationMapping) {
-                    $isTargetEntityCached = !empty($this->getAnnotationReader()->getClassAnnotations($associationMapping["targetEntity"], self::class));
+                    $isTargetEntityCached = !empty($this->getAttributeReader()->getClassAttributes($associationMapping["targetEntity"], self::class));
                     if (!$isTargetEntityCached) {
                         continue;
                     }
@@ -185,7 +185,7 @@ class Cache extends AbstractAnnotation implements ExtensionOptionInterface
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($classMetadata->associationMappings as $property => $associationMapping) {
 
-            $isTargetEntityCached = !empty($this->getAnnotationReader()->getClassAnnotations($associationMapping["targetEntity"], self::class));
+            $isTargetEntityCached = !empty($this->getAttributeReader()->getClassAttributes($associationMapping["targetEntity"], self::class));
             if (!$isTargetEntityCached) {
                 continue;
             }

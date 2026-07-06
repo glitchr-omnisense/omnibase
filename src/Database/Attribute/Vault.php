@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Traits\VaultTrait;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
@@ -21,7 +21,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use function is_file;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class Vault extends AbstractAnnotation
+class Vault extends AbstractAttribute
 {
     /**
      * @var string
@@ -64,7 +64,7 @@ class Vault extends AbstractAnnotation
             }
         }
 
-        return ($target == AnnotationReader::TARGET_CLASS);
+        return ($target == AttributeReader::TARGET_CLASS);
     }
 
     public function loadKeys(?string $vault = null): array

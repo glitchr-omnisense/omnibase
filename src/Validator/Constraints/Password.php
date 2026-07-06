@@ -5,7 +5,7 @@ namespace Base\Validator\Constraints;
 use Base\Validator\Constraint;
 
 /**
- * @Annotation
+ * @Attribute
  * @NamedArgumentConstructor
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY |\Attribute::TARGET_METHOD |\Attribute::TARGET_CLASS)]

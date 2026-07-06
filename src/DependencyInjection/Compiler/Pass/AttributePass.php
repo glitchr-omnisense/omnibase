@@ -2,10 +2,10 @@
 
 namespace Base\DependencyInjection\Compiler\Pass;
 
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\DependencyInjection\Compiler\AbstractPass;
 
-class AnnotationPass extends AbstractPass
+class AttributePass extends AbstractPass
 {
     public function serviceInterface(): ?string 
     { 
@@ -14,16 +14,16 @@ class AnnotationPass extends AbstractPass
 
     public function taggedServiceIds(): ?string
     {
-        return 'base.annotation';
+        return 'base.attribute';
     }
 
     public function classFqcn(): string
     {
-        return AnnotationReader::class;
+        return AttributeReader::class;
     }
 
     public function addMethod(): string
     {
-        return 'addAnnotation';
+        return 'addAttribute';
     }
 }

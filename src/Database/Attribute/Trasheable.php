@@ -2,7 +2,7 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
+use Base\Attributes\AbstractAttribute;
 use Base\Database\Entity\EntityExtension;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Entity\Extension\TrasheableTrait;
@@ -14,7 +14,7 @@ use Exception;
 
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
+class Trasheable extends AbstractAttribute implements EntityExtensionInterface
 {
     public string $deletedAt;
     public function __construct(string $field = "deletedAt")

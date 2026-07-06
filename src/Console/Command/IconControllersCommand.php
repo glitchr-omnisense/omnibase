@@ -3,7 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Attributes\Attribute\Iconize;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AttributeReader;
 use Base\Console\Command;
 use Base\Service\Model\IconizeInterface;
 
@@ -35,14 +35,14 @@ class IconControllersCommand extends Command
 
             list($class, $method) = explode("::", $controller);
 
-            $instance = AnnotationReader::getInstance();
+            $instance = AttributeReader::getInstance();
 
-            $annotations = $instance->getAnnotations($class, [Iconize::class]) ?? null;
-            $icon = $annotations[AnnotationReader::TARGET_METHOD][$class][$method] ?? null;
+            $attributes = $instance->getAttributes($class, [Iconize::class]) ?? null;
+            $icon = $attributes[AttributeReader::TARGET_METHOD][$class][$method] ?? null;
             $icon = $icon ? end($icon)->getIcon() : null;
 
             if (!$icon) {
-                $icon = $annotations[AnnotationReader::TARGET_CLASS][$class] ?? null;
+                $icon = $attributes[AttributeReader::TARGET_CLASS][$class] ?? null;
                 $icon = $icon ? end($icon)->getIcon() : null;
             }
 

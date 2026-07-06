@@ -2,8 +2,8 @@
 
 namespace Base\Database\Attribute;
 
-use Base\Attributes\AbstractAnnotation;
-use Base\Attributes\AnnotationReader;
+use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  */
 
  #[\Attribute(\Attribute::TARGET_CLASS)]
-class Hierarchify extends AbstractAnnotation implements ExtensionOptionInterface 
+class Hierarchify extends AbstractAttribute implements ExtensionOptionInterface 
 {
     /**
      * @var array|string|null
@@ -40,7 +40,7 @@ class Hierarchify extends AbstractAnnotation implements ExtensionOptionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        return AnnotationReader::TARGET_CLASS == $target;
+        return AttributeReader::TARGET_CLASS == $target;
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void

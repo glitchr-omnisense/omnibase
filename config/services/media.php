@@ -97,8 +97,8 @@ return static function (ContainerConfigurator $container): void {
         ]);
 
     // Former EagerSubscriber: eager construction is obsolete now that
-    // AnnotationReader's constructor is metadata-free (heavy precompute moved
-    // to AnnotationCacheWarmer) — only the cache-valid marker remains.
+    // AttributeReader's constructor is metadata-free (heavy precompute moved
+    // to AttributeCacheWarmer) — only the cache-valid marker remains.
     $services->set('Base\Subscriber\ValidCacheSubscriber')
         ->tag('kernel.event_subscriber');
 
@@ -111,7 +111,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Database\Middleware\PlatformMiddleware')
         ->tag('doctrine.middleware');
 
-    $services->set('Base\DatabaseSubscriber\AnnotationSubscriber')
+    $services->set('Base\DatabaseSubscriber\AttributeSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'loadClassMetadata', 'priority' => 4096])
         ->tag('doctrine.event_listener', ['event' => 'resolveDiscriminator', 'priority' => 2048])
         ->tag('doctrine.event_listener', ['event' => 'preQuery', 'priority' => 2048])
@@ -130,7 +130,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             new Reference('doctrine.orm.entity_manager'),
             new Reference('base.database.metadata_manipulator'),
-            new Reference('base.annotation_reader'),
+            new Reference('base.attribute_reader'),
         ]);
 
     /* ------------------------------
@@ -181,7 +181,7 @@ return static function (ContainerConfigurator $container): void {
         ->public()
         ->args([
             new Reference('twig'),
-            new Reference('base.annotation_reader'),
+            new Reference('base.attribute_reader'),
             new Reference('advanced_router'),
             new Reference('localizer'),
         ]);
@@ -350,7 +350,7 @@ return static function (ContainerConfigurator $container): void {
         ->public()
         ->tag('twig.runtime')
         ->args([
-            new Reference('base.annotation_reader'),
+            new Reference('base.attribute_reader'),
             new Reference('base.service.image'),
             new Reference('localizer'),
             new Reference('advanced_router'),

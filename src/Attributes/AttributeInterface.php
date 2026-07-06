@@ -10,7 +10,7 @@ use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
-interface AnnotationInterface
+interface AttributeInterface
 {
     public function supports(string $target, ?string $targetValue = null, mixed $object = null): bool;
 
