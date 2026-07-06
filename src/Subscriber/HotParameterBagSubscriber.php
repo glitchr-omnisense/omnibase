@@ -58,23 +58,11 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
 
         \benchmark_start();
 
-        $allRaw = [];
-        try { $allRaw = $this->settingBag->allRaw(true, true); } 
-        catch (DBALException $e) { return; }
-
-        array_map_recursive(function ($setting) {
-
-            if ($setting === null) {
-                return;
-            }
-
-            if ($setting->getBag() === null) {
-                return;
-            }
-
-            $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
-
-        }, $allRaw);
+        try {
+            $this->parameterBag->add($this->settingBag->getBagParameters());
+        } catch (DBALException $e) {
+            return;
+        }
 
         $this->parameterBag->markAsReady();
     }

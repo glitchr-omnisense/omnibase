@@ -13,6 +13,13 @@ interface SettingBagInterface
     public function getScalar(null|string|array $path, ?string $locale = null): mixed;
 
     /**
+     * Flat [bagParameterName => resolvedDefaultLocaleValue] map for every
+     * bag-linked setting, used by HotParameterBagSubscriber to seed the
+     * HotParameterBag without querying/hydrating entities on every request.
+     */
+    public function getBagParameters(): array;
+
+    /**
      * @param string $path
      * @param $value
      * @param string|null $locale

@@ -78,6 +78,20 @@ class SettingIntl implements TranslationInterface
     }
 
     /**
+     * Raw stored value (e.g. the upload uuid for file-backed settings),
+     * without the Uploader public-URL resolution applied by getValue().
+     * Used by SettingBag's compiled snapshot so cached settings stay
+     * independent of the active media storage — the URL is derived at read
+     * time instead of being baked in at compile time.
+     *
+     * @return array|mixed|null
+     */
+    public function getValueRaw()
+    {
+        return $this->value;
+    }
+
+    /**
      * @return array|mixed|File|null
      * @throws FilesystemException
      */

@@ -4,6 +4,7 @@ namespace Base\Service;
 
 use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
+use Base\Entity\Layout\SettingIntl;
 use Base\Repository\Layout\SettingRepository;
 use Psr\Cache\CacheItemInterface;
 use Symfony\Component\Asset\Packages;
@@ -13,10 +14,10 @@ use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;
 use Exception;
 use InvalidArgumentException;
-use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
+use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
-class SettingBag implements SettingBagInterface, WarmableInterface
+class SettingBag implements SettingBagInterface, CacheWarmerInterface
 {
     /**
      * @var Packages
@@ -32,6 +33,16 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      * @var CacheItemInterface|null
      */
     protected ?CacheItemInterface $cacheSettingBag = null;
+
+    /**
+     * In-memory copy of the compiled snapshot for this request/process, once
+     * loaded from cache (or compiled fresh). Shape: ['tree' => <normalize()
+     * shape, with each Setting entity leaf replaced by a SettingSnapshotValue>,
+     * 'bags' => [bagParameterName => settingPath]].
+     *
+     * @var array{tree: array, bags: array<string, string>}|null
+     */
+    private ?array $snapshot = null;
 
     /**
      * @var LocalizerInterface
@@ -61,16 +72,26 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     protected ParameterBagInterface $parameterBag;
 
     /**
-     * Track if cache needs to be saved (defer writes to destruct)
+     * Compile the snapshot fresh (bypassing any cached copy) and persist it,
+     * so the very first request after a deploy/cache:clear hits a warm cache
+     * instead of compiling on-demand.
      */
-    private bool $cacheIsDirty = false;
-
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
-        $this->all();
+        $this->invalidate();
+        $this->loadSnapshot(true);
         $this->allRaw();
 
         return [get_class($this)];
+    }
+
+    /**
+     * The snapshot compiles on-demand on a cache miss regardless (see
+     * loadSnapshot()), so this warmer is safe to skip under --no-optional-warmers.
+     */
+    public function isOptional(): bool
+    {
+        return true;
     }
 
     public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, SettingRepository $settingRepository, LocalizerInterface $localizer, Packages $packages, CacheInterface $cache, string $environment)
@@ -100,13 +121,133 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     }
 
     /**
-     * Save cache if dirty (deferred from get/clear calls)
+     * Drop the in-memory and persisted snapshot. The next read recompiles it
+     * from the database in one pass. Called by SettingBag::set() and by
+     * SettingSubscriber on any Setting/SettingIntl write (including ones that
+     * bypass SettingBag entirely, e.g. the admin CRUD's plain flush()).
      */
-    public function __destruct()
+    public function invalidate(): void
     {
-        if ($this->cacheIsDirty && $this->cacheSettingBag !== null) {
-            $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        $this->snapshot = null;
+        $this->cache->delete($this->cacheName);
+        $this->cacheSettingBag = null;
+    }
+
+    /**
+     * Load the compiled snapshot, from the in-memory copy, then the PSR-6
+     * cache, then a fresh compile — written back synchronously (no deferred
+     * write, no partial per-path cache keys).
+     */
+    private function loadSnapshot(bool $useCache = true): array
+    {
+        if ($this->snapshot !== null) {
+            return $this->snapshot;
         }
+
+        if ($useCache) {
+            $item = $this->getCacheItem();
+            if ($item->isHit()) {
+                return $this->snapshot = $item->get();
+            }
+        }
+
+        $snapshot = $this->compileSnapshot();
+
+        if ($useCache) {
+            $item = $this->getCacheItem();
+            $item->set($snapshot);
+            $this->cache->save($item);
+        }
+
+        return $this->snapshot = $snapshot;
+    }
+
+    /**
+     * One query (findAll(), translations already association-mapped) compiled
+     * into the full nested path tree (see normalize()), with every Setting
+     * entity leaf replaced by an opaque per-locale SettingSnapshotValue, plus
+     * a flat map of bag-linked settings for HotParameterBagSubscriber. Small
+     * dataset (tens of rows) — correctness of a single pass wins over
+     * micro-optimizing this compile step, which only runs on warmup/miss/
+     * invalidation, never on the request hot path.
+     */
+    private function compileSnapshot(): array
+    {
+        $useSettingBag = $this->parameterBag->get("base.parameter_bag.use_setting_bag") ?? false;
+        if (!$useSettingBag) {
+            return ["tree" => [], "bags" => []];
+        }
+
+        if (!$this->settingRepository) {
+            throw new InvalidArgumentException("Setting repository not found. No doctrine connection established ?");
+        }
+
+        $settings = $this->settingRepository->findAll();
+
+        $bags = [];
+        foreach ($settings as $setting) {
+            if ($setting->getBag() !== null) {
+                $bags[$setting->getBag()] = $setting->getPath();
+            }
+        }
+
+        $tree = $this->normalize(null, $settings);
+        $tree = array_map_recursive(function ($setting) {
+            if (!$setting instanceof Setting) {
+                return $setting;
+            }
+
+            // RAW values only (getValueRaw, not getValue): the Uploader
+            // public-URL resolution for file-backed settings (e.g. the site
+            // logo) depends on the ACTIVE media storage, so baking the derived
+            // URL into the snapshot would couple the settings cache to
+            // whatever storage was configured at compile time. Resolution
+            // happens at read time in get() instead.
+            $values = [];
+            foreach ($setting->getTranslations() as $locale => $translation) {
+                $values[$locale] = $translation->getValueRaw();
+            }
+
+            return new SettingSnapshotValue($values);
+        }, $tree);
+
+        return ["tree" => $tree, "bags" => $bags];
+    }
+
+    /**
+     * Apply the same value resolution SettingIntl::getValue() performs on a
+     * live entity (Uploader public-URL resolution for file-backed values,
+     * passthrough for everything else) to a raw snapshot value — through the
+     * genuine entity accessor on a throwaway instance, so the two paths can
+     * never drift apart.
+     */
+    private function resolveRawValue(mixed $raw): mixed
+    {
+        if ($raw === null) {
+            return null;
+        }
+
+        return (new SettingIntl())->setValue($raw)->getValue();
+    }
+
+    /**
+     * Flat [bagParameterName => resolvedDefaultLocaleValue] map, read straight
+     * off the compiled snapshot — no query, no entity hydration. Replaces
+     * HotParameterBagSubscriber's former allRaw(true, true) + recursive walk,
+     * which re-ran on every request/console command for what is typically a
+     * handful of bag-linked settings.
+     */
+    public function getBagParameters(): array
+    {
+        $snapshot = $this->loadSnapshot();
+        $defaultLocale = $this->localizer->getDefaultLocale();
+
+        $parameters = [];
+        foreach ($snapshot["bags"] as $bagParameter => $path) {
+            $parameters[$bagParameter] = $this->getScalar($path, $defaultLocale);
+        }
+
+        return $parameters;
     }
 
     public function all(?string $locale = null): array
@@ -354,8 +495,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this->get($path, $locale)["_self"] ?? null;
     }
 
-    protected array $settingBag = [];
-
     public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true): array
     {
         if (is_array($paths = $path)) {
@@ -367,30 +506,45 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return $settings;
         }
 
-        $this->settingBag ??= $useCache ? $this->getCacheItem()->get() ?? [] : [];
-        if (array_key_exists($path . ":" . ($locale ?? Localizer::LOCALE_FORMAT), $this->settingBag)) {
-            return $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)];
+        if (!$useCache) {
+            $this->invalidate();
         }
+
+        $snapshot = $this->loadSnapshot($useCache);
 
         try {
-            $values = $this->getRaw($path, $useCache) ?? [];
+            $values = $this->read($path, $snapshot["tree"]) ?? [];
         } catch (Exception $e) {
-            throw $e;
-            return [];
-        }
-
-        $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)] ??= array_map_recursive(function ($v) use ($locale) {
-            if (!$v instanceof Setting) {
-                return $v;
+            // The compiled tree only has branches for settings that actually
+            // exist in the DB. The old per-path getRaw($path) flow queried
+            // "WHERE path STARTS WITH $path" and fed the (possibly empty)
+            // result into normalize($path, ...), which synthesizes an empty
+            // ["_self" => null] skeleton for the requested path regardless of
+            // whether any matching row exists — so a well-formed but never-
+            // configured path degraded to null rather than erroring. Preserve
+            // that here; still surface genuine path-syntax errors (e.g. "_self"
+            // used mid-path).
+            if (str_contains($e->getMessage(), "key not found")) {
+                $values = ["_self" => null];
+            } else {
+                throw $e;
             }
-            return $v->translate($locale)?->getValue() ?? $v->translate($this->localizer->getDefaultLocale())?->getValue();
-        }, $values);
-
-        if ($useCache) {
-            $this->cacheIsDirty = true;
         }
 
-        return $this->settingBag[$path . ":" . ($locale ?? Localizer::LOCALE_FORMAT)];
+        $normLocale = $locale !== null ? $this->localizer->getLocale($locale) : null;
+        $defaultLocale = $this->localizer->getDefaultLocale();
+
+        return array_map_recursive(function ($entry) use ($normLocale, $defaultLocale) {
+            if (!$entry instanceof SettingSnapshotValue) {
+                return $entry;
+            }
+
+            $raw = $entry->values[$normLocale]
+                ?? $entry->values[$defaultLocale]
+                ?? (empty($entry->values) ? null : first($entry->values));
+
+            return $this->resolveRawValue($raw);
+        }, $values);
     }
 
     public function clearAll()
@@ -399,42 +553,22 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     }
 
     /**
+     * Invalidates the whole compiled snapshot. $path/$locale are accepted for
+     * backward compatibility with call sites that used to target a specific
+     * cache key, but a single small snapshot is cheap enough to recompile
+     * wholesale — there is no meaningful partial-invalidate left to do.
+     *
      * @param string|array|null $path
      * @param string|null $locale
-     * @param $useCache
      * @return void
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function clear(null|string|array $path, ?string $locale = null, $useCache = true)
     {
-        if (is_array($paths = $path)) {
-            foreach ($paths as $path) {
-                $this->clear($path, $locale, $useCache);
-            }
-
+        if (!$useCache) {
             return;
         }
 
-        if (!$path) {
-            $this->settingBag = [];
-        } else {
-            $pathByArray = explode(".", $path);
-            while (!empty($pathByArray)) {
-                $currentPath = implode(".", $pathByArray);
-                $this->settingBag = array_key_removes_startsWith($this->settingBag, true, $currentPath . ":");
-
-                array_pop($pathByArray);
-            }
-        }
-
-        if ($useCache) {
-            if ($path == null) {
-                $this->cache->delete($this->cacheName);
-                $this->cacheIsDirty = false;
-            } else {
-                $this->cacheIsDirty = true;
-            }
-        }
+        $this->invalidate();
     }
 
     /**

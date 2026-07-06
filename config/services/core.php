@@ -34,6 +34,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service_closure;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -138,6 +139,10 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\SettingBag')
         ->public(true)
         ->tag('twig.runtime')
+        // Compiles+persists the settings snapshot at warmup (SettingBag
+        // implements WarmableInterface) so the first request after a
+        // deploy/cache:clear hits a warm cache instead of compiling on-demand.
+        ->tag('kernel.cache_warmer')
         ->args([
             service('parameter_bag'),
             service('doctrine.orm.entity_manager'),
@@ -147,6 +152,19 @@ return static function (ContainerConfigurator $container): void {
             service('cache.adapter'),
         ])
         ->bind('$environment', '%kernel.environment%');
+
+    // Keeps the SettingBag snapshot in sync with every Setting/SettingIntl
+    // write, including the admin CRUD's plain flush() (which bypasses
+    // SettingBag::set() entirely). service_closure, NOT service: Doctrine
+    // instantiates listeners while initializing the event manager, and
+    // constructing SettingBag there (repository -> getClassMetadata) triggers
+    // a re-entrant resolveDiscriminator dispatch on the half-initialized
+    // event manager.
+    $services->set('Base\EntitySubscriber\SettingSubscriber')
+        ->tag('doctrine.event_listener', ['event' => 'postPersist'])
+        ->tag('doctrine.event_listener', ['event' => 'postUpdate'])
+        ->tag('doctrine.event_listener', ['event' => 'postRemove'])
+        ->args([service_closure('Base\Service\SettingBagInterface')]);
 
     // Notifier
     $services->alias('App\Notifier\Notifier', 'Base\Notifier\Notifier');
