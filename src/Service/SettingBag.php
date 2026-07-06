@@ -78,9 +78,18 @@ class SettingBag implements SettingBagInterface, CacheWarmerInterface
      */
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
-        $this->invalidate();
-        $this->loadSnapshot(true);
-        $this->allRaw();
+        // Never let an unreachable database turn cache warmup into a fatal:
+        // container entrypoints run cache:clear at boot, and a DB that is
+        // still starting (or temporarily down) would otherwise crash-loop the
+        // whole container (observed during the 2026-07-06 promotion). The
+        // snapshot compiles lazily on first read anyway.
+        try {
+            $this->invalidate();
+            $this->loadSnapshot(true);
+            $this->allRaw();
+        } catch (\Doctrine\DBAL\Exception | \PDOException $e) {
+            // degrade: warm nothing, compile on first request instead
+        }
 
         return [get_class($this)];
     }
