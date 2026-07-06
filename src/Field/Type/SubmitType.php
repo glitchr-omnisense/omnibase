@@ -8,10 +8,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SubmitType extends AbstractType implements SubmitButtonTypeInterface
 {
-    /**
-     * @return string
-     */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return "submit2";
     }

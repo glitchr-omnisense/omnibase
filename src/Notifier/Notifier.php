@@ -14,6 +14,24 @@ use Symfony\Component\Routing\Router;
 
 class Notifier extends BaseNotifier implements NotifierInterface
 {
+    /**
+     * Recipient for inbound "contact" style notifications. Falls back to the
+     * technical recipient when base.settings.mail.contact is not configured —
+     * an unset setting must never crash the public contact form.
+     */
+    protected function getContactRecipient(): Recipient
+    {
+        $name = $this->settingBag->getScalar("base.settings.mail.name");
+        $email = $this->settingBag->getScalar("base.settings.mail.contact");
+
+        $address = mailformat([], $name, $email);
+        if (!$address) {
+            $address = $this->getTechnicalRecipient()->getEmail();
+        }
+
+        return new Recipient($address);
+    }
+
     public function testEmail(User $user): Notification
     {
         $notification = new Notification("email.html.twig");
@@ -71,10 +89,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification = new Notification("contact.adminNotification");
         $notification->setHtmlTemplate("email.html.twig");
 
-        $name = $this->settingBag->getScalar("base.settings.mail.name");
-        $email = $this->settingBag->getScalar("base.settings.mail.contact");
-
-        $adminRecipient = new Recipient(mailformat([], $name, $email));
+        $adminRecipient = $this->getContactRecipient();
 
         $notification->addRecipient($adminRecipient);
         $notification->setHtmlParameters([
@@ -136,12 +151,8 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function userApprovalRequest(User $user)
     {
         $notification = new Notification("adminApproval.required");
-        
-        $name = $this->settingBag->getScalar("base.settings.mail.name");
-        $email = $this->settingBag->getScalar("base.settings.mail.contact");
 
-        $adminRecipient = new Recipient(mailformat([], $name, $email));
-        $notification->addRecipient($adminRecipient);
+        $notification->addRecipient($this->getContactRecipient());
 
         $notification->setHtmlTemplate("email.html.twig");
         $notification->setHtmlParameters([

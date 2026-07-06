@@ -173,7 +173,11 @@ return static function (ContainerConfigurator $container): void {
         ->parent('Base\Notifier\Abstract\BaseNotifier')
         ->public(true);
 
-    $services->alias('Base\Notifier\Abstract\BaseNotifierInterface', 'Base\Notifier\Abstract\BaseNotifier');
+    // No BaseNotifierInterface alias here: aliasing an ABSTRACT definition is
+    // unresolvable by design, and once RemoveAbstractDefinitionsPass drops the
+    // target the dangling alias crashes framework.test's
+    // TestServiceContainerRealRefPass ("Undefined array key"). Autowire against
+    // NotifierInterface (aliased to the concrete notifier above) instead.
     $services->set('Base\Notifier\Abstract\BaseNotifier')
         ->abstract(true)
         ->args([
