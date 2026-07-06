@@ -96,15 +96,11 @@ return static function (ContainerConfigurator $container): void {
             new Reference('security.token_storage'),
         ]);
 
-    // Constructs only the metadata-critical services early (ClassMetadata race
-    // guard) — no longer the full BaseService graph; see the class docblock.
-    $services->set('Base\Subscriber\EagerSubscriber')
-        ->tag('kernel.event_subscriber')
-        ->args([
-            new Reference('base.annotation_reader'),
-            new Reference('base.database.metadata_manipulator'),
-            new Reference('localizer'),
-        ]);
+    // Former EagerSubscriber: eager construction is obsolete now that
+    // AnnotationReader's constructor is metadata-free (heavy precompute moved
+    // to AnnotationCacheWarmer) — only the cache-valid marker remains.
+    $services->set('Base\Subscriber\ValidCacheSubscriber')
+        ->tag('kernel.event_subscriber');
 
     $services->set('Base\Subscriber\FlashBagSubscriber')
         ->tag('kernel.event_subscriber');

@@ -727,6 +727,14 @@ class AnnotationReader extends AbstractLocalCache
 
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
+        // Cheap cache-bucket loads ONLY — this runs in the CONSTRUCTOR
+        // (SimpleCacheTrait::__construct), which Doctrine may invoke while
+        // lazily instantiating event listeners MID-dispatch. Anything heavier
+        // here (in particular anything loading entity metadata) re-enters the
+        // half-initialized event manager: the historical ClassMetadata race.
+        // The heavy precompute lives in precompute(), driven by
+        // AnnotationCacheWarmer at cache:warmup time; classes not covered by
+        // a warm cache still resolve lazily in getAnnotations().
         $this->annotationTargets = $this->getCache("/Targets") ?? [];
         $this->classHierarchies = $this->getCache("/Hierarchies") ?? [];
         $this->classAncestors = $this->getCache("/Ancestors") ?? [];
@@ -734,6 +742,19 @@ class AnnotationReader extends AbstractLocalCache
         $this->methodAnnotations = $this->getCache("/MethodAnnotations") ?? [];
         $this->propertyAnnotations = $this->getCache("/PropertyAnnotations") ?? [];
 
+        return [];
+    }
+
+    /**
+     * Precompute annotations for every entity class and every routed
+     * controller. Iterating the ROUTE COLLECTION makes ApiPlatform load
+     * entity metadata, so this must NEVER run from a runtime constructor —
+     * only from the cache warmer (cache:clear / cache:warmup), where no
+     * Doctrine event dispatch is in flight. Idempotent per cache lifetime
+     * via executeOnce.
+     */
+    public function precompute(): void
+    {
         $this->executeOnce(function () {
 
             foreach ($this->classMetadataManipulator->getAllClassNames() as $className) {
@@ -759,8 +780,6 @@ class AnnotationReader extends AbstractLocalCache
 
             $this->commitCache();
         });
-
-        return [];
     }
 
     /**
