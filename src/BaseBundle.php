@@ -21,6 +21,7 @@ use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
 use Base\DependencyInjection\Dumper\CliDumper;
 use Base\DependencyInjection\Dumper\HtmlDumper;
+use Base\Service\BaseService;
 
 class BaseBundle extends AbstractBaseBundle
 {
@@ -174,10 +175,21 @@ class BaseBundle extends AbstractBaseBundle
         if (!extension_loaded('imagick')) {
            throw new EnvNotFoundException('Application requires `imagick`, but it is not enabled.');
         }
-        
+
         if (!extension_loaded('igbinary')) {
            throw new EnvNotFoundException('Application requires `igbinary`, but it is not enabled.');
         }
+
+        // Seed the lazy runtime for BaseTrait/BaseCommonTrait static accessors.
+        // boot() runs for HTTP, console AND bare kernel boots, so the statics
+        // work everywhere without eagerly constructing BaseService's full
+        // dependency graph — the locator only holds closures; each service is
+        // instantiated on its first actual accessor call.
+        if ($this->container->has('base.runtime')) {
+            BaseService::setRuntime($this->container->get('base.runtime'));
+        }
+        BaseService::setProjectDir($this->container->getParameter('kernel.project_dir'));
+        BaseService::setEnvironment($this->container->getParameter('kernel.environment'));
 
         if (!self::$cache) {
             $this->warmUp();

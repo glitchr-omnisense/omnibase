@@ -218,6 +218,38 @@ return static function (ContainerConfigurator $container): void {
         }
     }
 
+    // Lazy runtime locator backing BaseTrait/BaseCommonTrait static accessors.
+    // A compile-time ServiceLocator: constructing it costs nothing (it holds
+    // closures), and each service is only instantiated on the FIRST actual
+    // static accessor call. Seeded in BaseBundle::boot(), so the statics work
+    // in every context (HTTP, console, bare kernel boots) without eagerly
+    // building BaseService's full dependency graph. Keys mirror the ids
+    // BaseTrait::runtimeGet() requests.
+    $services->set('base.runtime', \Symfony\Component\DependencyInjection\ServiceLocator::class)
+        ->public(true)
+        ->tag('container.service_locator')
+        ->args([[
+            'base.service' => new Reference('base.service'),
+            'setting_bag' => new Reference('setting_bag'),
+            'doctrine' => new Reference('doctrine'),
+            'base.database.metadata_manipulator' => new Reference('base.database.metadata_manipulator'),
+            'security.token_storage' => new Reference('security.token_storage'),
+            'request_stack' => new Reference('request_stack'),
+            'base.database.entity_hydrator' => new Reference('base.database.entity_hydrator'),
+            'base.service.image' => new Reference('base.service.image'),
+            'obfuscator' => new Reference('obfuscator'),
+            'base.service.icon' => new Reference('base.service.icon'),
+            'localizer' => new Reference('localizer'),
+            'advanced_router' => new Reference('advanced_router'),
+            'security.firewall.map' => new Reference('security.firewall.map'),
+            'twig' => new Reference('twig'),
+            'base.notifier' => new Reference('base.notifier'),
+            'translator' => new Reference('translator'),
+            'slugger' => new Reference('slugger'),
+            'trading_market' => new Reference('trading_market'),
+            'parameter_bag' => new Reference('parameter_bag'),
+        ]]);
+
     // BaseService
     $services->set('Base\Service\BaseService')
         ->public(true)

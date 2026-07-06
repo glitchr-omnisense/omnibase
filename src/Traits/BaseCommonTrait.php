@@ -22,12 +22,52 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+use Psr\Container\ContainerInterface as RuntimeLocatorInterface;
 use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 
 trait BaseCommonTrait
 {
+    /**
+     * Lazy runtime locator (a compile-time ServiceLocator holding service
+     * CLOSURES, seeded in BaseBundle::boot() — zero services constructed at
+     * seed time). Static accessors fall back to it when their static property
+     * has not been populated yet, so BaseTrait keeps working everywhere
+     * (entities, attributes, bare-CLI kernel boots) WITHOUT requiring
+     * BaseService's full dependency graph to be eagerly built first.
+     *
+     * @var RuntimeLocatorInterface|null
+     */
+    protected static ?RuntimeLocatorInterface $runtime = null;
+
+    public static function setRuntime(?RuntimeLocatorInterface $runtime): void
+    {
+        self::$runtime = $runtime;
+    }
+
+    /**
+     * Resolve a static property, lazily pulling the backing service from the
+     * runtime locator on first access. Memoizes into the static property, so
+     * each service is resolved at most once per process — and an eagerly
+     * constructed BaseService (which still calls the set*() methods) simply
+     * pre-fills the same properties.
+     *
+     * @return mixed|null
+     */
+    public static function runtimeGet(string $property, string $serviceId)
+    {
+        if (!isset(self::$$property)) {
+            if (self::$runtime === null || !self::$runtime->has($serviceId)) {
+                return null;
+            }
+
+            self::$$property = self::$runtime->get($serviceId);
+        }
+
+        return self::$$property;
+    }
+
     /**
      * @var BaseService|null
      */

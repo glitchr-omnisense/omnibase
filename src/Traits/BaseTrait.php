@@ -27,6 +27,15 @@ use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
+/**
+ * Static service accessors usable from anywhere (entities, attributes,
+ * subscribers, ...). Backed by BaseService's static properties, which are
+ * populated EITHER eagerly by BaseService's constructor (when something
+ * actually injects it) OR lazily, one service at a time, through the
+ * `base.runtime` ServiceLocator seeded in BaseBundle::boot() — see
+ * BaseCommonTrait::runtimeGet(). Nothing here forces BaseService's full
+ * dependency graph to be built anymore.
+ */
 trait BaseTrait
 {
     public static function getAnnotationReader(): ?AnnotationReader
@@ -36,22 +45,22 @@ trait BaseTrait
 
     public static function getService(): ?BaseService
     {
-        return (self::class === BaseService::class) ? BaseService::$instance : BaseService::getService();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('instance', 'base.service') : BaseService::getService();
     }
 
     public static function getSettingBag(): ?SettingBag
     {
-        return (self::class === BaseService::class) ? BaseService::$settings : BaseService::getSettingBag();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('settings', 'setting_bag') : BaseService::getSettingBag();
     }
 
     public static function getDoctrine(): ?ManagerRegistry
     {
-        return (self::class === BaseService::class) ? BaseService::$doctrine : BaseService::getDoctrine();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('doctrine', 'doctrine') : BaseService::getDoctrine();
     }
 
     public static function getObjectManager(mixed $entity): ?ObjectManager
     {
-        return (self::class === BaseService::class) ? BaseService::$doctrine->getManagerForClass(is_object($entity) ? get_class($entity) : $entity) : BaseService::getObjectManager($entity);
+        return (self::class === BaseService::class) ? BaseService::getDoctrine()?->getManagerForClass(is_object($entity) ? get_class($entity) : $entity) : BaseService::getObjectManager($entity);
     }
 
     public static function getEntityManager(bool $reopen = false): ?EntityManagerInterface
@@ -60,10 +69,15 @@ trait BaseTrait
             return BaseService::getEntityManager();
         }
 
+        $doctrine = BaseService::getDoctrine();
+        if (!$doctrine) {
+            return null;
+        }
+
         /**
          * @var EntityManager $entityManager
          */
-        $entityManager = BaseService::$doctrine->getManager(BaseService::$doctrine->getDefaultManagerName());
+        $entityManager = $doctrine->getManager($doctrine->getDefaultManagerName());
 
         if (!$entityManager) {
             return null;
@@ -139,77 +153,77 @@ trait BaseTrait
 
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator
     {
-        return (self::class === BaseService::class) ? BaseService::$classMetadataManipulator : BaseService::getClassMetadataManipulator();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('classMetadataManipulator', 'base.database.metadata_manipulator') : BaseService::getClassMetadataManipulator();
     }
 
     public static function getTokenStorage(): ?TokenStorageInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$tokenStorage : BaseService::getTokenStorage();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('tokenStorage', 'security.token_storage') : BaseService::getTokenStorage();
     }
 
     public static function getRequestStack(): ?RequestStack
     {
-        return (self::class === BaseService::class) ? BaseService::$requestStack : BaseService::getRequestStack();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('requestStack', 'request_stack') : BaseService::getRequestStack();
     }
 
     public static function getEntityHydrator(): ?EntityHydrator
     {
-        return (self::class === BaseService::class) ? BaseService::$entityHydrator : BaseService::getEntityHydrator();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('entityHydrator', 'base.database.entity_hydrator') : BaseService::getEntityHydrator();
     }
 
     public static function getMediaService(): ?MediaService
     {
-        return (self::class === BaseService::class) ? BaseService::$mediaService : BaseService::getMediaService();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('mediaService', 'base.service.image') : BaseService::getMediaService();
     }
 
     public static function getObfuscator(): ?Obfuscator
     {
-        return (self::class === BaseService::class) ? BaseService::$obfuscator : BaseService::getObfuscator();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('obfuscator', 'obfuscator') : BaseService::getObfuscator();
     }
 
     public static function getIconProvider(): ?IconProvider
     {
-        return (self::class === BaseService::class) ? BaseService::$iconProvider : BaseService::getIconProvider();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('iconProvider', 'base.service.icon') : BaseService::getIconProvider();
     }
 
     public static function getLocalizer(): ?LocalizerInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$localizer : BaseService::getLocalizer();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('localizer', 'localizer') : BaseService::getLocalizer();
     }
 
     public static function getRouter(): ?AdvancedRouterInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$router : BaseService::getRouter();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('router', 'advanced_router') : BaseService::getRouter();
     }
 
     public static function getFirewallMap(): ?FirewallMapInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$firewallMap : BaseService::getFirewallMap();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('firewallMap', 'security.firewall.map') : BaseService::getFirewallMap();
     }
 
     public static function getTwig(): ?Environment
     {
-        return (self::class === BaseService::class) ? BaseService::$twig : BaseService::getTwig();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('twig', 'twig') : BaseService::getTwig();
     }
 
     public static function getNotifier(): ?BaseNotifierInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$notifier : BaseService::getNotifier();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('notifier', 'base.notifier') : BaseService::getNotifier();
     }
 
     public static function getTranslator(): ?TranslatorInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$translator : BaseService::getTranslator();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('translator', 'translator') : BaseService::getTranslator();
     }
 
     public static function getSlugger(): ?SluggerInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$slugger : BaseService::getSlugger();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('slugger', 'slugger') : BaseService::getSlugger();
     }
 
     public static function getTrading(): ?TradingInterface
     {
-        return (self::class === BaseService::class) ? BaseService::$tradingMarket : BaseService::getTrading();
+        return (self::class === BaseService::class) ? BaseService::runtimeGet('tradingMarket', 'trading_market') : BaseService::getTrading();
     }
 
     /**
@@ -219,7 +233,7 @@ trait BaseTrait
      */
     public static function getParameterBag(string $key = "", ?array $bag = null)
     {
-        $parameterBag = self::class === BaseService::class ? BaseService::$parameterBag : BaseService::getParameterBag();
+        $parameterBag = self::class === BaseService::class ? BaseService::runtimeGet('parameterBag', 'parameter_bag') : BaseService::getParameterBag();
         return $key ? $parameterBag->get($key, $bag) : $parameterBag;
     }
 }
