@@ -230,11 +230,9 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
 
                 $path = $that->getPath($entity, $fieldName, $uuidOrFile);
 
-                $pathPublic = $that->getFlysystem()->getPublic($path, $that->getStorage());
+                $pathPublic = self::resolvePublicOrRoute($that, $path, $uuidOrFile);
                 if ($pathPublic) {
                     $pathList[] = $pathPublic;
-                } elseif ($that->getMissable()) {
-                    $pathList[] = $uuidOrFile;
                 }
             }
 
@@ -253,13 +251,42 @@ class Uploader extends AbstractAnnotation implements ExtensionOptionInterface
             }
 
             $path = $that->getPath($entity, $fieldName, $uuidOrFile);
-            $pathPublic = $that->getFlysystem()->getPublic($path, $that->getStorage());
-            if ($pathPublic) {
-                return $pathPublic;
-            }
-
-            return $that->getMissable() ? $uuidOrFile : null;
+            return self::resolvePublicOrRoute($that, $path, $uuidOrFile);
         }
+    }
+
+    /**
+     * Resolve an entity-file storage path to a servable URL.
+     *
+     * Local storages expose files through public/ symlinks, so
+     * Flysystem::getPublic() returns a direct static URL — unchanged behavior.
+     * Remote storages (S3/MinIO) have no local file to symlink, so getPublic()
+     * returns null; route those through the /images resolver instead, carrying
+     * the source storage in-config so MediaService::filter() streams the source
+     * from the remote, applies filters, and caches the derivative locally
+     * (fast on repeat). Remote is checked FIRST so a stale local copy left over
+     * from a storage migration cannot shadow the configured source of truth.
+     * Falls back to the raw value when the field is "missable", otherwise null.
+     */
+    protected static function resolvePublicOrRoute(Uploader $that, ?string $path, mixed $fallback): mixed
+    {
+        if ($path === null) {
+            return $that->getMissable() ? $fallback : null;
+        }
+
+        if ($that->getFlysystem()->isRemote($that->getStorage())) {
+            $routed = BaseService::getMediaService()?->image($path, ["storage" => $that->getStorage()]);
+            if ($routed) {
+                return $routed;
+            }
+        }
+
+        $pathPublic = $that->getFlysystem()->getPublic($path, $that->getStorage());
+        if ($pathPublic) {
+            return $pathPublic;
+        }
+
+        return $that->getMissable() ? $fallback : null;
     }
 
     /**

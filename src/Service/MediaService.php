@@ -559,6 +559,58 @@ class MediaService extends FileService implements MediaServiceInterface
         return false;
     }
 
+    /**
+     * Stream a source file from a remote flysystem storage (S3/MinIO) into a temp
+     * file so imagine can open it — imagine only reads local paths/URLs, never a
+     * remote storage. The token may carry the source in several path forms
+     * (storage-relative like "_/entity/field/uuid", a public URL with a leading
+     * mount segment like "/wysiwyg/uuid", etc.), so we try the plausible
+     * storage-relative candidates and use the first that exists. Returns the temp
+     * file path (caller must unlink) or null if the source can't be found.
+     */
+    private function fetchRemoteSource(string $path, string $storage): ?string
+    {
+        $candidates = [];
+        $stripped = $this->flysystem->stripPrefix($path, $storage);
+        $candidates[] = ltrim((string) $stripped, "/");
+        $candidates[] = ltrim($path, "/");
+        // Drop a single leading mount segment (e.g. "wysiwyg/", "uploads/").
+        if (preg_match('#^/?[^/]+/(.+)$#', $path, $m)) {
+            $candidates[] = $m[1];
+        }
+
+        foreach (array_unique(array_filter($candidates)) as $rel) {
+            try {
+                if (!$this->flysystem->fileExists($rel, $storage)) {
+                    continue;
+                }
+                $contents = $this->flysystem->read($rel, $storage);
+            } catch (\Throwable $e) {
+                continue;
+            }
+            if ($contents === null) {
+                continue;
+            }
+
+            $tmp = tempnam(sys_get_temp_dir(), "media_");
+            if ($tmp === false) {
+                return null;
+            }
+            // Preserve the extension so imagine can detect the format (webp/svg/…).
+            $ext = pathinfo($rel, PATHINFO_EXTENSION);
+            if ($ext !== "") {
+                $tmpExt = $tmp . "." . $ext;
+                @rename($tmp, $tmpExt);
+                $tmp = $tmpExt;
+            }
+            file_put_contents($tmp, $contents);
+
+            return $tmp;
+        }
+
+        return null;
+    }
+
     public function filter(?string $path, array $config = [], FilterInterface|array $filters = []): ?string
     {
         if (!is_array($filters)) {
@@ -649,13 +701,23 @@ class MediaService extends FileService implements MediaServiceInterface
                 set_time_limit($this->timeout);
 
                 $filteredPath = $this->filter($path, array_merge($config, ["local_cache" => false]), $filters) ?? $path;
-                if (!file_exists($filteredPath)) {
+                if (!file_exists($filteredPath) || in_array($filteredPath, array_column($this->noImage, "path"), true)) {
+
+                    set_time_limit($maxExecutionTime);
 
                     if (!$this->fallback) {
                         throw new NotFoundHttpException($pathCache ? "Image \"$pathCache\" not found." : "Empty path provide in ".$storage.".");
                     }
 
-                    $filteredPath = $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension());
+                    // The source failed to resolve or filter: NEVER write the
+                    // no-image placeholder into the derivative cache — the miss
+                    // may be transient (source temporarily unreachable), and a
+                    // poisoned cache entry would keep serving the placeholder
+                    // (with public HTTP caching, since the cached file exists)
+                    // even after the source recovers. Returning null lets
+                    // serve(null) emit the placeholder with explicit no-store
+                    // semantics instead.
+                    return null;
                 }
 
                 try {
@@ -693,13 +755,38 @@ class MediaService extends FileService implements MediaServiceInterface
         $imagine = $formatter instanceof SvgFilter ? $this->imagineSvg : $this->imagineBitmap;
 
         //
+        // Resolve the source to a locally-openable path. Local sources (absolute
+        // paths behind public/ symlinks, or URLs) open directly — this is a no-op
+        // fast path. Remote sources (S3/MinIO) have no local file, so stream the
+        // source from the configured flysystem storage into a temp file first.
+        // The derivative is still cached locally afterwards (see the local_cache
+        // branch above), so a remote source is fetched at most once per
+        // (source, filter) combination and every later hit serves statically.
+        $openPath = $path;
+        $tmpSource = null;
+        if ($path !== null && !is_file($path) && !is_url($path) && $storage !== null && $this->flysystem->isRemote($storage)) {
+            $tmpSource = $this->fetchRemoteSource($path, $storage);
+            if ($tmpSource !== null) {
+                $openPath = $tmpSource;
+            }
+        }
+
+        //
         // GD does not support other palette than RGB..
         // if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
         //   cmyk2rgb($pathPublic); // @TODO: Not working yet.. to be investivated
         try {
-            $image = $imagine->open($path);
+            $image = $imagine->open($openPath);
         } catch (Exception $e) {
+            if ($tmpSource !== null) {
+                @unlink($tmpSource);
+            }
             return $this->fallback ? $this->getNoImage($this->getExtension($path) ?? $formatter->getStandardExtension()) : null;
+        }
+
+        // Source fully loaded into memory — the temp copy is no longer needed.
+        if ($tmpSource !== null) {
+            @unlink($tmpSource);
         }
 
         try {

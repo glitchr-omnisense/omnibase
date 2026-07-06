@@ -361,9 +361,18 @@ class EditorController extends AbstractController
             return new Response("Repository directory not writable.", 500);
         }
 
+        // Local storage: public/ symlink URL (unchanged). Remote storage
+        // (S3/MinIO): no local symlink exists, so route through the /images
+        // resolver with the storage in-config — MediaService::filter() streams
+        // the source from the remote and caches the derivative locally.
+        $filePublic = $this->flysystem->getPublic($filePath, $operator);
+        $fileUrl = $filePublic !== null
+            ? str_lstrip($filePublic, $this->flysystem->getPublicDir())
+            : $this->mediaService->image($filePath, ["storage" => $operator]);
+
         $fileMetadata = [
             "success" => self::STATUS_OK,
-            "file" => ["url" => str_lstrip($this->flysystem->getPublic($filePath, $operator), $this->flysystem->getPublicDir())]
+            "file" => ["url" => $fileUrl]
         ];
 
         unlink($file->getRealPath());
@@ -429,9 +438,15 @@ class EditorController extends AbstractController
             return new Response("Repository directory not writable.", 500);
         }
 
+        // Same local-vs-remote URL resolution as UploadByFile above.
+        $filePublic = $this->flysystem->getPublic($filePath, $operator);
+        $fileUrl = $filePublic !== null
+            ? str_lstrip($filePublic, $this->flysystem->getPublicDir())
+            : $this->mediaService->image($filePath, ["storage" => $operator]);
+
         $fileMetadata = [
             "success" => self::STATUS_OK,
-            "file" => ["url" => str_lstrip($this->flysystem->getPublic($filePath, $operator), $this->flysystem->getPublicDir())]
+            "file" => ["url" => $fileUrl]
         ];
 
         unlink($file->getRealPath());

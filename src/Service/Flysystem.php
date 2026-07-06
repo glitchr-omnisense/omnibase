@@ -342,8 +342,12 @@ class Flysystem extends LazyFactory implements FlysystemInterface
      */
     public function isRemote(FilesystemOperator|string|null $operator = null)
     {
+        // Anything that is not the local adapter has no locally-openable file
+        // behind it (S3/MinIO, SFTP, FTP, ...). The previous property-based
+        // detection (connectionOptions/connectionProvider) only matched
+        // SFTP/FTP adapters and silently reported S3 adapters as local.
         $adapter = $this->getAdapter($operator);
-        return property_exists($adapter, "connectionOptions") || property_exists($adapter, "connectionProvider");
+        return !$adapter instanceof \League\Flysystem\Local\LocalFilesystemAdapter;
     }
 
     /**
