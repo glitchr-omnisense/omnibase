@@ -496,6 +496,22 @@ class ClassMetadataManipulator extends AbstractLocalCache
             return null;
         }
 
+        // Doctrine ORM 3.4+ proxies associations with NATIVE lazy objects
+        // (PHP 8.4): reading a property through Reflection deliberately does
+        // NOT initialize them (that is how Doctrine's own hydration bypasses
+        // lazy loading). Every reflection-based read below would therefore
+        // see NULL on an untouched association (e.g. a template rendering
+        // Photo::image -> Image::source straight away). Force initialization
+        // before reading; classic Proxy instances get the same treatment.
+        if (is_object($entity)) {
+            $reflClass = new \ReflectionClass($entity);
+            if (method_exists($reflClass, 'isUninitializedLazyObject') && $reflClass->isUninitializedLazyObject($entity)) {
+                $reflClass->initializeLazyObject($entity);
+            } elseif ($entity instanceof \Doctrine\Persistence\Proxy && !$entity->__isInitialized()) {
+                $entity->__load();
+            }
+        }
+
         $entityName = get_class($entity);
 
         // Extract leading field && get metadata
