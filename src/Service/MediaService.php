@@ -75,6 +75,9 @@ class MediaService extends FileService implements MediaServiceInterface
     /** @var ?LoggerInterface */
     protected ?LoggerInterface $logger;
 
+    /** @var string[] active storage id per public mount, e.g. ["s3.uploads", "s3.wysiwyg"] */
+    protected array $mountStorages = [];
+
     public function __construct(
         Environment             $twig,
         AdvancedRouterInterface $router,
@@ -97,6 +100,15 @@ class MediaService extends FileService implements MediaServiceInterface
 
         $this->timeout = $parameterBag->get("base.images.timeout");
         $this->fallback = $parameterBag->get("base.images.fallback");
+
+        // Active storages per public mount, used to resolve STORAGE-INDEPENDENT
+        // canonical tokens (/uploads/..., /wysiwyg/...) at serve time — see
+        // obfuscate() and getStorageForMount(). Storage ids follow the
+        // "<backend>.<mount>" convention (local.uploads / s3.uploads, ...).
+        $this->mountStorages = array_filter([
+            $parameterBag->get("base.uploader.storage"),
+            $parameterBag->get("base.twig.editor.storage"),
+        ], fn($s) => is_string($s) && str_contains($s, "."));
         $this->maxResolution = $parameterBag->get("base.images.max_resolution");
         $this->maxQuality = $parameterBag->get("base.images.max_quality");
         $this->enableWebp = $parameterBag->get("base.images.enable_webp");
@@ -333,8 +345,32 @@ class MediaService extends FileService implements MediaServiceInterface
             // Already an obfuscated URL - extract the data parameter
             $data = $routeMatch["data"] ?? null;
             if ($data) {
-                // Data is already subdivided (e.g., "AB/CD/EF/GH/IJ/...") - return as-is
-                return $data;
+                $extraFilters = array_merge($config["filters"] ?? [], is_array($filters) ? $filters : [$filters]);
+                if (empty($extraFilters)) {
+                    // Bare re-obfuscation of an existing identifier: stable, return as-is.
+                    return $data;
+                }
+
+                // The caller is DERIVING from an existing identifier (e.g.
+                // thumbnail() applied to an /images URL, as templates do with
+                // entity media on remote storages). Returning the token as-is
+                // would silently DROP the new filters — a full-size image
+                // served where a thumbnail was requested. Decode the source
+                // config, merge, and fall through to the canonical re-encode
+                // below (which also migrates legacy absolute-path tokens to
+                // the canonical storage-independent form).
+                $decoded = $this->resolve($data);
+                if (!$decoded || !array_key_exists("path", $decoded)) {
+                    return $data;
+                }
+
+                $path = $decoded["path"];
+                $config["path"] = $path;
+                $config["filters"] = array_merge($decoded["filters"] ?? [], $config["filters"] ?? []);
+                $config["options"] = array_merge($decoded["options"] ?? [], $config["options"] ?? []);
+                if (!array_key_exists("storage", $config) && array_key_exists("storage", $decoded)) {
+                    $config["storage"] = $decoded["storage"];
+                }
             }
         }
 
@@ -353,6 +389,33 @@ class MediaService extends FileService implements MediaServiceInterface
             $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
             $config["options"] = array_merge_recursive($pathConfig["options"] ?? [], $config["options"] ?? []);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
+        }
+
+        //
+        // Canonicalize the source so the identifier is STORAGE-INDEPENDENT:
+        // the same origin yields the same /images hash whether the media
+        // lives on the local filesystem (public/ symlink -> absolute path) or
+        // on a remote storage (S3/MinIO, storage-relative path + explicit
+        // "storage" in config). The canonical form is the public-relative
+        // path ("/wysiwyg/<uuid>.jpg", "/uploads/_/<entity>/..."), and the
+        // "storage" key is dropped from the hashed payload — the ACTIVE
+        // storage for the mount is resolved at serve time instead (see
+        // filter()/getStorageForMount()), so already-issued URLs keep working
+        // across local<->S3 switches. Paths that fit neither shape (arbitrary
+        // files, exotic storages) keep their config untouched (legacy tokens
+        // remain fully decodable either way).
+        $storage = $config["storage"] ?? null;
+        $mount = is_string($storage) && str_contains($storage, ".") ? explode(".", $storage, 2)[1] : null;
+        $publicDir = $this->flysystem->getPublicDir();
+
+        if (str_starts_with($config["path"], $publicDir . "/")) {
+            $config["path"] = substr($config["path"], strlen($publicDir));
+            unset($config["storage"]);
+        } elseif ($mount !== null) {
+            if (!str_starts_with($config["path"], "/" . $mount . "/")) {
+                $config["path"] = "/" . $mount . "/" . ltrim($config["path"], "/");
+            }
+            unset($config["storage"]);
         }
 
         $data = $this->obfuscator->encode($config, MediaService::USE_SHORT);
@@ -568,6 +631,30 @@ class MediaService extends FileService implements MediaServiceInterface
      * storage-relative candidates and use the first that exists. Returns the temp
      * file path (caller must unlink) or null if the source can't be found.
      */
+    /**
+     * Resolve the ACTIVE storage for a canonical public-relative source path
+     * ("/uploads/...", "/wysiwyg/...") by matching the leading mount segment
+     * against the configured storage ids ("<backend>.<mount>" convention:
+     * local.uploads / s3.uploads share the "uploads" mount). This is what
+     * makes storage-independent tokens serveable: the token carries no
+     * storage, the mount decides at request time.
+     */
+    private function getStorageForMount(string $path): ?string
+    {
+        $mount = explode("/", ltrim($path, "/"), 2)[0] ?? null;
+        if (!$mount) {
+            return null;
+        }
+
+        foreach ($this->mountStorages as $storage) {
+            if (explode(".", $storage, 2)[1] === $mount) {
+                return $storage;
+            }
+        }
+
+        return null;
+    }
+
     private function fetchRemoteSource(string $path, string $storage): ?string
     {
         $candidates = [];
@@ -757,17 +844,28 @@ class MediaService extends FileService implements MediaServiceInterface
         //
         // Resolve the source to a locally-openable path. Local sources (absolute
         // paths behind public/ symlinks, or URLs) open directly — this is a no-op
-        // fast path. Remote sources (S3/MinIO) have no local file, so stream the
-        // source from the configured flysystem storage into a temp file first.
-        // The derivative is still cached locally afterwards (see the local_cache
-        // branch above), so a remote source is fetched at most once per
-        // (source, filter) combination and every later hit serves statically.
+        // fast path. Canonical storage-independent tokens (public-relative
+        // "/mount/rest", no storage in config) first try the local public mount
+        // (symlinked local storages), then fall back to the ACTIVE storage for
+        // that mount. Remote sources (S3/MinIO) have no local file, so stream
+        // the source from the flysystem storage into a temp file. The derivative
+        // is still cached locally afterwards (see the local_cache branch above),
+        // so a remote source is fetched at most once per (source, filter)
+        // combination and every later hit serves statically.
         $openPath = $path;
         $tmpSource = null;
-        if ($path !== null && !is_file($path) && !is_url($path) && $storage !== null && $this->flysystem->isRemote($storage)) {
-            $tmpSource = $this->fetchRemoteSource($path, $storage);
-            if ($tmpSource !== null) {
-                $openPath = $tmpSource;
+        if ($path !== null && !is_file($path) && !is_url($path)) {
+            $publicPath = str_starts_with($path, "/") ? $this->flysystem->getPublicDir() . $path : null;
+            if ($publicPath !== null && is_file($publicPath)) {
+                $openPath = $publicPath;
+            } else {
+                $storage ??= $this->getStorageForMount($path);
+                if ($storage !== null && $this->flysystem->isRemote($storage)) {
+                    $tmpSource = $this->fetchRemoteSource($path, $storage);
+                    if ($tmpSource !== null) {
+                        $openPath = $tmpSource;
+                    }
+                }
             }
         }
 
