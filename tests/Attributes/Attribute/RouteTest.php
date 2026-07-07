@@ -9,8 +9,10 @@ use ReflectionClass;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * translationKey resolution against the central route path dictionary
- * (config/routes_paths.yaml, relative to BaseService::getProjectDir()).
+ * Dictionary-key resolution against the central route path dictionary
+ * (config/routes_paths.yaml, relative to BaseService::getProjectDir()): a
+ * string $path that doesn't start with "/" is treated as a key rather than
+ * a literal path, since real route paths always start with "/".
  * BaseService::$projectDir and Route's own memoized dictionary cache are
  * both static, process-wide state — reset in tearDown() so tests stay
  * independent of run order, same convention as SingletonTraitTest.
@@ -43,13 +45,13 @@ class RouteTest extends TestCase
         file_put_contents($this->projectDir . Route::TRANSLATIONS_FILE, Yaml::dump($dictionary));
     }
 
-    public function testTranslationKeyResolvesToThePerLanguagePathArray(): void
+    public function testBareKeyResolvesToThePerLanguagePathArray(): void
     {
         $this->writeDictionary([
             'calendar' => ['en' => '/calendar', 'fr' => '/calendrier'],
         ]);
 
-        $route = new Route(translationKey: 'calendar', name: 'app_calendar');
+        $route = new Route(path: 'calendar', name: 'app_calendar');
 
         $this->assertSame(['en' => '/calendar', 'fr' => '/calendrier'], $route->path);
     }
@@ -61,7 +63,7 @@ class RouteTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessageMatches('/"calendar"/');
 
-        new Route(translationKey: 'calendar', name: 'app_calendar');
+        new Route(path: 'calendar', name: 'app_calendar');
     }
 
     public function testMissingDictionaryFileThrows(): void
@@ -69,7 +71,7 @@ class RouteTest extends TestCase
         // No file written at all this time.
         $this->expectException(\LogicException::class);
 
-        new Route(translationKey: 'calendar', name: 'app_calendar');
+        new Route(path: 'calendar', name: 'app_calendar');
     }
 
     /**
@@ -79,25 +81,36 @@ class RouteTest extends TestCase
     public function testDictionaryIsParsedOnceAndCached(): void
     {
         $this->writeDictionary(['calendar' => ['en' => '/calendar']]);
-        new Route(translationKey: 'calendar', name: 'a');
+        new Route(path: 'calendar', name: 'a');
 
         $this->writeDictionary(['calendar' => ['en' => '/changed']]);
-        $route = new Route(translationKey: 'calendar', name: 'b');
+        $route = new Route(path: 'calendar', name: 'b');
 
         $this->assertSame(['en' => '/calendar'], $route->path);
     }
 
-    public function testPlainPathStillWorksWithoutATranslationKey(): void
+    public function testLiteralPathStartingWithSlashIsNeverTreatedAsAKey(): void
     {
+        // No dictionary file exists at all — if this were misread as a key
+        // lookup, it would throw.
         $route = new Route(path: '/plain', name: 'app_plain');
 
         $this->assertSame('/plain', $route->path);
     }
 
-    public function testArrayPathStillWorksWithoutATranslationKey(): void
+    public function testArrayPathStillWorksAsALiteral(): void
     {
         $route = new Route(path: ['en' => '/calendar', 'fr' => '/calendrier'], name: 'app_calendar');
 
         $this->assertSame(['en' => '/calendar', 'fr' => '/calendrier'], $route->path);
+    }
+
+    public function testNullPathIsNeverTreatedAsAKey(): void
+    {
+        // A null $path (e.g. a class-level attribute used only for a
+        // prefix/options) must not trigger dictionary resolution.
+        $route = new Route(name: 'app_prefix_only');
+
+        $this->assertNull($route->path);
     }
 }
