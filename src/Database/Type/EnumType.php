@@ -61,7 +61,11 @@ abstract class EnumType extends Type implements SelectInterface
 
     public static function getIcon(string $id, int $index = -1): ?string
     {
-        return array_map(fn($values) => ($index < 0 || !is_array($values)) ? $values : closest($values, $index), self::getIcons())[$id] ?? null;
+        // closest() already resolves a negative $index to the first entry;
+        // the bypass this used to have for $index < 0 returned the whole
+        // icon array instead of a single string, violating the return type
+        // for every multi-icon entry (i.e. every real IconizeInterface use).
+        return array_map(fn($values) => !is_array($values) ? $values : closest($values, $index), self::getIcons())[$id] ?? null;
     }
 
     public static function getText(string $id, ?TranslatorInterface $translator = null): ?string
