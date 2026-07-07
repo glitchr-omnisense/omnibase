@@ -153,8 +153,13 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
         return $this;
     }
 
+    // No JoinColumn here: the legacy @ORM\JoinColumn(onDelete:"SET NULL") was
+    // silently ignored by the annotation reader on a ManyToMany, but the PHP-8
+    // attribute IS applied — and a join-table column is part of the primary
+    // key (NOT NULL), which MySQL refuses to combine with SET NULL (error
+    // 1830) on any fresh schema create. Legacy databases carry the default
+    // CASCADE join table this mapping now regenerates identically.
     #[ORM\ManyToMany(targetEntity:Widget::class)]
-    #[ORM\JoinColumn(onDelete:"SET NULL")]
     #[OrderColumn(orderBy:"connexPositions")]
     protected $connexes;
     protected $connexPositions;
