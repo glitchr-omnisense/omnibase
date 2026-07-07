@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Service\Model\Sharer\Adapter;
+namespace Base\Service\Model\Sharing\Adapter;
 
-use Base\Service\Model\Sharer\AbstractSharerAdapter;
+use Base\Service\Model\Sharing\AbstractSharingAdapter;
 
-class TumblrAdapter extends AbstractSharerAdapter
+class TumblrAdapter extends AbstractSharingAdapter
 {
     public function getIdentifier(): string
     {

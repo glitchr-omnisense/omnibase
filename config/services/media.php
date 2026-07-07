@@ -323,9 +323,9 @@ return static function (ContainerConfigurator $container): void {
     * Sharing System
     * ------------------------------*/
 
-    $services->set('Base\Service\Sharer')->public()->tag('twig.runtime');
+    $services->set('Base\Service\Sharing')->public()->tag('twig.runtime');
 
-    $services->set('Base\Service\Model\Sharer\AbstractSharerAdapter')
+    $services->set('Base\Service\Model\Sharing\AbstractSharingAdapter')
         ->args([new Reference('twig')]);
 
     foreach ([
@@ -336,9 +336,9 @@ return static function (ContainerConfigurator $container): void {
         'TwitterAdapter',
         'PinterestAdapter',
     ] as $adapter) {
-        $services->set("Base\Service\Model\Sharer\Adapter\\$adapter")
-            ->parent('Base\Service\Model\Sharer\AbstractSharerAdapter')
-            ->tag('base.service.sharer');
+        $services->set("Base\Service\Model\Sharing\Adapter\\$adapter")
+            ->parent('Base\Service\Model\Sharing\AbstractSharingAdapter')
+            ->tag('base.service.sharing');
     }
 
 

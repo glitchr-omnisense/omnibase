@@ -1,11 +1,11 @@
 <?php
 
-namespace Base\Service\Model\Sharer;
+namespace Base\Service\Model\Sharing;
 
 use Base\Service\Model\IconizeInterface;
 use Twig\Environment;
 
-abstract class AbstractSharerAdapter implements SharerAdapterInterface, IconizeInterface
+abstract class AbstractSharingAdapter implements SharingAdapterInterface, IconizeInterface
 {
     /**
      * @var Environment

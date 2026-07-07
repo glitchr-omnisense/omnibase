@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 use Base\Bundle\AbstractBaseExtension;
-use Base\Service\Model\Sharer\SharerAdapterInterface;
+use Base\Service\Model\Sharing\SharingAdapterInterface;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
 class BaseExtension extends AbstractBaseExtension implements PrependExtensionInterface
@@ -53,7 +53,7 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
         $container->registerForAutoconfiguration(AttributeInterface::class)->addTag('base.attribute');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
-        $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
+        $container->registerForAutoconfiguration(SharingAdapterInterface::class)->addTag('base.service.sharing');
         $container->registerForAutoconfiguration(AbstractLocalCacheInterface::class)->addTag('base.simple_cache');
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('currency.api');
         $container->registerForAutoconfiguration(CompressionInterface::class)->addTag('obfuscator.compressor');

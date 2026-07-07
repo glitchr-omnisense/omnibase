@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Service\Model\Sharer;
+namespace Base\Service\Model\Sharing;
 
-interface SharerAdapterInterface
+interface SharingAdapterInterface
 {
     public function getIdentifier(): string;
 

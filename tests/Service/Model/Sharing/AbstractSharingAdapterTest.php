@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Base\Service\Model\Sharer;
+namespace Tests\Base\Service\Model\Sharing;
 
 use PHPUnit\Framework\TestCase;
-use Tests\Base\Fixtures\Sharer\FakeSharerAdapter;
+use Tests\Base\Fixtures\Sharing\FakeSharingAdapter;
 use Twig\Environment;
 use Twig\Loader\ArrayLoader;
 
@@ -12,13 +12,13 @@ use Twig\Loader\ArrayLoader;
  * ArrayLoader is enough — the loader is keyed with the adapter's real default
  * template name, no bundle wiring needed.
  */
-class AbstractSharerAdapterTest extends TestCase
+class AbstractSharingAdapterTest extends TestCase
 {
-    private FakeSharerAdapter $adapter;
+    private FakeSharingAdapter $adapter;
 
     protected function setUp(): void
     {
-        $this->adapter = new FakeSharerAdapter(new Environment(new ArrayLoader([
+        $this->adapter = new FakeSharingAdapter(new Environment(new ArrayLoader([
             '@Base/sharer/default.html.twig' => '{{ sharer|raw }}',
             'custom.html.twig' => 'CUSTOM:{{ sharer|raw }}',
             'context.html.twig' => '{{ a }}|{{ b }}|{{ adapter.identifier }}',

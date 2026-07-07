@@ -168,7 +168,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([new Reference('base.breadgrinder')]);
     $services->set('Base\Twig\Extension\ShareTwigExtension')
         ->tag('twig.extension')
-        ->args([new Reference('base.service.sharer')]);
+        ->args([new Reference('base.service.sharing')]);
 
     // Form extensions
     $services->set('Base\Form\Extension\EaCrudFormCompatExtension')->tag('form.type_extension');

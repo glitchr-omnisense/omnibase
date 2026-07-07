@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Base\Fixtures\Sharer;
+namespace Tests\Base\Fixtures\Sharing;
 
-use Base\Service\Model\Sharer\AbstractSharerAdapter;
+use Base\Service\Model\Sharing\AbstractSharingAdapter;
 
-class FakeSharerAdapter extends AbstractSharerAdapter
+class FakeSharingAdapter extends AbstractSharingAdapter
 {
     public function getIdentifier(): string
     {

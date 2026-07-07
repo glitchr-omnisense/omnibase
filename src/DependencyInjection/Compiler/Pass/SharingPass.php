@@ -3,23 +3,23 @@
 namespace Base\DependencyInjection\Compiler\Pass;
 
 use Base\DependencyInjection\Compiler\AbstractPass;
-use Base\Service\Sharer;
+use Base\Service\Sharing;
 
-class SharerPass extends AbstractPass
+class SharingPass extends AbstractPass
 {
-    public function serviceInterface(): ?string 
-    { 
+    public function serviceInterface(): ?string
+    {
         return null;
     }
 
     public function taggedServiceIds(): ?string
     {
-        return 'base.service.sharer';
+        return 'base.service.sharing';
     }
 
     public function classFqcn(): string
     {
-        return Sharer::class;
+        return Sharing::class;
     }
 
     public function addMethod(): string

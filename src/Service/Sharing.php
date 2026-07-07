@@ -3,10 +3,10 @@
 namespace Base\Service;
 
 use Base\Service\Model\LinkableInterface;
-use Base\Service\Model\Sharer\SharerAdapterInterface;
+use Base\Service\Model\Sharing\SharingAdapterInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class Sharer
+class Sharing
 {
     protected $adapters = [];
 
@@ -18,7 +18,7 @@ class Sharer
         return $this->adapters;
     }
 
-    public function getAdapter(string $idOrClass): ?SharerAdapterInterface
+    public function getAdapter(string $idOrClass): ?SharingAdapterInterface
     {
         if (class_exists($idOrClass)) {
             return $this->adapters[$idOrClass] ?? null;
@@ -33,13 +33,13 @@ class Sharer
         return null;
     }
 
-    public function addAdapter(SharerAdapterInterface $adapter): self
+    public function addAdapter(SharingAdapterInterface $adapter): self
     {
         $this->adapters[get_class($adapter)] = $adapter;
         return $this;
     }
 
-    public function removeAdapter(SharerAdapterInterface $adapter): self
+    public function removeAdapter(SharingAdapterInterface $adapter): self
     {
         // array_values_remove() is pure — without the assignment this was a no-op.
         $this->adapters = array_values_remove($this->adapters, $adapter);
@@ -53,7 +53,7 @@ class Sharer
      * @param string|null $template
      * @return string
      */
-    public function share(string $adapterId, LinkableInterface|string $url, array $options = [], ?string $template = null)
+    public function generate(string $adapterId, LinkableInterface|string $url, array $options = [], ?string $template = null)
     {
         $adapter = $this->getAdapter($adapterId);
         if (!$adapter) {

@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Base\Service\Model\Sharer\Adapter;
+namespace Tests\Base\Service\Model\Sharing\Adapter;
 
 use Base\Service\Model\IconizeInterface;
-use Base\Service\Model\Sharer\Adapter\FacebookAdapter;
-use Base\Service\Model\Sharer\Adapter\GooglePlusAdapter;
-use Base\Service\Model\Sharer\Adapter\LinkedInAdapter;
-use Base\Service\Model\Sharer\Adapter\PinterestAdapter;
-use Base\Service\Model\Sharer\Adapter\TumblrAdapter;
-use Base\Service\Model\Sharer\Adapter\TwitterAdapter;
-use Base\Service\Model\Sharer\SharerAdapterInterface;
+use Base\Service\Model\Sharing\Adapter\FacebookAdapter;
+use Base\Service\Model\Sharing\Adapter\GooglePlusAdapter;
+use Base\Service\Model\Sharing\Adapter\LinkedInAdapter;
+use Base\Service\Model\Sharing\Adapter\PinterestAdapter;
+use Base\Service\Model\Sharing\Adapter\TumblrAdapter;
+use Base\Service\Model\Sharing\Adapter\TwitterAdapter;
+use Base\Service\Model\Sharing\SharingAdapterInterface;
 use PHPUnit\Framework\TestCase;
 use Twig\Environment;
 use Twig\Loader\ArrayLoader;
@@ -31,7 +31,7 @@ class AdaptersTest extends TestCase
         PinterestAdapter::class => 'pinterest',
     ];
 
-    private function makeAdapter(string $class): SharerAdapterInterface
+    private function makeAdapter(string $class): SharingAdapterInterface
     {
         return new $class(new Environment(new ArrayLoader([])));
     }

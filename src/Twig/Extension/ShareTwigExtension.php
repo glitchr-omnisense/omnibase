@@ -3,20 +3,20 @@
 namespace Base\Twig\Extension;
 
 use Base\Service\Model\LinkableInterface;
-use Base\Service\Sharer;
+use Base\Service\Sharing;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 final class ShareTwigExtension extends AbstractExtension
 {
     /**
-     * @var Sharer
+     * @var Sharing
      */
-    protected $sharer;
+    protected $sharing;
 
-    public function __construct(Sharer $sharer)
+    public function __construct(Sharing $sharing)
     {
-        $this->sharer = $sharer;
+        $this->sharing = $sharing;
     }
 
     /**
@@ -30,19 +30,19 @@ final class ShareTwigExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('share', [$this, 'share'], ['is_safe' => ['all']]),
+            new TwigFilter('share', [$this, 'generate'], ['is_safe' => ['all']]),
         ];
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFilter('share', [Sharer::class, 'share'], ['is_safe' => ['all']]),
+            new TwigFilter('share', [Sharing::class, 'generate'], ['is_safe' => ['all']]),
         ];
     }
 
-    public function share(LinkableInterface $url, string $identifier, array $options = [], ?string $template = null): ?string
+    public function generate(LinkableInterface $url, string $identifier, array $options = [], ?string $template = null): ?string
     {
-        return $this->sharer->share($identifier, $url, $options, $template);
+        return $this->sharing->generate($identifier, $url, $options, $template);
     }
 }

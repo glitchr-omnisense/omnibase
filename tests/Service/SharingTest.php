@@ -3,15 +3,15 @@
 namespace Tests\Base\Service;
 
 use Base\Service\Model\LinkableInterface;
-use Base\Service\Model\Sharer\Adapter\FacebookAdapter;
-use Base\Service\Model\Sharer\Adapter\TwitterAdapter;
-use Base\Service\Sharer;
+use Base\Service\Model\Sharing\Adapter\FacebookAdapter;
+use Base\Service\Model\Sharing\Adapter\TwitterAdapter;
+use Base\Service\Sharing;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 use Twig\Loader\ArrayLoader;
 
-class SharerTest extends TestCase
+class SharingTest extends TestCase
 {
     private Environment $twig;
 
@@ -26,22 +26,22 @@ class SharerTest extends TestCase
     {
         $facebook = new FacebookAdapter($this->twig);
 
-        $sharer = (new Sharer())->addAdapter($facebook);
+        $sharing = (new Sharing())->addAdapter($facebook);
 
-        $this->assertSame([FacebookAdapter::class => $facebook], $sharer->getAdapters());
+        $this->assertSame([FacebookAdapter::class => $facebook], $sharing->getAdapters());
     }
 
     public function testGetAdapterByClassOrIdentifier(): void
     {
         $facebook = new FacebookAdapter($this->twig);
-        $sharer = (new Sharer())->addAdapter($facebook);
+        $sharing = (new Sharing())->addAdapter($facebook);
 
-        $this->assertSame($facebook, $sharer->getAdapter(FacebookAdapter::class));
-        $this->assertSame($facebook, $sharer->getAdapter('facebook'));
+        $this->assertSame($facebook, $sharing->getAdapter(FacebookAdapter::class));
+        $this->assertSame($facebook, $sharing->getAdapter('facebook'));
 
         // Existing class that was never registered, and unknown identifier.
-        $this->assertNull($sharer->getAdapter(TwitterAdapter::class));
-        $this->assertNull($sharer->getAdapter('twitter'));
+        $this->assertNull($sharing->getAdapter(TwitterAdapter::class));
+        $this->assertNull($sharing->getAdapter('twitter'));
     }
 
     /**
@@ -53,30 +53,30 @@ class SharerTest extends TestCase
     {
         $facebook = new FacebookAdapter($this->twig);
         $twitter = new TwitterAdapter($this->twig);
-        $sharer = (new Sharer())->addAdapter($facebook)->addAdapter($twitter);
+        $sharing = (new Sharing())->addAdapter($facebook)->addAdapter($twitter);
 
-        $sharer->removeAdapter($facebook);
+        $sharing->removeAdapter($facebook);
 
-        $this->assertNull($sharer->getAdapter(FacebookAdapter::class));
-        $this->assertSame($twitter, $sharer->getAdapter(TwitterAdapter::class), 'other adapters must survive');
+        $this->assertNull($sharing->getAdapter(FacebookAdapter::class));
+        $this->assertSame($twitter, $sharing->getAdapter(TwitterAdapter::class), 'other adapters must survive');
     }
 
-    public function testShareWithAnUnknownAdapterReturnsAnEmptyString(): void
+    public function testGenerateWithAnUnknownAdapterReturnsAnEmptyString(): void
     {
-        $this->assertSame('', (new Sharer())->share('facebook', 'https://foo'));
+        $this->assertSame('', (new Sharing())->generate('facebook', 'https://foo'));
     }
 
-    public function testShareWithAPlainStringUrl(): void
+    public function testGenerateWithAPlainStringUrl(): void
     {
-        $sharer = (new Sharer())->addAdapter(new FacebookAdapter($this->twig));
+        $sharing = (new Sharing())->addAdapter(new FacebookAdapter($this->twig));
 
         $this->assertSame(
             'https://www.facebook.com/sharer/sharer.php?quote=hi&u=https%3A%2F%2Ffoo%2Fbar',
-            $sharer->share('facebook', 'https://foo/bar', ['quote' => 'hi'])
+            $sharing->generate('facebook', 'https://foo/bar', ['quote' => 'hi'])
         );
     }
 
-    public function testShareResolvesLinkableObjectsToTheirAbsoluteUrl(): void
+    public function testGenerateResolvesLinkableObjectsToTheirAbsoluteUrl(): void
     {
         $linkable = $this->createMock(LinkableInterface::class);
         $linkable->expects($this->once())
@@ -84,11 +84,11 @@ class SharerTest extends TestCase
             ->with([], UrlGeneratorInterface::ABSOLUTE_URL)
             ->willReturn('https://absolute.example/page');
 
-        $sharer = (new Sharer())->addAdapter(new FacebookAdapter($this->twig));
+        $sharing = (new Sharing())->addAdapter(new FacebookAdapter($this->twig));
 
         $this->assertStringContainsString(
             urlencode('https://absolute.example/page'),
-            $sharer->share('facebook', $linkable)
+            $sharing->generate('facebook', $linkable)
         );
     }
 }

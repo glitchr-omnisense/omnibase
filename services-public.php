@@ -38,7 +38,7 @@ return static function (ContainerConfigurator $container): void {
     // Base services
     $services->alias('base.service', 'Base\Service\BaseService');
     $services->alias('base.service.icon', 'Base\Service\IconProvider');
-    $services->alias('base.service.sharer', 'Base\Service\Sharer');
+    $services->alias('base.service.sharing', 'Base\Service\Sharing');
 
     // Twig renderers
     $services->alias('twig.html_renderer', 'Base\Twig\Renderer\Adapter\HtmlTagRenderer');
