@@ -111,7 +111,14 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "glitchr/base-plugin": true,
+            "glitchr/doctrine-dc2type": true,
+            "endroid/installer": true
         }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-html var/coverage --coverage-text"
     }
 }

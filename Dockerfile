@@ -14,6 +14,9 @@
 #
 # The glitchr companion packages (base-plugin, doctrine-dc2type, well-known,
 # backup-manager, ux-google) are fetched from gitlab.glitchr.dev (public).
+#
+# For running the test suite / coverage instead of touring the bundle, see
+# Dockerfile.test / docker-compose.yml (`docker compose run --rm test`).
 
 FROM php:8.4-cli
 
