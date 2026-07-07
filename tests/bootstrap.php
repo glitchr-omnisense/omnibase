@@ -7,7 +7,16 @@ foreach ([
     __DIR__ . '/../../../autoload.php',
 ] as $autoload) {
     if (file_exists($autoload)) {
-        require_once $autoload;
+        // Plain require, not require_once: if the runner already loaded the
+        // autoloader, require_once would return true instead of the loader.
+        // Composer's autoload.php is idempotent, so this is safe.
+        $loader = require $autoload;
+
+        // A host application's autoloader does not know about this bundle's
+        // autoload-dev section, so register the test namespace ourselves.
+        if ($loader instanceof \Composer\Autoload\ClassLoader) {
+            $loader->addPsr4('Tests\\Base\\', __DIR__);
+        }
 
         return;
     }
