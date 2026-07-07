@@ -5,6 +5,7 @@ namespace Base\Service\Model;
 use ArrayAccess;
 use Base\Attributes\Attribute\Iconize;
 use Base\Attributes\AttributeReader;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\TranslatorInterface;
 use Countable;
 use Exception;
@@ -12,7 +13,6 @@ use Iterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\RouterInterface;
 
 class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAccess
 {
