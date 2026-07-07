@@ -10,7 +10,7 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * translationKey resolution against the central route path dictionary
- * (config/routes/paths.yaml, relative to BaseService::getProjectDir()).
+ * (config/routes_paths.yaml, relative to BaseService::getProjectDir()).
  * BaseService::$projectDir and Route's own memoized dictionary cache are
  * both static, process-wide state — reset in tearDown() so tests stay
  * independent of run order, same convention as SingletonTraitTest.
@@ -22,7 +22,7 @@ class RouteTest extends TestCase
     protected function setUp(): void
     {
         $this->projectDir = sys_get_temp_dir() . '/base-bundle-route-test-' . uniqid();
-        mkdir($this->projectDir . '/config/routes', 0777, true);
+        mkdir($this->projectDir . '/config', 0777, true);
 
         (new ReflectionClass(BaseService::class))->setStaticPropertyValue('projectDir', $this->projectDir);
         (new ReflectionClass(Route::class))->setStaticPropertyValue('translations', null);
@@ -33,8 +33,7 @@ class RouteTest extends TestCase
         (new ReflectionClass(BaseService::class))->setStaticPropertyValue('projectDir', null);
         (new ReflectionClass(Route::class))->setStaticPropertyValue('translations', null);
 
-        array_map('unlink', glob($this->projectDir . '/config/routes/*'));
-        @rmdir($this->projectDir . '/config/routes');
+        @unlink($this->projectDir . Route::TRANSLATIONS_FILE);
         @rmdir($this->projectDir . '/config');
         @rmdir($this->projectDir);
     }

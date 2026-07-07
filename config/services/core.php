@@ -134,10 +134,11 @@ return static function (ContainerConfigurator $container): void {
         ->bind('$debug', '%kernel.debug%')
         ->bind('$environment', '%kernel.environment%');
 
-    // Tracks config/routes/paths.yaml (the Base\Attributes\Attribute\Route
+    // Tracks config/routes_paths.yaml (the Base\Attributes\Attribute\Route
     // translationKey dictionary) as a routing resource, so the route cache
     // invalidates when it changes even though no loader reads routes from it.
     $services->set('Base\Routing\Loader\RouteTranslationsResourceLoader')
+        ->args([service('file_locator'), '%kernel.environment%'])
         ->tag('routing.loader');
 
     // SettingBag

@@ -21,7 +21,7 @@ class LocalizedRouteTest extends TestCase
     protected function setUp(): void
     {
         $this->projectDir = sys_get_temp_dir() . '/base-bundle-localized-route-test-' . uniqid();
-        mkdir($this->projectDir . '/config/routes', 0777, true);
+        mkdir($this->projectDir . '/config', 0777, true);
 
         (new ReflectionClass(BaseService::class))->setStaticPropertyValue('projectDir', $this->projectDir);
         (new ReflectionClass(LocalizedRoute::class))->setStaticPropertyValue('translations', null);
@@ -32,8 +32,7 @@ class LocalizedRouteTest extends TestCase
         (new ReflectionClass(BaseService::class))->setStaticPropertyValue('projectDir', null);
         (new ReflectionClass(LocalizedRoute::class))->setStaticPropertyValue('translations', null);
 
-        array_map('unlink', glob($this->projectDir . '/config/routes/*'));
-        @rmdir($this->projectDir . '/config/routes');
+        @unlink($this->projectDir . LocalizedRoute::TRANSLATIONS_FILE);
         @rmdir($this->projectDir . '/config');
         @rmdir($this->projectDir);
     }
