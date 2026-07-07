@@ -185,27 +185,6 @@ class TranslatorTest extends TestCase
      * Outside debug mode, a dot-id missing from an explicitly-requested
      * locale falls back to the same key's translation in the default
      * locale rather than staying untranslated.
-     *
-     * NOT COVERED HERE — a genuine bug found while designing this test,
-     * deliberately not reproduced in a committed test because it hangs:
-     * transExists() normalizes its locale to underscore form via
-     * Localizer::__toLocale($locale, "_") before checking the catalogue,
-     * but the actual lookups in trans() (both the direct
-     * $this->translator->trans(...) call and the "nested translations"
-     * while loop) pass $locale through UNNORMALIZED. Symfony's own
-     * region -> language fallback (e.g. "en_GB" -> "en") tolerates a dash
-     * instead of an underscore just fine — but ONLY when the translation
-     * actually lives at the bare-language level, which is how every real
-     * catalogue in this bundle is structured (messages+intl-icu.en.yaml,
-     * no country code). If a translation ever existed ONLY under a
-     * region-specific key (e.g. "en_GB" with no "en" fallback), transExists()
-     * would keep saying "yes" (it normalizes correctly) while the direct
-     * lookup keeps saying "not found" (it doesn't) — and the "Lookup for
-     * nested translations" while loop at Translator.php:189 spins forever,
-     * since $trans never changes. Reproduced standalone outside this suite;
-     * flagged to the user rather than fixed given the blast radius of
-     * touching core trans() resolution, and not encoded as a test since a
-     * hanging test would take down the whole suite.
      */
     public function testProductionFallbackUsesTheDefaultLocaleTranslation(): void
     {
@@ -215,6 +194,35 @@ class TranslatorTest extends TestCase
         // production fallback to the default locale ("en", bare — matching
         // Localizer::getDefaultLocale()'s "en-GB" normalized down to its
         // language fallback).
+        $this->assertSame('FooBar value', $translator->trans('foo.bar', [], null, 'fr-FR'));
+    }
+
+    /**
+     * Regression test for a real infinite loop found while designing the
+     * test above: transExists() normalizes its locale to underscore form
+     * before checking the catalogue, but trans()'s own lookups used to pass
+     * the locale through unnormalized. A translation registered ONLY under
+     * a region-specific key (unlike this bundle's real catalogues, which are
+     * all bare-language) exposed the gap: transExists("en-GB") would find it
+     * (it normalizes to "en_GB" first) while the direct lookup wouldn't (no
+     * "en-GB" catalogue exists, and Symfony's own region fallback doesn't
+     * bridge dash<->underscore siblings of the SAME region, only region ->
+     * bare-language parents) — so $trans never changed and the "nested
+     * translations" while loop spun forever. Fixed by normalizing once,
+     * consistently, before any catalogue lookup.
+     */
+    public function testProductionFallbackDoesNotHangOnARegionSpecificOnlyTranslation(): void
+    {
+        $symfony = new SymfonyTranslator('en_GB');
+        $symfony->addLoader('array', new ArrayLoader());
+        $symfony->addResource('array', ['foo.bar' => 'FooBar value'], 'en_GB', 'messages');
+
+        $kernel = $this->createMock(KernelInterface::class);
+        $kernel->method('isDebug')->willReturn(false);
+
+        $translator = new Translator($symfony, $kernel, $this->createMock(ParameterBagInterface::class));
+        $translator->setLocale('en_GB');
+
         $this->assertSame('FooBar value', $translator->trans('foo.bar', [], null, 'fr-FR'));
     }
 

@@ -40,6 +40,11 @@ class Translator implements TranslatorInterface
     public const POLITENESS_POLITE = "_polite";
     public const POLITENESS_FORMAL = "_formal";
 
+    // Guards the "nested translations" while loops against a cyclic
+    // catalogue reference (e.g. "foo" => "@bar", "bar" => "@foo") hanging a
+    // request — translation content is often editable without code review.
+    public const MAX_NESTED_TRANSLATION_DEPTH = 10;
+
     /**
      * @var ParameterBag
      */
@@ -117,6 +122,17 @@ class Translator implements TranslatorInterface
         $customId = preg_match("/" . self::STRUCTURE_DOT . "|" . self::STRUCTURE_DOTBRACKET . "/", $id);
         $startsWithDomainTag = str_starts_with($id, "@");
 
+        // transExists() always normalizes its locale to underscore form
+        // before checking a catalogue. Every actual catalogue lookup below
+        // must use that same normalized form — $locale itself is left alone
+        // since it's also compared, as given, against Localizer::getDefaultLocale()
+        // further down. Without this, a translation transExists() can reach
+        // (it normalizes) but a raw Symfony trans() call can't (it doesn't)
+        // could make the "nested translations" while loop spin forever:
+        // transExists() keeps reporting the translation exists while $trans
+        // never changes.
+        $lookupLocale = $locale !== null ? Localizer::__toLocale($locale, "_") : null;
+
         $domain = $domain && str_starts_with($domain, "@") ? substr($domain, 1) : ($domain ?? null);
         $domainFallback = $domainFallback && str_starts_with($domainFallback, "@") ? substr($domainFallback, 1) : ($domainFallback ?? null);
         if ($id && $customId) {
@@ -136,9 +152,9 @@ class Translator implements TranslatorInterface
                 return $ret;
             }
 
-            $ret = $this->translator->trans($ret, $parameters, $domain, $locale);
+            $ret = $this->translator->trans($ret, $parameters, $domain, $lookupLocale);
             if (preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) {
-                $ret = $this->translator->trans($ret, $parameters, $domainFallback, $locale);
+                $ret = $this->translator->trans($ret, $parameters, $domainFallback, $lookupLocale);
                 if (preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) {
                     return $id;
                 }
@@ -176,7 +192,7 @@ class Translator implements TranslatorInterface
         }
 
         // Call for translation with parameter bag variables
-        $trans = $this->translator->trans($id, $parameters, $domain, $locale);
+        $trans = $this->translator->trans($id, $parameters, $domain, $lookupLocale);
         if (preg_match_all("/%([^%]*)%/", $trans, $matches)) {
             foreach ($matches[1] ?? [] as $key) {
                 if (($parameter = $this->parameterBag->get($key))) {
@@ -186,13 +202,15 @@ class Translator implements TranslatorInterface
         }
 
         // Lookup for nested translations
-        while ($this->transExists($trans, $domain, $locale) && $recursive) {
+        $depth = 0;
+        while ($this->transExists($trans, $domain, $lookupLocale) && $recursive && $depth++ < self::MAX_NESTED_TRANSLATION_DEPTH) {
             $trans = $this->trans($trans, $parameters, $domain, $locale, false);
         }
 
         if ($trans == $id) {
             if ($domainFallback !== false) {
-                while ($this->transExists($trans, $domainFallback, $locale) && $recursive) {
+                $depth = 0;
+                while ($this->transExists($trans, $domainFallback, $lookupLocale) && $recursive && $depth++ < self::MAX_NESTED_TRANSLATION_DEPTH) {
                     $trans = $this->trans($trans, $parameters, $domainFallback, $locale, false);
                 }
             }
