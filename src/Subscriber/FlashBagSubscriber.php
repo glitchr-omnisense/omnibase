@@ -20,22 +20,23 @@ class FlashBagSubscriber implements EventSubscriberInterface
     public function onKernelResponse(ResponseEvent $event)
     {
         $response = $event->getResponse();
+        if (!$response instanceof JsonResponse) {
+            return;
+        }
 
         /**
-         * @var Session $event
+         * @var Session $session
          */
         $session = $event->getRequest()->getSession();
-        if ($response instanceof JsonResponse) {
-            $flashMessages = $session->getFlashBag()->all();
-            if (!empty($flashMessages)) {
-                $data = json_decode($response->getContent(), true);
-                if (!is_array($data)) {
-                    $data = ["response" => $data];
-                }
-
-                $data['flashbag'] = $flashMessages;
-                $response->setData($data);
+        $flashMessages = $session->getFlashBag()->all();
+        if (!empty($flashMessages)) {
+            $data = json_decode($response->getContent(), true);
+            if (!is_array($data)) {
+                $data = ["response" => $data];
             }
+
+            $data['flashbag'] = $flashMessages;
+            $response->setData($data);
         }
     }
 }
