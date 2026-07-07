@@ -150,8 +150,10 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         return self::$locales;
     }
 
-    public function compatibleLocale(string $locale, string $preferredLocale, ?array $availableLocales = null): ?string
+    public function compatibleLocale(string $locale, string $preferredLocale, ?array $availableLocales = null): bool
     {
+        $availableLocales ??= $this->getAvailableLocales();
+
         if (in_array($locale, $availableLocales)) {
             return false;
         }
@@ -159,9 +161,9 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
             return true;
         }
 
-        if (in_array($preferredLocale, $availableLocales ?? $this->getAvailableLocales()) &&
+        if (in_array($preferredLocale, $availableLocales) &&
             $this->__toLocaleLang($locale) == $this->__toLocaleLang($preferredLocale)) {
-            $availableLangs = array_map(fn($l) => $this->__toLocaleLang($l), $availableLocales ?? $this->getAvailableLocales());
+            $availableLangs = array_map(fn($l) => $this->__toLocaleLang($l), $availableLocales);
             $defaultLangKey = array_search($this->__toLocaleLang($preferredLocale), $availableLangs);
             $defaultLocaleKey = array_search($preferredLocale, $availableLocales);
 

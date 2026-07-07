@@ -44,7 +44,7 @@ interface LocalizerInterface
 
     public function setLocale(string $locale);
 
-    public function compatibleLocale(string $locale, string $preferredLocale, ?array $availableLocales = null): ?string;
+    public function compatibleLocale(string $locale, string $preferredLocale, ?array $availableLocales = null): bool;
 
     public function getLocaleLang(?string $locale = null): string;
 
