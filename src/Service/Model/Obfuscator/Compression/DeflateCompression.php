@@ -23,6 +23,8 @@ class DeflateCompression extends AbstractCompression
 
     protected function decodeHex(string $data): string|false
     {
-        return gzinflate($data, $this->getMaxLength());
+        // Silenced: garbage input is an expected code path (any user-supplied
+        // hash reaches this), signalled by the false return, not the warning.
+        return @gzinflate($data, $this->getMaxLength());
     }
 }

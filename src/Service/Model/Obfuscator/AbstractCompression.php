@@ -84,6 +84,10 @@ abstract class AbstractCompression implements CompressionInterface
         try {
 
             $hex = $this->decodeHex($hex);
+            if ($hex === false) {
+                return null;
+            }
+
             if ((strlen($hex) % 2) != 0 || !is_hex($hex)) {
                 return null;
             }

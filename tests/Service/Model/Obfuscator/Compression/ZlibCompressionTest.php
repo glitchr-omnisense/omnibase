@@ -3,7 +3,6 @@
 namespace Tests\Base\Service\Model\Obfuscator\Compression;
 
 use Base\Service\Model\Obfuscator\Compression\ZlibCompression;
-use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use PHPUnit\Framework\TestCase;
 
 class ZlibCompressionTest extends TestCase
@@ -32,7 +31,6 @@ class ZlibCompressionTest extends TestCase
         $this->assertSame($payload, $this->compression->decode($hash));
     }
 
-    #[WithoutErrorHandler]
     public function testGarbageInputDecodesToNull(): void
     {
         $this->assertNull($this->compression->decode('###'));

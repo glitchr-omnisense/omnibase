@@ -23,6 +23,7 @@ class ZlibCompression extends AbstractCompression
 
     protected function decodeHex(string $data): string|false
     {
-        return gzuncompress($data, $this->getMaxLength());
+        // Silenced: garbage input is an expected code path, signalled by the false return.
+        return @gzuncompress($data, $this->getMaxLength());
     }
 }

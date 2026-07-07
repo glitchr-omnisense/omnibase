@@ -23,6 +23,7 @@ class GzipCompression extends AbstractCompression
 
     protected function decodeHex(string $data): string|false
     {
-        return gzdecode($data, $this->getMaxLength());
+        // Silenced: garbage input is an expected code path, signalled by the false return.
+        return @gzdecode($data, $this->getMaxLength());
     }
 }
