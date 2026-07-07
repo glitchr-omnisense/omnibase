@@ -41,7 +41,8 @@ class Sharer
 
     public function removeAdapter(SharerAdapterInterface $adapter): self
     {
-        array_values_remove($this->adapters, $adapter);
+        // array_values_remove() is pure — without the assignment this was a no-op.
+        $this->adapters = array_values_remove($this->adapters, $adapter);
         return $this;
     }
 
