@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
+use Base\Attributes\AttributeReader;
 use Base\Bundle\AbstractBaseBundle;
 use Base\Console\Command\CacheClearCommand;
 use Base\DependencyInjection\Dumper\CliDumper;
@@ -190,6 +191,17 @@ class BaseBundle extends AbstractBaseBundle
         }
         BaseService::setProjectDir($this->container->getParameter('kernel.project_dir'));
         BaseService::setEnvironment($this->container->getParameter('kernel.environment'));
+
+        // Doctrine constructs SQLFilter classes (e.g. TrashFilter) itself, bypassing
+        // the DI container entirely, so they can only reach AttributeReader through
+        // its getInstance() singleton. Nothing else on the console/command path
+        // (no Twig, no controller) necessarily asks the container for it first, so
+        // without this the singleton is still null the first time a filtered query
+        // runs. The constructor is metadata-free since the Attribute refactor, so
+        // constructing it here is cheap.
+        if ($this->container->has(AttributeReader::class)) {
+            $this->container->get(AttributeReader::class);
+        }
 
         if (!self::$cache) {
             $this->warmUp();
