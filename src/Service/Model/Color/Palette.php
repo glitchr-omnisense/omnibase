@@ -61,6 +61,16 @@ class Palette implements Countable, IteratorAggregate
         $this->load($filename, $colorKey);
     }
 
+    public static function fromFilename(string $filename, int|null $colorKey = null): self
+    {
+        return new static($filename, $colorKey);
+    }
+
+    public static function fromGD(GdImage $image, int|null $colorKey = null): self
+    {
+        return new static($image, $colorKey);
+    }
+
     /**
      * @param $filenameOrImage
      * @param int|null $colorKey
@@ -84,8 +94,10 @@ class Palette implements Countable, IteratorAggregate
 
     public function loadResource(GdImage|false $resource, int|null $colorKey = null): Palette
     {
-        if (!is_resource($resource) || get_resource_type($resource) != 'gd') {
-            throw new InvalidArgumentException('Image must be a gd resource');
+        // GD images are \GdImage objects since PHP 8, not resources — the old
+        // is_resource()/get_resource_type() check rejected every valid image.
+        if (!$resource instanceof GdImage) {
+            throw new InvalidArgumentException('Image must be a GD image');
         }
 
         if ($colorKey !== null && (!is_numeric($colorKey) || $colorKey < 0 || $colorKey > 16777215)) {
