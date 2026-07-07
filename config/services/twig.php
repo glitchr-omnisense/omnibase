@@ -166,7 +166,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Twig\Extension\BreadgrinderTwigExtension')
         ->tag('twig.extension')
         ->args([new Reference('base.breadgrinder')]);
-    $services->set('Base\Twig\Extension\ShareTwigExtension')
+    $services->set('Base\Twig\Extension\SharingFilter')
         ->tag('twig.extension')
         ->args([new Reference('base.service.sharing')]);
 

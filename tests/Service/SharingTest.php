@@ -18,7 +18,7 @@ class SharingTest extends TestCase
     protected function setUp(): void
     {
         $this->twig = new Environment(new ArrayLoader([
-            '@Base/sharer/default.html.twig' => '{{ sharer|raw }}',
+            '@Base/sharing/default.html.twig' => '{{ sharing|raw }}',
         ]));
     }
 

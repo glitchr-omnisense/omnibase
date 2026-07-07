@@ -7,7 +7,7 @@ use Base\Service\Sharing;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-final class ShareTwigExtension extends AbstractExtension
+final class SharingFilter extends AbstractExtension
 {
     /**
      * @var Sharing
@@ -24,7 +24,7 @@ final class ShareTwigExtension extends AbstractExtension
      */
     public function getName()
     {
-        return 'share_extension';
+        return 'sharing_filter';
     }
 
     public function getFilters(): array

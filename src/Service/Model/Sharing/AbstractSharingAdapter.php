@@ -25,7 +25,7 @@ abstract class AbstractSharingAdapter implements SharingAdapterInterface, Iconiz
 
     public function getTemplate(): string
     {
-        return "@Base/sharer/default.html.twig";
+        return "@Base/sharing/default.html.twig";
     }
 
     public function generate(array $options, ?string $template = null): string
@@ -38,7 +38,7 @@ abstract class AbstractSharingAdapter implements SharingAdapterInterface, Iconiz
             $template ?? $this->getTemplate(),
             array_merge($options, [
                 "adapter" => $this,
-                "sharer" => preg_replace("/\{[^\{\}]+\}/", "", str_replace($search, $replace, $this->getUrl()))
+                "sharing" => preg_replace("/\{[^\{\}]+\}/", "", str_replace($search, $replace, $this->getUrl()))
             ])
         );
     }

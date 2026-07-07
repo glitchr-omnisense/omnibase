@@ -66,7 +66,7 @@ class AdaptersTest extends TestCase
             $this->assertInstanceOf(IconizeInterface::class, $adapter, $class);
             $this->assertNotEmpty($class::__iconizeStatic(), $class);
             $this->assertNull($adapter->__iconize(), $class);
-            $this->assertSame('@Base/sharer/default.html.twig', $adapter->getTemplate(), $class);
+            $this->assertSame('@Base/sharing/default.html.twig', $adapter->getTemplate(), $class);
         }
     }
 }

@@ -19,15 +19,15 @@ class AbstractSharingAdapterTest extends TestCase
     protected function setUp(): void
     {
         $this->adapter = new FakeSharingAdapter(new Environment(new ArrayLoader([
-            '@Base/sharer/default.html.twig' => '{{ sharer|raw }}',
-            'custom.html.twig' => 'CUSTOM:{{ sharer|raw }}',
+            '@Base/sharing/default.html.twig' => '{{ sharing|raw }}',
+            'custom.html.twig' => 'CUSTOM:{{ sharing|raw }}',
             'context.html.twig' => '{{ a }}|{{ b }}|{{ adapter.identifier }}',
         ])));
     }
 
     public function testGenerateSubstitutesAndUrlEncodesOptions(): void
     {
-        $sharer = $this->adapter->generate([
+        $sharing = $this->adapter->generate([
             'a' => 'hello world',
             'url' => 'https://foo/bar?x=1',
         ]);
@@ -36,15 +36,15 @@ class AbstractSharingAdapterTest extends TestCase
         // placeholder is stripped. Rendered through the default template.
         $this->assertSame(
             'https://share.example/create?a=hello+world&b=&url=https%3A%2F%2Ffoo%2Fbar%3Fx%3D1',
-            $sharer
+            $sharing
         );
     }
 
     public function testGenerateWithAnExplicitTemplate(): void
     {
-        $sharer = $this->adapter->generate(['a' => 'x', 'b' => 'y', 'url' => 'u'], 'custom.html.twig');
+        $sharing = $this->adapter->generate(['a' => 'x', 'b' => 'y', 'url' => 'u'], 'custom.html.twig');
 
-        $this->assertSame('CUSTOM:https://share.example/create?a=x&b=y&url=u', $sharer);
+        $this->assertSame('CUSTOM:https://share.example/create?a=x&b=y&url=u', $sharing);
     }
 
     /**
@@ -54,20 +54,20 @@ class AbstractSharingAdapterTest extends TestCase
      */
     public function testFalsyOptionsAreFilteredOut(): void
     {
-        $sharer = $this->adapter->generate(['a' => '', 'b' => '0', 'url' => 'u']);
+        $sharing = $this->adapter->generate(['a' => '', 'b' => '0', 'url' => 'u']);
 
-        $this->assertSame('https://share.example/create?a=&b=&url=u', $sharer);
+        $this->assertSame('https://share.example/create?a=&b=&url=u', $sharing);
     }
 
     public function testOptionsAndAdapterAreExposedToTheTemplate(): void
     {
-        $sharer = $this->adapter->generate(['a' => 'left', 'b' => 'right', 'url' => 'u'], 'context.html.twig');
+        $sharing = $this->adapter->generate(['a' => 'left', 'b' => 'right', 'url' => 'u'], 'context.html.twig');
 
-        $this->assertSame('left|right|fake', $sharer);
+        $this->assertSame('left|right|fake', $sharing);
     }
 
     public function testDefaultTemplateName(): void
     {
-        $this->assertSame('@Base/sharer/default.html.twig', $this->adapter->getTemplate());
+        $this->assertSame('@Base/sharing/default.html.twig', $this->adapter->getTemplate());
     }
 }
