@@ -164,7 +164,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
             $route = $position !== false ? $attributes[$position] : null;
             $routeName = $route ? $this->getRouteName($path) : null;
-            $routeParameters = $route ? array_filter($this->getRouteParameters($path, $route->getPath() !== null ? rtrim($route->getPath(), "/") : null) ?? []) : [];
+            $routeParameters = $route ? array_filter($this->getRouteParameters($path, $route->path !== null ? rtrim($route->path, "/") : null) ?? []) : [];
             $routeParameterKeys = array_keys($routeParameters);
 
             $transPath = implode(".", array_merge([$routeName], $routeParameterKeys));
@@ -200,7 +200,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         }
 
         // Remove leading paths if offset requested
-        $offset = $this->getOption("offset");
+        $offset = $this->getOption("offset") ?? 0;
         while ($offset-- > 0) {
             array_shift($this->items);
             array_shift($icons);
