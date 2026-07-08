@@ -4148,20 +4148,26 @@ namespace {
         if (!is_string($str)) {
             return false;
         }
-        if (!str_starts_with($str, "{")) {
-            return false;
+
+        $str = trim($str);
+
+        // Detect a PHP serialize() string. The old body required the value to
+        // start with "{" and end with "}" (a JSON-object shape), which is NEVER
+        // true of real serialize() output (a:…, s:…, O:…, i:…, b:…, N;), so it
+        // rejected everything genuinely serialized — its own `$str == 'b:0;'`
+        // special-case was unreachable behind those guards.
+        if ('N;' === $str || 'b:0;' === $str) {   // serialized null / false
+            return true;
         }
-        if (!str_ends_with($str, "}")) {
+        if (strlen($str) < 4 || ':' !== ($str[1] ?? '')) {
             return false;
         }
 
-        try {
-            $ret = unserialize($str);
-        } catch (Exception $e) {
-            return false;
-        }
-
-        return ($str == 'b:0;' || $ret !== false);
+        // Validate by unserializing WITHOUT instantiating any objects, so the
+        // detection itself carries no object-injection side effect (an actual
+        // serialized object still reports true — it just resolves to an
+        // __PHP_Incomplete_Class placeholder here, never a real instance).
+        return @unserialize($str, ['allowed_classes' => false]) !== false;
     }
 
     /**
@@ -4344,7 +4350,7 @@ namespace {
      * @param string|array $startingWith
      * @return true
      */
-    function usort_startsWith(array $array, string|array $startingWith)
+    function usort_startsWith(array &$array, string|array $startingWith)
     {
         if (!is_array($startingWith)) {
             $startingWith = [$startingWith];

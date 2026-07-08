@@ -185,6 +185,22 @@ class FunctionsTest extends TestCase
         $this->assertSame('xb', $a[0]);
     }
 
+    /**
+     * Same by-value discarded-sort bug (its one caller, TranslatableWalker,
+     * relied on the no-op; verified via SQL diff that activating the sort
+     * leaves real translated-query SQL byte-identical, since Doctrine already
+     * emits statements in the FROM/INNER/LEFT priority order this produces).
+     * The multi-needle order defines the priority: FROM first, then INNER JOIN,
+     * then LEFT JOIN.
+     */
+    public function testUsortStartsWithReordersTheCallerByNeedlePriority(): void
+    {
+        $a = [' LEFT JOIN a', ' FROM x', ' INNER JOIN b'];
+        usort_startsWith($a, [' FROM', ' INNER JOIN', ' LEFT JOIN']);
+
+        $this->assertSame([' FROM x', ' INNER JOIN b', ' LEFT JOIN a'], $a);
+    }
+
     /** cast_datetime(null) is null; ->setTime()/->setDate() on the null defaults fataled. */
     public function testDateAndTimeIsBetweenDoNotFatalOnDefaultBounds(): void
     {
@@ -287,5 +303,49 @@ class FunctionsTest extends TestCase
         } finally {
             $_SERVER = $serverBackup;
         }
+    }
+
+    /**
+     * The old body required "{"…"}" (JSON-object shape) so it rejected ALL real
+     * serialize() output; Vault::reveal() and AssociationType gate unserialize()
+     * on it. Now it detects real serialize() strings — and the detection itself
+     * never instantiates an object (allowed_classes: false), so it carries no
+     * object-injection side effect.
+     */
+    public function testIsSerializedDetectsRealSerializeOutput(): void
+    {
+        $this->assertTrue(is_serialized(serialize([1, 2, 3])));
+        $this->assertTrue(is_serialized(serialize('hello')));
+        $this->assertTrue(is_serialized(serialize(42)));
+        $this->assertTrue(is_serialized('N;'));      // null
+        $this->assertTrue(is_serialized('b:0;'));    // false
+        $this->assertTrue(is_serialized(serialize(true)));
+
+        $this->assertFalse(is_serialized('randomsecret123'));
+        $this->assertFalse(is_serialized(''));
+        $this->assertFalse(is_serialized('{"a":1}'));
+        $this->assertFalse(is_serialized(42));
+    }
+
+    public function testIsSerializedDoesNotInstantiateAnObjectWhileDetecting(): void
+    {
+        $serialized = serialize(new FunctionsTestNoInstantiateProbe());
+        FunctionsTestNoInstantiateProbe::$woken = false;
+
+        $this->assertTrue(is_serialized($serialized));
+        $this->assertFalse(
+            FunctionsTestNoInstantiateProbe::$woken,
+            'is_serialized() must not run __wakeup / instantiate the class while checking.'
+        );
+    }
+}
+
+class FunctionsTestNoInstantiateProbe
+{
+    public static bool $woken = false;
+
+    public function __wakeup(): void
+    {
+        self::$woken = true;
     }
 }

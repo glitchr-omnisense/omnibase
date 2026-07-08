@@ -129,7 +129,7 @@ class Vault extends AbstractAttribute
      * @param string|null $value
      * @return mixed|null
      */
-    public function reveal(?MarshallerInterface $marshaller, ?string $value): ?string
+    public function reveal(?MarshallerInterface $marshaller, ?string $value): mixed
     {
         if ($value === null) {
             return null;
@@ -138,6 +138,13 @@ class Vault extends AbstractAttribute
         try { $value = $marshaller?->unmarshall(base64_decode($value)) ?? $value; }
         catch (Exception $e) { }
 
+        // seal() serialize()s arrays/objects, so reveal() genuinely returns
+        // whatever was sealed — a string, or the unserialized array/object.
+        // The declared type was `?string` (contradicting this method's own
+        // `@return mixed|null` docblock); with the previously-broken
+        // is_serialized() that mismatch was masked because nothing was ever
+        // unserialized. Now that is_serialized() works, the type must be mixed
+        // or an array/object @Vault field would hit "Array to string conversion".
         return is_serialized($value) ? unserialize($value) : $value;
     }
 
