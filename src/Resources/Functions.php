@@ -469,7 +469,7 @@ namespace {
             $parse["port"] ?? null,
             ($format & FORMAT_URL_KEEPSLASH) ? $parse["path"] : str_replace("//", "/", $parse["path"]),
             $parse["query"] ?? null,
-            $query["fragment"] ?? null
+            $parse["fragment"] ?? null
         );
     }
 
@@ -1059,12 +1059,16 @@ namespace {
 
     function make_pair(array|string $values): array|false
     {
+        $values = is_array($values) ? array_values($values) : str_split($values);
         if (count($values) % 2 != 0) {
             return false;
         }
 
+        // Step by 2: element 2i is the key, 2i+1 its value. The old
+        // $values[$i]/$values[$i+1] walked consecutive indices, producing
+        // overlapping pairs and consuming only the first half of the input.
         $pairs = [];
-        for ($i = 0, $N = count($values) / 2; $i < $N; $i++) {
+        for ($i = 0, $N = count($values); $i < $N; $i += 2) {
             $pairs[$values[$i]] = $values[$i + 1];
         }
 
@@ -1279,7 +1283,9 @@ namespace {
         if ($nChr > $length + strlen($separator)) {
             switch ($position) {
                 case SHORTEN_FRONT:
-                    return ltrim($separator) . mb_substr($haystack, $nChr, $length + 1);
+                    // Keep the LAST $length chars: start at $nChr - $length.
+                    // Starting at $nChr (the end of the string) returned "".
+                    return ltrim($separator) . mb_substr($haystack, $nChr - $length, $length + 1);
 
                 case SHORTEN_MIDDLE:
                     return mb_substr($haystack, 0, $length / 2) . $separator . mb_substr($haystack, $nChr - $length / 2, $length / 2 + 1);
@@ -2406,8 +2412,10 @@ namespace {
 
     function array_clear(array &$array)
     {
-        while (array_pop($array)) {
-        }
+        // while (array_pop($array)) {} used to stop at the first falsy element
+        // (0, "", null, false, [], "0"), leaving everything before it — so any
+        // array containing a falsy value was only partially cleared.
+        $array = [];
     }
 
     function array_prepend(array &$array, ...$value): int
@@ -2597,7 +2605,10 @@ namespace {
                 }
 
                 if (!$duplicates) {
-                    $buffer = array_unique($buffer);
+                    // $buffer holds arrays; array_unique defaults to SORT_STRING,
+                    // which casts every sub-array to the literal "Array" (with a
+                    // notice) so all compare equal and all but the first survive.
+                    $buffer = array_unique($buffer, SORT_REGULAR);
                 }
             }
 
@@ -2863,6 +2874,9 @@ namespace {
         }
 
         $imagesize = @getimagesize($path);
+        if ($imagesize === false) {
+            return false;
+        }
         return array_key_exists('channels', $imagesize) && 3 == $imagesize['channels'];
     }
 
@@ -2996,7 +3010,10 @@ namespace {
      */
     function array_contains(array $haystack, string $needle, int $mode = ARRAY_USE_KEYS)
     {
-        return array_filter($haystack, fn($k, $v) => str_contains($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
+        // ARRAY_FILTER_USE_BOTH passes ($value, $key) — the params were named
+        // ($k, $v) but bound the other way round, so ARRAY_USE_KEYS actually
+        // matched values and vice versa (cf. the correct array_starts_with below).
+        return array_filter($haystack, fn($v, $k) => str_contains($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH);
     }
 
     /**
@@ -3642,8 +3659,10 @@ namespace {
      * @param int $limit
      * @return void
      */
-    function array_occurrence_removes(array $array, $value, int $limit = 1)
+    function array_occurrence_removes(array &$array, $value, int $limit = 1)
     {
+        // $array was by value, so array_splice mutated a discarded copy and the
+        // caller's array was never touched (same class as the old usort_column).
         while ($limit-- > 0 && ($pos = array_search($value, $array)) !== false) {
             array_splice($array, $pos, 1);
         }
@@ -3902,8 +3921,10 @@ namespace {
             return $subject;
         }
 
-        $count = 1;
-        return str_replace($search, $replace, $subject, $count);
+        // Only the leading occurrence. str_replace's 4th arg is a by-ref output
+        // count, NOT a replacement limit — passing $count=1 replaced EVERY
+        // occurrence, not just the prefix.
+        return $replace . substr($subject, strlen($search));
     }
 
     function str_replace_suffix(string $search, string $replace, string $subject): string
@@ -3912,8 +3933,8 @@ namespace {
             return $subject;
         }
 
-        $count = 1;
-        return strrev(str_replace(strrev($search), strrev($replace), strrev($subject), $count));
+        // Only the trailing occurrence — same str_replace $count misuse as above.
+        return substr($subject, 0, strlen($subject) - strlen($search)) . $replace;
     }
 
     /**
@@ -4223,7 +4244,10 @@ namespace {
 
     function alpha2hex(float $alpha, bool $hash = true): string
     {
-        return ($hash ? '#' : '') . ($alpha * 0xFF);
+        // $alpha (0..1) → a 2-digit hex byte. The old `$alpha * 0xFF`
+        // concatenated a raw, un-rounded decimal ("#255", "#127.5") instead of
+        // a hex pair (cf. int2hex's sprintf('%06X', ...)).
+        return ($hash ? '#' : '') . sprintf('%02X', (int) round(max(0.0, min(1.0, $alpha)) * 0xFF));
     }
 
     function int2hex(int $int, bool $hash = true): string
@@ -4333,8 +4357,10 @@ namespace {
      * @param string|array $startingWith
      * @return true
      */
-    function usort_endsWith(array $array, string|array $startingWith)
+    function usort_endsWith(array &$array, string|array $startingWith)
     {
+        // by-value → the usort() sorted a discarded copy (same class as the old
+        // usort_column); the caller's array was never reordered.
         if (!is_array($startingWith)) {
             $startingWith = [$startingWith];
         }
@@ -4725,9 +4751,9 @@ namespace {
 
         $datetime->setTime(0, 0);
         $datetime1 = cast_datetime($d1);
-        $datetime1->setTime(0, 0);
+        $datetime1?->setTime(0, 0);
         $datetime2 = cast_datetime($d2);
-        $datetime2->setTime(0, 0);
+        $datetime2?->setTime(0, 0);
 
         return datetime_is_between($datetime, $datetime1, $datetime2);
     }
@@ -4772,9 +4798,9 @@ namespace {
 
         $datetime->setDate(0, 0, 0);
         $datetime1 = cast_datetime($t1);
-        $datetime1->setDate(0, 0, 0);
+        $datetime1?->setDate(0, 0, 0);
         $datetime2 = cast_datetime($t2);
-        $datetime2->setDate(0, 0, 0);
+        $datetime2?->setDate(0, 0, 0);
 
         return datetime_is_between($datetime, $datetime1, $datetime2);
     }
