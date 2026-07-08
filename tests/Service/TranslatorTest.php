@@ -2,6 +2,8 @@
 
 namespace Tests\Base\Service;
 
+use Base\BaseBundle;
+use Base\Bundle\AbstractBaseBundle;
 use Base\Enum\Quadrant\Quadrant;
 use Base\Enum\Quadrant\Quadrant8;
 use Base\Service\Localizer;
@@ -39,6 +41,28 @@ class TranslatorTest extends TestCase
     protected function tearDown(): void
     {
         $this->resetLocalizerStatics();
+
+        $ref = new ReflectionClass(AbstractBaseBundle::class);
+        $ref->setStaticPropertyValue('_instance', null);
+        $ref->setStaticPropertyValue('bundles', null);
+    }
+
+    /**
+     * parseClass(PARSE_NAMESPACE) reads Base\BaseBundle::getInstance() to
+     * build its bundle-specific entity-namespace replacements. In a real
+     * app Symfony's kernel always constructs BaseBundle directly during
+     * bundle registration, seeding the singleton before anything calls
+     * getInstance(). Nothing does that in a bare test process — and
+     * getInstance()'s own auto-construct fallback is "new self()" inside
+     * SingletonTrait, which — since traits don't carry their own late
+     * static binding — resolves against AbstractBaseBundle (where the
+     * trait is used), not BaseBundle, and fatals trying to instantiate an
+     * abstract class. Seed it directly first, exactly like the kernel
+     * would, to sidestep that pre-existing gap rather than trip over it.
+     */
+    private function seedBaseBundleSingleton(): void
+    {
+        new BaseBundle();
     }
 
     /**
@@ -69,6 +93,7 @@ class TranslatorTest extends TestCase
         ], 'en', 'messages');
         $symfony->addResource('array', [
             'widget.title' => 'A Widget',
+            'widget._properties.title' => 'the title',
         ], 'en', 'entities');
         $symfony->addResource('array', [
             'quadrant.north' => 'North',
@@ -270,5 +295,98 @@ class TranslatorTest extends TestCase
 
         $this->assertTrue($translator->transEnumExists(Quadrant::N, Quadrant::class));
         $this->assertFalse($translator->transEnumExists('bogus', Quadrant::class));
+    }
+
+    /**
+     * parseClass()'s default PARSE_NAMESPACE branch also strips
+     * bundle-specific entity namespaces (derived at runtime from
+     * Base\BaseBundle::getInstance()->getBundles(), a reflection scan over
+     * whatever Base\*Bundle classes happen to be autoloaded in THIS
+     * process) — deliberately not exercised here, since it's dependent on
+     * autoloading order across the whole test run. Every case below only
+     * uses the three fixed, always-present prefixes (Proxies\__CG__\,
+     * App\Entity\, Base\Entity\) or no matching prefix at all, so the
+     * bundle-derived part of the replacement table never matches and can't
+     * affect the result.
+     */
+    public function testParseClassNamespaceStripsKnownEntityPrefixes(): void
+    {
+        $this->seedBaseBundleSingleton();
+        $translator = $this->makeTranslator();
+
+        $this->assertSame('widget', $translator->parseClass('App\\Entity\\Widget'));
+        $this->assertSame('widget', $translator->parseClass('Base\\Entity\\Widget'));
+        $this->assertSame('widget', $translator->parseClass('Proxies\\__CG__\\App\\Entity\\Widget'));
+        $this->assertSame('category.category_widget', $translator->parseClass('App\\Entity\\Category\\CategoryWidget'));
+    }
+
+    public function testParseClassNamespaceKeepsNonEntityNamespacesIntact(): void
+    {
+        $this->seedBaseBundleSingleton();
+        $translator = $this->makeTranslator();
+
+        $this->assertSame('app.service.mailer_service', $translator->parseClass('App\\Service\\MailerService'));
+    }
+
+    public function testTransEntityStripsTheNamespaceAndSnakeCasesTheProperty(): void
+    {
+        $this->seedBaseBundleSingleton();
+        $translator = $this->makeTranslator();
+
+        $this->assertSame('The title', $translator->transEntity('App\\Entity\\Widget', 'title'));
+    }
+
+    public function testTransEntityExists(): void
+    {
+        $this->seedBaseBundleSingleton();
+        $translator = $this->makeTranslator();
+
+        $this->assertTrue($translator->transEntityExists('App\\Entity\\Widget', 'title'));
+        $this->assertFalse($translator->transEntityExists('App\\Entity\\Widget', 'bogus_property'));
+    }
+
+    /**
+     * transPerms() tries every ordering of the requested politeness/
+     * genderness/noun suffixes (get_permutations(), not a single fixed
+     * concatenation order) before giving up — registering the translation
+     * under one specific combined suffix and requesting the options in a
+     * different declared order still resolves it.
+     */
+    public function testTransEntityCombinesMultiplePermutationOptions(): void
+    {
+        $this->seedBaseBundleSingleton();
+
+        $symfony = new SymfonyTranslator('en');
+        $symfony->addLoader('array', new ArrayLoader());
+        $symfony->addResource('array', [
+            'ghost._properties.name._feminine._plural' => 'les fantômes',
+        ], 'en', 'entities');
+
+        $kernel = $this->createMock(KernelInterface::class);
+        $kernel->method('isDebug')->willReturn(true);
+
+        $translator = new Translator($symfony, $kernel, $this->createMock(ParameterBagInterface::class));
+        $translator->setLocale('en');
+
+        $this->assertSame(
+            'Les fantômes',
+            $translator->transEntity('App\\Entity\\Ghost', 'name', [Translator::GENDERNESS_FEMININE, Translator::NOUN_PLURAL])
+        );
+    }
+
+    /**
+     * transPerms() only throws when literally no option was requested at
+     * all (an empty array — not even the NOUN_SINGULAR default every public
+     * entry point normally supplies) and nothing matched any permutation.
+     */
+    public function testTransEntityThrowsWhenNoTranslationFoundAndNoOptionsGiven(): void
+    {
+        $this->seedBaseBundleSingleton();
+        $translator = $this->makeTranslator();
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessageMatches('/No translation found/');
+
+        $translator->transEntity('App\\Entity\\Ghost', 'missing', []);
     }
 }
