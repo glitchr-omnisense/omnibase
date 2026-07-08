@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class RouterSubscriber implements EventSubscriberInterface
 {
@@ -21,9 +21,9 @@ class RouterSubscriber implements EventSubscriberInterface
     protected RouterInterface $router;
 
     /**
-     * @var AuthorizationChecker
+     * @var AuthorizationCheckerInterface
      */
-    protected AuthorizationChecker $authorizationChecker;
+    protected AuthorizationCheckerInterface $authorizationChecker;
 
     /**
      * @var ParameterBagInterface
@@ -35,7 +35,7 @@ class RouterSubscriber implements EventSubscriberInterface
      */
     protected SettingBagInterface $settingBag;
 
-    public function __construct(AuthorizationChecker $authorizationChecker, RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->router = $router;
