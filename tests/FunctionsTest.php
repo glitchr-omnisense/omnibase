@@ -78,4 +78,24 @@ class FunctionsTest extends TestCase
         $this->assertSame('#AABBCC', expandhex('#AABBCC'));
         $this->assertNull(expandhex(null));
     }
+
+    /**
+     * Regression: usort_column()'s $array parameter used to be by-value, so
+     * its internal usort($array, ...) call sorted a local copy that was
+     * discarded the moment the function returned — the caller's array was
+     * silently left untouched (usort_column() always returned true, having
+     * done nothing observable). Found via typesense-bundle's
+     * Response::getFacetCounts(), whose sortByName option relied on this to
+     * actually reorder facet counts; also left Aco::sortByColor() in this
+     * bundle completely non-functional.
+     */
+    public function testUsortColumnSortsTheCallersArrayInPlace(): void
+    {
+        $rows = [['value' => 'b'], ['value' => 'a'], ['value' => 'c']];
+
+        $result = usort_column($rows, 'value', fn($a, $b) => strcmp($a, $b));
+
+        $this->assertTrue($result);
+        $this->assertSame(['a', 'b', 'c'], array_column($rows, 'value'));
+    }
 }

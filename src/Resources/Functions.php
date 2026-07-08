@@ -4274,7 +4274,7 @@ namespace {
         return $length < 1 ? "" : str_repeat(" ", $length);
     }
 
-    function usort_column(array $array, string $column, callable $fn): bool
+    function usort_column(array &$array, string $column, callable $fn): bool
     {
         return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null));
     }
