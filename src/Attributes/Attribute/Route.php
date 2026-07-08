@@ -32,6 +32,7 @@ class Route extends \Symfony\Component\Routing\Attribute\Route
         ?string           $domain = null,
         ?string           $subdomain = null,
         ?string           $machine = null,
+        ?int              $port = null,
         array|string      $methods = [],
         array|string      $schemes = [],
         ?string           $condition = null,
@@ -51,18 +52,46 @@ class Route extends \Symfony\Component\Routing\Attribute\Route
             $path = self::resolveTranslationKey($path);
         }
 
-        $parsedUrl = parse_url2($host ?? "");
-        if (!$parsedUrl) {
-            $parsedUrl = [];
+        // Host templating is opt-in: a route that asks for none of
+        // host/domain/subdomain/machine/port stays host-unconstrained, same
+        // as Symfony's own Route attribute. Unconditionally manufacturing a
+        // sentinel-templated host for every route — regardless of whether
+        // the caller wanted one — silently made every such route
+        // unreachable, since nothing ever asks for a Host header that
+        // literally matches those tokens.
+        if ($host !== null || $domain !== null || $subdomain !== null || $machine !== null || $port !== null) {
+            $parsedUrl = parse_url2($host ?? "");
+            if (!$parsedUrl) {
+                $parsedUrl = [];
+            }
+
+            $parsedUrl["domain"] ??= $domain ?? "\{_domain\}";
+            $parsedUrl["subdomain"] ??= $subdomain ?? "\{_subdomain\}";
+            $parsedUrl["machine"] ??= $machine ?? "\{_machine\}";
+            $parsedUrl["port"] ??= $port ?? "\{_port\}";
+
+            $host = self::composeHost($parsedUrl["machine"], $parsedUrl["subdomain"], $parsedUrl["domain"], $parsedUrl["port"]);
         }
 
-        $parsedUrl["domain"] ??= $domain ?? "\{_domain\}";
-        $parsedUrl["subdomain"] ??= $subdomain ?? "\{_subdomain\}";
-        $parsedUrl["machine"] ??= $machine ?? "\{_machine\}";
-        $parsedUrl["port"] ??= $port ?? "\{_port\}";
-
-        $host = compose_url(null, null, null, $parsedUrl["machine"], $parsedUrl["subdomain"], $parsedUrl["domain"], $parsedUrl["port"]);
         parent::__construct($path, $name, $requirements, $options, $defaults, $host, $methods, $schemes, $condition, $priority, $locale, $format, $utf8, $stateless, $env);
+    }
+
+    /**
+     * A bare host (no scheme, no path) — compose_url() is a full-URL
+     * composer and always prepends a scheme once a domain is set, which
+     * silently baked "https://"/"http://" into every route's Host
+     * attribute. A real Host request header never carries a scheme, so
+     * that compiled host requirement could never match a real request —
+     * every route relying on this templating always fell through to
+     * whatever route came next in the collection.
+     */
+    private static function composeHost(?string $machine, ?string $subdomain, string $domain, string|int|null $port): string
+    {
+        $machinePart = $machine ? $machine . "." : "";
+        $subdomainPart = $subdomain ? $subdomain . "." : "";
+        $portPart = ($port && !in_array($port, [80, 443], false)) ? ":" . $port : "";
+
+        return $machinePart . $subdomainPart . $domain . $portPart;
     }
 
     /**

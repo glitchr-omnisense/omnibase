@@ -113,4 +113,60 @@ class RouteTest extends TestCase
 
         $this->assertNull($route->path);
     }
+
+    /**
+     * Regression: the constructor used to unconditionally manufacture a
+     * fully sentinel-templated host for every route, even when the caller
+     * never asked for host/domain/subdomain/machine/port at all. Since
+     * nothing ever sends a Host header that literally matches those
+     * tokens, every plain route built this way was silently unroutable —
+     * this was only ever caught because this bundle's Route attribute had
+     * exactly one real caller in the host app (CalendarController), and it
+     * never passed any host-related argument. Host templating is opt-in:
+     * no host args in, no host constraint out — same as Symfony's own
+     * Route attribute.
+     */
+    public function testNoHostArgumentsLeavesTheRouteHostUnconstrained(): void
+    {
+        $route = new Route(path: '/plain', name: 'app_plain');
+
+        $this->assertNull($route->host);
+    }
+
+    public function testPortDefaultsToTheSentinelTokenWhenOtherHostArgumentsAreProvided(): void
+    {
+        $route = new Route(path: '/plain', name: 'app_plain', domain: 'example.org');
+
+        $this->assertStringContainsString('\{_port\}', $route->host);
+    }
+
+    public function testPortAloneIsEnoughToOptIntoHostTemplating(): void
+    {
+        $route = new Route(path: '/plain', name: 'app_plain', port: 8443);
+
+        $this->assertStringContainsString(':8443', $route->host);
+        $this->assertStringNotContainsString('\{_port\}', $route->host);
+    }
+
+    /**
+     * Regression: the host used to be built via compose_url(), which always
+     * prepends a scheme once a domain is set ("https://..."). A real Host
+     * request header never carries a scheme, so that host requirement could
+     * never match a real request — every host-templated route silently fell
+     * through to whatever route came next in the collection.
+     */
+    public function testHostNeverCarriesAScheme(): void
+    {
+        $route = new Route(path: '/plain', name: 'app_plain', port: 8443);
+
+        $this->assertStringNotContainsString('://', $route->host);
+        $this->assertSame('\{_machine\}.\{_subdomain\}.\{_domain\}:8443', $route->host);
+    }
+
+    public function testHostWithExplicitDomainNeverCarriesAScheme(): void
+    {
+        $route = new Route(path: '/plain', name: 'app_plain', domain: 'example.org', subdomain: 'm');
+
+        $this->assertSame('\{_machine\}.m.example.org:\{_port\}', $route->host);
+    }
 }
