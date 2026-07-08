@@ -385,7 +385,13 @@ namespace {
         $scheme = $scheme ? $scheme : null;
         $request_uri = $request_uri ? $request_uri : null;
 
-        $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"] ?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
+        // Honor an explicitly-passed $scheme; only derive it from $_SERVER when
+        // the caller didn't give one. The old code unconditionally overwrote
+        // $scheme on the next line, so passing "http"/"https" (as
+        // AdvancedUrlGenerator and RouterSubscriber do) had no effect.
+        if ($scheme === null) {
+            $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"] ?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
+        }
         $scheme = $scheme && (strcasecmp('on', $scheme) == 0 || strcasecmp('https', $scheme) == 0);
         $scheme = $scheme ? "https" : "http";
 
@@ -3792,7 +3798,12 @@ namespace {
     {
         $arrayOut = [];
         foreach ($array as $k => $v) {
-            if (array_filter($needles, fn($haystack) => str_starts_with($haystack, $k))) {
+            // Remove the key when the KEY starts with one of the needles.
+            // The args were swapped (str_starts_with($needle, $k)), which
+            // asked whether the needle started with the key — backwards, so
+            // e.g. key "filters[state]" was never stripped by needle "filters[".
+            // (cf. the correct array_key_startsWith.)
+            if (array_filter($needles, fn($needle) => str_starts_with((string) $k, (string) $needle))) {
                 continue;
             } elseif ($recursive && is_array($v)) {
                 $arrayOut[$k] = array_key_removes_startsWith($v, $recursive, ...$needles);
@@ -3814,7 +3825,9 @@ namespace {
     {
         $arrayOut = [];
         foreach ($array as $k => $v) {
-            if (array_filter($needles, fn($haystack) => str_ends_with($haystack, $k))) {
+            // Remove the key when the KEY ends with one of the needles (args
+            // were swapped, same bug as array_key_removes_startsWith above).
+            if (array_filter($needles, fn($needle) => str_ends_with((string) $k, (string) $needle))) {
                 continue;
             } elseif ($recursive && is_array($v)) {
                 $arrayOut[$k] = array_key_removes_endsWith($v, $recursive, ...$needles);
@@ -4187,13 +4200,15 @@ namespace {
         return intval($dec);
     }
 
-    function dec2abc(int $dec): int
+    function dec2abc(int $dec): string
     {
-        $dec = strval($dec);
-
+        // Inverse of abc2dec(), which maps each letter to its 0-based position
+        // (a=0…z=25) and concatenates. Map each decimal digit back to a letter
+        // (0→a, 1→b, …). The old code declared `: int` (returning a string
+        // TypeError'd) and did chr($digitChar), which is not that inverse.
         $abc = "";
-        foreach (str_split($dec) as $c) {
-            $abc .= chr($c);
+        foreach (str_split(strval($dec)) as $c) {
+            $abc .= chr(ord('a') + intval($c));
         }
 
         return $abc;
@@ -4553,8 +4568,16 @@ namespace {
     function is_identity(?array $array)
     {
         foreach ($array ?? [] as $key => $value) {
-            if (is_array($value) && !is_identity($value)) {
-                return false;
+            // A sub-array must itself be an identity; a scalar must equal its
+            // key. The old `is_array($value) && !is_identity($value)` collapsed
+            // to false for an identity sub-array and then fell into the
+            // `elseif ($key !== $value)` which compares an int key to an array
+            // — always true — so any array containing a sub-array was never
+            // considered an identity.
+            if (is_array($value)) {
+                if (!is_identity($value)) {
+                    return false;
+                }
             } elseif ($key !== $value) {
                 return false;
             }
@@ -4767,13 +4790,20 @@ namespace {
     function check_backtrace(string $str_starts_with = "", string $str_ends_with = "", ?array $debug_backtrace = null)
     {
         $debug_backtrace ??= debug_backtrace();
+        if ($str_starts_with === "" && $str_ends_with === "") {
+            return false;
+        }
         foreach ($debug_backtrace as $trace) {
             if (!array_key_exists("class", $trace)) {
                 continue;
             }
+            // Only apply each bound that was actually given. The old form
+            // (($ends && …) && ($starts && …)) required BOTH to be non-empty,
+            // so a prefix-only or suffix-only call could never match. When both
+            // are given (the only current caller), the result is unchanged.
             if (
-                ($str_ends_with && str_ends_with($trace["class"], $str_ends_with)) &&
-                ($str_starts_with && str_starts_with($trace["class"], $str_starts_with))
+                ($str_starts_with === "" || str_starts_with($trace["class"], $str_starts_with)) &&
+                ($str_ends_with === "" || str_ends_with($trace["class"], $str_ends_with))
             ) {
                 return true;
             }

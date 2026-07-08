@@ -201,4 +201,91 @@ class FunctionsTest extends TestCase
         $this->assertSame('#00', alpha2hex(0.0));
         $this->assertSame('FF', alpha2hex(1.0, false));
     }
+
+    // ── Second audit batch: "risky" helpers with real callers, verified
+    // against the live app before fixing (see base-bundle-functions-audit). ──
+
+    /**
+     * The class-name match required BOTH bounds to be non-empty
+     * (($ends && …) && ($starts && …)), so a prefix-only or suffix-only call
+     * could never match. Passing both (the only real caller) is unchanged.
+     */
+    public function testCheckBacktraceHonoursEitherBoundIndividually(): void
+    {
+        $bt = [['class' => 'Doctrine\\ORM\\UnitOfWork'], ['class' => 'App\\Foo']];
+
+        $this->assertTrue(check_backtrace('Doctrine', 'UnitOfWork', $bt));
+        $this->assertTrue(check_backtrace('Doctrine', '', $bt));
+        $this->assertTrue(check_backtrace('', 'UnitOfWork', $bt));
+        $this->assertFalse(check_backtrace('Nope', '', $bt));
+        $this->assertFalse(check_backtrace('', '', $bt));
+    }
+
+    /**
+     * A sub-array that is itself an identity used to fall through to
+     * `elseif ($key !== $value)` (int key !== array), so any array containing
+     * a sub-array was never an identity. Flat arrays (the real caller) are
+     * unaffected.
+     */
+    public function testIsIdentityRecursesIntoSubArrays(): void
+    {
+        $this->assertTrue(is_identity([0, 1, 2, 3]));
+        $this->assertFalse(is_identity([0 => 0, 1 => 5]));
+        $this->assertTrue(is_identity([0 => [0 => 0], 1 => 1]));
+        $this->assertFalse(is_identity([0 => [0 => 9], 1 => 1]));
+    }
+
+    /** Declared `: int` but returned a string (TypeError); now the inverse of abc2dec. */
+    public function testDec2abcIsTheInverseOfAbc2dec(): void
+    {
+        $this->assertIsString(dec2abc(53));
+        $this->assertSame(53, abc2dec(dec2abc(53)));
+        $this->assertSame(5, abc2dec(dec2abc(5)));
+    }
+
+    /**
+     * Swapped str_starts_with args asked whether the NEEDLE started with the
+     * key instead of the key with the needle, so e.g. "filters[state]" was
+     * never stripped by the prefix "filters[".
+     */
+    public function testArrayKeyRemovesStartsWithStripsKeysByPrefix(): void
+    {
+        $q = ['filters[state]' => 'x', 'page' => '2', 'sort[name]' => 'asc', 'destination' => 'paris'];
+
+        $this->assertSame(
+            ['destination' => 'paris'],
+            array_key_removes_startsWith($q, true, 'filters[', 'page', 'sort[')
+        );
+    }
+
+    public function testArrayKeyRemovesEndsWithStripsKeysBySuffix(): void
+    {
+        $this->assertSame(
+            ['name' => 2],
+            array_key_removes_endsWith(['a_id' => 1, 'name' => 2], true, '_id')
+        );
+    }
+
+    /**
+     * The $scheme argument was unconditionally overwritten by $_SERVER; a
+     * caller passing "http"/"https" (AdvancedUrlGenerator, RouterSubscriber)
+     * had no effect. No-arg still derives the scheme from $_SERVER.
+     */
+    public function testGetUrlHonoursAnExplicitScheme(): void
+    {
+        $serverBackup = $_SERVER;
+        try {
+            $_SERVER['HTTP_HOST'] = 'example.com';
+            $_SERVER['REQUEST_URI'] = '/x';
+            $_SERVER['HTTPS'] = 'on'; // request is https
+            unset($_SERVER['USE_HTTPS'], $_SERVER['REQUEST_SCHEME'], $_SERVER['HTTP_X_FORWARDED_PROTO']);
+
+            $this->assertStringStartsWith('https://', get_url());            // derived
+            $this->assertStringStartsWith('http://', get_url('http'));       // explicit overrides $_SERVER
+            $this->assertStringStartsWith('https://', get_url('https'));
+            $this->assertStringStartsWith('https://', get_url('on'));        // normalised
+        } finally {
+            $_SERVER = $serverBackup;
+        }
+    }
 }

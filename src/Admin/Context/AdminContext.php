@@ -130,7 +130,10 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
 
         $url["query"] ??= "";
         $url["query"] = explode_attributes("&", $url["query"]);
-        $url["query"] = array_key_removes_startsWith($url["query"], ...$ignoredKeys);
+        // Pass $recursive explicitly: without the `true`, the first ignored key
+        // ("menuIndex") was spread into the $recursive slot and never stripped,
+        // making this call inconsistent with the reference-URL one above.
+        $url["query"] = array_key_removes_startsWith($url["query"], true, ...$ignoredKeys);
         $url["query"] = array_key_exists("crudAction", $url["query"]) && in_array($url["query"]["crudAction"], ["index", "edit"]) ? array_key_removes($url["query"], "crudAction") : $url["query"];
         $url["query"] = array_map(fn($u) => urldecode($u), $url["query"]);
         ksort($url["query"]);
