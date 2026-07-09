@@ -118,6 +118,73 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [$criteria, $orderBy]);
     }
 
+    /**
+     * Query-by-Example: build the criteria from the *set* fields of a (usually
+     * non-persisted) select entity, then delegate to findBy(). Lets you query with
+     * a hydrated object instead of a raw array:
+     *
+     *     $select = (new Article())->setState('published');
+     *     $repo->findByExample($select);   // == findBy(['state' => 'published'])
+     *
+     * Only mapped scalar fields and to-one associations participate. Uninitialized
+     * and null properties are skipped — a select cannot express "IS NULL"; use the
+     * finder DSL (e.g. findByStateNull()) for that. Throws when the select yields no
+     * criteria, to avoid an accidental whole-table fetch (use findAll() instead).
+     *
+     * @return array<object>
+     * @throws Exception
+     */
+    public function findByExample(object $select, ?array $orderBy = null, $limit = null, $offset = null): array
+    {
+        $criteria = $this->criteriaFromSelect($select);
+        if (empty($criteria)) {
+            throw new Exception(sprintf(
+                'findByExample() received a select (%s) with no queryable set fields — refusing to match the whole "%s" table. Use findAll() instead.',
+                get_class($select),
+                $this->getFqcnEntityName()
+            ));
+        }
+
+        return $this->findBy($criteria, $orderBy, $limit, $offset);
+    }
+
+    /**
+     * Reflect over a select entity and collect its set, mapped fields into a
+     * findBy()-compatible criteria array. Shared by findByExample() and by the
+     * finder DSL's "Model" clause (e.g. findByModelAndIdGreaterThan($select, 0)).
+     *
+     * @return array<string,mixed>
+     */
+    public function criteriaFromSelect(object $select): array
+    {
+        $metadata = $this->classMetadata;
+        $criteria = [];
+
+        foreach ((new \ReflectionClass($select))->getProperties() as $property) {
+            $name = $property->getName();
+
+            $isField = $metadata->hasField($name);
+            $isToOne = $metadata->hasAssociation($name) && $metadata->isSingleValuedAssociation($name);
+            if (!$isField && !$isToOne) {
+                continue; // not a queryable mapped field / to-one association
+            }
+
+            $property->setAccessible(true);
+            if (!$property->isInitialized($select)) {
+                continue; // never set on this select
+            }
+
+            $value = $property->getValue($select);
+            if ($value === null) {
+                continue; // a select cannot express "IS NULL"
+            }
+
+            $criteria[$name] = $value;
+        }
+
+        return $criteria;
+    }
+
     public function count(array $criteria = []): int
     {
         return $this->__call(__METHOD__, [$criteria]);

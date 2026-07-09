@@ -247,7 +247,7 @@ class ServiceEntityParser
         foreach($orderBy ?? [] as $field => $order)
             $orderBy[$field] = ($order == "DESC") ? "ASC" : "DESC";
 
-        $limit = array_unshift($criteria);
+        $limit = array_pop_key("special:last", $criteria) ?? 1;
         return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, $offset, $groupBy, $selectAs) ?? null;
     }
 
@@ -507,6 +507,34 @@ class ServiceEntityParser
     }
 
     /**
+     * A bare clause is a Query-by-Example select clause when it names the generic
+     * "Model" keyword OR the entity's own / an ancestor's short class name
+     * (findByModel / findBySubscriber / findByThread). A real field or association
+     * of the entity always takes precedence.
+     */
+    protected function isSelectClause(string $by): bool
+    {
+        $name = lcfirst($by);
+        if ($this->classMetadata->hasField($name) || $this->classMetadata->hasAssociation($name)) {
+            return false;
+        }
+
+        if ($by === self::OPTION_MODEL) {
+            return true;
+        }
+
+        $entity = $this->classMetadata->getName();
+        foreach (array_merge([$entity], array_values(class_parents($entity) ?: [])) as $class) {
+            $short = ($pos = strrpos($class, "\\")) !== false ? substr($class, $pos + 1) : $class;
+            if ($by === $short) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param $method
      * @param $arguments
      * @return array
@@ -763,7 +791,8 @@ class ServiceEntityParser
         foreach ($byNames as $id => $by) {
             $oldBy = false;
 
-            $isModel = $isInsensitive = $isPartial = false;
+            $isModel = false;
+            $isInsensitive = $isPartial = false;
             $withRoute = false;
             $but = false;
 
@@ -801,6 +830,8 @@ class ServiceEntityParser
                     $option = self::OPTION_MEMBEROF;
                 } elseif (str_ends_with($by, self::OPTION_NOT_MEMBEROF)) {
                     $option = self::OPTION_NOT_MEMBEROF;
+                } elseif ($this->isSelectClause($by)) {
+                    $option = self::OPTION_MODEL;
                 } elseif (str_ends_with($by, self::OPTION_STARTING_WITH)) {
                     $option = self::OPTION_STARTING_WITH;
                 } elseif (str_ends_with($by, self::OPTION_ENDING_WITH)) {
@@ -910,6 +941,11 @@ class ServiceEntityParser
 
                     case self::OPTION_NOT_MEMBEROF:
                         $notMemberOf = true;
+                        list($method, $by) = $this->stripByEnd($method, $by, $option);
+                        break;
+
+                    case self::OPTION_MODEL:
+                        $isModel = true;
                         list($method, $by) = $this->stripByEnd($method, $by, $option);
                         break;
 
@@ -1036,59 +1072,29 @@ class ServiceEntityParser
                     $this->addCustomOption($id, self::OPTION_NOT_MEMBEROF);
                 }
             } elseif ($isModel) {
-                list($method, $_) = $this->stripByEnd($method, $by, $option);
-                $method = substr($method, 0, strpos($method, self::OPTION_MODEL));
-                $by = lcfirst($by);
-
-                $modelCriteria = [];
-                $model = array_shift($arguments);
-
-                if (is_object($model)) {
-                    $reflClass = new ReflectionClass(get_class($model));
-                    foreach ($reflClass->getProperties() as $field) {
-                        $fieldName = $field->getName();
-                        $field->setAccessible(true);
-
-                        if (!$field->isInitialized($model)) {
-                            continue;
-                        }
-                        if (!($fieldValue = $field->getValue($model))) {
-                            continue;
-                        }
-
-                        if ($this->classMetadata->hasAssociation($fieldName)) {
-                            $associationField = $this->classMetadata->getAssociationMapping($fieldName);
-                            if (!array_key_exists("targetEntity", $associationField) || $field->getType() != $associationField["targetEntity"]) {
-                                throw new Exception("Invalid association mapping \"$fieldName\" found (found \"" . $field->getType() . "\", expected type \"" . $associationField["targetEntity"] . "\") in \"" . $this->classMetadata->getName() . "\" entity, \"" . $reflClass->getName() . " cannot be applied\"");
-                            }
-                        } elseif (!$this->classMetadata->hasField($fieldName)) {
-                            throw new Exception("No field \"$fieldName\" (or association mapping) found in \"" . $this->classMetadata->getName() . "\" entity, \"" . $reflClass->getName() . " cannot be applied\"");
-                        }
-
-                        if (($fieldValue = $field->getValue($model))) {
-                            $modelCriteria[$fieldName] = $fieldValue;
-                        }
-                    }
-                } elseif (is_array($model)) {
-                    $modelCriteria = $this->entityHydrator->hydrate($this->classMetadata->getName(), $model);
-                } else {
-                    throw new Exception("Model expected to be an object or an array, currently \"" . gettype($model) . "\"");
+                // Query-by-Example clause: consume a select entity and expand its
+                // set fields into criteria (AND-combined at compile time). Composes
+                // with "And" only — "Or" would need parentheses this DSL forbids.
+                if ($this->getSeparator() === self::SEPARATOR_OR) {
+                    throw new Exception("\"Model\" cannot be combined with \"Or\" (would need parentheses); use \"And\" only.");
                 }
 
-                if (!empty($modelCriteria)) {
-                    $id = $this->addCriteria($by, $modelCriteria);
-                    if ($isPartial) {
-                        $this->addCustomOption($id, self::OPTION_PARTIAL);
-                    }
-                    if ($isInsensitive) {
-                        $this->addCustomOption($id, self::OPTION_INSENSITIVE);
-                    }
+                $select = array_shift($arguments);
+                if (!is_object($select)) {
+                    throw new Exception("\"Model\" expects a select object argument, got \"" . gettype($select) . "\".");
+                }
 
-                    if ($operator == self::OPTION_EQUAL || $operator == self::OPTION_NOT_EQUAL) {
-                        $this->addCustomOption($id, $operator);
-                    } else {
-                        throw new Exception("Unexpected operator \"" . $operator . "\" found in model definition");
-                    }
+                $modelCriteria = $this->serviceEntity->criteriaFromSelect($select);
+                if (empty($modelCriteria)) {
+                    throw new Exception("\"Model\" select (" . get_class($select) . ") has no queryable set fields for \"" . $this->classMetadata->getName() . "\".");
+                }
+
+                $id = $this->addCriteria(lcfirst(self::OPTION_MODEL), $modelCriteria);
+                if ($isPartial) {         // findByPartialModel -> LIKE per select field
+                    $this->addCustomOption($id, self::OPTION_PARTIAL);
+                }
+                if ($isInsensitive) {     // findByInsensitiveModel -> LOWER() per select field
+                    $this->addCustomOption($id, self::OPTION_INSENSITIVE);
                 }
             } elseif ($by) {
                 $by = lcfirst($by);
@@ -1799,7 +1805,8 @@ class ServiceEntityParser
                     }
                 }
 
-                $queryExpr = empty($queryExpr) ? null : $queryBuilder->expr()->orX(...$queryExpr);
+                // Query-by-Example: the select's set fields are AND-combined.
+                $queryExpr = empty($queryExpr) ? null : $queryBuilder->expr()->andX(...$queryExpr);
             } else {
                 // Default query builder
                 $queryExpr = $this->buildQueryExpr($queryBuilder, $field, $fieldValue);
