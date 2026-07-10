@@ -79,7 +79,10 @@ class LocalizerSubscriber implements EventSubscriberInterface
         }
 
         if ($_locale !== null) {
-            if (is_instanceof(User::class, BaseUser::class)) {
+            // headers_sent() guard: under PHPUnit/WebTestCase output has already
+            // started, and this raw setcookie() turns into a warning that debug
+            // mode escalates to a 500 on every authenticated request
+            if (is_instanceof(User::class, BaseUser::class) && !headers_sent()) {
                 setcookie(self::__LANG_IDENTIFIER__, $_locale, 0, "/", $this->router->getDomain());
             }
 
