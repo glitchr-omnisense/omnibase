@@ -147,7 +147,5 @@ return static function (ContainerConfigurator $container): void {
     $services->alias('Base\Form\FormProxyInterface', 'form.proxy');
 
     // Admin / Command
-    $services->alias('ea_extension', 'Base\Admin\Config\Extension');
-    $services->alias('ea_menu_factory', 'Base\Admin\Factory\MenuFactory');
     $services->alias('command.sessions.clear', 'Base\Console\Command\CacheClearSessionsCommand');
 };

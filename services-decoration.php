@@ -1,6 +1,5 @@
 <?php
 
-use EasyCorp\Bundle\EasyAdminBundle\Registry\AdminControllerRegistry;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
@@ -98,39 +97,6 @@ return static function (ContainerConfigurator $container): void {
             new Reference('advanced_router'),
             new Reference('parameter_bag'),
         ]);
-
-    $services->set('Base\Admin\EventListener\AdminRouterSubscriber')
-        ->parent('EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber')
-        ->decorate('EasyCorp\Bundle\EasyAdminBundle\EventListener\AdminRouterSubscriber')
-        ->tag('kernel.event_subscriber')
-        ->args([new Reference(AdminControllerRegistry::class), new Reference('doctrine.orm.entity_manager')]);
-
-    $services->set('Base\Admin\Router\AdminRouteGenerator')
-        ->parent('EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator')
-        ->decorate('EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator');
-
-    $services->set('Base\Admin\Router\AdminUrlGenerator')
-        ->parent('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator')
-        ->decorate('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator');
-
-    $services->set('Base\Admin\Provider\AdminContextProvider')
-        ->parent('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider')
-        ->decorate('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider');
-
-    $services->set('Base\Admin\Factory\AdminContextFactory')
-        ->parent('EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory')
-        ->decorate('EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory')
-        ->args([new Reference('ea_extension')]);
-
-    $services->set('Base\Admin\Factory\MenuFactory')
-        ->parent('EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory')
-        ->decorate('EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory')
-        ->args([new Reference('advanced_router')]);
-
-    $services->set('Base\Admin\Field\Configurator\CommonPreConfigurator')
-        ->parent('EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator')
-        ->decorate('EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator')
-        ->arg(3, new Reference('translator'));
 
     // Console commands
     $services->set('Base\Console\Command\CacheClearCommand')
