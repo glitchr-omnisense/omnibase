@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Controller\Admin\AbstractCrudController;
+use Base\Admin\Controller\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
@@ -21,8 +21,8 @@ use Doctrine\ORM\Mapping\InverseSideMapping;
 use Doctrine\ORM\Mapping\OwningSideMapping;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\MappingException;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Base\Admin\Config\Action;
+use Base\Admin\Router\AdminUrlGenerator;
 use Exception;
 use Generator;
 use Symfony\Component\OptionsResolver\Options;

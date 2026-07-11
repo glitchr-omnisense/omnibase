@@ -5,7 +5,7 @@ namespace Base\Field\Type;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Base\Admin\Router\AdminUrlGenerator;
 use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
