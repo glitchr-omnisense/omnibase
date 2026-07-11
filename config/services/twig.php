@@ -29,9 +29,6 @@ use Base\Field\Configurator\QuadrantConfigurator;
 use Base\Field\Configurator\DiscriminatorConfigurator;
 use Base\Field\Configurator\AttributeConfigurator;
 use Base\Field\Configurator\IconConfigurator;
-use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
-use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
@@ -72,7 +69,7 @@ return static function (ContainerConfigurator $container): void {
         ->parent('Base\Twig\Variable\SiteVariable')
         ->tag('twig.runtime')
         ->tag('twig.variable')
-        ->args([new Reference('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator')]);
+        ->args([new Reference('Base\Admin\Router\AdminUrlGenerator')]);
 
     $services->set('Base\Twig\Extension\MediaTwigExtension')->public()
         ->tag('twig.extension')
@@ -138,7 +135,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('translator'),
             new Reference('twig.extension.assets'),
             new Reference('twig'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'),
+            new Reference('Base\Admin\Router\AdminUrlGenerator'),
         ])
         ->bind('$projectDir', '%kernel.project_dir%');
 
@@ -321,7 +318,7 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
         ->public()
         ->tag('twig.runtime')
         ->tag('twig.variable')
-        ->args([new Reference('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator')]);
+        ->args([new Reference('Base\Admin\Router\AdminUrlGenerator')]);
 
     $services->set('Base\Twig\Extension\MediaTwigExtension')->public()
         ->tag('twig.extension')
@@ -388,7 +385,7 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
             new Reference('translator'),
             new Reference('twig.extension.assets'),
             new Reference('twig'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator')
+            new Reference('Base\Admin\Router\AdminUrlGenerator')
         ])
         ->bind('$projectDir', '%kernel.project_dir%');
 };

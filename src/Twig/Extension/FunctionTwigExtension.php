@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Controller\Admin\AbstractCrudController;
+use Base\Admin\Controller\AbstractCrudController;
 use Base\Database\Type\EnumType;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
@@ -13,8 +13,8 @@ use Base\Service\Model\LinkableInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Type;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Base\Admin\Config\Crud;
+use Base\Admin\Router\AdminUrlGenerator;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;

@@ -2,9 +2,9 @@
 
 namespace Base\Twig\Variable;
 
-use Base\Controller\Admin\AbstractCrudController;
-use Base\Controller\Admin\AbstractDashboardController;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Base\Admin\Controller\AbstractCrudController;
+use Base\Admin\Controller\AbstractDashboardController;
+use Base\Admin\Router\AdminUrlGenerator;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LauncherInterface;
@@ -12,7 +12,7 @@ use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use Base\Admin\Config\Crud;
 
 class AdminVariable extends SiteVariable
 {
