@@ -190,4 +190,15 @@ return function (ContainerConfigurator $configurator) {
         ->parent('Base\Field\Type\CollectionType')
         ->tag('form.type')
         ->args([new Reference('base.database.metadata_manipulator')]);
+
+    $services->set('Base\Form\Type\LayoutSettingListType')
+        ->tag('form.type')
+        ->args([
+            new Reference('setting_bag'),
+            new Reference('localizer'),
+            new Reference('base.database.metadata_manipulator'),
+        ]);
+    $services->set('Base\Form\Type\LayoutWidgetListType')
+        ->tag('form.type')
+        ->args([new Reference('base.widget_provider')]);
 };
