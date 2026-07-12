@@ -2,8 +2,7 @@
 
 namespace Base\Repository\Thread;
 
-use App\Entity\Thread\Mention;
-
+use Base\Entity\Thread\Mention;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
