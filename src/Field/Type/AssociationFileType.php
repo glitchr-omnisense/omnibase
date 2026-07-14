@@ -78,7 +78,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         return 'associationfile';
     }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, MediaService $mediaService)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, MediaService $mediaService, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -86,6 +86,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
         $this->mediaService = $mediaService;
         $this->fileService = cast($mediaService, FileService::class);
+        $this->adminUrlGenerator = $adminUrlGenerator;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }

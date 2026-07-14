@@ -877,7 +877,15 @@ class ClassMetadataManipulator extends AbstractLocalCache
             return $entityMapping;
         }
 
-        if (array_key_exists("targetEntity", $entityMapping)) {
+        // Doctrine 3.x returns typed mapping objects (AssociationMapping/
+        // FieldMapping) instead of plain arrays - only association mappings
+        // carry a targetEntity, so check via instanceof rather than
+        // array_key_exists (which fatals on an object) or isset() on a
+        // property that plain FieldMapping objects don't declare at all.
+        if ($entityMapping instanceof AssociationMapping) {
+            return $this->fetchEntityMapping($entityMapping->targetEntity, implode(".", $fieldPath));
+        }
+        if (is_array($entityMapping) && array_key_exists("targetEntity", $entityMapping)) {
             return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $fieldPath));
         }
 

@@ -77,6 +77,7 @@ return function (ContainerConfigurator $configurator) {
             new Reference('base.database.metadata_manipulator'),
             new Reference('base.database.entity_hydrator'),
             new Reference('base.service.image'),
+            new Reference('Base\Admin\Router\AdminUrlGenerator'),
         ]);
     $services->set('Base\Field\Type\AttributeType')
         ->tag('form.type')
