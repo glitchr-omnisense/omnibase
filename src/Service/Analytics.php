@@ -1,0 +1,118 @@
+<?php
+
+namespace Base\Service;
+
+use Base\Repository\Analytics\PageViewRepository;
+use Base\Repository\Analytics\VisitRepository;
+use Base\Entity\Analytics\Visit;
+
+/**
+ * Single entry point for this app's traffic counters: page views (a raw
+ * hit count per path) plus two independent unique-subject counters -
+ * anonymous "visitors" (cookie-identified, see the consent note on
+ * trackVisitor()) and authenticated "users" (Base\Entity\User ids) - both
+ * sliceable by the same time windows (today/24h, 7 days, 30 days, all
+ * time) because they're built on the exact same underlying mechanism
+ * (Base\Entity\Analytics\Visit's daily presence rows), just keyed
+ * differently. Storage/aggregation strategy lives in the two repositories;
+ * this class is the only thing application code (a request subscriber, an
+ * admin sidebar widget, ...) needs to know about.
+ */
+class Analytics
+{
+    public function __construct(
+        private readonly PageViewRepository $pageViews,
+        private readonly VisitRepository $visits,
+    ) {
+    }
+
+    /**
+     * Call once per trackable request. $visitorId is the ANALYTICS/
+     * VISITOR_ID cookie value if present - deliberately never generated or
+     * set here: that cookie is written client-side via Cookie.set("ANALYTICS",
+     * "VISITOR_ID", ...) (see @glitchr/cookie), which silently no-ops
+     * without consent. A visit with no visitor cookie still counts toward
+     * pageViews() (an anonymous hit, no identity involved) but never
+     * toward uniqueVisitors() - consent is what turns a hit into a
+     * de-duplicated visitor, not the other way around. $userId has no such
+     * gating: it's the already-authenticated session's own account.
+     */
+    public function track(string $path, ?string $visitorId = null, ?string $userId = null): void
+    {
+        $today = new \DateTimeImmutable("today");
+
+        $this->pageViews->incrementView($path, $today);
+
+        if ($visitorId !== null && $visitorId !== "") {
+            $this->visits->recordPresence(Visit::TYPE_VISITOR, $visitorId, $today);
+        }
+        if ($userId !== null && $userId !== "") {
+            $this->visits->recordPresence(Visit::TYPE_USER, $userId, $today);
+        }
+    }
+
+    /**
+     * Total hits. $path null = every page (site-wide).
+     */
+    public function pageViews(?string $path = null, ?string $window = null): int
+    {
+        return $this->pageViews->countViews($path, self::resolveWindow($window));
+    }
+
+    /**
+     * Distinct anonymous (cookie-consented) visitors.
+     */
+    public function uniqueVisitors(?string $window = null): int
+    {
+        return $this->visits->countUnique(Visit::TYPE_VISITOR, self::resolveWindow($window));
+    }
+
+    /**
+     * Distinct authenticated user accounts active in the window.
+     */
+    public function uniqueUsers(?string $window = null): int
+    {
+        return $this->visits->countUnique(Visit::TYPE_USER, self::resolveWindow($window));
+    }
+
+    /**
+     * The set of numbers an admin sidebar widget wants at a glance -
+     * every counter across every standard window in one round trip's
+     * worth of queries (6 small aggregate queries, all against the tiny
+     * daily-rollup tables - cheap regardless of how much traffic has
+     * accumulated behind them).
+     */
+    public function summary(): array
+    {
+        $windows = ["today", "7d", "30d", "all"];
+
+        $summary = [];
+        foreach ($windows as $window) {
+            $summary[$window] = [
+                "pageViews" => $this->pageViews($window),
+                "uniqueVisitors" => $this->uniqueVisitors($window),
+                "uniqueUsers" => $this->uniqueUsers($window),
+            ];
+        }
+
+        return $summary;
+    }
+
+    /**
+     * "today"/"24h" (kept as two spellings of the same thing - this is a
+     * calendar-day bucket, not a true rolling 24h window: the daily-rollup
+     * storage can't distinguish "3am today" from "11pm today" any finer
+     * than that, which is the standard, deliberate trade-off of a daily-
+     * aggregate design over a raw event log), "7d", "30d", null/"all".
+     */
+    private static function resolveWindow(?string $window): ?\DateTimeImmutable
+    {
+        return match ($window) {
+            null, "all" => null,
+            "today", "24h" => new \DateTimeImmutable("today"),
+            "7d" => new \DateTimeImmutable("-6 days"),
+            "30d" => new \DateTimeImmutable("-29 days"),
+            default => throw new \InvalidArgumentException("Unknown analytics window: \"{$window}\" (expected one of: today, 24h, 7d, 30d, all)"),
+        };
+    }
+}

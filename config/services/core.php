@@ -65,6 +65,14 @@ return static function (ContainerConfigurator $container): void {
             service('localizer'),
         ]);
 
+    // Analytics (page views + visitor/user unique counters)
+    $services->set('Base\Service\Analytics')
+        ->public(true)
+        ->args([
+            service('Base\Repository\Analytics\PageViewRepository'),
+            service('Base\Repository\Analytics\VisitRepository'),
+        ]);
+
     // CacheClearSessionsCommand
     $services->set('Base\Console\Command\CacheClearSessionsCommand')
         ->parent('Base\Console\Command')
@@ -105,6 +113,7 @@ return static function (ContainerConfigurator $container): void {
         'Base\Subscriber\EasyAdminSubscriber' => ['advanced_router', 'EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider', 'EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'],
         'Base\Subscriber\AdminContextSubscriber' => [],
         'Base\Subscriber\AnalyticsSubscriber' => ['security.token_storage', 'advanced_router', 'translator', 'twig', 'App\Repository\UserRepository', 'ga.service'],
+        'Base\Subscriber\PageViewSubscriber' => ['Base\Service\Analytics', 'Symfony\Bundle\SecurityBundle\Security', '$excludedPrefixes' => ['/admin', '/_', '/api']],
     ];
 
     foreach ($subscribers as $id => $args) {
