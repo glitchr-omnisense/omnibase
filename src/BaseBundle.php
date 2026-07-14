@@ -23,9 +23,18 @@ use Base\Console\Command\CacheClearCommand;
 use Base\DependencyInjection\Dumper\CliDumper;
 use Base\DependencyInjection\Dumper\HtmlDumper;
 use Base\Service\BaseService;
+use Base\Traits\SingletonTrait;
 
 class BaseBundle extends AbstractBaseBundle
 {
+    // Re-declaring the trait here (already present on AbstractBaseBundle)
+    // gives BaseBundle its OWN $_instance storage instead of sharing the
+    // abstract parent's - see AbstractBaseBundle's constructor for the
+    // full explanation. Every other concrete bundle extending
+    // AbstractBaseBundle (Base\Admin\AdminBundle, Base\Wikidoc\WikidocBundle)
+    // must do the same.
+    use SingletonTrait;
+
     public const VERSION = '1.0.0';
 
     public function __construct()
@@ -101,11 +110,6 @@ class BaseBundle extends AbstractBaseBundle
         $this->invalidCache = false;
     }
 
-    public static function getInstance(bool $instanciateIfNotFound = true): ?self
-    {
-        return parent::getInstance($instanciateIfNotFound);
-    }
-    
     public function warmUp()
     {
         $needsWarmup = !file_exists($this->getCacheDir() . "/pools/base/bundle.php");

@@ -16,8 +16,20 @@ abstract class AbstractBaseBundle extends Bundle
 
     public function __construct()
     {
+        // static:: (not self::) matters here: this constructor is defined
+        // ONCE on the abstract class, but each concrete bundle subclass
+        // (BaseBundle, Base\Admin\AdminBundle, Base\Wikidoc\WikidocBundle...)
+        // re-declares `use SingletonTrait;` itself so it gets its OWN
+        // $_instance storage slot (traits give each USING class independent
+        // static properties - see SingletonTraitTest - but subclasses that
+        // only inherit the trait via this abstract parent, without
+        // re-declaring it, would all share ONE slot instead). self:: would
+        // always target THIS class's own copy regardless of which concrete
+        // bundle was actually instantiated, silently overwriting one
+        // bundle's singleton with another's - exactly what happened once a
+        // second bundle (AdminBundle) started extending this class.
         if (!$this->hasInstance()) {
-            self::$_instance = $this;
+            static::$_instance = $this;
         }
     }
 
