@@ -2,7 +2,7 @@
 
 namespace Base\Enum;
 
-use Base\Controller\Admin\Crud\UserCrudController;
+use Base\Controller\Backoffice\Crud\UserCrudController;
 use Base\Database\Type\SetType;
 use Base\Service\Model\IconizeInterface;
 
