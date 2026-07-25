@@ -79,7 +79,7 @@ class AutocompleteController extends AbstractController
     #[Route("/ux/autocomplete/{data}", name:"ux_autocomplete")]
     public function Main(Request $request, string $data): Response
     {
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->attributes->get("_route"), "ux_");
         if ($this->profiler !== null && $isUX) {
             $this->profiler->disable();
         }
@@ -132,7 +132,7 @@ class AutocompleteController extends AbstractController
                 $fields = array_filter($fields);
 
                 $index0 = -1;
-                $entries = $repository->cacheByInstanceOfAndPartialModel($filters, $fields, [], [], null, null, ["id"]); // If no field, then get them all..
+                $entries = $repository->cacheByInstanceOf($filters, [], [], null, null, ["id"]); // Term matching happens below via $search/$term; $fields only decides which columns feed that comparison.
 
                 do {
                     $bookIsFull = false;
@@ -204,7 +204,7 @@ class AutocompleteController extends AbstractController
     #[Route("/ux/autocomplete/currency/{source}/{target}/{data}", name:"ux_autocomplete_forex")]
     public function Forex(Request $request, string $source, string $target, string $data, ?Profiler $profiler = null): Response
     {
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->attributes->get("_route"), "ux_");
         if ($this->profiler !== null && $isUX) {
             $this->profiler->disable();
         }
@@ -236,7 +236,7 @@ class AutocompleteController extends AbstractController
     #[Route("/ux/autocomplete/{provider}/{pageSize}/{data}", name:"ux_autocomplete_icons")]
     public function Icons(Request $request, string $provider, int $pageSize, string $data, ?Profiler $profiler = null): Response
     {
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->get("_route"), "ux_");
+        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->attributes->get("_route"), "ux_");
         if ($this->profiler !== null && $isUX) {
             $this->profiler->disable();
         }
@@ -256,8 +256,8 @@ class AutocompleteController extends AbstractController
         $pagination = false;
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
-            $term = mb_strtolower($request->get("term")) ?? "";
-            $meta = explode(".", $request->get("page") ?? "");
+            $term = mb_strtolower($request->query->get("term", $request->request->get("term", "")));
+            $meta = explode(".", $request->query->get("page", $request->request->get("page", "")));
             $page = max(1, intval($meta[0] ?? 1));
             $bookmark = max(0, intval($meta[1] ?? 0));
 
