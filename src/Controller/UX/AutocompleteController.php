@@ -4,6 +4,7 @@ namespace Base\Controller\UX;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
 
+use Base\Service\MediaServiceInterface;
 use Base\Service\Model\Autocomplete;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\PaginatorInterface;
@@ -63,7 +64,7 @@ class AutocompleteController extends AbstractController
      */
     private RequestStack $requestStack;
 
-    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?Profiler $profiler = null)
+    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?MediaServiceInterface $mediaService = null, ?Profiler $profiler = null)
     {
         $this->requestStack = $requestStack;
         $this->obfuscator = $obfuscator;
@@ -71,7 +72,7 @@ class AutocompleteController extends AbstractController
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->tradingMarket = $tradingMarket;
         $this->paginator = $paginator;
-        $this->autocomplete = new Autocomplete($translator);
+        $this->autocomplete = new Autocomplete($translator, $mediaService);
         $this->profiler = $profiler;
         $this->requestStack = $requestStack;
     }

@@ -2,6 +2,7 @@
 
 namespace Base\Service\Model;
 
+use Base\Service\MediaServiceInterface;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -11,9 +12,13 @@ class Autocomplete
     /** @var TranslatorInterface */
     protected TranslatorInterface $translator;
 
-    public function __construct(TranslatorInterface $translator)
+    /** @var MediaServiceInterface|null */
+    protected ?MediaServiceInterface $mediaService;
+
+    public function __construct(TranslatorInterface $translator, ?MediaServiceInterface $mediaService = null)
     {
         $this->translator = $translator;
+        $this->mediaService = $mediaService;
     }
 
     /**
@@ -50,6 +55,22 @@ class Autocomplete
             $html = $entryOptions["html"] && is_html($autocomplete) ? $autocomplete : null;
             $text = $entryOptions["html"] && is_html($autocomplete) ? null : $entityStr;
             $data = $autocompleteData;
+
+            // A User (or anything else exposing the same avatar-upload
+            // convention) gets its real profile picture in the chip instead
+            // of a generic icon - most useful exactly where a plain name is
+            // hardest to tell apart at a glance: several authors picked on
+            // the same entity. Falls through to the icon untouched when
+            // there's no media service wired in or no avatar set.
+            if ($this->mediaService !== null && method_exists($entry, "getAvatarFile")) {
+                $avatarFile = $entry->getAvatarFile();
+                if (!empty($avatarFile)) {
+                    $avatar = $this->mediaService->thumbnail($avatarFile, 40, 40);
+                    if (is_string($avatar)) {
+                        $data["avatar"] = $avatar;
+                    }
+                }
+            }
 
             if (!$text) {
                 $text = is_stringeable($entry) ? strip_tags(strval($entry)) : $className . " #" . $entry->getId();

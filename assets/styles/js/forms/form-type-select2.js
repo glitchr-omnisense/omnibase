@@ -62,7 +62,14 @@ window.addEventListener("load.form_type", function () {
 
             term = $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val();
 
-            var icon = iconAttributes ? '<i '+ iconAttributes + '></i> ' : '';
+            // A real profile picture (User's avatar, when the backend
+            // resolved one) reads better than a generic role icon, and
+            // matters most exactly where a plain name is hardest to tell
+            // apart at a glance - several authors on the same entity.
+            var avatarUrl = option["data"] ? option["data"]["avatar"] : undefined;
+            var icon = avatarUrl
+                ? '<img class="select2-avatar" src="' + avatarUrl.replace(/"/g, '\\"') + '"> '
+                : (iconAttributes ? '<i '+ iconAttributes + '></i> ' : '');
             var externalLink = (href ? '<span><a target="_blank" href="'+href+'"><i class=\"fas fa-external-link-square-alt\"></i></span>' : '');
             var highlightSearch = option.html ? option.html : (icon + highlight_search(option.text, term) + externalLink);
             var shiftAttribute = ' style="margin-left:calc('+tab+' * '+depth+')" class=\"select2-selection__entry\" '+dataAttribute;

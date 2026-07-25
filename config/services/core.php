@@ -87,7 +87,7 @@ return static function (ContainerConfigurator $container): void {
         'Base\Controller\Client\ContactController' => ['form.proxy', 'base.notifier'],
         'Base\Controller\LocalizerController' => ['localizer', 'doctrine.orm.entity_manager', 'advanced_router', 'referrer', 'translator'],
         'Base\Controller\UX\MediaController' => ['request_stack', 'flysystem', 'base.service.image', 'Base\Repository\Layout\ImageCropRepository'],
-        'Base\Controller\UX\AutocompleteController' => ['Base\Service\Obfuscator', 'request_stack', 'trading_market', 'translator', 'doctrine.orm.entity_manager', 'Base\Service\Paginator', 'Base\Database\Mapping\ClassMetadataManipulator'],
+        'Base\Controller\UX\AutocompleteController' => ['Base\Service\Obfuscator', 'request_stack', 'trading_market', 'translator', 'doctrine.orm.entity_manager', 'Base\Service\Paginator', 'Base\Database\Mapping\ClassMetadataManipulator', 'base.service.image'],
         'Base\Controller\WidgetController' => ['Base\Repository\Layout\Widget\PageRepository', 'Base\Repository\Layout\Widget\AttachmentRepository'],
         'Base\Controller\ShortLinkController' => ['advanced_router', 'Base\Repository\Layout\ShortLinkRepository'],
     ];
@@ -104,7 +104,7 @@ return static function (ContainerConfigurator $container): void {
             $definition->arg(4, new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE));
         }
         if ($id === 'Base\Controller\UX\AutocompleteController') {
-            $definition->arg(7, new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE));
+            $definition->arg(8, new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE));
         }
     }
 
