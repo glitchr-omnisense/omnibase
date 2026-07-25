@@ -47,4 +47,31 @@ class PageViewRepository extends ServiceEntityRepository
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
+
+    /**
+     * One row per calendar day in range (summed across every path),
+     * oldest first - the raw series a dashboard trend chart plots
+     * directly, no client-side date bucketing needed.
+     *
+     * @return array<string, int> date (Y-m-d) => views
+     */
+    public function dailyBreakdown(\DateTimeImmutable $since): array
+    {
+        $rows = $this->createQueryBuilder("pv")
+            ->select("pv.date AS date, SUM(pv.views) AS views")
+            ->andWhere("pv.date >= :since")
+            ->setParameter("since", $since)
+            ->groupBy("pv.date")
+            ->orderBy("pv.date", "ASC")
+            ->getQuery()
+            ->getArrayResult();
+
+        $breakdown = [];
+        foreach ($rows as $row) {
+            $date = $row["date"] instanceof \DateTimeInterface ? $row["date"]->format("Y-m-d") : (string) $row["date"];
+            $breakdown[$date] = (int) $row["views"];
+        }
+
+        return $breakdown;
+    }
 }

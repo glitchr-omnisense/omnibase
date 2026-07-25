@@ -99,6 +99,64 @@ class Analytics
     }
 
     /**
+     * Day-by-day series for the last $days calendar days (oldest first,
+     * today included) - the raw data a dashboard trend chart plots
+     * directly. Unlike summary()'s window totals, a day with genuinely
+     * zero activity is filled in as 0 rather than omitted, so a chart
+     * never has to guess at a gap in the x-axis.
+     *
+     * @return array<int, array{date: string, pageViews: int, uniqueVisitors: int, uniqueUsers: int}>
+     */
+    public function dailyBreakdown(int $days = 14): array
+    {
+        $since = new \DateTimeImmutable(($days - 1) . " days ago midnight");
+
+        $pageViews = $this->pageViews->dailyBreakdown($since);
+        $visitors = $this->visits->dailyBreakdown(Visit::TYPE_VISITOR, $since);
+        $users = $this->visits->dailyBreakdown(Visit::TYPE_USER, $since);
+
+        $series = [];
+        for ($i = 0; $i < $days; $i++) {
+            $date = $since->modify("+{$i} days")->format("Y-m-d");
+            $series[] = [
+                "date" => $date,
+                "pageViews" => $pageViews[$date] ?? 0,
+                "uniqueVisitors" => $visitors[$date] ?? 0,
+                "uniqueUsers" => $users[$date] ?? 0,
+            ];
+        }
+
+        return $series;
+    }
+
+    /**
+     * This 7-day window vs the 7 days before it, as a signed percentage
+     * per counter - the "up/down vs last week" badge a dashboard trend
+     * card needs. Reuses dailyBreakdown(14) rather than four more window
+     * queries: the same 14 rows already answer both halves.
+     *
+     * @return array{pageViews: ?float, uniqueVisitors: ?float, uniqueUsers: ?float}
+     *         null when the prior week was zero (no meaningful percentage to show)
+     */
+    public function weekOverWeekChange(): array
+    {
+        $series = $this->dailyBreakdown(14);
+        $previousWeek = \array_slice($series, 0, 7);
+        $thisWeek = \array_slice($series, 7, 7);
+
+        $sum = fn(array $days, string $key) => array_sum(array_column($days, $key));
+
+        $result = [];
+        foreach (["pageViews", "uniqueVisitors", "uniqueUsers"] as $key) {
+            $previous = $sum($previousWeek, $key);
+            $current = $sum($thisWeek, $key);
+            $result[$key] = $previous > 0 ? round((($current - $previous) / $previous) * 100, 1) : null;
+        }
+
+        return $result;
+    }
+
+    /**
      * "today"/"24h" (kept as two spellings of the same thing - this is a
      * calendar-day bucket, not a true rolling 24h window: the daily-rollup
      * storage can't distinguish "3am today" from "11pm today" any finer

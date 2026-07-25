@@ -47,4 +47,35 @@ class VisitRepository extends ServiceEntityRepository
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
+
+    /**
+     * One row per calendar day in range - unlike countUnique() (a single
+     * total over the whole window), a subject seen on multiple days
+     * within range legitimately contributes to EACH of those days here;
+     * that's the correct semantics for "how many distinct subjects were
+     * active on day X", which is what a trend chart needs.
+     *
+     * @return array<string, int> date (Y-m-d) => distinct subject count
+     */
+    public function dailyBreakdown(string $subjectType, \DateTimeImmutable $since): array
+    {
+        $rows = $this->createQueryBuilder("v")
+            ->select("v.date AS date, COUNT(DISTINCT v.subjectId) AS count")
+            ->andWhere("v.subjectType = :type")
+            ->andWhere("v.date >= :since")
+            ->setParameter("type", $subjectType)
+            ->setParameter("since", $since)
+            ->groupBy("v.date")
+            ->orderBy("v.date", "ASC")
+            ->getQuery()
+            ->getArrayResult();
+
+        $breakdown = [];
+        foreach ($rows as $row) {
+            $date = $row["date"] instanceof \DateTimeInterface ? $row["date"]->format("Y-m-d") : (string) $row["date"];
+            $breakdown[$date] = (int) $row["count"];
+        }
+
+        return $breakdown;
+    }
 }

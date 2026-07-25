@@ -24,6 +24,11 @@
         "/bundles/base/easyadmin-async.9cbe9b2f.js"
       ]
     },
+    "admin-charts": {
+      "js": [
+        "/bundles/base/admin-charts.2dc1200b.js"
+      ]
+    },
     "form-defer": {
       "css": [
         "/bundles/base/form-defer.c7f58a8b.css"

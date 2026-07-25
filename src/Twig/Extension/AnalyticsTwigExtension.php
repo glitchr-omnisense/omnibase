@@ -25,6 +25,8 @@ final class AnalyticsTwigExtension extends AbstractExtension
             new TwigFunction('analytics_unique_visitors', [$this, 'uniqueVisitors']),
             new TwigFunction('analytics_unique_users', [$this, 'uniqueUsers']),
             new TwigFunction('analytics_summary', [$this, 'summary']),
+            new TwigFunction('analytics_daily_breakdown', [$this, 'dailyBreakdown']),
+            new TwigFunction('analytics_week_over_week_change', [$this, 'weekOverWeekChange']),
         ];
     }
 
@@ -61,5 +63,22 @@ final class AnalyticsTwigExtension extends AbstractExtension
     public function summary(): array
     {
         return $this->analytics->summary();
+    }
+
+    /**
+     * {% set series = analytics_daily_breakdown(14) %}
+     */
+    public function dailyBreakdown(int $days = 14): array
+    {
+        return $this->analytics->dailyBreakdown($days);
+    }
+
+    /**
+     * {% set change = analytics_week_over_week_change() %}
+     * {{ change.pageViews }}% vs last week
+     */
+    public function weekOverWeekChange(): array
+    {
+        return $this->analytics->weekOverWeekChange();
     }
 }
