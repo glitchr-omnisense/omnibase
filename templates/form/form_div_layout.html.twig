@@ -7,7 +7,7 @@
     {%- set attr = attr|merge({'novalidate': 'novalidate'}) -%}
     {{ parent(attr) }}
 
-    <input type="hidden" name="referrer" value="{{ ea().request.query.get('referrer') }}">
+    <input type="hidden" name="referrer" value="{{ app.request.query.get('referrer') }}">
     {% if form.vars.errors|length > 0 and 'ea_crud' in form.vars.block_prefixes|default([]) %}
         {{ form_errors(form, {attr: { class: 'global-invalid-feedback' }}) }}
     {% endif %}
