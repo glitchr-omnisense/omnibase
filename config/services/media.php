@@ -64,7 +64,6 @@ return static function (ContainerConfigurator $container): void {
         ->call('setContainer', [new Reference('Psr\Container\ContainerInterface')])
         ->args([
             new Reference('advanced_router'),
-            new Reference('base.service.image'),
             new Reference('setting_bag'),
             new Reference('twig'),
             new Reference('translator'),

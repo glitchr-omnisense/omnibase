@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale|default('en') }}">
+{# Fully self-contained rescue login: no bundle layout, no admin package,
+   no build-step assets - just inline HTML/CSS and Symfony's own form
+   helpers, so base-bundle can render a working login on its own. When the
+   admin extension is installed, RescueController renders its richer
+   @Admin/security/login.html.twig instead. #}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ (page_title ?? 'Administration')|striptags }}</title>
+    <style>
+        :root { color-scheme: light dark; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+               background: #f6f7f9; color: #1f2429; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+        .card { width: 100%; max-width: 340px; background: #fff; border: 1px solid #e3e6ea; border-radius: 12px;
+                padding: 2rem; box-shadow: 0 12px 40px rgba(0,0,0,.08); }
+        h1 { margin: 0 0 1.5rem; font-size: 1.25rem; text-align: center; }
+        .field { margin-bottom: .9rem; }
+        .field label { display: block; font-size: .82rem; color: #6b7683; margin-bottom: .3rem; }
+        .field input { width: 100%; padding: .55rem .7rem; border: 1px solid #e3e6ea; border-radius: 8px; font: inherit; background: #f6f7f9; }
+        .remember { display: flex; align-items: center; gap: .5rem; margin: .5rem 0 1rem; font-size: .88rem; color: #6b7683; }
+        .error { background: #fde8e8; color: #b91c1c; border: 1px solid #f5c2c2; border-radius: 8px; padding: .6rem .75rem; margin-bottom: 1rem; font-size: .88rem; }
+        button { width: 100%; padding: .6rem; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+        button:hover { filter: brightness(1.05); }
+        @media (prefers-color-scheme: dark) {
+            body { background: #16181d; color: #e6e8eb; }
+            .card { background: #1e2127; border-color: #2c3038; }
+            .field input { background: #16181d; border-color: #2c3038; color: #e6e8eb; }
+            .error { background: #3b1d1d; color: #f5a3a3; border-color: #5c2b2b; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>{{ page_title|default('Administration') }}</h1>
+
+    {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+        <input type="hidden" name="_target_path" value="{{ target_path|default(app.referrer) }}">
+
+        {% if error is defined and error %}
+            <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
+
+        <div class="field">
+            <label>{{ '@forms.login.identifier'|trans }}</label>
+            {{ form_widget(form.identifier) }}
+        </div>
+
+        <div class="field">
+            <label>{{ '@forms.login.password'|trans }}</label>
+            {{ form_widget(form.password) }}
+        </div>
+
+        <label class="remember">
+            {{ form_widget(form._remember_me) }}
+            {{ '@forms.login.rememberMe'|trans }}
+        </label>
+
+        {{ form_rest(form) }}
+
+        <button type="submit">{{ '@forms.login.submit'|trans }}</button>
+    {{ form_end(form) }}
+</div>
+</body>
+</html>
