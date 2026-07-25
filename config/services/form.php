@@ -29,9 +29,6 @@ use Base\Field\Configurator\QuadrantConfigurator;
 use Base\Field\Configurator\DiscriminatorConfigurator;
 use Base\Field\Configurator\AttributeConfigurator;
 use Base\Field\Configurator\IconConfigurator;
-use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
-use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
@@ -44,8 +41,6 @@ return static function (ContainerConfigurator $container): void {
     // ------------------------------
     // Form Extensions
     // ------------------------------
-    $services->set('Base\Form\Extension\EaCrudFormCompatExtension')->tag('form.type_extension');
-
     $services->set('Base\Form\Extension\FormTypeBootstrapExtension')
         ->tag('form.type_extension')
         ->args([new Reference('base.service')]);

@@ -11,7 +11,6 @@ use ReflectionClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController as EaCrudController;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'translation:crud', aliases: [], description: '')]
@@ -29,12 +28,9 @@ class TranslationCrudCommand extends Command
     {
         $baseLocation = dirname((new ReflectionClass('Base\\BaseBundle'))->getFileName());
         $crudRestriction = $input->getOption('crud') ?? "";
-        $cruds = array_filter(
-            array_merge(
-                BaseBundle::getInstance()->getAllClasses($baseLocation . "/Controller/Admin/Crud"),
-                BaseBundle::getInstance()->getAllClasses("./src/Controller/Admin/Crud"),
-            ),
-            fn($c) => !($c instanceof EaCrudController)
+        $cruds = array_merge(
+            BaseBundle::getInstance()->getAllClasses($baseLocation . "/Controller/Admin/Crud"),
+            BaseBundle::getInstance()->getAllClasses("./src/Controller/Admin/Crud"),
         );
 
         $maxLength = 0;

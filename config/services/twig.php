@@ -171,7 +171,6 @@ return static function (ContainerConfigurator $container): void {
         ->args([new Reference('base.service.sharing')]);
 
     // Form extensions
-    $services->set('Base\Form\Extension\EaCrudFormCompatExtension')->tag('form.type_extension');
     $services->set('Base\Form\Extension\FormTypeBootstrapExtension')
         ->tag('form.type_extension')
         ->args([new Reference('base.service')]);

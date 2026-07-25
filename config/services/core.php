@@ -29,9 +29,6 @@ use Base\Field\Configurator\QuadrantConfigurator;
 use Base\Field\Configurator\DiscriminatorConfigurator;
 use Base\Field\Configurator\AttributeConfigurator;
 use Base\Field\Configurator\IconConfigurator;
-use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
-use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service_closure;
@@ -114,8 +111,6 @@ return static function (ContainerConfigurator $container): void {
         'Base\Subscriber\ProfilerSubscriber' => ['advanced_router'],
         'Base\Subscriber\TwigSubscriber' => ['twig.html_renderer', 'twig.webpack_renderer', 'security.authorization_checker', 'parameter_bag', 'advanced_router', '$publicDir' => '%kernel.project_dir%/public'],
         'Base\Subscriber\HotParameterBagSubscriber' => ['parameter_bag', 'setting_bag'],
-        'Base\Subscriber\EasyAdminSubscriber' => ['advanced_router', 'EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider', 'EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'],
-        'Base\Subscriber\AdminContextSubscriber' => [],
         'Base\Subscriber\AnalyticsSubscriber' => ['security.token_storage', 'advanced_router', 'translator', 'twig', 'App\Repository\UserRepository', 'ga.service'],
         'Base\Subscriber\PageViewSubscriber' => ['Base\Service\Analytics', 'Symfony\Bundle\SecurityBundle\Security', '$excludedPrefixes' => ['/admin', '/_', '/api']],
     ];
@@ -300,7 +295,6 @@ return static function (ContainerConfigurator $container): void {
             service('advanced_router'),
             service('base.database.entity_hydrator'),
             service('base.database.metadata_manipulator'),
-            service('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'),
             new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE),
         ]);
 

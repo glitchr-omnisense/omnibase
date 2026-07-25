@@ -7,7 +7,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\Routing\Route;
 use App\Entity\User;
-use Base\Controller\Admin\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\AdvancedRouterInterface;
@@ -24,9 +23,6 @@ use Base\Traits\BaseCommonTrait;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ManagerRegistry;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -71,11 +67,6 @@ class BaseService implements RuntimeExtensionInterface
     private KernelInterface $kernel;
 
     /**
-     * @var AdminContextProvider
-     */
-    protected AdminContextProvider $adminContextProvider;
-
-    /**
      * @var AuthorizationCheckerInterface
      */
     protected AuthorizationCheckerInterface $authorizationChecker;
@@ -84,11 +75,6 @@ class BaseService implements RuntimeExtensionInterface
      * @var CsrfTokenManagerInterface
      */
     protected CsrfTokenManagerInterface $csrfTokenManager;
-
-    /**
-     * @var AdminUrlGenerator
-     */
-    protected AdminUrlGenerator $adminUrlGenerator;
 
     /**
      * @var FormFactoryInterface
@@ -143,7 +129,6 @@ class BaseService implements RuntimeExtensionInterface
         AdvancedRouterInterface               $router,
         EntityHydratorInterface       $entityHydrator,
         ClassMetadataManipulator      $classMetadataManipulator,
-        AdminUrlGenerator             $adminUrlGenerator,
         ?Profiler                     $profiler
     )
     {
@@ -181,10 +166,6 @@ class BaseService implements RuntimeExtensionInterface
         $this->setUserIdentifier($this->getParameterBag()->get("base.user.identifier"));
         $this->setTokenStorage($tokenStorage);
         $this->setNotifier($notifier);
-
-        // EA provider
-        $this->adminContextProvider = new AdminContextProvider($requestStack);
-        $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
     public function getRouteIndex(): string
@@ -263,22 +244,6 @@ class BaseService implements RuntimeExtensionInterface
     public function settings()
     {
         return $this->getSettingBag();
-    }
-
-    // Used in twig environment
-
-    /**
-     * @param $entity
-     * @return string
-     */
-    public function crudify($entity): string
-    {
-        return $this->adminUrlGenerator->unsetAll()
-            ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
-            ->setEntityId($entity->getId())
-            ->setAction(Crud::PAGE_EDIT)
-            //->includeReferrer()
-            ->generateUrl();
     }
 
     /**
