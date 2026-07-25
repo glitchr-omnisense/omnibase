@@ -93,11 +93,36 @@ trait TranslationTrait
                 continue;
             }
 
+            // A multi-value choice widget (e.g. a "keywords" tag picker)
+            // left genuinely empty by the user can still submit an array
+            // containing only blank strings ([""], not the literal [] the
+            // widget conceptually means) - treated the same way a single
+            // blank string already is below (trimmed to nothing = no real
+            // content), instead of falling through to the generic
+            // !empty($value) check further down, which considers ANY
+            // array with at least one element "not empty" regardless of
+            // what that element actually contains.
+            if (is_array($value)) {
+                if (array_filter($value, fn($v) => is_string($v) ? trim($v) !== "" : (bool) $v) !== []) {
+                    return false;
+                }
+                continue;
+            }
+
+            // Same fallthrough problem as the array case above: a
+            // whitespace-only string ("   ") is blank content-wise, but
+            // PHP's empty() only considers "" (zero-length) empty, so the
+            // generic !empty($value) catch-all further down would still
+            // flag it "not empty" if this didn't return/continue on its
+            // own first.
+            if (is_string($value)) {
+                if (trim($value) !== "") {
+                    return false;
+                }
+                continue;
+            }
+
             if ($addConditions !== null && !call_user_func_array($addConditions, [$var, $value])) {
-                return false;
-            } elseif (is_string($value) && trim($value) !== "") {
-                return false;
-            } elseif (is_array($value) && $value !== []) {
                 return false;
             } elseif ($value === true) {
                 return false;
