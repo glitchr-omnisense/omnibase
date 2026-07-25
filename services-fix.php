@@ -4,7 +4,6 @@
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -29,57 +28,4 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set('Doctrine\Persistence\Mapping\ClassMetadataFactory')
         ->factory([new Reference('doctrine.orm.default_entity_manager'), 'getMetadataFactory']);
-
-    $services->set('EasyCorp\Bundle\EasyAdminBundle\Factory\FilterFactory')
-        ->public(true)
-        ->args([
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider'),
-            tagged_iterator('ea.filter_configurator'),
-        ]);
-
-    $services->set('EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory')
-        ->public(true)
-        ->args([
-            new Reference('security.authorization_checker'),
-            new Reference('doctrine'),
-            new Reference('event_dispatcher'),
-        ]);
-
-    $services->set('EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository')
-        ->public(true)
-        ->args([
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider'),
-            new Reference('doctrine'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Factory\FormFactory'),
-            new Reference('event_dispatcher'),
-        ]);
-
-    $services->set('EasyCorp\Bundle\EasyAdminBundle\Factory\PaginatorFactory')
-        ->public(true)
-        ->args([
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Orm\EntityPaginator'),
-        ]);
-
-    $services->set('EasyCorp\Bundle\EasyAdminBundle\Factory\FormFactory')
-        ->public(true)
-        ->args([
-            new Reference('form.factory'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator'),
-        ]);
-
-    $services->set('EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator')
-        ->public(true)
-        ->args([
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider'),
-            new Reference('router'),
-            new Reference('EasyCorp\\Bundle\\EasyAdminBundle\\Registry\\AdminControllerRegistry'),
-            new Reference('EasyCorp\Bundle\EasyAdminBundle\Router\AdminRouteGenerator'),
-            new Reference('cache.easyadmin'),
-        ]);
-
-    $services->set('EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider')
-        ->public(true)
-        ->args([new Reference('request_stack')]);
 };
