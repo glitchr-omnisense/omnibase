@@ -14,8 +14,6 @@ class UserRole extends SetType implements IconizeInterface
     public const ADMIN = "ROLE_ADMIN";
     public const USER = "ROLE_USER";
 
-    public const SOCIAL = "ROLE_SOCIAL";
-
     public function __iconize(): ?array
     {
         return null;
@@ -29,8 +27,6 @@ class UserRole extends SetType implements IconizeInterface
             self::SUPERADMIN => ["fa-solid fa-cog", "fa-solid fa-user-cog"],
             self::ADMIN => ["fa-solid fa-crown", "fa-solid fa-star"],
             self::USER => ["fa-solid fa-user", "fa-solid fa-user-tag"],
-
-            self::SOCIAL => ["fa-solid fa-user-friends"],
         ];
     }
 

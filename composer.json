@@ -64,6 +64,7 @@
         "picqer/php-barcode-generator": "^2.0",
         "scheb/2fa": "^7.0|^8.0",
         "scienta/doctrine-json-functions": "~4.3",
+        "web-auth/webauthn-symfony-bundle": "^5.3",
         "symfony/config": "^6.0|^7.0|^8.0",
         "symfony/dependency-injection": "^6.0|^7.0|^8.0",
         "symfony/discord-notifier": "^6.0|^7.0|^8.0",

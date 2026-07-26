@@ -31,6 +31,9 @@ use Base\Validator\Constraints as AssertBase;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
+use Scheb\TwoFactorBundle\Model\BackupCodeInterface;
+use Scheb\TwoFactorBundle\Model\Email\TwoFactorInterface as EmailTwoFactorInterface;
+use Scheb\TwoFactorBundle\Model\TrustedDeviceInterface;
 
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Database\Attribute\Timestamp;
@@ -66,7 +69,7 @@ use ApiPlatform\Metadata\ApiResource;
 #[AssertBase\UniqueEntity(fields:["email"], groups:["new", "edit"])]
 
 #[ApiResource]
-class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
+class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface, BackupCodeInterface, TrustedDeviceInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
 {
     use BaseTrait;
     use UserInfoTrait;
@@ -210,7 +213,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @return mixed
      */
-    public function getSecret()
+    public function getTotpSecret()
     {
         return $this->secret;
     }
@@ -237,9 +240,93 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @param $secret
      * @return $this
      */
-    public function setSecret($secret): self
+    public function setTotpSecret($secret): self
     {
         $this->secret = $secret;
+        return $this;
+    }
+
+    #[ORM\Column(type:"json", nullable:true)]
+    protected $backupCodes = [];
+
+    public function isBackupCode(string $code): bool
+    {
+        foreach ($this->backupCodes ?? [] as $hash) {
+            if (password_verify($code, $hash)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function invalidateBackupCode(string $code): void
+    {
+        $this->backupCodes = array_values(array_filter(
+            $this->backupCodes ?? [],
+            fn($hash) => !password_verify($code, $hash)
+        ));
+    }
+
+    public function getBackupCodesCount(): int
+    {
+        return count($this->backupCodes ?? []);
+    }
+
+    /**
+     * @param string[] $plainCodes
+     */
+    public function setBackupCodes(array $plainCodes): self
+    {
+        $this->backupCodes = array_map(fn($code) => password_hash($code, PASSWORD_DEFAULT), $plainCodes);
+        return $this;
+    }
+
+    #[ORM\Column(type:"boolean")]
+    protected $emailAuthEnabled = false;
+
+    #[ORM\Column(type:"string", nullable:true)]
+    protected $emailAuthCode;
+
+    public function isEmailAuthEnabled(): bool
+    {
+        return $this->emailAuthEnabled;
+    }
+
+    public function setEmailAuthEnabled(bool $emailAuthEnabled): self
+    {
+        $this->emailAuthEnabled = $emailAuthEnabled;
+        return $this;
+    }
+
+    public function getEmailAuthRecipient(): string
+    {
+        return $this->getEmail();
+    }
+
+    public function getEmailAuthCode(): ?string
+    {
+        return $this->emailAuthCode;
+    }
+
+    public function setEmailAuthCode(string $authCode): void
+    {
+        $this->emailAuthCode = $authCode;
+    }
+
+    #[ORM\Column(type:"integer")]
+    protected $trustedTokenVersion = 0;
+
+    public function getTrustedTokenVersion(): int
+    {
+        return $this->trustedTokenVersion;
+    }
+
+    /**
+     * Bump this to invalidate every previously-trusted device for this user (e.g. after disabling 2FA).
+     */
+    public function invalidateTrustedDevices(): self
+    {
+        $this->trustedTokenVersion++;
         return $this;
     }
 
@@ -390,14 +477,33 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     #[OrderColumn(orderBy: "rolesPositions")]
     protected $roles = [];
     protected $rolesPositions;
-    public function isSocial(): bool
+
+    /**
+     * Slug of the external identity provider this account originates from (e.g. "google"),
+     * or null for a locally-registered (password-based) account.
+     */
+    #[ORM\Column(type:"string", length:32, nullable:true)]
+    protected $identityProvider = null;
+
+    public function getIdentityProvider(): ?string
     {
-        return in_array(UserRole::SOCIAL, $this->roles);
+        return $this->identityProvider;
+    }
+
+    public function setIdentityProvider(?string $identityProvider): self
+    {
+        $this->identityProvider = $identityProvider;
+        return $this;
+    }
+
+    public function isFederated(): bool
+    {
+        return $this->identityProvider !== null;
     }
 
     public function isPersistent(): bool
     {
-        return (!$this->isSocial() || $this->id > 0);
+        return (!$this->isFederated() || $this->id > 0);
     }
 
     public function getRoles(): array

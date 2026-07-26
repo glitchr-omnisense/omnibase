@@ -4,18 +4,18 @@ namespace Base\Controller\Client;
 
 use Base\Service\BaseService;
 
-use App\Entity\User;
 use App\Repository\UserRepository;
 
 use App\Form\Extension\Login2FAType;
 use Base\Attributes\Attribute\Iconize;
 use Base\Entity\User\Notification;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
@@ -28,6 +28,8 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInte
 
 class UserSettingsController extends AbstractController
 {
+    private const SESSION_PENDING_SECRET = "2fa_pending_totp_secret";
+
     private $baseService;
     private UserRepository $userRepository;
 
@@ -38,10 +40,10 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/members/qr/totp", name: "qr_code_totp")]
-    public function displayTotpQrCode(TokenStorageInterface $tokenStorage, TotpAuthenticatorInterface $totpAuthenticator): Response
+    public function displayTotpQrCode(TotpAuthenticatorInterface $totpAuthenticator): Response
     {
-        $user = $tokenStorage->getToken()->getUser();
-        if (!($user instanceof TotpTwoFactorInterface)) {
+        $user = $this->getUser();
+        if (!($user instanceof TotpTwoFactorInterface) || !$user->isTotpAuthenticationEnabled()) {
             throw new NotFoundHttpException('Cannot display QR code');
         }
 
@@ -65,6 +67,18 @@ class UserSettingsController extends AbstractController
         return new Response($result->getString(), 200, ['Content-Type' => 'image/png']);
     }
 
+    /**
+     * @return string[] plain-text codes (only ever shown once, right after generation)
+     */
+    private function generateBackupCodes(int $count = 8): array
+    {
+        $codes = [];
+        for ($i = 0; $i < $count; $i++) {
+            $codes[] = strtoupper(bin2hex(random_bytes(3))) . '-' . strtoupper(bin2hex(random_bytes(3)));
+        }
+        return $codes;
+    }
+
     #[Route("/settings", name: "user_settings")]
     #[Iconize("fa-solid fa-fw fa-user-cog")]
     public function Settings()
@@ -74,68 +88,110 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa", name: "user_settings_2fa")]
-    public function TwoFactorAuthentification(Request $request)
+    public function TwoFactorAuthentification(Request $request, EntityManagerInterface $entityManager, TotpAuthenticatorInterface $totpAuthenticator)
     {
-        $newUser = new User();
-        $form = $this->createForm(Login2FAType::class, $newUser);
+        $user = $this->getUser();
+        $session = $request->getSession();
+
+        if ($user->isTotpAuthenticationEnabled()) {
+            return $this->redirectToRoute('user_settings');
+        }
+
+        $pendingSecret = $session->get(self::SESSION_PENDING_SECRET) ?? $totpAuthenticator->generateSecret();
+        $session->set(self::SESSION_PENDING_SECRET, $pendingSecret);
+
+        $form = $this->createForm(Login2FAType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $submittedToken = $request->request->get('login2_fa_form')["_csrf_token"] ?? null;
-            if (!$this->isCsrfTokenValid('2fa', $submittedToken)) {
-                $notification = new Notification("Invalid CSRF token detected. We cannot proceed with the 2FA authentification");
-                $notification->send("danger");
-            } else {
-                $notification = new Notification("The 2FA authentification is not yet enabled. Try this later");
-                $notification->send("danger");
-                // $newUser->setTotpSecret($form->get('totpSecret')->getData());
-                // $entityManager = $this->getDoctrine()->getManager();
-                // $entityManager->persist($newUser);
-                // $entityManager->flush();
 
-                // if($user && $user->getIsVerified()) {
+            // Validate against a throwaway clone: the real, tracked $user entity must not carry an
+            // unconfirmed secret, since other requests in this app flush() the entity manager as a
+            // side effect (e.g. UserTracker::updateConnection()) and would silently persist it.
+            $pendingUser = clone $user;
+            $pendingUser->setTotpSecret($pendingSecret);
 
-                //     $newUser->verify($user->getIsVerified());
-                //     $this->baseService->addFlashSuccess("You've got successfully registered ! You account is already verified.");
+            if ($totpAuthenticator->checkCode($pendingUser, $form->get('code')->getData())) {
 
-                // } else {
+                $user->setTotpSecret($pendingSecret);
+                $backupCodes = $this->generateBackupCodes();
+                $user->setBackupCodes($backupCodes);
+                $entityManager->flush();
 
-                //     // generate a signed url and email it to the user
-                //     $this->emailVerifier->sendEmailConfirmation('security_verifyEmailWithToken', $newUser,
-                //         (new TemplatedEmail())
-                //             ->from(new Address('support@example.com', 'Support'))
-                //             ->to($newUser->getEmail())
-                //             ->subject('Please Confirm your Email')
-                //             ->htmlTemplate('email/user/registration_email.html.twig')
-                //     );
+                $session->remove(self::SESSION_PENDING_SECRET);
 
-                //     $this->baseService->addFlashSuccess("You've got successfully registered ! Please confirm your account by checking your email.");
-                // }
+                $notification = new Notification("2FA has been enabled on your account.");
+                $notification->send("success");
+
+                return $this->render('client/user/settings_2fa_backup_codes.html.twig', [
+                    'backupCodes' => $backupCodes,
+                ]);
             }
+
+            $form->get('code')->addError(new \Symfony\Component\Form\FormError('Invalid code, please try again.'));
         }
 
         return $this->render('client/user/settings_2fa.html.twig', [
             'form' => $form->createView(),
-            'user' => $this->getUser()
+            'user' => $user
         ]);
     }
 
-    #[Route("/settings/2fa/qr-code", name: "user_settings_2fa_qrcode")]
-    public function TwoFactorAuthentification_QrCode(TotpAuthenticatorInterface $totpAuthenticator)
+    #[Route("/settings/2fa/disable", name: "user_settings_2fa_disable", methods: ["POST"])]
+    public function TwoFactorAuthentification_Disable(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
     {
-        // Was written against the endroid v3 generator API and a
-        // $this->qrCodeGenerator property that never existed: the route
-        // fataled whenever hit. Route through the same builder as
-        // /members/qr/totp instead.
         $user = $this->getUser();
-        if (!($user instanceof TotpTwoFactorInterface)) {
-            throw new NotFoundHttpException('Cannot display QR code');
+
+        if (!$this->isCsrfTokenValid('2fa_disable', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
         }
 
-        if (empty($user->getTotpSecret())) {
-            $user->setTotpSecret($totpAuthenticator->generateSecret());
+        if (!$passwordHasher->isPasswordValid($user, (string) $request->request->get('password'))) {
+            $notification = new Notification("Incorrect password.");
+            $notification->send("danger");
+            return $this->redirectToRoute('user_settings');
         }
 
-        return $this->displayQrCode($totpAuthenticator->getQRContent($user));
+        $user->setTotpSecret(null);
+        $user->setBackupCodes([]);
+        $user->invalidateTrustedDevices();
+        $entityManager->flush();
+
+        $notification = new Notification("2FA has been disabled on your account.");
+        $notification->send("success");
+
+        return $this->redirectToRoute('user_settings');
+    }
+
+    #[Route("/settings/2fa/email", name: "user_settings_2fa_email_toggle", methods: ["POST"])]
+    public function TwoFactorAuthentification_ToggleEmail(Request $request, EntityManagerInterface $entityManager)
+    {
+        if (!$this->isCsrfTokenValid('2fa_email', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $user = $this->getUser();
+        $user->setEmailAuthEnabled(!$user->isEmailAuthEnabled());
+        $entityManager->flush();
+
+        $notification = new Notification($user->isEmailAuthEnabled() ? "Email verification codes enabled." : "Email verification codes disabled.");
+        $notification->send("success");
+
+        return $this->redirectToRoute('user_settings');
+    }
+
+    #[Route("/settings/2fa/qr-code", name: "user_settings_2fa_qrcode")]
+    public function TwoFactorAuthentification_QrCode(Request $request, TotpAuthenticatorInterface $totpAuthenticator)
+    {
+        $user = $this->getUser();
+        $secret = $request->getSession()->get(self::SESSION_PENDING_SECRET);
+        if (!$secret) {
+            throw new NotFoundHttpException('No pending 2FA setup');
+        }
+
+        $pendingUser = clone $user;
+        $pendingUser->setTotpSecret($secret);
+
+        return $this->displayQrCode($totpAuthenticator->getQRContent($pendingUser));
     }
 }

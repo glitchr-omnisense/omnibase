@@ -11,6 +11,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Repository\UserRepository;
 
 class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, OAuthAwareUserProviderInterface
 {
@@ -19,9 +20,15 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      */
     protected UserTracker $userTracker;
 
-    public function __construct(UserTracker $userTracker)
+    /**
+     * @var UserRepository
+     */
+    protected UserRepository $userRepository;
+
+    public function __construct(UserTracker $userTracker, UserRepository $userRepository)
     {
         $this->userTracker = $userTracker;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -79,30 +86,30 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      */
     public function loadUserByOAuthUserResponse(UserResponseInterface $response): UserInterface
     {
-        // $data = $identifier->getData();
+        $identityProvider = $response->getResourceOwner()->getName();
+        $email = $response->getEmail();
 
-        // $user = new User();
-        // $user->setId(0);
-        // $user->setRoles([UserRole::SOCIAL]);
-        // $user->setEmail($data["email"]);
+        if ($email && ($user = $this->userRepository->findOneByEmail($email))) {
 
-        // $user->verify($data["verified_email"]);
+            // Link this IdP to an existing local (or previously-linked) account.
+            if ($user->getIdentityProvider() === null) {
+                $user->setIdentityProvider($identityProvider);
+            }
 
-        // $accessor = PropertyAccess::createPropertyAccessor();
-        // if ($accessor->isWritable($this, "username")) {
-        //     $accessor->setValue($this, "username", "Google");
-        // }
+            return $user;
+        }
 
-        // $accessor = PropertyAccess::createPropertyAccessor();
-        // if ($accessor->isWritable($this, "username")) {
-        //     $accessor->setValue($this, "username", $data["family_name"]);
-        // }
+        // No local account yet: return a transient, unpersisted stub. The oauth firewall's
+        // default_target_path (/register) lets the user complete registration (pick a username)
+        // before anything is written to the database - isPersistent() (id === 0 here) reflects that.
+        $user = new User();
+        $user->setId(0);
+        $user->setIdentityProvider($identityProvider);
+        $user->setEmail($email);
+        $user->setFirstname($response->getFirstName());
+        $user->setLastname($response->getLastName());
+        $user->verify(true); // Google already verified ownership of this email address
 
-        // $accessor = PropertyAccess::createPropertyAccessor();
-        // if ($accessor->isWritable($this, "firstname")) {
-        //     $accessor->setValue($this, "firstname", $data["given_name"]);
-        // }
-
-        throw new \Exception('loadUserByOAuthUserResponse() not implemented '.__FILE__);
+        return $user;
     }
 }

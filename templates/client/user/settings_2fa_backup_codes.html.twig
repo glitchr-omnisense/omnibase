@@ -1,0 +1,31 @@
+{% extends 'layout1.html.twig' %}
+
+{% block title %}{{'@forms.2fa.title'|trans}}{% endblock %}
+{% block content %}
+
+<article class="wrapper login half">
+<div class="card">
+    <div class="card-header">
+        <h3 class="text-center">{{'@forms.2fa.backupCodesTitle'|trans}}</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            {{'@forms.2fa.backupCodesWarning'|trans}}
+        </div>
+
+        <ul class="list-group mb-3">
+            {% for code in backupCodes %}
+                <li class="list-group-item font-monospace text-center">{{ code }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="card-footer">
+        <div class="text-center">
+            <a class="btn btn-primary" href="{{ path('user_settings') }}">{{'@forms.2fa.backupCodesDone'|trans}}</a>
+        </div>
+    </div>
+</div>
+</article>
+
+{% endblock %}

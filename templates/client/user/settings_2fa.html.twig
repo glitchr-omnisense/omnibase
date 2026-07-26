@@ -1,42 +1,46 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}Two Factor!{% endblock %}
+{% block title %}{{'@forms.2fa.title'|trans}}{% endblock %}
 {% block content %}
 
-    {% if user %}
-    <div class="mb-3">
+<article class="wrapper login half">
+<div class="card">
+    <div class="card-header">
+        <h3 class="text-center">{{'@forms.2fa.title'|trans}}</h3>
+    </div>
+    <div class="card-body">
 
-        <h1>Two Factor Authentification</h1>
+        <p>
+            {{'@forms.2fa.instructions'|trans}}
+        </p>
 
         {{ form_start(form) }}
         <div class="row">
-            <div class="col-sm">
-
-                You are about to set a two factor authentification.
-                It consists of using a smart app (e.g. Duo Mobile, Free OTP, Google Authenticator) to secure even more your account.
-                Flash this QR Code to enable this feature and submit the code provided.
-
-                <div class="input-group form-group mb-2">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="fa-fw fa-brands fa-hashtag {{ form.totpSecret.vars.required ? "required" : "" }}"></i>
-                        </span>
-                    </div>
-                    {{ form_widget(form.totpSecret) }}
-
-                    <small>{{ form_help(form.totpSecret) }}</small>
-                    <div class="invalid-feedback">{{ form_errors(form.totpSecret) }}</div>
-                </div>
-
-                {{ form_row(form._csrf_token) }}
-                <button class="w-100 btn btn-lg btn-primary" type="submit">Enable 2FA</button>
+            <div class="col-sm d-flex align-items-center justify-content-center">
+                <img src="{{ path('user_settings_2fa_qrcode') }}" width="200" height="200" alt="TOTP QR code">
             </div>
             <div class="col-sm">
-                <img src="{{ path('user_settings_2fa_qrcode') }}" width="200" height="200">
+                <div class="input-group form-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fa-fw fa-solid fa-hashtag"></i></span>
+                    </div>
+                    {{ form_widget(form.code) }}
+                </div>
+                <div class="invalid-feedback d-block">{{ form_errors(form.code) }}</div>
+                {{ form_rest(form) }}
+
+                <button class="w-100 btn btn-lg btn-primary mt-2" type="submit">{{'@forms.2fa.enable'|trans}}</button>
             </div>
         </div>
         {{ form_end(form) }}
     </div>
-    {% endif %}
+
+    <div class="card-footer">
+        <div class="text-center">
+            <a href="{{ path('user_settings') }}">{{'@forms.back'|trans}}</a>
+        </div>
+    </div>
+</div>
+</article>
 
 {% endblock %}
