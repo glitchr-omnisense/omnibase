@@ -9,6 +9,7 @@ use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
 use Base\Entity\User\Connection;
+use Base\Entity\User\Passkey;
 
 use App\Entity\User\Token;
 use App\Entity\User\Group;
@@ -142,6 +143,7 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
         $this->penalties = new ArrayCollection();
 
         $this->connections = new ArrayCollection();
+        $this->passkeys = new ArrayCollection();
 
         $this->threads = new ArrayCollection();
         $this->followedThreads = new ArrayCollection();
@@ -1186,10 +1188,38 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     public function removeConnection(Connection $connection): self
     {
         if ($this->connections->removeElement($connection)) {
-            
+
             // set the owning side to null (unless already changed)
             if ($connection->getUser() === $this) {
                 $connection->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    #[ORM\OneToMany(targetEntity:Passkey::class, mappedBy:"user", orphanRemoval:true, cascade:["persist", "remove"])]
+    protected $passkeys;
+    public function getPasskeys(): Collection
+    {
+        return $this->passkeys;
+    }
+
+    public function addPasskey(Passkey $passkey): self
+    {
+        if (!$this->passkeys->contains($passkey)) {
+            $this->passkeys[] = $passkey;
+            $passkey->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePasskey(Passkey $passkey): self
+    {
+        if ($this->passkeys->removeElement($passkey)) {
+            if ($passkey->getUser() === $this) {
+                $passkey->setUser(null);
             }
         }
 

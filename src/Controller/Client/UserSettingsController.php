@@ -7,6 +7,7 @@ use Base\Service\BaseService;
 use App\Repository\UserRepository;
 use Base\Entity\User\Connection;
 use Base\Repository\User\ConnectionRepository;
+use Base\Repository\User\PasskeyRepository;
 
 use App\Form\Extension\Login2FAType;
 use Base\Attributes\Attribute\Iconize;
@@ -92,6 +93,45 @@ class UserSettingsController extends AbstractController
             'user' => $user,
             'sessions' => $sessions,
         ]);
+    }
+
+    #[Route("/settings/passkeys/{id}/rename", name: "user_settings_passkey_rename", methods: ["POST"])]
+    public function RenamePasskey(int $id, Request $request, PasskeyRepository $passkeyRepository, EntityManagerInterface $entityManager)
+    {
+        if (!$this->isCsrfTokenValid('passkey_rename_' . $id, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $passkey = $passkeyRepository->find($id);
+        if (!$passkey || $passkey->getUser() !== $this->getUser()) {
+            throw $this->createNotFoundException();
+        }
+
+        $passkey->setLabel(trim((string) $request->request->get('label')) ?: null);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('user_settings');
+    }
+
+    #[Route("/settings/passkeys/{id}/delete", name: "user_settings_passkey_delete", methods: ["POST"])]
+    public function DeletePasskey(int $id, Request $request, PasskeyRepository $passkeyRepository, EntityManagerInterface $entityManager)
+    {
+        if (!$this->isCsrfTokenValid('passkey_delete_' . $id, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $passkey = $passkeyRepository->find($id);
+        if (!$passkey || $passkey->getUser() !== $this->getUser()) {
+            throw $this->createNotFoundException();
+        }
+
+        $entityManager->remove($passkey);
+        $entityManager->flush();
+
+        $notification = new Notification("Passkey removed.");
+        $notification->send("success");
+
+        return $this->redirectToRoute('user_settings');
     }
 
     #[Route("/settings/sessions/{id}/logout", name: "user_settings_session_logout", methods: ["POST"])]
