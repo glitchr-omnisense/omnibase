@@ -45,7 +45,37 @@
         </ul>
 
         <h5>{{'@forms.settings.passkeys'|trans}}</h5>
-        <p class="text-muted">{{'@forms.settings.passkeysComingSoon'|trans}}</p>
+        <ul class="list-group mb-2">
+            {% for passkey in user.getPasskeys() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        {{ passkey.getLabel() ?: '@forms.settings.unnamedPasskey'|trans }}
+                        <br><small class="text-muted">
+                            {{'@forms.settings.passkeyAdded'|trans({'%date%': passkey.getCreatedAt()|datetime("dd MMMM YYYY")})}}
+                            {% if passkey.getLastUsedAt() %}
+                                &middot; {{'@forms.settings.passkeyLastUsed'|trans({'%date%': passkey.getLastUsedAt()|datetime("dd MMMM YYYY")})}}
+                            {% endif %}
+                        </small>
+                    </span>
+                    <span>
+                        <form class="d-inline" method="post" action="{{ path('user_settings_passkey_rename', {id: passkey.getId()}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('passkey_rename_' ~ passkey.getId()) }}">
+                            <input type="text" name="label" class="form-control form-control-sm d-inline w-auto" placeholder="{{'@forms.settings.renamePasskey'|trans}}" value="{{ passkey.getLabel() }}">
+                            <button class="btn btn-sm btn-outline-secondary" type="submit">{{'@forms.settings.rename'|trans}}</button>
+                        </form>
+                        <form class="d-inline" method="post" action="{{ path('user_settings_passkey_delete', {id: passkey.getId()}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('passkey_delete_' ~ passkey.getId()) }}">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">{{'@forms.settings.delete'|trans}}</button>
+                        </form>
+                    </span>
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">{{'@forms.settings.noPasskeys'|trans}}</li>
+            {% endfor %}
+        </ul>
+        <button type="button" class="btn btn-sm btn-primary" data-passkey-register="{{ user.getUsername() }}">
+            <i class="fa-fw fa-solid fa-passport"></i> {{'@forms.settings.addPasskey'|trans}}
+        </button>
 
         <h5>{{'@forms.settings.connectedAccounts'|trans}}</h5>
         <ul class="list-group">
@@ -102,4 +132,9 @@
 
 {% endif %}
 </article>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('webauthn') }}
 {% endblock %}

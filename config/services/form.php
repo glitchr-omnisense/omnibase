@@ -153,7 +153,10 @@ return static function (ContainerConfigurator $container): void {
         ->args([new Reference('doctrine.orm.entity_manager')]);
 
     $services->set('Base\Security\UserProvider')
-        ->args([new Reference('Base\Security\UserTracker')]);
+        ->args([
+            new Reference('Base\Security\UserTracker'),
+            new Reference('App\Repository\UserRepository'),
+        ]);
 
     $services->set('Base\Security\RescueFormAuthenticator')
         ->parent('Base\Security\LoginFormAuthenticator');
