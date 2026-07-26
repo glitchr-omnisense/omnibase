@@ -55,6 +55,15 @@
             <button class="btn btn-lg btn-primary" type="submit">{{ '@forms.login.submit'|trans }}</button>
         </div>
         {{ form_end(form) }}
+
+        <hr>
+        <div class="text-center text-muted small mb-2">{{'@forms.login.orContinueWith'|trans}}</div>
+
+        <div class="col d-flex justify-content-center">
+            <a class="btn btn-outline-secondary m-1" href="{{ path('oauth_google') }}">
+                <i class="fa-fw fa-brands fa-google"></i> {{'@forms.login.withGoogle'|trans}}
+            </a>
+        </div>
     </div>
 
     <div class="card-footer">

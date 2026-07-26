@@ -5,6 +5,8 @@ namespace Base\Controller\Client;
 use Base\Service\BaseService;
 
 use App\Repository\UserRepository;
+use Base\Entity\User\Connection;
+use Base\Repository\User\ConnectionRepository;
 
 use App\Form\Extension\Login2FAType;
 use Base\Attributes\Attribute\Iconize;
@@ -81,10 +83,35 @@ class UserSettingsController extends AbstractController
 
     #[Route("/settings", name: "user_settings")]
     #[Iconize("fa-solid fa-fw fa-user-cog")]
-    public function Settings()
+    public function Settings(ConnectionRepository $connectionRepository)
     {
         $user = $this->getUser();
-        return $this->render('client/user/settings.html.twig', ['user' => $user]);
+        $sessions = $connectionRepository->findByUser($user, ["updatedAt" => "DESC"]);
+
+        return $this->render('client/user/settings.html.twig', [
+            'user' => $user,
+            'sessions' => $sessions,
+        ]);
+    }
+
+    #[Route("/settings/sessions/{id}/logout", name: "user_settings_session_logout", methods: ["POST"])]
+    public function LogoutSession(int $id, Request $request, ConnectionRepository $connectionRepository, EntityManagerInterface $entityManager)
+    {
+        if (!$this->isCsrfTokenValid('session_logout', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $user = $this->getUser();
+        $connection = $connectionRepository->find($id);
+
+        if (!$connection || $connection->getUser() !== $user) {
+            throw $this->createNotFoundException();
+        }
+
+        $connection->markAsLogout();
+        $entityManager->flush();
+
+        return $this->redirectToRoute('user_settings');
     }
 
     #[Route("/settings/2fa", name: "user_settings_2fa")]

@@ -1,14 +1,105 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}Profile!{% endblock %}
+{% block title %}{{'@forms.settings.title'|trans}}{% endblock %}
 {% block content %}
-    <article class="half">
-    <h1>Settings</h1>
+<article class="wrapper">
+<h1>{{'@forms.settings.title'|trans}}</h1>
 
-        {% if user %}
-        <div class="mb-3">
-            You are logged in as {{ user }}, <a href="{{ path('security_logout') }}">Logout</a>
-        </div>
-        {% endif %}
-    </article>
+{% if user %}
+
+<div class="card mb-3">
+    <div class="card-header"><i class="fa-fw fa-solid fa-shield-halved"></i> {{'@forms.settings.security'|trans}}</div>
+    <div class="card-body">
+
+        <h5>{{'@forms.settings.twoFactor'|trans}}</h5>
+        <ul class="list-group mb-3">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{'@forms.settings.totpApp'|trans}}
+                {% if user.isTotpAuthenticationEnabled() %}
+                    <span>
+                        <span class="badge bg-success me-2">{{'@forms.settings.enabled'|trans}}</span>
+                        <form class="d-inline" method="post" action="{{ path('user_settings_2fa_disable') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('2fa_disable') }}">
+                            <input type="password" name="password" class="form-control form-control-sm d-inline w-auto" placeholder="{{'@forms.login.password'|trans}}" required>
+                            <button class="btn btn-sm btn-outline-danger" type="submit">{{'@forms.settings.disable'|trans}}</button>
+                        </form>
+                    </span>
+                {% else %}
+                    <a class="btn btn-sm btn-primary" href="{{ path('user_settings_2fa') }}">{{'@forms.settings.enable'|trans}}</a>
+                {% endif %}
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{'@forms.settings.emailCode'|trans}}
+                <form method="post" action="{{ path('user_settings_2fa_email_toggle') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('2fa_email') }}">
+                    <button class="btn btn-sm {{ user.isEmailAuthEnabled() ? 'btn-outline-danger' : 'btn-outline-primary' }}" type="submit">
+                        {{ user.isEmailAuthEnabled() ? '@forms.settings.disable'|trans : '@forms.settings.enable'|trans }}
+                    </button>
+                </form>
+            </li>
+            {% if user.isTotpAuthenticationEnabled() %}
+            <li class="list-group-item">
+                {{'@forms.settings.backupCodesRemaining'|trans({'%count%': user.getBackupCodesCount()})}}
+            </li>
+            {% endif %}
+        </ul>
+
+        <h5>{{'@forms.settings.passkeys'|trans}}</h5>
+        <p class="text-muted">{{'@forms.settings.passkeysComingSoon'|trans}}</p>
+
+        <h5>{{'@forms.settings.connectedAccounts'|trans}}</h5>
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="fa-fw fa-brands fa-google"></i> Google</span>
+                {% if user.getIdentityProvider() == 'google' %}
+                    <span class="badge bg-success">{{'@forms.settings.connected'|trans}}</span>
+                {% else %}
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ path('oauth_google') }}">{{'@forms.settings.connect'|trans}}</a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header"><i class="fa-fw fa-solid fa-laptop"></i> {{'@forms.settings.devicesAndSessions'|trans}}</div>
+    <div class="card-body">
+        <ul class="list-group">
+            {% for session in sessions %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        {{ session.agent }}
+                        <br><small class="text-muted">{{ session.ipList|join(', ') }} &middot; {{ session.updatedAt|datetime("dd MMMM YYYY HH:mm") }}</small>
+                    </span>
+                    {% if session.isValid() %}
+                        <form method="post" action="{{ path('user_settings_session_logout', {id: session.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('session_logout') }}">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">{{'@forms.settings.logoutDevice'|trans}}</button>
+                        </form>
+                    {% else %}
+                        <span class="badge bg-secondary">{{'@forms.settings.loggedOut'|trans}}</span>
+                    {% endif %}
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">{{'@forms.settings.noSessions'|trans}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header"><i class="fa-fw fa-solid fa-sliders"></i> {{'@forms.settings.preferences'|trans}}</div>
+    <div class="card-body">
+        <p><strong>{{'@forms.settings.locale'|trans}}:</strong> {{ user.getLocale() }}</p>
+        <p><strong>{{'@forms.settings.timezone'|trans}}:</strong> {{ user.getTimezone() }}</p>
+    </div>
+</div>
+
+<div class="mb-3">
+    {{'@forms.settings.loggedInAs'|trans({'%user%': user})}}
+    <a href="{{ path('security_logout') }}">{{'@forms.login.logout'|trans}}</a>
+</div>
+
+{% endif %}
+</article>
 {% endblock %}

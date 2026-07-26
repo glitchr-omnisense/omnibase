@@ -10,10 +10,23 @@
             <ul class="field-avatar">
                 <li class="keep-opacity">{{ user.getFormattedAvatar()|raw }}</li>
             </ul>
-            
+
             <div class="text d-flex flex-column">
 
-                <h1>Membre #{{ user.id }}: {{ user }}</h1>
+                <h1>
+                    Membre #{{ user.id }}: {{ user }}
+                    {% if user.isOnline() %}
+                        <span class="badge bg-success" title="{{'@messages.profile.online'|trans}}">{{'@messages.profile.online'|trans}}</span>
+                    {% elseif user.isActive() %}
+                        <span class="badge bg-warning" title="{{'@messages.profile.recentlyActive'|trans}}">{{'@messages.profile.recentlyActive'|trans}}</span>
+                    {% endif %}
+                </h1>
+
+                <div class="roles mb-1">
+                    {% for role in user.roles %}
+                        <span class="badge bg-secondary">{{ ('@enum.userRole.' ~ role)|trans }}</span>
+                    {% endfor %}
+                </div>
 
                 <div class="info">
                     {{ '@messages.profile.registered'|trans([
@@ -34,6 +47,15 @@
                         user.updatedAt()|datetime("dd MMMM YYYY"),
                         user.updatedAt()|datetime("HH:mm")
                     ])|raw }}&nbsp
+                </div>
+
+                <div class="activity d-flex mt-2">
+                    <div class="me-4">
+                        <strong>{{ user.threads|length }}</strong> {{'@messages.profile.threads'|trans}}
+                    </div>
+                    <div class="me-4">
+                        <strong>{{ user.likes|length }}</strong> {{'@messages.profile.likes'|trans}}
+                    </div>
                 </div>
             </div>
         </div>
