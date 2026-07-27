@@ -105,11 +105,21 @@ class Analytics
      * zero activity is filled in as 0 rather than omitted, so a chart
      * never has to guess at a gap in the x-axis.
      *
+     * $days = null means "all time": since the earliest day anything was
+     * ever tracked (today, if nothing ever was - a 1-day series rather
+     * than an empty one, so callers never have to special-case "no data
+     * yet" separately from "no data in this window").
+     *
      * @return array<int, array{date: string, pageViews: int, uniqueVisitors: int, uniqueUsers: int}>
      */
-    public function dailyBreakdown(int $days = 14): array
+    public function dailyBreakdown(?int $days = 14): array
     {
-        $since = new \DateTimeImmutable(($days - 1) . " days ago midnight");
+        if (null === $days) {
+            $since = $this->pageViews->earliestDate() ?? new \DateTimeImmutable("today");
+            $days = (int) $since->diff(new \DateTimeImmutable("today"))->format("%a") + 1;
+        } else {
+            $since = new \DateTimeImmutable(($days - 1) . " days ago midnight");
+        }
 
         $pageViews = $this->pageViews->dailyBreakdown($since);
         $visitors = $this->visits->dailyBreakdown(Visit::TYPE_VISITOR, $since);

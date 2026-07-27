@@ -49,6 +49,22 @@ class PageViewRepository extends ServiceEntityRepository
     }
 
     /**
+     * The earliest recorded day, site-wide - what "all time" actually
+     * means for dailyBreakdown()'s $days=null case (there's no data
+     * before this, so generating a series further back would just be
+     * rows of zeroes). Null if nothing has ever been tracked.
+     */
+    public function earliestDate(): ?\DateTimeImmutable
+    {
+        $date = $this->createQueryBuilder("pv")
+            ->select("MIN(pv.date)")
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $date ? new \DateTimeImmutable($date) : null;
+    }
+
+    /**
      * One row per calendar day in range (summed across every path),
      * oldest first - the raw series a dashboard trend chart plots
      * directly, no client-side date bucketing needed.

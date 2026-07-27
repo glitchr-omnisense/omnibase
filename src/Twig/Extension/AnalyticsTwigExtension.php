@@ -67,8 +67,9 @@ final class AnalyticsTwigExtension extends AbstractExtension
 
     /**
      * {% set series = analytics_daily_breakdown(14) %}
+     * {% set series = analytics_daily_breakdown(null) %} - all time
      */
-    public function dailyBreakdown(int $days = 14): array
+    public function dailyBreakdown(?int $days = 14): array
     {
         return $this->analytics->dailyBreakdown($days);
     }
