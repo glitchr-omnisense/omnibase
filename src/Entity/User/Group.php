@@ -3,8 +3,8 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use App\Entity\User\Penalty;
-use App\Entity\User\Permission;
+use Base\Entity\User\Penalty;
+use Base\Entity\User\Permission;
 use Base\Service\Model\IconizeInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;

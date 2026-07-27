@@ -12,9 +12,9 @@ use Base\Entity\User\Connection;
 use Base\Entity\User\Passkey;
 
 use App\Entity\User\Token;
-use App\Entity\User\Group;
-use App\Entity\User\Penalty;
-use App\Entity\User\Permission;
+use Base\Entity\User\Group;
+use Base\Entity\User\Penalty;
+use Base\Entity\User\Permission;
 use App\Entity\User\Notification;
 use Base\Database\Attribute\OrderColumn;
 
@@ -508,7 +508,30 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
         return (!$this->isFederated() || $this->id > 0);
     }
 
+    private ?array $effectiveRoles = null;
+
+    /**
+     * Effective roles for security checks: this user's own roles unioned
+     * with every group they belong to. Memoized per-instance (busted by
+     * setRoles()/addGroup()/removeGroup()) since this is called on every
+     * auth check and getGroups() would otherwise trigger a lazy load each time.
+     */
     public function getRoles(): array
+    {
+        if (null !== $this->effectiveRoles) {
+            return $this->effectiveRoles;
+        }
+
+        $roles = $this->getOwnRoles();
+        foreach ($this->getGroups() as $group) {
+            $roles = array_merge($roles, $group->getRoles());
+        }
+
+        return $this->effectiveRoles = array_values(array_unique(array_filter($roles)));
+    }
+
+    /** Only this user's own roles - what the `roles` column stores, what edit forms bind to. */
+    public function getOwnRoles(): array
     {
         if (empty($this->roles)) {
             $this->roles[] = UserRole::USER;
@@ -524,7 +547,14 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
         }
 
         $this->roles = array_filter(array_unique($roles));
+        $this->effectiveRoles = null;
         return $this;
+    }
+
+    /** Alias so form binding on 'ownRoles' has a matching setter - writes only the own column, same as setRoles(). */
+    public function setOwnRoles(array $roles): self
+    {
+        return $this->setRoles($roles);
     }
 
     #[ORM\ManyToMany(targetEntity: Group::class, inversedBy:"members", orphanRemoval:true, cascade:["persist", "remove"])]
@@ -541,6 +571,7 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
             $this->groups[] = $group;
         }
 
+        $this->effectiveRoles = null;
         return $this;
     }
 
@@ -548,6 +579,7 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     {
         $this->groups->removeElement($group);
 
+        $this->effectiveRoles = null;
         return $this;
     }
 

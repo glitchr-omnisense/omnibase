@@ -77,6 +77,9 @@ return static function (ContainerConfigurator $container): void {
         ->tag('security.voter')
         ->args([new Reference('advanced_router')]);
 
+    $services->set('Base\Security\Voter\PermissionVoter')
+        ->tag('security.voter');
+
     $services->set('Base\Security\Voter\AccessVoter')
         ->tag('security.voter')
         ->args([

@@ -3,14 +3,14 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use App\Entity\User\Group;
+use Base\Entity\User\Group;
 use Base\Service\Model\IconizeInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\User\PenaltyRepository;
+use Base\Repository\User\PenaltyRepository;
 
 #[ORM\Entity(repositoryClass: PenaltyRepository::class)]
 class Penalty implements IconizeInterface
