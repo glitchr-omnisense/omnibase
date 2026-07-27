@@ -19,6 +19,14 @@ Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryS
 // order volume, whatever a client wants) only needs to render a <canvas
 // data-admin-chart="..."> - no new JS.
 function chartDatasets(config) {
+    // A line needs at least 2 points to draw a segment - a single-day
+    // range (e.g. "today") has exactly one, so with the usual
+    // pointRadius:0 the chart renders nothing at all: no line to connect,
+    // no dot to show for the lone point. Bumping the radius only in that
+    // case draws a visible dot instead, without changing how any
+    // multi-point range looks.
+    var pointRadius = (config.labels || []).length <= 1 ? 4 : 0;
+
     return (config.datasets || []).map(function (ds) {
         return {
             label: ds.label,
@@ -27,7 +35,7 @@ function chartDatasets(config) {
             backgroundColor: ds.color + '22',
             fill: true,
             tension: 0.35,
-            pointRadius: 0,
+            pointRadius: pointRadius,
             pointHoverRadius: 4,
             borderWidth: 2,
         };
