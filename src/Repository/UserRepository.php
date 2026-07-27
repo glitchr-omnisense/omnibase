@@ -58,6 +58,35 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * OTHER admins (own ROLE_ADMIN/ROLE_SUPERADMIN column, not group-
+     * inherited - a LIKE on the raw SET column can't see those without
+     * joining group membership, and this is a "who else is around right
+     * now" indicator, not a security check) active within the last
+     * $onlineDelay seconds, most recently active first. $excludeId is
+     * meant to be the current viewer - matches the one pre-existing
+     * precedent for this kind of query (the older, currently-inert
+     * AnalyticsSubscriber's findByIdNotEqualToAndActiveAtYoungerThan()).
+     *
+     * @return User[]
+     */
+    public function findActiveAdmins(int $onlineDelay, ?int $excludeId = null): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->andWhere('u.activeAt > :threshold')
+            ->andWhere('u.roles LIKE :roleAdmin OR u.roles LIKE :roleSuperadmin')
+            ->setParameter('threshold', new \DateTime($onlineDelay . ' seconds ago'))
+            ->setParameter('roleAdmin', '%ROLE_ADMIN%')
+            ->setParameter('roleSuperadmin', '%ROLE_SUPERADMIN%')
+            ->orderBy('u.activeAt', 'DESC');
+
+        if (null !== $excludeId) {
+            $qb->andWhere('u.id != :excludeId')->setParameter('excludeId', $excludeId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function cacheByInsensitiveIdentifier($identifier, array $fields = []) { return $this->findByInsensitiveIdentifier($identifier, $fields, true); }
     public function findByInsensitiveIdentifier($identifier, array $fields = [], $cacheable = false)
     {
