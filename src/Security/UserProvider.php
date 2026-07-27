@@ -36,7 +36,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      */
     public function loadUserByIdentifier($identifier): UserInterface
     {
-        throw new \Exception('TODO: fill in loadUserByIdentifier() inside '.__FILE__);
+        return $this->userRepository->loadUserByIdentifier($identifier);
     }
 
     /**

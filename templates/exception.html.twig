@@ -1,4 +1,18 @@
-{% extends 'layout1.html.twig' %}
+{# layout3, not layout1: layout1's collapsible sidebar-nav toggler
+   (__menu__() in index.js) reads/writes the "app/menu/toggle" localStorage
+   key on every hard page load, and error responses are always hard loads
+   (never the AJAX soft-nav that normally skips this). That forced the
+   sidebar open on every error regardless of the visitor's actual saved
+   preference. layout3 pages are exempt: __menu__() bails out immediately
+   because it gates on #page's data-layout being "layout1" - same pattern
+   already used by maintenance.html.twig/launchdate.html.twig for other
+   full-screen, nav-less pages. #}
+{% extends 'layout3.html.twig' %}
+
+{% block navbar %}{% endblock %}
+{% block flashbag %}{% endblock %}
+{% block sidebar %}{% endblock %}
+
 {% block content %}
     <div class="exception half text-center wrapper">
         {% set knownExceptionTitle = ("@controllers.exception." ~ flattenException.statusCode ~ ".title")|trans %}

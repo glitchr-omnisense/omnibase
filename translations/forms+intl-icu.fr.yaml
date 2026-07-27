@@ -25,6 +25,9 @@ login:
     byToken: "Lien par email"
     classic: "Connexion classique"
     sendEmail: "Envoyer le lien"
+    orContinueWith: "Ou continuer avec"
+    withGoogle: "Continuer avec Google"
+    withPasskey: "Continuer avec une clé d'accès"
 
 contact:
     check: "Merci pour votre message."
