@@ -9,8 +9,35 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip, Legend);
+Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip, Legend, annotationPlugin);
+
+// Translates config.events (see Base\Admin\Widget\TimelineEventRegistry)
+// into chartjs-plugin-annotation's config shape - one dashed vertical line
+// per event, anchored to its date via CategoryScale's own x-axis value
+// (the registry already guarantees every event's formatted date matches
+// one of the chart's own labels, so there's nothing to validate here).
+function buildAnnotations(events) {
+    var annotations = {};
+    (events || []).forEach(function (event, i) {
+        annotations['event' + i] = {
+            type: 'line',
+            scaleID: 'x',
+            value: event.label,
+            borderColor: event.color || '#7c3aed',
+            borderWidth: 2,
+            borderDash: [4, 4],
+            label: {
+                display: true,
+                content: event.title,
+                position: 'start',
+                backgroundColor: event.color || '#7c3aed',
+            },
+        };
+    });
+    return annotations;
+}
 
 // Generic dashboard chart initializer: any element carrying
 // data-admin-chart="{...}" (a JSON blob: {labels: [...], datasets: [{label, data, color}, ...]})
@@ -81,6 +108,7 @@ function initCharts() {
                 plugins: {
                     legend: { display: (config.datasets || []).length > 1, labels: { color: textColor, boxWidth: 12 } },
                     tooltip: { mode: 'index', intersect: false },
+                    annotation: { annotations: buildAnnotations(config.events) },
                 },
             },
         });
@@ -96,6 +124,7 @@ function updateChart(canvas, config) {
 
     chart.data.labels = config.labels || [];
     chart.data.datasets = chartDatasets(config);
+    chart.options.plugins.annotation.annotations = buildAnnotations(config.events);
     chart.update();
     return true;
 }
