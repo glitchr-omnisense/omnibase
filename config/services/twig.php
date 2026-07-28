@@ -169,6 +169,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Twig\Extension\SharingFilter')
         ->tag('twig.extension')
         ->args([new Reference('base.service.sharing')]);
+    $services->set('Base\Twig\Extension\DeployVersionExtension')
+        ->tag('twig.extension')
+        ->bind('$projectDir', '%kernel.project_dir%');
 
     // Form extensions
     $services->set('Base\Form\Extension\FormTypeBootstrapExtension')
