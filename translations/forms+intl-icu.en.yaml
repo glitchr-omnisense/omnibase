@@ -44,10 +44,24 @@ contact:
 
 resetPassword:
     title: "Reset your password"
-    descriptionRequest: "If you forgot your password or just want to reset it, please enter your email address ! 
+    descriptionRequest: "If you forgot your password or just want to reset it, please enter your email address !
     In case the address you used is in our records, you will receive a special email to reinitialise your password."
     description: "You are now about to change your password, please enter the password of your choice."
     email: "E-mail address"
     submit: "Send a request"
     newPassword: "Enter new password"
     newPasswordConfirm: "Confirm new password"
+
+cancel: "Cancel"
+back: "Back"
+
+2fa:
+    title: "Two-factor authentication"
+    challengeTitle: "Two-factor authentication"
+    trustDevice: "Trust this device"
+    confirm: "Confirm"
+    instructions: "Scan this QR code with your authenticator app, then enter the generated code below to enable two-factor authentication."
+    enable: "Enable"
+    backupCodesTitle: "Backup codes"
+    backupCodesWarning: "Save these backup codes somewhere safe - each one can be used once if you lose access to your authenticator app."
+    backupCodesDone: "Done"

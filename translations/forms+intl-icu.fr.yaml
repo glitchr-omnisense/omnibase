@@ -52,3 +52,17 @@ resetPassword:
     submit: "Envoyer la demande"
     newPassword: "Nouveau mot de passe"
     newPasswordConfirm: "Confirme nouveau mot de passe"
+
+cancel: "Annuler"
+back: "Retour"
+
+2fa:
+    title: "Authentification à deux facteurs"
+    challengeTitle: "Authentification à deux facteurs"
+    trustDevice: "Faire confiance à cet appareil"
+    confirm: "Confirmer"
+    instructions: "Scanne ce QR code avec ton application d'authentification, puis saisis le code généré ci-dessous pour activer l'authentification à deux facteurs."
+    enable: "Activer"
+    backupCodesTitle: "Codes de secours"
+    backupCodesWarning: "Conserve ces codes de secours en lieu sûr - chacun ne peut être utilisé qu'une seule fois si tu perds l'accès à ton application d'authentification."
+    backupCodesDone: "Terminé"

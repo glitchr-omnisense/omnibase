@@ -1,6 +1,6 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}{{ '@forms.2fa.challengeTitle'|trans }}{% endblock %}
 
 {% block content %}
 <article class="wrapper login half">
@@ -58,7 +58,7 @@
 
             <hr>
 
-            <div class="login-btn col d-flex justify-content-center">
+            <div class="login-btn col d-flex flex-column align-items-center">
                 <a class="btn btn m-1" href="{{ logoutPath }}">{{'@forms.cancel'|trans}}</a>
                 <button class="btn btn-primary m-1" type="submit">{{'@forms.2fa.confirm'|trans}}</button>
             </div>
