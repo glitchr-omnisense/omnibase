@@ -47,6 +47,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('error_handler.error_renderer.html'),
             new Reference('advanced_router'),
             new Reference('base.service'),
+            new Reference('request_stack'),
             new Reference('profiler', ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
         ]);
 
