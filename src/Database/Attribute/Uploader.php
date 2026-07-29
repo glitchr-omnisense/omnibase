@@ -220,6 +220,42 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 
         if (is_array($field)) {
 
+            // An #[Uploader]-attributed field isn't always exclusively a
+            // file/UUID list: SettingIntl::$value is the general-purpose
+            // JSON storage for EVERY setting type, file-backed or not, so
+            // an array value here can just as easily be an arbitrary
+            // nested structure (e.g. a stored admin.layout.* config -
+            // {version, columns, items: [...]}) that was never meant to
+            // go through file resolution at all.
+            //
+            // Validate ALL elements before touching any of them, rather
+            // than processing per-element with a per-element skip: an
+            // element that isn't itself a string or File (e.g. a nested
+            // array - one item of that layout config, or a plain scalar
+            // like the 'columns' int alongside it) isn't a uuid/File
+            // reference, so the WHOLE field isn't a file list. Two
+            // distinct failure modes were found live, both from the same
+            // root cause: passing a nested ARRAY element straight into
+            // getPath()'s ?string $uuid parameter is a hard TypeError
+            // (crashed every SECOND save of any dashboard/sidebar layout -
+            // preUpdate, not prePersist, is what reads this decorated
+            // getter, so the very first save/insert never touched this
+            // code path at all); merely SKIPPING that one bad element
+            // while still processing plain scalar siblings (e.g.
+            // 'columns') is not enough either - resolvePublicOrRoute()'s
+            // missable:true fallback echoes an unresolvable scalar back
+            // as itself, silently reconstructing a corrupted, flattened
+            // $pathList (e.g. [5, 1] - just the scalar siblings) instead
+            // of preserving the real nested value. Returning null here
+            // instead lets getValue()'s own `?? $this->value` fallback
+            // supply the untouched raw value, exactly like the scalar
+            // branch below already does for a single non-file value.
+            foreach ($field as $uuidOrFile) {
+                if (!is_string($uuidOrFile) && !($uuidOrFile instanceof File)) {
+                    return null;
+                }
+            }
+
             $pathList = [];
             foreach ($field as $uuidOrFile) {
                 $uuidOrFile = is_string($uuidOrFile) && !str_contains($uuidOrFile, "://") && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
