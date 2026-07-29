@@ -136,4 +136,10 @@ window.addEventListener('load', initCharts);
 // chart yet, and dataset.chartInitialized guards against double-init on
 // canvases that survive the swap.
 
-window.AdminCharts = { update: updateChart };
+// init() also covers a narrower case that isn't a full SPA swap: a
+// single new canvas inserted via plain DOM manipulation (the dashboard
+// widget palette's insertAdjacentHTML(), not a transparentJS navigation)
+// never gets the synthetic 'load' event either path above relies on -
+// found live, a palette-added analytics_card's canvas never initialized
+// until this was exposed for the palette's own JS to call directly.
+window.AdminCharts = { update: updateChart, init: initCharts };
