@@ -68,6 +68,13 @@ function chartDatasets(config, isDark) {
     return (config.datasets || []).map(function (ds) {
         var color = (isDark && ds.colorDark) ? ds.colorDark : ds.color;
         return {
+            // Not a Chart.js option - carried through so a consumer (e.g.
+            // the analytics widget's range picker) can read back WHICH
+            // series are currently plotted from the live chart instance's
+            // own data.datasets, without re-parsing the canvas's original
+            // (and, after any update(), stale) data-admin-chart JSON.
+            // Chart.js itself ignores unknown dataset properties.
+            key: ds.key,
             label: ds.label,
             data: ds.data,
             borderColor: color,
