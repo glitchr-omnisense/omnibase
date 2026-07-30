@@ -39,13 +39,24 @@ function buildAnnotations(events) {
     return annotations;
 }
 
+function isDarkMode() {
+    return document.documentElement.getAttribute('data-theme') === 'dark'
+        || (!document.documentElement.hasAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
 // Generic dashboard chart initializer: any element carrying
-// data-admin-chart="{...}" (a JSON blob: {labels: [...], datasets: [{label, data, color}, ...]})
-// gets a Chart.js line chart rendered into it. One shared function rather
-// than a chart-specific script, so a future dashboard widget (revenue,
-// order volume, whatever a client wants) only needs to render a <canvas
-// data-admin-chart="..."> - no new JS.
-function chartDatasets(config) {
+// data-admin-chart="{...}" (a JSON blob: {labels: [...], datasets: [{label,
+// data, color, colorDark}, ...]}) gets a Chart.js line chart rendered into
+// it. One shared function rather than a chart-specific script, so a future
+// dashboard widget (revenue, order volume, whatever a client wants) only
+// needs to render a <canvas data-admin-chart="..."> - no new JS.
+//
+// colorDark is optional (falls back to color) - every dataset this app
+// currently emits provides both (see dataviz's palette validation: a
+// categorical hex validated against a LIGHT surface isn't automatically
+// safe against a DARK one, so a straight reuse would have been unvalidated
+// there even though it looks fine here in light mode).
+function chartDatasets(config, isDark) {
     // A line needs at least 2 points to draw a segment - a single-day
     // range (e.g. "today") has exactly one, so with the usual
     // pointRadius:0 the chart renders nothing at all: no line to connect,
@@ -55,11 +66,12 @@ function chartDatasets(config) {
     var pointRadius = (config.labels || []).length <= 1 ? 4 : 0;
 
     return (config.datasets || []).map(function (ds) {
+        var color = (isDark && ds.colorDark) ? ds.colorDark : ds.color;
         return {
             label: ds.label,
             data: ds.data,
-            borderColor: ds.color,
-            backgroundColor: ds.color + '22',
+            borderColor: color,
+            backgroundColor: color + '22',
             fill: true,
             tension: 0.35,
             pointRadius: pointRadius,
@@ -81,8 +93,7 @@ function initCharts() {
             return;
         }
 
-        var isDark = document.documentElement.getAttribute('data-theme') === 'dark'
-            || (!document.documentElement.hasAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var isDark = isDarkMode();
         var gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
         var textColor = isDark ? '#8b94a1' : '#6b7683';
 
@@ -95,7 +106,7 @@ function initCharts() {
             type: 'line',
             data: {
                 labels: config.labels || [],
-                datasets: chartDatasets(config),
+                datasets: chartDatasets(config, isDark),
             },
             options: {
                 responsive: true,
@@ -123,7 +134,7 @@ function updateChart(canvas, config) {
     if (!chart) return false;
 
     chart.data.labels = config.labels || [];
-    chart.data.datasets = chartDatasets(config);
+    chart.data.datasets = chartDatasets(config, isDarkMode());
     chart.options.plugins.annotation.annotations = buildAnnotations(config.events);
     chart.update();
     return true;
