@@ -4,7 +4,9 @@ namespace Base\Service;
 
 use Base\Repository\Analytics\PageViewRepository;
 use Base\Repository\Analytics\VisitRepository;
+use Base\Entity\Analytics\PageView;
 use Base\Entity\Analytics\Visit;
+use Base\Service\Analytics\UserAgentClassifier;
 
 /**
  * Single entry point for this app's traffic counters: page views (a raw
@@ -23,6 +25,7 @@ class Analytics
     public function __construct(
         private readonly PageViewRepository $pageViews,
         private readonly VisitRepository $visits,
+        private readonly UserAgentClassifier $userAgentClassifier,
     ) {
     }
 
@@ -36,12 +39,27 @@ class Analytics
      * toward uniqueVisitors() - consent is what turns a hit into a
      * de-duplicated visitor, not the other way around. $userId has no such
      * gating: it's the already-authenticated session's own account.
+     *
+     * $userAgent decides which PageView::SOURCE_* bucket the hit lands in
+     * (via UserAgentClassifier) - null (the default, used by callers that
+     * never had an HTTP request to read a header from, e.g. this class's
+     * own test suite) is treated as SOURCE_HUMAN rather than run through
+     * the classifier, which would otherwise classify a truly empty/missing
+     * User-Agent as SOURCE_BOT. A hit classified as anything other than
+     * SOURCE_HUMAN never reaches the visitor/user presence tables below -
+     * a crawler's stray cookie or session should never count as a real
+     * unique visitor.
      */
-    public function track(string $path, ?string $visitorId = null, ?string $userId = null): void
+    public function track(string $path, ?string $visitorId = null, ?string $userId = null, ?string $userAgent = null): void
     {
         $today = new \DateTimeImmutable("today");
+        $source = $userAgent !== null ? $this->userAgentClassifier->classify($userAgent) : PageView::SOURCE_HUMAN;
 
-        $this->pageViews->incrementView($path, $today);
+        $this->pageViews->incrementView($path, $today, $source);
+
+        if ($source !== PageView::SOURCE_HUMAN) {
+            return;
+        }
 
         if ($visitorId !== null && $visitorId !== "") {
             $this->visits->recordPresence(Visit::TYPE_VISITOR, $visitorId, $today);
@@ -52,11 +70,13 @@ class Analytics
     }
 
     /**
-     * Total hits. $path null = every page (site-wide).
+     * Total hits. $path null = every page (site-wide). $source null = every
+     * source combined (human + bot + ai); pass a PageView::SOURCE_*
+     * constant to see just that bucket's hits.
      */
-    public function pageViews(?string $path = null, ?string $window = null): int
+    public function pageViews(?string $path = null, ?string $window = null, ?string $source = null): int
     {
-        return $this->pageViews->countViews($path, self::resolveWindow($window));
+        return $this->pageViews->countViews($path, self::resolveWindow($window), $source);
     }
 
     /**
@@ -78,7 +98,7 @@ class Analytics
     /**
      * The set of numbers an admin sidebar widget wants at a glance -
      * every counter across every standard window in one round trip's
-     * worth of queries (6 small aggregate queries, all against the tiny
+     * worth of queries (9 small aggregate queries, all against the tiny
      * daily-rollup tables - cheap regardless of how much traffic has
      * accumulated behind them).
      */
@@ -89,7 +109,10 @@ class Analytics
         $summary = [];
         foreach ($windows as $window) {
             $summary[$window] = [
-                "pageViews" => $this->pageViews($window),
+                "pageViews" => $this->pageViews(null, $window),
+                "pageViewsHuman" => $this->pageViews(null, $window, PageView::SOURCE_HUMAN),
+                "pageViewsBot" => $this->pageViews(null, $window, PageView::SOURCE_BOT),
+                "pageViewsAi" => $this->pageViews(null, $window, PageView::SOURCE_AI),
                 "uniqueVisitors" => $this->uniqueVisitors($window),
                 "uniqueUsers" => $this->uniqueUsers($window),
             ];
@@ -110,7 +133,7 @@ class Analytics
      * than an empty one, so callers never have to special-case "no data
      * yet" separately from "no data in this window").
      *
-     * @return array<int, array{date: string, pageViews: int, uniqueVisitors: int, uniqueUsers: int}>
+     * @return array<int, array{date: string, pageViews: int, pageViewsHuman: int, pageViewsBot: int, pageViewsAi: int, uniqueVisitors: int, uniqueUsers: int}>
      */
     public function dailyBreakdown(?int $days = 14): array
     {
@@ -122,15 +145,22 @@ class Analytics
         }
 
         $pageViews = $this->pageViews->dailyBreakdown($since);
+        $pageViewsBySource = $this->pageViews->dailyBreakdownBySource($since);
         $visitors = $this->visits->dailyBreakdown(Visit::TYPE_VISITOR, $since);
         $users = $this->visits->dailyBreakdown(Visit::TYPE_USER, $since);
+
+        $emptySource = [PageView::SOURCE_HUMAN => 0, PageView::SOURCE_BOT => 0, PageView::SOURCE_AI => 0];
 
         $series = [];
         for ($i = 0; $i < $days; $i++) {
             $date = $since->modify("+{$i} days")->format("Y-m-d");
+            $bySource = $pageViewsBySource[$date] ?? $emptySource;
             $series[] = [
                 "date" => $date,
                 "pageViews" => $pageViews[$date] ?? 0,
+                "pageViewsHuman" => $bySource[PageView::SOURCE_HUMAN],
+                "pageViewsBot" => $bySource[PageView::SOURCE_BOT],
+                "pageViewsAi" => $bySource[PageView::SOURCE_AI],
                 "uniqueVisitors" => $visitors[$date] ?? 0,
                 "uniqueUsers" => $users[$date] ?? 0,
             ];
@@ -145,7 +175,7 @@ class Analytics
      * card needs. Reuses dailyBreakdown(14) rather than four more window
      * queries: the same 14 rows already answer both halves.
      *
-     * @return array{pageViews: ?float, uniqueVisitors: ?float, uniqueUsers: ?float}
+     * @return array{pageViews: ?float, pageViewsHuman: ?float, pageViewsBot: ?float, pageViewsAi: ?float, uniqueVisitors: ?float, uniqueUsers: ?float}
      *         null when the prior week was zero (no meaningful percentage to show)
      */
     public function weekOverWeekChange(): array
@@ -157,7 +187,7 @@ class Analytics
         $sum = fn(array $days, string $key) => array_sum(array_column($days, $key));
 
         $result = [];
-        foreach (["pageViews", "uniqueVisitors", "uniqueUsers"] as $key) {
+        foreach (["pageViews", "pageViewsHuman", "pageViewsBot", "pageViewsAi", "uniqueVisitors", "uniqueUsers"] as $key) {
             $previous = $sum($previousWeek, $key);
             $current = $sum($thisWeek, $key);
             $result[$key] = $previous > 0 ? round((($current - $previous) / $previous) * 100, 1) : null;

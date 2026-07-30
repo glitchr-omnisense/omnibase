@@ -2,6 +2,7 @@
 
 namespace Tests\Base\Service;
 
+use Base\Entity\Analytics\PageView;
 use Base\Service\Analytics;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -234,6 +235,110 @@ class AnalyticsTest extends KernelTestCase
             $this->assertArrayHasKey("pageViews", $day);
             $this->assertArrayHasKey("uniqueVisitors", $day);
             $this->assertArrayHasKey("uniqueUsers", $day);
+        }
+    }
+
+    public function testTrackWithBotUserAgentCountsPageViewButSkipsVisitorPresence(): void
+    {
+        $path = $this->path("-bot");
+        $visitor = $this->subject("-bot-visitor");
+
+        // Googlebot's real UA - a generic (non-AI) crawler, still carrying
+        // a stray ANALYTICS/VISITOR_ID cookie value (this never happens for
+        // a real crawler, but proves the presence table stays clean even if
+        // one somehow replays a cookie).
+        $this->analytics->track($path, $visitor, null, 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+
+        $this->assertSame(1, $this->analytics->pageViews($path), 'total hits include the bot');
+        $this->assertSame(0, $this->analytics->pageViews($path, null, PageView::SOURCE_HUMAN));
+        $this->assertSame(1, $this->analytics->pageViews($path, null, PageView::SOURCE_BOT));
+
+        $connection = $this->em->getConnection();
+        $count = (int) $connection->fetchOne(
+            "SELECT COUNT(*) FROM analytics_visit WHERE subject_type = 'visitor' AND subject_id = :id",
+            ["id" => $visitor],
+        );
+        $this->assertSame(0, $count, 'a bot hit must never dedupe into the unique-visitor table');
+    }
+
+    public function testTrackWithAiUserAgentClassifiesSeparatelyFromGenericBot(): void
+    {
+        $path = $this->path("-ai");
+
+        $this->analytics->track($path, null, null, 'Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)');
+
+        $this->assertSame(0, $this->analytics->pageViews($path, null, PageView::SOURCE_BOT));
+        $this->assertSame(1, $this->analytics->pageViews($path, null, PageView::SOURCE_AI));
+    }
+
+    public function testTrackWithHumanUserAgentStillRecordsVisitorPresence(): void
+    {
+        $path = $this->path("-human");
+        $visitor = $this->subject("-human-visitor");
+
+        $this->analytics->track($path, $visitor, null, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36');
+
+        $this->assertSame(1, $this->analytics->pageViews($path, null, PageView::SOURCE_HUMAN));
+
+        $connection = $this->em->getConnection();
+        $count = (int) $connection->fetchOne(
+            "SELECT COUNT(*) FROM analytics_visit WHERE subject_type = 'visitor' AND subject_id = :id",
+            ["id" => $visitor],
+        );
+        $this->assertSame(1, $count);
+    }
+
+    public function testTrackWithoutAUserAgentArgumentDefaultsToHuman(): void
+    {
+        // No 4th argument at all (not even null) - the pre-existing 3-arg
+        // call shape every other test in this file already uses - must
+        // keep behaving exactly as it always did: counted as human, no
+        // classifier round trip.
+        $path = $this->path("-no-ua-arg");
+
+        $this->analytics->track($path);
+
+        $this->assertSame(1, $this->analytics->pageViews($path, null, PageView::SOURCE_HUMAN));
+    }
+
+    public function testDailyBreakdownIncludesPerSourceKeys(): void
+    {
+        $path = $this->path("-source-daily");
+
+        $this->analytics->track($path, null, null, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36');
+        $this->analytics->track($path, null, null, 'CCBot/2.0 (https://commoncrawl.org/faq/)');
+
+        $series = $this->analytics->dailyBreakdown(1);
+        $today = $series[0];
+
+        $this->assertArrayHasKey("pageViewsHuman", $today);
+        $this->assertArrayHasKey("pageViewsBot", $today);
+        $this->assertArrayHasKey("pageViewsAi", $today);
+        // site-wide today includes real traffic beyond this test's own two
+        // hits, so assert the floor each source contributed, not an exact
+        // total (same convention as testDailyBreakdownFillsInZeroForDaysWithNoActivity)
+        $this->assertGreaterThanOrEqual(1, $today["pageViewsHuman"]);
+        $this->assertGreaterThanOrEqual(1, $today["pageViewsAi"]);
+        $this->assertSame($today["pageViewsHuman"] + $today["pageViewsBot"] + $today["pageViewsAi"], $today["pageViews"]);
+    }
+
+    public function testSummaryIncludesPerSourceKeysAndRespectsWindow(): void
+    {
+        $summary = $this->analytics->summary();
+
+        foreach (["today", "7d", "30d", "all"] as $window) {
+            $this->assertArrayHasKey("pageViewsHuman", $summary[$window]);
+            $this->assertArrayHasKey("pageViewsBot", $summary[$window]);
+            $this->assertArrayHasKey("pageViewsAi", $summary[$window]);
+            // regression guard for the pre-existing bug where summary()
+            // passed the window name itself as the $path filter (matching
+            // no real page) instead of as the $window - "today" total must
+            // be at least the actual site-wide today total the window-aware
+            // pageViews() call returns directly.
+            $this->assertSame(
+                $this->analytics->pageViews(null, $window),
+                $summary[$window]["pageViews"],
+            );
         }
     }
 

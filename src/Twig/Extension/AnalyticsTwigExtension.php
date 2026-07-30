@@ -34,10 +34,11 @@ final class AnalyticsTwigExtension extends AbstractExtension
      * {{ analytics_page_views() }} - site-wide, all-time
      * {{ analytics_page_views(window: '7d') }} - site-wide, last 7 days
      * {{ analytics_page_views(app.request.pathInfo, 'today') }} - this page, today
+     * {{ analytics_page_views(window: '7d', source: 'ai') }} - AI crawler hits only, last 7 days
      */
-    public function pageViews(?string $path = null, ?string $window = null): int
+    public function pageViews(?string $path = null, ?string $window = null, ?string $source = null): int
     {
-        return $this->analytics->pageViews($path, $window);
+        return $this->analytics->pageViews($path, $window, $source);
     }
 
     /**

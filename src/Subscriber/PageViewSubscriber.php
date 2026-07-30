@@ -75,6 +75,11 @@ class PageViewSubscriber implements EventSubscriberInterface
         $visitorId = $request->cookies->get("ANALYTICS/VISITOR_ID");
         $user = $this->security->getUser();
 
-        $this->analytics->track($path, $visitorId, $user?->getUserIdentifier());
+        // "" (not null) when the header is missing - Analytics::track()
+        // only skips UA classification (defaults to SOURCE_HUMAN) for a
+        // null $userAgent, which is for callers with no HTTP request to
+        // read from at all, not for a real request that happens to omit
+        // the header (itself a bot/script signal worth classifying).
+        $this->analytics->track($path, $visitorId, $user?->getUserIdentifier(), $request->headers->get("User-Agent") ?? "");
     }
 }

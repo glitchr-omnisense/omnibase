@@ -54,6 +54,7 @@
         "glitchr/doctrine-dc2type": "1.0.*-dev",
         "glitchr/ux-google": "1.0.*-dev",
         "hashids/hashids": "^5.0",
+        "jaybizzle/crawler-detect": "^1.2",
         "hwi/oauth-bundle": "^2.1",
         "imagine/imagine": "^1.2",
         "league/flysystem-bundle": "^3.1",

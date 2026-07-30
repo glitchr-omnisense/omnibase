@@ -63,11 +63,15 @@ return static function (ContainerConfigurator $container): void {
         ]);
 
     // Analytics (page views + visitor/user unique counters)
+    $services->set('Base\Service\Analytics\UserAgentClassifier')
+        ->public(false);
+
     $services->set('Base\Service\Analytics')
         ->public(true)
         ->args([
             service('Base\Repository\Analytics\PageViewRepository'),
             service('Base\Repository\Analytics\VisitRepository'),
+            service('Base\Service\Analytics\UserAgentClassifier'),
         ]);
 
     // CacheClearSessionsCommand
