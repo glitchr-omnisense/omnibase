@@ -17,6 +17,18 @@ use Twig\TwigFunction;
  * deploy model resets the production directory to a specific commit via
  * `git fetch && git reset --hard`, so HEAD always changes on a real
  * deploy and never otherwise.
+ *
+ * ALSO folds in vendor/glitchr/*'s own git HEADs, not just the app's -
+ * on this project, those aren't standard immutable Composer installs,
+ * they're live git checkouts iterated on directly (see e.g. the
+ * base-bundle-admin/base-bundle dev workflow), so a change committed
+ * there changes nothing about the APP's own HEAD at all. Without this,
+ * every vendor-level fix left every already-open admin tab replaying
+ * the pre-fix HTML/CSS/JS indefinitely - reported live, repeatedly, as
+ * "no handler" for a control that had genuinely already shipped.
+ * Missing/non-git vendor dirs (a normal production Composer install,
+ * source-archive not git checkout) just contribute nothing, same as
+ * the app dir falling back to 'dev' when it isn't a git checkout either.
  */
 final class DeployVersionExtension extends AbstractExtension
 {
@@ -40,17 +52,33 @@ final class DeployVersionExtension extends AbstractExtension
             return $this->version;
         }
 
-        $headFile = $this->projectDir . '/.git/HEAD';
-        if (!is_file($headFile)) {
+        $heads = [$this->readGitHead($this->projectDir)];
+
+        foreach (glob($this->projectDir . '/vendor/glitchr/*', GLOB_ONLYDIR) ?: [] as $packageDir) {
+            $heads[] = $this->readGitHead($packageDir);
+        }
+
+        $heads = array_filter($heads, static fn (?string $head): bool => null !== $head);
+        if ([] === $heads) {
             return $this->version = 'dev';
+        }
+
+        return $this->version = substr(md5(implode('|', $heads)), 0, 8);
+    }
+
+    private function readGitHead(string $dir): ?string
+    {
+        $headFile = $dir . '/.git/HEAD';
+        if (!is_file($headFile)) {
+            return null;
         }
 
         $head = trim((string) file_get_contents($headFile));
         if (str_starts_with($head, 'ref: ')) {
-            $refFile = $this->projectDir . '/.git/' . substr($head, 5);
+            $refFile = $dir . '/.git/' . substr($head, 5);
             $head = is_file($refFile) ? trim((string) file_get_contents($refFile)) : $head;
         }
 
-        return $this->version = ('' !== $head ? substr($head, 0, 8) : 'dev');
+        return '' !== $head ? $head : null;
     }
 }
