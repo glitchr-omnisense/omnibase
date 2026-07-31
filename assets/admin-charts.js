@@ -84,8 +84,28 @@ function chartDatasets(config, isDark) {
             pointRadius: pointRadius,
             pointHoverRadius: 4,
             borderWidth: 2,
+            // Chart.js's own native per-dataset visibility - reading this
+            // back in (rather than only ever OMITTING a hidden series from
+            // config.datasets entirely) is what lets the legend re-show a
+            // series that started hidden: an omitted dataset never has a
+            // legend entry to click on in the first place.
+            hidden: !!ds.hidden,
         };
     });
+}
+
+// Chart.js's own default legend click already toggles a dataset's
+// visibility for free - this only ADDS a DOM event on top of that (a
+// custom event on the canvas, not a Chart.js callback other scripts on
+// the page can't reach), so a consumer like the analytics widget's own
+// script (layout.html.twig, not this generic file - see the comment on
+// chartDatasets()'s `key` field for why widget-specific logic stays out
+// of here) can persist the new hidden/shown state wherever it needs to,
+// without admin-charts.js knowing anything about what "persist" means
+// for any particular widget.
+function legendOnClick(e, legendItem, legend) {
+    Chart.defaults.plugins.legend.onClick(e, legendItem, legend);
+    legend.chart.canvas.dispatchEvent(new CustomEvent('admin-chart:legend-toggle', { bubbles: true }));
 }
 
 function initCharts() {
@@ -124,7 +144,7 @@ function initCharts() {
                     y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, precision: 0 } },
                 },
                 plugins: {
-                    legend: { display: (config.datasets || []).length > 1, labels: { color: textColor, boxWidth: 12 } },
+                    legend: { display: (config.datasets || []).length > 1, labels: { color: textColor, boxWidth: 12 }, onClick: legendOnClick },
                     tooltip: { mode: 'index', intersect: false },
                     annotation: { annotations: buildAnnotations(config.events) },
                 },
