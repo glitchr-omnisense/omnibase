@@ -398,4 +398,24 @@ class AnalyticsTest extends KernelTestCase
             $this->assertIsFloat($change["pageViews"]);
         }
     }
+
+    public function testPeriodOverPeriodChangeWithNullDaysReturnsAllNull(): void
+    {
+        // "all time" has no prior period to compare against - every counter
+        // must come back null (the same "nothing meaningful to show" shape
+        // as a genuinely-zero prior period), not a division-by-zero/crash.
+        $change = $this->analytics->periodOverPeriodChange(null);
+
+        foreach (["pageViews", "pageViewsHuman", "pageViewsBot", "pageViewsAi", "uniqueVisitors", "uniqueUsers"] as $key) {
+            $this->assertArrayHasKey($key, $change);
+            $this->assertNull($change[$key]);
+        }
+    }
+
+    public function testPeriodOverPeriodChangeWithSevenDaysMatchesWeekOverWeekChange(): void
+    {
+        // weekOverWeekChange() is now just this with $days=7 - lock in that
+        // the refactor preserves the exact same contract for existing callers.
+        $this->assertSame($this->analytics->weekOverWeekChange(), $this->analytics->periodOverPeriodChange(7));
+    }
 }

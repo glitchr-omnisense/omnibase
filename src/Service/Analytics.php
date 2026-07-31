@@ -180,30 +180,50 @@ class Analytics
     }
 
     /**
-     * This 7-day window vs the 7 days before it, as a signed percentage
-     * per counter - the "up/down vs last week" badge a dashboard trend
-     * card needs. Reuses dailyBreakdown(14) rather than four more window
-     * queries: the same 14 rows already answer both halves.
+     * This $days-day window vs the $days days before it, as a signed
+     * percentage per counter - the "up/down vs the prior period" badge a
+     * dashboard trend card needs, generalized from what used to be a
+     * hardcoded 7-vs-7 (see weekOverWeekChange(), now just this with
+     * $days=7 - kept as its own method since existing callers already
+     * expect that exact contract). Reuses dailyBreakdown($days*2) rather
+     * than four more window queries: the same rows already answer both
+     * halves. $days=null (an "all time" window has no prior period to
+     * compare against) short-circuits to every counter null, same shape
+     * as the "prior period was zero" case below.
      *
      * @return array{pageViews: ?float, pageViewsHuman: ?float, pageViewsBot: ?float, pageViewsAi: ?float, uniqueVisitors: ?float, uniqueUsers: ?float}
-     *         null when the prior week was zero (no meaningful percentage to show)
+     *         null when the prior period was zero (no meaningful percentage to show) or $days is null
      */
-    public function weekOverWeekChange(): array
+    public function periodOverPeriodChange(?int $days): array
     {
-        $series = $this->dailyBreakdown(14);
-        $previousWeek = \array_slice($series, 0, 7);
-        $thisWeek = \array_slice($series, 7, 7);
+        $keys = ["pageViews", "pageViewsHuman", "pageViewsBot", "pageViewsAi", "uniqueVisitors", "uniqueUsers"];
+
+        if (null === $days) {
+            return \array_fill_keys($keys, null);
+        }
+
+        $series = $this->dailyBreakdown($days * 2);
+        $previousPeriod = \array_slice($series, 0, $days);
+        $currentPeriod = \array_slice($series, $days, $days);
 
         $sum = fn(array $days, string $key) => array_sum(array_column($days, $key));
 
         $result = [];
-        foreach (["pageViews", "pageViewsHuman", "pageViewsBot", "pageViewsAi", "uniqueVisitors", "uniqueUsers"] as $key) {
-            $previous = $sum($previousWeek, $key);
-            $current = $sum($thisWeek, $key);
+        foreach ($keys as $key) {
+            $previous = $sum($previousPeriod, $key);
+            $current = $sum($currentPeriod, $key);
             $result[$key] = $previous > 0 ? round((($current - $previous) / $previous) * 100, 1) : null;
         }
 
         return $result;
+    }
+
+    /**
+     * @return array{pageViews: ?float, pageViewsHuman: ?float, pageViewsBot: ?float, pageViewsAi: ?float, uniqueVisitors: ?float, uniqueUsers: ?float}
+     */
+    public function weekOverWeekChange(): array
+    {
+        return $this->periodOverPeriodChange(7);
     }
 
     /**
