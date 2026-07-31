@@ -73,22 +73,28 @@ class PageViewRepository extends ServiceEntityRepository
     }
 
     /**
-     * One row per calendar day in range (summed across every path),
-     * oldest first - the raw series a dashboard trend chart plots
-     * directly, no client-side date bucketing needed.
+     * One row per calendar day in range, oldest first - the raw series a
+     * dashboard trend chart plots directly, no client-side date bucketing
+     * needed. $path null means every page summed together (the original,
+     * site-wide semantics); pass an exact path to scope the series to one
+     * page instead (e.g. a single Article's own traffic trend).
      *
      * @return array<string, int> date (Y-m-d) => views
      */
-    public function dailyBreakdown(\DateTimeImmutable $since): array
+    public function dailyBreakdown(\DateTimeImmutable $since, ?string $path = null): array
     {
-        $rows = $this->createQueryBuilder("pv")
+        $qb = $this->createQueryBuilder("pv")
             ->select("pv.date AS date, SUM(pv.views) AS views")
             ->andWhere("pv.date >= :since")
             ->setParameter("since", $since)
             ->groupBy("pv.date")
-            ->orderBy("pv.date", "ASC")
-            ->getQuery()
-            ->getArrayResult();
+            ->orderBy("pv.date", "ASC");
+
+        if ($path !== null) {
+            $qb->andWhere("pv.path = :path")->setParameter("path", $path);
+        }
+
+        $rows = $qb->getQuery()->getArrayResult();
 
         $breakdown = [];
         foreach ($rows as $row) {
@@ -108,19 +114,26 @@ class PageViewRepository extends ServiceEntityRepository
      * same "never make the caller guess at a missing key" guarantee
      * dailyBreakdown()/Analytics::dailyBreakdown() already give callers.
      *
+     * $path null means every page (site-wide); pass an exact path to scope
+     * this to one page instead, same convention as dailyBreakdown().
+     *
      * @return array<string, array<string, int>> date (Y-m-d) => [source => views]
      */
-    public function dailyBreakdownBySource(\DateTimeImmutable $since): array
+    public function dailyBreakdownBySource(\DateTimeImmutable $since, ?string $path = null): array
     {
-        $rows = $this->createQueryBuilder("pv")
+        $qb = $this->createQueryBuilder("pv")
             ->select("pv.date AS date, pv.source AS source, SUM(pv.views) AS views")
             ->andWhere("pv.date >= :since")
             ->setParameter("since", $since)
             ->groupBy("pv.date")
             ->addGroupBy("pv.source")
-            ->orderBy("pv.date", "ASC")
-            ->getQuery()
-            ->getArrayResult();
+            ->orderBy("pv.date", "ASC");
+
+        if ($path !== null) {
+            $qb->andWhere("pv.path = :path")->setParameter("path", $path);
+        }
+
+        $rows = $qb->getQuery()->getArrayResult();
 
         $sources = [PageView::SOURCE_HUMAN, PageView::SOURCE_BOT, PageView::SOURCE_AI];
 

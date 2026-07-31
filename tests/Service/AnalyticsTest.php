@@ -322,6 +322,34 @@ class AnalyticsTest extends KernelTestCase
         $this->assertSame($today["pageViewsHuman"] + $today["pageViewsBot"] + $today["pageViewsAi"], $today["pageViews"]);
     }
 
+    /**
+     * A $path-scoped daily breakdown is exactly what an "Article views"
+     * (or Destination/Product, ...) dashboard widget needs - the same
+     * page-view rollup this whole test file already exercises, just
+     * filtered to one URL instead of summed site-wide.
+     */
+    public function testDailyBreakdownCanBeScopedToASinglePath(): void
+    {
+        $scoped = $this->path("-scoped");
+        $other = $this->path("-other");
+
+        $this->analytics->track($scoped);
+        $this->analytics->track($scoped);
+        $this->analytics->track($other);
+
+        $scopedSeries = $this->analytics->dailyBreakdown(1, $scoped);
+        $siteWideSeries = $this->analytics->dailyBreakdown(1);
+
+        $this->assertSame(2, $scopedSeries[0]["pageViews"]);
+        $this->assertSame(2, $scopedSeries[0]["pageViewsHuman"]);
+        // site-wide still includes real traffic beyond this test's own
+        // three hits, so assert the floor, not an exact total (same
+        // convention as testDailyBreakdownIncludesPerSourceKeys above) -
+        // the actual guarantee under test is that path-scoping narrows
+        // the result relative to the unscoped call, not a specific count.
+        $this->assertGreaterThanOrEqual(3, $siteWideSeries[0]["pageViews"]);
+    }
+
     public function testSummaryIncludesPerSourceKeysAndRespectsWindow(): void
     {
         $summary = $this->analytics->summary();

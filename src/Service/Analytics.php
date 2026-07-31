@@ -133,9 +133,19 @@ class Analytics
      * than an empty one, so callers never have to special-case "no data
      * yet" separately from "no data in this window").
      *
+     * $path null means every page summed together (the original, site-
+     * wide semantics); pass an exact path to scope the PAGE-VIEW columns
+     * to one page instead (e.g. a single Article's own traffic trend).
+     * uniqueVisitors/uniqueUsers stay SITE-WIDE regardless of $path - the
+     * underlying presence records (Visit) have no path of their own at
+     * all (see Visit's own docblock), so "unique visitors to this one
+     * page" isn't a question this data model can answer yet. A $path-
+     * scoped caller should simply not read those two columns rather than
+     * this method fabricating a page-specific number it can't back up.
+     *
      * @return array<int, array{date: string, pageViews: int, pageViewsHuman: int, pageViewsBot: int, pageViewsAi: int, uniqueVisitors: int, uniqueUsers: int}>
      */
-    public function dailyBreakdown(?int $days = 14): array
+    public function dailyBreakdown(?int $days = 14, ?string $path = null): array
     {
         if (null === $days) {
             $since = $this->pageViews->earliestDate() ?? new \DateTimeImmutable("today");
@@ -144,8 +154,8 @@ class Analytics
             $since = new \DateTimeImmutable(($days - 1) . " days ago midnight");
         }
 
-        $pageViews = $this->pageViews->dailyBreakdown($since);
-        $pageViewsBySource = $this->pageViews->dailyBreakdownBySource($since);
+        $pageViews = $this->pageViews->dailyBreakdown($since, $path);
+        $pageViewsBySource = $this->pageViews->dailyBreakdownBySource($since, $path);
         $visitors = $this->visits->dailyBreakdown(Visit::TYPE_VISITOR, $since);
         $users = $this->visits->dailyBreakdown(Visit::TYPE_USER, $since);
 
