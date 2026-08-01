@@ -81,7 +81,13 @@ class PageViewRepository extends ServiceEntityRepository
      *
      * @return array<string, int> date (Y-m-d) => views
      */
-    public function dailyBreakdown(\DateTimeImmutable $since, ?string $path = null): array
+    /**
+     * @param string|string[]|null $path a single path (exact match), a list
+     *        of paths (any-of match - e.g. every Article's own __toLink(),
+     *        for a whole-class rollup rather than one instance), or null
+     *        for site-wide
+     */
+    public function dailyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array
     {
         $qb = $this->createQueryBuilder("pv")
             ->select("pv.date AS date, SUM(pv.views) AS views")
@@ -90,7 +96,9 @@ class PageViewRepository extends ServiceEntityRepository
             ->groupBy("pv.date")
             ->orderBy("pv.date", "ASC");
 
-        if ($path !== null) {
+        if (\is_array($path)) {
+            $qb->andWhere("pv.path IN (:paths)")->setParameter("paths", $path);
+        } elseif ($path !== null) {
             $qb->andWhere("pv.path = :path")->setParameter("path", $path);
         }
 
@@ -119,7 +127,10 @@ class PageViewRepository extends ServiceEntityRepository
      *
      * @return array<string, array<string, int>> date (Y-m-d) => [source => views]
      */
-    public function dailyBreakdownBySource(\DateTimeImmutable $since, ?string $path = null): array
+    /**
+     * @param string|string[]|null $path see dailyBreakdown()'s own docblock
+     */
+    public function dailyBreakdownBySource(\DateTimeImmutable $since, string|array|null $path = null): array
     {
         $qb = $this->createQueryBuilder("pv")
             ->select("pv.date AS date, pv.source AS source, SUM(pv.views) AS views")
@@ -129,7 +140,9 @@ class PageViewRepository extends ServiceEntityRepository
             ->addGroupBy("pv.source")
             ->orderBy("pv.date", "ASC");
 
-        if ($path !== null) {
+        if (\is_array($path)) {
+            $qb->andWhere("pv.path IN (:paths)")->setParameter("paths", $path);
+        } elseif ($path !== null) {
             $qb->andWhere("pv.path = :path")->setParameter("path", $path);
         }
 

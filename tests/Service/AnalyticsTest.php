@@ -350,6 +350,27 @@ class AnalyticsTest extends KernelTestCase
         $this->assertGreaterThanOrEqual(3, $siteWideSeries[0]["pageViews"]);
     }
 
+    public function testDailyBreakdownCanBeScopedToAListOfPaths(): void
+    {
+        // the "all articles" rollup: no single path prefix covers every
+        // instance of a class in this app's routing, so scoping means the
+        // exact set of their own generated links, matched any-of rather
+        // than one exact path.
+        $first = $this->path("-multi-a");
+        $second = $this->path("-multi-b");
+        $other = $this->path("-multi-other");
+
+        $this->analytics->track($first);
+        $this->analytics->track($second);
+        $this->analytics->track($second);
+        $this->analytics->track($other);
+
+        $series = $this->analytics->dailyBreakdown(1, [$first, $second]);
+
+        $this->assertSame(3, $series[0]["pageViews"]);
+        $this->assertSame(3, $series[0]["pageViewsHuman"]);
+    }
+
     public function testSummaryIncludesPerSourceKeysAndRespectsWindow(): void
     {
         $summary = $this->analytics->summary();

@@ -135,7 +135,12 @@ class Analytics
      *
      * $path null means every page summed together (the original, site-
      * wide semantics); pass an exact path to scope the PAGE-VIEW columns
-     * to one page instead (e.g. a single Article's own traffic trend).
+     * to one page instead (e.g. a single Article's own traffic trend), or
+     * a list of paths to scope to any of them (e.g. every Article's own
+     * __toLink(), for a whole-class rollup - there's no single stable
+     * path PREFIX shared by every instance of a class in this app's
+     * routing, so "all articles" means the exact set of their own
+     * generated links, not a LIKE pattern).
      * uniqueVisitors/uniqueUsers stay SITE-WIDE regardless of $path - the
      * underlying presence records (Visit) have no path of their own at
      * all (see Visit's own docblock), so "unique visitors to this one
@@ -143,9 +148,11 @@ class Analytics
      * scoped caller should simply not read those two columns rather than
      * this method fabricating a page-specific number it can't back up.
      *
+     * @param string|string[]|null $path
+     *
      * @return array<int, array{date: string, pageViews: int, pageViewsHuman: int, pageViewsBot: int, pageViewsAi: int, uniqueVisitors: int, uniqueUsers: int}>
      */
-    public function dailyBreakdown(?int $days = 14, ?string $path = null): array
+    public function dailyBreakdown(?int $days = 14, string|array|null $path = null): array
     {
         if (null === $days) {
             $since = $this->pageViews->earliestDate() ?? new \DateTimeImmutable("today");
