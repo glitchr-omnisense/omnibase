@@ -21,8 +21,13 @@ interface TimelineEventProviderInterface
      * @param \DateTimeImmutable $since
      * @param ?\DateTimeImmutable $until null = up to today
      *
-     * @return array<int, array{date: string, title: string, description?: ?string, color?: ?string}>
+     * @return array<int, array{date: string, title: string, description?: ?string, color?: ?string, url?: ?string}>
      *         'date' is Y-m-d, same granularity as Analytics::dailyBreakdown()'s own rows.
+     *         'url', when present, is what turns this event into a clickable
+     *         marker on the chart (see admin-charts.js's buildAnnotations())
+     *         instead of a plain dashed line - an event with somewhere real
+     *         to send an admin (an article's own page, here) is worth
+     *         making directly navigable, not just visible.
      */
     public function getTimelineEvents(\DateTimeImmutable $since, ?\DateTimeImmutable $until = null): array;
 }

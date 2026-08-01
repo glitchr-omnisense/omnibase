@@ -14,13 +14,55 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip, Legend, annotationPlugin);
 
 // Translates config.events (see Base\Admin\Widget\TimelineEventRegistry)
-// into chartjs-plugin-annotation's config shape - one dashed vertical line
-// per event, anchored to its date via CategoryScale's own x-axis value
-// (the registry already guarantees every event's formatted date matches
-// one of the chart's own labels, so there's nothing to validate here).
+// into chartjs-plugin-annotation's config shape, anchored to its date via
+// CategoryScale's own x-axis value (the registry already guarantees every
+// event's formatted date matches one of the chart's own labels, so
+// there's nothing to validate here). Two shapes:
+//
+// - event.url present: a small triangle sitting on the x-axis (yValue:0,
+//   beginAtZero:true on the y-scale always puts that at the visual
+//   bottom) rather than a full-height line - a marker meant to be
+//   clicked, not a divider meant to be read at a glance. click opens the
+//   url directly (window.open, not a same-tab navigation - a chart
+//   click shouldn't blow away whatever the admin was doing on this
+//   page); enter/leave swap the canvas cursor AND its title attribute,
+//   the plain browser-native tooltip standing in for "tell me the
+//   article name" on hover, since chartjs-plugin-annotation's own point
+//   annotations don't paint permanent text labels the way a line
+//   annotation's `label` option does.
+// - no url: the original dashed vertical line + permanent label, for any
+//   OTHER kind of event a provider might report (a deploy, a campaign
+//   launch, ...) that has nowhere obvious to link to.
 function buildAnnotations(events) {
     var annotations = {};
     (events || []).forEach(function (event, i) {
+        if (event.url) {
+            annotations['event' + i] = {
+                type: 'point',
+                xScaleID: 'x',
+                xValue: event.label,
+                yScaleID: 'y',
+                yValue: 0,
+                pointStyle: 'triangle',
+                radius: 6,
+                backgroundColor: event.color || '#7c3aed',
+                borderColor: event.color || '#7c3aed',
+                borderWidth: 1,
+                click: function (context) {
+                    window.open(event.url, '_blank', 'noopener');
+                },
+                enter: function (context) {
+                    context.chart.canvas.style.cursor = 'pointer';
+                    context.chart.canvas.title = event.title;
+                },
+                leave: function (context) {
+                    context.chart.canvas.style.cursor = '';
+                    context.chart.canvas.title = '';
+                },
+            };
+            return;
+        }
+
         annotations['event' + i] = {
             type: 'line',
             scaleID: 'x',
