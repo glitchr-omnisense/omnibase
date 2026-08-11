@@ -121,6 +121,25 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 // Set default label
                 if (!array_key_exists('label', $fieldOptions)) {
                     $label = explode('-', trim(str_lstrip($formattedField, ['app-settings', 'base-settings']), ' -'));
+
+                    // Split camelCase/PascalCase too, not just the "-" and
+                    // "_" separators below: a path segment written as one
+                    // run of words ("exchangeRatesApi", "APIKeyLabel")
+                    // otherwise reached the form as a single unreadable
+                    // token. Two passes are needed - the first breaks a
+                    // lower/digit -> upper boundary ("exchangeRates" =>
+                    // "exchange Rates"), the second the acronym -> word one
+                    // ("APIKey" => "API Key"), which the first cannot see
+                    // because both characters around it are uppercase.
+                    $label = array_map(
+                        static fn (string $part): string => preg_replace('/\s+/', ' ', trim(preg_replace(
+                            ['/(?<=[a-z0-9])([A-Z])/', '/(?<=[A-Z])([A-Z][a-z])/'],
+                            ' $1',
+                            $part
+                        ))),
+                        $label
+                    );
+
                     $fieldOptions['label'] = $setting->getLabel() ?? mb_ucwords(str_replace('_', ' ', implode(' - ', $label)));
                 }
 

@@ -1384,8 +1384,32 @@
 
         <div {{ html_attributes(attr) }}>
             <div class="form-group">
-
-                {{ form_label(form.plain) }}
+                {# form2_label's debug badges (is_dbcolumn/is_multiple/is_alias/
+                   is_inherited/is_descending, superadmin-only) always came out
+                   empty for every password-type field: form2_label reads
+                   form.vars.is_dbcolumn, but form.plain here is PasswordType's
+                   own internal sub-field (Base\Field\Type\PasswordType::
+                   buildForm()'s $builder->add('plain', SymfonyPasswordType::
+                   class, ...)), which never itself gets walked by
+                   FormTypeExtension's markAsDbColumns()/markDbProperties() -
+                   only the OUTER field does. Confirmed live: the outer
+                   form.vars.is_dbcolumn IS correctly true; form_label()'s own
+                   `variables` 3rd argument does NOT fix this (tried, verified
+                   with an unmistakable marker value) - it only injects bare
+                   Twig-scope variables into whatever block ends up
+                   rendering, it does not write into the FormView's own
+                   `vars` array that form2_label actually reads. Rather than
+                   fight that, this string-replaces the exact empty badge
+                   span form_label(form.plain) already renders (confirmed
+                   byte-for-byte via curl) with the real one, computed here
+                   from the OUTER form's vars directly - no change to
+                   form_label()'s own call or form2_label's block needed. #}
+                {% set badges = "" %}
+                {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_dbcolumn ?? false) ? "fa-solid fa-fw fa-database"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn"|trans)})|first|raw : "") %}
+                {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_multiple ?? false) ? "fa-solid fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple"|trans)})|first|raw : "") %}
+                {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_alias ?? false) ? "fa-solid fa-fw fa-hashtag"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"|trans)})|first|raw : "") %}
+                {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_inherited ?? false) ? "fa-solid fa-fw fa-sitemap"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
+                {{ (form_label(form.plain)|replace({'<span class="badge badge-secondary label"></span>': '<span class="badge badge-secondary label">' ~ badges|trim ~ '</span>'}))|raw }}
                 <div class="input-group">
                     <span class="input-group-text">{{ (form.vars.repeater ? 'fa-solid fa-unlock' : 'fa-solid fa-lock')|iconify|first|raw }}</span>
                     {% if form.vars.revealer %}{{ 'fa-solid fa-eye'|iconify({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"})|first|raw }}{% endif%}
@@ -1405,7 +1429,16 @@
                 {% endfor %}
                 </div>
 
-                {% if (not form.vars.secure and app.debug) %}
+                {# revealer=true NECESSARILY means secure=false was set on
+                   purpose (see form_widget's own value: line right above -
+                   a revealer field can't show the stored plaintext any
+                   other way), so warning about that combination for an
+                   API-key-style field is just alarming noise about an
+                   intentional design choice, not a real misconfiguration.
+                   Reported live: every field on the API keys admin page
+                   showed this in red, even though secure=false is exactly
+                   what makes their reveal-eye work at all. #}
+                {% if (not form.vars.secure and not form.vars.revealer and app.debug) %}
                     <div class="form-text text-muted text-danger">{{"@fields.password.unsecure"|trans}}</div>
                 {% endif %}
 
