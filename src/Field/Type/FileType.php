@@ -300,7 +300,23 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["allow_url"] = $options["allow_url"];
 
         $view->vars['max_files'] = $view->vars['max_files'] ?? $options["max_files"];
-        $view->vars['max_size'] = $options["max_size"] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
+        // Same min() the CONSTRAINT applies in buildForm() above, rather than
+        // re-resolving from scratch and discarding an explicitly passed
+        // max_size. Without it the displayed hint and the enforced limit
+        // could disagree, and did: getMaxFilesize() starts from PHP's ini
+        // ceiling and only narrows it when it finds an #[Uploader] attribute
+        // on ($class ?? $entity). For a TRANSLATABLE file field, $entity is
+        // the per-locale translation row - present for a locale that already
+        // has a value, null for one that doesn't. So the same field
+        // advertised "2MB" under the locale that had an upload and PHP's raw
+        // "33MB" under the empty ones, while all of them actually rejected
+        // anything over 2MB. Reported live on /admin/settings (Logo).
+        $maxFilesize = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
+        if (!empty($options["max_size"])) {
+            $maxFilesize = min($maxFilesize, $options["max_size"]);
+        }
+
+        $view->vars['max_size'] = $options["max_size"] = $maxFilesize;
 
         $mimeTypes = $options["mime_types"];
         if (!$mimeTypes && $entity) {
