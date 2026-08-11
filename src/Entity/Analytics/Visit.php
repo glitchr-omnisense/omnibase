@@ -6,13 +6,20 @@ use Base\Repository\Analytics\VisitRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * A daily PRESENCE record, not a per-request event log: at most one row per
- * (day, subjectType, subjectId), inserted on first sight that day and
- * ignored on every later request the same day. This is what makes
- * COUNT(DISTINCT subjectId) over any date range an exact unique-visitor/
- * unique-user count instead of an approximation - unlike PageView (a raw
- * hit counter), a returning subject never inflates this table twice in one
- * day, and the table stays bounded by (subjects x days), not raw traffic.
+ * An HOURLY PRESENCE record, not a per-request event log: at most one row
+ * per (hour, subjectType, subjectId) - see VisitRepository, which buckets
+ * any timestamp down to the top of its hour before writing - inserted on
+ * first sight that hour and ignored on every later request the same hour.
+ * COUNT(DISTINCT subjectId) still gives an exact unique count over any
+ * window regardless of grain (a subject seen in two different hours of the
+ * same day contributes two rows but ONE distinct id, so a day/week/all-time
+ * total is never inflated); the finer grain only changes what an hour-by-
+ * hour BREAKDOWN can show (a subject active at 9am and 2pm now shows up in
+ * both hourly buckets, same as it already showed up on multiple separate
+ * DAYS in a multi-day breakdown before this). Unlike PageView (a raw hit
+ * counter), a returning subject never inflates this table twice in the
+ * same hour, and the table stays bounded by (subjects x hours), not raw
+ * traffic.
  *
  * subjectType is "visitor" (an anonymous, cookie-identified browser - see
  * Base\Service\Analytics for the consent-gating this depends on) or "user"
@@ -38,7 +45,7 @@ class Visit
         return $this->id;
     }
 
-    #[ORM\Column(type: "date_immutable")]
+    #[ORM\Column(type: "datetime_immutable")]
     protected $date;
 
     public function getDate(): ?\DateTimeImmutable

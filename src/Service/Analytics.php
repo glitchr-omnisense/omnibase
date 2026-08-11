@@ -52,20 +52,25 @@ class Analytics
      */
     public function track(string $path, ?string $visitorId = null, ?string $userId = null, ?string $userAgent = null): void
     {
-        $today = new \DateTimeImmutable("today");
+        // Raw "now", not "today" - both repositories bucket this down to
+        // the top of its own hour before writing (see PageViewRepository::
+        // incrementView()/VisitRepository::recordPresence()), which is
+        // what lets dailyBreakdown()'s "today" row now come from up to 24
+        // real hourly rows instead of being the storage grain itself.
+        $now = new \DateTimeImmutable("now");
         $source = $userAgent !== null ? $this->userAgentClassifier->classify($userAgent) : PageView::SOURCE_HUMAN;
 
-        $this->pageViews->incrementView($path, $today, $source);
+        $this->pageViews->incrementView($path, $now, $source);
 
         if ($source !== PageView::SOURCE_HUMAN) {
             return;
         }
 
         if ($visitorId !== null && $visitorId !== "") {
-            $this->visits->recordPresence(Visit::TYPE_VISITOR, $visitorId, $today);
+            $this->visits->recordPresence(Visit::TYPE_VISITOR, $visitorId, $now);
         }
         if ($userId !== null && $userId !== "") {
-            $this->visits->recordPresence(Visit::TYPE_USER, $userId, $today);
+            $this->visits->recordPresence(Visit::TYPE_USER, $userId, $now);
         }
     }
 
@@ -171,6 +176,51 @@ class Analytics
         $series = [];
         for ($i = 0; $i < $days; $i++) {
             $date = $since->modify("+{$i} days")->format("Y-m-d");
+            $bySource = $pageViewsBySource[$date] ?? $emptySource;
+            $series[] = [
+                "date" => $date,
+                "pageViews" => $pageViews[$date] ?? 0,
+                "pageViewsHuman" => $bySource[PageView::SOURCE_HUMAN],
+                "pageViewsBot" => $bySource[PageView::SOURCE_BOT],
+                "pageViewsAi" => $bySource[PageView::SOURCE_AI],
+                "uniqueVisitors" => $visitors[$date] ?? 0,
+                "uniqueUsers" => $users[$date] ?? 0,
+            ];
+        }
+
+        return $series;
+    }
+
+    /**
+     * Hour-by-hour series for TODAY only (hour 0 through the current hour,
+     * oldest first) - the one range short enough that a per-hour curve is
+     * actually legible, unlike dailyBreakdown()'s calendar-day grain. No
+     * hours past "now" are included (an all-zero flat tail for the rest of
+     * the day would just read as "no traffic yet", not as "hasn't happened
+     * yet" - the two look identical on a chart, so there's no honest way
+     * to zero-fill them).
+     *
+     * Same $path convention as dailyBreakdown().
+     *
+     * @param string|string[]|null $path
+     *
+     * @return array<int, array{date: string, pageViews: int, pageViewsHuman: int, pageViewsBot: int, pageViewsAi: int, uniqueVisitors: int, uniqueUsers: int}>
+     */
+    public function hourlyBreakdown(string|array|null $path = null): array
+    {
+        $since = new \DateTimeImmutable("today");
+        $currentHour = (int) (new \DateTimeImmutable("now"))->format("H");
+
+        $pageViews = $this->pageViews->hourlyBreakdown($since, $path);
+        $pageViewsBySource = $this->pageViews->hourlyBreakdownBySource($since, $path);
+        $visitors = $this->visits->hourlyBreakdown(Visit::TYPE_VISITOR, $since);
+        $users = $this->visits->hourlyBreakdown(Visit::TYPE_USER, $since);
+
+        $emptySource = [PageView::SOURCE_HUMAN => 0, PageView::SOURCE_BOT => 0, PageView::SOURCE_AI => 0];
+
+        $series = [];
+        for ($hour = 0; $hour <= $currentHour; $hour++) {
+            $date = $since->modify("+{$hour} hours")->format("Y-m-d H:i:s");
             $bySource = $pageViewsBySource[$date] ?? $emptySource;
             $series[] = [
                 "date" => $date,

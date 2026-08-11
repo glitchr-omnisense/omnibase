@@ -125,7 +125,7 @@ class AnalyticsTest extends KernelTestCase
 
         $connection = $this->em->getConnection();
         $count = (int) $connection->fetchOne(
-            "SELECT COUNT(*) FROM analytics_visit WHERE date = CURDATE() AND subject_id LIKE :id",
+            "SELECT COUNT(*) FROM analytics_visit WHERE DATE(date) = CURDATE() AND subject_id LIKE :id",
             ["id" => "test-" . self::$runId . "%"],
         );
         // no visitor/user rows at all from this test's own subjects,
@@ -438,5 +438,68 @@ class AnalyticsTest extends KernelTestCase
         // weekOverWeekChange() is now just this with $days=7 - lock in that
         // the refactor preserves the exact same contract for existing callers.
         $this->assertSame($this->analytics->weekOverWeekChange(), $this->analytics->periodOverPeriodChange(7));
+    }
+
+    public function testTrackTwiceInSameHourIncrementsOneRowNotTwo(): void
+    {
+        $path = $this->path("-hour-dedup");
+
+        $this->analytics->track($path);
+        $this->analytics->track($path);
+
+        $connection = $this->em->getConnection();
+        $count = (int) $connection->fetchOne(
+            "SELECT COUNT(*) FROM analytics_page_view WHERE path = :path",
+            ["path" => $path],
+        );
+        $this->assertSame(1, $count, "two tracks in the same hour must upsert into one row, not two");
+        $this->assertSame(2, $this->analytics->pageViews($path));
+    }
+
+    public function testHourlyBreakdownZeroFillsEarlierHoursAndIncludesCurrentOne(): void
+    {
+        $path = $this->path("-hourly");
+
+        $this->analytics->track($path);
+
+        $series = $this->analytics->hourlyBreakdown($path);
+
+        $currentHour = (int) (new \DateTimeImmutable("now"))->format("H");
+        $this->assertCount($currentHour + 1, $series, "one row per hour from 00:00 through the current hour, no future hours");
+        $this->assertSame(1, $series[$currentHour]["pageViews"], "the hit just tracked lands in the CURRENT hour's bucket");
+        if ($currentHour > 0) {
+            $this->assertSame(0, $series[0]["pageViews"], "an earlier, untouched hour is zero-filled, not omitted");
+        }
+        foreach ($series as $hour) {
+            $this->assertArrayHasKey("uniqueVisitors", $hour);
+            $this->assertArrayHasKey("uniqueUsers", $hour);
+        }
+    }
+
+    public function testVisitorSeenInTwoDifferentHoursCountsOnceForTheDayButTwiceAcrossHourlyBuckets(): void
+    {
+        $visitor = $this->subject("-two-hours");
+        $connection = $this->em->getConnection();
+
+        // Simulate the same visitor present in two DIFFERENT hours today -
+        // recordPresence() itself only ever writes "now", so this seeds an
+        // earlier hour directly (deterministically NOT the current hour,
+        // whatever that happens to be), same convention as this file's
+        // other seeded-history tests.
+        $currentHour = (int) (new \DateTimeImmutable("now"))->format("H");
+        $seedHour = 12 === $currentHour ? 11 : 12;
+        $connection->executeStatement(
+            "INSERT IGNORE INTO analytics_visit (date, subject_type, subject_id) VALUES (:date, 'visitor', :id)",
+            ["date" => (new \DateTimeImmutable("today"))->modify("+{$seedHour} hours")->format("Y-m-d H:i:s"), "id" => $visitor],
+        );
+        $this->analytics->track($this->path("-two-hours"), $visitor);
+
+        $this->assertSame(1, $this->analytics->uniqueVisitors("today"), "one distinct visitor across the whole day, regardless of how many hourly rows back it");
+
+        $rows = (int) $connection->fetchOne(
+            "SELECT COUNT(*) FROM analytics_visit WHERE subject_type = 'visitor' AND subject_id = :id",
+            ["id" => $visitor],
+        );
+        $this->assertSame(2, $rows, "two real rows, one per hour bucket - only the DISTINCT count stays at 1");
     }
 }

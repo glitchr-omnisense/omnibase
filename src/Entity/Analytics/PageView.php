@@ -6,11 +6,15 @@ use Base\Repository\Analytics\PageViewRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * One row per (path, day, source) - a daily rolling aggregate, not a
+ * One row per (path, HOUR, source) - an hourly rolling aggregate, not a
  * per-request event log. $views is incremented atomically (see
- * PageViewRepository) on every trackable request; time windows ("24h",
+ * PageViewRepository, which buckets any timestamp down to the top of its
+ * hour before writing) on every trackable request; time windows ("24h",
  * "7 days", "all time") are just a SUM over however many of these rows
- * fall in range.
+ * fall in range, and a calendar-day figure (dailyBreakdown()) is itself a
+ * SUM over that day's up-to-24 hourly rows rather than its own storage
+ * grain - this is what lets "today" plot an hour-by-hour curve instead of
+ * the single flat point a pure daily rollup could ever produce.
  *
  * $source splits that aggregate three ways (see Base\Service\Analytics\
  * UserAgentClassifier, which is what decides it at track() time) so a
@@ -55,7 +59,7 @@ class PageView
         return $this;
     }
 
-    #[ORM\Column(type: "date_immutable")]
+    #[ORM\Column(type: "datetime_immutable")]
     protected $date;
 
     public function getDate(): ?\DateTimeImmutable

@@ -4,6 +4,7 @@ namespace Base\Repository\Analytics;
 
 use Base\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Analytics\PageView;
+use Doctrine\DBAL\ArrayParameterType;
 
 /**
  * @extends ServiceEntityRepository<PageView>
@@ -12,22 +13,29 @@ class PageViewRepository extends ServiceEntityRepository
 {
     /**
      * Atomic increment, not a load-modify-flush cycle - two concurrent
-     * requests hitting the same page the same day must both count, not
+     * requests hitting the same page the same HOUR must both count, not
      * race and silently drop one. Native upsert (MySQL/MariaDB-specific,
      * same DB family as the rest of this app) rather than a Doctrine
      * entity round-trip. $source is part of the unique key now (see
      * PageView's docblock), so human/bot/ai hits on the same page the same
-     * day land in three separate rows rather than one blended count.
+     * hour land in three separate rows rather than one blended count.
+     *
+     * $date is bucketed down to the top of its hour here (minutes/seconds
+     * zeroed) rather than trusting every caller to already pass an
+     * hour-aligned value - Analytics::track() passes the raw "now", not
+     * something pre-bucketed, same as it used to pass a raw "today" before
+     * PageView moved from daily to hourly grain.
      */
     public function incrementView(string $path, \DateTimeImmutable $date, string $source = PageView::SOURCE_HUMAN): void
     {
         $table = $this->getClassMetadata()->getTableName();
         $connection = $this->getEntityManager()->getConnection();
+        $hour = $date->setTime((int) $date->format("H"), 0, 0);
 
         $connection->executeStatement(
             "INSERT INTO {$table} (path, date, source, views) VALUES (:path, :date, :source, 1)
              ON DUPLICATE KEY UPDATE views = views + 1",
-            ["path" => mb_substr($path, 0, 255), "date" => $date->format("Y-m-d"), "source" => $source],
+            ["path" => mb_substr($path, 0, 255), "date" => $hour->format("Y-m-d H:i:s"), "source" => $source],
         );
     }
 
@@ -57,10 +65,15 @@ class PageViewRepository extends ServiceEntityRepository
     }
 
     /**
-     * The earliest recorded day, site-wide - what "all time" actually
+     * The earliest recorded DAY, site-wide - what "all time" actually
      * means for dailyBreakdown()'s $days=null case (there's no data
      * before this, so generating a series further back would just be
      * rows of zeroes). Null if nothing has ever been tracked.
+     *
+     * Truncated to midnight even though the underlying column is now
+     * hour-grained - Analytics::dailyBreakdown()'s "all time" day-count
+     * (a plain calendar diff against today) would be thrown off by
+     * whatever hour the earliest row happens to carry otherwise.
      */
     public function earliestDate(): ?\DateTimeImmutable
     {
@@ -69,7 +82,7 @@ class PageViewRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
 
-        return $date ? new \DateTimeImmutable($date) : null;
+        return $date ? new \DateTimeImmutable((new \DateTimeImmutable($date))->format("Y-m-d")) : null;
     }
 
     /**
@@ -78,6 +91,12 @@ class PageViewRepository extends ServiceEntityRepository
      * needed. $path null means every page summed together (the original,
      * site-wide semantics); pass an exact path to scope the series to one
      * page instead (e.g. a single Article's own traffic trend).
+     *
+     * Raw SQL (not the QueryBuilder/DQL the rest of this class mostly
+     * uses) because this needs to fold the table's own hourly rows back
+     * down to one row per DAY via DATE(date) - DQL has no built-in DATE()
+     * function, and this app registers no custom one, so a GROUP BY pv.date
+     * here would silently return one row per HOUR instead of per day.
      *
      * @return array<string, int> date (Y-m-d) => views
      */
@@ -89,25 +108,21 @@ class PageViewRepository extends ServiceEntityRepository
      */
     public function dailyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array
     {
-        $qb = $this->createQueryBuilder("pv")
-            ->select("pv.date AS date, SUM(pv.views) AS views")
-            ->andWhere("pv.date >= :since")
-            ->setParameter("since", $since)
-            ->groupBy("pv.date")
-            ->orderBy("pv.date", "ASC");
+        [$where, $params, $types] = $this->pathFilter($path);
+        $table = $this->getClassMetadata()->getTableName();
+        $connection = $this->getEntityManager()->getConnection();
 
-        if (\is_array($path)) {
-            $qb->andWhere("pv.path IN (:paths)")->setParameter("paths", $path);
-        } elseif ($path !== null) {
-            $qb->andWhere("pv.path = :path")->setParameter("path", $path);
-        }
-
-        $rows = $qb->getQuery()->getArrayResult();
+        $rows = $connection->fetchAllAssociative(
+            "SELECT DATE(date) AS date, SUM(views) AS views FROM {$table}
+             WHERE date >= :since {$where}
+             GROUP BY DATE(date) ORDER BY DATE(date) ASC",
+            \array_merge(["since" => $since->format("Y-m-d H:i:s")], $params),
+            \array_merge(["since" => "string"], $types),
+        );
 
         $breakdown = [];
         foreach ($rows as $row) {
-            $date = $row["date"] instanceof \DateTimeInterface ? $row["date"]->format("Y-m-d") : (string) $row["date"];
-            $breakdown[$date] = (int) $row["views"];
+            $breakdown[$row["date"]] = (int) $row["views"];
         }
 
         return $breakdown;
@@ -132,31 +147,119 @@ class PageViewRepository extends ServiceEntityRepository
      */
     public function dailyBreakdownBySource(\DateTimeImmutable $since, string|array|null $path = null): array
     {
-        $qb = $this->createQueryBuilder("pv")
-            ->select("pv.date AS date, pv.source AS source, SUM(pv.views) AS views")
-            ->andWhere("pv.date >= :since")
-            ->setParameter("since", $since)
-            ->groupBy("pv.date")
-            ->addGroupBy("pv.source")
-            ->orderBy("pv.date", "ASC");
+        [$where, $params, $types] = $this->pathFilter($path);
+        $table = $this->getClassMetadata()->getTableName();
+        $connection = $this->getEntityManager()->getConnection();
 
-        if (\is_array($path)) {
-            $qb->andWhere("pv.path IN (:paths)")->setParameter("paths", $path);
-        } elseif ($path !== null) {
-            $qb->andWhere("pv.path = :path")->setParameter("path", $path);
-        }
-
-        $rows = $qb->getQuery()->getArrayResult();
+        $rows = $connection->fetchAllAssociative(
+            "SELECT DATE(date) AS date, source, SUM(views) AS views FROM {$table}
+             WHERE date >= :since {$where}
+             GROUP BY DATE(date), source ORDER BY DATE(date) ASC",
+            \array_merge(["since" => $since->format("Y-m-d H:i:s")], $params),
+            \array_merge(["since" => "string"], $types),
+        );
 
         $sources = [PageView::SOURCE_HUMAN, PageView::SOURCE_BOT, PageView::SOURCE_AI];
 
         $breakdown = [];
         foreach ($rows as $row) {
-            $date = $row["date"] instanceof \DateTimeInterface ? $row["date"]->format("Y-m-d") : (string) $row["date"];
-            $breakdown[$date] ??= array_fill_keys($sources, 0);
-            $breakdown[$date][$row["source"]] = (int) $row["views"];
+            $breakdown[$row["date"]] ??= array_fill_keys($sources, 0);
+            $breakdown[$row["date"]][$row["source"]] = (int) $row["views"];
         }
 
         return $breakdown;
+    }
+
+    /**
+     * One row per HOUR in range, oldest first - the same idea as
+     * dailyBreakdown() one grain finer, for the one range ("today") short
+     * enough that an hour-by-hour curve is actually legible. No zero-fill
+     * here (unlike Analytics::hourlyBreakdown(), which is the one that
+     * fills in every hour up to now) - this stays a thin raw-rows read,
+     * same division of responsibility dailyBreakdown() already has with
+     * Analytics::dailyBreakdown().
+     *
+     * @return array<string, int> hour ("Y-m-d H:i:s") => views
+     */
+    /**
+     * @param string|string[]|null $path see dailyBreakdown()'s own docblock
+     */
+    public function hourlyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array
+    {
+        [$where, $params, $types] = $this->pathFilter($path);
+        $table = $this->getClassMetadata()->getTableName();
+        $connection = $this->getEntityManager()->getConnection();
+
+        $rows = $connection->fetchAllAssociative(
+            "SELECT date, SUM(views) AS views FROM {$table}
+             WHERE date >= :since {$where}
+             GROUP BY date ORDER BY date ASC",
+            \array_merge(["since" => $since->format("Y-m-d H:i:s")], $params),
+            \array_merge(["since" => "string"], $types),
+        );
+
+        $breakdown = [];
+        foreach ($rows as $row) {
+            $breakdown[$row["date"]] = (int) $row["views"];
+        }
+
+        return $breakdown;
+    }
+
+    /**
+     * Same shape/semantics as hourlyBreakdown(), but grouped by source too
+     * - the hourly counterpart to dailyBreakdownBySource().
+     *
+     * @return array<string, array<string, int>> hour ("Y-m-d H:i:s") => [source => views]
+     */
+    /**
+     * @param string|string[]|null $path see dailyBreakdown()'s own docblock
+     */
+    public function hourlyBreakdownBySource(\DateTimeImmutable $since, string|array|null $path = null): array
+    {
+        [$where, $params, $types] = $this->pathFilter($path);
+        $table = $this->getClassMetadata()->getTableName();
+        $connection = $this->getEntityManager()->getConnection();
+
+        $rows = $connection->fetchAllAssociative(
+            "SELECT date, source, SUM(views) AS views FROM {$table}
+             WHERE date >= :since {$where}
+             GROUP BY date, source ORDER BY date ASC",
+            \array_merge(["since" => $since->format("Y-m-d H:i:s")], $params),
+            \array_merge(["since" => "string"], $types),
+        );
+
+        $sources = [PageView::SOURCE_HUMAN, PageView::SOURCE_BOT, PageView::SOURCE_AI];
+
+        $breakdown = [];
+        foreach ($rows as $row) {
+            $breakdown[$row["date"]] ??= array_fill_keys($sources, 0);
+            $breakdown[$row["date"]][$row["source"]] = (int) $row["views"];
+        }
+
+        return $breakdown;
+    }
+
+    /**
+     * Shared WHERE-fragment/params/types builder for the raw-SQL breakdown
+     * queries above - one path (exact match), a list (any-of, IN(...)), or
+     * null (no filter, site-wide) all land on the same three-way return
+     * shape so every caller above can just array_merge() it straight into
+     * its own since/params.
+     *
+     * @param string|string[]|null $path
+     *
+     * @return array{0: string, 1: array<string, mixed>, 2: array<string, mixed>}
+     */
+    private function pathFilter(string|array|null $path): array
+    {
+        if (\is_array($path)) {
+            return [" AND path IN (:paths)", ["paths" => $path], ["paths" => ArrayParameterType::STRING]];
+        }
+        if ($path !== null) {
+            return [" AND path = :path", ["path" => $path], ["path" => "string"]];
+        }
+
+        return ["", [], []];
     }
 }
