@@ -595,7 +595,20 @@ class SettingBag implements SettingBagInterface, CacheWarmerInterface
             throw new Exception("Setting \"$path\" is locked and cannot be modified.");
         }
 
-        $setting->translate($locale)->setValue($value);
+        $translation = $setting->translate($locale);
+        $translation->setValue($value);
+
+        // Writing null has to DELETE the translation, not just null the
+        // object: SettingIntl::isEmpty() is `value === null`, and the
+        // translatable behaviour skips persisting an empty translation - so
+        // the row already in the database survived untouched and set($path,
+        // null) silently did nothing at all. Found while clearing settings
+        // corrupted by a bad save: the old value kept coming back.
+        if (null === $value && null !== $translation->getId()) {
+            $setting->removeTranslation($translation);
+            $this->entityManager->remove($translation);
+        }
+
         $this->clear($path, $locale);
 
         if ($this->entityManager->getCache()) {
