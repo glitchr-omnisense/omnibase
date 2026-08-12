@@ -146,7 +146,24 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 if (FileType::class == $fieldOptions['form_type'] || ImageType::class == $fieldOptions['form_type'] || AvatarType::class == $fieldOptions['form_type']) {
                     $fieldOptions['max_size'] = $fieldOptions['max_size'] ?? Uploader::getMaxFilesize(SettingIntl::class, 'value');
                     $fieldOptions['mime_types'] = $fieldOptions['mime_types'] ?? Uploader::getMimeTypes(SettingIntl::class, 'value');
-                    $fieldOptions['empty_data'] = $settingValue ?? '';
+                    // THIS setting's own stored value, not $settingValue -
+                    // that variable is assigned in the per-locale loop
+                    // further down, so reading it here picked up whatever
+                    // the PREVIOUS setting in this same loop happened to
+                    // leave behind. empty_data is what a file field binds
+                    // when no new file is chosen, so on a plain Save every
+                    // untouched upload field adopted another setting's
+                    // value: reported live, the site logo came back holding
+                    // "image.webp" while an unrelated redirect setting came
+                    // back holding the logo's URL.
+                    $ownValue = null;
+                    foreach ($setting->getTranslations() as $ownTranslation) {
+                        $ownValue = $ownTranslation->getValue();
+                        if (null !== $ownValue) {
+                            break;
+                        }
+                    }
+                    $fieldOptions['empty_data'] = $ownValue ?? '';
                 }
 
                 if (!array_key_exists('help', $fieldOptions)) {
@@ -254,7 +271,16 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                             throw new \Exception('Setting "' . $viewData[$field]->getPath() . '" is locked, you cannot edit this variable.');
                         }
 
-                        if ([] == $translation->getValue()) {
+                        // A BOOLEAN is never "empty" here. `[] == false` is
+                        // true in PHP, so the old `[] == $value` guard
+                        // rewrote every switch saved as OFF to NULL - and a
+                        // null setting is *unset*, so it falls back to its
+                        // code-defined default, silently re-enabling what
+                        // the operator had just turned off. Empty
+                        // string/array still normalise to null, which is
+                        // what the guard was for (clearing a text or
+                        // multi-value field unsets it).
+                        if (!\is_bool($translation->getValue()) && [] == $translation->getValue()) {
                             $translation->setValue(null);
                         }
                         $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
