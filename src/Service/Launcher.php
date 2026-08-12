@@ -112,7 +112,11 @@ class Launcher implements LauncherInterface
         }
 
         if ($event) {
-            $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
+            // Same bug as MaintenanceProvider: the 4th argument of
+            // redirectToRoute() is $headers, so the event ended up in a
+            // RedirectResponse header bag and threw. redirectEvent() is the
+            // one that sets the response on the event.
+            $this->router->redirectEvent($event, $redirectOnDeny, [], 302);
         }
 
         $token = $this->tokenStorage->getToken();

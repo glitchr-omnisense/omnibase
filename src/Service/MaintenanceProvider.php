@@ -154,7 +154,14 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         }
 
         if ($event) {
-            $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
+            // redirectEvent(), not redirectToRoute(): the 4th argument there
+            // is $headers, so passing ["event" => $event] fed a RequestEvent
+            // into new RedirectResponse()'s header bag and threw
+            // "HeaderBag::set(): Argument #2 must be array|string|null".
+            // Every maintenance-deny redirect 500'd instead of redirecting.
+            // redirectEvent() is the method that actually sets the response
+            // on the event.
+            $this->router->redirectEvent($event, $redirectOnDeny, [], 302);
         }
 
         $token = $this->tokenStorage->getToken();

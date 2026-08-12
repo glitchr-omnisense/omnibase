@@ -86,7 +86,12 @@ window.addEventListener('load', function(event) {
 
                     var navButton = $("#"+navPane.attr("aria-labelledby"));
                         navButton.one('shown.bs.tab', function() {
-                            invalidRequiredField[0].reportValidity();
+                            // `invalid`, not `invalidRequiredField`: that
+                            // name is not defined in this scope, so the
+                            // moment this callback ran it threw a
+                            // ReferenceError and the field was never
+                            // reported.
+                            invalid[0].reportValidity();
                         });
 
                     var target = navButton.data("bs-target");

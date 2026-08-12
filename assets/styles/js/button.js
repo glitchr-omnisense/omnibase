@@ -20,13 +20,20 @@ $("[type=submit]").on("click", function(e) {
     if (form.length == 1) {
 
         var submitter = form.find("[type=submit]");
-        if(submitter.length == 1) { 
-        
-            if (submitter[0] != this) 
+        if(submitter.length == 1) {
+
+            if (submitter[0] != this)
                 submitter.trigger("click");
 
-        } else if(id != undefined) {
-            
+        // `id != undefined` alone meant this whole validation branch only
+        // ran for a button carrying a form="..." attribute. A form with
+        // MORE than one submit control whose button has no such attribute
+        // matched neither branch, so the click fell through doing nothing
+        // at all - which is every settings form (a hidden `valid` submit
+        // plus the visible one). Reaching it via the clicked button's own
+        // form is the same thing, minus the attribute requirement.
+        } else if(id != undefined || form.length == 1) {
+
             form = form[0];
             if ( $(form).hasClass("needs-validation") ) {
 
@@ -41,7 +48,12 @@ $("[type=submit]").on("click", function(e) {
     
                         var navButton = $("#"+navPane.attr("aria-labelledby"));
                             navButton.one('shown.bs.tab', function() {
-                                invalidRequiredField[0].reportValidity();
+                                // `invalid`, not `invalidRequiredField`: that
+                            // name is not defined in this scope, so the
+                            // moment this callback ran it threw a
+                            // ReferenceError and the field was never
+                            // reported.
+                            invalid[0].reportValidity();
                             });
     
                         location.hash = navButton.data("bs-target");
