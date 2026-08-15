@@ -4,6 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Base\Admin\Router\AdminUrlGenerator;
 use Exception;
@@ -21,6 +22,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
 class CollectionType extends AbstractType
 {
+    /** @var array<int,int> total entry count per form instance, pre-windowing */
+    private array $entryTotals = [];
+
     /**
      * @var Environment
      */
@@ -60,6 +64,16 @@ class CollectionType extends AbstractType
         $resolver->setDefaults([
             'form2' => false,
             'length' => 0,
+            // Cap how many entries are BUILT into the form. Each entry is a full
+            // sub-form whose own relations get hydrated, so an unbounded
+            // collection is an unbounded query count - a thread with 146
+            // comments builds 146 sub-forms on every edit page load.
+            // Deliberately null (off) by default: see the allow_delete guard
+            // below for why this cannot be applied blindly.
+            'max_entries' => null,
+            // Window offset, used by the lazy-load endpoint to render the NEXT
+            // slice of an already-capped collection.
+            'entry_offset' => 0,
             'allow_object' => false, // This is introduced because object should be stringeable, otherwise there will be some error turning it into string
             'allow_add' => false,
             'allow_delete' => true,
@@ -156,6 +170,49 @@ class CollectionType extends AbstractType
             $event->setData($data);
         });
 
+        // Cap the number of entries built, when asked and when SAFE to do so.
+        //
+        // The guard matters: Symfony removes entries that are absent from the
+        // submitted data only when allow_delete is true. With allow_delete
+        // false, entries we never rendered are left alone on save - so capping
+        // is purely a rendering economy. With allow_delete true the same cap
+        // would silently delete every entry past the limit the moment the form
+        // is submitted, so it is refused outright rather than made optional.
+        $maxEntries = $options["max_entries"];
+        $entryOffset = max(0, (int) $options["entry_offset"]);
+
+        // Remember how many entries there really were, before any windowing, so
+        // the view can offer "load the rest". Keyed per form instance and
+        // request-scoped - the type itself is a shared service.
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
+            $data = $event->getData();
+            $this->entryTotals[spl_object_id($event->getForm())] = is_countable($data) ? \count($data) : 0;
+        }, 10);
+        if (\is_int($maxEntries) && $maxEntries > 0 && false === $options["allow_delete"]) {
+            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($maxEntries, $entryOffset) {
+                $data = $event->getData();
+                if (null === $data) {
+                    return;
+                }
+
+                $count = is_countable($data) ? \count($data) : 0;
+                if (0 === $entryOffset && $count <= $maxEntries) {
+                    return;
+                }
+
+                // preserve_keys = true is load-bearing, not tidiness: the key IS
+                // the entry's index in the collection, and therefore the index in
+                // the submitted field name. A lazily fetched entry #12 must come
+                // back as [_collection][12][...] or it would bind to the wrong
+                // slot (or create a new one) on save.
+                if ($data instanceof Collection) {
+                    $event->setData(new ArrayCollection(\array_slice($data->toArray(), $entryOffset, $maxEntries, true)));
+                } elseif (\is_array($data)) {
+                    $event->setData(\array_slice($data, $entryOffset, $maxEntries, true));
+                }
+            });
+        }
+
         // Resize collection according to length option
         if (is_int($options["length"]) && $options["length"] > 0) {
             $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
@@ -211,6 +268,10 @@ class CollectionType extends AbstractType
     public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['length'] = $options["length"];
+        // The window, for the lazy-load control (see collection2_widget).
+        $view->vars['entry_offset'] = max(0, (int) $options["entry_offset"]);
+        $view->vars['max_entries'] = $options["max_entries"];
+        $view->vars['entry_total'] = $this->entryTotals[spl_object_id($form)] ?? null;
 
         $prefixOffset = -1;
         // check if the entry type also defines a block prefix

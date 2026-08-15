@@ -95,6 +95,11 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'html' => false,
 
             'entry_collapsed' => true,
+            // Forwarded to the inner CollectionType (see its own comment): caps
+            // how many entries are built, and only takes effect when the
+            // collection cannot delete.
+            'max_entries' => null,
+            'entry_offset' => 0,
             'entry_label' => function ($i, $label) {
                 if ($i === "__prototype__") {
                     return false;
@@ -130,7 +135,26 @@ class AssociationType extends AbstractType implements DataMapperInterface
         ]);
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
-            // Association type must depends on child requirement here.. it marked as false for some reasons..
+            // A to-MANY association is a collection, and "no entries" is a
+            // legitimate value for one. Returning entry_required (default true)
+            // unconditionally put a browser-level `required` on every such
+            // field, so the create form could not be submitted until the
+            // operator picked something: Comments/Followers/Replies on a
+            // comment, Children on a calendar and a guestbook, Subscribers on
+            // a newsletter, Tags on a gallery, Permissions on a group,
+            // Hyperlinks on a user - none of which are mandatory. It also
+            // overrode an explicit ->setRequired(false), which is why the
+            // Article fields had to be fought individually.
+            //
+            // A genuinely mandatory collection belongs in validation (a Count
+            // constraint), which reports WHY it is refusing; an HTML required
+            // attribute on a multi-select just blocks submit with no
+            // explanation. entry_required still governs the single-valued
+            // case, where it means "this one related record is mandatory".
+            if ($options["multiple"]) {
+                return false;
+            }
+
             return $options["entry_required"];
         });
 
@@ -191,7 +215,12 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
                 $collectionOptions = [
                     "data_class" => null,
-                    "label" => $options["label"],
+                    // `?? false`: with no label to inherit, Symfony humanises the
+                    // child's own name and the inner group renders "Collection" -
+                    // a second, wrong label under the field's real one ("Comments").
+                    // The parent already labels the field, so an unlabelled parent
+                    // means "don't label me twice", not "make one up".
+                    "label" => $options["label"] ?? false,
                     "html" => $options["html"],
                     'by_reference' => false,
                     'allow_object' => true,
@@ -199,6 +228,8 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     "group" => $options["group"],
                     "row_group" => $options["row_group"],
                     'entry_collapsed' => $options["entry_collapsed"],
+                    'max_entries' => $options["max_entries"],
+                    'entry_offset' => $options["entry_offset"],
                     'entry_type' => AssociationType::class,
                     'entry_label' => $options["entry_label"],
                     'entry_options' => array_merge($options, [

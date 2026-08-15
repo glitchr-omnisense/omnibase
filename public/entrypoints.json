@@ -34,7 +34,7 @@
         "/bundles/base/form-defer.c7f58a8b.css"
       ],
       "js": [
-        "/bundles/base/form-defer.b4300c25.js"
+        "/bundles/base/form-defer.0bfef823.js"
       ]
     },
     "form-defer.editor": {
@@ -100,7 +100,7 @@
         "/bundles/base/form-defer.dropzone.063304f6.css"
       ],
       "js": [
-        "/bundles/base/form-defer.dropzone.c5579be7.js"
+        "/bundles/base/form-defer.dropzone.e358177c.js"
       ]
     }
   }

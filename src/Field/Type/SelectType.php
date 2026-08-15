@@ -173,6 +173,12 @@ class SelectType extends AbstractType implements DataMapperInterface
             'capitalize' => null,
             'language' => null,
             'required' => null,
+            // Opt back IN to a browser-level required on a multi-select. The
+            // default is off (see the choice child below) because "nothing
+            // selected" is valid for almost every collection, but a few really
+            // are mandatory - an Article must have an author - and those say so
+            // here rather than losing the constraint silently.
+            'required_when_multiple' => false,
             'multiple' => null,
             'multivalue' => false,
 
@@ -272,6 +278,21 @@ class SelectType extends AbstractType implements DataMapperInterface
                 'choice_value' => $options["choice_value"],
                 'multiple' => $options["multiple"]
             ];
+
+                // A multi-select is a collection: "nothing selected" is valid.
+                // Symfony hands `required` down from the parent, and the
+                // parent's own default resolves to true while `multiple` is
+                // still unguessed - so every to-many select emitted a browser
+                // `required` on this child <select> and the create form could
+                // not be submitted until something was picked (Tags, Followers,
+                // Subscribers, Permissions, Newsletters, Children...). A
+                // genuinely mandatory collection is a validation constraint,
+                // which can say why; this attribute just blocks submit
+                // silently. Set on the CHILD because that is the element that
+                // carries the attribute - a parent view var never reaches it.
+                if ($options["multiple"] && !$options["required_when_multiple"]) {
+                    $formOptions['required'] = false;
+                }
 
             $form->add('choice', ChoiceType::class, $formOptions);
         });
@@ -449,6 +470,12 @@ class SelectType extends AbstractType implements DataMapperInterface
                 'multiple' => $options["multiple"]
             ];
 
+            // Same as the PRE_SET_DATA branch above: this rebuild must not
+            // reinstate the required attribute the other one dropped.
+            if ($options["multiple"] && !$options["required_when_multiple"]) {
+                $formOptions['required'] = false;
+            }
+
             $form->remove('choice')->add('choice', ChoiceType::class, $formOptions);
         });
     }
@@ -594,6 +621,22 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["class"] = $this->formFactory->guessClass($form, $options);
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
+
+        // A MULTI-select is a collection, and "nothing selected" is a valid
+        // value for one. The `required` normalizer above defaults to true and
+        // runs while `multiple` is still null - it is only guessed here - so
+        // every to-many select shipped a browser-level `required` and the
+        // create form refused to submit until something was picked: Tags on a
+        // gallery, Followers on a comment, Subscribers on a newsletter,
+        // Permissions on a group, Newsletters on a subscriber, Children on a
+        // calendar/guestbook. Same reasoning as AssociationType's own
+        // normalizer: a genuinely mandatory collection is a validation
+        // constraint (which can say why), not an HTML attribute that blocks
+        // submit silently. Applied here because this is the first point where
+        // multiplicity is actually known.
+        if ($options["multiple"]) {
+            $view->vars["required"] = false;
+        }
 
         $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
         if ($options["choices"] === null && $options["choice_loader"] === null) {

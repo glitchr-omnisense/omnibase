@@ -33,4 +33,52 @@
     {% endfor %}
 </div>
 
+{# Self-contained dismissal. flashbag.js (jQuery $.fn.flashNotification) owns
+   auto-hide, but it is not loaded on the public site - verified live,
+   $.fn.flashNotification is undefined there - so a flash had a working close
+   button and no timeout, and simply stayed. Its init also runs on `load`
+   only, which a transparentJS page swap never fires again, so a flash
+   arriving with swapped content would never be armed even where the plugin
+   IS present.
+
+   This depends on neither jQuery nor Bootstrap. It no-ops when the plugin is
+   loaded and has already armed the alert (data-flash-armed), so the two
+   cannot double-dismiss. Errors are exempt: a failure the visitor blinked
+   past is worse than one they have to close. #}
+<script>
+(function () {
+    if (window.__flashbagAutoHide) return;
+    window.__flashbagAutoHide = true;
+
+    var AUTO_MS = 6000;
+
+    function retire(alert) {
+        if (!alert || alert.dataset.flashDismissing) return;
+        alert.dataset.flashDismissing = '1';
+        alert.style.transition = 'opacity .25s ease, transform .25s ease';
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-.35rem)';
+        setTimeout(function () { alert.remove(); }, 260);
+    }
+
+    function arm(root) {
+        var scope = (root && root.querySelectorAll) ? root : document;
+        scope.querySelectorAll('#flash-messages .alert:not([data-flash-armed])').forEach(function (alert) {
+            alert.dataset.flashArmed = '1';
+            if (alert.classList.contains('alert-danger') || alert.classList.contains('alert-error')) return;
+            setTimeout(function () { retire(alert); }, AUTO_MS);
+        });
+    }
+
+    function boot() {
+        arm(document);
+        var box = document.getElementById('flash-messages');
+        if (box) new MutationObserver(function () { arm(document); }).observe(box, { childList: true });
+    }
+
+    if ('loading' === document.readyState) document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+})();
+</script>
+
 {% endif %}

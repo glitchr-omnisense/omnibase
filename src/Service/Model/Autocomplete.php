@@ -62,10 +62,24 @@ class Autocomplete
             // hardest to tell apart at a glance: several authors picked on
             // the same entity. Falls through to the icon untouched when
             // there's no media service wired in or no avatar set.
-            if ($this->mediaService !== null && method_exists($entry, "getAvatarFile")) {
-                $avatarFile = $entry->getAvatarFile();
-                if (!empty($avatarFile)) {
-                    $avatar = $this->mediaService->thumbnail($avatarFile, 40, 40);
+            //
+            // Thumbnail the PUBLIC accessor ("/images/<hash>/image.png"), never
+            // getAvatarFile(). On a remote storage (S3) Uploader::get() streams the
+            // object down to a per-request temp file, so getAvatarFile() hands back a
+            // File pointing at "/tmp/phpXXXXXX". thumbnail() then bakes that absolute
+            // temp path into the durable obfuscator token - and the temp file is gone
+            // by the time the browser requests the token, so every avatar in every
+            // select2 dropdown resolved to a dead path and served the no-image
+            // placeholder. The public accessor is storage-independent and re-encodes
+            // into a stable token that keeps working across requests.
+            if ($this->mediaService !== null) {
+                $avatarSource = match (true) {
+                    method_exists($entry, "getAvatar") => $entry->getAvatar(),
+                    method_exists($entry, "getAvatarFile") => $entry->getAvatarFile(),
+                    default => null,
+                };
+                if (!empty($avatarSource)) {
+                    $avatar = $this->mediaService->thumbnail($avatarSource, 40, 40);
                     if (is_string($avatar)) {
                         $data["avatar"] = $avatar;
                     }

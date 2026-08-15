@@ -36,7 +36,12 @@
 
     {% set fieldset = "ea_form_fieldset_open" in form.vars.block_prefixes or "ea_form_fieldset_close" in form.vars.block_prefixes %}
     {% if (badges is not empty or labelTrim is not empty) and not fieldset %}
-    <div class="label-wrapper">
+    {#- When there is no real label the wrapper still renders, carrying a
+        `<label>&nbsp;</label>` spacer plus whatever badges the field earned.
+        That keeps rows aligned in themes that want it, but leaves a badge
+        floating with nothing to describe in themes that don't. Marking the
+        case lets a theme hide it in CSS - text emptiness is not selectable. -#}
+    <div class="label-wrapper{% if labelTrim is empty %} label-wrapper-unlabelled{% endif %}">
         {% if labelTrim is not empty %}
 
             {{- label|raw -}}
@@ -838,6 +843,22 @@
             {{ '@EasyAdminBundle.action.add_new_item'|trans }}
         </button>
     {% endif %}
+
+    {#- Windowed collection: the remaining entries were deliberately not built
+        (each one costs queries), so offer to fetch them instead of pretending
+        they do not exist. The button carries everything the loader needs; the
+        admin layer owns the fetch, since the endpoint is an admin route. -#}
+    {%- set _shown = (entry_offset|default(0)) + (max_entries|default(0)) -%}
+    {%- if max_entries and entry_total is not null and entry_total > _shown -%}
+        <button type="button" class="btn form-collection-more"
+                data-collection-more
+                data-loaded="{{ _shown }}"
+                data-total="{{ entry_total }}"
+                data-limit="{{ max_entries }}">
+            <i class="fa-solid fa-chevron-down"></i>
+            <span data-collection-more-label>{{ entry_total - _shown }}</span>
+        </button>
+    {%- endif -%}
 
 {%- endblock collection2_widget -%}
 

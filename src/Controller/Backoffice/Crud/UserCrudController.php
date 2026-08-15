@@ -35,7 +35,12 @@ class UserCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->onlyOnIndex();
         yield BooleanField::new('isApproved')->setColumns(2);
-        yield AvatarField::new('avatar')->setColumns(2)->hideOnDetail();
+        // setRequired(false): User::$avatar is `nullable: true`, but with
+        // nothing declared the form guesser marks the upload required, so the
+        // browser refused to submit /admin/users/new without a picture - a
+        // user cannot be created at all. Same failure the tags/followers
+        // fields had on Article. The label's red marker went with it.
+        yield AvatarField::new('avatar')->setColumns(2)->hideOnDetail()->setRequired(false);
         // KNOWN ISSUE, not yet fixed: this binds to 'roles', which now
         // reads via User::getRoles() (own roles unioned with group
         // membership - see Group-based permissions). Saving this form

@@ -100,7 +100,13 @@ window.addEventListener("load.form_type", function () {
 
                     const isUUID = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
                     if(isUUID.test(path)) arr.push({path: paths[path] ?? ajax+"/"+path, uuid:path});
-                    else arr.push({path:path});
+                    // Non-UUID entries are BASENAMES ("image.webp"), not URLs -
+                    // using one as a src makes the browser resolve it against
+                    // the current admin page, 404, and Dropzone then re-emits
+                    // its own error Event as the thumbnail source
+                    // (<img src="[object Event]">). The server now ships the
+                    // real URLs positionally, so take this row's own.
+                    else arr.push({path: paths[key] ?? paths[path] ?? path});
                 });
 
                 Promise.all(arr).then(function(val){
@@ -117,11 +123,46 @@ window.addEventListener("load.form_type", function () {
 
                         editor.files.push(mock);
 
-                        if(path === "") path = "./bundles/base/images.svg";
-                        editor.displayExistingFile(mock, path);
+                        // Leading slash: a relative fallback resolves against the
+                        // CURRENT admin page ("/admin/galleries/x/bundles/...").
+                        if(path === "") path = "/bundles/base/images/image.svg";
+
+                        // resizeThumbnail = false (5th arg). Dropzone's resizing
+                        // path loads the image into a canvas and, on ANY failure,
+                        // hands its own error Event to the same callback that
+                        // supplies the thumbnail data URL - which Dropzone then
+                        // assigns to img.src, producing <img src="[object Event]">.
+                        // These are already server-side thumbnails at a sane size,
+                        // so there is nothing to resize: point Dropzone straight at
+                        // the URL. Also avoids decoding a dozen full-size images in
+                        // the browser just to shrink them again.
+                        editor.displayExistingFile(mock, path, null, null, false);
 
                         updateMetadata(this.id, editor.files.length);
                     });
+
+                    // Paint the thumbnails from the DOM, positionally.
+                    //
+                    // Dropzone assigns the image to every [data-dz-thumbnail] in
+                    // the preview it built, but for an EXISTING file that never
+                    // took effect here: the <img> held the correct URL while the
+                    // browser issued no request for it at all (complete=true,
+                    // naturalWidth=0, nothing in the resource timeline - though
+                    // the same URL loads instantly through a fresh Image()).
+                    // Rather than keep guessing at which internal the mock is
+                    // missing, set it on the rendered previews, which are in
+                    // document order and match the value list one-for-one.
+                    var previews = document.querySelectorAll('#'+id+'_dropzone .dz-preview');
+                    for (var n = 0; n < previews.length; n++) {
+                        var url = (val[n] || {}).path;
+                        if (!url || String(url).indexOf('[object') > -1) continue;
+
+                        var thumbs = previews[n].querySelectorAll('[data-dz-thumbnail], .dz-image img');
+                        for (var t = 0; t < thumbs.length; t++) {
+                            if (thumbs[t].getAttribute('src') === url && thumbs[t].naturalWidth > 0) continue;
+                            thumbs[t].src = url;
+                        }
+                    }
                 });
 
                 this.on('error', function(file, response) {

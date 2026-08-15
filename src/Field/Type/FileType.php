@@ -259,6 +259,37 @@ class FileType extends AbstractType implements DataMapperInterface
         }
     }
 
+    /**
+     * Storage-aware existence check.
+     *
+     * `file_exists()` only ever answers for the LOCAL filesystem. Once media
+     * moved to S3 it returned false for every stored file, so the three view
+     * vars below (path / download / clippable) were built from an empty set and
+     * the dropzone received bare basenames instead of URLs: it then requested
+     * "image.webp" relative to the current admin page, got a 404, and Dropzone
+     * re-emitted its own error Event as the thumbnail source - which is how
+     * twelve <img src="[object Event]"> ended up on a gallery edit page.
+     */
+    private function fileIsAvailable(?string $path): bool
+    {
+        if (null === $path || '' === $path) {
+            return false;
+        }
+
+        if (file_exists($path)) {
+            return true;
+        }
+
+        // Remote (or otherwise non-local) storage. FileService::getMimeType()
+        // reads through flysystem first, so a resolvable mime type means the
+        // storage can see the object - which is exactly the question here.
+        try {
+            return null !== $this->fileService->getMimeType($path);
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $parent = $form->getParent();
@@ -338,16 +369,33 @@ class FileType extends AbstractType implements DataMapperInterface
 
             if ($view->vars['value']) {
 
-                $view->vars['path'] = json_encode(array_transforms(function ($k, $v): ?array {
-                    return file_exists($v) ? [basename($v), $this->fileService->isImage($v) ? $this->mediaService->image($v) : $this->mediaService->linkable($v)] : null;
-                }, array_filter($view->vars['value'])));
+                // Keyed by POSITION, not basename: every uploaded image is stored
+                // as "<hash>/image.webp", so basenaming the key collapsed a
+                // twelve-photo gallery into a single map entry and eleven
+                // thumbnails had no URL at all. The client walks the value list
+                // in order, so the index is the one key guaranteed unique.
+                $view->vars['path'] = json_encode(array_values(array_transforms(function ($k, $v): ?array {
+                    if (!$this->fileIsAvailable($v)) {
+                        return null;
+                    }
+
+                    // thumbnail(), not image(): these URLs feed 124px dropzone
+                    // previews, and handing them the ORIGINAL made a twelve-photo
+                    // gallery pull twelve 2880x2160 files (~400KB each, ~5MB of
+                    // originals to draw thumbnails) - enough of them stalled that
+                    // only 7 of 12 ever painted. 1024px keeps the lightbox usable
+                    // while costing a fraction of that.
+                    return [$k, $this->fileService->isImage($v)
+                        ? $this->mediaService->thumbnail($v, 1024, 1024)
+                        : $this->mediaService->linkable($v)];
+                }, array_filter($view->vars['value']))));
 
                 $view->vars['download'] = json_encode(array_transforms(function ($k, $v): ?array {
-                    return file_exists($v) ? [basename($v), $this->fileService->downloadable($v)] : null;
+                    return $this->fileIsAvailable($v) ? [basename($v), $this->fileService->downloadable($v)] : null;
                 }, array_filter($view->vars['value'])));
 
                 $view->vars['clippable'] = json_encode(array_transforms(function ($k, $v): ?array {
-                    return file_exists($v) ? [basename($v), $this->fileService->isImage($v)] : null;
+                    return $this->fileIsAvailable($v) ? [basename($v), $this->fileService->isImage($v)] : null;
                 }, array_filter($view->vars['value'])));
             }
 

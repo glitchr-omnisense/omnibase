@@ -139,10 +139,27 @@ window.addEventListener("load.form_type", function () {
                     }
                 }, {
                     key: "updateValue",
-                    value: function (value = undefined) {
+                    value: function (value = undefined, keepTrailingSeparator = false) {
 
                         if(!this.target) return;
-                        this.field.value = this.compute(value)
+
+                        var computed = this.compute(value);
+
+                        // While the user is typing INTO the slug field, a separator
+                        // is always the last character at the moment it is typed, so
+                        // compute()'s trim() deleted it on every keystroke and a
+                        // hyphen could never be entered at all ("mon-slug-manuel"
+                        // came out "monslugmanuel"). Put a trailing separator back
+                        // during input; `change`/blur still normalises it away.
+                        if (keepTrailingSeparator) {
+                            var sep = $(this.field).data("slug-separator") ?? "-";
+                            var raw = value ?? "";
+                            if (sep && raw.endsWith(sep) && !computed.endsWith(sep) && computed !== "") {
+                                computed += sep;
+                            }
+                        }
+
+                        this.field.value = computed
                     }
                 }, {
                     key: "compute",
@@ -228,7 +245,12 @@ window.addEventListener("load.form_type", function () {
                     });
                 }
 
-                $(slugger.field).on('input change keyup', function() {
+                // Typing: keep a trailing separator so hyphens can be entered.
+                $(slugger.field).on('input keyup', function() {
+                    slugger.updateValue(this.value, true);
+                });
+                // Committing: normalise fully (drops any dangling separator).
+                $(slugger.field).on('change', function() {
                     slugger.updateValue(this.value);
                 });
 
