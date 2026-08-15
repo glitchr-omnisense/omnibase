@@ -849,6 +849,15 @@
         they do not exist. The button carries everything the loader needs; the
         admin layer owns the fetch, since the endpoint is an admin route. -#}
     {%- set _shown = (entry_offset|default(0)) + (max_entries|default(0)) -%}
+    {#- Declare WHICH indices this page actually rendered. The server restores
+        any original entry outside this set on submit: an operator cannot have
+        deleted a row they were never shown. The lazy loader appends the
+        indices of each fetched slice. Only emitted for windowed collections,
+        so ordinary forms keep byte-identical payloads. -#}
+    {%- if max_entries and entry_total is not null and entry_total > (form.children|length) -%}
+        <input type="hidden" name="{{ full_name }}[_rendered]"
+               value="{{ form.children|keys|join(',') }}" data-collection-rendered>
+    {%- endif -%}
     {%- if max_entries and entry_total is not null and entry_total > _shown -%}
         <button type="button" class="btn form-collection-more"
                 data-collection-more

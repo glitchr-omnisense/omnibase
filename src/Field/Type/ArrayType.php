@@ -26,9 +26,16 @@ class ArrayType extends CollectionType
      */
     protected ClassMetadataManipulator $classMetadataManipulator;
 
-    public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, ClassMetadataManipulator $classMetadataManipulator)
+    /**
+     * The service definition inherits CollectionType's args (`->parent(...)`)
+     * and APPENDS its own - so this signature must mirror the parent's
+     * positionally. When the parent gained a RequestStack, this ctor received
+     * it as its 5th argument where it expected the manipulator, and every
+     * form using ArrayType 500'd (caught by the groups/new render test).
+     */
+    public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, ?\Symfony\Component\HttpFoundation\RequestStack $requestStack = null, ?ClassMetadataManipulator $classMetadataManipulator = null)
     {
-        parent::__construct($twig, $translator, $authorizationChecker, $adminUrlGenerator);
+        parent::__construct($twig, $translator, $authorizationChecker, $adminUrlGenerator, $requestStack);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 

@@ -186,6 +186,12 @@ return function (ContainerConfigurator $configurator) {
             new Reference('translator'),
             new Reference('security.authorization_checker'),
             new Reference('Base\Admin\Router\AdminUrlGenerator'),
+            // Windowing must know the request method: it engages on GET renders
+            // only (a submission binds every entry natively). Without this the
+            // optional param stayed null, the method defaulted to GET, and a
+            // POST was windowed too - lazily loaded entries then arrived as
+            // "extra fields" and the save was rejected with a 422.
+            new Reference('request_stack'),
         ]);
     $services->set('Base\Field\Type\ArrayType')
         ->parent('Base\Field\Type\CollectionType')

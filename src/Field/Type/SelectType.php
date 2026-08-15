@@ -528,6 +528,13 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $orderBy = array_flip($dataChoices);
                 $default = count($orderBy);
 
+                // A placeholder <option value=""> (or a client serializing an
+                // empty multi-select as [""]) must not reach hydration: an
+                // empty id matches no entity, survives the id->entity swap
+                // below as a raw string, and Doctrine then rejects the
+                // collection ("Expected value of type User, got string").
+                $dataChoices = array_values(array_filter($dataChoices, static fn ($id) => null !== $id && '' !== $id));
+
                 $entities = [];
                 if ($dataChoices) {
                     $entities = $classRepository->cacheById($dataChoices, [])->getResult();
