@@ -913,7 +913,11 @@
                     <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ is_empty ? 'style="cursor:default;"' : '' }}
                             type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-collapse" aria-expanded="{{ collapsed ? false : true}}" aria-controls="{{ id }}-collapse">
                     {%- endif -%}
-                        &nbsp;
+                    {#- No leading &nbsp;: the header is a flex container whose
+                        text is an anonymous item, and a stray leading space
+                        renders at unstable subpixel offsets - the label visibly
+                        wobbled ~3px between hover states. Spacing belongs to the
+                        container's own padding/gap. -#}
                     {%- if linkable and not html -%}
                     <i class="fa-solid fw fa-chevron-right form-collection-item-collapse-marker"></i>
                     {% endif %}
