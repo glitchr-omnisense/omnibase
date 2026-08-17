@@ -1,3 +1,9 @@
+/* --editor-heading-color lets a dark-themed layout (e.g. base-bundle-admin,
+   which defines its own --admin-text token) repaint EditorJS headings
+   without this file needing to know about that theme's variable names -
+   unset anywhere, this still falls back to the original #000. Without this
+   hook, a dark admin theme left these hardcoded black, unreadable against
+   a dark background (reported live). */
 .codex-editor h1, .codex-editor .h1,
 .codex-editor h2, .codex-editor .h2,
 .codex-editor h3, .codex-editor .h3,
@@ -5,7 +11,7 @@
 .codex-editor h5, .codex-editor .h5,
 .codex-editor h6, .codex-editor .h6
 {
-    color:#000;
+    color: var(--editor-heading-color, #000);
 }
 
 .cdx-notifies

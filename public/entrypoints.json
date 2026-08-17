@@ -31,18 +31,18 @@
     },
     "form-defer": {
       "css": [
-        "/bundles/base/form-defer.388de9f2.css"
+        "/bundles/base/form-defer.22a83f5c.css"
       ],
       "js": [
-        "/bundles/base/form-defer.e359b567.js"
+        "/bundles/base/form-defer.600e0d52.js"
       ]
     },
     "form-defer.editor": {
       "css": [
-        "/bundles/base/form-defer.editor.1c80c5a6.css"
+        "/bundles/base/form-defer.editor.7ef0990d.css"
       ],
       "js": [
-        "/bundles/base/form-defer.editor.36d4d056.js"
+        "/bundles/base/form-defer.editor.1ef6d447.js"
       ]
     },
     "form-defer.array": {

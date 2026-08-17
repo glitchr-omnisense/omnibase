@@ -1,6 +1,27 @@
 import $ from 'jquery';
-import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
+
+// yjs/y-websocket are loaded lazily (dynamic import), not as a static
+// top-level import, and specifically NOT because of bundle size alone.
+// This file lives in the always-loaded form-defer.js entry, while
+// editorjs-yjs (form-type-editor.js's lazy form-defer.editor.js entry)
+// also depends on yjs - Encore builds each entry as an independent
+// bundle with no shared-chunk config between them, so BOTH ended up
+// carrying their own copy of yjs's module code, and yjs's own
+// module-identity check logged "Yjs was already imported..." the moment
+// both entries were present on the same page (confirmed live on an
+// article edit page). Since collab_live/collab isn't turned on for any
+// field yet, neither copy's module-level code needs to run AT ALL on a
+// page that never actually asks for it - loading it only inside
+// connectPresence(), the one place it's used, means yjs's side effects
+// never fire unless a live-collab field is genuinely present, sidestepping
+// the duplicate-registration entirely for every page today.
+var yjsModules = null;
+function loadYjs() {
+    if (!yjsModules) {
+        yjsModules = Promise.all([import('yjs'), import('y-websocket')]);
+    }
+    return yjsModules;
+}
 
 // ── Optional live collaboration for regular fields (input/select/select2) ───
 // This code reuses the same room contract and ticket contract as
@@ -58,15 +79,21 @@ var connections = {};
 function connectPresence(fieldId, room, ticketUrl, token, user) {
     if (connections[room]) return;
 
-    var ydoc = new Y.Doc();
-    var entry = { ydoc: ydoc, provider: null, users: [], fieldId: fieldId };
+    var entry = { ydoc: null, provider: null, users: [], fieldId: fieldId };
     connections[room] = entry;
 
-    fetchTicket(ticketUrl, token, room).then(function (result) {
+    Promise.all([loadYjs(), fetchTicket(ticketUrl, token, room)]).then(function (all) {
+        var Y = all[0][0];
+        var WebsocketProvider = all[0][1].WebsocketProvider;
+        var result = all[1];
+
         // A newer request can replace this entry, or a caller can remove
-        // this entry, before this fetch completes. In that case, this
-        // code stops here.
+        // this entry, before this resolves. In that case, this code
+        // stops here.
         if (!result || connections[room] !== entry) return;
+
+        var ydoc = new Y.Doc();
+        entry.ydoc = ydoc;
 
         var wsBase = result.wsUrl.replace(/\/+$/, "") + "/collab/";
         var provider = new WebsocketProvider(wsBase, encodeURIComponent(room), ydoc, {

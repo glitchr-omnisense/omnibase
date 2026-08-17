@@ -17,7 +17,22 @@ import Header from 'editorjs-header';
 import Paragraph from 'editorjs-paragraph';
 import Mention from 'editorjs-mention';
 import {ImageTool, ImageToolTune} from 'editorjs-image';
-import EditorYjs from 'editorjs-yjs';
+
+// editorjs-yjs (and, transitively, yjs/y-websocket) is loaded lazily, not
+// as a static top-level import. This file's entry (form-defer.editor.js)
+// and form-type-collab-presence.js's entry (the always-loaded
+// form-defer.js) both depend on yjs, and Encore builds each entry as an
+// independent bundle with no shared-chunk config between them - two
+// static imports meant two separate copies of yjs's module code landing
+// on the same page, and yjs's own module-identity check logged "Yjs was
+// already imported. This breaks constructor checks..." the moment both
+// were present (confirmed live on an article edit page). Loading
+// editorjs-yjs only inside the collab_live branch below means its module
+// code, and yjs's, never runs at all unless a field actually turns on
+// collab_live.
+function loadEditorYjs() {
+    return import('editorjs-yjs').then(function (m) { return m.default || m; });
+}
 
 function json_decode(str) {
     try {
@@ -331,7 +346,10 @@ function edjs(inputEl, holderId, value = {}, options = {})
     }
 
     if (options.collab && options.collab.live && inputEl != undefined) {
-        fetchCollabTicket(options.collab).then(function (result) {
+        Promise.all([loadEditorYjs(), fetchCollabTicket(options.collab)]).then(function (all) {
+            var EditorYjs = all[0];
+            var result = all[1];
+
             if (!result) {
                 // The relay has no configuration, or the relay is not
                 // reachable. In this case, this code uses plain,
