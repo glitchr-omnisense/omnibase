@@ -83,11 +83,13 @@ The relay sends a `401` response and closes the connection in these cases:
 | `COLLAB_PERSIST_DEBOUNCE_MS` | no       | This is the wait time, in milliseconds, before the relay saves a quiet content room. The default value is `5000`. The relay also saves a room immediately when the last client disconnects. |
 
 The app also needs the `COLLAB_RELAY_WS_URL` variable. This variable holds
-the public `wss://` address for client connections. The
-`CollabTicketFactory::isConfigured()` method keeps the `collab_live` option
-inactive until the app sets both `COLLAB_TICKET_SECRET` and
-`COLLAB_RELAY_WS_URL`. While the option is inactive, the app does not
-create tickets.
+the public `wss://` address for client connections. This value is the bare
+origin only, with no `/collab` path — the browser client appends
+`/collab/<room>` itself. Example: `wss://your-host`, not
+`wss://your-host/collab`. The `CollabTicketFactory::isConfigured()` method
+keeps the `collab_live` option inactive until the app sets both
+`COLLAB_TICKET_SECRET` and `COLLAB_RELAY_WS_URL`. While the option is
+inactive, the app does not create tickets.
 
 ## Deployment with the app
 
@@ -129,7 +131,7 @@ Because of this, the new location needs only the `proxy_pass` directive.
     }
 ```
 
-Set the `COLLAB_RELAY_WS_URL` variable to `wss://<your-host>/collab`. Set
+Set the `COLLAB_RELAY_WS_URL` variable to `wss://<your-host>` (no `/collab` suffix). Set
 the same `COLLAB_TICKET_SECRET` value in the app's `.env.local` file.
 
 ## Local development

@@ -45,6 +45,7 @@
 // compromises the relay.
 
 const http = require('http');
+const { URL } = require('url');
 const crypto = require('crypto');
 const WebSocket = require('ws');
 const { setupWSConnection, getYDoc } = require('y-websocket/bin/utils');
@@ -53,6 +54,24 @@ const PORT = parseInt(process.env.COLLAB_RELAY_PORT || '1234', 10);
 const SECRET = process.env.COLLAB_TICKET_SECRET;
 const AUTOSAVE_URL = process.env.COLLAB_AUTOSAVE_URL || '';
 const PERSIST_DEBOUNCE_MS = parseInt(process.env.COLLAB_PERSIST_DEBOUNCE_MS || '5000', 10);
+
+// AUTOSAVE_URL holds the app's internal Docker address (e.g.
+// http://web/ux/editorjs/autosave), not its public domain. This relay
+// must send that request with a Host header matching the app's real
+// public domain, or base-bundle's RouterSubscriber does not recognize it
+// as a configured domain and silently redirects to the app's fallback
+// host instead of handling it (confirmed live: a 302, then a 500 from
+// that unrelated host). fetch()/undici treats "Host" as a forbidden
+// header name and silently drops any attempt to set it through the
+// headers option (confirmed live: the header simply never left this
+// process) - persistRoom() below uses Node's low-level http.request()
+// instead of fetch() specifically so this header takes effect.
+// COLLAB_RELAY_WS_URL is reused here only to read the app's real public
+// domain - it is already required for collab_live to activate at all.
+const AUTOSAVE_HOST = (() => {
+    try { return new URL(process.env.COLLAB_RELAY_WS_URL || '').hostname || null; }
+    catch (e) { return null; }
+})();
 const TICKET_MAX_AGE_SKEW_S = 5; // This value is a small clock-skew allowance. This value is not a TTL extension.
 
 if (!SECRET) {
@@ -168,22 +187,19 @@ async function persistRoom(room, doc) {
 
     const value = JSON.stringify({ time: Date.now(), blocks });
 
+    const body = JSON.stringify({
+        serviceToken: mintServiceToken(room),
+        room,
+        fqcn: parsed.fqcn,
+        id: parsed.id,
+        field: parsed.field,
+        locale: parsed.locale,
+        value,
+        baseVersion: lastKnownVersion.get(room) || null,
+    });
+
     try {
-        const res = await fetch(AUTOSAVE_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                serviceToken: mintServiceToken(room),
-                room,
-                fqcn: parsed.fqcn,
-                id: parsed.id,
-                field: parsed.field,
-                locale: parsed.locale,
-                value,
-                baseVersion: lastKnownVersion.get(room) || null,
-            }),
-        });
-        const json = await res.json().catch(() => null);
+        const { status, json } = await postAutosave(body);
 
         // A 409 response still carries the server's current version
         // value. This code adopts that value as the new baseline, in
@@ -196,12 +212,48 @@ async function persistRoom(room, doc) {
         // request.
         if (json && json.version) lastKnownVersion.set(room, json.version);
 
-        if (!res.ok && res.status !== 409) {
-            console.error(`collab relay: persistence POST for room ${room} failed with status ${res.status}`);
+        if (status < 200 || (status >= 300 && status !== 409)) {
+            console.error(`collab relay: persistence POST for room ${room} failed with status ${status}`);
         }
     } catch (e) {
         console.error(`collab relay: persistence POST for room ${room} threw`, e);
     }
+}
+
+// fetch()/undici refuses to send a caller-supplied Host header (see the
+// AUTOSAVE_HOST comment above) - this function uses http.request()
+// instead, which has no such restriction, so AUTOSAVE_URL's internal
+// Docker address can still resolve the real app while carrying the real
+// public Host the app's router expects.
+function postAutosave(body) {
+    return new Promise((resolve, reject) => {
+        const target = new URL(AUTOSAVE_URL);
+        const headers = { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) };
+        if (AUTOSAVE_HOST) {
+            headers['Host'] = AUTOSAVE_HOST;
+            headers['X-Forwarded-Proto'] = 'https';
+        }
+
+        const req = http.request({
+            hostname: target.hostname,
+            port: target.port || 80,
+            path: target.pathname + target.search,
+            method: 'POST',
+            headers,
+        }, (res) => {
+            let raw = '';
+            res.on('data', (chunk) => { raw += chunk; });
+            res.on('end', () => {
+                let json = null;
+                try { json = JSON.parse(raw); } catch (e) { /* non-JSON body */ }
+                resolve({ status: res.statusCode, json });
+            });
+        });
+
+        req.on('error', reject);
+        req.write(body);
+        req.end();
+    });
 }
 
 function schedulePersist(room, doc) {

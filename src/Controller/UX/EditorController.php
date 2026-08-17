@@ -479,7 +479,7 @@ class EditorController extends AbstractController
      * method below for the reason: this action adds no separate
      * per-room check.
      */
-    #[Route("/ux/editorjs/collab-ticket", name:"collabTicket", methods:["POST"])]
+    #[Route("/ux/editorjs/collab-ticket", name:"collabTicket", methods:["POST"], priority: 1)]
     public function CollabTicket(Request $request): JsonResponse
     {
         $vars = json_decode($request->getContent(), true) ?? [];
@@ -548,7 +548,7 @@ class EditorController extends AbstractController
      * CollabTicketFactory::verifyServiceToken(). This method uses the
      * same shared secret as ticket creation.
      */
-    #[Route("/ux/editorjs/autosave", name:"autosave", methods:["POST"])]
+    #[Route("/ux/editorjs/autosave", name:"autosave", methods:["POST"], priority: 1)]
     public function Autosave(Request $request): JsonResponse
     {
         $vars = json_decode($request->getContent(), true) ?? [];
