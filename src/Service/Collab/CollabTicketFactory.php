@@ -3,14 +3,17 @@
 namespace Base\Service\Collab;
 
 /**
- * Mints the short-lived signed ticket a browser presents to the collab
- * relay (collab-relay/src/server.js) to join a room's WebSocket — the relay
- * verifies the signature itself and never talks to PHP/the session store,
- * so this is the only place the shared secret is used on this side.
+ * This class creates a short-lived, signed ticket. A browser presents
+ * this ticket to the collab relay (collab-relay/src/server.js), to join a
+ * room's WebSocket connection. The relay checks the signature by itself.
+ * The relay does not send requests to PHP. The relay does not read the
+ * session store. Because of this, this class is the only place on this
+ * side that uses the shared secret.
  *
- * Wire format — base64url(payload) . "." . hex(hmac_sha256(payload, secret))
- * — was fixed by reading the relay's own verifyTicket() first, not designed
- * independently on each side and hoped to match.
+ * Ticket format: base64url(payload) . "." . hex(hmac_sha256(payload,
+ * secret)). This format matches the relay's own verifyTicket() method
+ * exactly. To confirm this match, read the relay code first. Do not
+ * design each side separately.
  */
 class CollabTicketFactory
 {
@@ -26,10 +29,11 @@ class CollabTicketFactory
     }
 
     /**
-     * A relay may be deployed (secret set) without a public WS URL being
-     * known yet, or vice versa during setup — both are required for
-     * collab_live to actually work, so callers should check this rather
-     * than isConfigured() alone before advertising the feature to a field.
+     * An operator can deploy a relay with a secret value, but with no
+     * public WebSocket URL yet. The opposite case can also occur during
+     * setup. The `collab_live` option needs both values. Because of
+     * this, a caller must check this method before it activates the
+     * `collab_live` option for a field.
      */
     public function isConfigured(): bool
     {
@@ -66,20 +70,22 @@ class CollabTicketFactory
     }
 
     /**
-     * Verifies a service-to-service token the relay signs itself (same
-     * HMAC wire format as mint(), payload {room, exp}, no user fields)
-     * when it calls back into ux_editorjs_autosave to persist a room's
-     * content — there's no Symfony session to reuse for that call since
-     * it originates from the relay process, not a browser, so this reuses
-     * the same shared secret from the other direction instead of a second
-     * one — one secret, symmetric use on both sides.
+     * This method checks a service-to-service token. The relay signs
+     * this token by itself. This token uses the same HMAC format as the
+     * mint() method, with payload {room, exp} and with no user fields.
+     * The relay sends this token when the relay calls
+     * ux_editorjs_autosave, to save a room's content. The relay process
+     * is not a browser. Because of this, no Symfony session exists for
+     * that call. This method reuses the same shared secret from the
+     * other direction, instead of a second secret. This design uses one
+     * secret for symmetric use on both sides.
      */
     public function verifyServiceToken(string $token, string $room): bool
     {
-        // Deliberately not isConfigured(): verifying a service call only
-        // needs the shared secret, not the public wsUrl (which is about
-        // whether collab_live is ready to be *advertised* to a browser —
-        // a different, stricter condition).
+        // This method does not call isConfigured() here. A check of a
+        // service call needs only the shared secret. The public wsUrl
+        // value controls a different, stricter condition: readiness to
+        // advertise the collab_live option to a browser.
         if ($this->secret === "") {
             return false;
         }

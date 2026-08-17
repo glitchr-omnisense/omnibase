@@ -1,21 +1,23 @@
-// Local relay smoke-test page — deliberately NOT using editorjs-yjs (that
-// package doesn't exist yet, see the bundle's collaboration plan, Milestone
-// 3). This exercises the exact same two channels editorjs-yjs will use —
-// a Y.Doc content array over the relay's sync protocol, and
-// provider.awareness for presence — with raw yjs/y-websocket APIs, so it
-// proves the relay itself works independently of any higher-level binding.
+// This file is a local relay smoke-test page. This file does not use
+// the editorjs-yjs package. This file uses two channels directly: a
+// Y.Doc content array, over the relay's synchronization protocol, and
+// provider.awareness, for presence data. This file uses the raw yjs API
+// and the raw y-websocket API. The editorjs-yjs package uses these same
+// two channels. Because of this direct approach, this file proves that
+// the relay works correctly, separate from any higher-level binding.
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 
 const WS_URL = window.COLLAB_DEMO_WS_URL || 'ws://localhost:1234';
 const ROOM = 'demo\\Room:1:content:_';
 
-// Ticket minting normally happens server-side (Base\Service\Collab\
-// CollabTicketFactory, called via ux_editorjs_collabTicket) — there's no
-// PHP here, so this page fakes it in-browser against the SAME dev secret
-// the relay was started with. Never do this outside a local demo: the
-// whole point of the real flow is that only the authenticated Symfony app
-// can mint a valid ticket.
+// Ticket creation normally occurs on the server, through the PHP class
+// Base\Service\Collab\CollabTicketFactory, through the action
+// ux_editorjs_collabTicket. This page has no PHP code. Because of this,
+// this page creates a false ticket instead, inside the browser, against
+// the same dev secret value that started the relay. Do not use this
+// method outside a local demonstration. In the real system, only the
+// authenticated Symfony app can create a valid ticket.
 const DEV_SECRET = window.COLLAB_DEMO_SECRET || 'dev-secret';
 
 function base64url(buf) {

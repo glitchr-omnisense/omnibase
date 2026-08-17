@@ -13,10 +13,12 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 
 /*
- * Real-time collaboration plumbing (autosave conflict guard today, presence
- * and live sync later) for EditorType and, eventually, regular form fields —
- * kept in its own domain file per the "split per domain" convention (see
- * services.php).
+ * This file contains the real-time collaboration services. These
+ * services support EditorType, and also support regular form fields.
+ * Current features: the autosave conflict guard. Future features:
+ * presence data and live synchronization. This file is a separate
+ * domain file. Refer to services.php for the "split per domain"
+ * convention.
  */
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -30,10 +32,12 @@ return static function (ContainerConfigurator $container): void {
             new Reference('doctrine.orm.entity_manager'),
         ]);
 
-    // Empty-string defaults so the container still compiles for apps that
-    // haven't deployed the relay yet — collab_live stays fully opt-in;
-    // CollabTicketFactory::isConfigured() refuses to mint a ticket unless
-    // both are actually set, rather than silently signing with "".
+    // This code sets an empty-string default for each parameter. With
+    // these defaults, the container still compiles for an app with no
+    // deployed relay. The collab_live option stays fully optional. The
+    // CollabTicketFactory::isConfigured() method refuses to create a
+    // ticket unless both values are set. This method does not sign a
+    // ticket silently with an empty value.
     $container->parameters()->set('env(COLLAB_TICKET_SECRET)', '');
     $container->parameters()->set('env(COLLAB_RELAY_WS_URL)', '');
 

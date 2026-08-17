@@ -1,68 +1,105 @@
 # base-bundle collab relay
 
-Auth-gated [y-websocket](https://github.com/yjs/y-websocket) relay for
-glitchr/base-bundle's real-time collaboration feature (`EditorType`'s
-`collab_live` option, and regular fields via `FormTypeCollabExtension`'s
-`collab: "live"`). Content rooms (a non-empty `blocks` Y.Array — i.e.
-EditorJS fields, via `editorjs-yjs`) get their content persisted into the
-app's database on a debounce, via a service-authenticated POST back into
-`ux_editorjs_autosave`. Presence-only rooms (regular fields) never write to
-`blocks`, so this never fires for them — see `persistRoom`/`schedulePersist`
-in `src/server.js`.
+This is an authentication-gated WebSocket relay. The relay makes real-time
+collaboration possible for glitchr/base-bundle. The relay uses the
+[y-websocket](https://github.com/yjs/y-websocket) protocol.
 
-Lives inside the bundle (rather than its own gitlab.glitchr.dev repo) so it
-stays version-locked with whichever bundle version an app has installed, and
-so a consuming app can build it straight out of its `vendor/` checkout with
-no extra registry/repo to manage.
+Two features use the relay:
+- The `collab_live` option of `EditorType`.
+- The `collab: "live"` option of `FormTypeCollabExtension`, for regular
+  fields.
 
-## Why a relay lives here at all
+A content room is a room with data in the `blocks` Y.Array. EditorJS fields
+use content rooms, through the `editorjs-yjs` package. The relay sends the
+content of a content room to the app database. The relay sends this content
+on a timer. The relay sends this content through a service-authenticated
+POST request to `ux_editorjs_autosave`.
 
-Symfony Messenger in this project is Doctrine-transport (DB-polling) only —
-fine for background jobs, unsuitable for sub-second cursor/presence
-broadcast. There's no Mercure/pub-sub infrastructure in this stack either.
-This relay is deliberately small and stateless: an app that never enables
-`collab_live` on any field never needs to deploy it at all.
+A presence room is a room with no data in the `blocks` Y.Array. Regular
+fields use presence rooms. The relay does not send data from a presence
+room to the app database, because the room has no `blocks` data. Refer to
+`persistRoom` and `schedulePersist` in `src/server.js` for this logic.
 
-## Auth model
+This relay is part of the bundle. This relay is not a separate
+gitlab.glitchr.dev repository. Because of this, the relay version stays
+equal to the installed bundle version. Also, an app can build the relay
+directly from its `vendor/` directory. The app does not need a separate
+registry or repository for the relay.
 
-The browser calls `ux_editorjs_collabTicket` (Symfony, session +
-CSRF-protected) to get a short-lived ticket:
+## Why the relay is necessary
 
+In this project, Symfony Messenger uses only the Doctrine transport. The
+Doctrine transport reads the database on a timer. This method is correct
+for background jobs. This method is not correct for presence data or
+cursor data, because these data types need updates in less than one
+second.
+
+This project has no Mercure infrastructure. This project has no other
+publish-subscribe infrastructure.
+
+The relay is small. The relay stores no persistent data of its own. An app
+that does not use the `collab_live` option does not need to deploy the
+relay.
+
+## Authentication method
+
+The browser sends a request to `ux_editorjs_collabTicket`. This request
+uses the Symfony session. This request uses CSRF protection. The response
+contains a ticket. The ticket is valid for a short time only.
+
+The ticket has this format:
 ```
 base64url(json_payload) + "." + hex(hmac_sha256(json_payload, COLLAB_TICKET_SECRET))
 ```
 
-`json_payload` is `{uid, name, avatar, color, room, exp}`. This relay
-verifies the signature and expiry itself — it never talks to PHP or the
-session store — so `COLLAB_TICKET_SECRET` must be the same value on both
-sides. Use a **dedicated** secret, not Symfony's `APP_SECRET`: keeps a
-compromised relay from having any bearing on session/CSRF signing.
+The `json_payload` data has these fields: `uid`, `name`, `avatar`, `color`,
+`room`, `exp`.
 
-A client connects to `wss://<host>/collab/<urlencoded room>?ticket=<ticket>`.
-The relay rejects the upgrade with `401` if the ticket is missing, expired,
-tampered with, or was minted for a different room than the one being joined.
+The relay checks the ticket signature and the ticket expiry time by itself.
+The relay does not send requests to PHP. The relay does not read the
+session store. Because of this, `COLLAB_TICKET_SECRET` must have the same
+value in the app and in the relay.
+
+Use a separate secret for `COLLAB_TICKET_SECRET`. Do not use the Symfony
+`APP_SECRET` value. This keeps session security and CSRF security separate
+from relay security, if an operator compromises the relay.
+
+A client connects to this address:
+`wss://<host>/collab/<urlencoded room>?ticket=<ticket>`.
+
+The relay sends a `401` response and closes the connection in these cases:
+- The ticket is not present.
+- The ticket has expired.
+- The ticket signature is not correct.
+- The ticket is valid for a different room.
 
 ## Environment variables
 
-| Variable                     | Required | Description                                                                                          |
-|--------------------------------|----------|--------------------------------------------------------------------------------------------------------|
-| `COLLAB_TICKET_SECRET`       | yes      | HMAC secret shared with the app's `COLLAB_TICKET_SECRET` env var. Also signs this relay's own service calls into `ux_editorjs_autosave` (see below) — one secret, symmetric use on both sides. |
-| `COLLAB_RELAY_PORT`          | no       | Port to listen on (default `1234`).                                                                  |
-| `COLLAB_AUTOSAVE_URL`        | no       | Full URL to the app's `ux_editorjs_autosave` action (e.g. `http://web/ux/editorjs/autosave`, reachable over the app's internal Docker network — no need to go through the public proxy). Without it, live collaboration still works, but content is never persisted past the in-memory Y.Doc. |
-| `COLLAB_PERSIST_DEBOUNCE_MS` | no       | How long a content room must be quiet before its content is flushed to the database (default `5000`). Also flushed immediately once a room's last client disconnects. |
+| Variable                     | Required | Description |
+|--------------------------------|----------|-------------|
+| `COLLAB_TICKET_SECRET`       | yes      | This is the HMAC secret. The app must use the same secret. The relay also uses this secret to sign its own requests to `ux_editorjs_autosave`. |
+| `COLLAB_RELAY_PORT`          | no       | This is the listen port. The default value is `1234`. |
+| `COLLAB_AUTOSAVE_URL`        | no       | This is the full URL of the app's `ux_editorjs_autosave` action. Example: `http://web/ux/editorjs/autosave`. Use the app's internal Docker network address. Do not use the public proxy address. If this variable is not set, live collaboration still works, but the relay does not save content to the database. |
+| `COLLAB_PERSIST_DEBOUNCE_MS` | no       | This is the wait time, in milliseconds, before the relay saves a quiet content room. The default value is `5000`. The relay also saves a room immediately when the last client disconnects. |
 
-The app side also needs `COLLAB_RELAY_WS_URL` set (the public `wss://` URL
-clients should connect to) — `CollabTicketFactory::isConfigured()` keeps
-`collab_live` silently inert (no ticket minted) until both
-`COLLAB_TICKET_SECRET` and `COLLAB_RELAY_WS_URL` are set on the app side.
+The app also needs the `COLLAB_RELAY_WS_URL` variable. This variable holds
+the public `wss://` address for client connections. The
+`CollabTicketFactory::isConfigured()` method keeps the `collab_live` option
+inactive until the app sets both `COLLAB_TICKET_SECRET` and
+`COLLAB_RELAY_WS_URL`. While the option is inactive, the app does not
+create tickets.
 
-## Deploying alongside the app
+## Deployment with the app
 
-Add a service to the app's `docker-compose.yml` (same shape as the existing
-`search`/`minio` third-party services), on `extranet` since browsers connect
-to it directly (unlike `minio`, which stays `intranet`-only behind the
-proxy) — but it also needs `intranet` to reach the `web` service for the
-persistence bridge:
+Add a service to the app's `docker-compose.yml` file. Use the same format
+as the `search` service and the `minio` service.
+
+Connect the service to the `extranet` network, because browsers connect to
+the relay directly. Do not use only the `intranet` network, as with the
+`minio` service.
+
+Also connect the service to the `intranet` network. The relay needs this
+network to reach the `web` service for the persistence bridge.
 
 ```yaml
   collab:
@@ -78,10 +115,11 @@ persistence bridge:
       - intranet
 ```
 
-Then add a WebSocket-upgrade location to
-`deployments/docker/proxy/conf.d/default.conf`, inside the existing `server
-{ listen 443 ssl ... }` block (it already sets `Upgrade`/`Connection`
-headers server-wide, so this location only needs `proxy_pass`):
+Add a WebSocket-upgrade location to the file
+`deployments/docker/proxy/conf.d/default.conf`. Add this location inside
+the existing `server { listen 443 ssl ... }` block. This block already
+sets the `Upgrade` header and the `Connection` header for all locations.
+Because of this, the new location needs only the `proxy_pass` directive.
 
 ```nginx
     location /collab/ {
@@ -91,8 +129,8 @@ headers server-wide, so this location only needs `proxy_pass`):
     }
 ```
 
-Set `COLLAB_RELAY_WS_URL=wss://<your-host>/collab` and the same
-`COLLAB_TICKET_SECRET` in the app's `.env.local`.
+Set the `COLLAB_RELAY_WS_URL` variable to `wss://<your-host>/collab`. Set
+the same `COLLAB_TICKET_SECRET` value in the app's `.env.local` file.
 
 ## Local development
 
@@ -101,33 +139,56 @@ npm install
 COLLAB_TICKET_SECRET=dev-secret npm start
 ```
 
-`GET /health` returns `200 ok` once the relay is up — useful for the
-Dockerfile's `HEALTHCHECK` and for a quick manual check.
+The `GET /health` request returns a `200 ok` response when the relay is
+active. Use this request for the Dockerfile `HEALTHCHECK` instruction. Use
+this request also for a quick manual check.
 
-## Local demo (relay + browser page, no Symfony app needed)
+## Local demonstration
 
-`docker-compose.yml` in this directory (distinct from the production
-snippet above) runs the relay plus a static demo page in one command:
+This demonstration does not need the Symfony app. This demonstration uses
+only the relay and a browser page.
 
+The file `docker-compose.yml` in this directory starts the relay and a
+static demo page. This file is not the production configuration. Refer to
+the section "Deployment with the app" for the production configuration.
+
+Run this command:
 ```sh
 docker compose up --build
 ```
 
-Then open **http://localhost:8088** — two independent `Y.Doc` +
-`WebsocketProvider` connections to the same room, side by side in one page
-(stands in for two browser tabs/users, "Marco" and "Sasha"). Typing a
-message in one pane appears live in the other, and each pane's presence
-list shows the other user's colored badge — this exercises the exact two
-channels (content sync + awareness) that `editorjs-yjs` will use, using raw
-`yjs`/`y-websocket` client APIs directly rather than that package (which
-doesn't exist yet), so it's a way to confirm/debug the relay in isolation.
+Open this address: http://localhost:8088.
 
-`example/client.js` mints its own ticket in-browser (Web Crypto HMAC)
-against the same `dev-secret` the compose file starts the relay with — a
-stand-in for `ux_editorjs_collabTicket`, which is the only real ticket
-source once the Symfony app is involved. Rebuild the bundle after editing
-`example/client.js` with `npm run example:build` (uses this project's own
-pinned `yjs`/`y-websocket` versions via esbuild, so the demo always matches
-what the relay actually runs).
+The page shows two users, "Marco" and "Sasha". Each user has a separate
+`Y.Doc` object and a separate `WebsocketProvider` connection. Both
+connections use the same room. The two users appear side by side on one
+page. This layout represents two separate browser tabs.
 
-Tear down with `docker compose down`.
+Type a message in one pane. The message appears immediately in the other
+pane. Each pane also shows a colored badge for the other user.
+
+This demonstration uses the content-sync channel and the awareness
+channel. These are the same two channels that the `editorjs-yjs` package
+uses. This demonstration uses the raw `yjs` and `y-websocket` client APIs
+directly. This demonstration does not use the `editorjs-yjs` package. Use
+this demonstration to check the relay by itself.
+
+The file `example/client.js` creates its own ticket inside the browser.
+This file uses the Web Crypto API for the HMAC signature. This file uses
+the same `dev-secret` value as the `docker-compose.yml` file. This method
+is only for this demonstration. When the Symfony app is present,
+`ux_editorjs_collabTicket` is the only correct ticket source.
+
+After a change to `example/client.js`, run this command:
+```sh
+npm run example:build
+```
+
+This command uses esbuild. This command uses the same `yjs` version and
+`y-websocket` version as the relay. Because of this, the demonstration
+always matches the current relay code.
+
+Run this command to stop the demonstration:
+```sh
+docker compose down
+```

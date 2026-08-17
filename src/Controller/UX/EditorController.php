@@ -470,11 +470,14 @@ class EditorController extends AbstractController
     }
 
     /**
-     * Mints the short-lived signed ticket a browser presents to the collab
-     * relay (see collab-relay/ at the bundle root) to join a room's
-     * WebSocket for live presence/collaboration (`collab_live`). Same CSRF
-     * + session trust boundary as this controller's other actions — see
-     * Autosave() below for why no further per-room check is added here.
+     * This action creates a short-lived, signed ticket. A browser
+     * presents this ticket to the collab relay. Refer to the collab-relay/
+     * directory at the bundle root for the relay code. This ticket lets a
+     * client join a room's WebSocket connection, for the `collab_live`
+     * option. This action uses the same CSRF check and session check as
+     * the other actions in this controller. Refer to the Autosave()
+     * method below for the reason: this action adds no separate
+     * per-room check.
      */
     #[Route("/ux/editorjs/collab-ticket", name:"collabTicket", methods:["POST"])]
     public function CollabTicket(Request $request): JsonResponse
@@ -515,28 +518,35 @@ class EditorController extends AbstractController
     }
 
     /**
-     * Optional debounced autosave for `collab_autosave`-enabled EditorType
-     * fields (and, later, `collab`-enabled regular fields) — persists a
-     * single field's value outside of a full form submit, guarded by an
-     * optimistic-concurrency version hash so a stale client never silently
-     * overwrites a value someone else already saved. This action alone
-     * (without any WebSocket relay) is the whole "plain autosave" mode; in
-     * "live" collaboration mode the relay calls this same endpoint instead
-     * of the browser calling it directly.
+     * This action is an optional, debounced autosave method. This action
+     * serves EditorType fields with the `collab_autosave` option. This
+     * action also serves regular fields with the `collab` option. This
+     * action saves one field's value outside a full form submission. This
+     * action uses an optimistic-concurrency version hash. Because of this
+     * hash, a stale client never overwrites a newer saved value silently.
+     * This action, by itself, with no WebSocket relay, is the complete
+     * "plain autosave" mode. In "live" collaboration mode, the relay calls
+     * this same action. In "live" mode, the browser does not call this
+     * action directly.
      *
-     * No bespoke per-entity permission check here, by design: this endpoint
-     * is only reachable by whoever the surrounding form/route already let
-     * in (session auth via this app's normal firewall) plus the same
-     * per-action CSRF token this controller's other actions already
-     * require — it does not introduce a new trust boundary.
+     * This action has no separate per-entity permission check, by design.
+     * A user can reach this action only through a form or a route that
+     * already allowed that user in, through this app's normal firewall
+     * and session system. This action also needs the same per-action CSRF
+     * token as the other actions in this controller. This action creates
+     * no new trust boundary.
      *
-     * Two callers, two auth paths: a browser (collab_autosave — plain
-     * mode, or the fallback path for collab_live) sends the usual
-     * session-scoped "token" (CSRF); the collab relay itself, persisting a
-     * collab_live room's content on its own debounced schedule with no
-     * Symfony session to reuse, sends a "serviceToken" + "room" instead,
-     * verified via CollabTicketFactory::verifyServiceToken() against the
-     * same shared secret used for ticket signing.
+     * This action accepts two callers, through two authentication paths.
+     * A browser sends the usual session-scoped "token" value, for CSRF
+     * protection. A browser uses this path in plain `collab_autosave`
+     * mode. A browser also uses this path as the fallback path in
+     * `collab_live` mode. The collab relay itself uses a different path.
+     * The relay saves a `collab_live` room's content on its own debounced
+     * schedule. The relay has no Symfony session for that call. Because
+     * of this, the relay sends a "serviceToken" value and a "room" value
+     * instead. This action checks these two values through
+     * CollabTicketFactory::verifyServiceToken(). This method uses the
+     * same shared secret as ticket creation.
      */
     #[Route("/ux/editorjs/autosave", name:"autosave", methods:["POST"])]
     public function Autosave(Request $request): JsonResponse
@@ -575,8 +585,9 @@ class EditorController extends AbstractController
             return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Entity not found."], 404);
         }
 
-        // Translatable entities (e.g. Thread/Article content): autosave the
-        // locale-specific translation, not the parent record.
+        // A translatable entity, for example Thread or Article content,
+        // needs the locale-specific translation object here. This action
+        // must not save the value to the parent record.
         $target = ($locale && method_exists($entity, "translate")) ? $entity->translate($locale) : $entity;
         if (!$target) {
             return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Unknown locale."], 400);
@@ -590,10 +601,12 @@ class EditorController extends AbstractController
         $currentValue = $accessor->getValue($target, $field);
         $currentVersion = $this->roomResolver->hash($currentValue);
 
-        // Someone else's save landed since this client last read the field:
-        // reject rather than overwrite, and hand back the current value so
-        // the client can render it as a highlighted restore/suppress choice
-        // instead of losing it silently.
+        // Another save can occur after this client last read the field.
+        // In this case, this action rejects the new value. This action
+        // does not overwrite the newer value. This action also returns
+        // the current value. The client uses this value for a
+        // highlighted restore-or-suppress choice. This method prevents
+        // silent data loss.
         if ($baseVersion && $currentVersion !== $baseVersion) {
             return new JsonResponse([
                 "success"  => self::STATUS_BAD,

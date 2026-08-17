@@ -3,21 +3,29 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 
 // ── Optional live collaboration for regular fields (input/select/select2) ───
-// Reuses the same room/ticket contract as editorjs-yjs's EditorJS binding
-// (ux_editorjs_collabTicket, ux_editorjs_autosave), but doesn't need a
-// content-sync channel at all — a plain field's value isn't collaboratively
-// merged, just its focus state (for the presence badge) and, in "autosave"
-// mode, its value on change (with the same conflict guard EditorType uses).
-// Each collab-enabled field gets its own room (see CollabRoomResolver), so
-// a plain Y.Doc's awareness channel is enough — no Y.Array needed.
+// This code reuses the same room contract and ticket contract as
+// editorjs-yjs's EditorJS binding. This code uses the
+// ux_editorjs_collabTicket action and the ux_editorjs_autosave action.
+// This code needs no content-sync channel. A plain field's value has no
+// collaborative merge. This code tracks only two things: the field's
+// focus state, for the presence badge, and, in "autosave" mode, the
+// field's value on a change event, with the same conflict guard that
+// EditorType uses. Each field with an active collab option receives a
+// separate room. Refer to CollabRoomResolver for the room-key format.
+// Because of this separation, a plain Y.Doc's awareness channel is
+// sufficient. This code needs no Y.Array.
 //
-// Delegated document-level focusin/focusout/change listeners, not
-// per-element binding: this is the only approach that survives
-// form-type-select2.js's destroy-and-rebuild-on-reload (the whole
-// .select2-container is removed and recreated on every load.form_type
-// refire) and any other widget's DOM teardown, without needing an
-// init-guard — there's nothing to double-bind, and target elements are
-// looked up fresh by id at render time rather than cached.
+// This code uses delegated, document-level listeners for the focusin
+// event, the focusout event, and the change event. This code does not
+// bind a listener to each element directly. This method is the only
+// method that survives two conditions. First condition:
+// form-type-select2.js destroys and rebuilds a field on each reload. This
+// process removes and recreates the whole .select2-container element, on
+// each load.form_type event. Second condition: another widget can remove
+// a field's DOM element completely. This delegated method needs no
+// init-guard, because this method binds nothing twice. This method finds
+// each target element fresh, by id, at render time. This method does not
+// use a cached reference.
 
 function json_decode(str) {
     try {
@@ -43,7 +51,8 @@ function fetchTicket(ticketUrl, token, room) {
     });
 }
 
-// room -> { ydoc, provider, users: [{name,color}], fieldId }
+// This object maps each room to a connection record, with this format:
+// { ydoc, provider, users: [{name,color}], fieldId }.
 var connections = {};
 
 function connectPresence(fieldId, room, ticketUrl, token, user) {
@@ -54,7 +63,10 @@ function connectPresence(fieldId, room, ticketUrl, token, user) {
     connections[room] = entry;
 
     fetchTicket(ticketUrl, token, room).then(function (result) {
-        if (!result || connections[room] !== entry) return; // superseded/removed meanwhile
+        // A newer request can replace this entry, or a caller can remove
+        // this entry, before this fetch completes. In that case, this
+        // code stops here.
+        if (!result || connections[room] !== entry) return;
 
         var wsBase = result.wsUrl.replace(/\/+$/, "") + "/collab/";
         var provider = new WebsocketProvider(wsBase, encodeURIComponent(room), ydoc, {
@@ -66,7 +78,8 @@ function connectPresence(fieldId, room, ticketUrl, token, user) {
         provider.awareness.on("change", function () {
             entry.users = [];
             provider.awareness.getStates().forEach(function (state, clientId) {
-                if (clientId === ydoc.clientID) return; // never badge yourself
+                // This code never shows a badge for the local user.
+                if (clientId === ydoc.clientID) return;
                 if (state.focused && state.user) entry.users.push(state.user);
             });
             renderBadge(entry);
@@ -106,10 +119,15 @@ function renderBadge(entry) {
     });
 }
 
-// ── "autosave" mode: same debounced-save + conflict-guard shape as
-// form-type-editor.js's collabAutosave(), reused for a plain field value
-// instead of EditorJS block JSON. ──────────────────────────────────────────
-var autosaveState = {}; // fieldId -> {version, pending, banner}
+// ── "autosave" mode ───────────────────────────────────────────────────────
+// This code uses the same debounced-save shape and the same
+// conflict-guard shape as form-type-editor.js's collabAutosave()
+// function. This code applies that shape to a plain field value, instead
+// of EditorJS block JSON data.
+
+// This object maps each field id to a state record, with this format:
+// {version, pending, banner}.
+var autosaveState = {};
 
 function autosaveField(field) {
     var fieldId = field.id;
@@ -194,17 +212,21 @@ function autosaveField(field) {
     doSave();
 }
 
-// Delegated via jQuery, not native addEventListener, specifically because
-// select2 needs its own "select2:open"/"select2:close" custom events —
-// select2 replaces a field's visible UI with sibling DOM elements (the
-// original <select data-collab-field> stays hidden), so a click/focus on
-// select2's own UI never bubbles a native focusin *through* the tagged
-// element the way it would for a plain <input> — closest() would never
-// find it. select2 fires its custom events directly on the original
-// select (confirmed against form-type-select2.js's own `$(field).select2
-// (...).on("select2:open", ...)` binding), and jQuery's delegated .on()
-// handles both native event bubbling (plain inputs) and this custom-event
-// case uniformly, so one set of handlers covers both.
+// This code uses jQuery delegation, not native addEventListener. This
+// method is necessary for one specific reason: select2 needs its own
+// "select2:open" event and "select2:close" event. select2 replaces a
+// field's visible UI with separate, sibling DOM elements. The original
+// element, <select data-collab-field>, stays hidden. Because of this
+// structure, a click or a focus action on select2's own UI never
+// triggers a native focusin event through the tagged element, in the way
+// that a plain <input> element would. A closest() call would never find
+// the tagged element in this case. select2 sends its custom events
+// directly to the original select element. This behavior is confirmed
+// against form-type-select2.js's own binding:
+// `$(field).select2(...).on("select2:open", ...)`. jQuery's delegated
+// .on() method handles both cases with one set of handlers: native
+// event bubbling, for plain input elements, and this custom-event
+// method, for select2 elements.
 
 function markFocused(field, focused) {
     var room = field.dataset.collabRoom;
@@ -221,7 +243,8 @@ function markFocused(field, focused) {
     if (entry.provider) {
         entry.provider.awareness.setLocalStateField("focused", focused);
     } else if (focused) {
-        // Ticket fetch still in flight — flag once the provider exists.
+        // The ticket fetch is still active. This code sets the flag
+        // after the provider object exists.
         var check = setInterval(function () {
             if (entry.provider) { entry.provider.awareness.setLocalStateField("focused", true); clearInterval(check); }
         }, 100);

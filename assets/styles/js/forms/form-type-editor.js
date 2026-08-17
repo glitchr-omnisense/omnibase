@@ -40,10 +40,12 @@ function randid(length)
     return result;
 }
 
-// ── Optional debounced autosave + conflict guard ─────────────────────────────
-// No WebSocket relay involved here — plain POSTs to ux_editorjs_autosave,
-// gated per-field by EditorType's "collab_autosave" option (off by default).
-// See Base\Controller\UX\EditorController::Autosave() for the server side.
+// ── Optional debounced autosave and conflict guard ───────────────────────────
+// This code uses no WebSocket relay. This code sends plain POST requests
+// to ux_editorjs_autosave. Each field controls this feature through
+// EditorType's "collab_autosave" option. The default value of this
+// option is false. Refer to Base\Controller\UX\EditorController::
+// Autosave() for the server-side code.
 function collabAutosave(editor, holder, collab) {
     if (!collab || !collab.autosave) return null;
 
@@ -53,8 +55,10 @@ function collabAutosave(editor, holder, collab) {
         if (state.banner) { state.banner.remove(); state.banner = null; }
     }
 
-    // Minimal, self-contained conflict UI (no translation catalog wired in
-    // yet — plain text, revisit once this ships beyond a first pass).
+    // This function creates a minimal, self-contained conflict UI. This
+    // code has no connection to a translation catalog yet. This code
+    // uses plain text instead. A future update must add the translation
+    // catalog connection.
     function showConflict(remoteBlocks, remoteVersion) {
         clearBanner();
 
@@ -70,8 +74,10 @@ function collabAutosave(editor, holder, collab) {
         restoreBtn.className = "collab-conflict-banner__restore";
         restoreBtn.textContent = "Restaurer ma version";
         restoreBtn.addEventListener("click", function () {
-            // Keep my local content: explicitly re-save on top of the newer
-            // server version (deliberate overwrite, user-initiated only).
+            // This action keeps the local content. This action saves
+            // the local content again, over the newer server version.
+            // This action is an explicit overwrite. Only a direct user
+            // action can trigger this overwrite.
             state.version = remoteVersion;
             clearBanner();
             doSave();
@@ -82,8 +88,9 @@ function collabAutosave(editor, holder, collab) {
         suppressBtn.className = "collab-conflict-banner__suppress";
         suppressBtn.textContent = "Accepter l'autre version";
         suppressBtn.addEventListener("click", function () {
-            // Accept the incoming remote content: replace local blocks and
-            // resume autosaving on top of it.
+            // This action accepts the incoming remote content. This
+            // action replaces the local blocks with the remote blocks.
+            // Autosave then continues on top of this new content.
             state.version = remoteVersion;
             clearBanner();
             if (remoteBlocks) editor.render(remoteBlocks);
@@ -146,13 +153,18 @@ function collabAutosave(editor, holder, collab) {
 }
 
 // ── Optional live collaboration (editorjs-yjs) ───────────────────────────────
-// Fetches a ticket from ux_editorjs_collabTicket, which is also the only
-// place the actual relay WS URL is learned (Base\Service\Collab\
-// CollabTicketFactory::getWsUrl()) — so the ticket has to be fetched BEFORE
-// the EditorYjs instance (and hence the presence Tune, and hence the
-// EditorJs instance itself) can be constructed. Returns a Promise resolving
-// to {wsUrl, ticket}, or null if collaboration isn't configured server-side
-// (ux_editorjs_collabTicket responds 503 when the relay isn't deployed).
+// This function requests a ticket from ux_editorjs_collabTicket. This
+// action is also the only source of the relay's WebSocket URL. Refer to
+// Base\Service\Collab\CollabTicketFactory::getWsUrl(). Because of this,
+// this code must fetch the ticket before it creates the EditorYjs
+// instance. This order is necessary because the EditorYjs instance
+// creates the presence Tune, and the presence Tune must exist before
+// this code creates the EditorJs instance. This function returns a
+// Promise. This Promise resolves to an object with this format:
+// {wsUrl, ticket}. This Promise resolves to null in one case: the
+// server has no collaboration configuration. In that case, the
+// ux_editorjs_collabTicket action returns a 503 response, because no
+// relay is deployed.
 function fetchCollabTicket(collab) {
     return fetch(collab.ticketUrl, {
         method: "POST",
@@ -282,12 +294,14 @@ function edjs(inputEl, holderId, value = {}, options = {})
         }
     });
 
-    var collab = null; // collabAutosave state, see above
+    var collab = null; // This variable holds the collabAutosave state. Refer to the section above.
 
-    // Live collaboration (editorjs-yjs) needs its ticket fetched — which is
-    // also the only place the relay's WS URL is learned — BEFORE the
-    // presence Tune (and hence the EditorJs instance itself) can be built,
-    // so construction is deferred behind that fetch when collab_live is on.
+    // Live collaboration (editorjs-yjs) needs its ticket fetch to
+    // complete first. This fetch is also the only source of the relay's
+    // WebSocket URL. The presence Tune needs this ticket. The EditorJs
+    // instance needs the presence Tune. Because of this order, this code
+    // delays construction until the fetch completes, when the
+    // collab_live option is active.
     function finishConstruction(collabYjs) {
 
         Object.assign(options, {
@@ -319,8 +333,10 @@ function edjs(inputEl, holderId, value = {}, options = {})
     if (options.collab && options.collab.live && inputEl != undefined) {
         fetchCollabTicket(options.collab).then(function (result) {
             if (!result) {
-                // Relay not configured/reachable — fall back to plain
-                // (non-collaborative) editing rather than failing to load.
+                // The relay has no configuration, or the relay is not
+                // reachable. In this case, this code uses plain,
+                // non-collaborative editing instead. The editor must
+                // still load.
                 finishConstruction(null);
                 return;
             }

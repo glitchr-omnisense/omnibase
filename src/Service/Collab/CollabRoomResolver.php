@@ -5,10 +5,11 @@ namespace Base\Service\Collab;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Shared room-key + version-hash logic for the real-time collaboration
- * feature (autosave conflict guard, and later presence/live sync), used by
- * EditorType, EditorController, and the regular-field presence widget alike
- * so the room-key format and version hashing only exist in one place.
+ * This class supplies room-key logic and version-hash logic for the
+ * real-time collaboration feature. EditorType uses this class.
+ * EditorController uses this class. The regular-field presence widget
+ * uses this class. Because of this shared use, the room-key format and
+ * the hash method exist in one place only.
  */
 class CollabRoomResolver
 {
@@ -20,10 +21,13 @@ class CollabRoomResolver
     }
 
     /**
-     * entity_fqcn:entity_id:field:locale — one room per *field* (an EditorJS
-     * field and a select2 field on the same record are independent rooms).
-     * Locale is always present (placeholder "_") since translatable content
-     * is per-locale and must not bleed presence/conflicts across locales.
+     * The room key has this format: entity_fqcn:entity_id:field:locale.
+     * Each field has one separate room. Example: an EditorJS field and a
+     * select2 field on the same record use two different rooms. The
+     * locale segment is always present. This method uses the placeholder
+     * value "_" for a field with no locale. Translatable content is
+     * specific to one locale. This method must not mix presence data or
+     * conflict data between two locales.
      */
     public function buildRoom(string $fqcn, int|string $id, string $field, ?string $locale = null): string
     {
@@ -31,9 +35,11 @@ class CollabRoomResolver
     }
 
     /**
-     * Root form data isn't always the mapped entity itself (embedded/
-     * collection forms may bind a DTO/wrapper) — returns null rather than
-     * guessing so callers can simply skip collab wiring for that field.
+     * The root form data is not always the mapped entity. An embedded
+     * form or a collection form can bind a separate DTO object or wrapper
+     * object instead. In this case, this method returns null. This
+     * method does not guess the correct entity. When this method returns
+     * null, the caller must skip the collaboration setup for that field.
      */
     public function resolveEntity(mixed $data): ?object
     {
@@ -49,9 +55,11 @@ class CollabRoomResolver
     }
 
     /**
-     * Optimistic-concurrency version stamp for a field's current value —
-     * content hash rather than a timestamp column, since not every entity
-     * has one and this avoids a schema change per entity.
+     * This method creates a version stamp for a field's current value.
+     * This system uses this stamp for optimistic-concurrency control.
+     * This method uses a content hash. This method does not use a
+     * timestamp column, because not every entity has a timestamp column.
+     * This method avoids a database schema change for each entity.
      */
     public function hash(mixed $value): string
     {

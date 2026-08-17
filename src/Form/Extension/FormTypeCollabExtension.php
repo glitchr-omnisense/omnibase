@@ -14,19 +14,25 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 /**
- * Opts any regular field (input/select/select2 — anything, not just
- * EditorType) into the same real-time presence/autosave machinery
- * EditorType uses, via a new `collab` form option: false (default) |
- * "autosave" | "live". Renders plain data-collab-* attributes rather than
- * touching form_div_layout.html.twig — Twig's own widget_attributes
- * rendering already outputs whatever finishView() puts in $view->vars
- * ["attr"], so every field type (including select2_widget's own attr
- * merge) picks these up automatically.
+ * This class activates real-time presence and autosave for any regular
+ * field: an input field, a select field, a select2 field, or another
+ * field type. This class is not specific to EditorType. This class adds
+ * a new `collab` form option, with three possible values: false (the
+ * default value), "autosave", or "live".
  *
- * form-type-collab-presence.js (assets/styles/js/forms/) is the client
- * side, reusing ux_editorjs_collabTicket/ux_editorjs_autosave — the same
- * generic endpoints EditorType uses, per the "one controller" decision in
- * the collaboration plan.
+ * This class writes plain data-collab-* attributes. This class does not
+ * change form_div_layout.html.twig. Twig's own widget_attributes
+ * rendering already outputs the content of $view->vars["attr"], set by
+ * finishView(). Because of this, every field type receives these
+ * attributes automatically, including a field that uses
+ * select2_widget's own attribute merge.
+ *
+ * The file form-type-collab-presence.js, inside
+ * assets/styles/js/forms/, is the client-side code for this feature.
+ * This file reuses the ux_editorjs_collabTicket action and the
+ * ux_editorjs_autosave action. EditorType uses these same two generic
+ * actions. This design follows the "one controller" decision in the
+ * collaboration plan.
  */
 class FormTypeCollabExtension extends AbstractTypeExtension
 {

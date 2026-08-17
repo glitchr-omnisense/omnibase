@@ -70,16 +70,26 @@ class EditorType extends AbstractType
             'placeholder' => $this->translator->trans("@fields.editor.placeholder"),
             "webpack_entry" => "form.editor",
 
-            // Optional, off by default, independently toggleable:
-            //  - collab_autosave: debounced periodic save + optimistic-
-            //    concurrency conflict guard via ux_editorjs_autosave. No
-            //    WebSocket relay involved on its own.
-            //  - collab_live: real-time presence/collaboration via the
-            //    collab relay (collab-relay/ at the bundle root) — mints a
-            //    join ticket via ux_editorjs_collabTicket. Setting this does
-            //    not also require collab_autosave (the relay's own
-            //    persistence bridge covers durable saving once that lands).
-            // See Base\Controller\UX\EditorController::Autosave()/CollabTicket().
+            // These two options are optional. The default value of each
+            // option is false. A form can activate the two options
+            // independently.
+            //
+            // collab_autosave: this option activates a debounced,
+            // periodic save action, through ux_editorjs_autosave. This
+            // option also activates an optimistic-concurrency conflict
+            // guard. This option, by itself, uses no WebSocket relay.
+            //
+            // collab_live: this option activates real-time presence and
+            // real-time collaboration, through the collab relay. Refer to
+            // the collab-relay/ directory at the bundle root for the
+            // relay code. This option creates a join ticket, through
+            // ux_editorjs_collabTicket. This option does not require the
+            // collab_autosave option. The relay's own persistence bridge
+            // provides durable saving for this option.
+            //
+            // Refer to Base\Controller\UX\EditorController::Autosave()
+            // and Base\Controller\UX\EditorController::CollabTicket() for
+            // the related PHP code.
             "collab_autosave" => false,
             "collab_live"     => false,
         ]);
@@ -123,11 +133,13 @@ class EditorType extends AbstractType
         $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
         $data = $this->obfuscator->encode(["token" => $token], ObfuscatorInterface::NO_SHORT);
 
-        // Captured before mediaEnhancer rewrites image block URLs below: the
-        // autosave conflict guard's version hash must match what's actually
-        // stored in the DB (raw origin URLs), not the display-enhanced JSON
-        // sent to the browser, or every save touching an image block would
-        // spuriously look like a conflict.
+        // This code captures the raw value here, before the
+        // mediaEnhancer service changes the image block URLs below. The
+        // autosave conflict guard needs a version hash of the value in
+        // the database, with the raw origin URLs. The guard must not use
+        // a hash of the display-enhanced JSON sent to the browser. If
+        // this code used the wrong value, every save of a block with an
+        // image would show a false conflict.
         $rawValue = $view->vars["value"];
 
         $value = $view->vars["value"];
@@ -154,21 +166,23 @@ class EditorType extends AbstractType
         $view->vars["endpointByThread"]  = $this->router->generate("ux_editorjs_endpointByThread", ["data" => $data]);
         $view->vars["endpointByKeyword"] = $this->router->generate("ux_editorjs_endpointByKeyword", ["data" => $data]);
 
-        // Optional collaboration block — only populated when at least one of
-        // collab_autosave/collab_live is enabled AND the form's root data
-        // resolves to a real mapped entity (embedded/collection forms
-        // binding a DTO instead just get no "collab" key, i.e. plain
-        // non-collaborative behavior).
+        // This code adds the optional "collab" block only in two
+        // conditions. First, the form must activate the collab_autosave
+        // option or the collab_live option. Second, the form's root data
+        // must resolve to a real, mapped entity. An embedded form or a
+        // collection form can bind a separate DTO object instead. In
+        // that case, this code adds no "collab" key. The field then
+        // shows plain, non-collaborative behavior.
         $collabAutosave = $options["collab_autosave"] ?? false;
         $collabLive     = $options["collab_live"] ?? false;
         if ($collabAutosave || $collabLive) {
             $entity = $this->roomResolver->resolveEntity($form->getRoot()->getData());
             if ($entity && method_exists($entity, "getId") && $entity->getId()) {
-                // Locale-tab resolution for translatable content is not yet
-                // wired here — defaults to a single, locale-agnostic room
-                // until the active-locale-tab plumbing is traced (see plan's
-                // open risk #2), so multi-locale forms should not enable
-                // collab_autosave/collab_live until that lands.
+                // This code does not yet resolve the active locale tab
+                // for translatable content. This code uses one
+                // locale-agnostic room instead, until that work is
+                // complete. Because of this limit, a multi-locale form
+                // must not activate collab_autosave or collab_live yet.
                 $locale = $view->vars["locale"] ?? null;
 
                 $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
