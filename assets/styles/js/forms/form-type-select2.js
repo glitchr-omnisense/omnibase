@@ -334,12 +334,17 @@ window.addEventListener("load.form_type", function () {
         var sortable = el.getAttribute("data-select2-sortable") || false;
         if(!select2["multivalue"] && sortable) {
 
-            // Initialize sorting feature
+            // Initialize sorting feature. containment/start/update are real
+            // jQuery UI Sortable options (this is .sortable(), not
+            // SortableJS - ui.item/ui.placeholder and this update()
+            // signature are jQuery UI's API); swapThreshold/animation are
+            // SortableJS-only option names that jQuery UI silently ignores,
+            // apparently copy-pasted from SortableJS's own docs - dropped
+            // rather than left in as dead config that reads as tuning
+            // something it never touched.
             var choices = $(el.nextElementSibling).find("ul.select2-selection__rendered");
                 choices.sortable({
                     containment: 'parent',
-                    swapThreshold: 0.50,
-                    animation: 150,
                     start: function(e, ui){
                         ui.placeholder.height(ui.item.height());
                     },

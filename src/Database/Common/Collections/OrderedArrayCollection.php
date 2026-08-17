@@ -19,9 +19,25 @@ class OrderedArrayCollection extends ArrayCollection
     
     public function __construct(Collection|array $array = [], array $positions = [])
     {
-        if($array instanceof Collection) object_hydrate($this, $array);
-        else parent::__construct($array);
-
+        // Was object_hydrate($this, $array) for the Collection branch: a
+        // raw reflection property copy keyed by NAME between $array and
+        // $this. That works for two instances of compatible classes, but
+        // the one real caller here (OrderColumn::postLoad(), reordering a
+        // freshly loaded association) passes a Doctrine PersistentCollection
+        // - which stores its entries behind its OWN "collection" property,
+        // never one named "elements" (ArrayCollection's own storage) - so
+        // the copy silently matched nothing and this ended up empty right
+        // after construction. toArray() is the real, class-agnostic way to
+        // read any Collection's entries regardless of its internal storage
+        // name; it also forces the PersistentCollection's own lazy
+        // initialize() to run now, before the reflection swap in postLoad()
+        // replaces its wrapped collection - so a later access no longer
+        // re-triggers Doctrine's OWN (unordered) lazy load over top of the
+        // reordered one, which is what silently discarded every drag-to-
+        // reorder on the next page load despite the correct order being
+        // saved (reported live: Tags, Authors, ... reverted to their
+        // original order on reload even though the DB held the new one).
+        parent::__construct($array instanceof Collection ? $array->toArray() : $array);
         $this->positions = $positions;
     }
 
