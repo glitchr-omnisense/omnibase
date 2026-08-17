@@ -1,0 +1,97 @@
+<?php
+
+namespace Base\Service\Model\Wysiwyg;
+
+use DOMDocument;
+
+class LinkEnhancer implements LinkEnhancerInterface
+{
+    /**
+     * Rewrites same-site absolute <a href> links back to relative, leaving
+     * everything else (external links, already-relative paths, anchors,
+     * mailto:/tel:, ...) untouched.
+     *
+     * An editor authoring/pasting a link always bakes in whatever host they
+     * were browsing at the time (EditorJS's built-in inline "link" tool
+     * stores the href verbatim, no normalization) - on this app that means
+     * an absolute https://m.example.org/... URL sits in the stored
+     * content forever, so viewing that same article on
+     * beta.m.example.org (or any other environment sharing the DB)
+     * silently bounces the reader back to production instead of following
+     * the link on the current host (reported live).
+     *
+     * "Same site" is deliberately domain+subdomain, NOT the full host:
+     * AdvancedRouter's own getDomain()/getSubdomain()/getMachine() split
+     * (see parse_url2()) treats "example.org" + "m" as the stable
+     * site identity and "machine" (beta/empty) as the part that legitimately
+     * varies per environment - comparing full hosts would never match beta
+     * against prod, which is exactly the case this exists to fix.
+     */
+    public function enhance(string|array|null $strOrArray, array $attributes = []): string|array|null
+    {
+        if (!$strOrArray) {
+            return $strOrArray;
+        }
+
+        $array = $strOrArray;
+        if (!is_array($array)) {
+            $array = [$array];
+        }
+
+        $current = parse_url2(get_url());
+        $currentDomain = $current["domain"] ?? null;
+        $currentSubdomain = $current["subdomain"] ?? null;
+
+        foreach ($array as &$entry) {
+
+            if (!$entry || !is_string($entry) || !str_contains($entry, "<a")) {
+                continue;
+            }
+
+            $encoding = mb_detect_encoding($entry);
+            $dom = new DOMDocument('1.0', $encoding);
+            $dom->loadHTML(mb_convert_encoding($entry, 'UTF-8', $encoding), LIBXML_NOERROR);
+
+            $tags = $dom->getElementsByTagName("a");
+            if (count($tags) < 1) {
+                continue;
+            }
+
+            foreach (iterator_to_array($tags) as $tag) {
+
+                $href = $tag->getAttribute("href");
+
+                // Only a fully-qualified absolute URL is a candidate - an
+                // already-relative path, an anchor-only "#..." href, or a
+                // mailto:/tel: link has nothing to relativize.
+                if (!$href || !str_contains($href, "://")) {
+                    continue;
+                }
+
+                $link = parse_url2($href);
+                if (!$link || ($link["domain"] ?? null) === null) {
+                    continue;
+                }
+
+                if ($link["domain"] !== $currentDomain || ($link["subdomain"] ?? null) !== $currentSubdomain) {
+                    continue; // genuinely external - leave absolute
+                }
+
+                $relative = $link["path"] ?? "/";
+                if (!empty($link["query"])) {
+                    $relative .= "?" . $link["query"];
+                }
+                if (!empty($link["fragment"])) {
+                    $relative .= "#" . $link["fragment"];
+                }
+
+                $tag->setAttribute("href", $relative);
+            }
+
+            $node = $dom->getElementsByTagName('body')->item(0);
+            $entry = trim(implode(array_map([$node->ownerDocument, "saveHTML"], iterator_to_array($node->childNodes))));
+        }
+
+        return is_array($strOrArray) ? $array : first($array);
+    }
+}

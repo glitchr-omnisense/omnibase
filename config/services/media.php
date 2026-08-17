@@ -203,6 +203,10 @@ return static function (ContainerConfigurator $container): void {
             new Reference('obfuscator'),
         ]);
 
+    $services->set('Base\Service\Model\Wysiwyg\LinkEnhancer')
+        ->public()
+        ->tag('twig.runtime');
+
     $services->set('Base\Service\Model\Wysiwyg\MediaEnhancer')
         ->public()
         ->tag('twig.runtime')
@@ -227,6 +231,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('heading_enhancer'),
             new Reference('semantic_enhancer'),
             new Reference('mention_enhancer'),
+            new Reference('Base\Service\Model\Wysiwyg\LinkEnhancer'),
             new Reference('media_enhancer'),
         ]);
 

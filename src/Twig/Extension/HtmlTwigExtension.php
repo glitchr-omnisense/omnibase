@@ -50,7 +50,8 @@ final class HtmlTwigExtension extends AbstractExtension
         }
         
         $htmlOrJson = $enhancer->enhanceMentions($htmlOrJson);
-        
+        $htmlOrJson = $enhancer->enhanceLinks($htmlOrJson);
+
         $applySemantics = array_pop_key('semantics', $options) ?? false;
         if ($applySemantics) {
             $htmlOrJson = $enhancer->enhanceSemantics($htmlOrJson);

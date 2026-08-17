@@ -86,7 +86,20 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         foreach (json_leaves($json) as &$block) {
             $block = $this->mentionEnhancer->enhance($block, $attrs);
         }
-        
+
+        return json_encode($json);
+    }
+
+    public function enhanceLinks(mixed $json, array $attrs = []): mixed
+    {
+        if (is_string($json)) {
+            $json = json_decode($json, true);
+        }
+
+        foreach (json_leaves($json) as &$block) {
+            $block = $this->linkEnhancer->enhance($block, $attrs);
+        }
+
         return json_encode($json);
     }
 

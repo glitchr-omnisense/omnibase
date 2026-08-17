@@ -5,6 +5,7 @@ namespace Base\Service;
 use Base\Imagine\FilterInterface;
 use Base\Service\Model\Wysiwyg\HeadingEnhancerInterface;
 use Base\Service\Model\Wysiwyg\MentionEnhancerInterface;
+use Base\Service\Model\Wysiwyg\LinkEnhancerInterface;
 use Base\Service\Model\Wysiwyg\SemanticEnhancerInterface;
 use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
 use Base\Twig\Environment;
@@ -32,15 +33,21 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
     protected $mentionEnhancer;
 
     /**
+     * @var LinkEnhancerInterface
+     */
+    protected $linkEnhancer;
+
+    /**
      * @var MediaEnhancerInterface
      */
     protected $mediaEnhancer;
 
     public function __construct(
-        Environment $twig, 
-        HeadingEnhancerInterface $headingEnhancer, 
-        SemanticEnhancerInterface $semanticEnhancer, 
-        MentionEnhancerInterface $mentionEnhancer, 
+        Environment $twig,
+        HeadingEnhancerInterface $headingEnhancer,
+        SemanticEnhancerInterface $semanticEnhancer,
+        MentionEnhancerInterface $mentionEnhancer,
+        LinkEnhancerInterface $linkEnhancer,
         MediaEnhancerInterface $mediaEnhancer)
     {
         $this->twig = $twig;
@@ -48,6 +55,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         $this->headingEnhancer = $headingEnhancer;
         $this->semanticEnhancer = $semanticEnhancer;
         $this->mentionEnhancer = $mentionEnhancer;
+        $this->linkEnhancer = $linkEnhancer;
         $this->mediaEnhancer = $mediaEnhancer;
     }
 
@@ -136,6 +144,25 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
         }
 
         return $this->mentionEnhancer->enhance($html, $attrs);
+    }
+
+    public function enhanceLinks(mixed $html, array $attrs = []): mixed
+    {
+        if ($html === null) {
+            return null;
+        }
+
+        if (is_array($html)) {
+
+            $htmlRet = [];
+            foreach ($html as $htmlEntry) {
+                $htmlRet[] = $this->enhanceLinks($htmlEntry, $attrs);
+            }
+
+            return $htmlRet;
+        }
+
+        return $this->linkEnhancer->enhance($html, $attrs);
     }
 
     public function enhanceMedia(mixed $html, array $config = [], FilterInterface|array $filters = [], array $attrs = []): mixed
