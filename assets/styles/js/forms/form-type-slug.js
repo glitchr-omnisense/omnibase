@@ -197,6 +197,18 @@ window.addEventListener("load.form_type", function () {
 
             document.querySelectorAll("[data-slug-target]").forEach((function (e) {
 
+                // "load.form_type" is dispatched globally on every lazy load
+                // (a collection's "load more" elsewhere on the page, ...),
+                // and this querySelectorAll is unscoped - without this
+                // guard, every re-fire built a whole SECOND Slugger for the
+                // same field: another readonly/lock button listener, another
+                // set of input/change/keyup listeners, each instance
+                // tracking its OWN `locked` boolean independently of the
+                // real DOM state. Same class of bug already found and fixed
+                // for flatpickr in form-type-datetimepicker.js.
+                if (e.dataset.sluggerInitialized) return;
+                e.dataset.sluggerInitialized = "1";
+
                 // On slug change
                 var slugger = new i(e);
                 if(!slugger.target)

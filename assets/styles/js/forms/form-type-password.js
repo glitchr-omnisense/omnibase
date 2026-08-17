@@ -2,6 +2,18 @@ window.addEventListener("load.form_type", function () {
 
     document.querySelectorAll("[data-password-field]").forEach(function (el) {
 
+        // "load.form_type" is dispatched globally on every lazy load (a
+        // collection's "load more" elsewhere on the page, ...), and this
+        // querySelectorAll is unscoped - without this guard, every re-fire
+        // added another `revealer.on("click", ...)` handler that toggles
+        // the field's type based on its CURRENT state; with two stacked
+        // handlers a single click flips the type twice in the same
+        // synchronous pass, so the show/hide-password button silently
+        // becomes a no-op. Same class of bug already found and fixed for
+        // flatpickr in form-type-datetimepicker.js.
+        if (el.dataset.passwordInitialized) return;
+        el.dataset.passwordInitialized = "1";
+
         var id = el.getAttribute("data-password-field");
 
         var plainPassword = $("#"+id+"_plain");

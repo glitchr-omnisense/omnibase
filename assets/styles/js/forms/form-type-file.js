@@ -364,7 +364,17 @@ window.addEventListener("load.form_type", function () {
             if (editor === undefined)
                 editor = new Dropzone("#"+id+"_dropzone", dropzone);
 
-            if(sortable)
+            // "load.form_type" is dispatched globally on every lazy load (a
+            // collection's "load more" elsewhere on the page, ...), and this
+            // querySelectorAll is unscoped. The Dropzone construction just
+            // above is already guarded (`dropzoneEl[0].dropzone` check), but
+            // this Sortable one wasn't - every re-fire stacked another
+            // SortableJS instance (its own drag handlers) on the same
+            // dropzone container. Sortable.get() is the library's own
+            // "already attached?" check, same idea as flatpickr's
+            // `element._flatpickr` used in form-type-datetimepicker.js for
+            // the same class of bug.
+            if(sortable && !Sortable.get(document.getElementById(id+'_dropzone')))
                 var sortable = new Sortable(document.getElementById(id+'_dropzone'), {draggable: '.dz-preview'});
 
         } else {

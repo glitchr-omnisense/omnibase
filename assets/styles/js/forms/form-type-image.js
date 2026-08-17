@@ -19,6 +19,22 @@ window.addEventListener("load.form_type", function () {
 
     document.querySelectorAll("[data-image-field]").forEach((function (el) {
 
+        // "load.form_type" is dispatched globally on every lazy load (a
+        // collection's "load more" elsewhere on the page, form-type-array's
+        // own re-dispatch, ...), and this querySelectorAll is unscoped, so
+        // every re-fire re-ran this whole block - including a SECOND
+        // `.on('shown.bs.modal', ...)`/`.on('hidden.bs.modal', ...)` pair -
+        // on an already-initialized field. Opening the crop modal then ran
+        // `new Cropper(...)` twice on the same <img>, and closing it raced
+        // two `imageCropper.destroy()` calls over the same DOM/instance -
+        // the exact failure signature already fixed in
+        // form-type-datetimepicker.js for flatpickr. Cropper/Dropzone-style
+        // libraries mark themselves on their own element once initialized;
+        // this field has no such library-provided marker to reuse, so it's
+        // flagged explicitly instead.
+        if (el.dataset.imageInitialized) return;
+        el.dataset.imageInitialized = "1";
+
         var id              = el.getAttribute("data-image-field");
         var thumbnail       = el.getAttribute("data-image-thumbnail");
         var ajaxUrl         = el.getAttribute("data-image-ajax");

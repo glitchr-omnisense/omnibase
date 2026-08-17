@@ -17,9 +17,20 @@ window.addEventListener("load.form_type", function () {
         var placeholder = el.getAttribute("data-wysiwyg-placeholder");
         var placeholderHTML = el.getAttribute("data-wysiwyg-placeholder");
 
+        // "load.form_type" is dispatched globally on every lazy load (a
+        // collection's "load more" elsewhere on the page, ...), and this
+        // querySelectorAll is unscoped, so a re-fire used to run this whole
+        // block again on an already-initialized editor. The old code only
+        // removed the STALE TOOLBAR here ("avoid toolbar duplication") and
+        // then fell straight through to `new Quill(...)` again a few lines
+        // down anyway - a second Quill instance bound to the same
+        // container, with its own `.ql-editor` surface and its own
+        // 'text-change' listener both writing to the same hidden input.
+        // Skipping the whole re-init (not just the toolbar remnant) is the
+        // actual fix - same class of bug already found and fixed for
+        // flatpickr in form-type-datetimepicker.js.
         var editorId = id+"_editor";
-        if ($('#'+editorId).hasClass("ql-container")) // Quill editor already loaded (avoid toolbar duplication)
-            $('#'+editorId).parent().find(".ql-toolbar").remove();
+        if ($('#'+editorId).hasClass("ql-container")) return;
 
         var disableHTML = false;
         var Delta = Quill.import('delta');
