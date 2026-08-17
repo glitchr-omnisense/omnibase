@@ -17,7 +17,7 @@ import Header from 'editorjs-header';
 import Paragraph from 'editorjs-paragraph';
 import Mention from 'editorjs-mention';
 import {ImageTool, ImageToolTune} from 'editorjs-image';
-// import YTool from 'y-editorjs';
+import EditorYjs from 'editorjs-yjs';
 
 function json_decode(str) {
     try {
@@ -38,6 +38,135 @@ function randid(length)
       counter += 1;
     }
     return result;
+}
+
+// ── Optional debounced autosave + conflict guard ─────────────────────────────
+// No WebSocket relay involved here — plain POSTs to ux_editorjs_autosave,
+// gated per-field by EditorType's "collab_autosave" option (off by default).
+// See Base\Controller\UX\EditorController::Autosave() for the server side.
+function collabAutosave(editor, holder, collab) {
+    if (!collab || !collab.autosave) return null;
+
+    var state = { version: collab.version || null, timer: null, pending: false, banner: null };
+
+    function clearBanner() {
+        if (state.banner) { state.banner.remove(); state.banner = null; }
+    }
+
+    // Minimal, self-contained conflict UI (no translation catalog wired in
+    // yet — plain text, revisit once this ships beyond a first pass).
+    function showConflict(remoteBlocks, remoteVersion) {
+        clearBanner();
+
+        var banner = document.createElement("div");
+        banner.className = "collab-conflict-banner";
+
+        var text = document.createElement("span");
+        text.className = "collab-conflict-banner__text";
+        text.textContent = "Ce contenu a été modifié par quelqu'un d'autre depuis votre dernière lecture.";
+
+        var restoreBtn = document.createElement("button");
+        restoreBtn.type = "button";
+        restoreBtn.className = "collab-conflict-banner__restore";
+        restoreBtn.textContent = "Restaurer ma version";
+        restoreBtn.addEventListener("click", function () {
+            // Keep my local content: explicitly re-save on top of the newer
+            // server version (deliberate overwrite, user-initiated only).
+            state.version = remoteVersion;
+            clearBanner();
+            doSave();
+        });
+
+        var suppressBtn = document.createElement("button");
+        suppressBtn.type = "button";
+        suppressBtn.className = "collab-conflict-banner__suppress";
+        suppressBtn.textContent = "Accepter l'autre version";
+        suppressBtn.addEventListener("click", function () {
+            // Accept the incoming remote content: replace local blocks and
+            // resume autosaving on top of it.
+            state.version = remoteVersion;
+            clearBanner();
+            if (remoteBlocks) editor.render(remoteBlocks);
+        });
+
+        banner.appendChild(text);
+        banner.appendChild(restoreBtn);
+        banner.appendChild(suppressBtn);
+
+        holder.parentNode.insertBefore(banner, holder);
+        state.banner = banner;
+    }
+
+    function scheduleSave() {
+        if (state.timer) clearTimeout(state.timer);
+        state.timer = setTimeout(doSave, 4000);
+    }
+
+    function doSave() {
+        if (state.pending) return;
+        state.pending = true;
+
+        editor.save().then(function (savedData) {
+            var body = JSON.stringify({
+                token: collab.token,
+                fqcn: collab.fqcn,
+                id: collab.id,
+                field: collab.field,
+                locale: collab.locale,
+                value: JSON.stringify(savedData),
+                baseVersion: state.version,
+            });
+
+            fetch(collab.autosaveUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
+                body: body,
+            }).then(function (res) {
+                return res.json().then(function (json) { return { status: res.status, json: json }; });
+            }).then(function (result) {
+                state.pending = false;
+
+                if (result.status === 409 && result.json && result.json.conflict) {
+                    showConflict(json_decode(result.json.value), result.json.version);
+                    return;
+                }
+
+                if (result.json && result.json.version) {
+                    state.version = result.json.version;
+                    clearBanner();
+                }
+            }).catch(function () {
+                state.pending = false;
+            });
+        });
+    }
+
+    return { scheduleSave: scheduleSave };
+}
+
+// ── Optional live collaboration (editorjs-yjs) ───────────────────────────────
+// Fetches a ticket from ux_editorjs_collabTicket, which is also the only
+// place the actual relay WS URL is learned (Base\Service\Collab\
+// CollabTicketFactory::getWsUrl()) — so the ticket has to be fetched BEFORE
+// the EditorYjs instance (and hence the presence Tune, and hence the
+// EditorJs instance itself) can be constructed. Returns a Promise resolving
+// to {wsUrl, ticket}, or null if collaboration isn't configured server-side
+// (ux_editorjs_collabTicket responds 503 when the relay isn't deployed).
+function fetchCollabTicket(collab) {
+    return fetch(collab.ticketUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ token: collab.token, room: collab.room }),
+    }).then(function (res) {
+        return res.json().then(function (json) {
+            if (!res.ok || !json.success || !json.ticket) return null;
+            return { wsUrl: json.wsUrl, ticket: json.ticket };
+        });
+    }).catch(function () {
+        return null;
+    });
 }
 
 $(window).off("DOMContentLoaded.edjs");
@@ -90,12 +219,7 @@ function edjs(inputEl, holderId, value = {}, options = {})
                 inlineToolbar: true,
             },
 
-            // collaborative: {
-            //     class: YTool,
-            //     inlineToolbar: true,
-            // }, 
-            
-            mention: { 
+            mention: {
 
                 class: Mention,
                 config: {
@@ -158,25 +282,65 @@ function edjs(inputEl, holderId, value = {}, options = {})
         }
     });
 
-    Object.assign(options, {
+    var collab = null; // collabAutosave state, see above
 
-        holder  : holderId, 
-        onReady : () => { 
-            if(data == undefined && value != '') editor.blocks.renderFromHTML(value);
-            // if(inputEl != undefined) new Undo({ editor }); // issue 
+    // Live collaboration (editorjs-yjs) needs its ticket fetched — which is
+    // also the only place the relay's WS URL is learned — BEFORE the
+    // presence Tune (and hence the EditorJs instance itself) can be built,
+    // so construction is deferred behind that fetch when collab_live is on.
+    function finishConstruction(collabYjs) {
 
-            if(options.readOnly ?? false) {
-                $("#" + holderId).children(".codex-editor").addClass("read-only");
+        Object.assign(options, {
+
+            holder  : holderId,
+            onReady : () => {
+                if(data == undefined && value != '') editor.blocks.renderFromHTML(value);
+                // if(inputEl != undefined) new Undo({ editor }); // issue
+
+                if(options.readOnly ?? false) {
+                    $("#" + holderId).children(".codex-editor").addClass("read-only");
+                }
+
+                if (inputEl != undefined) collab = collabAutosave(editor, holder, options.collab);
+                if (collabYjs) collabYjs.attach(editor, holderId);
+            },
+            onChange: async (api, event) => {
+
+                if(options.readOnly) return;
+                editor.save().then(onSave);
+                if (collab) collab.scheduleSave();
+                if (collabYjs) collabYjs.onChange(api, event);
             }
-        },
-        onChange: async (api, event) => {
+        });
 
-            if(options.readOnly) return;
-            editor.save().then(onSave); 
-        }
-    });
+        var editor = new EditorJs(options);
+    }
 
-    var editor = new EditorJs(options);
+    if (options.collab && options.collab.live && inputEl != undefined) {
+        fetchCollabTicket(options.collab).then(function (result) {
+            if (!result) {
+                // Relay not configured/reachable — fall back to plain
+                // (non-collaborative) editing rather than failing to load.
+                finishConstruction(null);
+                return;
+            }
+
+            var collabYjs = new EditorYjs({
+                wsUrl: result.wsUrl,
+                room: options.collab.room,
+                ticket: result.ticket,
+                getTicket: () => fetchCollabTicket(options.collab).then(function (r) { return r ? r.ticket : null; }),
+                user: options.collab.user || undefined,
+            });
+
+            options.tools.presence = { class: collabYjs.Tune };
+            options.tunes = (options.tunes || []).concat(['presence']);
+
+            finishConstruction(collabYjs);
+        });
+    } else {
+        finishConstruction(null);
+    }
 }
 
 window.addEventListener("load.form_type", function (el) {

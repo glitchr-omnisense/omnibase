@@ -5,6 +5,9 @@
 .swp
 node_modules
 package-lock.json
+# collab-relay is its own npm project (not yarn), independent of the
+# bundle's own package manager choice above — its lockfile is intentional.
+!collab-relay/package-lock.json
 yarn.lock
 yarn-error.log
 .DS_Store

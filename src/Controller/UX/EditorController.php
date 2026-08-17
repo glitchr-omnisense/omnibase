@@ -8,12 +8,15 @@ use App\Repository\UserRepository;
 use Base\Enum\UserRole;
 use Base\Repository\Thread\TagRepository;
 use Base\Repository\ThreadRepository;
+use Base\Service\Collab\CollabRoomResolver;
+use Base\Service\Collab\CollabTicketFactory;
 use Base\Traits\BaseTrait;
 use Base\Service\FlysystemInterface;
 use Base\Service\MediaServiceInterface;
 use Base\Service\Model\LinkableInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -107,7 +110,17 @@ class EditorController extends AbstractController
      */
     protected SluggerInterface $slugger;
 
-    public function __construct(ParameterBagInterface $parameterBag, SluggerInterface $slugger, MediaServiceInterface $mediaService, FlysystemInterface $flysystem, TranslatorInterface $translator, RequestStack $requestStack, PaginatorInterface $paginator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository, TagRepository $tagRepository, ?Profiler $profiler = null)
+    /**
+     * @var CollabRoomResolver
+     */
+    protected CollabRoomResolver $roomResolver;
+
+    /**
+     * @var CollabTicketFactory
+     */
+    protected CollabTicketFactory $ticketFactory;
+
+    public function __construct(ParameterBagInterface $parameterBag, SluggerInterface $slugger, MediaServiceInterface $mediaService, FlysystemInterface $flysystem, TranslatorInterface $translator, RequestStack $requestStack, PaginatorInterface $paginator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository, TagRepository $tagRepository, CollabRoomResolver $roomResolver, CollabTicketFactory $ticketFactory, ?Profiler $profiler = null)
     {
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;
@@ -121,6 +134,8 @@ class EditorController extends AbstractController
         $this->threadRepository   = $threadRepository;
         $this->tagRepository = $tagRepository;
         $this->userRepository     = $userRepository;
+        $this->roomResolver       = $roomResolver;
+        $this->ticketFactory      = $ticketFactory;
 
         $this->mimeTypes = new MimeTypes();
         $this->profiler = $profiler;
@@ -452,5 +467,148 @@ class EditorController extends AbstractController
         unlink($file->getRealPath());
 
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
+    }
+
+    /**
+     * Mints the short-lived signed ticket a browser presents to the collab
+     * relay (see collab-relay/ at the bundle root) to join a room's
+     * WebSocket for live presence/collaboration (`collab_live`). Same CSRF
+     * + session trust boundary as this controller's other actions — see
+     * Autosave() below for why no further per-room check is added here.
+     */
+    #[Route("/ux/editorjs/collab-ticket", name:"collabTicket", methods:["POST"])]
+    public function CollabTicket(Request $request): JsonResponse
+    {
+        $vars = json_decode($request->getContent(), true) ?? [];
+
+        $token = $vars["token"] ?? null;
+        if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
+            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 500);
+        }
+
+        $room = $vars["room"] ?? null;
+        if (!$room) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Missing room."], 400);
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Not authenticated."], 403);
+        }
+
+        if (!$this->ticketFactory->isConfigured()) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Collaboration relay is not configured."], 503);
+        }
+
+        $ticket = $this->ticketFactory->mint($room, [
+            "id"     => $user->getId(),
+            "name"   => (string) $user,
+            "avatar" => $user->getAvatar(),
+            "color"  => $user->getColor(),
+        ]);
+
+        return new JsonResponse([
+            "success" => self::STATUS_OK,
+            "ticket"  => $ticket,
+            "wsUrl"   => $this->ticketFactory->getWsUrl(),
+        ]);
+    }
+
+    /**
+     * Optional debounced autosave for `collab_autosave`-enabled EditorType
+     * fields (and, later, `collab`-enabled regular fields) — persists a
+     * single field's value outside of a full form submit, guarded by an
+     * optimistic-concurrency version hash so a stale client never silently
+     * overwrites a value someone else already saved. This action alone
+     * (without any WebSocket relay) is the whole "plain autosave" mode; in
+     * "live" collaboration mode the relay calls this same endpoint instead
+     * of the browser calling it directly.
+     *
+     * No bespoke per-entity permission check here, by design: this endpoint
+     * is only reachable by whoever the surrounding form/route already let
+     * in (session auth via this app's normal firewall) plus the same
+     * per-action CSRF token this controller's other actions already
+     * require — it does not introduce a new trust boundary.
+     *
+     * Two callers, two auth paths: a browser (collab_autosave — plain
+     * mode, or the fallback path for collab_live) sends the usual
+     * session-scoped "token" (CSRF); the collab relay itself, persisting a
+     * collab_live room's content on its own debounced schedule with no
+     * Symfony session to reuse, sends a "serviceToken" + "room" instead,
+     * verified via CollabTicketFactory::verifyServiceToken() against the
+     * same shared secret used for ticket signing.
+     */
+    #[Route("/ux/editorjs/autosave", name:"autosave", methods:["POST"])]
+    public function Autosave(Request $request): JsonResponse
+    {
+        $vars = json_decode($request->getContent(), true) ?? [];
+
+        $token = $vars["token"] ?? null;
+        $serviceToken = $vars["serviceToken"] ?? null;
+        $room = $vars["room"] ?? null;
+
+        $authorized = ($token && $this->isCsrfTokenValid("editorjs", $token))
+            || ($serviceToken && $room && $this->ticketFactory->verifyServiceToken($serviceToken, $room));
+
+        if (!$authorized) {
+            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 500);
+        }
+
+        $fqcn        = $vars["fqcn"]        ?? null;
+        $id          = $vars["id"]          ?? null;
+        $field       = $vars["field"]       ?? null;
+        $locale      = $vars["locale"]      ?? null;
+        $value       = $vars["value"]       ?? null;
+        $baseVersion = $vars["baseVersion"] ?? null;
+
+        if (!$fqcn || !$id || !$field || !class_exists($fqcn)) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Invalid autosave target."], 400);
+        }
+
+        $em = $this->getEntityManager();
+        if (!$em || $em->getMetadataFactory()->isTransient($fqcn)) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Invalid autosave target."], 400);
+        }
+
+        $entity = $em->find($fqcn, $id);
+        if (!$entity) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Entity not found."], 404);
+        }
+
+        // Translatable entities (e.g. Thread/Article content): autosave the
+        // locale-specific translation, not the parent record.
+        $target = ($locale && method_exists($entity, "translate")) ? $entity->translate($locale) : $entity;
+        if (!$target) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Unknown locale."], 400);
+        }
+
+        $accessor = PropertyAccess::createPropertyAccessor();
+        if (!$accessor->isReadable($target, $field) || !$accessor->isWritable($target, $field)) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Unknown field."], 400);
+        }
+
+        $currentValue = $accessor->getValue($target, $field);
+        $currentVersion = $this->roomResolver->hash($currentValue);
+
+        // Someone else's save landed since this client last read the field:
+        // reject rather than overwrite, and hand back the current value so
+        // the client can render it as a highlighted restore/suppress choice
+        // instead of losing it silently.
+        if ($baseVersion && $currentVersion !== $baseVersion) {
+            return new JsonResponse([
+                "success"  => self::STATUS_BAD,
+                "conflict" => true,
+                "value"    => $currentValue,
+                "version"  => $currentVersion,
+            ], 409);
+        }
+
+        $accessor->setValue($target, $field, $value);
+        $em->flush();
+
+        return new JsonResponse([
+            "success" => self::STATUS_OK,
+            "version" => $this->roomResolver->hash($value),
+        ]);
     }
 }

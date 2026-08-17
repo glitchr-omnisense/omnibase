@@ -5,6 +5,7 @@ import './styles/js/form.js';
 import './styles/js/forms/form-type-button.js';
 import './styles/js/forms/form-type-attribute.js';
 import './styles/js/forms/form-type-boolean.js';
+import './styles/js/forms/form-type-collab-presence.js';
 import './styles/js/forms/form-type-collection.js';
 import './styles/js/forms/form-type-money.js';
 import './styles/js/forms/form-type-number.js';

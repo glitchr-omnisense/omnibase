@@ -109,6 +109,8 @@ return function (ContainerConfigurator $configurator) {
             new Reference('security.csrf.token_manager'),
             new Reference('obfuscator'),
             new Reference('media_enhancer'),
+            new Reference('Base\Service\Collab\CollabRoomResolver'),
+            new Reference('security.token_storage'),
         ]);
     $services->set('Base\Field\Type\MoneyType')
         ->tag('form.type')

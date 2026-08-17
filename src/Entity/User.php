@@ -395,6 +395,20 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
         return $this;
     }
 
+    #[ORM\Column(type:"string", length:7, nullable:true)]
+    protected $color;
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(?string $color): self
+    {
+        $this->color = $color;
+        return $this;
+    }
+
     #[ORM\Column(type:"string", length:16, nullable:true)]
     #[Assert\Locale(canonicalize: true)]
     protected $locale;

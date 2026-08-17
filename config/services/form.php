@@ -70,6 +70,15 @@ return static function (ContainerConfigurator $container): void {
         ->tag('form.type_extension')
         ->args([new Reference('base.database.metadata_manipulator')]);
 
+    $services->set('Base\Form\Extension\FormTypeCollabExtension')
+        ->tag('form.type_extension')
+        ->args([
+            new Reference('Base\Service\Collab\CollabRoomResolver'),
+            new Reference('security.token_storage'),
+            new Reference('security.csrf.token_manager'),
+            new Reference('advanced_router'),
+        ]);
+
     // ------------------------------
     // Validators
     // ------------------------------
