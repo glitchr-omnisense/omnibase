@@ -41,6 +41,12 @@ profile:
     registered: "Registered on {0} at {1}"
     edit: "Edit my profile"
     last_seen: "Last seen on {0} at {1}"
+    online: "Online"
+    recentlyActive: "Recently active"
+    threads: "posts"
+    likes: "likes"
+    member: "Member"
+    logout: "Sign out"
 
 logout:
     title: "Log out"

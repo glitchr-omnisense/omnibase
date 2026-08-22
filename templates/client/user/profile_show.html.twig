@@ -14,7 +14,7 @@
             <div class="text d-flex flex-column">
 
                 <h1>
-                    Membre #{{ user.id }}: {{ user }}
+                    {{ '@messages.profile.member'|trans }} #{{ user.id }}: {{ user }}
                     {% if user.isOnline() %}
                         <span class="badge bg-success" title="{{'@messages.profile.online'|trans}}">{{'@messages.profile.online'|trans}}</span>
                     {% elseif user.isActive() %}
@@ -23,8 +23,13 @@
                 </h1>
 
                 <div class="roles mb-1">
+                    {# Domain is "enums" (plural) and the catalogue is snake_case
+                       with a _singular/_plural suffix - see TranslationEnumsCommand,
+                       which generates exactly this shape. The previous
+                       '@enum.userRole.' ~ role built none of that, so every badge
+                       rendered its raw key (e.g. "@enum.userRole.ROLE_EDITOR"). #}
                     {% for role in user.roles %}
-                        <span class="badge bg-secondary">{{ ('@enum.userRole.' ~ role)|trans }}</span>
+                        <span class="badge bg-secondary">{{ ('@enums.user_role.' ~ role|lower ~ '._singular')|trans }}</span>
                     {% endfor %}
                 </div>
 
@@ -34,11 +39,11 @@
                         user.createdAt()|datetime("HH:mm")
                     ])|raw }}&nbsp
 
-                    - {% if app.user == user or is_granted("ROLE_ADMIN") %}
-                        <a href="{{ path('user_profileEdit', {'id':user.id}) }}">Editer le profil</a>
+                    {% if app.user == user or is_granted("ROLE_ADMIN") %}
+                        - <a href="{{ path('user_profileEdit', {'id':user.id}) }}">{{ '@messages.profile.edit'|trans }}</a>
                     {% endif %}
-                    - {% if app.user == user %}
-                        <a href="{{ path('security_logout') }}">Se déconnecter</a>
+                    {% if app.user == user %}
+                        - <a href="{{ path('security_logout') }}">{{ '@messages.profile.logout'|trans }}</a>
                     {% endif %}
                 </div>
 

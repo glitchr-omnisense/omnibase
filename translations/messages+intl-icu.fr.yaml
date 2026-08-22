@@ -41,6 +41,12 @@ profile:
     registered: "Inscrit depuis le {0} à {1}"
     edit: "Editer mon profil"
     last_seen: "Dernière connexion le {0} à {1}"
+    online: "En ligne"
+    recentlyActive: "Actif récemment"
+    threads: "publications"
+    likes: "j'aime"
+    member: "Membre"
+    logout: "Se déconnecter"
 
 logout:
     title: "Se déconnecter"
