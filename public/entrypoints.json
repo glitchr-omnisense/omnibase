@@ -42,7 +42,7 @@
         "/bundles/base/form-defer.editor.7ef0990d.css"
       ],
       "js": [
-        "/bundles/base/form-defer.editor.1ef6d447.js"
+        "/bundles/base/form-defer.editor.f23a8184.js"
       ]
     },
     "form-defer.array": {
@@ -55,7 +55,7 @@
         "/bundles/base/form-defer.datetime.604c58d2.css"
       ],
       "js": [
-        "/bundles/base/form-defer.datetime.26af9d3a.js"
+        "/bundles/base/form-defer.datetime.f641aa3b.js"
       ]
     },
     "form-defer.select2": {
