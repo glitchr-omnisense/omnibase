@@ -185,6 +185,31 @@ return static function (ContainerConfigurator $container): void {
         ->tag('doctrine.event_listener', ['event' => 'postRemove'])
         ->args([service_closure('Base\Service\SettingBagInterface')]);
 
+    // Entity dispatchers shipped by this bundle.
+    //
+    // BaseExtension::load() calls registerForAutoconfiguration() on
+    // EventDispatcherInterface and attaches the six doctrine.event_listener
+    // tags to it - but autoconfiguration only ever applies to services that are
+    // actually DEFINED somewhere, and these two never were. A consuming app's
+    // own dispatchers get picked up by its `App\` resource block, which is why
+    // App-side ones worked and these silently did not: neither class was in the
+    // container at all, so thread.* and user.* were never dispatched.
+    //
+    // Concretely, that meant ThreadEvent::PUBLISHABLE never fired, so anything
+    // listening for it - such as an app subscriber that mails subscribers when
+    // a scheduled article comes due - never ran, with no error to show for it.
+    //
+    // autoconfigure() is required (the defaults() block above only sets
+    // public(false)); autowire() satisfies AbstractEventDispatcher's
+    // constructor, exactly as the app-side dispatchers are already resolved.
+    $services->set('Base\EntityDispatcher\Event\ThreadEventDispatcher')
+        ->autowire()
+        ->autoconfigure();
+
+    $services->set('Base\EntityDispatcher\Event\UserEventDispatcher')
+        ->autowire()
+        ->autoconfigure();
+
     // Notifier
     $services->alias('App\Notifier\Notifier', 'Base\Notifier\Notifier');
     $services->alias('Base\Notifier\NotifierInterface', 'Base\Notifier\Notifier');
