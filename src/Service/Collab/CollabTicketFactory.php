@@ -21,7 +21,21 @@ class CollabTicketFactory
     protected string $wsUrl;
     protected int $ttl;
 
-    public function __construct(string $secret, string $wsUrl = "", int $ttl = 60)
+    /**
+     * $ttl is the ticket lifetime in seconds.
+     *
+     * 300, not 60: a ticket is only presented on the WebSocket handshake, and
+     * the client refreshes it well inside this window, so a short ttl bounds
+     * exposure of a leaked ticket without any legitimate client ever needing
+     * to stretch it. 60 was too tight in practice - the client's refresh timer
+     * runs at 45s, and browsers clamp timers in background tabs to once a
+     * minute (suspending them entirely while the machine sleeps), so the
+     * refresh routinely slipped past a 60s ttl and the following reconnect
+     * presented an expired ticket, which the relay rejects with 401. The
+     * client now also refreshes on socket close and on tab focus, so this
+     * margin is defence in depth rather than the only guard.
+     */
+    public function __construct(string $secret, string $wsUrl = "", int $ttl = 300)
     {
         $this->secret = $secret;
         $this->wsUrl = $wsUrl;
