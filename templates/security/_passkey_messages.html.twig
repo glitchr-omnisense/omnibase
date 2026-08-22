@@ -1,0 +1,25 @@
+{# Translated passkey error strings, handed to assets/security/webauthn.js.
+
+   WebAuthn failures surface as a DOMException whose .message is written for
+   developers, not users - "The request is not allowed by the user agent or the
+   platform in the current context, possibly because the user denied
+   permission." is what a browser returns for a plain cancel, for a timeout, AND
+   for "this device holds no passkey for this site", which are three very
+   different situations for the person reading it.
+
+   The script maps the exception NAME to one of these instead. They live here,
+   rendered through the catalogue, because the script is a static asset and has
+   no access to the translator. Included by every template carrying a
+   [data-passkey-register] or [data-passkey-login] control. #}
+<script type="application/json" id="passkey-messages">
+{
+    "cancelledLogin":     {{ '@forms.passkey.cancelledLogin'|trans|json_encode|raw }},
+    "cancelledRegister":  {{ '@forms.passkey.cancelledRegister'|trans|json_encode|raw }},
+    "alreadyRegistered":  {{ '@forms.passkey.alreadyRegistered'|trans|json_encode|raw }},
+    "notSupported":       {{ '@forms.passkey.notSupported'|trans|json_encode|raw }},
+    "misconfigured":      {{ '@forms.passkey.misconfigured'|trans|json_encode|raw }},
+    "unsupportedBrowser": {{ '@forms.passkey.unsupportedBrowser'|trans|json_encode|raw }},
+    "serverError":        {{ '@forms.passkey.serverError'|trans({'reason': '__REASON__'})|json_encode|raw }},
+    "generic":            {{ '@forms.passkey.generic'|trans({'reason': '__REASON__'})|json_encode|raw }}
+}
+</script>

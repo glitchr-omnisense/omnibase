@@ -39,7 +39,7 @@
             </li>
             {% if user.isTotpAuthenticationEnabled() %}
             <li class="list-group-item">
-                {{'@forms.settings.backupCodesRemaining'|trans({'%count%': user.getBackupCodesCount()})}}
+                {{'@forms.settings.backupCodesRemaining'|trans({'count': user.getBackupCodesCount()})}}
             </li>
             {% endif %}
         </ul>
@@ -51,9 +51,9 @@
                     <span>
                         {{ passkey.getLabel() ?: '@forms.settings.unnamedPasskey'|trans }}
                         <br><small class="text-muted">
-                            {{'@forms.settings.passkeyAdded'|trans({'%date%': passkey.getCreatedAt()|datetime("dd MMMM YYYY")})}}
+                            {{'@forms.settings.passkeyAdded'|trans({'date': passkey.getCreatedAt()|datetime("dd MMMM YYYY")})}}
                             {% if passkey.getLastUsedAt() %}
-                                &middot; {{'@forms.settings.passkeyLastUsed'|trans({'%date%': passkey.getLastUsedAt()|datetime("dd MMMM YYYY")})}}
+                                &middot; {{'@forms.settings.passkeyLastUsed'|trans({'date': passkey.getLastUsedAt()|datetime("dd MMMM YYYY")})}}
                             {% endif %}
                         </small>
                     </span>
@@ -126,7 +126,7 @@
 </div>
 
 <div class="mb-3">
-    {{'@forms.settings.loggedInAs'|trans({'%user%': user})}}
+    {{'@forms.settings.loggedInAs'|trans({'user': user})}}
     <a href="{{ path('security_logout') }}">{{'@forms.login.logout'|trans}}</a>
 </div>
 
@@ -136,5 +136,6 @@
 
 {% block javascripts %}
     {{ parent() }}
+    {% include '@Base/security/_passkey_messages.html.twig' %}
     {{ encore_entry_script_tags('webauthn') }}
 {% endblock %}
