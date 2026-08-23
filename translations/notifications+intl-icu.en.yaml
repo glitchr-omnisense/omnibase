@@ -107,3 +107,18 @@ accountWelcomeBack:
     already: Your account is already enabled.
     tokenFound: "A confirmation email has already been sent ! Please wait {0} before next submission."
     invalidToken: "Invalid token. We cannot reactivate your email address. Please resend a request"
+settings:
+    twoFactorEnabled: "Two-factor authentication is now active on your account."
+    twoFactorDisabled: "Two-factor authentication is switched off on your account."
+    twoFactorMandatory: "The site administrator requires two-factor authentication, so it cannot be switched off."
+    twoFactorUnavailable: "Two-factor authentication is not offered on this site."
+    twoFactorInvalidCode: "That code is not right. Check the clock on your phone, then try again."
+    passkeysUnavailable: "Passkeys are not offered on this site."
+    passkeyAdded: "Your passkey has been saved."
+    passkeyRenamed: "Your passkey has been renamed."
+    passkeyDeleted: "Your passkey has been deleted."
+    emailCodeEnabled: "Email verification codes are switched on."
+    emailCodeDisabled: "Email verification codes are switched off."
+    wrongPassword: "Incorrect password."
+    enrolmentRequired: "The administrator requires two-factor authentication. Pick a method to carry on."
+    enrolmentSkipped: "You can switch two-factor authentication on at any time from your settings."

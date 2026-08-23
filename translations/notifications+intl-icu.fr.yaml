@@ -107,3 +107,19 @@ accountWelcomeBack:
     foundToken: "Un email de réactivation a déjà été envoyé ! Merci de patienter {0} avant la prochaine demande."
     invalidToken: "Jeton invalide. Nous ne pouvons pas confirmer ton adresse avec ce lien. Merci de renvoyer une demande"
 
+
+settings:
+    twoFactorEnabled: "La double authentification est maintenant active sur ton compte."
+    twoFactorDisabled: "La double authentification est désactivée sur ton compte."
+    twoFactorMandatory: "L'administrateur du site impose la double authentification : elle ne peut pas être désactivée."
+    twoFactorUnavailable: "La double authentification n'est pas proposée sur ce site."
+    twoFactorInvalidCode: "Ce code est incorrect. Vérifie l'heure de ton téléphone, puis réessaie."
+    passkeysUnavailable: "Les clés d'accès ne sont pas proposées sur ce site."
+    passkeyAdded: "Ta clé d'accès a bien été enregistrée."
+    passkeyRenamed: "Ta clé d'accès a été renommée."
+    passkeyDeleted: "Ta clé d'accès a été supprimée."
+    emailCodeEnabled: "Les codes de vérification par e-mail sont activés."
+    emailCodeDisabled: "Les codes de vérification par e-mail sont désactivés."
+    wrongPassword: "Mot de passe incorrect."
+    enrolmentRequired: "L'administrateur impose la double authentification. Choisis une méthode pour continuer."
+    enrolmentSkipped: "Tu pourras activer la double authentification à tout moment depuis tes réglages."

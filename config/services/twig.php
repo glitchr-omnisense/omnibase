@@ -142,6 +142,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Twig\Extension\MathTwigExtension')->tag('twig.extension');
     $services->set('Base\Twig\Extension\ClassTwigExtension')->tag('twig.extension');
     $services->set('Base\Twig\Extension\ClipboardTwigExtension')->tag('twig.extension');
+    $services->set('Base\Twig\Extension\SecurityPolicyTwigExtension')
+        ->tag('twig.extension')
+        ->args([service('Base\Service\SecurityPolicy')]);
     $services->set('Base\Twig\Extension\AnalyticsTwigExtension')
         ->tag('twig.extension')
         ->args([service('Base\Service\Analytics')]);

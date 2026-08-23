@@ -26,8 +26,8 @@ login:
     classic: "Connexion classique"
     sendEmail: "Envoyer le lien"
     orContinueWith: "Ou continuer avec"
-    withGoogle: "Continuer avec Google"
-    withPasskey: "Continuer avec une clé d'accès"
+    withGoogle: "Google"
+    withPasskey: "Clé d'accès"
     logout: "Se déconnecter"
 
 contact:
@@ -72,6 +72,9 @@ settings:
     title: "Paramètres du compte"
     security: "Sécurité"
     twoFactor: "Authentification à deux facteurs"
+    requiredByAdmin: "Requise"
+    lockedByAdmin: "Imposée par l'administrateur"
+    enrolmentRequired: "L'administrateur impose la double authentification. Choisis une méthode ci-dessous pour sécuriser ton compte."
     totpApp: "Application d'authentification (TOTP)"
     emailCode: "Code par e-mail"
     enable: "Activer"

@@ -3,6 +3,8 @@
 namespace Base\Controller\Client;
 
 use Base\Service\BaseService;
+use Base\Service\SecurityPolicy;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use App\Repository\UserRepository;
 use Base\Entity\User\Connection;
@@ -35,11 +37,15 @@ class UserSettingsController extends AbstractController
 
     private $baseService;
     private UserRepository $userRepository;
+    private SecurityPolicy $securityPolicy;
+    private TranslatorInterface $translator;
 
-    public function __construct(BaseService $baseService, UserRepository $userRepository)
+    public function __construct(BaseService $baseService, UserRepository $userRepository, SecurityPolicy $securityPolicy, TranslatorInterface $translator)
     {
         $this->baseService = $baseService;
         $this->userRepository = $userRepository;
+        $this->securityPolicy = $securityPolicy;
+        $this->translator = $translator;
     }
 
     #[Route("/members/qr/totp", name: "qr_code_totp")]
@@ -92,6 +98,7 @@ class UserSettingsController extends AbstractController
         return $this->render('client/user/settings.html.twig', [
             'user' => $user,
             'sessions' => $sessions,
+            'policy' => $this->securityPolicy,
         ]);
     }
 
@@ -128,7 +135,7 @@ class UserSettingsController extends AbstractController
         $entityManager->remove($passkey);
         $entityManager->flush();
 
-        $notification = new Notification("Passkey removed.");
+        $notification = new Notification("@notifications.settings.passkeyDeleted");
         $notification->send("success");
 
         return $this->redirectToRoute('user_settings');
@@ -160,6 +167,15 @@ class UserSettingsController extends AbstractController
         $user = $this->getUser();
         $session = $request->getSession();
 
+        // The administrator can switch the whole feature off. Refuse here as
+        // well as hiding the button, so a bookmarked URL is refused too.
+        if (!$this->securityPolicy->canEnableTwoFactor()) {
+            $notification = new Notification("@notifications.settings.twoFactorUnavailable");
+            $notification->send("warning");
+
+            return $this->redirectToRoute('user_settings');
+        }
+
         if ($user->isTotpAuthenticationEnabled()) {
             return $this->redirectToRoute('user_settings');
         }
@@ -187,7 +203,7 @@ class UserSettingsController extends AbstractController
 
                 $session->remove(self::SESSION_PENDING_SECRET);
 
-                $notification = new Notification("2FA has been enabled on your account.");
+                $notification = new Notification("@notifications.settings.twoFactorEnabled");
                 $notification->send("success");
 
                 return $this->render('client/user/settings_2fa_backup_codes.html.twig', [
@@ -195,7 +211,7 @@ class UserSettingsController extends AbstractController
                 ]);
             }
 
-            $form->get('code')->addError(new \Symfony\Component\Form\FormError('Invalid code, please try again.'));
+            $form->get('code')->addError(new \Symfony\Component\Form\FormError($this->translator->trans('@notifications.settings.twoFactorInvalidCode')));
         }
 
         return $this->render('client/user/settings_2fa.html.twig', [
@@ -213,8 +229,17 @@ class UserSettingsController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        // The precedence rule: while the administrator requires a second
+        // factor, the user cannot give theirs up - password or no password.
+        if (!$this->securityPolicy->canDisableTwoFactor()) {
+            $notification = new Notification("@notifications.settings.twoFactorMandatory");
+            $notification->send("warning");
+
+            return $this->redirectToRoute('user_settings');
+        }
+
         if (!$passwordHasher->isPasswordValid($user, (string) $request->request->get('password'))) {
-            $notification = new Notification("Incorrect password.");
+            $notification = new Notification("@notifications.settings.wrongPassword");
             $notification->send("danger");
             return $this->redirectToRoute('user_settings');
         }
@@ -224,7 +249,7 @@ class UserSettingsController extends AbstractController
         $user->invalidateTrustedDevices();
         $entityManager->flush();
 
-        $notification = new Notification("2FA has been disabled on your account.");
+        $notification = new Notification("@notifications.settings.twoFactorDisabled");
         $notification->send("success");
 
         return $this->redirectToRoute('user_settings');
@@ -238,10 +263,28 @@ class UserSettingsController extends AbstractController
         }
 
         $user = $this->getUser();
-        $user->setEmailAuthEnabled(!$user->isEmailAuthEnabled());
+        $enabling = !$user->isEmailAuthEnabled();
+
+        if ($enabling && !$this->securityPolicy->canEnableTwoFactor()) {
+            $notification = new Notification("@notifications.settings.twoFactorUnavailable");
+            $notification->send("warning");
+
+            return $this->redirectToRoute('user_settings');
+        }
+
+        // Turning email codes off is only a problem when they are the second
+        // factor the site insists on - i.e. when nothing else would be left.
+        if (!$enabling && !$this->securityPolicy->canDisableTwoFactor() && !$user->isTotpAuthenticationEnabled()) {
+            $notification = new Notification("@notifications.settings.twoFactorMandatory");
+            $notification->send("warning");
+
+            return $this->redirectToRoute('user_settings');
+        }
+
+        $user->setEmailAuthEnabled($enabling);
         $entityManager->flush();
 
-        $notification = new Notification($user->isEmailAuthEnabled() ? "Email verification codes enabled." : "Email verification codes disabled.");
+        $notification = new Notification($user->isEmailAuthEnabled() ? "@notifications.settings.emailCodeEnabled" : "@notifications.settings.emailCodeDisabled");
         $notification->send("success");
 
         return $this->redirectToRoute('user_settings');

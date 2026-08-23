@@ -2,7 +2,7 @@
 
 {% block title %}{{'@forms.settings.title'|trans}}{% endblock %}
 {% block content %}
-<article class="wrapper">
+<article class="wrapper extended">
 <h1>{{'@forms.settings.title'|trans}}</h1>
 
 {% if user %}
@@ -11,31 +11,58 @@
     <div class="card-header"><i class="fa-fw fa-solid fa-shield-halved"></i> {{'@forms.settings.security'|trans}}</div>
     <div class="card-body">
 
-        <h5>{{'@forms.settings.twoFactor'|trans}}</h5>
+        {# Everything below asks Base\Service\SecurityPolicy rather than
+           testing the user alone: the administrator decides whether these
+           features exist at all, and whether a user who has switched one on
+           is allowed to switch it back off. The same predicates guard the
+           controller actions, so hiding a button here is a courtesy, not the
+           security boundary. #}
+        {% if policy.isTwoFactorAvailable() %}
+        <h5>
+            {{'@forms.settings.twoFactor'|trans}}
+            {% if policy.isTwoFactorMandatory() %}
+                <span class="badge bg-warning text-dark align-middle">{{'@forms.settings.requiredByAdmin'|trans}}</span>
+            {% endif %}
+        </h5>
+        {% if policy.isTwoFactorMandatory() and not policy.hasSecondFactor(user) %}
+            <div class="alert alert-warning py-2">{{'@forms.settings.enrolmentRequired'|trans}}</div>
+        {% endif %}
         <ul class="list-group mb-3">
-            <li class="list-group-item d-flex justify-content-between align-items-center">
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                 {{'@forms.settings.totpApp'|trans}}
                 {% if user.isTotpAuthenticationEnabled() %}
-                    <span>
-                        <span class="badge bg-success me-2">{{'@forms.settings.enabled'|trans}}</span>
-                        <form class="d-inline" method="post" action="{{ path('user_settings_2fa_disable') }}">
+                    <span class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success">{{'@forms.settings.enabled'|trans}}</span>
+                        {% if policy.canDisableTwoFactor() %}
+                        <form class="d-flex align-items-center gap-2 mb-0" method="post" action="{{ path('user_settings_2fa_disable') }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('2fa_disable') }}">
-                            <input type="password" name="password" class="form-control form-control-sm d-inline w-auto" placeholder="{{'@forms.login.password'|trans}}" required>
+                            <input type="password" name="password" class="form-control form-control-sm w-auto" placeholder="{{'@forms.login.password'|trans}}" required>
                             <button class="btn btn-sm btn-outline-danger" type="submit">{{'@forms.settings.disable'|trans}}</button>
                         </form>
+                        {% else %}
+                        <small class="text-muted">{{'@forms.settings.lockedByAdmin'|trans}}</small>
+                        {% endif %}
                     </span>
                 {% else %}
                     <a class="btn btn-sm btn-primary" href="{{ path('user_settings_2fa') }}">{{'@forms.settings.enable'|trans}}</a>
                 {% endif %}
             </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                 {{'@forms.settings.emailCode'|trans}}
-                <form method="post" action="{{ path('user_settings_2fa_email_toggle') }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('2fa_email') }}">
-                    <button class="btn btn-sm {{ user.isEmailAuthEnabled() ? 'btn-outline-danger' : 'btn-outline-primary' }}" type="submit">
-                        {{ user.isEmailAuthEnabled() ? '@forms.settings.disable'|trans : '@forms.settings.enable'|trans }}
-                    </button>
-                </form>
+                {% set emailCodeLocked = user.isEmailAuthEnabled() and not policy.canDisableTwoFactor() and not user.isTotpAuthenticationEnabled() %}
+                {% if emailCodeLocked %}
+                    <span class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success">{{'@forms.settings.enabled'|trans}}</span>
+                        <small class="text-muted">{{'@forms.settings.lockedByAdmin'|trans}}</small>
+                    </span>
+                {% else %}
+                    <form class="mb-0" method="post" action="{{ path('user_settings_2fa_email_toggle') }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('2fa_email') }}">
+                        <button class="btn btn-sm {{ user.isEmailAuthEnabled() ? 'btn-outline-danger' : 'btn-outline-primary' }}" type="submit">
+                            {{ user.isEmailAuthEnabled() ? '@forms.settings.disable'|trans : '@forms.settings.enable'|trans }}
+                        </button>
+                    </form>
+                {% endif %}
             </li>
             {% if user.isTotpAuthenticationEnabled() %}
             <li class="list-group-item">
@@ -43,11 +70,13 @@
             </li>
             {% endif %}
         </ul>
+        {% endif %}
 
+        {% if policy.arePasskeysAvailable() %}
         <h5>{{'@forms.settings.passkeys'|trans}}</h5>
         <ul class="list-group mb-2">
             {% for passkey in user.getPasskeys() %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+                <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <span>
                         {{ passkey.getLabel() ?: '@forms.settings.unnamedPasskey'|trans }}
                         <br><small class="text-muted">
@@ -76,10 +105,11 @@
         <button type="button" class="btn btn-sm btn-primary" data-passkey-register="{{ user.getUsername() }}">
             <i class="fa-fw fa-solid fa-passport"></i> {{'@forms.settings.addPasskey'|trans}}
         </button>
+        {% endif %}
 
         <h5>{{'@forms.settings.connectedAccounts'|trans}}</h5>
         <ul class="list-group">
-            <li class="list-group-item d-flex justify-content-between align-items-center">
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span><i class="fa-fw fa-brands fa-google"></i> Google</span>
                 {% if user.getIdentityProvider() == 'google' %}
                     <span class="badge bg-success">{{'@forms.settings.connected'|trans}}</span>
@@ -96,7 +126,7 @@
     <div class="card-body">
         <ul class="list-group">
             {% for session in sessions %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+                <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <span>
                         {{ session.agent }}
                         <br><small class="text-muted">{{ session.ipList|join(', ') }} &middot; {{ session.updatedAt|datetime("dd MMMM YYYY HH:mm") }}</small>

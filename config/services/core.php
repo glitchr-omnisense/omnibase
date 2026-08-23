@@ -172,6 +172,13 @@ return static function (ContainerConfigurator $container): void {
         ])
         ->bind('$environment', '%kernel.environment%');
 
+    // Reads the administrator's account-security settings and answers "may
+    // this user change that themselves". Autowired on SettingBagInterface,
+    // which is aliased just above.
+    $services->set('Base\\Service\\SecurityPolicy')
+        ->autowire()
+        ->public(true);
+
     // Keeps the SettingBag snapshot in sync with every Setting/SettingIntl
     // write, including the admin CRUD's plain flush() (which bypasses
     // SettingBag::set() entirely). service_closure, NOT service: Doctrine
