@@ -91,7 +91,13 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
+
+        // Upload fields that were already holding a file when the page was
+        // drawn, keyed by the SettingIntl carrying them. See the POST_SUBMIT
+        // listener at the end of this method for what it is for.
+        $storedUploads = [];
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options, &$storedUploads) {
             $settingBag = [];
 
             $formattedFields = $this->getFormattedData($options['fields']);
@@ -184,6 +190,15 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 foreach ($translations as $locale => $settingTranslation) {
                     $settingValue = $settingTranslation->getValue();
 
+                    if (in_array($fieldOptions['form_type'], [FileType::class, ImageType::class, AvatarType::class], true)
+                        && is_string($settingValue) && '' !== $settingValue) {
+                        $storedUploads[spl_object_id($settingTranslation)] = [
+                            'translation' => $settingTranslation,
+                            'raw' => $settingTranslation->getValueRaw(),
+                            'displayed' => basename($settingValue),
+                        ];
+                    }
+
                     switch ($fieldOptions['form_type']) {
                         case DateTimePickerType::class:
                             $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
@@ -238,6 +253,36 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
             if (count($fields) > 0) {
                 $form->add('valid', SubmitType::class, ['attr' => ['class' => 'btn btn-primary'], 'translation_domain' => 'controllers', 'label_format' => 'admin_settings.valid']);
+            }
+        });
+
+        // Put back the upload references that a plain Save would otherwise
+        // erase.
+        //
+        // A file-backed setting is STORED as its upload uuid but READ BACK as
+        // the resolved public path - SettingIntl::getValue() runs it through
+        // Uploader::getPublic() - and FileType renders that path as a hidden
+        // input holding only its basename. Submitting the page therefore
+        // hands the field's own display name back as if it were a new value,
+        // and the child data mapper writes it straight onto the SettingIntl.
+        // Saving /admin/settings without touching the logo replaced
+        // "c241f214-dc84-4b36-9cd9-8e16f6972f51" with "image.webp", and the
+        // site logo was gone.
+        //
+        // Nothing was uploaded in that case, so there is nothing to save:
+        // whenever a field comes back holding exactly the name it was drawn
+        // with, restore the stored reference. A real upload arrives as a
+        // different name (or as a File) and is left alone; clearing a field
+        // submits nothing and is left alone too, so deleting a logo still
+        // works.
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function () use (&$storedUploads) {
+            foreach ($storedUploads as $stored) {
+                $current = $stored['translation']->getValueRaw();
+                if (!is_string($current) || $current !== $stored['displayed'] || $current === $stored['raw']) {
+                    continue;
+                }
+
+                $stored['translation']->setValue($stored['raw']);
             }
         });
     }
