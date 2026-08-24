@@ -47,6 +47,10 @@ profile:
     likes: "likes"
     member: "Member"
     logout: "Sign out"
+    recentThreads: "Recent posts"
+    accountSecurity: "Account security"
+    notEnabled: "Not enabled"
+    notConnected: "Not linked"
 
 logout:
     title: "Log out"

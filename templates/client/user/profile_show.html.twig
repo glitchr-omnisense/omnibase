@@ -4,6 +4,13 @@
 {% block content %}
 
     {% if user is defined %}
+
+    {# Only the account holder - or an administrator - sees anything beyond
+       the public header. Everything below this flag is about the account,
+       not about the person's public presence on the site. #}
+    {% set isOwnProfile = app.user == user %}
+    {% set canSeeAccount = isOwnProfile or is_granted("ROLE_ADMIN") %}
+
     <article class="wrapper extended">
         <div class="header">
 
@@ -39,10 +46,11 @@
                         user.createdAt()|datetime("HH:mm")
                     ])|raw }}&nbsp
 
-                    {% if app.user == user or is_granted("ROLE_ADMIN") %}
+                    {% if canSeeAccount %}
                         - <a href="{{ path('user_profileEdit', {'id':user.id}) }}">{{ '@messages.profile.edit'|trans }}</a>
                     {% endif %}
-                    {% if app.user == user %}
+                    {% if isOwnProfile %}
+                        - <a href="{{ path('user_settings') }}">{{ '@forms.settings.title'|trans }}</a>
                         - <a href="{{ path('security_logout') }}">{{ '@messages.profile.logout'|trans }}</a>
                     {% endif %}
                 </div>
@@ -66,6 +74,67 @@
         </div>
 
     </article>
+
+    {# Most recent published writing. Threads come back in no particular
+       order and include drafts, so sort and filter here rather than trusting
+       the collection - and cap it, because an author with hundreds of
+       articles should not turn their profile into an archive page. #}
+    {% set published = user.threads|filter(t => t.isPublished() and t.title)|sort((a, b) => (b.publishedAt ?? b.createdAt) <=> (a.publishedAt ?? a.createdAt))|slice(0, 5) %}
+    {% if published|length %}
+    <article class="wrapper extended">
+        <h3>{{ '@messages.profile.recentThreads'|trans }}</h3>
+        <ul class="list-group">
+            {% for thread in published %}
+                <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <a href="{{ thread.__toLink() }}">{{ thread.title }}</a>
+                    <small class="text-muted">{{ (thread.publishedAt ?? thread.createdAt)|datetime("dd MMMM YYYY") }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    </article>
+    {% endif %}
+
+    {% if canSeeAccount %}
+    <article class="wrapper extended">
+        <h3>{{ '@messages.profile.accountSecurity'|trans }}</h3>
+        <ul class="list-group">
+            {% if security_policy.isTwoFactorAvailable() %}
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                {{ '@forms.settings.twoFactor'|trans }}
+                {% if security_policy.hasSecondFactor(user) %}
+                    <span class="badge bg-success">{{ '@forms.settings.enabled'|trans }}</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ '@messages.profile.notEnabled'|trans }}</span>
+                {% endif %}
+            </li>
+            {% endif %}
+            {% if security_policy.arePasskeysAvailable() %}
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                {{ '@forms.settings.passkeys'|trans }}
+                <span class="badge {{ user.getPasskeys()|length ? 'bg-success' : 'bg-secondary' }}">{{ user.getPasskeys()|length }}</span>
+            </li>
+            {% endif %}
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span><i class="fa-fw fa-brands fa-google"></i> Google</span>
+                {% if user.getIdentityProvider() == 'google' %}
+                    <span class="badge bg-success">{{ '@forms.settings.connected'|trans }}</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ '@messages.profile.notConnected'|trans }}</span>
+                {% endif %}
+            </li>
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                {{ '@forms.settings.preferences'|trans }}
+                <small class="text-muted">{{ user.getLocale() }} &middot; {{ user.getTimezone() }}</small>
+            </li>
+        </ul>
+        {% if isOwnProfile %}
+        <a class="btn btn-sm btn-primary mt-2" href="{{ path('user_settings') }}">
+            <i class="fa-fw fa-solid fa-user-cog"></i> {{ '@forms.settings.title'|trans }}
+        </a>
+        {% endif %}
+    </article>
+    {% endif %}
+
     {% endif %}
 
 {% endblock %}
