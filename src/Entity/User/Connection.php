@@ -173,6 +173,72 @@ class Connection implements IconizeInterface
         return $this;
     }
 
+    /**
+     * A short, readable name for the browser behind this connection.
+     *
+     * Purely for display: a settings page listing "Mozilla/5.0 (Macintosh;
+     * Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)
+     * Version/26.5 Safari/605.1.15" twenty times over tells nobody which
+     * session is theirs. The full string stays available - this is a label
+     * beside it, not a replacement for it.
+     *
+     * Order matters in both lists: Edge and Chrome both claim to be Safari,
+     * and Chrome claims to be Safari too, so the most specific claim has to
+     * be tested first. Anything unrecognised keeps the raw string.
+     */
+    public function getAgentLabel(): ?string
+    {
+        if (!$this->agent) {
+            return $this->agent;
+        }
+
+        $browsers = [
+            'Edg/' => 'Edge',
+            'OPR/' => 'Opera',
+            'Firefox/' => 'Firefox',
+            'Chrome/' => 'Chrome',
+            'Safari/' => 'Safari',
+            'curl/' => 'curl',
+            'Wget/' => 'Wget',
+        ];
+
+        $systems = [
+            'iPhone' => 'iPhone',
+            'iPad' => 'iPad',
+            'Android' => 'Android',
+            'Mac OS X' => 'macOS',
+            'Windows' => 'Windows',
+            'CrOS' => 'ChromeOS',
+            'Linux' => 'Linux',
+        ];
+
+        $browser = null;
+        foreach ($browsers as $needle => $name) {
+            if (str_contains($this->agent, $needle)) {
+                $browser = $name;
+                break;
+            }
+        }
+
+        $system = null;
+        foreach ($systems as $needle => $name) {
+            if (str_contains($this->agent, $needle)) {
+                $system = $name;
+                break;
+            }
+        }
+
+        if (null === $browser && null === $system) {
+            return $this->agent;
+        }
+
+        if (null === $system) {
+            return $browser;
+        }
+
+        return null === $browser ? $system : $browser . ' - ' . $system;
+    }
+
     #[ORM\Column(type:"string", length:16, nullable:true)]
     protected $locale;
     public function getLocale(): ?string

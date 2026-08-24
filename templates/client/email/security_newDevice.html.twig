@@ -1,0 +1,17 @@
+{% extends 'email.html.twig' %}
+
+{% block subject %}
+    {{ '@emails.security_newDevice.subject'|trans|raw }}
+{% endblock %}
+
+{% block content %}
+    <p>{{ '@emails.security_newDevice.content'|trans|raw }}</p>
+
+    <ul>
+        <li><strong>{{ '@emails.security_newDevice.field_date'|trans }}:</strong> {{ connection.createdAt|datetime("dd MMMM YYYY HH:mm") }}</li>
+        <li><strong>{{ '@emails.security_newDevice.field_agent'|trans }}:</strong> {{ connection.agentLabel }}</li>
+        <li><strong>{{ '@emails.security_newDevice.field_ip'|trans }}:</strong> {{ connection.ipList|join(', ') }}</li>
+    </ul>
+
+    <p>{{ '@emails.security_newDevice.warning'|trans|raw }}</p>
+{% endblock %}

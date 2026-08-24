@@ -123,3 +123,6 @@ settings:
     wrongPassword: "Mot de passe incorrect."
     enrolmentRequired: "L'administrateur impose la double authentification. Choisis une méthode pour continuer."
     enrolmentSkipped: "Tu pourras activer la double authentification à tout moment depuis tes réglages."
+
+newDevice:
+    subject: "Nouvelle connexion à ton compte, {0}"

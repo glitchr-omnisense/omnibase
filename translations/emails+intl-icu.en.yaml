@@ -81,3 +81,11 @@ thread:
     content: "Your name has been mentioned in a new thread `{0}` !"
     action_text: Go to see it !
     
+security_newDevice:
+    subject: "New sign-in to your account"
+    content: "Your account has just been used to sign in from a browser we had not seen before. If that was you, there is nothing to do."
+    warning: "If it was not you, change your password straight away and sign that device out from your settings."
+    action_text: "See my devices"
+    field_date: "Date"
+    field_agent: "Browser"
+    field_ip: "IP address"

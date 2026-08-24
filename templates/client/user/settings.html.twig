@@ -128,7 +128,11 @@
             {% for session in sessions %}
                 <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <span>
-                        {{ session.agent }}
+                        {# The readable label, with the raw string on hover -
+                           twenty rows of "Mozilla/5.0 (Macintosh; Intel Mac
+                           OS X 10_15_7) AppleWebKit/605.1.15..." tell nobody
+                           which session is theirs. #}
+                        <span title="{{ session.agent }}">{{ session.agentLabel }}</span>
                         <br><small class="text-muted">{{ session.ipList|join(', ') }} &middot; {{ session.updatedAt|datetime("dd MMMM YYYY HH:mm") }}</small>
                     </span>
                     {% if session.isValid() %}

@@ -78,3 +78,11 @@ thread:
     subject: "Bonjour {0}, tu vas être ravi !"
     content: "Ton nom vient d'être mentionné dans une nouvelle publication `{0}` !"
     action_text: Voir la publication    
+security_newDevice:
+    subject: "Nouvelle connexion à ton compte"
+    content: "Ton compte vient d'être utilisé pour se connecter depuis un navigateur que nous ne connaissions pas encore. Si c'est bien toi, il n'y a rien à faire."
+    warning: "Si ce n'est pas toi, change ton mot de passe sans attendre et déconnecte cet appareil depuis tes réglages."
+    action_text: "Voir mes appareils"
+    field_date: "Date"
+    field_agent: "Navigateur"
+    field_ip: "Adresse IP"

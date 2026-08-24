@@ -122,3 +122,6 @@ settings:
     wrongPassword: "Incorrect password."
     enrolmentRequired: "The administrator requires two-factor authentication. Pick a method to carry on."
     enrolmentSkipped: "You can switch two-factor authentication on at any time from your settings."
+
+newDevice:
+    subject: "New sign-in to your account, {0}"
