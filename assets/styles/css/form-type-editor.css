@@ -96,3 +96,17 @@
 {
     .read-only .ce-block__content, .read-only .ce-toolbar__content { max-width:calc(100% - 10px); }
 }
+
+/* ── Editing on a phone ───────────────────────────────────────────────────────
+   The 88% above buys room beside the block for EditorJS's own handles, which
+   is a fair trade on a desktop and a bad one on a 390px screen: it left the
+   text a ~230px column, hyphenating mid-word every second line. The toolbar
+   overlays the block at this width anyway (EditorJS drops --narrow's 50px
+   gutter below 651px itself), so the 12% buys nothing here. Give the text the
+   full column back, and drop the container's own side padding with it. */
+@media all and (max-width: 720px)
+{
+    .ce-block__content, .ce-toolbar__content { max-width: 100%; }
+    .cdx-block { max-width: 100%; }
+    .form-editor-codex { padding-left: 0; padding-right: 0; }
+}

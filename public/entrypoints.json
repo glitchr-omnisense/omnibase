@@ -31,7 +31,7 @@
     },
     "form-defer": {
       "css": [
-        "/bundles/base/form-defer.22a83f5c.css"
+        "/bundles/base/form-defer.4242d73b.css"
       ],
       "js": [
         "/bundles/base/form-defer.600e0d52.js"
@@ -39,7 +39,7 @@
     },
     "form-defer.editor": {
       "css": [
-        "/bundles/base/form-defer.editor.7ef0990d.css"
+        "/bundles/base/form-defer.editor.f43c0d96.css"
       ],
       "js": [
         "/bundles/base/form-defer.editor.29795065.js"
