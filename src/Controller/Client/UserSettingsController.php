@@ -35,6 +35,9 @@ class UserSettingsController extends AbstractController
 {
     private const SESSION_PENDING_SECRET = "2fa_pending_totp_secret";
 
+    /** How many of the account's sessions the settings page lists. */
+    private const SESSIONS_SHOWN = 20;
+
     private $baseService;
     private UserRepository $userRepository;
     private SecurityPolicy $securityPolicy;
@@ -93,13 +96,60 @@ class UserSettingsController extends AbstractController
     public function Settings(ConnectionRepository $connectionRepository)
     {
         $user = $this->getUser();
-        $sessions = $connectionRepository->findByUser($user, ["updatedAt" => "DESC"]);
+
+        // findByUser() is the finder DSL and hands back a Doctrine Query, not
+        // results - passing that straight to Twig is why this page said "no
+        // sessions" for an account with hundreds of them. Ask plainly, and
+        // keep it to a screenful: the oldest of 600-odd rows tell nobody
+        // anything, and the point of the list is to spot a session that
+        // should not be there.
+        $sessions = $connectionRepository->findBy(["user" => $user], ["updatedAt" => "DESC"], self::SESSIONS_SHOWN);
 
         return $this->render('client/user/settings.html.twig', [
             'user' => $user,
             'sessions' => $sessions,
             'policy' => $this->securityPolicy,
         ]);
+    }
+
+    /**
+     * The one-off "your account needs a second factor" prompt.
+     *
+     * Reached only by being redirected here (see SecurityEnrolmentSubscriber),
+     * and only while the administrator requires a second factor this account
+     * does not have. It offers the same three methods the settings page does,
+     * plus a way out: the skip is deliberate, so nobody is trapped mid-task by
+     * a policy that changed under them. While enrolment is mandatory that
+     * answer lives in the session and the prompt returns on the next sign-in;
+     * SecurityPolicy::canPostponeEnrolmentPermanently() is what decides.
+     */
+    #[Route("/settings/security-required", name: "user_settings_enrolment")]
+    public function Enrolment(Request $request)
+    {
+        $user = $this->getUser();
+        if (!$this->securityPolicy->needsEnrolment($user)) {
+            return $this->redirectToRoute('user_settings');
+        }
+
+        return $this->render('client/user/settings_enrolment.html.twig', [
+            'user' => $user,
+            'policy' => $this->securityPolicy,
+        ]);
+    }
+
+    #[Route("/settings/security-required/skip", name: "user_settings_enrolment_skip", methods: ["POST"])]
+    public function EnrolmentSkip(Request $request)
+    {
+        if (!$this->isCsrfTokenValid('2fa_enrolment_skip', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $request->getSession()->set(SecurityPolicy::SESSION_ENROLMENT_SKIPPED, true);
+
+        $notification = new Notification("@notifications.settings.enrolmentSkipped");
+        $notification->send("info");
+
+        return $this->redirectToRoute('user_settings');
     }
 
     #[Route("/settings/passkeys/{id}/rename", name: "user_settings_passkey_rename", methods: ["POST"])]

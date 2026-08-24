@@ -179,6 +179,18 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
         ->public(true);
 
+    // Steers a signed-in user to the enrolment prompt while the administrator
+    // requires a second factor they do not have.
+    $services->set('Base\\Subscriber\\SecurityEnrolmentSubscriber')
+        ->autowire()
+        ->tag('kernel.event_subscriber');
+
+    // Emails the account holder when their account is signed into from a
+    // browser it has not been signed into before.
+    $services->set('Base\\Subscriber\\NewDeviceSubscriber')
+        ->autowire()
+        ->tag('kernel.event_subscriber');
+
     // Keeps the SettingBag snapshot in sync with every Setting/SettingIntl
     // write, including the admin CRUD's plain flush() (which bypasses
     // SettingBag::set() entirely). service_closure, NOT service: Doctrine
