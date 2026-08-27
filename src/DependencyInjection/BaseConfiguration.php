@@ -4,6 +4,7 @@ namespace Base\DependencyInjection;
 
 use Base\Imagine\Filter\Basic\Definition\UltraHighDefinitionFilter;
 use Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter;
+use Base\Service\TimeMachine;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Uid\Uuid;
 
@@ -345,6 +346,15 @@ class BaseConfiguration extends AbstractBaseConfiguration
                     ->integerNode('max_cycle')
                         ->info('Default compression algorithm')
                         ->defaultValue(-1)
+                        ->end()
+                    ->scalarNode('snapshot_dir')
+                        ->info('Directory the snapshot is staged in before transfer (defaults to the kernel cache directory)')
+                        ->defaultValue(null)
+                        ->end()
+                    ->arrayNode('excludes')
+                        ->info('Paths left out of the application tarball')
+                        ->scalarPrototype()->end()
+                        ->defaultValue(TimeMachine::DEFAULT_EXCLUDES)
                         ->end()
                 ->end()
             ->end()

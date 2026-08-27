@@ -77,7 +77,123 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      */
     public function getCacheDir()
     {
-        return $this->cacheDir . "/timemachine";
+        return ($this->snapshotDir ?: $this->cacheDir) . "/timemachine";
+    }
+
+    /**
+     * Paths left out of the application tarball. Defaults to dependency and
+     * build output that `composer install` / `yarn` / a cache warmup rebuild
+     * from scratch - keeping them would multiply the snapshot size (and the
+     * free space it needs) for no restorable data.
+     */
+    public const DEFAULT_EXCLUDES = [
+        "./vendor",
+        "./node_modules",
+        "./var/cache",
+        "./var/log",
+        "./var/coverage",
+        "./var/phpunit",
+        "./.git",
+    ];
+
+    protected array $excludes = self::DEFAULT_EXCLUDES;
+
+    public function getExcludes(): array
+    {
+        return $this->excludes;
+    }
+
+    /**
+     * @param array $excludes
+     * @return $this
+     */
+    public function setExcludes(array $excludes)
+    {
+        $this->excludes = $excludes;
+        return $this;
+    }
+
+    protected ?string $snapshotDir = null;
+
+    public function getSnapshotDir(): ?string
+    {
+        return $this->snapshotDir;
+    }
+
+    /**
+     * @param string|null $snapshotDir
+     * @return $this
+     */
+    public function setSnapshotDir(?string $snapshotDir)
+    {
+        $this->snapshotDir = $snapshotDir;
+        return $this;
+    }
+
+    /**
+     * Refuse to start a snapshot that cannot fit, instead of filling the disk
+     * up and taking the application down with it. The tarball and its compressed
+     * copy coexist while compressing, hence the multiplier.
+     */
+    public function assertEnoughFreeSpace(string $directory, array $excludes = [], float $factor = 2.2): void
+    {
+        $staging = $this->getCacheDir();
+        $probe   = is_dir($staging) ? $staging : dirname($staging);
+
+        $estimate = $this->estimateArchiveSize($directory, $excludes);
+        $free     = @disk_free_space($probe);
+
+        if ($estimate === null || $free === false) {
+            return; // cannot tell - do not block the backup on a failed probe
+        }
+
+        $needed = (int) ($estimate * $factor);
+        if ($free >= $needed) {
+
+            $this->output?->section()->writeln(sprintf(
+                "<info>- Free space check:</info> need ~%s, %s available in %s",
+                byte2str($needed), byte2str($free), $probe
+            ));
+
+            return;
+        }
+
+        throw new LogicException(sprintf(
+            "Not enough free space to build the snapshot in \"%s\": ~%s needed (source ~%s x%s), only %s available. "
+            . "Free some space, exclude more paths via `base.time_machine.excludes`, "
+            . "or stage the archive elsewhere via `base.time_machine.snapshot_dir`.",
+            $probe, byte2str($needed), byte2str($estimate), $factor, byte2str($free)
+        ));
+    }
+
+    /**
+     * Apparent size of what would actually go into the tarball (excludes applied),
+     * or null when `du` is unavailable / fails.
+     */
+    public function estimateArchiveSize(string $directory, array $excludes = []): ?int
+    {
+        $exclusions = "";
+        foreach ($excludes as $exclude) {
+            if ($exclude === null || $exclude === "") {
+                continue;
+            }
+
+            $exclusions .= "--exclude=" . escapeshellarg(str_replace(getcwd(), ".", $exclude)) . " ";
+        }
+
+        list($lines, $ret) = [[], false];
+        exec(sprintf(
+            'du -sb %s --directory=%s . 2>/dev/null || du -sb %s . 2>/dev/null',
+            $exclusions, escapeshellarg($directory), $exclusions
+        ), $lines, $ret);
+
+        if ($ret !== 0 || !$lines) {
+            return null;
+        }
+
+        $size = (int) trim(explode("\t", end($lines))[0] ?? "");
+
+        return $size > 0 ? $size : null;
     }
 
     public function preventAbort()
@@ -109,6 +225,14 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Common variables
         $this->cacheDir      = $parameterBag->get("kernel.cache_dir");
         $this->compression   = $parameterBag->get("base.time_machine.compression");
+        $this->snapshotDir   = $parameterBag->has("base.time_machine.snapshot_dir")
+            ? ($parameterBag->get("base.time_machine.snapshot_dir") ?: null) : null;
+        if ($parameterBag->has("base.time_machine.excludes")) {
+            $excludes = $parameterBag->get("base.time_machine.excludes");
+            if (is_array($excludes)) {
+                $this->excludes = $excludes;
+            }
+        }
         $this->environment   = $parameterBag->get("kernel.environment"); 
        
         //
@@ -528,7 +652,10 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
 
         // Compress and transfer
-        $output = $this->buildArchive($this->getCacheDir() . "/" . $prefix . "/application.tar", getcwd(), [$this->cacheDir], false, false);
+        $excludes = array_merge([$this->cacheDir], $this->getExcludes());
+        $this->assertEnoughFreeSpace(getcwd(), $excludes);
+
+        $output = $this->buildArchive($this->getCacheDir() . "/" . $prefix . "/application.tar", getcwd(), $excludes, false, false);
         $output = $this->buildCompressedArchive($this->getCacheDir() . "/" . $prefix . ".tar", $this->getCacheDir() . "/" . $prefix);
         $outputDir = $this->getCacheDir() . "/" . $prefix;
         if (is_dir($outputDir)) {
@@ -714,11 +841,22 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         // Prepare tarball archive
         $output = str_replace(getcwd(), ".", $output);
         $directory = str_replace(getcwd(), ".", $directory);
-        $excludes = array_map(fn($o) => str_replace(getcwd(), ".", $o), $excludes);
+        $excludes = array_map(
+            fn($o) => str_replace(getcwd(), ".", $o),
+            array_filter($excludes, fn($o) => $o !== null && $o !== "")
+        );
 
         $exclusions = "";
         foreach ($excludes as $exclude) {
-            $exclusions .= "--exclude='" . $exclude . "'";
+
+            if ($exclude === null || $exclude === "") {
+                continue;
+            }
+
+            // NB. the trailing space matters: concatenated back to back, tar reads
+            // the whole run as a single pattern, matches nothing, and archives
+            // everything without any error at all.
+            $exclusions .= "--exclude=" . escapeshellarg($exclude) . " ";
         }
 
         if($verbose) $this->output?->section()->writeln("<info>- Preparing tarball archive:</info> ./" . basename($output). " (temporary working directory: ".escapeshellarg($directory).")");

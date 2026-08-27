@@ -21,6 +21,12 @@ abstract class AbstractBaseExtension extends Extension
             }
 
             if (is_array($value)) {
+
+                // Also expose the array itself, not just its flattened leaves:
+                // a list-valued option (e.g. `base.time_machine.excludes`) would
+                // otherwise only ever exist as `<key>.0`, `<key>.1`, .. and be
+                // unreachable as a single parameter.
+                $container->setParameter($key, $value);
                 $this->setConfiguration($container, $value, $key);
             } else {
                 $container->setParameter($key, $value);
