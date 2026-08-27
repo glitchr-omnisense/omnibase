@@ -139,7 +139,9 @@ class Semantic implements TranslatableInterface, IconizeInterface
 
         $dom = new DomDocument();
         $encoding = mb_detect_encoding($text);
-        $dom->loadHTML(mb_convert_encoding($text, 'UTF-8', $encoding), LIBXML_NOERROR);
+        // Charset hint is load-bearing - see LinkEnhancer for the full note: without
+        // it libxml treats this UTF-8 fragment as ISO-8859-1 and doubles every accent.
+        $dom->loadHTML('<?xml encoding="UTF-8" ?>' . mb_convert_encoding($text, 'UTF-8', $encoding), LIBXML_NOERROR);
 
         $xpath = new DOMXPath($dom);
         foreach ($xpath->query('//text()') as $text) {

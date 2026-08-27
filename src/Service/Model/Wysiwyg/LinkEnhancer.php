@@ -50,7 +50,17 @@ class LinkEnhancer implements LinkEnhancerInterface
 
             $encoding = mb_detect_encoding($entry);
             $dom = new DOMDocument('1.0', $encoding);
-            $dom->loadHTML(mb_convert_encoding($entry, 'UTF-8', $encoding), LIBXML_NOERROR);
+
+            // The "<?xml encoding" prefix is load-bearing, NOT decoration: given an
+            // HTML fragment with no charset declaration, libxml assumes ISO-8859-1
+            // and decodes each UTF-8 byte as its own character, so saveHTML() below
+            // re-encodes them and every accent comes back doubled ("é" -> "Ã©").
+            // Passing the encoding to the DOMDocument constructor does NOT prevent
+            // this - that argument only labels the output document, it has no effect
+            // on how loadHTML() decodes its input. Found live: every article whose
+            // stored content contains a link (this enhancer's own entry condition)
+            // rendered as mojibake on the public site.
+            $dom->loadHTML('<?xml encoding="UTF-8" ?>' . mb_convert_encoding($entry, 'UTF-8', $encoding), LIBXML_NOERROR);
 
             $tags = $dom->getElementsByTagName("a");
             if (count($tags) < 1) {
