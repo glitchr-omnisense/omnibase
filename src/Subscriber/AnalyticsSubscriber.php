@@ -79,7 +79,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         if ($this->router->isProfiler()) {
             return;
         }
-        if (!$this->router->isEasyAdmin()) {
+        if (!$this->router->isAdmin()) {
             return;
         }
 

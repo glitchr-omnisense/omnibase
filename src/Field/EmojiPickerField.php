@@ -20,7 +20,7 @@ final class EmojiPickerField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath('@EasyAdmin/crud/field/emoji.html.twig')
+            ->setTemplatePath('@Admin/crud/field/emoji.html.twig')
             ->setFormType(EmojiPickerType::class);
     }
 }

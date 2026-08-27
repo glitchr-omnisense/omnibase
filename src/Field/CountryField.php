@@ -19,7 +19,7 @@ class CountryField extends SelectField implements FieldInterface
             ->setTemplateName('crud/field/country')
             ->setFormType(CountryType::class)
             ->setChoices(CountryType::getChoices())
-            ->setTemplatePath('@EasyAdmin/crud/field/country.html.twig')
+            ->setTemplatePath('@Admin/crud/field/country.html.twig')
             ->addCssClass('field-country');
     }
 }

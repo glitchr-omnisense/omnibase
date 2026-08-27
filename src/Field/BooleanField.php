@@ -28,7 +28,7 @@ final class BooleanField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/boolean')
-            ->setTemplatePath('@EasyAdmin/crud/field/boolean.html.twig')
+            ->setTemplatePath('@Admin/crud/field/boolean.html.twig')
             ->setFormType(BooleanType::class)
             ->addCssClass('field-boolean')
             ->setTextAlign(TextAlign::CENTER)

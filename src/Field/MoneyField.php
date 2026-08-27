@@ -34,7 +34,7 @@ final class MoneyField implements FieldInterface
             ->setCustomOption(self::OPTION_CURRENCY_PROPERTY_PATH, null)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, 2)
             ->setCustomOption(self::OPTION_STORED_AS_CENTS, true)
-            ->setTemplatePath('@EasyAdmin/crud/field/money.html.twig');
+            ->setTemplatePath('@Admin/crud/field/money.html.twig');
     }
 
     public function useSwap(bool $swap = true): self

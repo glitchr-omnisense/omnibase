@@ -162,10 +162,6 @@ class AdvancedRouter implements AdvancedRouterInterface
         return $this->debug;
     }
 
-    public function isAdmin(mixed $request = null): bool
-    {
-        return $this->isEasyAdmin($request) || $this->isProfiler($request);
-    }
     public function isProfiler(mixed $request = null): bool
     {
         if (!$request) {
@@ -226,7 +222,7 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function isMainApplication(mixed $request = null): bool
     {
         if ($this->isProfiler($request)) return false;
-        if ($this->isEasyAdmin($request)) return false;
+        if ($this->isAdmin($request)) return false;
         if ($this->isUX($request)) return false;
         if ($this->isAPI($request)) return false;
 
@@ -275,7 +271,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         return str_starts_with($route, "_wdt");
     }
 
-    public function isEasyAdmin(mixed $request = null): bool
+    public function isAdmin(mixed $request = null): bool
     {
         if (!$request) {
             $request = $this->requestStack->getCurrentRequest();
@@ -304,8 +300,8 @@ class AdvancedRouter implements AdvancedRouterInterface
             $parents[] = $parent;
         }
 
-        $eaParents = array_filter($parents, fn($c) => str_starts_with($c, "EasyCorp\Bundle\EasyAdminBundle") || str_starts_with($c, "Base\Admin\Controller"));
-        return !empty($eaParents);
+        $adminParents = array_filter($parents, fn($c) => str_starts_with($c, "Base\Admin\Controller"));
+        return !empty($adminParents);
     }
 
     public function getUrl(

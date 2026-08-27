@@ -840,7 +840,7 @@
     {% if group and allow_add %}
         <button type="button" class="btn btn-link form-collection-add-button">
             <i class="fa-solid fa-plus pr-1"></i>
-            {{ '@EasyAdminBundle.action.add_new_item'|trans }}
+            {{ '@fields.collection.add_item'|trans }}
         </button>
     {% endif %}
 
@@ -892,7 +892,7 @@
         {% set allows_deleting_items = form_parent(form).vars.allow_delete %}
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
-                    title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
+                    title="{{ '@fields.collection.remove_item'|trans }}">
                 <i class="fa-regular fa-fw fa-trash-alt"></i>
             </button>
         {% endset %}
@@ -1067,7 +1067,7 @@
     {% if allow_add %}
         <button type="button" class="btn btn-link form-array-add-button">
             <i class="fa-solid fa-plus pr-1"></i>
-            {{ '@EasyAdminBundle.action.add_new_item'|trans }}
+            {{ '@fields.collection.add_item'|trans }}
         </button>
     {% endif %}
 
@@ -1097,7 +1097,7 @@
         {% set allows_deleting_items = form_parent(form).vars.allow_delete %}
         {% set delete_item_button %}
             <button type="button" tabindex="-1" class="btn btn-link btn-link-danger form-array-delete-button"
-                    title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
+                    title="{{ '@fields.collection.remove_item'|trans }}">
                 <i class="fa-regular fa-fw fa-trash-alt"></i>
             </button>
         {% endset %}

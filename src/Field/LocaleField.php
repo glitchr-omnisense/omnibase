@@ -31,7 +31,7 @@ class LocaleField implements FieldInterface
             ->setFormType(LocaleType::class)
             ->addCssClass('field-locale')
             ->setDefaultColumns('col-md-5 col-xxl-4')
-            ->setTemplatePath('@EasyAdmin/crud/field/country.html.twig')
+            ->setTemplatePath('@Admin/crud/field/country.html.twig')
             ->setCustomOption(self::OPTION_SHOW_CODE, false)
             ->setCustomOption(self::OPTION_SHOW_NAME, true)
             ->setCustomOption(self::OPTION_LOCALE_CODES_TO_KEEP, null)

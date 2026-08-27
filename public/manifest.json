@@ -1,8 +1,6 @@
 {
   "./form-defer.datetime.css": "/bundles/base/form-defer.datetime.604c58d2.css",
   "./form-defer.datetime.js": "/bundles/base/form-defer.datetime.f641aa3b.js",
-  "./easyadmin-async.css": "/bundles/base/easyadmin-async.a4508e13.css",
-  "./easyadmin-async.js": "/bundles/base/easyadmin-async.9cbe9b2f.js",
   "./base-async.css": "/bundles/base/base-async.25c495ee.css",
   "./base-async.js": "/bundles/base/base-async.ab81de0f.js",
   "./240.f0b45cba.js": "/bundles/base/240.f0b45cba.js",
@@ -28,7 +26,6 @@
   "./base-defer.js": "/bundles/base/base-defer.9997b95f.js",
   "./951.67a4d524.js": "/bundles/base/951.67a4d524.js",
   "./base-async-mobile.css": "/bundles/base/base-async-mobile.c150b274e88f97b747ce.css",
-  "./easyadmin-async-mobile.css": "/bundles/base/easyadmin-async-mobile.d9eadde4a245864c88ae.css",
   "./metadata/icons.yml": "/bundles/base/metadata/icons.yml",
   "./fonts/fa-solid-900.ttf": "/bundles/base/fonts/fa-solid-900.2582b0e4bcf85eceead0de3fd9035c90.ttf",
   "./fonts/fa-brands-400.ttf": "/bundles/base/fonts/fa-brands-400.1815e00441357e01619e5793e1caa78a.ttf",

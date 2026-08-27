@@ -22,6 +22,6 @@ class StateField extends SelectField
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ALL)
             ->setTextAlign(TextAlign::LEFT)
             ->setFormTypeOption('capitalize', false)
-            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
+            ->setTemplatePath('@Admin/crud/field/select.html.twig');
     }
 }

@@ -4,31 +4,6 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use \Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
-use Base\Field\Configurator\LocaleConfigurator;
-use Base\Field\Configurator\TextConfigurator;
-use Base\Field\Configurator\WysiwygConfigurator;
-use Base\Field\Configurator\StockConfigurator;
-use Base\Field\Configurator\MoneyConfigurator;
-use Base\Field\Configurator\CurrencyConfigurator;
-use Base\Field\Configurator\EmailConfigurator;
-use Base\Field\Configurator\DateTimePickerConfigurator;
-use Base\Field\Configurator\CollectionConfigurator;
-use Base\Field\Configurator\ArrayConfigurator;
-use Base\Field\Configurator\SlugConfigurator;
-use Base\Field\Configurator\CropperConfigurator;
-use Base\Field\Configurator\FileConfigurator;
-use Base\Field\Configurator\TranslationConfigurator;
-use Base\Field\Configurator\BooleanConfigurator;
-use Base\Field\Configurator\AssociationConfigurator;
-use Base\Field\Configurator\AssociationFileConfigurator;
-use Base\Field\Configurator\SelectConfigurator;
-use Base\Field\Configurator\RoleConfigurator;
-use Base\Field\Configurator\StateConfigurator;
-use Base\Field\Configurator\CountryConfigurator;
-use Base\Field\Configurator\QuadrantConfigurator;
-use Base\Field\Configurator\DiscriminatorConfigurator;
-use Base\Field\Configurator\AttributeConfigurator;
-use Base\Field\Configurator\IconConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 

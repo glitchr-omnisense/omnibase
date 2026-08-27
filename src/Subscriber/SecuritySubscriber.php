@@ -202,14 +202,14 @@ class SecuritySubscriber implements EventSubscriberInterface
                 throw new NotFoundHttpException();
             }
 
-            if ($this->router->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND")) {
+            if ($this->router->isAdmin() && !$this->authorizationChecker->isGranted("BACKEND")) {
                 throw new NotFoundHttpException();
             }
 
             //
             // Nonetheless exception access is always possible
             // Let's notify connected user that there is a special access grant for this page
-            if (!$this->router->isProfiler() && !$this->router->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
+            if (!$this->router->isProfiler() && !$this->router->isAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
                 if ($specialGrant) {
                     $notification = new Notification("access_restricted." . $restrictionType . ".exception");
                     $notification->send("info");
@@ -230,7 +230,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 if ($specialGrant) {
 
                     // If not let them know that this page is locked for others
-                    if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !$this->router->isAdmin()) {
+                    if ($this->authorizationChecker->isGranted("ROLE_SUPERADMIN") && !($this->router->isAdmin() || $this->router->isProfiler())) {
                         $notification = new Notification("access_restricted." . $restrictionType . ".message");
                         $notification->send("warning");
                     }
@@ -311,7 +311,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             $response = $event->getResponse();
             $alreadyRedirected = $response && $response->getStatusCode() == 302;
-            $isException = $this->router->isEasyAdmin() || $this->router->isProfiler() || !$this->router->isSecured();
+            $isException = $this->router->isAdmin() || $this->router->isProfiler() || !$this->router->isSecured();
 
             if ($alreadyRedirected || $isException) {
                 $callbackFn();

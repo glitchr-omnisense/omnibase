@@ -69,7 +69,7 @@ class ErrorController extends AbstractController
      * front-end's exception.html.twig - matched by request PATH, not the
      * resolved route name: a genuinely unmatched 404 never gets a
      * "_route" attribute set at all, so route-name-based admin detection
-     * (AdvancedRouter::isEasyAdmin()) silently misses exactly the most
+     * (AdvancedRouter::isAdmin()) silently misses exactly the most
      * common admin error case (a bad/typo'd /admin/... URL). Falls back
      * to the front-end template if base-bundle-admin isn't installed (no
      * "@Admin" Twig namespace registered) or its error.html.twig is

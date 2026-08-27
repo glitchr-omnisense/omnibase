@@ -15,7 +15,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * the counter writes never add latency to what the visitor is waiting on.
  *
  * Not to be confused with the pre-existing Base\Subscriber\AnalyticsSubscriber
- * (an unrelated, currently-inert - gated behind the now-dead isEasyAdmin()
+ * (an unrelated, currently-inert - gated behind the now-dead isAdmin()
  * check - "online users" heartbeat + Google Analytics live-stats puller).
  * That one is untouched by this; naming this class PageViewSubscriber
  * specifically to avoid colliding with it.

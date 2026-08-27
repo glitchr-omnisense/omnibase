@@ -21,6 +21,6 @@ class RoleField extends SelectField
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ALL)
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setTextAlign(TextAlign::RIGHT)
-            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
+            ->setTemplatePath('@Admin/crud/field/select.html.twig');
     }
 }

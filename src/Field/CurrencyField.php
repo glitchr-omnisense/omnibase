@@ -15,6 +15,6 @@ class CurrencyField extends SelectField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(CurrencyType::class)
-            ->setTemplatePath('@EasyAdmin/crud/field/currency.html.twig');
+            ->setTemplatePath('@Admin/crud/field/currency.html.twig');
     }
 }

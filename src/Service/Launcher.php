@@ -83,7 +83,7 @@ class Launcher implements LauncherInterface
         if ($this->router->isProfiler()) {
             return false;
         }
-        if ($this->router->isEasyAdmin()) {
+        if ($this->router->isAdmin()) {
             return false;
         }
         if ($this->router->isSecured()) {

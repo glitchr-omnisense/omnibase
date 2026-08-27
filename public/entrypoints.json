@@ -16,14 +16,6 @@
         "/bundles/base/base-defer.9997b95f.js"
       ]
     },
-    "easyadmin-async": {
-      "css": [
-        "/bundles/base/easyadmin-async.a4508e13.css"
-      ],
-      "js": [
-        "/bundles/base/easyadmin-async.9cbe9b2f.js"
-      ]
-    },
     "admin-charts": {
       "js": [
         "/bundles/base/admin-charts.a599e7fe.js"

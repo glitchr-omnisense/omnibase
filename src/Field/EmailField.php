@@ -30,7 +30,7 @@ class EmailField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/email')
-            ->setTemplatePath('@EasyAdmin/crud/field/email.html.twig')
+            ->setTemplatePath('@Admin/crud/field/email.html.twig')
             ->setFormType(EmailType::class)
             ->setTextAlign(TextAlign::CENTER)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON)

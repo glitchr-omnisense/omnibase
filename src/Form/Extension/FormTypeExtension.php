@@ -87,7 +87,7 @@ class FormTypeExtension extends AbstractTypeExtension
             $this->applyEA($view, $form);
         }
 
-        if ($this->authorizationChecker->isGranted(UserRole::ADMIN) && $this->router->isEasyAdmin()) {
+        if ($this->authorizationChecker->isGranted(UserRole::ADMIN) && $this->router->isAdmin()) {
             $this->markDbProperties($view, $form, $options);
             $this->markOptions($view, $form, $options);
         }

@@ -34,7 +34,7 @@ final class AttributeField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath('@EasyAdmin/crud/field/attribute.html.twig')
+            ->setTemplatePath('@Admin/crud/field/attribute.html.twig')
             ->setFormType(AttributeType::class)
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)

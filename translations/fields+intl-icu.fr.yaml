@@ -104,6 +104,8 @@ select:
 collection:
   empty: Cette collection est vide !
   entry: Entrée
+  add_item: Ajouter un élément
+  remove_item: Supprimer cet élément
 
 array:
   key: "Variable"

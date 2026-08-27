@@ -18,7 +18,7 @@ class ForexField extends SelectField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(ForexType::class)
-            ->setTemplatePath('@EasyAdmin/crud/field/icon.html.twig')
+            ->setTemplatePath('@Admin/crud/field/icon.html.twig')
             ->setTextAlign(TextAlign::CENTER);
     }
 }

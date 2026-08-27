@@ -24,7 +24,7 @@ class ArrayField extends CollectionField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/collection')
-            ->setTemplatePath('@EasyAdmin/crud/field/collection.html.twig')
+            ->setTemplatePath('@Admin/crud/field/collection.html.twig')
             ->setFormType(ArrayType::class)
             ->setCustomOption(self::OPTION_ALLOW_ADD, true)
             ->setCustomOption(self::OPTION_ALLOW_DELETE, true)

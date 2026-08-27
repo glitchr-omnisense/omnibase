@@ -20,6 +20,6 @@ class GenderField extends SelectField implements FieldInterface
             ->setTemplateName('crud/field/text')
             ->setFormType(GenderType::class)
             ->setCustomOption(SelectField::OPTION_CLASS, Gender::class)
-            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
+            ->setTemplatePath('@Admin/crud/field/select.html.twig');
     }
 }

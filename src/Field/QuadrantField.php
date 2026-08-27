@@ -32,7 +32,7 @@ final class QuadrantField implements FieldInterface
             ->setFormType(QuadrantType::class)
             ->addCssClass('field-quadrant')
             ->addCssClass('quadrant-widget')
-            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
+            ->setTemplatePath('@Admin/crud/field/select.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->showIconOnly()
             ->setColumns(2)

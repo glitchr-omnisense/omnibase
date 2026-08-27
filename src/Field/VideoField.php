@@ -20,7 +20,7 @@ class VideoField extends FileField implements FieldInterface
             ->setFormType(VideoType::class)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
-            ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
+            ->setTemplatePath('@Admin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet('data_class', null)
             ->setCustomOption(self::OPTION_SHOWFIRST, true)

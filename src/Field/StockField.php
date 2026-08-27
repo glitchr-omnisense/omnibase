@@ -26,7 +26,7 @@ final class StockField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/stock')
-            ->setTemplatePath('@EasyAdmin/crud/field/stock.html.twig')
+            ->setTemplatePath('@Admin/crud/field/stock.html.twig')
             ->setFormType(StockType::class)
             ->addCssClass('field-stock')
             ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)

@@ -30,7 +30,7 @@ class DiscriminatorField extends SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "text")
             ->setIconAlign(TextAlign::RIGHT)->hideOnForm()
             ->setTextAlign(TextAlign::LEFT)->setColumns(6)
-            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
+            ->setTemplatePath('@Admin/crud/field/select.html.twig');
     }
 
     public function showColumnLabel(bool $show = true): self

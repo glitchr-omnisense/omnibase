@@ -25,7 +25,7 @@ class AdminVoter extends Voter
     {
         // Voter only support "User" objects and one specific ballot type..
         // Check attribute first to short-circuit expensive route resolution
-        return $attribute == self::BACKEND && $this->router->isAdmin();
+        return $attribute == self::BACKEND && ($this->router->isAdmin() || $this->router->isProfiler());
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool

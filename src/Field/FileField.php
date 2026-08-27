@@ -37,7 +37,7 @@ class FileField implements FieldInterface
             ->setFormType(FileType::class)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
-            ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
+            ->setTemplatePath('@Admin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setCustomOption(self::OPTION_ALLOW_URL, false)
             ->setCustomOption(self::OPTION_SHOWFIRST, false)

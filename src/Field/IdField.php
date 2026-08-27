@@ -21,7 +21,7 @@ final class IdField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/id')
-            ->setTemplatePath('@EasyAdmin/crud/field/id.html.twig')
+            ->setTemplatePath('@Admin/crud/field/id.html.twig')
             ->setFormType(HiddenType::class)
             ->addCssClass('field-id')
             ->setCustomOption(self::OPTION_MAX_LENGTH, null)

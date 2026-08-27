@@ -19,7 +19,7 @@ final class ColorPickerField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath('@EasyAdmin/crud/field/color.html.twig')
+            ->setTemplatePath('@Admin/crud/field/color.html.twig')
             ->setFormType(ColorPickerType::class);
     }
 }

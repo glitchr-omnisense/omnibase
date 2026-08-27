@@ -19,7 +19,7 @@ class IconField extends SelectField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(IconType::class)
-            ->setTemplatePath('@EasyAdmin/crud/field/icon.html.twig')
+            ->setTemplatePath('@Admin/crud/field/icon.html.twig')
             ->setTextAlign(TextAlign::CENTER);
     }
 

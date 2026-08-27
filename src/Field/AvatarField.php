@@ -20,7 +20,7 @@ class AvatarField extends ImageField implements FieldInterface
             ->setFormType(AvatarType::class)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
-            ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
+            ->setTemplatePath('@Admin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setColumns(2)
             ->setFormTypeOptionIfNotSet('data_class', null)

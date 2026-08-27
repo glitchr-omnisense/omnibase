@@ -21,7 +21,7 @@ final class SlugField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath('@EasyAdmin/crud/field/slug.html.twig')
+            ->setTemplatePath('@Admin/crud/field/slug.html.twig')
             ->setFormType(SlugType::class)
             ->showLeadingHash()
             ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)

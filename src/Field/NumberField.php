@@ -30,7 +30,7 @@ final class NumberField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/number')
-            ->setTemplatePath('@EasyAdmin/crud/field/number.html.twig')
+            ->setTemplatePath('@Admin/crud/field/number.html.twig')
             ->setFormType(NumberType::class)
             ->addCssClass('field-number')
             ->setDefaultColumns(3)

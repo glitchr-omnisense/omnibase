@@ -65,6 +65,8 @@ select:
 collection:
   empty: This collection is empty !
   entry: Entry
+  add_item: Add a new item
+  remove_item: Remove this item
 
 array:
   key: "Key"

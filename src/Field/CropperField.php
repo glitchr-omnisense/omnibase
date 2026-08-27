@@ -24,7 +24,7 @@ class CropperField implements FieldInterface
             ->setFormType(ImageType::class)
             ->addCssClass('field-cropper')
             ->addCssClass('cropper-widget')
-            ->setTemplatePath('@EasyAdmin/crud/field/cropper.html.twig')
+            ->setTemplatePath('@Admin/crud/field/cropper.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet('data_class', null)
             ->setCustomOption(self::OPTION_SHOWFIRST, true)

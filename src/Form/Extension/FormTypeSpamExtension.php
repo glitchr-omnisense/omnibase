@@ -60,7 +60,7 @@ class FormTypeSpamExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'spam_protection' => ($this->defaultEnabled && !$this->router->isEasyAdmin())
+            'spam_protection' => ($this->defaultEnabled && !$this->router->isAdmin())
         ]);
     }
 

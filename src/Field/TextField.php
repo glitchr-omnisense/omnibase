@@ -26,7 +26,7 @@ class TextField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath('@EasyAdmin/crud/field/text.html.twig')
+            ->setTemplatePath('@Admin/crud/field/text.html.twig')
             ->setFormType(TextType::class)
             ->addCssClass('field-text')
             ->setDefaultColumns('col-md-6 col-xxl-5')

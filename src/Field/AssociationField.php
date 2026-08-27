@@ -44,7 +44,7 @@ final class AssociationField implements FieldInterface
             ->setFormType(AssociationType::class)
             ->addCssClass('field-entity')
             ->addCssClass('file-widget')
-            ->setTemplatePath('@EasyAdmin/crud/field/association.html.twig')
+            ->setTemplatePath('@Admin/crud/field/association.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet('class', null)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, 'count')

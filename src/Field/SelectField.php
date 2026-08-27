@@ -53,7 +53,7 @@ class SelectField implements FieldInterface
             ->setTemplateName('crud/field/text')
             ->setFormType(SelectType::class)
             ->useHtml(false) // Do not use HTML by default in EasyAdmin.. (line height are constrained)
-            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
+            ->setTemplatePath('@Admin/crud/field/select.html.twig')
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ALL)

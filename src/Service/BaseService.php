@@ -537,9 +537,9 @@ class BaseService implements RuntimeExtensionInterface
     /**
      * @return bool
      */
-    public function isEasyAdmin()
+    public function isAdmin()
     {
-        return $this->getRouter()->isEasyAdmin();
+        return $this->getRouter()->isAdmin();
     }
 
     /**
