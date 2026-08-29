@@ -47,7 +47,7 @@ profile:
     likes: "likes"
     member: "Member"
     logout: "Sign out"
-    recentThreads: "Recent posts"
+    recentThreads: "Latest posts"
     accountSecurity: "Account security"
     notEnabled: "Not enabled"
     notConnected: "Not linked"

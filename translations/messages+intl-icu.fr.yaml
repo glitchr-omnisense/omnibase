@@ -47,7 +47,7 @@ profile:
     likes: "j'aime"
     member: "Membre"
     logout: "Se déconnecter"
-    recentThreads: "Publications récentes"
+    recentThreads: "Dernières publications"
     accountSecurity: "Sécurité du compte"
     notEnabled: "Non activée"
     notConnected: "Non lié"
