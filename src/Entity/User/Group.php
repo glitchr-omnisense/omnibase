@@ -12,6 +12,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Base\Database\Attribute\Cache;
 
+use Base\Entity\User\Attribute\Action\GrantPermissionAdapter;
+use Base\Entity\User\Attribute\Action\GrantRoleAdapter;
+use Base\Entity\User\Attribute\GroupAction;
 use Base\Entity\User\Attribute\GroupRule;
 use Base\Entity\User\Attribute\GroupScope;
 use Doctrine\ORM\Mapping as ORM;
@@ -38,6 +41,7 @@ class Group implements IconizeInterface
         $this->penalties = new ArrayCollection();
         $this->rules = new ArrayCollection();
         $this->scopes = new ArrayCollection();
+        $this->actions = new ArrayCollection();
 
         // createdAt is NOT NULL and nothing else ever set it, so persisting a
         // freshly constructed Group failed outright with an integrity
@@ -207,6 +211,80 @@ class Group implements IconizeInterface
         $this->scopes->removeElement($scope);
 
         return $this;
+    }
+
+    #[ORM\OneToMany(targetEntity: GroupAction::class, mappedBy: "group", orphanRemoval: true, cascade: ["persist", "remove"])]
+    protected $actions;
+
+    public function getActions(): Collection
+    {
+        return $this->actions;
+    }
+
+    public function addAction(GroupAction $action): self
+    {
+        if (!$this->actions->contains($action)) {
+            $this->actions[] = $action;
+            $action->setGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAction(GroupAction $action): self
+    {
+        $this->actions->removeElement($action);
+
+        return $this;
+    }
+
+    /**
+     * Everything this group would award $subject, or nothing if it would not
+     * admit them.
+     *
+     * Computes; it does not grant. The marketplace's manager accumulates what
+     * its actions return and applies the total itself
+     * (`$discount += $action->apply($product)`), and the same separation is
+     * what lets this be used to SHOW somebody what reaching the next level
+     * would give them - a preview that grants nothing.
+     *
+     * Awards are merged and de-duplicated per kind, because two actions on one
+     * group may legitimately award the same role, and the caller wants the set
+     * rather than the tally.
+     *
+     * Returns e.g. ["roles" => ["ROLE_X"], "permissions" => ["ALLIANCE.SENIOR"]].
+     * The keys are the shapes the shipped adapters return; an adapter awarding
+     * something else lands under "other" rather than being silently dropped.
+     */
+    public function awardsFor(mixed $subject): array
+    {
+        if (!$this->isOpenTo($subject)) {
+            return [];
+        }
+
+        $awards = [];
+        foreach ($this->actions as $action) {
+            $awarded = $action->apply($subject);
+            if ($awarded === null) {
+                continue;
+            }
+
+            $kind = match (true) {
+                $action->getAdapter() instanceof GrantRoleAdapter => "roles",
+                $action->getAdapter() instanceof GrantPermissionAdapter => "permissions",
+                default => "other",
+            };
+
+            foreach (is_array($awarded) ? $awarded : [$awarded] as $one) {
+                $awards[$kind][] = $one;
+            }
+        }
+
+        foreach ($awards as $kind => $values) {
+            $awards[$kind] = array_values(array_unique($values, SORT_REGULAR));
+        }
+
+        return $awards;
     }
 
     /**
