@@ -14,6 +14,7 @@ use Base\Entity\User\Passkey;
 use App\Entity\User\Token;
 use Base\Entity\User\Group;
 use Base\Entity\User\Penalty;
+use Base\Entity\User\Sanction;
 use Base\Entity\User\Permission;
 use App\Entity\User\Notification;
 use Base\Database\Attribute\OrderColumn;
@@ -140,7 +141,7 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
         $this->permissions = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->groups = new ArrayCollection();
-        $this->penalties = new ArrayCollection();
+        $this->sanctions = new ArrayCollection();
 
         $this->connections = new ArrayCollection();
         $this->passkeys = new ArrayCollection();
@@ -620,28 +621,115 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
         return $this;
     }
 
-    #[ORM\ManyToMany(targetEntity: Penalty::class, inversedBy: "uid", orphanRemoval: true, cascade:["persist", "remove"])]
-    protected $penalties;
+    /**
+     * Every penalty this user has ever been given, spent ones included.
+     *
+     * A Sanction rather than the many-to-many this replaces, because a join
+     * row cannot say who issued a penalty, why, or when it lapses - see
+     * Base\Entity\User\Sanction.
+     */
+    #[ORM\OneToMany(targetEntity: Sanction::class, mappedBy: "user", orphanRemoval: true, cascade: ["persist", "remove"])]
+    protected $sanctions;
 
-    public function getPenalties(): Collection
+    public function getSanctions(): Collection
     {
-        return $this->penalties;
+        return $this->sanctions;
     }
 
-    public function addPenalty(Penalty $penalty): self
+    /** Only the ones still standing: not lifted, not lapsed. */
+    public function getActiveSanctions(?DateTimeInterface $at = null): Collection
     {
-        if (!$this->penalties->contains($penalty)) {
-            $this->penalties[] = $penalty;
+        return $this->sanctions->filter(fn (Sanction $sanction) => $sanction->isActive($at));
+    }
+
+    public function addSanction(Sanction $sanction): self
+    {
+        if (!$this->sanctions->contains($sanction)) {
+            $this->sanctions[] = $sanction;
+            $sanction->setUser($this);
         }
 
         return $this;
     }
 
-    public function removePenalty(Penalty $penalty): self
+    public function removeSanction(Sanction $sanction): self
     {
-        $this->penalties->removeElement($penalty);
+        $this->sanctions->removeElement($sanction);
 
         return $this;
+    }
+
+    /**
+     * The catalogue entries behind the sanctions still standing.
+     *
+     * Kept under the old name so callers asking "what penalties does this
+     * user have" still read naturally, but it now answers with what is in
+     * force rather than with everything ever recorded.
+     *
+     * @return Penalty[]
+     */
+    public function getPenalties(?DateTimeInterface $at = null): array
+    {
+        return array_values(array_filter(array_map(
+            fn (Sanction $sanction) => $sanction->getPenalty(),
+            $this->getActiveSanctions($at)->toArray()
+        )));
+    }
+
+    /**
+     * What this account is worth right now.
+     *
+     * The sum of every sanction still in force, plus whatever the groups it
+     * belongs to carry. Signed, because the catalogue is: a penalty may cost
+     * points and a credit may award them, so one number answers both "is this
+     * account in trouble" and "has it earned its way in somewhere".
+     *
+     * Group penalties count because membership is the point of a group - a
+     * group under sanction puts every member under it, without having to
+     * write the same sanction out per head.
+     *
+     * Not cached. The obvious cache is per-request, and the obvious bug is a
+     * moderator lifting a sanction and the score not moving until the next
+     * page load; callers that need it hot should hold it themselves.
+     */
+    public function getScore(?DateTimeInterface $at = null): int
+    {
+        $score = 0;
+
+        foreach ($this->sanctions as $sanction) {
+            $score += $sanction->getWeight($at);
+        }
+
+        foreach ($this->getGroups() as $group) {
+            $score += $group->getScore();
+        }
+
+        return $score;
+    }
+
+    /**
+     * Where that score puts them, as a discrete level.
+     *
+     * Thresholds are the lower bound of each level and must stay ascending.
+     * A public constant rather than a setting because nothing reads it yet:
+     * when levels start gating anything real this wants to move behind
+     * base.settings, and one constant is a smaller thing to move than a
+     * scattering of inline numbers.
+     */
+    public const LEVELS = [0, 100, 250, 500, 1000];
+
+    public function getLevel(?DateTimeInterface $at = null): int
+    {
+        $score = $this->getScore($at);
+
+        $level = 0;
+        foreach (static::LEVELS as $index => $threshold) {
+            if ($score >= $threshold) {
+                $level = $index;
+            }
+        }
+
+        return $level;
     }
 
     #[ORM\OneToMany(targetEntity:Notification::class, mappedBy:"user", orphanRemoval:true, cascade:["persist", "remove"])]

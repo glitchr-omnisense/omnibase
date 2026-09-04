@@ -2,7 +2,7 @@
 
 namespace Base\Repository\User;
 
-use App\Entity\User\Penalty;
+use Base\Entity\User\Penalty;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**

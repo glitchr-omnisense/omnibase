@@ -138,6 +138,26 @@ class Group implements IconizeInterface
         return $this;
     }
     
+    /**
+     * What belonging to this group costs, or earns.
+     *
+     * A group carries penalties directly rather than through Sanction: a
+     * penalty on a group is a standing property of the group, not an incident
+     * with a date and an author, and it applies to whoever is a member at the
+     * time rather than to the people who were members when it was issued.
+     *
+     * @see User::getScore() which adds this to each member's own total.
+     */
+    public function getScore(): int
+    {
+        $score = 0;
+        foreach ($this->penalties as $penalty) {
+            $score += $penalty->getWeight();
+        }
+
+        return $score;
+    }
+
     #[ORM\ManyToMany(targetEntity:Penalty::class, inversedBy:"gid")]
     protected $penalties;
 
