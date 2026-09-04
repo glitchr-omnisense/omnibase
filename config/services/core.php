@@ -229,6 +229,27 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
         ->autoconfigure();
 
+    // ...and the subscriber that HANDLES those events, which is the same bug
+    // one layer up: fixing the dispatchers above made thread.publishable fire,
+    // but this class was never defined either, so the only listeners left were
+    // the consuming app's own. Nothing set the thread's state.
+    //
+    // The visible symptom was a scheduled article that came due: the app
+    // subscriber mailed every newsletter subscriber, this one never flipped
+    // STATE_FUTURE to STATE_PUBLISH, and so the article stayed publishable.
+    // ThreadPublishableCommand only calls poke(), which touches updatedAt and
+    // relies on this subscriber for the actual transition - it even reports
+    // "These are now published" - so the cron re-sent the whole newsletter to
+    // every subscriber on its next run, every five minutes, indefinitely.
+    // Measured on beta before the fix: two runs, two newsletters, 24 queued
+    // mails for one article, and the state still STATE_FUTURE.
+    //
+    // Author and mention notifications live in the same handler, so they were
+    // silently dead for the same reason.
+    $services->set('Base\EntitySubscriber\ThreadSubscriber')
+        ->autowire()
+        ->autoconfigure();
+
     // Notifier
     $services->alias('App\Notifier\Notifier', 'Base\Notifier\Notifier');
     $services->alias('Base\Notifier\NotifierInterface', 'Base\Notifier\Notifier');
