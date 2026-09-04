@@ -229,6 +229,17 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
         ->autoconfigure();
 
+    // The one service that turns eligibility into a capability.
+    //
+    // Group::isOpenTo() and awardsFor() deliberately grant nothing, so
+    // something has to close the gap between "has earned this" and "has it".
+    // In fr.example.www that something is a single service,
+    // MarketplaceManager, and this is its counterpart for people.
+    $services->set('Base\Service\GroupManager')
+        ->autowire()
+        ->autoconfigure()
+        ->public();
+
     // ...and the subscriber that HANDLES those events, which is the same bug
     // one layer up: fixing the dispatchers above made thread.publishable fire,
     // but this class was never defined either, so the only listeners left were

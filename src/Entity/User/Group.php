@@ -303,8 +303,12 @@ class Group implements IconizeInterface
     {
         $inScope = $this->scopes->isEmpty();
         foreach ($this->scopes as $scope) {
-            // OR: any one scope bringing them into range is enough.
-            $inScope = $inScope || $scope->contains($subject);
+            // OR, and stop at the first hit: one scope bringing them into
+            // range is enough, and the rest may be doing real work to answer.
+            if ($scope->contains($subject)) {
+                $inScope = true;
+                break;
+            }
         }
 
         if (!$inScope) {
@@ -312,7 +316,7 @@ class Group implements IconizeInterface
         }
 
         foreach ($this->rules as $rule) {
-            // AND: every condition has to hold.
+            // AND, and stop at the first miss.
             if (!$rule->compliesWith($subject)) {
                 return false;
             }
