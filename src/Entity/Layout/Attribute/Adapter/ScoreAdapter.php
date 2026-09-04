@@ -4,6 +4,7 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractRuleAdapter;
+use Base\Enum\Operation;
 use Base\Field\Type\NumberType;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -11,29 +12,26 @@ use Base\Repository\Layout\Attribute\Adapter\ScoreAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 /**
- * "Is this account's score inside this band?"
+ * "Is this account's score <operation> this number?"
  *
- * The rule's value is a band, either end of which may be omitted:
+ * Modelled on the marketplace's TotalPriceAdapter rather than on a bespoke
+ * shape: the comparison is a stored Operation (LESS, GREATER_EQUAL, EQUAL...)
+ * rather than baked into the class, so one adapter covers every threshold a
+ * rule might want instead of needing a MinScoreAdapter and a MaxScoreAdapter.
+ * It also means a band is expressed the way the engine already expresses
+ * everything else - as two rules on the same subject, AND-ed together by the
+ * caller, which is exactly what MarketplaceManager does with $validRules &=.
  *
- *     {"min": 100}              at least 100
- *     {"max": -50}              at most -50, i.e. in trouble
- *     {"min": 100, "max": 499}  a single level's worth
- *
- * min is inclusive and max is exclusive, so consecutive bands can be written
- * as {0,100}, {100,250}, {250,500} without a gap or an overlap at the seam.
- *
- * The subject is anything that can state a score - a User today, and a Group
- * as well, since both grew a getScore(). Deliberately duck-typed rather than
- * type-hinted on User: this class lives in the layout engine, and making the
- * condition engine depend on the user model would stop the same rule being
- * pointed at anything else that learns to score itself later.
- *
- * A subject that cannot state a score does not "fail" the rule, it is simply
- * not something this rule can judge - see supports() and compliesWith().
+ * The subject is anything that can state a score - a User today, and a Group,
+ * since both grew a getScore(). Deliberately duck-typed rather than hinted on
+ * User: this class lives in the layout engine, and hinting it there would stop
+ * the same rule judging anything else that learns to score itself later. A
+ * subject that cannot state one returns false, the same way TotalPriceAdapter
+ * returns false for anything that is not an Order.
  */
 #[ORM\Entity(repositoryClass: ScoreAdapterRepository::class)]
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
-#[DiscriminatorEntry(value: "score")]
+#[DiscriminatorEntry(value: "rule_score")]
 class ScoreAdapter extends AbstractRuleAdapter
 {
     public static function __iconizeStatic(): ?array
@@ -53,57 +51,34 @@ class ScoreAdapter extends AbstractRuleAdapter
 
     public function resolve(mixed $value): mixed
     {
-        return $this->band($value);
+        return $value;
     }
 
     public function supports(mixed $value): bool
     {
-        $band = $this->band($value);
-
-        return $band["min"] !== null || $band["max"] !== null;
+        return is_numeric($value);
     }
 
     public function compliesWith(mixed $value, mixed $subject): bool
     {
         $score = $this->scoreOf($subject);
-        if ($score === null) {
+        if ($score === null || !is_numeric($value)) {
             return false;
         }
 
-        $band = $this->band($value);
+        $value = (int) $value;
 
-        if ($band["min"] !== null && $score < $band["min"]) {
-            return false;
-        }
-
-        // Exclusive, so adjacent bands meet without overlapping.
-        if ($band["max"] !== null && $score >= $band["max"]) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /** @return array{min: int|null, max: int|null} */
-    private function band(mixed $value): array
-    {
-        // A bare number is the common case ("at least N"), and writing it out
-        // as {"min": N} every time would be noise in the admin form.
-        if (is_int($value) || (is_string($value) && is_numeric($value))) {
-            return ["min" => (int) $value, "max" => null];
-        }
-
-        if (!is_array($value)) {
-            return ["min" => null, "max" => null];
-        }
-
-        $min = $value["min"] ?? null;
-        $max = $value["max"] ?? null;
-
-        return [
-            "min" => is_numeric($min) ? (int) $min : null,
-            "max" => is_numeric($max) ? (int) $max : null,
-        ];
+        return match ($this->operation) {
+            Operation::LT  => $score <   $value,
+            Operation::LTE => $score <=  $value,
+            Operation::EQ  => $score === $value,
+            Operation::NEQ => $score !== $value,
+            Operation::GT  => $score >   $value,
+            Operation::GTE => $score >=  $value,
+            // An adapter saved without an operation should not silently
+            // behave like one - see the class comment on why false.
+            default => false,
+        };
     }
 
     private function scoreOf(mixed $subject): ?int
@@ -119,5 +94,20 @@ class ScoreAdapter extends AbstractRuleAdapter
         }
 
         return null;
+    }
+
+    #[ORM\Column(type: "operation")]
+    protected $operation;
+
+    public function getOperation()
+    {
+        return $this->operation;
+    }
+
+    public function setOperation($operation): self
+    {
+        $this->operation = $operation;
+
+        return $this;
     }
 }

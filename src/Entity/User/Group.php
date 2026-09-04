@@ -7,10 +7,13 @@ use Base\Entity\User\Penalty;
 use Base\Entity\User\Permission;
 use Base\Service\Model\IconizeInterface;
 use DateTimeInterface;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Base\Database\Attribute\Cache;
 
+use Base\Entity\User\Attribute\GroupRule;
+use Base\Entity\User\Attribute\GroupScope;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\GroupRepository;
 
@@ -33,6 +36,14 @@ class Group implements IconizeInterface
         $this->members = new ArrayCollection();
         $this->permissions = new ArrayCollection();
         $this->penalties = new ArrayCollection();
+        $this->rules = new ArrayCollection();
+        $this->scopes = new ArrayCollection();
+
+        // createdAt is NOT NULL and nothing else ever set it, so persisting a
+        // freshly constructed Group failed outright with an integrity
+        // violation - found the first time one was created in code rather
+        // than by a fixture.
+        $this->createdAt = new DateTime("now");
     }
 
     #[ORM\Id]
@@ -138,6 +149,100 @@ class Group implements IconizeInterface
         return $this;
     }
     
+    /**
+     * Conditions on joining, and who they are about.
+     *
+     * Evaluated the way the marketplace evaluates a discount's - scopes OR-ed,
+     * rules AND-ed - so the two halves keep the meanings they have everywhere
+     * else in this engine: a scope says whether the group concerns you at all,
+     * a rule says whether you qualify.
+     *
+     * @see isOpenTo()
+     */
+    #[ORM\OneToMany(targetEntity: GroupRule::class, mappedBy: "group", orphanRemoval: true, cascade: ["persist", "remove"])]
+    protected $rules;
+
+    public function getRules(): Collection
+    {
+        return $this->rules;
+    }
+
+    public function addRule(GroupRule $rule): self
+    {
+        if (!$this->rules->contains($rule)) {
+            $this->rules[] = $rule;
+            $rule->setGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRule(GroupRule $rule): self
+    {
+        $this->rules->removeElement($rule);
+
+        return $this;
+    }
+
+    #[ORM\OneToMany(targetEntity: GroupScope::class, mappedBy: "group", orphanRemoval: true, cascade: ["persist", "remove"])]
+    protected $scopes;
+
+    public function getScopes(): Collection
+    {
+        return $this->scopes;
+    }
+
+    public function addScope(GroupScope $scope): self
+    {
+        if (!$this->scopes->contains($scope)) {
+            $this->scopes[] = $scope;
+            $scope->setGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function removeScope(GroupScope $scope): self
+    {
+        $this->scopes->removeElement($scope);
+
+        return $this;
+    }
+
+    /**
+     * Whether this group would admit $subject as things stand.
+     *
+     * Says nothing about whether they are already a member: this answers
+     * "have they earned it", so a group can be offered when it becomes
+     * reachable and a membership can be re-checked when a score moves.
+     *
+     * No scopes means the group concerns everybody - the right default for one
+     * whose entry is purely a matter of score. No rules means nothing is being
+     * asked of them, so it admits anyone in scope rather than nobody: a group
+     * still being configured must not read as "closed".
+     */
+    public function isOpenTo(mixed $subject): bool
+    {
+        $inScope = $this->scopes->isEmpty();
+        foreach ($this->scopes as $scope) {
+            // OR: any one scope bringing them into range is enough.
+            $inScope = $inScope || $scope->contains($subject);
+        }
+
+        if (!$inScope) {
+            return false;
+        }
+
+        foreach ($this->rules as $rule) {
+            // AND: every condition has to hold.
+            if (!$rule->compliesWith($subject)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * What belonging to this group costs, or earns.
      *

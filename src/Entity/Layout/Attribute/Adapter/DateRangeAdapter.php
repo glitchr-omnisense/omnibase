@@ -42,7 +42,7 @@ use Base\Database\Attribute\Cache;
  */
 #[ORM\Entity(repositoryClass: DateRangeAdapterRepository::class)]
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]
-#[DiscriminatorEntry(value: "date_range")]
+#[DiscriminatorEntry(value: "rule_dateRange")]
 class DateRangeAdapter extends AbstractRuleAdapter
 {
     public static function __iconizeStatic(): ?array
