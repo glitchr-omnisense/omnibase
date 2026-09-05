@@ -7,6 +7,7 @@ use Base\Service\ParameterBagInterface;
 use Base\Twig\Environment;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 
@@ -60,6 +61,20 @@ class DateTimePickerType extends AbstractType
                 "dateFormat" => "Y-m-d H:i", // Format must match... between format option and dateFormat (JS Format)
             ]
         ]);
+
+        // Merge whatever the caller passed OVER the defaults instead of
+        // replacing them. A caller that wants a date-only picker naturally
+        // writes ["enableTime" => false, "dateFormat" => "Y-m-d"], and with a
+        // plain default that silently dropped `locale` - leaving flatpickr in
+        // English on a French form. Only the keys actually given are
+        // overridden now, so a partial option stays partial.
+        $resolver->setNormalizer("datetimepicker", function (Options $options, $value) {
+            return array_merge([
+                "enableTime" => true,
+                "locale" => $this->localizer->getLocaleLang(),
+                "dateFormat" => "Y-m-d H:i",
+            ], is_array($value) ? $value : []);
+        });
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options): void

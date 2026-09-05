@@ -5,6 +5,7 @@ namespace Base\Controller\Backoffice\Crud;
 use Base\Admin\Controller\AbstractCrudController;
 use Base\Admin\Field\AvatarField;
 use Base\Admin\Field\BooleanField;
+use Base\Admin\Field\DateTimePickerField;
 use Base\Admin\Field\DateField;
 use Base\Admin\Field\DateTimeField;
 use Base\Admin\Field\EmailField;
@@ -51,10 +52,17 @@ class UserCrudController extends AbstractCrudController
         // column to introspect and threw on the synthetic property.
         // Needs a real fix (e.g. an explicit getter/setter data-mapper
         // override, or a dedicated OwnRoleType) before this is safe.
-        yield RoleField::new('roles')->setColumns(5);
-        yield EmailField::new('email')->setColumns(5);
-        yield DateField::new('birthdate')->hideOnIndex()->setColumns(2);
-        yield PasswordField::new('plainPassword')->onlyOnForms()->setRequired(false)->setColumns(10);
+        yield RoleField::new('roles')->setColumns(8);
+        yield EmailField::new('email')->setColumns(8);
+        // The same picker every other date in this admin uses. DateField is a
+        // native <input type="date">, which the browser renders in its own
+        // locale - so on a French form this was the one field showing
+        // mm/dd/yyyy, at its own height, next to fields styled by the app.
+        // Date-only: no time on a birthdate.
+        yield DateTimePickerField::new('birthdate')->hideOnIndex()->setColumns(4)
+            ->setFormTypeOption('format', 'yyyy-MM-dd')
+            ->setFormTypeOption('datetimepicker', ['enableTime' => false, 'dateFormat' => 'Y-m-d']);
+        yield PasswordField::new('plainPassword')->onlyOnForms()->setRequired(false)->setColumns(12);
         yield DateTimeField::new('activeAt')->hideOnForm();
         yield DateTimeField::new('updatedAt')->onlyOnDetail();
         yield DateTimeField::new('createdAt')->onlyOnDetail();
