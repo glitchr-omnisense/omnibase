@@ -70,11 +70,31 @@ window.addEventListener("load.form_type", function () {
             var icon = avatarUrl
                 ? '<img class="select2-avatar" src="' + avatarUrl.replace(/"/g, '\\"') + '"> '
                 : (iconAttributes ? '<i '+ iconAttributes + '></i> ' : '');
-            var externalLink = (href ? '<span><a target="_blank" href="'+href+'"><i class=\"fas fa-external-link-square-alt\"></i></span>' : '');
+            // The </a> was missing and the <i> unclosed, so the browser
+            // auto-closed the anchor around whatever followed - which is why
+            // the arrow's hit area bled into the row.
+            var externalLink = (href ? '<span class="select2-external"><a target="_blank" rel="noopener" href="'+href+'"><i class=\"fas fa-external-link-square-alt\"></i></a></span>' : '');
             var highlightSearch = option.html ? option.html : (icon + highlight_search(option.text, term) + externalLink);
             var shiftAttribute = ' style="margin-left:calc('+tab+' * '+depth+')" class=\"select2-selection__entry\" '+dataAttribute;
 
-            return $('<span '+shiftAttribute+'><span>' + highlightSearch + '</span></span>');
+            var $rendered = $('<span '+shiftAttribute+'><span>' + highlightSearch + '</span></span>');
+
+            // The arrow opens the record; it is not a way of choosing it.
+            // Select2 selects an option from a click anywhere inside the
+            // rendered row, so following the link ALSO added the entry to the
+            // field - reported live: one click, two outcomes, and the second
+            // one unwanted.
+            //
+            // Propagation is stopped rather than the default prevented, so the
+            // link still opens normally in its new tab. mousedown and mouseup
+            // are covered as well as click, because select2 commits a choice
+            // on the mouse events rather than on the synthesised click, and
+            // stopping only the click would still have selected the row.
+            $rendered.find('a').on('mousedown mouseup click', function (event) {
+                event.stopPropagation();
+            });
+
+            return $rendered;
         };
 
         var data = function (args)
