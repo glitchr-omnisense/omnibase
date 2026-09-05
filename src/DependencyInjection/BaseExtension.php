@@ -3,6 +3,8 @@
 namespace Base\DependencyInjection;
 
 use Base\Attributes\AttributeInterface;
+use Base\BaseBundle;
+use Doctrine\DBAL\Types\Type;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\EntityDispatcher\EventDispatcherInterface;
@@ -71,7 +73,8 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
 
     public function prepend(ContainerBuilder $builder): void
     {
-        
+        $this->prependDoctrineTypes($builder);
+
         $builder->prependExtensionConfig('twig_component', [
             'defaults' => [
                 'Base\\Twig\\Component\\' => [
@@ -84,5 +87,53 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Registers the Enum/Set classes as doctrine.dbal.types.
+     *
+     * BaseBundle::boot() also calls Type::addType() for these, but that is far too
+     * late: by the time boot() reaches it, entity metadata has already been built
+     * and CACHED. Attributes that ask "what Doctrine type is this field?" during
+     * loadClassMetadata therefore got null and silently declined - most visibly
+     * OrderColumn, whose companion ordering column (e.g. User::rolesPositions)
+     * never made it into the mapping. dev hid this because it rebuilds metadata
+     * lazily, after boot; test and prod cached the amputated version for good, so
+     * `doctrine:schema:update` created a table WITHOUT the column while the
+     * running app still SELECTed it - "Unknown column 'u0_.rolesPositions'".
+     *
+     * Declaring them here instead makes DoctrineBundle's ConnectionFactory
+     * register them while the connection is created, which necessarily precedes
+     * any metadata load through that entity manager. boot()'s registration is
+     * kept (it is hasType()-guarded, so it simply becomes a no-op) rather than
+     * removed, because it also covers the built-in overrides.
+     */
+    private function prependDoctrineTypes(ContainerBuilder $builder): void
+    {
+        $types = [];
+
+        $classList = array_merge(
+            BaseBundle::getAllClasses(BaseBundle::getBundleDir() . "/src/Enum"),
+            BaseBundle::getAllClasses(BaseBundle::getProjectDir() . "/src/Enum")
+        );
+
+        foreach ($classList as $className) {
+
+            if (!is_subclass_of($className, Type::class)) {
+                continue;
+            }
+
+            if (!method_exists($className, "getStaticName")) {
+                continue;
+            }
+
+            $types[$className::getStaticName()] = $className;
+        }
+
+        if (!$types) {
+            return;
+        }
+
+        $builder->prependExtensionConfig('doctrine', ['dbal' => ['types' => $types]]);
     }
 }
