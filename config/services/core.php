@@ -423,6 +423,19 @@ return static function (ContainerConfigurator $container): void {
         ->tag('form.type_extension')
         ->args([service('spam_checker'), service('advanced_router')]);
 
+    // Outgoing-mail trap: a hold-everything switch for the minutes after a
+    // hotfix, when you want to see what the site is about to send before it
+    // sends it. File-backed under var/ rather than the database or settings,
+    // because it has to work in exactly the situations where you distrust the
+    // application - and var/cache is wiped on deploy, var/ is not.
+    $services->set('Base\Mailer\MailTrap')
+        ->public(true)
+        ->args(['%kernel.project_dir%/var/mail-trap']);
+
+    $services->set('Base\Subscriber\MailTrapSubscriber')
+        ->args([service('Base\Mailer\MailTrap')])
+        ->tag('kernel.event_subscriber');
+
     // Console
     $services->set('Base\Console\Console')->public(true)->args([service('kernel')]);
     $services->set('Base\Console\Command')->public(true)->args([service('localizer'), service('translator'), service('doctrine.orm.entity_manager'), service('parameter_bag')]);
@@ -438,6 +451,7 @@ return static function (ContainerConfigurator $container): void {
         'Base\Console\Command\TimeMachineSnapshotCommand',
         'Base\Console\Command\TimeMachineSnapshotBackupCommand',
         'Base\Console\Command\TimeMachineSnapshotRestoreCommand',
+        'Base\Console\Command\MailTrapCommand',
     ];
 
     foreach ($commandServices as $command) {
@@ -453,6 +467,18 @@ return static function (ContainerConfigurator $container): void {
         }
         if (str_contains($command, 'TimeMachineSnapshot')) {
             $definition->args([service('time_machine'), service('flysystem')]);
+        }
+        // Setters, not args(): args() would replace the parent definition's
+        // own four arguments, which every Base\Console\Command constructor
+        // still expects.
+        //
+        // mailer.transports (the real transport chain), not the Mailer
+        // service: releasing a held message through Mailer would hand it
+        // straight back to the armed trap and capture it again.
+        if ($command === 'Base\Console\Command\MailTrapCommand') {
+            $definition
+                ->call('setMailTrap', [service('Base\Mailer\MailTrap')])
+                ->call('setMailerTransport', [service('mailer.transports')]);
         }
     }
 
