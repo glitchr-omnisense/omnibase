@@ -9,6 +9,7 @@ use Base\Form\FormFactory;
 use Base\Form\FormProxyInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ParameterBagInterface;
+use Base\Service\VersionManager;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -32,8 +33,11 @@ class FormTypeExtension extends AbstractTypeExtension
 
     protected AuthorizationCheckerInterface $authorizationChecker;
 
-    public function __construct(AdvancedRouterInterface $router, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, FormFactory $formFactory, FormProxyInterface $formProxy, ClassMetadataManipulator $classMetadataManipulator)
+    protected VersionManager $versionManager;
+
+    public function __construct(AdvancedRouterInterface $router, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, FormFactory $formFactory, FormProxyInterface $formProxy, ClassMetadataManipulator $classMetadataManipulator, VersionManager $versionManager)
     {
+        $this->versionManager = $versionManager;
         $this->parameterBag = $parameterBag;
         $this->authorizationChecker = $authorizationChecker;
 
@@ -90,6 +94,7 @@ class FormTypeExtension extends AbstractTypeExtension
         if ($this->authorizationChecker->isGranted(UserRole::ADMIN) && $this->router->isAdmin()) {
             $this->markDbProperties($view, $form, $options);
             $this->markOptions($view, $form, $options);
+            $this->markVersionable($view, $form);
         }
 
         foreach ($view->children as $field => $childView) {
@@ -198,6 +203,51 @@ class FormTypeExtension extends AbstractTypeExtension
 
                 unset($childView->vars['is_alias']);
             }
+        }
+    }
+
+    /**
+     * Hand each versioned field its own history, so form_div_layout can put a
+     * badge next to the label of the fields that actually have one.
+     *
+     * Runs per form node rather than once at the root: an article's translated
+     * fields live on a ThreadIntl sub-form, one per locale, and each of those
+     * has to be matched against the locale-prefixed keys of the parent's
+     * revisions. VersionManager handles both the anchoring and the memoisation
+     * that keeps this from being one query per locale tab.
+     */
+    public function markVersionable(FormView $view, FormInterface $form)
+    {
+        $data = $form->getData();
+        if (!is_object($data) || !$this->classMetadataManipulator->isEntity($data)) {
+            return;
+        }
+
+        $history = $this->versionManager->fieldHistory($data);
+        if (empty($history)) {
+            return;
+        }
+
+        // The badge is rendered by the bundle's own form theme, which must not
+        // hardcode an admin route: generate it here, and leave it null when
+        // the admin bundle is not installed. A null url makes the history
+        // read-only rather than making the badge disappear - knowing WHEN
+        // something changed is useful even where restoring is not offered.
+        $url = null;
+        try {
+            $url = $this->router->generate('admin_revision_value', ['id' => '__ID__']);
+        } catch (\Throwable) {
+            $url = null;
+        }
+
+        foreach ($history as $property => $entries) {
+            $childView = $view->children[$property] ?? null;
+            if ($childView === null || empty($entries)) {
+                continue;
+            }
+
+            $childView->vars['revisions'] = $entries;
+            $childView->vars['revisions_url'] = $url;
         }
     }
 

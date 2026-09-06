@@ -22,6 +22,7 @@ use Base\Database\Attribute\Slugify;
 use Base\Database\Attribute\Hierarchify;
 use Base\Database\Attribute\Cache;
 use Base\Database\Attribute\Trasheable;
+use Base\Database\Attribute\Versionable;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
@@ -208,6 +209,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 
     #[ORM\Column(type:"string", length:255, unique:true)]
     #[Slugify(reference:"title")]
+    #[Versionable]
     protected $slug;
 
     public function getSlug(): ?string
@@ -223,6 +225,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 
     #[ORM\Column(type:"thread_state")]
     #[AssertBase\NotBlank(groups:["new", "edit"])]
+    #[Versionable]
     protected $state;
 
     /**
@@ -306,6 +309,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 
     #[ORM\Column(type:"workflow_state")]
     #[AssertBase\NotBlank(groups:["new", "edit"])]
+    #[Versionable]
     protected $workflow;
 
     /**
@@ -402,6 +406,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy:"threads", cascade:["persist"])]
     #[OrderColumn(orderBy: "tagPositions")]
+    #[Versionable]
     protected $tags;
     protected $tagPositions;
 
@@ -442,6 +447,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
 
     #[ORM\ManyToMany(targetEntity:Taxon::class, inversedBy:"threads", cascade:["persist"])]
     #[OrderColumn(orderBy:"taxonPositions")]
+    #[Versionable]
     protected $taxa;
     protected $taxonPositions;
 
@@ -588,6 +594,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     #[ORM\Column(type:"datetime", nullable:true)]
+    #[Versionable]
     protected $publishedAt;
 
     public function getPublishedAt(): ?DateTimeInterface

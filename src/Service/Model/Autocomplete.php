@@ -31,6 +31,7 @@ class Autocomplete
     {
         $entryOptions["format"] ??= FORMAT_IDENTITY;
         $entryOptions["html"] ??= true;
+        $entryOptions["avatar"] ??= false;
 
         if ($entry == null) {
             return null;
@@ -57,11 +58,19 @@ class Autocomplete
             $data = $autocompleteData;
 
             // A User (or anything else exposing the same avatar-upload
-            // convention) gets its real profile picture in the chip instead
-            // of a generic icon - most useful exactly where a plain name is
-            // hardest to tell apart at a glance: several authors picked on
-            // the same entity. Falls through to the icon untouched when
-            // there's no media service wired in or no avatar set.
+            // convention) can show its real profile picture instead of a
+            // generic icon - most useful exactly where a plain name is hardest
+            // to tell apart at a glance: several authors picked on the same
+            // entity. Falls through to the icon untouched when there's no
+            // media service wired in or no avatar set.
+            //
+            // OPT-IN, and deliberately so: the icon it replaces is not
+            // decoration, it is __iconize() - for a User, the icon of their
+            // highest role. Swapping it for a photo silently drops that from
+            // every picker, and only for the people who happen to have
+            // uploaded one, which is the worst of both. A field that wants
+            // faces asks for them (SelectType's `avatar` option); everything
+            // else keeps saying what the entity IS.
             //
             // Thumbnail the PUBLIC accessor ("/images/<hash>/image.png"), never
             // getAvatarFile(). On a remote storage (S3) Uploader::get() streams the
@@ -72,7 +81,7 @@ class Autocomplete
             // select2 dropdown resolved to a dead path and served the no-image
             // placeholder. The public accessor is storage-independent and re-encodes
             // into a stable token that keeps working across requests.
-            if ($this->mediaService !== null) {
+            if ($this->mediaService !== null && ($entryOptions["avatar"] ?? false)) {
                 $avatarSource = match (true) {
                     method_exists($entry, "getAvatar") => $entry->getAvatar(),
                     method_exists($entry, "getAvatarFile") => $entry->getAvatarFile(),

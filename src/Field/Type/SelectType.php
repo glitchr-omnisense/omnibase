@@ -7,6 +7,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Service\LocalizerInterface;
+use Base\Service\MediaServiceInterface;
 use Base\Service\Model\Autocomplete;
 use Base\Service\Localizer;
 use Base\Service\ObfuscatorInterface;
@@ -101,7 +102,8 @@ class SelectType extends AbstractType implements DataMapperInterface
         AuthorizationChecker      $authorizationChecker,
         ObfuscatorInterface       $obfuscator,
         ParameterBagInterface     $parameterBag,
-        RouterInterface           $router
+        RouterInterface           $router,
+        ?MediaServiceInterface    $mediaService = null
     )
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -118,7 +120,14 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->router = $router;
 
-        $this->autocomplete = new Autocomplete($this->translator);
+        // WITH the media service, unlike every other `new Autocomplete()` in
+        // this bundle. Without it resolve() cannot thumbnail anything, so the
+        // avatar was silently dropped for the entries rendered server-side -
+        // i.e. exactly the ones already selected. Only the AJAX controller
+        // passed it, which is why a picked author showed a role icon in its
+        // chip while the same person showed a photo in the dropdown right
+        // below it.
+        $this->autocomplete = new Autocomplete($this->translator, $mediaService);
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
@@ -196,6 +205,15 @@ class SelectType extends AbstractType implements DataMapperInterface
             "containerCssClass" => null,
 
             'use_html' => false,
+
+            // Show entries as profile pictures instead of their __iconize()
+            // icon, where one is available. Off by default: for a User that
+            // icon is their role, and replacing it with a photo drops that
+            // from the picker for whoever happens to have uploaded one. Turn
+            // it on for the fields where telling people apart matters more
+            // than their role - authors, owners.
+            'avatar' => false,
+
             'href' => null,
             'webpack_entry' => "form.select2",
 
@@ -736,6 +754,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "filters" => $options["choice_filter"],
                 'capitalize' => $options["capitalize"],
                 "html" => $options["use_html"],
+                "avatar" => $options["avatar"],
                 "token_name" => $tokenName,
                 "token" => $token
             ];
@@ -880,7 +899,8 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     $entry = $this->autocomplete->resolve($entry, $options["class"] ?? $innerType, [
                         "html" => $options["use_html"],
-                        "format" => $entryFormat
+                        "format" => $entryFormat,
+                        "avatar" => $options["avatar"]
                     ]);
 
                     if (!$entry) {

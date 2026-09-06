@@ -6,6 +6,13 @@ debug:
   is_inherited: "This field is inherited from it's parent object"
   is_descending: "This field is stored in descending order"
 
+history:
+  label: "Modification history"
+  restore: "Restore this value"
+  restored: "Value restored — remember to save"
+  empty: "No recorded change"
+  failed: "Could not fetch that version"
+
 boolean:
   title: "Toggle switch on \"{0}\""
   text:  Are you sure you want to confirm this action ?

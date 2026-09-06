@@ -343,6 +343,12 @@ function edjs(inputEl, holderId, value = {}, options = {})
         });
 
         var editor = new EditorJs(options);
+
+        // Keep the live instance reachable from the DOM. The per-field history
+        // badge needs to REPLACE the content of an editor that is already
+        // running, and rebuilding it from scratch is not equivalent when
+        // collab_live is on - see the restore.form_type handler below.
+        holder.__editorjs = editor;
     }
 
     if (options.collab && options.collab.live && inputEl != undefined) {
@@ -376,6 +382,59 @@ function edjs(inputEl, holderId, value = {}, options = {})
         finishConstruction(null);
     }
 }
+
+// Restoring a previous value into a wysiwyg field (see form-type-history.js).
+//
+// EditorJS holds its content in its own instance, not in the input, so setting
+// the input alone would be invisible in the editor AND overwritten by the next
+// onChange. edjs() already rebuilds an editor from a value - it empties the
+// holder and constructs a new EditorJs - so a restore is just that same call
+// again with the old value, which is why this lives here rather than in the
+// history module: edjs is deliberately private to this file.
+window.addEventListener("restore.form_type", function (event) {
+
+    var id = event.detail && event.detail.id;
+    if (!id) return;
+
+    var input = document.getElementById(id);
+    var holder = document.getElementById(id + "_editor");
+    if (!input || !holder) return; // not a wysiwyg field: let the generic setter have it
+
+    var value = event.detail.value;
+    value = (value === null || value === undefined) ? "" : String(value);
+
+    var data = json_decode(value);
+    var editor = holder.__editorjs;
+
+    // Replace the content THROUGH the running editor rather than by rebuilding
+    // it. On a collab_live field the text belongs to the shared Yjs document,
+    // not to the `data` option: a rebuilt editor is re-synced from the room and
+    // the restored value vanishes on the spot (observed - the badge reported
+    // success while the editor still showed the current text). Going through
+    // blocks.render() makes the restore an ordinary edit, which is also the
+    // right collaborative semantics: everyone in the room sees it.
+    if (editor && data && Array.isArray(data.blocks)) {
+
+        Promise.resolve(editor.isReady)
+            .then(function () { return editor.blocks.render({ blocks: data.blocks }); })
+            .then(function () { return editor.save(); })
+            .then(function (savedData) { $(input).val(JSON.stringify(savedData)); })
+            .catch(function () {
+                // Last resort for an editor that will not take the render:
+                // rebuild it. Correct on a non-collab field, and no worse than
+                // doing nothing on a collab one.
+                $(input).val(value);
+                edjs($(input), id + "_editor", value);
+            });
+
+    } else {
+        $(input).val(value);
+        edjs($(input), id + "_editor", value);
+    }
+
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    event.preventDefault();
+});
 
 window.addEventListener("load.form_type", function (el) {
 

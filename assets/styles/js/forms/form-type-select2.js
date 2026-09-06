@@ -345,6 +345,22 @@ window.addEventListener("load.form_type", function () {
             $(this).attr("last-search", $('body > .select2-container input.select2-search__field').val() || $(field).parent().find('input.select2-search__field').val());
         });
 
+        // select2 clamps the result list itself: as soon as the wheel would
+        // carry past the first or the last option, Results.prototype.bind's
+        // `mousewheel` handler preventDefault()s the event and re-assigns
+        // scrollTop (select2.js:1260). That fires on EVERY wheel event at
+        // either end, so it fights the browser's own elastic overscroll -
+        // the list jitters while scrolling and then sits frozen once it is
+        // at the bottom, until the wheel is turned the other way. The only
+        // thing the handler buys is keeping the wheel from reaching the page
+        // behind, and `overscroll-behavior: contain` (form-type-select2.css)
+        // now does that natively, so the handler is dropped. Unbound per
+        // instance rather than by deleting $.fn.mousewheel, which is a
+        // global on a jQuery shared with everything else on the page.
+        var instance = $(field).data('select2');
+        if (instance && instance.results && instance.results.$results)
+            instance.results.$results.off('mousewheel');
+
         $('body > .select2-container input.select2-search__field').off();
         $('body > .select2-container input.select2-search__field').on("input", function() { page = "1.0"; });
 
@@ -432,4 +448,39 @@ window.addEventListener("load.form_type", function () {
         }
 
     }));
+});
+
+// Restoring a previous value into a select2 field (see form-type-history.js).
+//
+// select2 renders from the underlying <select>'s options, and an ajax-backed
+// select2 only ever has options for what is currently selected - so setting
+// .value to an id that was removed from the list would select nothing. The
+// stored value carries {id, label} for exactly this reason: the options are
+// rebuilt from it, which also means a restored tag shows its name rather than
+// a bare number.
+window.addEventListener("restore.form_type", function (event) {
+
+    var id = event.detail && event.detail.id;
+    if (!id) return;
+
+    // event.detail.target is the resolved CONTROL, not the form node - an
+    // association's <select> is "<id>_choice" and there is nothing at "<id>".
+    var field = event.detail.target || document.getElementById(id);
+    if (!field || field.tagName !== "SELECT" || !$(field).data("select2")) return;
+
+    var value = event.detail.value;
+    var entries = Array.isArray(value) ? value : (value === null || value === undefined ? [] : [value]);
+
+    $(field).empty();
+    entries.forEach(function (entry) {
+
+        var optionId = (entry && entry.id !== undefined) ? entry.id : entry;
+        var label = (entry && entry.label) ? entry.label : String(optionId);
+        if (optionId === null || optionId === undefined) return;
+
+        $(field).append(new Option(label, optionId, true, true));
+    });
+
+    $(field).trigger("change");
+    event.preventDefault();
 });

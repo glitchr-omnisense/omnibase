@@ -6,6 +6,13 @@ debug:
   is_inherited: "Ce champ est hérité d'un objet parent"
   is_descending: "Ce champ est stocké en ordre inverse"
 
+history:
+  label: "Historique des modifications"
+  restore: "Restaurer cette valeur"
+  restored: "Valeur restaurée — pense à enregistrer"
+  empty: "Aucune modification enregistrée"
+  failed: "Impossible de récupérer cette version"
+
 boolean:
   title: "Action démandée sur \"{0}\""
   text: Es-tu certain de vouloir confirmer cette action ?

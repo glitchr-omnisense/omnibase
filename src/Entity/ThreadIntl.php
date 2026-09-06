@@ -3,6 +3,7 @@
 namespace Base\Entity;
 
 use Base\Database\Attribute\OrderColumn;
+use Base\Database\Attribute\Versionable;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Traits\BaseTrait;
@@ -17,6 +18,7 @@ class ThreadIntl implements TranslationInterface
     use TranslationTrait;
 
     #[ORM\Column(type:"string", length:255, nullable:true)]
+    #[Versionable]
     protected $title;
 
     public function getTitle(): ?string
@@ -36,6 +38,7 @@ class ThreadIntl implements TranslationInterface
     }
 
     #[ORM\Column(type:"string", length:255, nullable:true)]
+    #[Versionable]
     protected $headline;
 
     public function getHeadline(bool $fallback = false): ?string
@@ -56,6 +59,7 @@ class ThreadIntl implements TranslationInterface
 
     #[ORM\Column(type:"json")]
     #[OrderColumn(orderBy: "keywordPositions")]
+    #[Versionable]
     protected $keywords = [];
     protected $keywordPositions;
     public function getKeywords(): array
@@ -75,6 +79,7 @@ class ThreadIntl implements TranslationInterface
     }
 
     #[ORM\Column(type:"text", nullable:true)]
+    #[Versionable]
     protected $excerpt;
     public function getExcerpt(): ?string
     {
@@ -92,7 +97,11 @@ class ThreadIntl implements TranslationInterface
         return $this;
     }
 
+    // EditorJS stamps a "time" into the payload on every save, so without the
+    // exclusion an untouched article would still record a ~28 KB revision each
+    // time it was opened and saved.
     #[ORM\Column(type:"text", nullable:true)]
+    #[Versionable(ignore: ["time"])]
     protected $content;
 
     public function getContent(): ?string

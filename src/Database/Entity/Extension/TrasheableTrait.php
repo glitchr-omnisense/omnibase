@@ -25,9 +25,20 @@ trait TrasheableTrait
         return $this->deletedAt;
     }
 
-    public function setDeletedAt(DateTimeInterface $deletedAt): self
+    public function setDeletedAt(?DateTimeInterface $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
+        return $this;
+    }
+
+    /**
+     * Take the entity back out of the trash. Nullable is the whole point of
+     * the widened setter above: without it there was no way, in code, to undo
+     * a soft deletion.
+     */
+    public function restore(): self
+    {
+        $this->deletedAt = null;
         return $this;
     }
 }

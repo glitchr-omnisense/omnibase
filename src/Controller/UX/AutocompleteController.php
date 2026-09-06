@@ -94,6 +94,11 @@ class AutocompleteController extends AbstractController
         $filters = $dict["filters"] ?? null;
         $class = $dict["class"] ?? null;
         $html = $dict["html"] ?? true;
+        // Whether this particular field asked for profile pictures - see
+        // SelectType's `avatar` option. Carried in the obfuscated payload so
+        // the dropdown and the already-selected chips agree: a field showing
+        // faces in one and role icons in the other reads as a bug.
+        $avatar = $dict["avatar"] ?? false;
 
         $format = FORMAT_IDENTITY;
         if ($dict["capitalize"] !== null) {
@@ -144,7 +149,7 @@ class AutocompleteController extends AbstractController
 
                     foreach ($book as $index => $result) {
                         $entry = $result["entity"] ?? null;
-                        $entry = $this->autocomplete->resolve($entry, $class, ["format" => $format, "html" => $html]);
+                        $entry = $this->autocomplete->resolve($entry, $class, ["format" => $format, "html" => $html, "avatar" => $avatar]);
 
                         if ($entry === null) {
                             continue;
@@ -186,7 +191,7 @@ class AutocompleteController extends AbstractController
             } elseif ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
                 $values = $class::getPermittedValues();
                 foreach ($values as $value) {
-                    $results[] = array_values(array_filter($this->autocomplete->resolve($value, $class, ["format" => $format, "html" => $html]), fn($r) => !empty($fields) || str_contains(mb_strtolower(strval($r["text"])), $term)));
+                    $results[] = array_values(array_filter($this->autocomplete->resolve($value, $class, ["format" => $format, "html" => $html, "avatar" => $avatar]), fn($r) => !empty($fields) || str_contains(mb_strtolower(strval($r["text"])), $term)));
                 }
             }
 

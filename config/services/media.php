@@ -158,6 +158,27 @@ return static function (ContainerConfigurator $container): void {
             new Reference('base.entity_extension'),
         ]);
 
+    // Soft deletion, and the modification history that goes with it. Both run
+    // BELOW AttributeSubscriber's 2048 so Timestamp and Blameable have already
+    // stamped updatedAt and the initiator by the time a revision reads the
+    // change set; Trasheable runs above Versionable so a removal that turns
+    // into a soft delete never also reads as an edit.
+    $services->set('Base\EntitySubscriber\TrasheableSubscriber')
+        ->tag('doctrine.event_listener', ['event' => 'onFlush',   'priority' => 1024])
+        ->tag('doctrine.event_listener', ['event' => 'postFlush', 'priority' => 1024])
+        ->args([
+            new Reference('doctrine.orm.entity_manager'),
+            '%base.extension.empty_trash%',
+        ]);
+
+    $services->set('Base\EntitySubscriber\VersionableSubscriber')
+        ->tag('doctrine.event_listener', ['event' => 'onFlush',   'priority' => 512])
+        ->tag('doctrine.event_listener', ['event' => 'postFlush', 'priority' => 512])
+        ->args([
+            new Reference('doctrine.orm.entity_manager'),
+            '%base.extension.max_revisions%',
+        ]);
+
 
     /* ------------------------------
     * Core Services
@@ -213,6 +234,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             new Reference('base.service.image'),
             new Reference('flysystem'),
+            new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE),
         ]);
 
     $services->set('Base\Service\Model\Wysiwyg\HeadingEnhancer')

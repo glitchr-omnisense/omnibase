@@ -151,30 +151,13 @@ return static function (ContainerConfigurator $container): void {
         ->tag('twig.extension')
         ->bind('$projectDir', '%kernel.project_dir%');
 
-    // Form extensions
-    $services->set('Base\Form\Extension\FormTypeBootstrapExtension')
-        ->tag('form.type_extension')
-        ->args([new Reference('base.service')]);
-    $services->set('Base\Form\Extension\FormTypeCsrfExtension')->tag('form.type_extension');
-    $services->set('Base\Form\Extension\FormTypeExtension')
-        ->tag('form.type_extension')
-        ->args([
-            new Reference('advanced_router'),
-            new Reference('security.authorization_checker'),
-            new Reference('parameter_bag'),
-            new Reference('form.factory'),
-            new Reference('form.proxy'),
-            new Reference('base.database.metadata_manipulator'),
-        ]);
-    $services->set('Base\Form\Extension\FormTypeWebpackExtension')
-        ->tag('form.type_extension')
-        ->args([
-            new Reference('form.proxy'),
-            new Reference('twig.webpack_renderer'),
-        ]);
-    $services->set('Base\Form\Extension\FormTypeCollectionExtension')
-        ->tag('form.type_extension')
-        ->args([new Reference('base.database.metadata_manipulator')]);
+    // Form extensions live in services/form.php. Four of them were ALSO
+    // defined here, byte-identical, and since the set is imported
+    // alphabetically this file's copies silently won - so adding an argument
+    // to FormTypeExtension in its own file changed nothing, and the
+    // constructor blew up with "6 passed and exactly 7 expected". Removed
+    // rather than kept in sync: services.php promises each id is defined
+    // exactly once across the set, and these were the exception.
 
     // Validators
     $services->set('Base\Validator\ConstraintValidator')

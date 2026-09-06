@@ -57,6 +57,11 @@ return function (ContainerConfigurator $configurator) {
             new Reference('obfuscator'),
             new Reference('parameter_bag'),
             new Reference('advanced_router'),
+            // Lets SelectType thumbnail avatars for the entries it renders
+            // server-side (the already-selected ones). Appended last so the
+            // child definitions below, which override argument 0, are
+            // untouched.
+            new Reference('base.service.image'),
         ]);
     $services->set('Base\Field\Type\ForexType')->parent('Base\Field\Type\SelectType')->tag('form.type');
     $services->set('Base\Field\Type\IconType')->parent('Base\Field\Type\SelectType')->tag('form.type')

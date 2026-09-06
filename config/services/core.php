@@ -240,6 +240,21 @@ return static function (ContainerConfigurator $container): void {
         ->autoconfigure()
         ->public();
 
+    // Reading and emptying the trash, i.e. everything that has to see what the
+    // trash filter hides. Public because the admin trash page and the purge
+    // command are its only callers and both fetch it by id.
+    $services->set('Base\Service\TrashManager')
+        ->public()
+        ->args([service('doctrine.orm.entity_manager')]);
+    $services->alias('trash_manager', 'Base\Service\TrashManager')->public();
+
+    // Reads the modification history back - for the per-field badge in form
+    // labels and for the entity-level history page.
+    $services->set('Base\Service\VersionManager')
+        ->public()
+        ->args([service('doctrine.orm.entity_manager'), '%base.extension.max_revisions%']);
+    $services->alias('version_manager', 'Base\Service\VersionManager')->public();
+
     // ...and the subscriber that HANDLES those events, which is the same bug
     // one layer up: fixing the dispatchers above made thread.publishable fire,
     // but this class was never defined either, so the only listeners left were
@@ -452,6 +467,7 @@ return static function (ContainerConfigurator $container): void {
         'Base\Console\Command\TimeMachineSnapshotBackupCommand',
         'Base\Console\Command\TimeMachineSnapshotRestoreCommand',
         'Base\Console\Command\MailTrapCommand',
+        'Base\Console\Command\TrashPurgeCommand',
     ];
 
     foreach ($commandServices as $command) {
@@ -467,6 +483,9 @@ return static function (ContainerConfigurator $container): void {
         }
         if (str_contains($command, 'TimeMachineSnapshot')) {
             $definition->args([service('time_machine'), service('flysystem')]);
+        }
+        if ($command === 'Base\Console\Command\TrashPurgeCommand') {
+            $definition->call('setTrashManager', [service('Base\Service\TrashManager')]);
         }
         // Setters, not args(): args() would replace the parent definition's
         // own four arguments, which every Base\Console\Command constructor

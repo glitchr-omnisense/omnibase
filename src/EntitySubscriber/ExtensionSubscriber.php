@@ -40,9 +40,16 @@ class ExtensionSubscriber
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
 
-        $name = $namingStrategy->classToTableName(AbstractExtension::class) . '_unique';
-        $classMetadata->table['uniqueConstraints'][$name]["columns"] = array_unique(array_merge(
-            $classMetadata->table['uniqueConstraints'][$name]["columns"] ?? [],
+        // Deliberately an ordinary index and not a unique constraint. One row
+        // per (entityClass, entityId) was fine while the only writer was the
+        // old inline-ordering extension, which kept a single current state per
+        // entity. It is fatal to anything that keeps a history: a Revision is
+        // one row per flush, and an entity can be trashed, restored and
+        // trashed again. The lookup this index serves - "everything recorded
+        // about this entity" - is the same either way.
+        $name = $namingStrategy->classToTableName(AbstractExtension::class) . '_entity';
+        $classMetadata->table['indexes'][$name]["columns"] = array_unique(array_merge(
+            $classMetadata->table['indexes'][$name]["columns"] ?? [],
             ["entityClass", "entityId"]
         ));
     }

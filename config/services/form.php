@@ -56,7 +56,8 @@ return static function (ContainerConfigurator $container): void {
             new Reference('parameter_bag'),
             new Reference('form.factory'),
             new Reference('form.proxy'),
-            new Reference('base.database.metadata_manipulator')
+            new Reference('base.database.metadata_manipulator'),
+            new Reference('Base\Service\VersionManager')
         ]);
 
     $services->set('Base\Form\Extension\FormTypeWebpackExtension')

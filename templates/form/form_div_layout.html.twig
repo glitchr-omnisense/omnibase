@@ -56,9 +56,53 @@
         {% else %}
             <label>&nbsp;</label>
         {% endif %}
-        <span class="badge badge-secondary label">{{- badges|trim|raw -}}</span>
+        <span class="badge badge-secondary label">{{- badges|trim|raw -}}{{- block('form2_history') -}}</span>
     </div>
     {% endif %}
+
+{%- endblock -%}
+
+{#- Per-field modification history: one more badge in the strip above, but a
+    button rather than a tooltip, because it opens the list of previous values.
+
+    Only rendered where there IS history - a field nobody ever changed gets no
+    badge at all, so the strip stays a statement about this field rather than a
+    row of dead icons. Values are NOT inlined: each entry carries the revision
+    id and the (locale-prefixed) key, and the JS fetches the value on click.
+    See FormTypeExtension::markVersionable() and RevisionController::value(). -#}
+{%- block form2_history -%}
+    {%- set revisions = form.vars.revisions|default([]) -%}
+    {%- if revisions is not empty -%}
+    <span class="field-history" data-field-history data-field-history-target="{{ form.vars.id }}"
+          data-message-restored="{{ '@fields.history.restored'|trans }}"
+          data-message-failed="{{ '@fields.history.failed'|trans }}"
+          {%- if form.vars.revisions_url|default(null) %} data-field-history-url="{{ form.vars.revisions_url }}"{% endif %}>
+        <button type="button" class="field-history-toggle" aria-expanded="false"
+                title="{{ '@fields.history.label'|trans }}">
+            <i class="fa-solid fa-fw fa-clock-rotate-left"></i>
+        </button>
+        <div class="field-history-panel" hidden>
+            <p class="field-history-title">{{ '@fields.history.label'|trans }}</p>
+            <ul>
+            {%- for entry in revisions -%}
+                <li>
+                    <button type="button" class="field-history-entry"
+                            data-revision="{{ entry.id }}" data-key="{{ entry.key }}"
+                            {%- if not entry.restorable or form.vars.revisions_url|default(null) is null %} disabled{% endif %}>
+                        <span class="field-history-meta">
+                            <span class="field-history-when">{{ entry.at ? entry.at|date('d/m/Y H:i') : '—' }}</span>
+                            {%- if entry.by %}<span class="field-history-who">{{ entry.by }}</span>{% endif -%}
+                            {%- if entry.impersonator %}<span class="field-history-who">↷ {{ entry.impersonator }}</span>{% endif -%}
+                            <span class="field-history-hash">{{ entry.hash }}</span>
+                        </span>
+                        <span class="field-history-preview">{{ entry.preview }}</span>
+                    </button>
+                </li>
+            {%- endfor -%}
+            </ul>
+        </div>
+    </span>
+    {%- endif -%}
 
 {%- endblock -%}
 {%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}

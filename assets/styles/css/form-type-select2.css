@@ -234,6 +234,16 @@ form.was-validated select:valid~.select2-container--bootstrap4 .select2-selectio
   overflow-y: auto;
 }
 
+/* Keeps the wheel inside the result list once it is scrolled to either end,
+   natively. select2 does the same thing in JS (Results.prototype.bind's
+   `mousewheel` handler), but it does it by re-assigning scrollTop on every
+   single wheel event, which fights the browser's own elastic overscroll and
+   makes the list flicker - and pins it once it reaches the bottom. That
+   handler is unbound in form-type-select2.js; this rule replaces it. */
+.select2-results__options {
+  overscroll-behavior: contain;
+}
+
 .select2-container--bootstrap4 .select2-results__group {
   padding: 6px;
   display: list-item;
