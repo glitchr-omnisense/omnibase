@@ -39,6 +39,8 @@ interface FlysystemInterface
 
     public function fileExists(string $path, FilesystemOperator|string|null $operator = null): bool;
 
+    public function isRemote(FilesystemOperator|string|null $operator = null);
+
     public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = []): bool;
 
     public function mimeType(string $path, FilesystemOperator|string|null $operator = null): ?string;
