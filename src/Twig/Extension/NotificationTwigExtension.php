@@ -55,7 +55,7 @@ class NotificationTwigExtension extends AbstractExtension
         if (!$user instanceof User) {
             return [];
         }
-        return $this->repository->findBy(["user" => $user], ["sentAt" => "DESC", "id" => "DESC"], $limit);
+        return $this->repository->findVisibleFor($user, $limit);
     }
 
     public function token(): string

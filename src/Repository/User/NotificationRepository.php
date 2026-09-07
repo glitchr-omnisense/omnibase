@@ -22,10 +22,35 @@ class NotificationRepository extends ServiceEntityRepository
      */
     public function countUnreadFor(User $user): int
     {
-        return (int) $this->createQueryBuilder('n')
+        return (int) $this->visibleFor($user)
             ->select('COUNT(n.id)')
-            ->andWhere('n.user = :user')->setParameter('user', $user)
             ->andWhere('n.isRead = false')
             ->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * The user's notifications that have something to show, newest first.
+     *
+     * @return Notification[]
+     */
+    public function findVisibleFor(User $user, int $limit = 100, int $offset = 0): array
+    {
+        return $this->visibleFor($user)
+            ->orderBy('n.sentAt', 'DESC')->addOrderBy('n.id', 'DESC')
+            ->setMaxResults($limit)->setFirstResult($offset)
+            ->getQuery()->getResult();
+    }
+
+    /**
+     * Rows with a title, a subject or a content. An e-mail-only notification
+     * (a templated mail sent through setUser()) is persisted with all three
+     * empty - 570 of them on this site - and has nothing a list or a toast
+     * could display, so the notification center does not count or show it.
+     */
+    protected function visibleFor(User $user): \Doctrine\ORM\QueryBuilder
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.user = :user')->setParameter('user', $user)
+            ->andWhere("COALESCE(n.title, '') <> '' OR COALESCE(n.subject, '') <> '' OR COALESCE(n.content, '') <> ''");
     }
 }

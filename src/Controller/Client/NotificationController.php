@@ -42,7 +42,7 @@ class NotificationController extends AbstractController
             return $this->redirectToRoute("security_login");
         }
 
-        $notifications = $this->notificationRepository->findBy(["user" => $user], ["sentAt" => "DESC", "id" => "DESC"], 100);
+        $notifications = $this->notificationRepository->findVisibleFor($user, 100);
 
         return $this->render("client/user/notifications.html.twig", [
             "notifications" => $notifications,
@@ -64,8 +64,7 @@ class NotificationController extends AbstractController
         }
 
         $limit = min(20, max(1, $request->query->getInt("limit", 8)));
-        $items = array_map(fn (Notification $n) => $this->serialize($n),
-            $this->notificationRepository->findBy(["user" => $user], ["sentAt" => "DESC", "id" => "DESC"], $limit));
+        $items = array_map(fn (Notification $n) => $this->serialize($n), $this->notificationRepository->findVisibleFor($user, $limit));
 
         return new JsonResponse(["unread" => $this->countUnread($user), "items" => $items]);
     }
