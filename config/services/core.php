@@ -66,6 +66,10 @@ return static function (ContainerConfigurator $container): void {
         'Base\Controller\UX\AutocompleteController' => ['Base\Service\Obfuscator', 'request_stack', 'trading_market', 'translator', 'doctrine.orm.entity_manager', 'Base\Service\Paginator', 'Base\Database\Mapping\ClassMetadataManipulator', 'base.service.image'],
         'Base\Controller\WidgetController' => ['Base\Repository\Layout\Widget\PageRepository', 'Base\Repository\Layout\Widget\AttachmentRepository'],
         'Base\Controller\ShortLinkController' => ['advanced_router', 'Base\Repository\Layout\ShortLinkRepository'],
+        // The like/follow/publish API. Was silently unregistered (constructor
+        // arguments, no service): every /api/thread/{slug}/like answered 500
+        // in production - "the like doesn't work".
+        'Base\Controller\Api\ThreadController' => ['doctrine.orm.entity_manager', 'translator', 'Base\Repository\ThreadRepository', 'Base\Repository\Thread\LikeRepository'],
         'Base\Controller\Client\NotificationController' => ['doctrine.orm.entity_manager', 'Base\Repository\User\NotificationRepository', 'Base\Service\Push\WebPushService', 'security.csrf.token_manager'],
     ];
 
