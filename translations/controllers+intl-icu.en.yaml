@@ -23,17 +23,17 @@ base_contact:
   follow_us: Follow us on..
 
 thread:
-  in: "{0} dans \"{1}\""
-  more: "Voir plus.."
+  in: "{0} dans `{1}`"
+  more: "See more.."
   readingTime: "{0, plural,
-                     =0 {moins d'une minute}
+                     =0 {less than a minute}
                      =1 {# minute}
                      other {# minutes}
                   }"
-  like: "J'aime !"
-  unlink: "Je n'aime plus !"
-  follow: "Vous suivez désormais ce fil"
-  unfollow: "Vous ne suivez plus ce fil"
+  like: "I like it !"
+  unlike: "I don't like it anymore !"
+  follow: "You are now following this thread !"
+  unfollow: "You are not following this thread anymore !"
 
 locale_changeto:
   action: "The website is now displayed in {0}"

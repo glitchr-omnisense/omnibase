@@ -4,17 +4,17 @@ widget_page:
     title: "{slug}"
 
 thread:
-  in: "{0} dans `{1}`"
-  more: "See more.."
+  in: "{0} dans \"{1}\""
+  more: "Voir plus.."
   readingTime: "{0, plural,
-                     =0 {less than a minute}
+                     =0 {moins d'une minute}
                      =1 {# minute}
                      other {# minutes}
                   }"
-  like: "I like it !"
-  unlink: "I don't like it anymore !"
-  follow: "You are now following this thread !"
-  unfollow: "You are not following this thread anymore !"
+  like: "J'aime !"
+  unlike: "Je n'aime plus !"
+  follow: "Vous suivez désormais ce fil"
+  unfollow: "Vous ne suivez plus ce fil"
 
 thread_search:
   title: "Rechercher un contenu précis, c'est par ici.. "
