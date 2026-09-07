@@ -486,7 +486,7 @@ class EditorController extends AbstractController
 
         $token = $vars["token"] ?? null;
         if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
-            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 500);
+            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 403);
         }
 
         $room = $vars["room"] ?? null;
@@ -561,7 +561,7 @@ class EditorController extends AbstractController
             || ($serviceToken && $room && $this->ticketFactory->verifyServiceToken($serviceToken, $room));
 
         if (!$authorized) {
-            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 500);
+            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 403);
         }
 
         $fqcn        = $vars["fqcn"]        ?? null;
