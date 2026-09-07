@@ -6,7 +6,7 @@ use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Base\Admin\Router\AdminUrlGenerator;
+use Base\Routing\AdminUrlGeneratorInterface;
 use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
@@ -50,11 +50,11 @@ class CollectionType extends AbstractType
     protected AuthorizationChecker $authorizationChecker;
 
     /**
-     * @var AdminUrlGenerator
+     * @var AdminUrlGeneratorInterface
      */
-    protected AdminUrlGenerator $adminUrlGenerator;
+    protected AdminUrlGeneratorInterface $adminUrlGenerator;
 
-    public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, private readonly ?\Symfony\Component\HttpFoundation\RequestStack $requestStack = null)
+    public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGeneratorInterface $adminUrlGenerator, private readonly ?\Symfony\Component\HttpFoundation\RequestStack $requestStack = null)
     {
         $this->twig = $twig;
         $this->translator = $translator;

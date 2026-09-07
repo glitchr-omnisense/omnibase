@@ -3,15 +3,15 @@
 namespace Base\Controller\Backoffice\Crud;
 
 use Base\Admin\Controller\AbstractCrudController;
-use Base\Admin\Field\AvatarField;
-use Base\Admin\Field\BooleanField;
-use Base\Admin\Field\DateTimePickerField;
-use Base\Admin\Field\DateField;
-use Base\Admin\Field\DateTimeField;
-use Base\Admin\Field\EmailField;
-use Base\Admin\Field\IdField;
-use Base\Admin\Field\PasswordField;
-use Base\Admin\Field\RoleField;
+use Base\Field\AvatarField;
+use Base\Field\BooleanField;
+use Base\Field\DateTimePickerField;
+use Base\Field\DateField;
+use Base\Field\DateTimeField;
+use Base\Field\EmailField;
+use Base\Field\IdField;
+use Base\Field\PasswordField;
+use Base\Field\RoleField;
 use Base\Admin\Filter\Filters;
 use Base\Entity\User;
 

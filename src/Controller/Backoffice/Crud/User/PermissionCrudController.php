@@ -3,12 +3,12 @@
 namespace Base\Controller\Backoffice\Crud\User;
 
 use Base\Admin\Controller\AbstractCrudController;
-use Base\Admin\Field\ArrayField;
-use Base\Admin\Field\AssociationField;
-use Base\Admin\Field\IconField;
-use Base\Admin\Field\IdField;
-use Base\Admin\Field\TextareaField;
-use Base\Admin\Field\TextField;
+use Base\Field\ArrayField;
+use Base\Field\AssociationField;
+use Base\Field\IconField;
+use Base\Field\IdField;
+use Base\Field\TextareaField;
+use Base\Field\TextField;
 use Base\Entity\User\Permission;
 
 class PermissionCrudController extends AbstractCrudController

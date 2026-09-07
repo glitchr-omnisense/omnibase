@@ -3,10 +3,10 @@
 namespace Base\Controller\Backoffice\Crud\Layout;
 
 use Base\Admin\Controller\AbstractCrudController;
-use Base\Admin\Field\BooleanField;
-use Base\Admin\Field\IdField;
-use Base\Admin\Field\SlugField;
-use Base\Admin\Field\TranslationField;
+use Base\Field\BooleanField;
+use Base\Field\IdField;
+use Base\Field\SlugField;
+use Base\Field\TranslationField;
 use Base\Admin\Filter\Filters;
 use Base\Entity\Layout\Setting;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;

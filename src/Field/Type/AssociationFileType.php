@@ -16,7 +16,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\MappingException;
 use Base\Admin\Config\Action;
-use Base\Admin\Router\AdminUrlGenerator;
+use Base\Routing\AdminUrlGeneratorInterface;
 use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -69,16 +69,16 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     protected ?PropertyAccessor $propertyAccessor = null;
 
     /**
-     * @var AdminUrlGenerator|null
+     * @var AdminUrlGeneratorInterface|null
      */
-    protected ?AdminUrlGenerator $adminUrlGenerator = null;
+    protected ?AdminUrlGeneratorInterface $adminUrlGenerator = null;
 
     public function getBlockPrefix(): string
     {
         return 'associationfile';
     }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, MediaService $mediaService, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, MediaService $mediaService, AdminUrlGeneratorInterface $adminUrlGenerator)
     {
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;

@@ -3,11 +3,11 @@
 namespace Base\Controller\Backoffice\Crud\Thread;
 
 use Base\Admin\Controller\AbstractCrudController;
-use Base\Admin\Field\IconField;
-use Base\Admin\Field\IdField;
-use Base\Admin\Field\NumberField;
-use Base\Admin\Field\SlugField;
-use Base\Admin\Field\TranslationField;
+use Base\Field\IconField;
+use Base\Field\IdField;
+use Base\Field\NumberField;
+use Base\Field\SlugField;
+use Base\Field\TranslationField;
 use Base\Admin\Filter\Filters;
 use Base\Entity\Thread\Tag;
 

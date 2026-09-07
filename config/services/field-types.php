@@ -51,7 +51,7 @@ return function (ContainerConfigurator $configurator) {
             new Reference('base.database.metadata_manipulator'),
             new Reference('security.csrf.token_manager'),
             new Reference('localizer'),
-            new Reference('Base\Admin\Router\AdminUrlGenerator'),
+            new Reference('Base\Routing\AdminUrlGeneratorInterface'),
             new Reference('twig'),
             new Reference('security.authorization_checker'),
             new Reference('obfuscator'),
@@ -82,7 +82,7 @@ return function (ContainerConfigurator $configurator) {
             new Reference('base.database.metadata_manipulator'),
             new Reference('base.database.entity_hydrator'),
             new Reference('base.service.image'),
-            new Reference('Base\Admin\Router\AdminUrlGenerator'),
+            new Reference('Base\Routing\AdminUrlGeneratorInterface'),
         ]);
     $services->set('Base\Field\Type\AttributeType')
         ->tag('form.type')
@@ -192,7 +192,7 @@ return function (ContainerConfigurator $configurator) {
             new Reference('twig'),
             new Reference('translator'),
             new Reference('security.authorization_checker'),
-            new Reference('Base\Admin\Router\AdminUrlGenerator'),
+            new Reference('Base\Routing\AdminUrlGeneratorInterface'),
             // Windowing must know the request method: it engages on GET renders
             // only (a submission binds every entry natively). Without this the
             // optional param stayed null, the method defaulted to GET, and a

@@ -5,7 +5,7 @@ namespace Base\Field\Type;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
-use Base\Admin\Router\AdminUrlGenerator;
+use Base\Routing\AdminUrlGeneratorInterface;
 use Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -33,7 +33,7 @@ class ArrayType extends CollectionType
      * it as its 5th argument where it expected the manipulator, and every
      * form using ArrayType 500'd (caught by the groups/new render test).
      */
-    public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, ?\Symfony\Component\HttpFoundation\RequestStack $requestStack = null, ?ClassMetadataManipulator $classMetadataManipulator = null)
+    public function __construct(Environment $twig, TranslatorInterface $translator, AuthorizationChecker $authorizationChecker, AdminUrlGeneratorInterface $adminUrlGenerator, ?\Symfony\Component\HttpFoundation\RequestStack $requestStack = null, ?ClassMetadataManipulator $classMetadataManipulator = null)
     {
         parent::__construct($twig, $translator, $authorizationChecker, $adminUrlGenerator, $requestStack);
         $this->classMetadataManipulator = $classMetadataManipulator;

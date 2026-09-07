@@ -14,6 +14,8 @@ function highlight_search(text, search) {
 var localCache = {};
 var localCacheSelected = {};
 var localCacheData = {};
+// Which server render each cached selection belongs to - see the init below.
+var localCacheSignature = {};
 
 window.addEventListener("load.form_type", function () {
 
@@ -191,10 +193,34 @@ window.addEventListener("load.form_type", function () {
         if(!(el.getAttribute("data-select2-field") in localCache))
             localCache[el.getAttribute("data-select2-field")] = {};
 
-        if(el.getAttribute("data-select2-field") in localCacheSelected)
-            select2["selected"] = localCacheSelected[el.getAttribute("data-select2-field")];
-        if(el.getAttribute("data-select2-field") in localCacheData)
-            select2["data"] = localCacheData[el.getAttribute("data-select2-field")];
+        // The caches below are module-level, so under transparentJS - which
+        // swaps the page in place instead of reloading - they outlive the page
+        // that filled them. Seeding a field from them unconditionally means the
+        // SERVER's freshly rendered selection is thrown away and replaced by
+        // whatever the previous page held.
+        //
+        // That is what made a newly added tag vanish from the widget the moment
+        // the form was saved, and come back on a manual reload (a real reload
+        // re-evaluates this module, so the caches start empty and the server
+        // wins). The data was always saved correctly; only the redraw lied.
+        //
+        // The render signature discriminates the two cases the cache has to
+        // tell apart: re-initialising the SAME render (a lazily loaded
+        // collection re-fires load.form_type, and an in-progress selection must
+        // survive it) versus a NEW render from the server (a save, a
+        // navigation), where the server is authoritative. The options attribute
+        // carries the selection, so it changes exactly when the render does.
+        var renderSignature = el.getAttribute("data-select2-options");
+        if(localCacheSignature[el.getAttribute("data-select2-field")] === renderSignature) {
+            if(el.getAttribute("data-select2-field") in localCacheSelected)
+                select2["selected"] = localCacheSelected[el.getAttribute("data-select2-field")];
+            if(el.getAttribute("data-select2-field") in localCacheData)
+                select2["data"] = localCacheData[el.getAttribute("data-select2-field")];
+        } else {
+            delete localCacheSelected[el.getAttribute("data-select2-field")];
+            delete localCacheData[el.getAttribute("data-select2-field")];
+        }
+        localCacheSignature[el.getAttribute("data-select2-field")] = renderSignature;
 
         if("ajax" in select2) {
 

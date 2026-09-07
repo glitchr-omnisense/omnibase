@@ -44,7 +44,7 @@ return static function (ContainerConfigurator $container): void {
         ->parent('Base\Twig\Variable\SiteVariable')
         ->tag('twig.runtime')
         ->tag('twig.variable')
-        ->args([new Reference('Base\Admin\Router\AdminUrlGenerator')]);
+        ->args([new Reference('Base\Routing\AdminUrlGeneratorInterface')]);
 
     $services->set('Base\Twig\Extension\MediaTwigExtension')->public()
         ->tag('twig.extension')
@@ -110,7 +110,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('translator'),
             new Reference('twig.extension.assets'),
             new Reference('twig'),
-            new Reference('Base\Admin\Router\AdminUrlGenerator'),
+            new Reference('Base\Routing\AdminUrlGeneratorInterface'),
         ])
         ->bind('$projectDir', '%kernel.project_dir%');
 
@@ -284,7 +284,7 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
         ->public()
         ->tag('twig.runtime')
         ->tag('twig.variable')
-        ->args([new Reference('Base\Admin\Router\AdminUrlGenerator')]);
+        ->args([new Reference('Base\Routing\AdminUrlGeneratorInterface')]);
 
     $services->set('Base\Twig\Extension\MediaTwigExtension')->public()
         ->tag('twig.extension')
@@ -351,7 +351,7 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
             new Reference('translator'),
             new Reference('twig.extension.assets'),
             new Reference('twig'),
-            new Reference('Base\Admin\Router\AdminUrlGenerator')
+            new Reference('Base\Routing\AdminUrlGeneratorInterface')
         ])
         ->bind('$projectDir', '%kernel.project_dir%');
 };

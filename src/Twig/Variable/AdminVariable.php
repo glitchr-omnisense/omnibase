@@ -4,7 +4,7 @@ namespace Base\Twig\Variable;
 
 use Base\Admin\Controller\AbstractCrudController;
 use Base\Admin\Controller\AbstractDashboardController;
-use Base\Admin\Router\AdminUrlGenerator;
+use Base\Routing\AdminUrlGeneratorInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\LauncherInterface;
@@ -16,7 +16,7 @@ use Base\Admin\Config\Crud;
 
 class AdminVariable extends SiteVariable
 {
-    protected AdminUrlGenerator $adminUrlGenerator;
+    protected AdminUrlGeneratorInterface $adminUrlGenerator;
 
     public function __construct(
         AdvancedRouterInterface              $router,
@@ -26,7 +26,7 @@ class AdminVariable extends SiteVariable
         BaseService                  $baseService,
         MaintenanceProviderInterface $maintenanceProvider,
         LauncherInterface            $launcher,
-        AdminUrlGenerator            $adminUrlGenerator
+        AdminUrlGeneratorInterface            $adminUrlGenerator
     )
     {
         parent::__construct($router, $sitemapper, $translator, $localizer, $baseService, $maintenanceProvider, $launcher);

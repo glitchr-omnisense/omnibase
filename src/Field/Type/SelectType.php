@@ -23,7 +23,7 @@ use Doctrine\ORM\Mapping\OwningSideMapping;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\MappingException;
 use Base\Admin\Config\Action;
-use Base\Admin\Router\AdminUrlGenerator;
+use Base\Routing\AdminUrlGeneratorInterface;
 use Exception;
 use Generator;
 use Symfony\Component\OptionsResolver\Options;
@@ -78,8 +78,8 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var LocalizerInterface */
     protected LocalizerInterface $localizer;
 
-    /** @var AdminUrlGenerator */
-    protected AdminUrlGenerator $adminUrlGenerator;
+    /** @var AdminUrlGeneratorInterface */
+    protected AdminUrlGeneratorInterface $adminUrlGenerator;
 
     /** @var Autocomplete */
     protected Autocomplete $autocomplete;
@@ -97,7 +97,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         ClassMetadataManipulator  $classMetadataManipulator,
         CsrfTokenManagerInterface $csrfTokenManager,
         Localizer                 $localizer,
-        AdminUrlGenerator         $adminUrlGenerator,
+        AdminUrlGeneratorInterface         $adminUrlGenerator,
         Environment               $twig,
         AuthorizationChecker      $authorizationChecker,
         ObfuscatorInterface       $obfuscator,

@@ -14,7 +14,7 @@ use Base\Service\TranslatorInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Type;
 use Base\Admin\Config\Crud;
-use Base\Admin\Router\AdminUrlGenerator;
+use Base\Routing\AdminUrlGeneratorInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
@@ -47,11 +47,11 @@ final class FunctionTwigExtension extends AbstractExtension
 
     protected string $projectDir;
 
-    protected AdminUrlGenerator $adminUrlGenerator;
+    protected AdminUrlGeneratorInterface $adminUrlGenerator;
 
     protected Environment $twig;
 
-    public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGenerator $adminUrlGenerator, string $projectDir)
+    public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGeneratorInterface $adminUrlGenerator, string $projectDir)
     {
         $this->translator = $translator;
         $this->assetExtension = $assetExtension;
