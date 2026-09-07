@@ -70,7 +70,10 @@ class NotificationController extends AbstractController
         return new JsonResponse(["unread" => $this->countUnread($user), "items" => $items]);
     }
 
-    /** Body: {token, id?} - one notification, or every unread one when id is absent. */
+    /**
+     * Body: {token, id?, read?} - one notification, or every unread one when
+     * id is absent. read defaults to true; false puts one back to unread.
+     */
     #[Route("/notifications/read", name: "user_notifications_read", methods: ["POST"])]
     public function MarkRead(Request $request): JsonResponse
     {
@@ -80,10 +83,13 @@ class NotificationController extends AbstractController
             return new JsonResponse(["success" => false], 403);
         }
 
+        $read = !array_key_exists("read", $vars) || filter_var($vars["read"], FILTER_VALIDATE_BOOLEAN);
+        $isRead = null;
         if (!empty($vars["id"])) {
             $notification = $this->notificationRepository->findOneBy(["id" => (int) $vars["id"], "user" => $user]);
             if ($notification) {
-                $notification->setIsRead(true);
+                $notification->setIsRead($read);
+                $isRead = $read;
             }
         } else {
             foreach ($this->notificationRepository->findBy(["user" => $user, "isRead" => false]) as $notification) {
@@ -92,7 +98,35 @@ class NotificationController extends AbstractController
         }
         $this->entityManager->flush();
 
-        return new JsonResponse(["success" => true, "unread" => $this->countUnread($user)]);
+        return new JsonResponse(["success" => true, "unread" => $this->countUnread($user), "isRead" => $isRead]);
+    }
+
+    /** Body: {token, id?} - deletes one notification, or every READ one when id is absent. */
+    #[Route("/notifications/delete", name: "user_notifications_delete", methods: ["POST"])]
+    public function Delete(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
+        $vars = $this->body($request);
+        if (!$user instanceof User || !$this->csrfOk($vars)) {
+            return new JsonResponse(["success" => false], 403);
+        }
+
+        $deleted = [];
+        if (!empty($vars["id"])) {
+            $notification = $this->notificationRepository->findOneBy(["id" => (int) $vars["id"], "user" => $user]);
+            if ($notification) {
+                $deleted[] = $notification->getId();
+                $this->entityManager->remove($notification);
+            }
+        } else {
+            foreach ($this->notificationRepository->findBy(["user" => $user, "isRead" => true]) as $notification) {
+                $deleted[] = $notification->getId();
+                $this->entityManager->remove($notification);
+            }
+        }
+        $this->entityManager->flush();
+
+        return new JsonResponse(["success" => true, "deleted" => $deleted, "unread" => $this->countUnread($user)]);
     }
 
     /** What the browser needs before it can subscribe: the VAPID public key, or null when push is off. */

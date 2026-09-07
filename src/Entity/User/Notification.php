@@ -89,7 +89,15 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this->id;
     }
 
-    #[ORM\ManyToOne(targetEntity:User::class, inversedBy:"notifications", cascade:["persist", "remove"])]
+    /**
+     * NO cascade remove here. Cascade on the owning side of a ManyToOne means
+     * "when this notification is removed, remove its user too" - which is what
+     * happened on 2026-09-07 the first time a notification was deleted through
+     * the notification center: the member's whole account went with it. The
+     * inverse side (User::$notifications, orphanRemoval) already handles the
+     * only cascade that makes sense, user gone => notifications gone.
+     */
+    #[ORM\ManyToOne(targetEntity:User::class, inversedBy:"notifications", cascade:["persist"])]
     #[ORM\JoinColumn(nullable:false)]
     protected $user;
 

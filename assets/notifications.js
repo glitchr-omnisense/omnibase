@@ -9,6 +9,9 @@
  *   [data-notifications-toggle]     the bell button (opens the panel)
  *   [data-notifications-panel]      the dropdown
  *   [data-notifications-read-all]   "mark all as read"
+ *   [data-notifications-delete-read] "delete every read one"
+ *   [data-notification-read-toggle] per entry: flips read/unread (data-id)
+ *   [data-notification-delete]      per entry: deletes it (data-id)
  *   [data-notification-item]        one entry, with data-id (+ .is-unread)
  *   [data-push-toggle]              enable/disable push in this browser
  *
@@ -64,6 +67,51 @@
                 var el = document.querySelector('[data-notification-item][data-id="' + id + '"]');
                 if (el) el.classList.remove('is-unread');
             }
+        });
+    }
+
+    function setReadState(id, isRead) {
+        document.querySelectorAll('[data-notification-item][data-id="' + id + '"]').forEach(function (el) {
+            el.classList.toggle('is-unread', !isRead);
+            el.querySelectorAll('[data-notification-read-toggle]').forEach(function (b) {
+                b.classList.toggle('is-read', isRead);
+                b.setAttribute('title', b.getAttribute(isRead ? 'data-label-unread' : 'data-label-read') || '');
+                b.setAttribute('aria-label', b.getAttribute('title'));
+            });
+        });
+    }
+
+    function toggleRead(id, read) {
+        var url = cfg('read-url');
+        if (!url) return Promise.resolve();
+        return post(url, { id: id, read: read }).then(function (json) {
+            if (json.success) { setUnread(json.unread || 0); setReadState(id, json.isRead !== false); }
+        });
+    }
+
+    function removeEntries(ids) {
+        ids.forEach(function (id) {
+            document.querySelectorAll('[data-notification-item][data-id="' + id + '"]').forEach(function (el) {
+                var row = el.closest('li') || el;
+                row.classList.add('is-leaving');
+                setTimeout(function () { row.remove(); }, 200);
+            });
+        });
+    }
+
+    function deleteOne(id) {
+        var url = cfg('delete-url');
+        if (!url) return Promise.resolve();
+        return post(url, { id: id }).then(function (json) {
+            if (json.success) { setUnread(json.unread || 0); removeEntries(json.deleted || [id]); }
+        });
+    }
+
+    function deleteRead() {
+        var url = cfg('delete-url');
+        if (!url) return Promise.resolve();
+        return post(url).then(function (json) {
+            if (json.success) { setUnread(json.unread || 0); removeEntries(json.deleted || []); }
         });
     }
 
@@ -243,6 +291,25 @@
         var readAll = e.target.closest('[data-notifications-read-all]');
         if (readAll) { e.preventDefault(); markAllRead(); return; }
 
+        var deleteReadBtn = e.target.closest('[data-notifications-delete-read]');
+        if (deleteReadBtn) { e.preventDefault(); deleteRead(); return; }
+
+        var readToggle = e.target.closest('[data-notification-read-toggle]');
+        if (readToggle) {
+            e.preventDefault(); e.stopPropagation();
+            var entry = readToggle.closest('[data-notification-item]');
+            if (entry) toggleRead(entry.getAttribute('data-id'), entry.classList.contains('is-unread'));
+            return;
+        }
+
+        var deleteBtn = e.target.closest('[data-notification-delete]');
+        if (deleteBtn) {
+            e.preventDefault(); e.stopPropagation();
+            var target = deleteBtn.closest('[data-notification-item]');
+            if (target) deleteOne(target.getAttribute('data-id'));
+            return;
+        }
+
         var pushToggle = e.target.closest('[data-push-toggle]');
         if (pushToggle) {
             e.preventDefault();
@@ -275,8 +342,13 @@
         var open = document.querySelector('[data-notifications-panel].is-open.is-floating');
         if (open && lastAnchor && document.contains(lastAnchor)) placeFloating(open, lastAnchor);
     });
+    // Page scroll follows the bell instead of dismissing: the toolbars are
+    // fixed on every layout so the bell rarely moves, and losing the panel to
+    // a wheel gesture that merely reached the end of its list was the first
+    // thing reported about it.
     window.addEventListener('scroll', function () {
-        if (document.querySelector('[data-notifications-panel].is-open.is-floating')) closePanels();
+        var open = document.querySelector('[data-notifications-panel].is-open.is-floating');
+        if (open && lastAnchor && document.contains(lastAnchor)) placeFloating(open, lastAnchor);
     }, { passive: true });
 
     // ── Toasts ──────────────────────────────────────────────────────────
@@ -351,5 +423,5 @@
     window.addEventListener('load', sync);
     if (document.readyState === 'complete') sync();
 
-    window.__baseNotificationsBound = { sync: sync, enablePush: enablePush, disablePush: disablePush, markAllRead: markAllRead, toast: toast, announceNew: announceNew };
+    window.__baseNotificationsBound = { sync: sync, enablePush: enablePush, disablePush: disablePush, markAllRead: markAllRead, toggleRead: toggleRead, deleteOne: deleteOne, deleteRead: deleteRead, toast: toast, announceNew: announceNew };
 })();
