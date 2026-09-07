@@ -215,8 +215,14 @@ class Translator implements TranslatorInterface
                 }
             }
 
-            // Fallback in production
-            if ($locale != Localizer::getDefaultLocale() && !$this->isDebug) {
+            // Fallback to the default language. This used to be production
+            // only, on the theory that a raw key is a useful signal while
+            // developing - but a back-office switched to a language whose
+            // catalogues are partial (German has none for the admin) then
+            // shows raw keys on every button and title, on beta, to the
+            // people who review it there. debug:translation is the tool for
+            // finding missing keys; the pages fall back like production does.
+            if ($locale != Localizer::getDefaultLocale()) {
                 if ($trans == $id) {
                     $trans = $this->transQuiet($id, $parameters, $domain, Localizer::getDefaultLocale());
                 }
