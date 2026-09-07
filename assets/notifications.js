@@ -139,10 +139,58 @@
     }
 
     // ── Panel ───────────────────────────────────────────────────────────
+    // A panel marked data-notifications-float is lifted out of wherever the
+    // template rendered it (the front-end toolbar, inside a masked, scrolling
+    // sidebar column) into <body> the first time it opens, and positioned
+    // fixed under its bell. That frees it from every ancestor: the column's
+    // overflow and fade mask, the toolbar's icon-button CSS, the sidebar's
+    // own scroll. It gets its own scrolling list and a height that follows
+    // the viewport instead. Panels without the flag (the back-office topbar,
+    // which already has a proper dropdown) keep their in-place behaviour.
+    function isFloating(panel) { return panel.hasAttribute('data-notifications-float'); }
+
     function closePanels(except) {
         document.querySelectorAll('[data-notifications-panel].is-open').forEach(function (p) {
             if (p !== except) { p.classList.remove('is-open'); p.hidden = true; }
         });
+    }
+
+    // transparent.js replaces #page on every navigation, so a panel lifted to
+    // <body> would outlive its page and sit beside the new page's own panel.
+    // The new page's panel is what the bell finds (document order), and any
+    // older lifted panel is dropped the next time one opens.
+    function dropStaleFloating(keep) {
+        document.querySelectorAll('body > [data-notifications-panel]').forEach(function (p) {
+            if (p !== keep && !document.querySelector('#page') ?.contains(p)) p.remove();
+        });
+    }
+
+    function placeFloating(panel, anchor) {
+        var margin = 8;
+        var vw = window.innerWidth, vh = window.innerHeight;
+        // Aligned with the toolbar's button row (the bell's <ul>), the way the
+        // language menu sits under it, and at least as wide as that row.
+        var row = anchor ? (anchor.closest('ul') || anchor) : null;
+        var a = anchor ? anchor.getBoundingClientRect() : { left: margin, right: margin, bottom: margin, top: margin };
+        var rowRect = row ? row.getBoundingClientRect() : a;
+        var width = Math.min(Math.max(rowRect.width, 300), 420, vw - 2 * margin);
+        var left = rowRect.left;
+        if (left + width > vw - margin) left = vw - margin - width;
+        if (left < margin) left = margin;
+        var top = a.bottom + 6;
+        var maxH = vh - top - margin;
+        if (maxH < 240 && a.top > vh / 2) {
+            // Not enough room below a bell that sits low: open upwards.
+            maxH = Math.max(240, a.top - 6 - margin);
+            top = Math.max(margin, a.top - 6 - maxH);
+        }
+        panel.style.position = 'fixed';
+        panel.style.left = left + 'px';
+        panel.style.top = top + 'px';
+        panel.style.width = width + 'px';
+        panel.style.maxWidth = 'none';
+        panel.style.maxHeight = maxH + 'px';
+        panel.style.zIndex = '2000';
     }
 
     // Fit the panel inside whatever clips it. The front-end sidebar's toolbar
@@ -164,10 +212,18 @@
         if (room > 120 && room < panel.getBoundingClientRect().width) panel.style.maxWidth = Math.floor(room) + 'px';
     }
 
-    function openPanel(panel) {
+    var lastAnchor = null;
+    function openPanel(panel, anchor) {
+        lastAnchor = anchor || lastAnchor;
+        if (isFloating(panel)) {
+            dropStaleFloating(panel);
+            if (panel.parentElement !== document.body) document.body.appendChild(panel);
+            panel.classList.add('is-floating');
+            placeFloating(panel, lastAnchor);
+        }
         panel.hidden = false;
         panel.classList.add('is-open');
-        fitPanel(panel);
+        if (!isFloating(panel)) fitPanel(panel);
         // Opening the list is reading it: the dot goes away, entries keep
         // their own unread styling until clicked.
         if (document.querySelector('[data-notification-item].is-unread')) markAllRead();
@@ -180,7 +236,7 @@
             e.preventDefault();
             var panel = document.querySelector(toggle.getAttribute('data-notifications-toggle') || '[data-notifications-panel]');
             if (!panel) return;
-            if (panel.classList.contains('is-open')) { closePanels(); } else { closePanels(panel); openPanel(panel); }
+            if (panel.classList.contains('is-open')) { closePanels(); } else { closePanels(panel); openPanel(panel, toggle); }
             return;
         }
 
@@ -211,8 +267,77 @@
 
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePanels(); });
 
+    // A floating panel is pinned to where the bell WAS: page scroll and
+    // resize move the bell, so re-place (resize) or dismiss (scroll) rather
+    // than leave it stranded. Scrolling inside the panel's own list does not
+    // reach the window, so it is unaffected.
+    window.addEventListener('resize', function () {
+        var open = document.querySelector('[data-notifications-panel].is-open.is-floating');
+        if (open && lastAnchor && document.contains(lastAnchor)) placeFloating(open, lastAnchor);
+    });
+    window.addEventListener('scroll', function () {
+        if (document.querySelector('[data-notifications-panel].is-open.is-floating')) closePanels();
+    }, { passive: true });
+
+    // ── Toasts ──────────────────────────────────────────────────────────
+    // Transient cards for what arrived since this browser last looked:
+    // compared against a per-browser "seen" list of notification ids, so a
+    // notification is toasted once, on whichever page the person is on
+    // when it is first noticed (load, SPA navigation, tab focus). Never on
+    // a page where the person is not signed in (no root).
+    var SEEN_KEY = 'base/notifications/seen';
+    function seenIds() { try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'); } catch (e) { return []; } }
+    function rememberSeen(ids) { try { localStorage.setItem(SEEN_KEY, JSON.stringify(ids.slice(-200))); } catch (e) {} }
+
+    function toastContainer() {
+        var c = document.getElementById('notifications-toasts');
+        if (!c) { c = document.createElement('div'); c.id = 'notifications-toasts'; c.setAttribute('aria-live', 'polite'); document.body.appendChild(c); }
+        return c;
+    }
+
+    function toast(item, ttl) {
+        var el = document.createElement(item.url ? 'a' : 'div');
+        el.className = 'notification-toast';
+        if (item.url) el.href = item.url;
+        el.innerHTML = '<span class="notification-toast-icon"><i class="fa-solid fa-bell"></i></span>' +
+            '<span class="notification-toast-text"><span class="notification-toast-title"></span><span class="notification-toast-body"></span></span>' +
+            '<button type="button" class="notification-toast-close" aria-label="close">&times;</button>';
+        el.querySelector('.notification-toast-title').textContent = item.title || '';
+        el.querySelector('.notification-toast-body').textContent = item.content || '';
+        if (!item.title) el.querySelector('.notification-toast-title').remove();
+        var dismiss = function () { if (el.classList.contains('is-leaving')) return; el.classList.add('is-leaving'); setTimeout(function () { el.remove(); }, 260); };
+        el.querySelector('.notification-toast-close').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); dismiss(); });
+        el.addEventListener('click', function () { if (item.id) markRead(item.id); dismiss(); });
+        toastContainer().appendChild(el);
+        setTimeout(dismiss, ttl || 9000);
+        return el;
+    }
+
+    var announcing = false;
+    function announceNew() {
+        var url = cfg('latest-url');
+        if (!url || announcing) return;
+        announcing = true;
+        fetch(url + '?limit=6', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (json) {
+            announcing = false;
+            if (!json) return;
+            setUnread(json.unread || 0);
+            var seen = seenIds();
+            var fresh = (json.items || []).filter(function (n) { return !n.isRead && seen.indexOf(n.id) === -1; });
+            // First visit from this browser: don't dump the whole backlog as
+            // toasts, just remember it.
+            var firstTime = seen.length === 0;
+            if (!firstTime) fresh.slice(0, 3).forEach(function (n) { toast(n); });
+            rememberSeen(seen.concat((json.items || []).map(function (n) { return n.id; })));
+        }).catch(function () { announcing = false; });
+    }
+
     function sync() {
+        // A navigation replaced the page: whatever was open belongs to the
+        // old one.
+        closePanels();
         syncPushButtons();
+        if (root()) announceNew();
         var badge = document.querySelector('[data-notifications-badge]');
         if (badge) setUnread(parseInt(badge.getAttribute('data-count') || badge.textContent, 10) || 0);
     }
@@ -220,15 +345,11 @@
     // A tab that sat in the background comes back with a stale badge; the
     // latest endpoint is cheap, and focus is a user-driven rate.
     document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState !== 'visible') return;
-        var url = cfg('latest-url');
-        if (!url) return;
-        fetch(url + '?limit=1', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (json) { if (json) setUnread(json.unread || 0); }).catch(function () {});
+        if (document.visibilityState === 'visible' && root()) announceNew();
     });
 
     window.addEventListener('load', sync);
     if (document.readyState === 'complete') sync();
 
-    window.__baseNotificationsBound = { sync: sync, enablePush: enablePush, disablePush: disablePush, markAllRead: markAllRead };
+    window.__baseNotificationsBound = { sync: sync, enablePush: enablePush, disablePush: disablePush, markAllRead: markAllRead, toast: toast, announceNew: announceNew };
 })();
