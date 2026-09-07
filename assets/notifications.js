@@ -145,9 +145,29 @@
         });
     }
 
+    // Fit the panel inside whatever clips it. The front-end sidebar's toolbar
+    // is wider than the scrolling column it sits in (its search bar sets the
+    // width), so a panel sized to the toolbar lost its right third behind
+    // the column's edge. Measured at open time against the nearest ancestor
+    // that clips (overflow other than visible), so it holds for every layout
+    // and breakpoint without knowing any of their widths.
+    function fitPanel(panel) {
+        panel.style.maxWidth = '';
+        var el = panel.parentElement;
+        while (el && el !== document.body) {
+            var o = getComputedStyle(el).overflow + getComputedStyle(el).overflowX;
+            if (/hidden|scroll|auto|clip/.test(o)) break;
+            el = el.parentElement;
+        }
+        if (!el || el === document.body) return;
+        var room = el.getBoundingClientRect().right - panel.getBoundingClientRect().left - 4;
+        if (room > 120 && room < panel.getBoundingClientRect().width) panel.style.maxWidth = Math.floor(room) + 'px';
+    }
+
     function openPanel(panel) {
         panel.hidden = false;
         panel.classList.add('is-open');
+        fitPanel(panel);
         // Opening the list is reading it: the dot goes away, entries keep
         // their own unread styling until clicked.
         if (document.querySelector('[data-notification-item].is-unread')) markAllRead();
