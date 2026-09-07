@@ -212,6 +212,26 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
+    /**
+     * Where the notification points (the article it announces, the profile
+     * it concerns...). Optional: a plain informational notification has no
+     * destination. Stored as a path or absolute URL, whatever the sender
+     * had; the in-app list and the push payload use it verbatim.
+     */
+    #[ORM\Column(type:"string", length:512, nullable:true)]
+    protected $url = null;
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(?string $url): self
+    {
+        $this->url = $url ?: null;
+        return $this;
+    }
+
     #[ORM\Column(type:"string", length:255)]
     protected $title;
 

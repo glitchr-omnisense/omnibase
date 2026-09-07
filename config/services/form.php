@@ -100,6 +100,30 @@ return static function (ContainerConfigurator $container): void {
         ->parent('notifier.channel.email')
         ->tag('notifier.channel', ['channel' => 'email+']);
 
+    // Notification center: the persisted list behind the toolbar bell, and
+    // Web Push to the browsers that opted in. See each channel's docblock.
+    $services->set('Base\Notifier\Channel\InAppChannel')
+        ->tag('notifier.channel', ['channel' => 'inapp'])
+        ->args([new Reference('doctrine.orm.entity_manager')]);
+
+    $services->set('Base\Service\Push\WebPushService')->public()
+        ->args([
+            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Base\Repository\User\PushSubscriptionRepository'),
+            new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            '%env(default::VAPID_PUBLIC_KEY)%',
+            '%env(default::VAPID_PRIVATE_KEY)%',
+            '%env(default::VAPID_SUBJECT)%',
+        ]);
+    $services->alias('base.push', 'Base\Service\Push\WebPushService');
+
+    $services->set('Base\Notifier\Channel\PushChannel')
+        ->tag('notifier.channel', ['channel' => 'push'])
+        ->args([
+            new Reference('Base\Service\Push\WebPushService'),
+            new Reference('Base\Notifier\Channel\InAppChannel'),
+        ]);
+
     // ------------------------------
     // Controllers, Subscribers, Security
     // ------------------------------

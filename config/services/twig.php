@@ -96,6 +96,15 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Twig\Extension\WebpackTwigExtension')
         ->tag('twig.extension', ['priority' => -1]);
 
+    $services->set('Base\Twig\Extension\NotificationTwigExtension')
+        ->tag('twig.extension')
+        ->args([
+            new Reference('security.helper'),
+            new Reference('Base\Repository\User\NotificationRepository'),
+            new Reference('Base\Service\Push\WebPushService'),
+            new Reference('security.csrf.token_manager'),
+        ]);
+
     $services->set('Base\Twig\Extension\HtmlTwigExtension')
         ->tag('twig.extension')
         ->args([
