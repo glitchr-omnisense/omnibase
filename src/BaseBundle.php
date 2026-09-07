@@ -135,6 +135,21 @@ class BaseBundle extends AbstractBaseBundle
             class_alias($class, $alias);
         }
 
+        // One builder at a time. Without this, every request that finds the
+        // pool missing (a cache:clear just swapped the cache dir, a fresh
+        // deploy) scans the bundles concurrently and each rewrites the pool;
+        // the rewrite itself is atomic (tempnam + rename), but the requests
+        // in between booted from whatever they had read. Waiting on the lock
+        // and re-reading the pool means only the first request pays for the
+        // scan and the others start from its result.
+        $lock = null;
+        if ($needsWarmup) {
+            $lock = $this->acquirePoolLock();
+            if ($lock && $this->reloadPool()) {
+                $needsWarmup = false;
+            }
+        }
+
         if ($needsWarmup) {
 
             foreach(array_reverse($this->getBundles()) as $baseBundle)
@@ -182,6 +197,67 @@ class BaseBundle extends AbstractBaseBundle
                 "base.alias_repository_list" => self::$aliasRepositoryList ?? []
             ]);
         }
+
+        if ($lock) {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /**
+     * Blocks until this process holds the pool lock, or returns null when the
+     * lock cannot be taken (read-only cache dir): the caller then scans on its
+     * own, which is the pre-lock behaviour, never a failure.
+     *
+     * @return resource|null
+     */
+    private function acquirePoolLock()
+    {
+        $dir = $this->getCacheDir() . "/pools/base";
+        if (!is_dir($dir) && !@mkdir($dir, 0777, true) && !is_dir($dir)) {
+            return null;
+        }
+        $fp = @fopen($dir . "/bundle.lock", "c");
+        if (!$fp) {
+            return null;
+        }
+        if (!flock($fp, LOCK_EX)) {
+            fclose($fp);
+            return null;
+        }
+        return $fp;
+    }
+
+    /**
+     * After waiting on the lock, another request may have built the pool:
+     * re-read it (a fresh adapter, the previous one memoised the miss) and
+     * register its aliases. True when the pool is usable.
+     */
+    private function reloadPool(): bool
+    {
+        $file = $this->getCacheDir() . "/pools/base/bundle.php";
+        if (!file_exists($file)) {
+            return false;
+        }
+        $cache = new PhpArrayAdapter($file, new FilesystemAdapter("", 0, $this->getCacheDir() . "/pools/base/fallback"));
+        $aliasList = $cache->getItem('base.alias_list')->get() ?? [];
+        $aliasRepositoryList = $cache->getItem('base.alias_repository_list')->get() ?? [];
+        if (empty($aliasList) && empty($aliasRepositoryList)) {
+            return false;
+        }
+
+        self::$cache = $cache;
+        self::$files = $cache->getItem('base.files')->get() ?? [];
+        self::$classes = $cache->getItem('base.classes')->get() ?? [];
+        self::$aliasList = $aliasList;
+        self::$aliasRepositoryList = $aliasRepositoryList;
+        foreach (self::$aliasList as $class => $alias) {
+            if (!class_exists($alias, false)) class_alias($class, $alias);
+        }
+        foreach (self::$aliasRepositoryList as $class => $alias) {
+            if (!class_exists($alias, false)) class_alias($class, $alias);
+        }
+        return true;
     }
 
     public function boot(): void
