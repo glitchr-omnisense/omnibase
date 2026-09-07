@@ -17,6 +17,28 @@ var localCacheData = {};
 // Which server render each cached selection belongs to - see the init below.
 var localCacheSignature = {};
 
+// While a dropdown is open, select2 locks the scroll of every scrollable
+// ancestor: it stores their position and binds a `scroll.select2.<id>`
+// handler that snaps scrollTop back to it (dropdown/attachBody.js). It
+// unbinds on close - but a dropdown that is open when transparentJS swaps
+// the page never closes, and the ancestors that persist across swaps (the
+// admin's scroll container, body) keep the handler while the swap rewrites
+// the data-select2-id the stored position hangs off. The next synthetic
+// `scroll` - transparent's own scrollTo() fires one - then hits
+// `position.y` with position undefined. Harmless, but it is a zombie, so
+// the locked ancestors are remembered here and released on close and
+// before every swap. Through select2's OWN jQuery ($container is one of
+// its objects): three jQuery instances share this page and each keeps its
+// handlers in its own store, so `off` only works from the one that bound.
+var scrollLockedAncestors = null;
+function releaseScrollLock() {
+    if (scrollLockedAncestors) {
+        scrollLockedAncestors.off('scroll.select2');
+        scrollLockedAncestors = null;
+    }
+}
+window.addEventListener('transparent:beforeunload', releaseScrollLock);
+
 window.addEventListener("load.form_type", function () {
 
     document.querySelectorAll("[data-select2-field]").forEach((function (el) {
@@ -346,6 +368,9 @@ window.addEventListener("load.form_type", function () {
 
         }).on("select2:open", function(e) {
 
+            var instance = $(this).data('select2');
+            scrollLockedAncestors = instance && instance.$container ? instance.$container.parents() : null;
+
             // Put back previous value
             $('body > .select2-container input.select2-search__field').focus().val($(this).attr("last-search"));
             $(field).parent().find('input.select2-search__field').val($(this).attr("last-search"));
@@ -358,6 +383,7 @@ window.addEventListener("load.form_type", function () {
 
         }).on("select2:close", function(e) {
 
+            releaseScrollLock();
             this.dispatchEvent(new Event("focusout"));
             $(document).off("keyup.select2");
 
