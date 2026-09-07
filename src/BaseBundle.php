@@ -119,6 +119,15 @@ class BaseBundle extends AbstractBaseBundle
         self::$aliasList           = self::$aliasList           ?? self::$cache->getItem('base.alias_list')->get() ?? [];
         self::$aliasRepositoryList = self::$aliasRepositoryList ?? self::$cache->getItem('base.alias_repository_list')->get() ?? [];
 
+        // A pool file that exists but carries no aliases is not a warm cache,
+        // it is a cache being (re)written by a concurrent request - seen live
+        // as `Class "App\Repository\Thread\MentionRepository" not found` when two
+        // requests rebuilt the container at once. Rescan rather than boot
+        // with no aliases at all.
+        if (!$needsWarmup && empty(self::$aliasList) && empty(self::$aliasRepositoryList)) {
+            $needsWarmup = true;
+        }
+
         foreach (self::$aliasList as $class => $alias) {
             class_alias($class, $alias);
         }
