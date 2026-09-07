@@ -229,12 +229,19 @@
         if (left + width > vw - margin) left = vw - margin - width;
         if (left < margin) left = margin;
         var top = a.bottom + 6;
-        var maxH = vh - top - margin;
+        // Room kept at the bottom of the window: the browser's link preview
+        // sits there and was covering the panel's last row on layout1.
+        var bottomGap = 48;
+        var maxH = vh - top - bottomGap;
         if (maxH < 240 && a.top > vh / 2) {
             // Not enough room below a bell that sits low: open upwards.
             maxH = Math.max(240, a.top - 6 - margin);
             top = Math.max(margin, a.top - 6 - maxH);
         }
+        // A menu, not a page: about five entries tall, the list scrolls for
+        // the rest (data-notifications-max-height on the panel overrides).
+        var cap = parseInt(panel.getAttribute('data-notifications-max-height') || '440', 10);
+        if (cap > 0) maxH = Math.min(maxH, cap);
         panel.style.position = 'fixed';
         panel.style.left = left + 'px';
         panel.style.top = top + 'px';
