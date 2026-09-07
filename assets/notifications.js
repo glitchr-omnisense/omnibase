@@ -58,16 +58,17 @@
         });
     }
 
+    // Optimistic: the row changes on the click, the request follows, and the
+    // row is put back only if the server refuses. A round trip on this site
+    // is a good fraction of a second, which read as "the icon lags".
     function markRead(id) {
         var url = cfg('read-url');
         if (!url) return Promise.resolve();
+        setReadState(id, true);
         return post(url, { id: id }).then(function (json) {
-            if (json.success) {
-                setUnread(json.unread || 0);
-                var el = document.querySelector('[data-notification-item][data-id="' + id + '"]');
-                if (el) el.classList.remove('is-unread');
-            }
-        });
+            if (json.success) setUnread(json.unread || 0);
+            else setReadState(id, false);
+        }).catch(function () { setReadState(id, false); });
     }
 
     function setReadState(id, isRead) {
@@ -84,9 +85,11 @@
     function toggleRead(id, read) {
         var url = cfg('read-url');
         if (!url) return Promise.resolve();
+        setReadState(id, read);
         return post(url, { id: id, read: read }).then(function (json) {
             if (json.success) { setUnread(json.unread || 0); setReadState(id, json.isRead !== false); }
-        });
+            else setReadState(id, !read);
+        }).catch(function () { setReadState(id, !read); });
     }
 
     function removeEntries(ids) {
