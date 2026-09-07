@@ -172,7 +172,7 @@ class NotificationController extends AbstractController
 
     protected function countUnread(User $user): int
     {
-        return (int) $this->notificationRepository->count(["user" => $user, "isRead" => false]);
+        return $this->notificationRepository->countUnreadFor($user);
     }
 
     public function serialize(Notification $n): array

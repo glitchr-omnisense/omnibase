@@ -51,7 +51,7 @@ Encore.addPlugin(new WebpackBar())
     .addEntry('base-async', './assets/base-async.js')
     .addEntry('base-defer', './assets/base-defer.js')
     .addEntry('admin-charts', './assets/admin-charts.js')
-    .addEntry('notifications', './assets/notifications.js')
+    .addEntry('notifications-defer', './assets/notifications.js')
 
     .addEntry('form-defer', './assets/form-defer.js')
     .addEntry('form-defer.editor', './assets/form-defer.editor.js')

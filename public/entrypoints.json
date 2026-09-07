@@ -21,6 +21,11 @@
         "/bundles/base/admin-charts.a599e7fe.js"
       ]
     },
+    "notifications-defer": {
+      "js": [
+        "/bundles/base/notifications-defer.16f94770.js"
+      ]
+    },
     "form-defer": {
       "css": [
         "/bundles/base/form-defer.beb808be.css"

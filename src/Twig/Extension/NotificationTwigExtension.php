@@ -35,6 +35,7 @@ class NotificationTwigExtension extends AbstractExtension
             new TwigFunction('notifications_latest', [$this, 'latest']),
             new TwigFunction('notifications_token', [$this, 'token']),
             new TwigFunction('push_available', [$this, 'pushAvailable']),
+            new TwigFunction('push_vapid_key', [$this, 'pushKey']),
         ];
     }
 
@@ -44,7 +45,7 @@ class NotificationTwigExtension extends AbstractExtension
         if (!$user instanceof User) {
             return 0;
         }
-        return (int) $this->repository->count(["user" => $user, "isRead" => false]);
+        return $this->repository->countUnreadFor($user);
     }
 
     /** @return Notification[] */
@@ -60,6 +61,11 @@ class NotificationTwigExtension extends AbstractExtension
     public function token(): string
     {
         return $this->csrfTokenManager->getToken("notifications")->getValue();
+    }
+
+    public function pushKey(): string
+    {
+        return (string) $this->webPush->getPublicKey();
     }
 
     public function pushAvailable(): bool

@@ -19,7 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 #[ORM\Entity(repositoryClass: PushSubscriptionRepository::class)]
 #[ORM\Table(name: "userPushSubscription")]
-#[ORM\UniqueConstraint(name: "uniq_push_endpoint", columns: ["endpoint_hash"])]
+#[ORM\UniqueConstraint(name: "uniq_push_endpoint", columns: ["endpointHash"])]
 class PushSubscription
 {
     #[ORM\Id]
