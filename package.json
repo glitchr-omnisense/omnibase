@@ -57,7 +57,7 @@
     "editorjs-mention": "^1.0.20",
     "editorjs-paragraph": "^1.0",
     "editorjs-undo": "^2.0",
-    "editorjs-yjs": "^0.1.2",
+    "editorjs-yjs": "^0.2.0",
     "flatpickr": "^4.6",
     "highlight.js": "11.6.0",
     "picmo": "5.7.2",
