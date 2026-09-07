@@ -10,6 +10,7 @@ use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\Bundle\Repository\CanSaveCredentialRecord;
 use Webauthn\Bundle\Repository\CredentialRecordRepositoryInterface;
+use Webauthn\Bundle\Repository\PublicKeyCredentialSourceRepositoryInterface;
 
 /**
  * @method Passkey|null find($id, $lockMode = null, $lockVersion = null)
@@ -17,7 +18,15 @@ use Webauthn\Bundle\Repository\CredentialRecordRepositoryInterface;
  * @method Passkey[]    findAll()
  * @method Passkey[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PasskeyRepository extends ServiceEntityRepository implements CredentialRecordRepositoryInterface, CanSaveCredentialRecord
+/**
+ * PublicKeyCredentialSourceRepositoryInterface is the bundle's deprecated
+ * name for the same contract (it extends CredentialRecordRepositoryInterface
+ * and adds nothing this class does not already have). It is declared here
+ * only because WebauthnExtension still aliases that interface to the
+ * configured credential_repository, and an alias to an interface the class
+ * does not implement fails `lint:container`.
+ */
+class PasskeyRepository extends ServiceEntityRepository implements CredentialRecordRepositoryInterface, PublicKeyCredentialSourceRepositoryInterface, CanSaveCredentialRecord
 {
     public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
     {
