@@ -27,6 +27,9 @@
 
     function root() { return document.querySelector('[data-notifications]'); }
     function cfg(name) { var r = root(); return r ? r.getAttribute('data-' + name) : null; }
+    // Which link an entry from the JSON endpoint should carry: the back-office
+    // (data-notifications-context="admin") wants the record's edit page.
+    function linkOf(item) { return (cfg('context') === 'admin' && item.adminUrl) ? item.adminUrl : (item.url || null); }
 
     function post(url, body) {
         return fetch(url, {
@@ -378,9 +381,9 @@
     }
 
     function toast(item, ttl) {
-        var el = document.createElement(item.url ? 'a' : 'div');
+        var el = document.createElement(linkOf(item) ? 'a' : 'div');
         el.className = 'notification-toast';
-        if (item.url) el.href = item.url;
+        if (linkOf(item)) el.href = linkOf(item);
         el.innerHTML = '<span class="notification-toast-icon"><i class="fa-solid fa-bell"></i></span>' +
             '<span class="notification-toast-text"><span class="notification-toast-title"></span><span class="notification-toast-body"></span></span>' +
             '<button type="button" class="notification-toast-close" aria-label="close">&times;</button>';

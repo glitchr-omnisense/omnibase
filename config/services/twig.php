@@ -103,6 +103,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('Base\Repository\User\NotificationRepository'),
             new Reference('Base\Service\Push\WebPushService'),
             new Reference('security.csrf.token_manager'),
+            new Reference('Base\Notifier\NotificationLinkerInterface'),
         ]);
 
     $services->set('Base\Twig\Extension\HtmlTwigExtension')

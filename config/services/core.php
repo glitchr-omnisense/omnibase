@@ -70,7 +70,7 @@ return static function (ContainerConfigurator $container): void {
         // arguments, no service): every /api/thread/{slug}/like answered 500
         // in production - "the like doesn't work".
         'Base\Controller\Api\ThreadController' => ['doctrine.orm.entity_manager', 'translator', 'Base\Repository\ThreadRepository', 'Base\Repository\Thread\LikeRepository'],
-        'Base\Controller\Client\NotificationController' => ['doctrine.orm.entity_manager', 'Base\Repository\User\NotificationRepository', 'Base\Service\Push\WebPushService', 'security.csrf.token_manager'],
+        'Base\Controller\Client\NotificationController' => ['doctrine.orm.entity_manager', 'Base\Repository\User\NotificationRepository', 'Base\Service\Push\WebPushService', 'security.csrf.token_manager', 'Base\Notifier\NotificationLinkerInterface'],
     ];
 
     foreach ($controllers as $id => $args) {

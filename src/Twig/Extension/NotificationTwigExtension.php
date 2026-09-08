@@ -4,6 +4,7 @@ namespace Base\Twig\Extension;
 
 use App\Entity\User;
 use Base\Entity\User\Notification;
+use Base\Notifier\NotificationLinkerInterface;
 use Base\Repository\User\NotificationRepository;
 use Base\Service\Push\WebPushService;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -25,6 +26,7 @@ class NotificationTwigExtension extends AbstractExtension
         protected readonly NotificationRepository $repository,
         protected readonly WebPushService $webPush,
         protected readonly CsrfTokenManagerInterface $csrfTokenManager,
+        protected readonly ?NotificationLinkerInterface $linker = null,
     ) {
     }
 
@@ -35,6 +37,7 @@ class NotificationTwigExtension extends AbstractExtension
             new TwigFunction('notifications_latest', [$this, 'latest']),
             new TwigFunction('notifications_token', [$this, 'token']),
             new TwigFunction('push_available', [$this, 'pushAvailable']),
+            new TwigFunction('notification_admin_url', [$this, 'adminUrl']),
             new TwigFunction('push_vapid_key', [$this, 'pushKey']),
         ];
     }
@@ -66,6 +69,12 @@ class NotificationTwigExtension extends AbstractExtension
     public function pushKey(): string
     {
         return (string) $this->webPush->getPublicKey();
+    }
+
+    /** The back-office page of what a notification is about, or null. */
+    public function adminUrl(Notification $notification): ?string
+    {
+        return $this->linker?->adminUrl($notification);
     }
 
     public function pushAvailable(): bool

@@ -117,6 +117,12 @@ return static function (ContainerConfigurator $container): void {
         ]);
     $services->alias('base.push', 'Base\Service\Push\WebPushService');
 
+    // Back-office links for notifications: null here, replaced by the admin
+    // bundle's own implementation when it is installed (same id, later
+    // definition wins).
+    $services->set('Base\Notifier\NullNotificationLinker');
+    $services->alias('Base\Notifier\NotificationLinkerInterface', 'Base\Notifier\NullNotificationLinker');
+
     $services->set('Base\Notifier\Channel\PushChannel')
         ->tag('notifier.channel', ['channel' => 'push'])
         ->args([

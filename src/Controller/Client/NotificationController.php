@@ -4,6 +4,7 @@ namespace Base\Controller\Client;
 
 use App\Entity\User;
 use Base\Entity\User\Notification;
+use Base\Notifier\NotificationLinkerInterface;
 use Base\Repository\User\NotificationRepository;
 use Base\Service\Push\WebPushService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,6 +32,7 @@ class NotificationController extends AbstractController
         protected readonly NotificationRepository $notificationRepository,
         protected readonly WebPushService $webPush,
         protected readonly CsrfTokenManagerInterface $csrfTokenManager,
+        protected readonly ?NotificationLinkerInterface $linker = null,
     ) {
     }
 
@@ -215,6 +217,10 @@ class NotificationController extends AbstractController
             "title" => $n->getTitle() ?: $n->getSubject(),
             "content" => strip_tags($n->getContent()),
             "url" => $n->getUrl(),
+            // The back-office page for the same target, when an admin is
+            // installed and the notification knows what it is about; the
+            // client picks it in the back-office (data-notifications-context).
+            "adminUrl" => $this->linker?->adminUrl($n),
             "importance" => $n->getImportance(),
             "isRead" => $n->isRead(),
             "sentAt" => $n->getSentAt()?->format(\DateTimeInterface::ATOM),

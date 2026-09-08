@@ -240,6 +240,36 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         return $this;
     }
 
+    /**
+     * The entity this notification is about (an article, a comment...), as
+     * class + identifier, so each side of the site can build its own link
+     * to it: the public page on the front-end, the edit page in the
+     * back-office (see NotificationLinkerInterface). `url` stays the
+     * front-end link; this is the adaptive half.
+     */
+    #[ORM\Column(type:"string", length:255, nullable:true)]
+    protected $targetClass = null;
+
+    #[ORM\Column(type:"string", length:64, nullable:true)]
+    protected $targetId = null;
+
+    public function getTargetClass(): ?string { return $this->targetClass; }
+    public function getTargetId(): ?string { return $this->targetId; }
+
+    public function setTarget(?object $entity): self
+    {
+        $this->targetClass = $entity ? get_class($entity) : null;
+        // The id when the entity has one; its uuid when it is still being
+        // persisted (a comment's notifications fire before its flush) - the
+        // linker resolves either.
+        $id = $entity && method_exists($entity, 'getId') ? $entity->getId() : null;
+        if ($id === null && $entity && method_exists($entity, 'getUuid')) {
+            $id = $entity->getUuid();
+        }
+        $this->targetId = ($id === null || $id === '') ? null : (string) $id;
+        return $this;
+    }
+
     #[ORM\Column(type:"string", length:255)]
     protected $title;
 
